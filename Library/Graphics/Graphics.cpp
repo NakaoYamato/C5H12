@@ -187,15 +187,15 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		//		static_cast<UINT>(GetScreenWidth()),
 		//		static_cast<UINT>(GetScreenHeight()));
 		//}
-		//fullscreenQuad = std::make_unique<Sprite>(device.Get(),
-		//	L"",
-		//	".\\Data\\Shader\\FullscreenQuadVS.cso");
-		//(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/SpritePS.cso",
-		//	pixelShaders[static_cast<int>(FullscreenQuadPS::EmbeddedPS)].ReleaseAndGetAddressOf());
-		//(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/CascadedShadowMapPS.cso",
-		//	pixelShaders[static_cast<int>(FullscreenQuadPS::CascadedPS)].ReleaseAndGetAddressOf());
-		//(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/AddBloomPS.cso",
-		//	pixelShaders[static_cast<int>(FullscreenQuadPS::AddBloomPS)].ReleaseAndGetAddressOf());
+		fullscreenQuad = std::make_unique<Sprite>(device.Get(),
+			L"",
+			".\\Data\\Shader\\FullscreenQuadVS.cso");
+		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/SpritePS.cso",
+			pixelShaders[static_cast<int>(FullscreenQuadPS::EmbeddedPS)].ReleaseAndGetAddressOf());
+		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/CascadedShadowMapPS.cso",
+			pixelShaders[static_cast<int>(FullscreenQuadPS::CascadedPS)].ReleaseAndGetAddressOf());
+		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/AddBloomPS.cso",
+			pixelShaders[static_cast<int>(FullscreenQuadPS::AddBloomPS)].ReleaseAndGetAddressOf());
 
 		//cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
 		//	1024 * 4, 1024 * 4);
@@ -203,8 +203,8 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 
 	// ÉåÉìÉ_Éâê∂ê¨
 	{
-		//modelRenderer = std::make_unique<ModelRenderer>(device.Get());
-		//primitiveRenderer = std::make_unique<PrimitiveRenderer>(device.Get());
+		modelRenderer = std::make_unique<ModelRenderer>(device.Get());
+		primitiveRenderer = std::make_unique<PrimitiveRenderer>(device.Get());
 	}
 }
 

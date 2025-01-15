@@ -129,6 +129,33 @@
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Renderer\ModelRenderer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\3D\Model.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\3D\SkyMap.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Basic\BasicShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Phong\PhongShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\2D\Primitive.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\2D\Sprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -272,12 +299,89 @@
     <ClInclude Include="Library\ResourceManager\ModelResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Renderer\ModelRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Renderer\PrimitiveRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\3D\Model.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\3D\SkyMap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Basic\BasicShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Phong\PhongShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\ShaderBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\2D\Primitive.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\2D\Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
+    <None Include="HLSL\Function\ToMatrix.hlsli" />
+    <None Include="HLSL\Function\ShadingFunctions.hlsli" />
+    <None Include="HLSL\Scene\SceneConstantBuffer.hlsli" />
+    <None Include="HLSL\Model\Light.hlsli" />
+    <None Include="HLSL\Model\ModelInputLayout.hlsli" />
+    <None Include="HLSL\Model\Skinning.hlsli" />
+    <None Include="HLSL\Model\CascadedShadow\CascadedShadow.hlsli" />
+    <None Include="HLSL\Model\Phong\Phong.hlsli" />
+    <None Include="HLSL\PrimitiveRenderer\PrimitiveRenderer.hlsli" />
+    <None Include="HLSL\Primitive\Primitive.hlsli" />
+    <None Include="HLSL\Sprite\Sprite.hlsli" />
+    <None Include="HLSL\PostProcess\Bloom\Bloom.hlsli" />
+    <None Include="HLSL\PostProcess\ColorFilter\ColorFilter.hlsli" />
+    <None Include="HLSL\PostProcess\ColorFilter\FilterFunctions.hlsli" />
+    <None Include="HLSL\PostProcess\GaussianFilter\GaussianFilter.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Basic\BasicBatchingVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Basic\BasicInstancedVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Basic\BasicPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Basic\BasicVS.hlsl" />
+    <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowBatchingVS.hlsl" />
+    <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowGS.hlsl" />
+    <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowInstancedVS.hlsl" />
+    <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Phong\PhongBatchingVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Phong\PhongInstancedVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Phong\PhongPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Phong\PhongVS.hlsl" />
+    <FxCompile Include="HLSL\PrimitiveRenderer\PrimitiveRendererPS.hlsl" />
+    <FxCompile Include="HLSL\PrimitiveRenderer\PrimitiveRendererVS.hlsl" />
+    <FxCompile Include="HLSL\Primitive\PrimitivePS.hlsl" />
+    <FxCompile Include="HLSL\Primitive\PrimitiveVS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\FullscreenQuadVS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\SpritePS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\SpriteVS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Bloom\AddBloomPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Bloom\BloomDownsamplingPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Bloom\BloomHorizontalPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Bloom\BloomUpsamplingPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Bloom\BloomVerticalPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Bloom\GlowExtractionPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\CascadedShadowMap\CascadedShadowMapPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\ChromaticAberration\ChromaticAberrationPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\ColorFilter\ColorFilterPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\GaussianFilter\GaussianFilterPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\RadialBlur\RadialBlurPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Tonemapping\TonemappingPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\Vignette\VignettePS.hlsl" />
   </ItemGroup>
 </Project>

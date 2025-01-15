@@ -1,0 +1,70 @@
+#pragma once
+
+#include <Windows.h>
+#include <unordered_map>
+
+static constexpr int MOUSE_POSITION_X = 0x00;
+static constexpr int MOUSE_POSITION_Y = 0x01;
+static constexpr int MOUSE_OLD_POSITION_X = 0x02;
+static constexpr int MOUSE_OLD_POSITION_Y = 0x03;
+static constexpr int MOUSE_WHEEL = 0x04;
+static constexpr int MOUSE_OLD_WHEEL = 0x05;
+
+static constexpr int MOUSE_MOVE_X = 0x06;
+static constexpr int MOUSE_MOVE_Y = 0x07;
+
+static constexpr int MOUSE_AXIS_RX = 0x08;
+static constexpr int MOUSE_AXIS_RY = 0x09;
+
+/// <summary>
+/// マウスの入力監視クラス
+/// </summary>
+class MouseInputObserver
+{
+public:
+	/// <summary>
+	/// コンストラクタで取得するボタンを設定している
+	/// </summary>
+	MouseInputObserver(HWND hWnd);
+	~MouseInputObserver() {}
+
+	/// <summary>
+	/// 入力情報更新
+	/// </summary>
+	void Update();
+
+	/// <summary>
+	/// マウス位置を更新
+	/// </summary>
+	void UpdatePosition();
+
+	// マウス入力情報格納
+	// 一覧:https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
+	std::unordered_map<int, BOOL> mousestates;
+
+	// 入力量がある情報
+	std::unordered_map<int, float> mouseParameters;
+
+	int				screenWidth = 0;
+	int				screenHeight = 0;
+	HWND			hWnd = nullptr;
+
+	// マウス移動量を正規化するためのパラメータ
+	float normalizeFactor = 10.0f;
+
+public:
+	/// <summary>
+	/// ホイール移動値をセット
+	/// </summary>
+	void SetWheel(int wheel) { this->mouseParameters[MOUSE_WHEEL] += wheel; }
+
+	/// <summary>
+	/// マウスを画面中心に修正
+	/// </summary>
+	void FixCursorInCenter() const;
+
+	/// <summary>
+	/// マウスのキー番号から文字列に変換
+	/// </summary>
+	static const char* ToString(int vKey);
+};

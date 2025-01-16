@@ -14,6 +14,7 @@
 #include "./imgui-docking/imgui_impl_dx11.h"
 #include "./imgui-docking/imstb_truetype.h"
 #include "./imgui-docking/imgui_internal.h"
+#include "./imgui-docking/imgui_stdlib.h"
 #pragma warning(pop)
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

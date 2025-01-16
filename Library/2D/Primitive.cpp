@@ -12,7 +12,7 @@ Primitive::Primitive(ID3D11Device* device)
     bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// GPU→読み取りのみ　CPU→書き込みのみ
     bd.MiscFlags = 0;
     bd.StructureByteStride = 0;
-    if (FAILED(device->CreateBuffer(&bd, nullptr, &vertexBuffer)))
+    if (FAILED(device->CreateBuffer(&bd, nullptr, &vertexBuffer_)))
     {
         assert(!"頂点バッファの作成に失敗(Primitive)");
         return;
@@ -27,11 +27,11 @@ Primitive::Primitive(ID3D11Device* device)
     UINT numElements = ARRAYSIZE(layout);
 
     //	頂点シェーダーの読み込み
-    GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/PrimitiveVS.cso", vertexShader.GetAddressOf(),
-        inputLayout.GetAddressOf(), layout, numElements);
+    GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/PrimitiveVS.cso", vertexShader_.GetAddressOf(),
+        inputLayout_.GetAddressOf(), layout, numElements);
 
     //	ピクセルシェーダーの作成
-    GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/PrimitivePS.cso", pixelShader.GetAddressOf());
+    GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/PrimitivePS.cso", pixelShader_.GetAddressOf());
 }
 
 void Primitive::Rect(ID3D11DeviceContext* context,
@@ -71,17 +71,17 @@ void Primitive::Rect(ID3D11DeviceContext* context,
     }
 
     D3D11_MAPPED_SUBRESOURCE msr;
-    context->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+    context->Map(vertexBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
     memcpy(msr.pData, vertices, sizeof(vertices));
-    context->Unmap(vertexBuffer.Get(), 0);
+    context->Unmap(vertexBuffer_.Get(), 0);
 
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
-    context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+    context->IASetVertexBuffers(0, 1, vertexBuffer_.GetAddressOf(), &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    context->IASetInputLayout(inputLayout.Get());
-    context->VSSetShader(vertexShader.Get(), NULL, 0);
-    context->PSSetShader(pixelShader.Get(), NULL, 0);
+    context->IASetInputLayout(inputLayout_.Get());
+    context->VSSetShader(vertexShader_.Get(), NULL, 0);
+    context->PSSetShader(pixelShader_.Get(), NULL, 0);
 
     context->Draw(4, 0);
 }
@@ -146,17 +146,17 @@ void Primitive::Circle(ID3D11DeviceContext* context,
     }
 
     D3D11_MAPPED_SUBRESOURCE msr;
-    context->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+    context->Map(vertexBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
     memcpy(msr.pData, vertices, sizeof(Vertex) * (n + 1) * 2);
-    context->Unmap(vertexBuffer.Get(), 0);
+    context->Unmap(vertexBuffer_.Get(), 0);
 
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
-    context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+    context->IASetVertexBuffers(0, 1, vertexBuffer_.GetAddressOf(), &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    context->IASetInputLayout(inputLayout.Get());
-    context->VSSetShader(vertexShader.Get(), NULL, 0);
-    context->PSSetShader(pixelShader.Get(), NULL, 0);
+    context->IASetInputLayout(inputLayout_.Get());
+    context->VSSetShader(vertexShader_.Get(), NULL, 0);
+    context->PSSetShader(pixelShader_.Get(), NULL, 0);
 
     context->Draw((n + 1) * 2 - 1, 0);
 }

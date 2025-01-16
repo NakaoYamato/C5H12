@@ -111,10 +111,10 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 			inputLayoutData.insert(std::make_pair(csoName, *inputLayout));
 		}
 
-		DebugSupporter::Instance().OutputString(L"頂点シェーダーの作成成功\n");
-		DebugSupporter::Instance().OutputString("\t");
-		DebugSupporter::Instance().OutputString(csoName);
-		DebugSupporter::Instance().OutputString("\n");
+		Debug::Output::String(L"頂点シェーダーの作成成功\n");
+		Debug::Output::String("\t");
+		Debug::Output::String(csoName);
+		Debug::Output::String("\n");
 	}
 }
 
@@ -182,10 +182,10 @@ void GpuResourceManager::CreatePsFromCso(ID3D11Device* device,
 		// 生成したデータをセット
 		pixelShaderData.insert(std::make_pair(csoName, *pixelShader));
 
-		DebugSupporter::Instance().OutputString(L"ピクセルシェーダーの作成成功\n");
-		DebugSupporter::Instance().OutputString("\t");
-		DebugSupporter::Instance().OutputString(csoName);
-		DebugSupporter::Instance().OutputString("\n");
+		Debug::Output::String(L"ピクセルシェーダーの作成成功\n");
+		Debug::Output::String("\t");
+		Debug::Output::String(csoName);
+		Debug::Output::String("\n");
 	}
 }
 
@@ -225,10 +225,10 @@ void GpuResourceManager::CreateGsFromCso(ID3D11Device* device,
 		// 生成したデータをセット
 		geometryShaderData.insert(std::make_pair(csoName, *geometryShader));
 
-		DebugSupporter::Instance().OutputString(L"ジオメトリシェーダーの作成成功\n");
-		DebugSupporter::Instance().OutputString("\t");
-		DebugSupporter::Instance().OutputString(csoName);
-		DebugSupporter::Instance().OutputString("\n");
+		Debug::Output::String(L"ジオメトリシェーダーの作成成功\n");
+		Debug::Output::String("\t");
+		Debug::Output::String(csoName);
+		Debug::Output::String("\n");
 	}
 }
 
@@ -253,10 +253,10 @@ void GpuResourceManager::CreateCsFromCso(ID3D11Device* device,
 	hr = device->CreateComputeShader(csoData.get(), cso_sz, nullptr, computeShader);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	DebugSupporter::Instance().OutputString(L"コンピュートシェーダーの作成成功\n");
-	DebugSupporter::Instance().OutputString("\t");
-	DebugSupporter::Instance().OutputString(csoName);
-	DebugSupporter::Instance().OutputString("\n");
+	Debug::Output::String(L"コンピュートシェーダーの作成成功\n");
+	Debug::Output::String("\t");
+	Debug::Output::String(csoName);
+	Debug::Output::String("\n");
 }
 
 // テクスチャ読み込み

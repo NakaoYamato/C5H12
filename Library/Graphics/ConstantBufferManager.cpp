@@ -16,7 +16,7 @@ ConstantBufferManager::ConstantBufferManager(ID3D11Device* device)
 }
 
 // 定数バッファの一括更新
-void ConstantBufferManager::Update(RenderContext& rc)
+void ConstantBufferManager::Update(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	// シーン定数バッファの更新

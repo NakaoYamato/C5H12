@@ -73,16 +73,16 @@ public:
 	/// <returns></returns>
 	const Vector2 GetTextureSize()
 	{
-		return Vector2(static_cast<float>(texture2dDesc.Width), static_cast<float>(texture2dDesc.Height));
+		return Vector2(static_cast<float>(texture2dDesc_.Width), static_cast<float>(texture2dDesc_.Height));
 	}
 private:
-	bool isLoadFile = true;
+	bool isLoadFile_ = true;
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader_;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader_;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout_;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer_;
 
 	struct Vertex
 	{
@@ -91,6 +91,6 @@ private:
 		Vector2 texcoord{};
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-	D3D11_TEXTURE2D_DESC texture2dDesc{};
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv_;
+	D3D11_TEXTURE2D_DESC texture2dDesc_{};
 };

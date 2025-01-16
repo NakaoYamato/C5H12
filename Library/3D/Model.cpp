@@ -12,20 +12,22 @@
 
 #include "../DebugSupporter/DebugSupporter.h"
 
-Model::Model(ID3D11Device* device, const char* filename) : 
-    filepath(filename)
+Model::Model(ID3D11Device* device, const char* filename)
 {
     // リソース読み込み
     resource = ModelResourceManager::Instance().LoadModelResource(filename);
 
     assert(resource != nullptr);
 
+    // シリアライズ用ファイルパス取得
+    serializePath_ = resource->GetSerializePath();
+
     // ノードデータをコピー
-    copyNodes.resize(resource->GetNodes().size());
-    for (size_t i = 0; i < copyNodes.size(); ++i)
+    poseNode.resize(resource->GetNodes().size());
+    for (size_t i = 0; i < poseNode.size(); ++i)
     {
         const ModelResource::Node& node = resource->GetNodes().at(i);
-        ModelResource::Node& copyNode = copyNodes.at(i);
+        ModelResource::Node& copyNode = poseNode.at(i);
         // データをコピー
         copyNode.name = node.name;
         copyNode.parentIndex = node.parentIndex;
@@ -35,21 +37,21 @@ Model::Model(ID3D11Device* device, const char* filename) :
     }
 
     // 親、子供の再構築
-    for (size_t i = 0; i < copyNodes.size(); ++i)
+    for (size_t i = 0; i < poseNode.size(); ++i)
     {
-        ModelResource::Node& copyNode = copyNodes.at(i);
+        ModelResource::Node& copyNode = poseNode.at(i);
 
         if (copyNode.parentIndex != -1)
         {
-            copyNode.parent = &copyNodes.at(copyNode.parentIndex);
-            copyNodes.at(copyNode.parentIndex).children.emplace_back(&copyNode);
+            copyNode.parent = &poseNode.at(copyNode.parentIndex);
+            poseNode.at(copyNode.parentIndex).children.emplace_back(&copyNode);
         }
     }
 
-    DebugSupporter::Instance().OutputString(L"FBXモデルの読み込み成功\n");
-    DebugSupporter::Instance().OutputString("\t");
-    DebugSupporter::Instance().OutputString(filename);
-    DebugSupporter::Instance().OutputString("\n");
+    Debug::Output::String(L"FBXモデルの読み込み成功\n");
+    Debug::Output::String("\t");
+    Debug::Output::String(filename);
+    Debug::Output::String("\n");
 
     // COM生成
     CreateComObject(device, filename);
@@ -58,7 +60,7 @@ Model::Model(ID3D11Device* device, const char* filename) :
 // トランスフォーム更新処理
 void Model::UpdateTransform(const DirectX::XMFLOAT4X4& world)
 {
-    for (ModelResource::Node& node : copyNodes)
+    for (ModelResource::Node& node : poseNode)
     {
         // ローカル行列算出
         DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
@@ -135,15 +137,20 @@ void Model::DrawGui()
                         ImGui::TreePop();
                     }
                 };
-            NodeGui(copyNodes.at(0));
+            NodeGui(poseNode.at(0));
             ImGui::TreePop();
         }
         ImGui::TreePop();
+        ImGui::InputText(u8"ファイルパス", &serializePath_);
+        if (ImGui::Button(u8"シリアライズ"))
+        {
+            resource->Serialize(serializePath_.c_str());
+        }
     }
 
     if (debugNodeIndex != -1)
     {
-        Debug::DrawAxis(copyNodes[debugNodeIndex].worldTransform);        
+        Debug::Renderer::DrawAxis(poseNode[debugNodeIndex].worldTransform);
     }
 }
 

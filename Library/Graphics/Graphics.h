@@ -10,8 +10,6 @@
 #include "RenderState.h"
 #include "ConstantBufferManager.h"
 
-#include "../Renderer/ModelRenderer.h"
-#include "../Renderer/PrimitiveRenderer.h"
 //#include "../PostProcess/PostProcessManager.h"
 //#include "../PostProcess/CascadedShadowMap/CascadedShadowMap.h"
 #include "../2D/Sprite.h"
@@ -89,12 +87,6 @@ public:
 	// スクリーン高さ取得
 	[[nodiscard]] float GetScreenHeight() const { return static_cast<float>(framebufferDimensions_.cy); }
 
-	// プリミティブレンダラ取得
-	[[nodiscard]] PrimitiveRenderer* GetPrimitiveRenderer() const { return primitiveRenderer.get(); }
-
-	// モデルレンダラ取得
-	[[nodiscard]] ModelRenderer* GetModelRenderer() const { return modelRenderer.get(); }
-
 	//// フレームバッファ取得
 	//[[nodiscard]] FrameBuffer* GetFrameBuffer(int index) { return frameBufferes[index].get(); }
 
@@ -148,10 +140,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaders[static_cast<int>(FullscreenQuadPS::FullscreenQuadPSMax)];
 	//// カスケードシャドウマップ
 	//std::unique_ptr<CascadedShadowMap> cascadedShadowMap;
-
-	// 各種レンダラー
-	std::unique_ptr<ModelRenderer>					modelRenderer;
-	std::unique_ptr<PrimitiveRenderer>				primitiveRenderer;
 
 private:
 	// スクリーンの大きさ

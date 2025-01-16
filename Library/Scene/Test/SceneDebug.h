@@ -2,6 +2,7 @@
 
 #include "../SceneManager.h"
 
+#include "../../3D/Model.h"
 class SceneDebug : public Scene
 {
 public:
@@ -28,6 +29,8 @@ public:
 	{
 		return std::make_shared<SceneDebug>();
 	}
+
+	std::unique_ptr<Model> testModel;
 };
 
 // メニューバーに登録

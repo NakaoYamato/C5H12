@@ -7,6 +7,11 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Camera/Camera.h"
 
+#include "../../Library/Renderer/ModelRenderer.h"
+#include "../../Library/Renderer/PrimitiveRenderer.h"
+
+#include "../../Library/Actor/ActorManager.h"
+
 //初期化
 void SceneDebug::Initialize()
 {
@@ -26,16 +31,29 @@ void SceneDebug::Initialize()
     );
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
+    testModel = std::make_unique<Model>(device, "./Data/Model/Player/Mixamo.fbx");
 }
 
 //終了化 
 void SceneDebug::Finalize()
 {
+    ActorManager::Clear();
 }
 
 //更新処理
 void SceneDebug::Update(float elapsedTime)
 {
+    // ゲームオブジェクトの更新
+    ActorManager::Update(elapsedTime);
+    // 当たり判定処理
+    ActorManager::Judge();
+
+    testModel->UpdateTransform({
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+        });
 }
 
 //描画処理
@@ -48,8 +66,6 @@ void SceneDebug::Render()
 
     RenderState* renderState = graphics.GetRenderState();
     ConstantBufferManager* cbManager = graphics.GetConstantBufferManager();
-    //ModelRenderer* modelRenderer = graphics.GetModelRenderer();
-    //PrimitiveRenderer* primitiveRenderer = graphics.GetPrimitiveRenderer();
 
     FLOAT color[] = { 0.2f,0.2f,0.2f,1.0f };
     dc->ClearRenderTargetView(rtv, color);
@@ -83,7 +99,7 @@ void SceneDebug::Render()
     rc.lightAmbientColor = { 0,0,0,0 };
 
     // 描画の前処理
-    //Actors::RenderPreprocess(rc);
+    ActorManager::RenderPreprocess(rc);
 
     // シーン定数バッファ、ライト定数バッファの更新
     cbManager->Update(rc);
@@ -98,13 +114,13 @@ void SceneDebug::Render()
     //modelRenderBuffer->ClearAndActive(dc);
     //{
     //    // ゲームオブジェクトの描画
-    //    Actors::Render(rc);
+    ActorManager::Render(rc);
+    ModelRenderer::Draw(testModel.get(), VECTOR4_WHITE, ShaderId::Basic, ModelRenderType::Dynamic);
+        // モデルの描画
+    ModelRenderer::Render(rc);
 
-    //    // モデルの描画
-    //    modelRenderer->Render(rc);
-
-    //    // プリミティブ描画
-    //    primitiveRenderer->Render(dc, rc.camera->view, rc.camera->projection);
+        // プリミティブ描画
+    PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
 
     //    // デバッグ描画
     //    Debug::Render(Camera::Instance().GetView(), Camera::Instance().GetProjection());
@@ -240,20 +256,26 @@ void SceneDebug::Render()
     //    0, 1,
     //    FullscreenQuadPS::EmbeddedPS);
 
-    //// レンダーステート設定
-    //dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-    //dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-    //dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+    // レンダーステート設定
+    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
-    //// 3D描画後の描画処理
-    //Actors::DelayedRender(rc);
+    // 3D描画後の描画処理
+    ActorManager::DelayedRender(rc);
 }
 
 // デバッグ用Gui描画
 void SceneDebug::DrawGui()
 {
     //　ゲームオブジェクトのGui表示
-    //Actors::DrawGui();
+    ActorManager::DrawGui();
 
     //Graphics::Instance().GetCascadedShadowMap()->DrawGui();
+
+    if (ImGui::Begin("tes"))
+    {
+        testModel->DrawGui();
+    }
+    ImGui::End();
 }

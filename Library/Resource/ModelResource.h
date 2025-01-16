@@ -172,19 +172,27 @@ public:
 	void AppendAnimations(ModelResource* animationResource);
 
 	// アクセサ
-	const std::vector<Node>& GetNodes() const { return nodes; }
-	const std::vector<Mesh>& GetMeshes() const { return meshes; }
-	const std::vector<Material>& GetMaterials() const { return materials; }
-	const std::vector<Animation>& GetAnimations() const { return animations; }
+	const std::vector<Node>& GetNodes() const { return nodes_; }
+	const std::vector<Mesh>& GetMeshes() const { return meshes_; }
+	const std::vector<Material>& GetMaterials() const { return materials_; }
+	const std::vector<Animation>& GetAnimations() const { return animations_; }
+	const std::string& GetSerializePath() const { return serializePath_; }
 
-	std::vector<Mesh>& GetAddressMeshes() { return meshes; }
-	std::vector<Material>& GetAddressMaterials() { return materials; }
+	std::vector<Mesh>& GetAddressMeshes() { return meshes_; }
+	std::vector<Material>& GetAddressMaterials() { return materials_; }
 
 	// 指定のマテリアルのSRVを変更
 	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)
 	{
-		materials.at(materialIndex).textureDatas.at(textureKey).textureSRV = srv;
+		materials_.at(materialIndex).textureDatas.at(textureKey).textureSRV = srv;
 	}
+
+	// シリアライズ
+	void Serialize(const char* filename);
+
+	// デシリアライズ
+	void Deserialize(const char* filename);
+
 private:
 	// ノードの読み込み
 	void LoadNodes(std::vector<Node>& nodes);
@@ -215,23 +223,17 @@ private:
 	// ノードインデックス取得
 	static int GetNodeIndex(const std::vector<Node>& nodes, const char* name);
 
-	// シリアライズ
-	void Serialize(const char* filename);
-
-	// デシリアライズ
-	void Deserialize(const char* filename);
-
 private:
-	std::filesystem::path filepath;
-	std::string sesializePathStr{};
+	std::filesystem::path filepath_;
+	std::string serializePath_{};
 
-	Assimp::Importer aImporter;
-	const aiScene* aScene = nullptr;
+	Assimp::Importer aImporter_;
+	const aiScene* aScene_ = nullptr;
 
-	std::vector<Node> nodes;
-	std::vector<Mesh> meshes;
-	std::vector<Material> materials;
-	std::vector<Animation> animations;
+	std::vector<Node> nodes_;
+	std::vector<Mesh> meshes_;
+	std::vector<Material> materials_;
+	std::vector<Animation> animations_;
 
-	std::map<const aiNode*, int> nodeIndexMap;
+	std::map<const aiNode*, int> nodeIndexMap_;
 };

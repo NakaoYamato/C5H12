@@ -742,7 +742,7 @@ void DebugRenderer::Render(
 
 	// F7キーでキー非表示
 #ifdef _DEBUG
-	if (!Debug::IsActive(DebugInput::BTN_F7))
+	if (!Debug::Input::IsActive(DebugInput::BTN_F7))
 	{
 		for (const Instance& instance : instances)
 		{

@@ -7,6 +7,8 @@
 #include "../ResourceManager/ModelResourceManager.h"
 //#include "../PostProcess/PostProcessManager.h"
 //#include "../Effekseer/EffectManager.h"
+#include "../Renderer/ModelRenderer.h"
+#include "../Renderer/PrimitiveRenderer.h"
 
 #include "../Scene/SceneManager.h"
 
@@ -94,7 +96,7 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
         case VK_F11:
         case VK_F12:
             // 指定のキーを押すとそのビットを反転
-            DebugSupporter::Instance().GetDebugInput()->buttonData_ ^= (1 << (wparam - VK_F1));
+            Debug::GetDebugInput()->buttonData_ ^= (1 << (wparam - VK_F1));
             break;
 #endif
         }
@@ -149,6 +151,10 @@ bool Framework::Initialize() const
     // Graphicsの初期化
     Graphics::Instance().Initialize(hwnd_, FULLSCREEN);
 
+    // 各種レンダラー作成
+    ModelRenderer::Initialize(Graphics::Instance().GetDevice());
+    PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
+
     // 入力監視クラスの初期化
     Input::Instance().Initialize(hwnd_);
 
@@ -159,7 +165,7 @@ bool Framework::Initialize() const
     SceneManager::Instance().ChangeScene(u8"デバッグ");
 
     // デバッグの初期化
-    DebugSupporter::Instance().Initialize();
+    Debug::Initialize();
 
     // ImGui初期化
     ImGuiManager::Initialize(hwnd_,
@@ -177,14 +183,14 @@ void Framework::Update(float elapsedTime)
 #endif
 
     // F5キー有効化で時間停止
-    if (Debug::IsActive(DebugInput::BTN_F5))
+    if (Debug::Input::IsActive(DebugInput::BTN_F5))
         elapsedTime = 0.0f;
 
     // 入力監視クラスの更新
     Input::Instance().Update();
 
     // デバッグの更新
-    DebugSupporter::Instance().Update(elapsedTime);
+    Debug::Update(elapsedTime);
 
     // シーンの更新
     SceneManager::Instance().Update(elapsedTime);
@@ -210,13 +216,13 @@ void Framework::Render(float elapsedTime)
 
 #ifdef USE_IMGUI
     // F6キーでGUIを非表示
-    if (!Debug::IsActive(DebugInput::BTN_F6))
+    if (!Debug::Input::IsActive(DebugInput::BTN_F6))
     {
         // GUIのメニューバーでシーン変更
         SceneManager::Instance().SceneMenuGui();
 
         // デバッグのGui描画
-        DebugSupporter::Instance().DrawGui();
+        Debug::DrawGui();
 
         // モデルリソース管理クラスのGui描画
         ModelResourceManager::Instance().DrawGui();

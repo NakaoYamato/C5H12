@@ -65,7 +65,7 @@ public:
 	~ConstantBufferManager() {}
 
 	// 定数バッファの一括更新
-	void Update(RenderContext& rc);
+	void Update(const RenderContext& rc);
 
 	/// <summary>
 	/// 指定の定数バッファの更新

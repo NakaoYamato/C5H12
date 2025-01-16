@@ -200,12 +200,6 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		//cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
 		//	1024 * 4, 1024 * 4);
 	}
-
-	// レンダラ生成
-	{
-		modelRenderer = std::make_unique<ModelRenderer>(device.Get());
-		primitiveRenderer = std::make_unique<PrimitiveRenderer>(device.Get());
-	}
 }
 
 // フルスクリーンの切り替え

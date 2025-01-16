@@ -18,5 +18,5 @@ void PointLight::DrawGui()
 // デバッグ表示
 void PointLight::DebugRender()
 {
-    Debug::DrawSphere(data_.position.Vec3(), data_.range, data_.color);
+    Debug::Renderer::DrawSphere(data_.position.Vec3(), data_.range, data_.color);
 }

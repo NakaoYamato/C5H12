@@ -13,7 +13,7 @@ void DebugCamera::Update(float elapsedTime)
     isActive_ = false;
 
     // F4を押していたら起動
-    if (Debug::IsActive(DebugInput::BTN_F4))
+    if (Debug::Input::IsActive(DebugInput::BTN_F4))
     {
         // 使用フラグをオン
         isActive_ = true;

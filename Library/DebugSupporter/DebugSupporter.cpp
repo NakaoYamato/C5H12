@@ -10,128 +10,136 @@
 
 namespace Debug
 {
-    /// 指定のボタンが有効化かどうか
-    bool IsActive(DebugButton button)
+    std::vector<std::string>    debugStrings_;
+    DebugInput                  debugInput_;
+    DebugCamera                 debugCamera_;
+    std::unique_ptr<DebugRenderer> debugRenderer_;
+
+    bool showCameraGui_ = false;
+
+    namespace Input
     {
-        return DebugSupporter::Instance().GetDebugInput()->buttonData_ & button;
+        /// 指定のボタンが有効化かどうか
+        bool IsActive(DebugButton button)
+        {
+            return debugInput_.buttonData_ & button;
+        }
     }
-    /// デバッグ文字出力
-    void OutputString(std::string str)
+
+    namespace Output
     {
-        DebugSupporter::Instance().OutputString(str);
+        /// デバッグ文字出力
+        void String(std::string str)
+        {
+            debugStrings_.push_back(str);
+            OutputDebugStringA(str.c_str());
+        }
+        void String(std::wstring str)
+        {
+            debugStrings_.push_back(ToString(str));
+            OutputDebugStringW(str.c_str());
+        }
     }
-    void OutputString(std::wstring str)
+
+    namespace Renderer
     {
-        DebugSupporter::Instance().OutputString(str);
+        /// 箱描画
+        void DrawBox(const Vector3& position, const Vector3& angle, const Vector3& size, const Vector4& color)
+        {
+            debugRenderer_->DrawBox(position, angle, size, color);
+        }
+        void DrawBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
+        {
+            debugRenderer_->DrawBox(transform, color);
+        }
+        /// 球描画
+        void DrawSphere(const Vector3& position, float radius, const Vector4& color)
+        {
+            debugRenderer_->DrawSphere(position, radius, color);
+        }
+        /// カプセル描画
+        void DrawCapsule(const DirectX::XMFLOAT4X4& transform, float radius, float height, const Vector4& color)
+        {
+            debugRenderer_->DrawCapsule(transform, radius, height, color);
+        }
+        /// カプセル描画
+        void DrawCapsule(const Vector3& start, const Vector3& end, float radius, const Vector4& color)
+        {
+            debugRenderer_->DrawCapsule(start, end, radius, color);
+        }
+        /// 骨描画
+        void DrawBone(const DirectX::XMFLOAT4X4& transform, float length, const Vector4& color)
+        {
+            debugRenderer_->DrawBone(transform, length, color);
+        }
+        /// 矢印描画
+        void DrawArrow(const Vector3& start, const Vector3& target, float radius, const Vector4& color)
+        {
+            debugRenderer_->DrawArrow(start, target, radius, color);
+        }
+        /// 軸描画
+        void DrawAxis(const DirectX::XMFLOAT4X4& transform)
+        {
+            debugRenderer_->DrawAxis(transform);
+        }
+        /// グリッド描画
+        void DrawGrid(int subdivisions, float scale)
+        {
+            debugRenderer_->DrawGrid(subdivisions, scale);
+        }
+        void AddVertex(const Vector3& position)
+        {
+            debugRenderer_->AddVertex(position);
+        }
+        /// 描画実行
+        void Render(
+            const DirectX::XMFLOAT4X4& view,
+            const DirectX::XMFLOAT4X4& projection)
+        {
+            debugRenderer_->Render(Graphics::Instance().GetDeviceContext(), view, projection);
+        }
     }
-    /// 箱描画
-    void DrawBox(const Vector3& position, const Vector3& angle, const Vector3& size, const Vector4& color)
+    void Initialize()
     {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawBox(position, angle, size, color);
+        debugRenderer_ = std::make_unique<DebugRenderer>(Graphics::Instance().GetDevice());
     }
-    void DrawBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
+    void Update(float elapsedTime)
     {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawBox(transform, color);
+        debugCamera_.Update(elapsedTime);
     }
-    /// 球描画
-    void DrawSphere(const Vector3& position, float radius, const Vector4& color)
+    void DrawGui()
     {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawSphere(position, radius, color);
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu(u8"デバッグ"))
+            {
+                ImGui::Checkbox(u8"デバッグカメラ", &showCameraGui_);
+
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMainMenuBar();
+        }
+
+        if (showCameraGui_)
+        {
+            if (ImGui::Begin(u8"デバッグカメラ"))
+            {
+                debugCamera_.DrawGui();
+            }
+            ImGui::End();
+        }
     }
-    /// カプセル描画
-    void DrawCapsule(const DirectX::XMFLOAT4X4& transform, float radius, float height, const Vector4& color)
+    DebugInput* GetDebugInput()
     {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawCapsule(transform, radius, height, color);
-    }
-    /// カプセル描画
-    void DrawCapsule(const Vector3& start, const Vector3& end, float radius, const Vector4& color)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawCapsule(start, end, radius, color);
-    }
-    /// 骨描画
-    void DrawBone(const DirectX::XMFLOAT4X4& transform, float length, const Vector4& color)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawBone(transform, length, color);
-    }
-    /// 矢印描画
-    void DrawArrow(const Vector3& start, const Vector3& target, float radius, const Vector4& color)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawArrow(start, target, radius, color);
-    }
-    /// 軸描画
-    void DrawAxis(const DirectX::XMFLOAT4X4& transform)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawAxis(transform);
-    }
-    /// グリッド描画
-    void DrawGrid(int subdivisions, float scale)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->DrawGrid(subdivisions, scale);
-    }
-    void AddVertex(const Vector3& position)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->AddVertex(position);
-    }
-    /// 描画実行
-    void Render(
-        const DirectX::XMFLOAT4X4& view,
-        const DirectX::XMFLOAT4X4& projection)
-    {
-        DebugSupporter::Instance().GetDebugRenderer()->Render(Graphics::Instance().GetDeviceContext(), view, projection);
+        return &debugInput_;
     }
     DebugCamera* GetDebugCamera()
     {
-        return DebugSupporter::Instance().GetDebugCamera();
+        return &debugCamera_;
     }
-}
-
-/// 初期化
-void DebugSupporter::Initialize()
-{
-    debugRenderer_ = std::make_unique<DebugRenderer>(Graphics::Instance().GetDevice());
-}
-
-/// 更新処理
-void DebugSupporter::Update(float elapsedTime)
-{
-    debugCamera_.Update(elapsedTime);
-}
-
-/// デバッグGUI表示
-void DebugSupporter::DrawGui()
-{
-    if (ImGui::BeginMainMenuBar())
+    DebugRenderer* GetDebugRenderer()
     {
-        if (ImGui::BeginMenu(u8"デバッグ"))
-        {
-            ImGui::Checkbox(u8"デバッグカメラ", &showCameraGui_);
-
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
+        return debugRenderer_.get();
     }
-
-    if (showCameraGui_)
-    {
-        if (ImGui::Begin(u8"デバッグカメラ"))
-        {
-            debugCamera_.DrawGui();
-        }
-        ImGui::End();
-    }
-}
-
-/// stringを出力に表示
-void DebugSupporter::OutputString(std::string str)
-{
-    debugStrings_.push_back(str);
-    OutputDebugStringA(str.c_str());
-}
-
-/// stringを出力に表示
-void DebugSupporter::OutputString(std::wstring str)
-{
-    debugStrings_.push_back(ToString(str));
-    OutputDebugStringW(str.c_str());
 }

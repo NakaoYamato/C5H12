@@ -90,7 +90,7 @@ void Light::DrawGui()
 // デバッグ表示
 void Light::DebugRender()
 {
-    Debug::DrawSphere(lightStart_, 0.5f, { 1,0,0,1 });
-    Debug::DrawSphere(lightEnd_, 0.5f, { 0,1,0,1 });
-    Debug::DrawArrow(lightStart_, lightEnd_, 1.0f, { 1,1,1,1 });
+    Debug::Renderer::DrawSphere(lightStart_, 0.5f, { 1,0,0,1 });
+    Debug::Renderer::DrawSphere(lightEnd_, 0.5f, { 0,1,0,1 });
+    Debug::Renderer::DrawArrow(lightStart_, lightEnd_, 1.0f, { 1,1,1,1 });
 }

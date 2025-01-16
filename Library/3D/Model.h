@@ -31,7 +31,7 @@ public:
 	int GetNodeIndex(const std::string& str)
 	{
 		int i = 0;
-		for (auto& node : copyNodes)
+		for (auto& node : poseNode)
 		{
 			if (node.name == str)
 				return i;
@@ -42,25 +42,22 @@ public:
 
 	// ゲッター
 	ModelResource* GetResource() { return resource.get(); }
-	const std::vector<ModelResource::Mesh>& GetMesh() const { return resource->GetMeshes(); }
-	const std::vector<ModelResource::Material>& GetMaterials() const { return resource->GetMaterials(); }
-	const std::vector<ModelResource::Node>& GetNodes()const { return copyNodes; }
+	const std::vector<ModelResource::Node>& GetPoseNodes()const { return poseNode; }
+	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->poseNode = nodes; }
 
-	const char* GetFilepath()const { return filepath.c_str(); }
-
-	void SetNodes(const std::vector<ModelResource::Node>& nodes) { this->copyNodes = nodes; }
+	const char* GetFilepath()const { return serializePath_.c_str(); }
 protected:
 	void CreateComObject(ID3D11Device* device, const char* fbx_filename);
 
 protected:
 	// ファイルパス
-	std::string filepath;
+	std::string serializePath_;
 
 	// モデルデータ
 	std::shared_ptr<ModelResource> resource;
 
-	// コピーノードデータ
-	std::vector<ModelResource::Node> copyNodes;
+	// 姿勢用ノード
+	std::vector<ModelResource::Node> poseNode;
 
 	// デバッグ用
 	int debugNodeIndex = -1;

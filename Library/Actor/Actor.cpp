@@ -93,6 +93,7 @@ void Actor::Render(const RenderContext& rc)
 {
 	// 起動チェック
 	if (!isActive_)return;
+	if (!isShowing_)return;
 
 	// 各コンポーネントの描画処理
 	for (std::shared_ptr<Component>& component : components_)
@@ -110,6 +111,7 @@ void Actor::DebugRender(const RenderContext& rc)
 {
 	// 起動チェック
 	if (!isActive_)return;
+	if (!drawDebug_)return;
 
 	// 各コンポーネントの描画処理
 	for (std::shared_ptr<Component>& component : components_)
@@ -150,6 +152,8 @@ void Actor::DelayedRender(const RenderContext& rc)
 void Actor::DrawGui()
 {
 	ImGui::Checkbox(u8"Active", &isActive_);
+	ImGui::Checkbox(u8"Show", &isShowing_);
+	ImGui::Checkbox(u8"DrawDebug", &drawDebug_);
 
 	// トランスフォーム
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))

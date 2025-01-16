@@ -132,8 +132,8 @@ protected:
 	Transform			transform_;
 
 	bool				isActive_ = true;
-	bool				isShowing_ = false;
-	bool				drawDebug_ = false;
+	bool				isShowing_ = true;
+	bool				drawDebug_ = true;
 
 	std::vector<std::shared_ptr<Component>>	components_;
 	// 当たり判定コンポーネント

@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 
 #include "../../Library/Math/Vector.h"
+#include "../../Library/Math/Quaternion.h"
 
 namespace PrimitiveRenderer
 {

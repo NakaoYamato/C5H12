@@ -176,17 +176,13 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		renderState = std::make_unique<RenderState>(device.Get());
 		// 定数バッファの管理者作成
 		constantBufferManager = std::make_unique<ConstantBufferManager>(device.Get());
-		// ポストプロセスの管理者作成
-		//postProcessManager = std::make_unique<PostProcessManager>(device.Get(),
-		//	static_cast<UINT>(GetScreenWidth()),
-		//	static_cast<UINT>(GetScreenHeight()));
-		//// ポストエフェクト用の管理者生成
-		//for (size_t index = 0; index < 8; ++index)
-		//{
-		//	frameBufferes[index] = std::make_unique<FrameBuffer>(device.Get(),
-		//		static_cast<UINT>(GetScreenWidth()),
-		//		static_cast<UINT>(GetScreenHeight()));
-		//}
+		// ポストエフェクト用の管理者生成
+		for (size_t index = 0; index < 8; ++index)
+		{
+			frameBufferes[index] = std::make_unique<FrameBuffer>(device.Get(),
+				static_cast<UINT>(GetScreenWidth()),
+				static_cast<UINT>(GetScreenHeight()));
+		}
 		fullscreenQuad = std::make_unique<Sprite>(device.Get(),
 			L"",
 			".\\Data\\Shader\\FullscreenQuadVS.cso");
@@ -197,8 +193,8 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/AddBloomPS.cso",
 			pixelShaders[static_cast<int>(FullscreenQuadPS::AddBloomPS)].ReleaseAndGetAddressOf());
 
-		//cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
-		//	1024 * 4, 1024 * 4);
+		cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
+			1024 * 4, 1024 * 4);
 	}
 }
 
@@ -299,9 +295,9 @@ void Graphics::Blit(ID3D11ShaderResourceView** shaderResourceView,
 	uint32_t startSlot, uint32_t numViews, 
 	FullscreenQuadPS shaderType)
 {
-	//Graphics::Blit(shaderResourceView,
-	//	startSlot, numViews,
-	//	pixelShaders[static_cast<int>(shaderType)].Get());
+	Graphics::Blit(shaderResourceView,
+		startSlot, numViews,
+		pixelShaders[static_cast<int>(shaderType)].Get());
 }
 
 // この関数の使用者側でピクセルシェーダを指定して描画
@@ -310,10 +306,10 @@ void Graphics::Blit(ID3D11ShaderResourceView** shaderResourceView,
 	ID3D11PixelShader* pixelShader)
 {
 	// 描画処理
-	//fullscreenQuad->Blit(immediateContext.Get(),
-	//	shaderResourceView,
-	//	startSlot, numViews,
-	//	pixelShader);
+	fullscreenQuad->Blit(immediateContext.Get(),
+		shaderResourceView,
+		startSlot, numViews,
+		pixelShader);
 }
 
 // 高性能アダプターの取得

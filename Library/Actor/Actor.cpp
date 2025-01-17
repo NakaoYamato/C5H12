@@ -47,11 +47,19 @@ void Actor::Update(float elapsedTime)
 		collider->Update(elapsedTime);
 	}
 
+	const DirectX::XMFLOAT4X4* ParentMatrix = nullptr;
+	// 親がいるときの処理
 	// トランスフォーム更新
-	if(!parent_.expired())
-		transform_.UpdateTransform(&parent_.lock()->GetTransform().GetMatrix());
-	else
-		transform_.UpdateTransform(nullptr);
+	if (!parent_.expired())
+	{
+		// 親の起動チェック
+		if (!parent_.lock()->IsActive())
+			this->isActive_ = false;
+
+		ParentMatrix = &parent_.lock()->GetTransform().GetMatrix();
+	}
+	// トランスフォーム更新
+	transform_.UpdateTransform(ParentMatrix);
 }
 
 // 1秒ごとの更新処理
@@ -229,7 +237,7 @@ void Actor::Judge(Actor* other)
 		const size_t otherComponentSize = other->GetColliderComponentSize();
 		for (size_t i = 0; i < otherComponentSize; ++i)
 		{
-			std::shared_ptr<ColliderComponent> otherComponent = other->GetColliderComponent(i);
+			std::shared_ptr<ColliderComponent> otherComponent = other->GetCollider(i);
 
 			// 当たり判定処理
 			const bool result = collider->Judge(other, otherComponent.get(),

@@ -65,12 +65,7 @@ public:
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
-		// 当たり判定に追加するか判定
-		std::shared_ptr<ColliderComponent> cc = std::dynamic_pointer_cast<ColliderComponent>(component);
-		if (cc != nullptr)
-			colliderComponents_.emplace_back(component);
-		else
-			components_.emplace_back(component);
+		components_.emplace_back(component);
 		return component;
 	}
 
@@ -88,8 +83,16 @@ public:
 	}
 
 	// 当たり判定コンポーネント
+	template<class T, class... Args>
+	std::shared_ptr<T> AddCollider(Args... args)
+	{
+		std::shared_ptr<T> component = std::make_shared<T>(args...);
+		component->SetActor(shared_from_this());
+		colliderComponents_.emplace_back(component);
+		return component;
+	}
 	template<class T>
-	std::shared_ptr<T> GetColliderComponent()
+	std::shared_ptr<T> GetCollider()
 	{
 		for (std::shared_ptr<ColliderComponent>& component : colliderComponents_)
 		{
@@ -99,7 +102,7 @@ public:
 		}
 		return nullptr;
 	}
-	std::shared_ptr<ColliderComponent> GetColliderComponent(size_t index)
+	std::shared_ptr<ColliderComponent> GetCollider(size_t index)
 	{
 		return colliderComponents_[index];
 	}
@@ -108,10 +111,16 @@ public:
 
 
 #pragma region アクセサ
+	std::weak_ptr<Actor> GetParent() { return parent_; }
+	std::vector<std::weak_ptr<Actor>> GetChildren() { return children_; };
 	const char* GetName() const { return name_.c_str(); }
 	Transform& GetTransform() { return transform_; }
 	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return judgeTags_; }
 
+	void SetParent(std::shared_ptr<Actor> parent) {
+		this->parent_ = parent;
+		parent->children_.push_back(shared_from_this());
+	}
 	void SetName(const char* name) { this->name_ = name; }
 	void SetTransform(const Transform& t) { this->transform_ = t; }
 	void SetActiveFlag(bool b) { this->isActive_ = b; }
@@ -127,6 +136,7 @@ public:
 #pragma endregion
 protected:
 	std::weak_ptr<Actor>	parent_;
+	std::vector<std::weak_ptr<Actor>> children_;
 
 	std::string			name_;
 	Transform			transform_;

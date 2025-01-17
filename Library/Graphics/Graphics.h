@@ -9,9 +9,8 @@
 
 #include "RenderState.h"
 #include "ConstantBufferManager.h"
-
-//#include "../PostProcess/PostProcessManager.h"
-//#include "../PostProcess/CascadedShadowMap/CascadedShadowMap.h"
+#include "../PostProcess/FrameBuffer.h"
+#include "../PostProcess/CascadedShadowMap/CascadedShadowMap.h"
 #include "../2D/Sprite.h"
 
 //#define X3DGP_FULLSCREEN
@@ -87,14 +86,11 @@ public:
 	// スクリーン高さ取得
 	[[nodiscard]] float GetScreenHeight() const { return static_cast<float>(framebufferDimensions_.cy); }
 
-	//// フレームバッファ取得
-	//[[nodiscard]] FrameBuffer* GetFrameBuffer(int index) { return frameBufferes[index].get(); }
+	// フレームバッファ取得
+	[[nodiscard]] FrameBuffer* GetFrameBuffer(int index) { return frameBufferes[index].get(); }
 
-	//// カスケードシャドウマップ取得
-	//[[nodiscard]] CascadedShadowMap* GetCascadedShadowMap() { return cascadedShadowMap.get(); }
-
-	//// ポストエフェクト管理者取得
-	//[[nodiscard]] PostProcessManager* GetPostProcessManager() { return postProcessManager.get(); }
+	// カスケードシャドウマップ取得
+	[[nodiscard]] CascadedShadowMap* GetCascadedShadowMap() { return cascadedShadowMap.get(); }
 
 	// 定数バッファの管理者取得
 	[[nodiscard]] ConstantBufferManager* GetConstantBufferManager() { return constantBufferManager.get(); }
@@ -132,14 +128,12 @@ private:
 	std::unique_ptr<RenderState>					renderState;
 	// 定数バッファの管理者
 	std::unique_ptr<ConstantBufferManager> constantBufferManager;
-	//// ポストエフェクト管理者
-	//std::unique_ptr<PostProcessManager> postProcessManager;
-	//// オフスクリーンレンダリングの管理者
-	//std::unique_ptr<FrameBuffer> frameBufferes[8];
+	// オフスクリーンレンダリングの管理者
+	std::unique_ptr<FrameBuffer> frameBufferes[8];
 	std::unique_ptr<Sprite> fullscreenQuad;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaders[static_cast<int>(FullscreenQuadPS::FullscreenQuadPSMax)];
-	//// カスケードシャドウマップ
-	//std::unique_ptr<CascadedShadowMap> cascadedShadowMap;
+	// カスケードシャドウマップ
+	std::unique_ptr<CascadedShadowMap> cascadedShadowMap;
 
 private:
 	// スクリーンの大きさ

@@ -165,6 +165,57 @@
     <ClCompile Include="Library\Actor\ActorManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Renderer\ShapeRenderer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\ShapeController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\ModelController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\Light\LightController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\Light\PointLightController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\SkyMapController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\PostProcessManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\PostProcessBase.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\FrameBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\Bloom\Bloom.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\ColorFilter\ColorFilter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\GaussianFilter\GaussianFilter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\Tonemapping\Tonemapping.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\Vignette\Vignette.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -353,6 +404,57 @@
     <ClInclude Include="Library\Component\Collider\ColliderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Renderer\ShapeRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\ShapeController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\ModelController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\Light\LightController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\Light\PointLightController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\SkyMapController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\PostProcessManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\PostProcessBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\FrameBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\Bloom\Bloom.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\ColorFilter\ColorFilter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\GaussianFilter\GaussianFilter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\Tonemapping\Tonemapping.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\Vignette\Vignette.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -371,6 +473,8 @@
     <None Include="HLSL\PostProcess\ColorFilter\ColorFilter.hlsli" />
     <None Include="HLSL\PostProcess\ColorFilter\FilterFunctions.hlsli" />
     <None Include="HLSL\PostProcess\GaussianFilter\GaussianFilter.hlsli" />
+    <None Include="HLSL\ShapeRenderer\ShapeRenderer.hlsli" />
+    <None Include="HLSL\SkyMap\SkyMap.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -407,5 +511,10 @@
     <FxCompile Include="HLSL\PostProcess\RadialBlur\RadialBlurPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\Tonemapping\TonemappingPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\Vignette\VignettePS.hlsl" />
+    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererPS.hlsl" />
+    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererVS.hlsl" />
+    <FxCompile Include="HLSL\SkyMap\SkyBoxPS.hlsl" />
+    <FxCompile Include="HLSL\SkyMap\SkyMapPS.hlsl" />
+    <FxCompile Include="HLSL\SkyMap\SkyMapVS.hlsl" />
   </ItemGroup>
 </Project>

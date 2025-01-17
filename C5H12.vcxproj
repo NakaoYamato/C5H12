@@ -157,6 +157,11 @@
     <ClCompile Include="Library\Application\Main.cpp" />
     <ClCompile Include="Library\Camera\Camera.cpp" />
     <ClCompile Include="Library\Camera\CameraController.cpp" />
+    <ClCompile Include="Library\Component\Light\LightController.cpp" />
+    <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
+    <ClCompile Include="Library\Component\ModelController.cpp" />
+    <ClCompile Include="Library\Component\ShapeController.cpp" />
+    <ClCompile Include="Library\Component\SkyMapController.cpp" />
     <ClCompile Include="Library\Converter\ToString.cpp" />
     <ClCompile Include="Library\DebugSupporter\Camera\DebugCamera.cpp" />
     <ClCompile Include="Library\DebugSupporter\DebugSupporter.cpp" />
@@ -186,8 +191,20 @@
     <ClCompile Include="Library\Math\Quaternion.cpp" />
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
+    <ClCompile Include="Library\PostProcess\Bloom\Bloom.cpp" />
+    <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
+    <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
+    <ClCompile Include="Library\PostProcess\ColorFilter\ColorFilter.cpp" />
+    <ClCompile Include="Library\PostProcess\FrameBuffer.cpp" />
+    <ClCompile Include="Library\PostProcess\GaussianFilter\GaussianFilter.cpp" />
+    <ClCompile Include="Library\PostProcess\PostProcessBase.cpp" />
+    <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
+    <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
+    <ClCompile Include="Library\PostProcess\Tonemapping\Tonemapping.cpp" />
+    <ClCompile Include="Library\PostProcess\Vignette\Vignette.cpp" />
     <ClCompile Include="Library\Renderer\ModelRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
+    <ClCompile Include="Library\Renderer\ShapeRenderer.cpp" />
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp" />
     <ClCompile Include="Library\Resource\ModelResource.cpp" />
@@ -211,6 +228,11 @@
     <ClInclude Include="Library\Camera\CameraData.h" />
     <ClInclude Include="Library\Component\Collider\ColliderComponent.h" />
     <ClInclude Include="Library\Component\Component.h" />
+    <ClInclude Include="Library\Component\Light\LightController.h" />
+    <ClInclude Include="Library\Component\Light\PointLightController.h" />
+    <ClInclude Include="Library\Component\ModelController.h" />
+    <ClInclude Include="Library\Component\ShapeController.h" />
+    <ClInclude Include="Library\Component\SkyMapController.h" />
     <ClInclude Include="Library\Converter\ToString.h" />
     <ClInclude Include="Library\DebugSupporter\Camera\DebugCamera.h" />
     <ClInclude Include="Library\DebugSupporter\DebugSupporter.h" />
@@ -247,8 +269,20 @@
     <ClInclude Include="Library\Math\Random.h" />
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
+    <ClInclude Include="Library\PostProcess\Bloom\Bloom.h" />
+    <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
+    <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />
+    <ClInclude Include="Library\PostProcess\ColorFilter\ColorFilter.h" />
+    <ClInclude Include="Library\PostProcess\FrameBuffer.h" />
+    <ClInclude Include="Library\PostProcess\GaussianFilter\GaussianFilter.h" />
+    <ClInclude Include="Library\PostProcess\PostProcessBase.h" />
+    <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
+    <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
+    <ClInclude Include="Library\PostProcess\Tonemapping\Tonemapping.h" />
+    <ClInclude Include="Library\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Library\Renderer\ModelRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
+    <ClInclude Include="Library\Renderer\ShapeRenderer.h" />
     <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />
     <ClInclude Include="Library\ResourceManager\ModelResourceManager.h" />
     <ClInclude Include="Library\Resource\ModelResource.h" />
@@ -278,6 +312,8 @@
     <None Include="HLSL\PrimitiveRenderer\PrimitiveRenderer.hlsli" />
     <None Include="HLSL\Primitive\Primitive.hlsli" />
     <None Include="HLSL\Scene\SceneConstantBuffer.hlsli" />
+    <None Include="HLSL\ShapeRenderer\ShapeRenderer.hlsli" />
+    <None Include="HLSL\SkyMap\SkyMap.hlsli" />
     <None Include="HLSL\Sprite\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
@@ -402,6 +438,26 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Primitive\PrimitiveVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\SkyMap\SkyBoxPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\SkyMap\SkyMapPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\SkyMap\SkyMapVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

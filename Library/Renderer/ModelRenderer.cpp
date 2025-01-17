@@ -404,7 +404,127 @@ public:
 	/// <param name="rc"></param>
 	void CastShadow(const RenderContext& rc)
 	{
+		ID3D11DeviceContext* dc = rc.deviceContext;
 
+		// サンプラステート設定
+		ID3D11SamplerState* samplerStates[] =
+		{
+			rc.renderState->GetSamplerState(SamplerState::LinearWrap)
+		};
+		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+
+		// レンダーステート設定
+		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+		// ブレンドステート設定
+		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+
+		// ボーンの影響度があるモデルの描画
+		{
+			// 定数バッファ設定
+			dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+
+			// 不透明描画処理
+			for (auto& drawInfomap : dynamicBoneDrawInfomap_)
+			{
+				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
+				shader->Begin(rc);
+
+				for (auto& drawInfo : drawInfomap.second)
+				{
+					// メッシュ描画
+					auto model = drawInfo.model;
+					auto& color = drawInfo.color;
+					const ModelResource* resource = model->GetResource();
+					const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
+					for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+					{
+						uint32_t stride{ sizeof(ModelResource::Vertex) };
+						uint32_t offset{ 0 };
+						dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
+						dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+						dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+						// スケルトン用定数バッファ
+						if (mesh.bones.size() > 0)
+						{
+							for (size_t i = 0; i < mesh.bones.size(); ++i)
+							{
+								const ModelResource::Bone& bone = mesh.bones.at(i);
+								DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
+								DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+								DirectX::XMMATRIX Bone = Offset * World;
+								DirectX::XMStoreFloat4x4(&cbSkeleton_.boneTransforms[i], Bone);
+							}
+						}
+						else
+						{
+							cbSkeleton_.boneTransforms[0] = nodes[mesh.nodeIndex].worldTransform;
+						}
+						cbSkeleton_.materialColor = color;
+
+						dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbSkeleton_, 0, 0);
+
+						// シェーダーの更新処理
+						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
+
+						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
+					}
+				}
+
+				shader->End(rc);
+			}
+			dynamicBoneDrawInfomap_.clear();
+		}
+
+		// ボーンの影響度がないモデルの描画
+		{
+			ID3D11DeviceContext* dc = rc.deviceContext;
+			// 定数バッファ設定
+			dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+
+			// 不透明描画処理
+			for (auto& drawInfomap : staticBoneDrawInfomap_)
+			{
+				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
+				shader->Begin(rc);
+
+				for (auto& drawInfo : drawInfomap.second)
+				{
+					// メッシュ描画
+					auto model = drawInfo.model;
+					auto& color = drawInfo.color;
+					const ModelResource* resource = model->GetResource();
+					const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
+					for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+					{
+						uint32_t stride{ sizeof(ModelResource::Vertex) };
+						uint32_t offset{ 0 };
+						dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
+						dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+						dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+						// スケルトン用定数バッファ
+						cbBSkeleton_.world = nodes[mesh.nodeIndex].worldTransform;
+						cbBSkeleton_.materialColor = color;
+						dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbBSkeleton_, 0, 0);
+
+						// シェーダーの更新処理
+						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
+
+						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
+					}
+				}
+
+				shader->End(rc);
+			}
+			staticBoneDrawInfomap_.clear();
+		}
+
+		// インスタンシングモデルの描画
+		RenderInstancing(rc);
 	}
 
 private:

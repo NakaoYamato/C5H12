@@ -6,11 +6,21 @@
 #include "../../Library/Input/Input.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Camera/Camera.h"
+#include "../../Library/PostProcess/PostProcessManager.h"
 
 #include "../../Library/Renderer/ModelRenderer.h"
 #include "../../Library/Renderer/PrimitiveRenderer.h"
+#include "../../Library/Renderer/ShapeRenderer.h"
 
 #include "../../Library/Actor/ActorManager.h"
+
+// コンポーネント
+#include "../../Library/Component/SkyMapController.h"
+#include "../../Library/Component/Light/LightController.h"
+#include "../../Library/Component/Light/PointLightController.h"
+
+#include "../../Library/Component/ShapeController.h"
+#include "../../Library/Component/ModelController.h"
 
 //初期化
 void SceneDebug::Initialize()
@@ -31,7 +41,42 @@ void SceneDebug::Initialize()
     );
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
-    testModel = std::make_unique<Model>(device, "./Data/Model/Player/Mixamo.fbx");
+    // オブジェクト作成
+    {
+        std::shared_ptr<Actor> skyMap = ActorManager::Create(u8"スカイマップ", ActorTag::DrawContextParameter);
+        skyMap->AddComponent<SkyMapController>(L"./Data/SkyMap/S0.dds");
+    }
+    {
+        std::shared_ptr<Actor> light = ActorManager::Create(u8"ライト", ActorTag::DrawContextParameter);
+        auto lc = light->AddComponent<LightController>();
+        lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
+    }
+    {
+        std::shared_ptr<Actor> light = ActorManager::Create(u8"PointLight0", ActorTag::DrawContextParameter);
+        light->AddComponent<PointLightController>();
+    }
+    {
+        std::shared_ptr<Actor> light = ActorManager::Create(u8"PointLight1", ActorTag::DrawContextParameter);
+        light->AddComponent<PointLightController>();
+    }
+    {
+        auto stage = ActorManager::Create("Stage", ActorTag::Stage);
+        auto modelCont = stage->AddComponent<ModelController>("./Data/Model/Stage/Land/Land1.fbx");
+    }
+    {
+        auto parentAct = ActorManager::Create("TestParent", ActorTag::Player);
+        auto childAct = ActorManager::Create("TestChild", ActorTag::Player);
+
+        parentAct->AddComponent<ShapeController>();
+        childAct->AddComponent<ShapeController>();
+
+        childAct->SetParent(parentAct);
+    }
+    {
+        auto player = ActorManager::Create("Player", ActorTag::Player);
+        player->GetTransform().SetLengthScale(0.01f);
+        auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/Mixamo.fbx");
+    }
 }
 
 //終了化 
@@ -47,13 +92,6 @@ void SceneDebug::Update(float elapsedTime)
     ActorManager::Update(elapsedTime);
     // 当たり判定処理
     ActorManager::Judge();
-
-    testModel->UpdateTransform({
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        0,0,0,1
-        });
 }
 
 //描画処理
@@ -108,153 +146,155 @@ void SceneDebug::Render()
     // ライト定数バッファの設定
     cbManager->SetCB(dc, 3, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
 
-    ////--------------------------------------------------------------------------------------
-    //// レンダーターゲットをフレームバッファ0番に設定
-    //FrameBuffer* modelRenderBuffer = graphics.GetFrameBuffer(0);
-    //modelRenderBuffer->ClearAndActive(dc);
-    //{
-    //    // ゲームオブジェクトの描画
-    ActorManager::Render(rc);
-    ModelRenderer::Draw(testModel.get(), VECTOR4_WHITE, ShaderId::Basic, ModelRenderType::Dynamic);
+    //--------------------------------------------------------------------------------------
+    // レンダーターゲットをフレームバッファ0番に設定
+    FrameBuffer* modelRenderBuffer = graphics.GetFrameBuffer(0);
+    modelRenderBuffer->ClearAndActive(dc);
+    {
+        // ゲームオブジェクトの描画
+        ActorManager::Render(rc);
         // モデルの描画
-    ModelRenderer::Render(rc);
+        ModelRenderer::Render(rc);
+
+        // シェイプ描画
+        ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
 
         // プリミティブ描画
-    PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+        PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
 
-    //    // デバッグ描画
-    //    Debug::Render(Camera::Instance().GetView(), Camera::Instance().GetProjection());
-    //}
-    //modelRenderBuffer->Deactivate(dc);
-    //// フレームバッファ0番の処理終了
-    ////--------------------------------------------------------------------------------------
+        // デバッグ描画
+        Debug::Renderer::Render(Camera::Instance().GetView(), Camera::Instance().GetProjection());
+    }
+    modelRenderBuffer->Deactivate(dc);
+    // フレームバッファ0番の処理終了
+    //--------------------------------------------------------------------------------------
 
-    ////--------------------------------------------------------------------------------------
-    //// カスケードシャドウマップ作成
-    //CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
-    //cascadedShadowMap->ClearAndActive(rc, 3/*cb_slot*/);
-    //{
-    //    // ゲームオブジェクトの影描画処理
-    //    Actors::CastShadow(rc);
+    //--------------------------------------------------------------------------------------
+    // カスケードシャドウマップ作成
+    CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
+    cascadedShadowMap->ClearAndActive(rc, 3/*cb_slot*/);
+    {
+        // ゲームオブジェクトの影描画処理
+        ActorManager::CastShadow(rc);
 
-    //    // モデルの影描画処理
-    //    modelRenderer->CastShadow(rc);
+        // モデルの影描画処理
+        ModelRenderer::CastShadow(rc);
 
-    //}
-    //cascadedShadowMap->Deactivate(rc);
-    //// カスケードシャドウマップの処理終了
-    ////--------------------------------------------------------------------------------------
+    }
+    cascadedShadowMap->Deactivate(rc);
+    // カスケードシャドウマップの処理終了
+    //--------------------------------------------------------------------------------------
 
-    ////--------------------------------------------------------------------------------------
-    //// レンダーターゲットをフレームバッファ1番に設定
-    //FrameBuffer* modelAndShadowRenderBuffer = graphics.GetFrameBuffer(1);
-    //modelAndShadowRenderBuffer->ClearAndActive(dc);
-    //{
-    //    // 影の描画
-    //    // cascadedShadowMapにある深度情報から
-    //    // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
-    //    ID3D11ShaderResourceView* srvs[]
-    //    {
-    //        modelRenderBuffer->GetColorSRV().Get(), // color_map
-    //        modelRenderBuffer->GetDepthSRV().Get(), // depth_map
-    //        cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
-    //    };
-    //    // cascadedShadowMapの定数バッファ更新
-    //    cascadedShadowMap->UpdateCSMConstants(rc);
-    //    // レンダーステート設定
-    //    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
-    //    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-    //    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-    //    // サンプラーステート設定
-    //    dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
-    //    dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
+    //--------------------------------------------------------------------------------------
+    // レンダーターゲットをフレームバッファ1番に設定
+    FrameBuffer* modelAndShadowRenderBuffer = graphics.GetFrameBuffer(1);
+    modelAndShadowRenderBuffer->ClearAndActive(dc);
+    {
+        // 影の描画
+        // cascadedShadowMapにある深度情報から
+        // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
+        ID3D11ShaderResourceView* srvs[]
+        {
+            modelRenderBuffer->GetColorSRV().Get(), // color_map
+            modelRenderBuffer->GetDepthSRV().Get(), // depth_map
+            cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
+        };
+        // cascadedShadowMapの定数バッファ更新
+        cascadedShadowMap->UpdateCSMConstants(rc);
+        // レンダーステート設定
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+        // サンプラーステート設定
+        dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
+        dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
 
-    //    graphics.Blit(
-    //        srvs,
-    //        0, _countof(srvs),
-    //        FullscreenQuadPS::CascadedPS);
-    //}
-    //modelAndShadowRenderBuffer->Deactivate(dc);
-    //// フレームバッファ1番の処理終了
-    ////--------------------------------------------------------------------------------------
+        graphics.Blit(
+            srvs,
+            0, _countof(srvs),
+            FullscreenQuadPS::CascadedPS);
+    }
+    modelAndShadowRenderBuffer->Deactivate(dc);
+    // フレームバッファ1番の処理終了
+    //--------------------------------------------------------------------------------------
 
-    ////--------------------------------------------------------------------------------------
-    //// フレームバッファ2番にブルームをかけたものを描画
-    //FrameBuffer* bloomRenderBuffer = graphics.GetFrameBuffer(2);
-    //bloomRenderBuffer->ClearAndActive(dc);
-    //{
-    //    PostProcessManager* postProcessManager = Graphics::Instance().GetPostProcessManager();
-    //    // ブルーム処理
-    //    PostProcessBase* bloomPP = postProcessManager->GetPostProcess(PostProcessType::BloomPP);
-    //    bloomPP->Render(dc,
-    //        modelAndShadowRenderBuffer->GetColorSRV().GetAddressOf(),
-    //        0, 1);
+    //--------------------------------------------------------------------------------------
+    // フレームバッファ2番にブルームをかけたものを描画
+    FrameBuffer* bloomRenderBuffer = graphics.GetFrameBuffer(2);
+    bloomRenderBuffer->ClearAndActive(dc);
+    {
+        PostProcessManager& postProcessManager = PostProcessManager::Instance();
+        // ブルーム処理
+        PostProcessBase* bloomPP = postProcessManager.GetPostProcess(PostProcessType::BloomPP);
+        bloomPP->Render(dc,
+            modelAndShadowRenderBuffer->GetColorSRV().GetAddressOf(),
+            0, 1);
 
-    //    ID3D11ShaderResourceView* srvs[] =
-    //    {
-    //        modelAndShadowRenderBuffer->GetColorSRV().Get(),
-    //        bloomPP->GetColorSRV().Get()
-    //    };
-    //    // 高輝度抽出し、ぼかしたものを加算描画
-    //    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-    //    dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
-    //    graphics.Blit(
-    //        srvs,
-    //        0, _countof(srvs),
-    //        FullscreenQuadPS::AddBloomPS);
-    //}
-    //bloomRenderBuffer->Deactivate(dc);
-    //// フレームバッファ2番の処理終了
-    ////--------------------------------------------------------------------------------------
+        ID3D11ShaderResourceView* srvs[] =
+        {
+            modelAndShadowRenderBuffer->GetColorSRV().Get(),
+            bloomPP->GetColorSRV().Get()
+        };
+        // 高輝度抽出し、ぼかしたものを加算描画
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+        dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
+        graphics.Blit(
+            srvs,
+            0, _countof(srvs),
+            FullscreenQuadPS::AddBloomPS);
+    }
+    bloomRenderBuffer->Deactivate(dc);
+    // フレームバッファ2番の処理終了
+    //--------------------------------------------------------------------------------------
 
-    ////--------------------------------------------------------------------------------------
-    //// ポストエフェクトの処理
-    //PostProcessManager* postProcessManager = Graphics::Instance().GetPostProcessManager();
-    //// ラジアルブラー
-    //PostProcessBase* radialBlurPP = postProcessManager->GetPostProcess(PostProcessType::RadialBlurPP);
-    //radialBlurPP->Render(dc,
-    //    bloomRenderBuffer->GetColorSRV().GetAddressOf(),
-    //    0, 1);
-    //// ヴィネット
-    //PostProcessBase* vignettePP = postProcessManager->GetPostProcess(PostProcessType::VignettePP);
-    //vignettePP->Render(dc,
-    //    radialBlurPP->GetColorSRV().GetAddressOf(),
-    //    0, 1);
-    //// 色収差
-    //PostProcessBase* chromaticAberrationPP = postProcessManager->GetPostProcess(PostProcessType::ChromaticAberrationPP);
-    //chromaticAberrationPP->Render(dc,
-    //    vignettePP->GetColorSRV().GetAddressOf(),
-    //    0, 1);
-    //// カラーフィルター
-    //PostProcessBase* colorFilterPP = postProcessManager->GetPostProcess(PostProcessType::ColorFilterPP);
-    //colorFilterPP->Render(dc,
-    //    chromaticAberrationPP->GetColorSRV().GetAddressOf(),
-    //    0, 1);
-    //// トーンマッピング
-    //PostProcessBase* tonemappingPP = postProcessManager->GetPostProcess(PostProcessType::TonemappingPP);
-    //tonemappingPP->Render(dc,
-    //    colorFilterPP->GetColorSRV().GetAddressOf(),
-    //    0, 1);
-    //// ポストエフェクトの処理終了
-    ////--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
+    // ポストエフェクトの処理
+    PostProcessManager& postProcessManager = PostProcessManager::Instance();
+    // ラジアルブラー
+    PostProcessBase* radialBlurPP = postProcessManager.GetPostProcess(PostProcessType::RadialBlurPP);
+    radialBlurPP->Render(dc,
+        bloomRenderBuffer->GetColorSRV().GetAddressOf(),
+        0, 1);
+    // ヴィネット
+    PostProcessBase* vignettePP = postProcessManager.GetPostProcess(PostProcessType::VignettePP);
+    vignettePP->Render(dc,
+        radialBlurPP->GetColorSRV().GetAddressOf(),
+        0, 1);
+    // 色収差
+    PostProcessBase* chromaticAberrationPP = postProcessManager.GetPostProcess(PostProcessType::ChromaticAberrationPP);
+    chromaticAberrationPP->Render(dc,
+        vignettePP->GetColorSRV().GetAddressOf(),
+        0, 1);
+    // カラーフィルター
+    PostProcessBase* colorFilterPP = postProcessManager.GetPostProcess(PostProcessType::ColorFilterPP);
+    colorFilterPP->Render(dc,
+        chromaticAberrationPP->GetColorSRV().GetAddressOf(),
+        0, 1);
+    // トーンマッピング
+    PostProcessBase* tonemappingPP = postProcessManager.GetPostProcess(PostProcessType::TonemappingPP);
+    tonemappingPP->Render(dc,
+        colorFilterPP->GetColorSRV().GetAddressOf(),
+        0, 1);
+    // ポストエフェクトの処理終了
+    //--------------------------------------------------------------------------------------
 
-    //// サンプラーステート設定
-    //{
-    //    ID3D11SamplerState* samplerStates[] =
-    //    {
-    //        renderState->GetSamplerState(SamplerState::PointWrap),
-    //        renderState->GetSamplerState(SamplerState::PointClamp),
-    //        renderState->GetSamplerState(SamplerState::LinearWrap),
-    //        renderState->GetSamplerState(SamplerState::LinearClamp)
-    //    };
-    //    dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-    //}
-    //// バックバッファに描画
-    //dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-    //graphics.Blit(
-    //    tonemappingPP->GetColorSRV().GetAddressOf(),
-    //    0, 1,
-    //    FullscreenQuadPS::EmbeddedPS);
+    // サンプラーステート設定
+    {
+        ID3D11SamplerState* samplerStates[] =
+        {
+            renderState->GetSamplerState(SamplerState::PointWrap),
+            renderState->GetSamplerState(SamplerState::PointClamp),
+            renderState->GetSamplerState(SamplerState::LinearWrap),
+            renderState->GetSamplerState(SamplerState::LinearClamp)
+        };
+        dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+    }
+    // バックバッファに描画
+    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+    graphics.Blit(
+        tonemappingPP->GetColorSRV().GetAddressOf(),
+        0, 1,
+        FullscreenQuadPS::EmbeddedPS);
 
     // レンダーステート設定
     dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
@@ -270,12 +310,4 @@ void SceneDebug::DrawGui()
 {
     //　ゲームオブジェクトのGui表示
     ActorManager::DrawGui();
-
-    //Graphics::Instance().GetCascadedShadowMap()->DrawGui();
-
-    if (ImGui::Begin("tes"))
-    {
-        testModel->DrawGui();
-    }
-    ImGui::End();
 }

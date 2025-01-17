@@ -5,10 +5,11 @@
 #include "../Input/Input.h"
 #include "../DebugSupporter/DebugSupporter.h"
 #include "../ResourceManager/ModelResourceManager.h"
-//#include "../PostProcess/PostProcessManager.h"
+#include "../PostProcess/PostProcessManager.h"
 //#include "../Effekseer/EffectManager.h"
 #include "../Renderer/ModelRenderer.h"
 #include "../Renderer/PrimitiveRenderer.h"
+#include "../Renderer/ShapeRenderer.h"
 
 #include "../Scene/SceneManager.h"
 
@@ -154,6 +155,12 @@ bool Framework::Initialize() const
     // 各種レンダラー作成
     ModelRenderer::Initialize(Graphics::Instance().GetDevice());
     PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
+    ShapeRenderer::Initialize(Graphics::Instance().GetDevice());
+
+    // ポストプロセス管理者初期化
+    PostProcessManager::Instance().Initialize(Graphics::Instance().GetDevice(),
+        static_cast<uint32_t>(Graphics::Instance().GetScreenWidth()),
+        static_cast<uint32_t>(Graphics::Instance().GetScreenHeight()));
 
     // 入力監視クラスの初期化
     Input::Instance().Initialize(hwnd_);

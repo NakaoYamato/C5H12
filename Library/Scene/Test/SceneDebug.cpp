@@ -21,6 +21,7 @@
 
 #include "../../Library/Component/ShapeController.h"
 #include "../../Library/Component/ModelController.h"
+#include "../../Library/Component/Animator.h"
 
 //‰Šú‰»
 void SceneDebug::Initialize()
@@ -61,21 +62,16 @@ void SceneDebug::Initialize()
     }
     {
         auto stage = ActorManager::Create("Stage", ActorTag::Stage);
+        stage->GetTransform().SetPositionY(-2.0f);
         auto modelCont = stage->AddComponent<ModelController>("./Data/Model/Stage/Land/Land1.fbx");
-    }
-    {
-        auto parentAct = ActorManager::Create("TestParent", ActorTag::Player);
-        auto childAct = ActorManager::Create("TestChild", ActorTag::Player);
-
-        parentAct->AddComponent<ShapeController>();
-        childAct->AddComponent<ShapeController>();
-
-        childAct->SetParent(parentAct);
     }
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);
         player->GetTransform().SetLengthScale(0.01f);
-        auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/Mixamo.fbx");
+        //auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/HPmaid1.fbx");
+        //auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/Test/Test.fbx");
+        auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/HPmaidEyeBone.fbx");
+        auto animator = player->AddComponent<Animator>(modelCont->GetModel());
     }
 }
 

@@ -157,6 +157,7 @@
     <ClCompile Include="Library\Application\Main.cpp" />
     <ClCompile Include="Library\Camera\Camera.cpp" />
     <ClCompile Include="Library\Camera\CameraController.cpp" />
+    <ClCompile Include="Library\Component\Animator.cpp" />
     <ClCompile Include="Library\Component\Light\LightController.cpp" />
     <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
     <ClCompile Include="Library\Component\ModelController.cpp" />
@@ -226,6 +227,7 @@
     <ClInclude Include="Library\Camera\Camera.h" />
     <ClInclude Include="Library\Camera\CameraController.h" />
     <ClInclude Include="Library\Camera\CameraData.h" />
+    <ClInclude Include="Library\Component\Animator.h" />
     <ClInclude Include="Library\Component\Collider\ColliderComponent.h" />
     <ClInclude Include="Library\Component\Component.h" />
     <ClInclude Include="Library\Component\Light\LightController.h" />

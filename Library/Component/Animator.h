@@ -1,0 +1,87 @@
+#pragma once
+
+#include "Component.h"
+#include "../../Library/3D/Model.h"
+
+class Animator : public Component
+{
+public:
+	Animator(Model* model);
+	~Animator()override {}
+
+	// 名前取得
+	const char* GetName()const { return "Animator"; }
+
+	// 開始処理
+	void Start()override {}
+
+	// 更新処理
+	void Update(float elapsedTime) override;
+
+	// GUI描画
+	void DrawGui() override;
+
+public:
+#pragma region アニメーション制御
+	// アニメーション更新処理
+	void UpdateAnimation(float elapsedTime);
+
+	// アニメーション経過時間更新
+	void UpdateAnimSeconds(float elapsedTime);
+
+	// アニメーション再生
+	void PlayAnimation(int index, bool loop, float blendSeconds = 0.0f);
+
+	// アニメーション再生(名前から検索)
+	void PlayAnimation(std::string name, bool loop, float blendSeconds = 0.0f);
+
+	// アニメーション再生中か
+	// index	: 指定のアニメーションが再生中か調べる-1ですべてから調べる
+	bool IsPlayAnimation(int index = -1)const;
+
+	// アニメーション計算処理
+	void ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const;
+	void ComputeAnimation(int animationIndex, float time, std::vector<ModelResource::Node>& nodePoses) const;
+
+	// ブレンディング計算処理
+	std::vector<ModelResource::Node> ComputeBlending(
+		const std::vector<ModelResource::Node>& pose0,
+		const std::vector<ModelResource::Node>& pose1, float rate) const;
+
+	/// <summary>
+	/// ルートモーション処理
+	/// </summary>
+	/// <param name="animationIndex">アニメーション番号</param>
+	/// <param name="oldAnimSeconds">前フレームのアニメーション経過時間</param>
+	/// <param name="currentAnimSeconds">今フレームのアニメーション経過時間</param>
+	/// <param name="controlNodeIndex">ルートモーションを適応させるノード</param>
+	/// <param name="resultNodePose">処理を行った後のノード</param>
+	/// <param name="movement">モデル空間内での移動量</param>
+	void ComputeRootMotion(int animationIndex,
+		float oldAnimSeconds, float currentAnimSeconds,
+		int controlNodeIndex,
+		std::vector<ModelResource::Node>& resultNodePose,
+		Vector3& movement) const;
+
+	/// <summary>
+	/// アニメーション名から番号取得
+	/// </summary>
+	int GetAnimationIndex(const std::string& key) const;
+
+#pragma endregion
+public:
+	// アニメーションパラメーター
+	int currentAnimationIndex = -1;
+	float currentAnimationSeconds = 0.0f;
+	bool animationPlaying = false;
+	bool animationLoop = false;
+
+	// ブレンドアニメーションパラメーター
+	std::vector<ModelResource::Node> nodeCaches;
+	float animationBlendSeconds = 0.0f;
+	float currentAnimationBlendSeconds = 0.0f;
+	float animationBlendSecondsLength = -1.0f;
+	bool animationBlending = false;
+
+	Model* model{};
+};

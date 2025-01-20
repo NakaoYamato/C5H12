@@ -118,6 +118,32 @@ namespace Debug
                 ImGui::EndMenu();
             }
 
+            {
+                auto DrawDebugFlagGui = [&](unsigned int key, std::string name)
+                    {
+                        ImVec4 color = ImVec4(1, 1, 1, 1);
+                        if (Debug::Input::IsActive(key))
+                        {
+                            color = ImVec4(1, 0, 0, 1);
+                            name += ":Active";
+                        }
+                        else
+                        {
+                            name += ":Deactive";
+                        }
+                        ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, color);
+                        if (ImGui::MenuItem(name.c_str()))
+                        {
+                            Debug::GetDebugInput()->buttonData_ ^= key;
+                        }
+                        ImGui::PopStyleColor();
+                    };
+
+                DrawDebugFlagGui(DebugInput::BTN_F4, "DebugCamera");
+                DrawDebugFlagGui(DebugInput::BTN_F5, "FixedTime");
+                DrawDebugFlagGui(DebugInput::BTN_F7, "DebugDraw");
+            }
+
             ImGui::EndMainMenuBar();
         }
 

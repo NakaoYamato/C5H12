@@ -48,7 +48,7 @@ void SceneDebug::Initialize()
         skyMap->AddComponent<SkyMapController>(L"./Data/SkyMap/S0.dds");
     }
     {
-        std::shared_ptr<Actor> light = ActorManager::Create(u8"ƒ‰ƒCƒg", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = ActorManager::Create(u8"Light", ActorTag::DrawContextParameter);
         auto lc = light->AddComponent<LightController>();
         lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
     }

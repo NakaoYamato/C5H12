@@ -228,9 +228,6 @@ void Framework::Render(float elapsedTime)
         // GUIのメニューバーでシーン変更
         SceneManager::Instance().SceneMenuGui();
 
-        // デバッグのGui描画
-        Debug::DrawGui();
-
         // モデルリソース管理クラスのGui描画
         ModelResourceManager::Instance().DrawGui();
 
@@ -242,6 +239,12 @@ void Framework::Render(float elapsedTime)
 
         // 入力管理クラスのGUI描画
         Input::Instance().DrawGui();
+
+        // カスケードシャドウマップのGUI
+        Graphics::Instance().GetCascadedShadowMap()->DrawGui();
+
+        // デバッグのGui描画
+        Debug::DrawGui();
     }
 
     // ImGui描画

@@ -36,6 +36,7 @@ void ModelController::DrawGui()
 	{
 		u8"Basic",
 		u8"Phong",
+		u8"Ramp",
 	};
 	int sId = static_cast<int>(shaderId);
 	ImGui::Combo(u8"使用するシェーダタイプ", &sId, shaderTypeName, _countof(shaderTypeName));

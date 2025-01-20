@@ -215,6 +215,7 @@
     <ClCompile Include="Library\Shader\Basic\BasicShader.cpp" />
     <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
+    <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
@@ -296,6 +297,7 @@
     <ClInclude Include="Library\Shader\Basic\BasicShader.h" />
     <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h" />
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
+    <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
   </ItemGroup>
   <ItemGroup>
@@ -374,6 +376,12 @@
     <FxCompile Include="HLSL\Model\Phong\PhongVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\Ramp\RampPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\Bloom\AddBloomPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

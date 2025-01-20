@@ -12,6 +12,7 @@ enum class ShaderId
 {
     Basic,
     Phong,
+    Ramp,
     CascadedShadowMap,
 
     ShaderIdMax

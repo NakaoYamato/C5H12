@@ -1,9 +1,9 @@
-#include "PhongShader.h"
+#include "RampShader.h"
+#include "../../HRTrace.h"
 #include "../../ResourceManager/GpuResourceManager.h"
 
-
-PhongShader::PhongShader(ID3D11Device* device, 
-	const char* vsName,
+RampShader::RampShader(ID3D11Device* device,
+	const char* vsName, 
 	D3D11_INPUT_ELEMENT_DESC* inputDescs,
 	UINT inputSize)
 {
@@ -18,7 +18,7 @@ PhongShader::PhongShader(ID3D11Device* device,
 
 	// ピクセルシェーダ
 	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/PhongPS.cso",
+		"./Data/Shader/RampPS.cso",
 		pixelShader_.ReleaseAndGetAddressOf());
 
 
@@ -26,9 +26,16 @@ PhongShader::PhongShader(ID3D11Device* device,
 	(void)GpuResourceManager::CreateConstantBuffer(device,
 		sizeof(CbMesh),
 		meshConstantBuffer_.ReleaseAndGetAddressOf());
+
+	// ランプシェーディング用テクスチャ読み込み
+	D3D11_TEXTURE2D_DESC texture2dDesc{};
+	GpuResourceManager::LoadTextureFromFile(device,
+		L"./Data/Texture/Ramp/ramp.png",
+		rampSRV_.ReleaseAndGetAddressOf(),
+		&texture2dDesc);
 }
 
-void PhongShader::Begin(const RenderContext& rc)
+void RampShader::Begin(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -43,9 +50,12 @@ void PhongShader::Begin(const RenderContext& rc)
 		meshConstantBuffer_.Get(),
 	};
 	dc->PSSetConstantBuffers(2, _countof(cbs), cbs);
+
+	// ランプシェーディング用テクスチャ設定
+	dc->PSSetShaderResources(5, 1, rampSRV_.GetAddressOf());
 }
 
-void PhongShader::Update(const RenderContext& rc, const ModelResource::Material* material)
+void RampShader::Update(const RenderContext& rc, const ModelResource::Material* material)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -59,12 +69,10 @@ void PhongShader::Update(const RenderContext& rc, const ModelResource::Material*
 	// シェーダーリソースビュー設定
 	dc->PSSetShaderResources(0, 1, material->textureDatas.at("Diffuse").textureSRV.GetAddressOf());
 	dc->PSSetShaderResources(1, 1, material->textureDatas.at("Normal").textureSRV.GetAddressOf());
-	dc->PSSetShaderResources(2, 1, material->textureDatas.at("Specular").textureSRV.GetAddressOf());
 }
 
-void PhongShader::End(const RenderContext& rc)
+void RampShader::End(const RenderContext& rc)
 {
-	//ShaderBase::End(rc);
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定解除
@@ -79,4 +87,7 @@ void PhongShader::End(const RenderContext& rc)
 	// シェーダーリソースビュー設定解除
 	ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
+
+	ID3D11ShaderResourceView* rampsrvs[] = { nullptr };
+	dc->PSSetShaderResources(5, 1, rampsrvs);
 }

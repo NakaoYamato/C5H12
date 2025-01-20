@@ -3,6 +3,8 @@
 #include "../ResourceManager/GpuResourceManager.h"
 #include "../../Shader/Basic/BasicShader.h"
 #include "../../Shader/Phong/PhongShader.h"
+#include "../../Shader/Ramp/RampShader.h"
+
 #include "../../Shader/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include <algorithm>
@@ -127,9 +129,15 @@ public:
 			shaderMap[ShaderId::Basic] = std::make_unique<BasicShader>(device,
 				"./Data/Shader/BasicVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
 				"./Data/Shader/PhongVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+			shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+				"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
+				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 			shaderMap[ShaderId::CascadedShadowMap] = std::make_unique<CascadedShadowMapShader>(device,
 				"./Data/Shader/CascadedShadowVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
@@ -142,9 +150,15 @@ public:
 			shaderMap[ShaderId::Basic] = std::make_unique<BasicShader>(device,
 				"./Data/Shader/BasicBatchingVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
 				"./Data/Shader/PhongBatchingVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+			shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+				"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 			shaderMap[ShaderId::CascadedShadowMap] = std::make_unique<CascadedShadowMapShader>(device,
 				"./Data/Shader/CascadedShadowBatchingVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
@@ -160,6 +174,11 @@ public:
 			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
 				"./Data/Shader/PhongInstancedVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+			shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+				"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
+				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 			shaderMap[ShaderId::CascadedShadowMap] = std::make_unique<CascadedShadowMapShader>(device,
 				"./Data/Shader/CascadedShadowInstancedVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));

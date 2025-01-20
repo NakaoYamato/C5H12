@@ -33,6 +33,11 @@ float4 main(VsOut pin) : SV_TARGET
         color = (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
     }
     
+#if 1
+	// Gamma process
+    const float GAMMA = 2.2;
+    color = pow(color, 1.0 / GAMMA);
+#endif
     
     return color;
 }

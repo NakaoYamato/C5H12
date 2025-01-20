@@ -183,8 +183,8 @@ void SceneDebug::Render()
 
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
-    FrameBuffer* modelAndShadowRenderBuffer = graphics.GetFrameBuffer(1);
-    modelAndShadowRenderBuffer->ClearAndActive(dc);
+    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
+    modelAndShadowRenderFrame->ClearAndActive(dc);
     {
         // 影の描画
         // cascadedShadowMapにある深度情報から
@@ -210,67 +210,13 @@ void SceneDebug::Render()
             0, _countof(srvs),
             FullscreenQuadPS::CascadedPS);
     }
-    modelAndShadowRenderBuffer->Deactivate(dc);
+    modelAndShadowRenderFrame->Deactivate(dc);
     // フレームバッファ1番の処理終了
     //--------------------------------------------------------------------------------------
 
     //--------------------------------------------------------------------------------------
-    // フレームバッファ2番にブルームをかけたものを描画
-    FrameBuffer* bloomRenderBuffer = graphics.GetFrameBuffer(2);
-    bloomRenderBuffer->ClearAndActive(dc);
-    {
-        PostProcessManager& postProcessManager = PostProcessManager::Instance();
-        // ブルーム処理
-        PostProcessBase* bloomPP = postProcessManager.GetPostProcess(PostProcessType::BloomPP);
-        bloomPP->Render(dc,
-            modelAndShadowRenderBuffer->GetColorSRV().GetAddressOf(),
-            0, 1);
-
-        ID3D11ShaderResourceView* srvs[] =
-        {
-            modelAndShadowRenderBuffer->GetColorSRV().Get(),
-            bloomPP->GetColorSRV().Get()
-        };
-        // 高輝度抽出し、ぼかしたものを加算描画
-        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-        dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
-        graphics.Blit(
-            srvs,
-            0, _countof(srvs),
-            FullscreenQuadPS::AddBloomPS);
-    }
-    bloomRenderBuffer->Deactivate(dc);
-    // フレームバッファ2番の処理終了
-    //--------------------------------------------------------------------------------------
-
-    //--------------------------------------------------------------------------------------
     // ポストエフェクトの処理
-    PostProcessManager& postProcessManager = PostProcessManager::Instance();
-    // ラジアルブラー
-    PostProcessBase* radialBlurPP = postProcessManager.GetPostProcess(PostProcessType::RadialBlurPP);
-    radialBlurPP->Render(dc,
-        bloomRenderBuffer->GetColorSRV().GetAddressOf(),
-        0, 1);
-    // ヴィネット
-    PostProcessBase* vignettePP = postProcessManager.GetPostProcess(PostProcessType::VignettePP);
-    vignettePP->Render(dc,
-        radialBlurPP->GetColorSRV().GetAddressOf(),
-        0, 1);
-    // 色収差
-    PostProcessBase* chromaticAberrationPP = postProcessManager.GetPostProcess(PostProcessType::ChromaticAberrationPP);
-    chromaticAberrationPP->Render(dc,
-        vignettePP->GetColorSRV().GetAddressOf(),
-        0, 1);
-    // カラーフィルター
-    PostProcessBase* colorFilterPP = postProcessManager.GetPostProcess(PostProcessType::ColorFilterPP);
-    colorFilterPP->Render(dc,
-        chromaticAberrationPP->GetColorSRV().GetAddressOf(),
-        0, 1);
-    // トーンマッピング
-    PostProcessBase* tonemappingPP = postProcessManager.GetPostProcess(PostProcessType::TonemappingPP);
-    tonemappingPP->Render(dc,
-        colorFilterPP->GetColorSRV().GetAddressOf(),
-        0, 1);
+    PostProcessManager::Instance().ApplyEffect(rc, modelAndShadowRenderFrame->GetColorSRV().GetAddressOf());
     // ポストエフェクトの処理終了
     //--------------------------------------------------------------------------------------
 
@@ -285,10 +231,10 @@ void SceneDebug::Render()
         };
         dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
     }
-    // バックバッファに描画
     dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+    // バックバッファに描画
     graphics.Blit(
-        tonemappingPP->GetColorSRV().GetAddressOf(),
+        PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
         0, 1,
         FullscreenQuadPS::EmbeddedPS);
 

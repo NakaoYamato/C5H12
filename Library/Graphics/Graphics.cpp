@@ -177,7 +177,7 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		// 定数バッファの管理者作成
 		constantBufferManager = std::make_unique<ConstantBufferManager>(device.Get());
 		// ポストエフェクト用の管理者生成
-		for (size_t index = 0; index < 8; ++index)
+		for (size_t index = 0; index < _countof(frameBufferes); ++index)
 		{
 			frameBufferes[index] = std::make_unique<FrameBuffer>(device.Get(),
 				static_cast<UINT>(GetScreenWidth()),
@@ -190,8 +190,6 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 			pixelShaders[static_cast<int>(FullscreenQuadPS::EmbeddedPS)].ReleaseAndGetAddressOf());
 		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/CascadedShadowMapPS.cso",
 			pixelShaders[static_cast<int>(FullscreenQuadPS::CascadedPS)].ReleaseAndGetAddressOf());
-		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/AddBloomPS.cso",
-			pixelShaders[static_cast<int>(FullscreenQuadPS::AddBloomPS)].ReleaseAndGetAddressOf());
 
 		cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
 			1024 * 4, 1024 * 4);

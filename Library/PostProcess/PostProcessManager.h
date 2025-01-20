@@ -6,6 +6,7 @@
 #include <string>
 
 #include "PostProcessBase.h"
+#include "../Graphics/RenderContext.h"
 
 /// <summary>
 /// ポストプロセスの種類
@@ -44,17 +45,38 @@ public:
 	// 更新処理
 	void Update(float elapsedTime);
 
+	/// <summary>
+	/// ポストプロセスをかける
+	/// </summary>
+	/// <param name="rc"></param>
+	/// <param name="srcSRV"></param>
+	void ApplyEffect(RenderContext& rc,
+		ID3D11ShaderResourceView** srcSRV);
+
 	// Gui描画
 	void DrawGui();
 
 	// アクセサ
 	[[nodiscard]] PostProcessBase* GetPostProcess(PostProcessType type) {
-		return postProcesses[static_cast<int>(type)].first.get();
+		return postProcesses_[static_cast<int>(type)].first.get();
+	}
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetAppliedEffectSRV() {
+		return appliedEffectSRV_;
 	}
 
 private:
 	using GuiFlag = std::pair<std::string, bool>;
-	// ポストエフェクトの配列
+	// ポストプロセスの配列
 	// bool	: GUIの使用フラグ
-	std::pair<std::unique_ptr<PostProcessBase>, GuiFlag> postProcesses[static_cast<int>(PostProcessType::MAX_PostProcessType)];
+	std::pair<std::unique_ptr<PostProcessBase>, GuiFlag> postProcesses_[static_cast<int>(PostProcessType::MAX_PostProcessType)];
+
+	// ポストプロセスをかけた後のSRV
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> appliedEffectSRV_;
+
+	// ブルーム用
+	std::unique_ptr<FrameBuffer> bloomRenderFrame_;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> bloomPS_;
+	std::unique_ptr<Sprite> fullscreenQuad_;
+
 };

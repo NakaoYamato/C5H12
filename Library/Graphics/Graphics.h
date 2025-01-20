@@ -19,7 +19,6 @@ enum class FullscreenQuadPS
 {
 	EmbeddedPS,	// 通常の処理
 	CascadedPS,	// カスケードシャドウ
-	AddBloomPS,	// ブルーム用
 
 	FullscreenQuadPSMax,
 };
@@ -129,7 +128,7 @@ private:
 	// 定数バッファの管理者
 	std::unique_ptr<ConstantBufferManager> constantBufferManager;
 	// オフスクリーンレンダリングの管理者
-	std::unique_ptr<FrameBuffer> frameBufferes[8];
+	std::unique_ptr<FrameBuffer> frameBufferes[4];
 	std::unique_ptr<Sprite> fullscreenQuad;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaders[static_cast<int>(FullscreenQuadPS::FullscreenQuadPSMax)];
 	// カスケードシャドウマップ

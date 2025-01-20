@@ -78,6 +78,9 @@ Bloom::Bloom(ID3D11Device* device, uint32_t width, uint32_t height) :
 		hr = device->CreateBlendState(&blend_desc, blendState.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
+
+	// 初期値の設定
+	startData = GetCurrentData();
 }
 
 // 描画処理
@@ -192,8 +195,10 @@ void Bloom::DrawGui()
 {
 	if (ImGui::Begin(u8"ブルーム"))
 	{
-		ImGui::SliderFloat("bloom_extraction_threshold", &data.bloom_extraction_threshold, +0.0f, +5.0f);
-		ImGui::SliderFloat("bloom_intensity", &data.bloom_intensity, +0.0f, +5.0f);
+		if (ImGui::Button("reset"))
+			ClearData();
+		ImGui::SliderFloat("extractionThreshold", &data.extractionThreshold, +0.0f, +1.0f);
+		ImGui::SliderFloat("intensity", &data.intensity, +0.0f, +5.0f);
 		if (ImGui::TreeNode("Resource"))
 		{
 			static float textureSize = 512.0f;
@@ -205,6 +210,28 @@ void Bloom::DrawGui()
 		}
 	}
 	ImGui::End();
+}
+
+std::unordered_map<std::string, float> Bloom::GetCurrentData()
+{
+	std::unordered_map<std::string, float> parameter;
+	parameter["extractionThreshold"] = data.extractionThreshold;
+	parameter["intensity"] = data.intensity;
+	return parameter;
+}
+
+void Bloom::SetData(std::unordered_map<std::string, float>& parameter)
+{
+	{
+		auto iter = parameter.find("extractionThreshold");
+		if (iter != parameter.end())
+			data.extractionThreshold = (*iter).second;
+	}
+	{
+		auto iter = parameter.find("intensity");
+		if (iter != parameter.end())
+			data.intensity = (*iter).second;
+	}
 }
 
 // 定数バッファの更新

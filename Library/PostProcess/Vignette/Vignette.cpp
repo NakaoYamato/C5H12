@@ -11,6 +11,8 @@ void Vignette::DrawGui()
 {
 	if (ImGui::Begin(u8"ヴィネット"))
 	{
+		if (ImGui::Button("reset"))
+			ClearData();
 		ImGui::ColorEdit3("color", &data.vignetteColor.x);
 		ImGui::SliderFloat2("center", &data.vignetteCenter.x, 0, 1);
 		float vignetteIntensity = data.vignetteIntensity / 3.0f;
@@ -38,7 +40,7 @@ void Vignette::DrawGui()
 	ImGui::End();
 }
 
-std::unordered_map<std::string, float> Vignette::GetData()
+std::unordered_map<std::string, float> Vignette::GetCurrentData()
 {
 	std::unordered_map<std::string, float> parameter;
 	parameter["color.x"] = data.vignetteColor.x;

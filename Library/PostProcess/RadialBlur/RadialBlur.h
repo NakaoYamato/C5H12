@@ -17,7 +17,10 @@ public:
     };
 public:
     RadialBlur(ID3D11Device* device, uint32_t width, uint32_t height) :
-        PostProcessBase(device, width, height, "./Data/Shader/RadialBlurPS.cso", sizeof(Constants)) {};
+        PostProcessBase(device, width, height, "./Data/Shader/RadialBlurPS.cso", sizeof(Constants)) {
+        // 初期値の設定
+        startData = GetCurrentData();
+    };
     ~RadialBlur()override {}
 
     // 更新処理
@@ -26,10 +29,10 @@ public:
     // デバッグGui描画
     void DrawGui()override;
 
-    std::unordered_map<std::string, float> GetData();
+    // 現在のデータの取得
+    std::unordered_map<std::string, float> GetCurrentData();
     // データのセット
     void SetData(std::unordered_map<std::string, float>& parameter) override;
-
 private:
     // 定数バッファの更新
     void UpdateConstantBuffer(ID3D11DeviceContext* immediateContext,

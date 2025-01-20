@@ -6,6 +6,8 @@ void ColorFilter::DrawGui()
 {
 	if (ImGui::Begin(u8"êFí≤ï‚ê≥"))
 	{
+		if (ImGui::Button("reset"))
+			ClearData();
 		ImGui::DragFloat("hueShift", &data.hueShift, 1.0f);
 		ImGui::DragFloat("saturation", &data.saturation, 0.01f);
 		ImGui::DragFloat("brightness", &data.brightness, 0.01f);
@@ -22,7 +24,7 @@ void ColorFilter::DrawGui()
 	ImGui::End();
 }
 
-std::unordered_map<std::string, float> ColorFilter::GetData()
+std::unordered_map<std::string, float> ColorFilter::GetCurrentData()
 {
 	std::unordered_map<std::string, float> parameter;
 	parameter["hueShift"] = data.hueShift;

@@ -159,9 +159,12 @@ void Actor::DelayedRender(const RenderContext& rc)
 // Gui描画
 void Actor::DrawGui()
 {
-	ImGui::Checkbox(u8"Active", &isActive_);
-	ImGui::Checkbox(u8"Show", &isShowing_);
-	ImGui::Checkbox(u8"DrawDebug", &drawDebug_);
+	if (ImGui::CollapsingHeader("Flags", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Checkbox(u8"Active", &isActive_);
+		ImGui::Checkbox(u8"Show", &isShowing_);
+		ImGui::Checkbox(u8"DrawDebug", &drawDebug_);
+	}
 
 	// トランスフォーム
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))

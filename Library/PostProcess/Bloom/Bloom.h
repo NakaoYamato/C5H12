@@ -8,8 +8,8 @@ class Bloom : public PostProcessBase
 public:
     struct Constants
     {
-        float bloom_extraction_threshold = 0.47f;
-        float bloom_intensity = 0.05f;
+        float extractionThreshold = 0.47f;
+        float intensity = 0.05f;
         float something[2];
     };
 
@@ -26,6 +26,10 @@ public:
     // デバッグGui描画
     void DrawGui()override;
 
+    // 現在のデータの取得
+    std::unordered_map<std::string, float> GetCurrentData() override;
+    // データのセット
+    void SetData(std::unordered_map<std::string, float>& parameter) override;
 private:
     // 定数バッファの更新
     void UpdateConstantBuffer(ID3D11DeviceContext* immediateContext,

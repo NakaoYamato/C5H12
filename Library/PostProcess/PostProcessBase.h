@@ -42,9 +42,14 @@ public:
 		return frameBuffer->GetDSV().Get();
 	}
 
-	virtual std::unordered_map<std::string, float> GetData() { return std::unordered_map<std::string, float>(); };
-	// データのセット
+	// 初期のデータの取得
+	const std::unordered_map<std::string, float>& GetStartData()const { return startData; }
+	// 現在のデータの取得
+	virtual std::unordered_map<std::string, float> GetCurrentData() { return std::unordered_map<std::string, float>(); };
+	// データの設定
 	virtual void SetData(std::unordered_map<std::string, float>& parameter) {};
+	// データの初期化
+	virtual void ClearData() { SetData(startData); };
 
 protected:
 	// 定数バッファの更新
@@ -55,4 +60,6 @@ protected:
 	std::unique_ptr<Sprite> fullscreenQuad;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
+
+	std::unordered_map<std::string, float> startData;
 };

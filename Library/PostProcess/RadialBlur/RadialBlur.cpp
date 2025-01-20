@@ -11,6 +11,8 @@ void RadialBlur::DrawGui()
 {
 	if (ImGui::Begin(u8"ラジアルブラー"))
 	{
+		if (ImGui::Button("reset"))
+			ClearData();
 		ImGui::SliderFloat("blurRadius", &data.blurRadius, 0.001f, +100.0f);
 		ImGui::SliderInt("blurSamplingCount", &data.blurSamplingCount, 1, 100);
 		ImGui::SliderFloat2("blurCenter", &data.blurCenter.x, 0.0f, 1.0f);
@@ -28,7 +30,8 @@ void RadialBlur::DrawGui()
 	ImGui::End();
 }
 
-std::unordered_map<std::string, float> RadialBlur::GetData()
+// 現在のデータの取得
+std::unordered_map<std::string, float> RadialBlur::GetCurrentData()
 {
 	std::unordered_map<std::string, float> parameter;
 	parameter["blurRadius"] = data.blurRadius;
@@ -39,6 +42,7 @@ std::unordered_map<std::string, float> RadialBlur::GetData()
 	return parameter;
 }
 
+// データのセット
 void RadialBlur::SetData(std::unordered_map<std::string, float>& parameter)
 {
 	{

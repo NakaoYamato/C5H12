@@ -24,8 +24,14 @@ public:
 
 public:
     GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t height) :
-        PostProcessBase(device, width, height, "./Data/Shader/GaussianFilterPS.cso", sizeof(Constants)) {};
+        PostProcessBase(device, width, height, "./Data/Shader/GaussianFilterPS.cso", sizeof(Constants)) {
+        // 初期値の設定
+        startData = GetCurrentData();
+    };
     ~GaussianFilter()override {}
+
+    // 更新処理
+    void Update(float elapsedTime)override;
 
     // デバッグGui描画
     void DrawGui()override;
@@ -38,6 +44,10 @@ private:
     // フィルターの計算
     void CalcGaussianFilterConstant(Constants& constant, const Datas data);
 
+    // 現在のデータの取得
+    std::unordered_map<std::string, float> GetCurrentData() override;
+    // データのセット
+    void SetData(std::unordered_map<std::string, float>& parameter) override;
 private:
     Constants constant{};
     Datas data{};

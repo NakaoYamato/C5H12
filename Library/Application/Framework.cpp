@@ -237,8 +237,8 @@ void Framework::Render(float elapsedTime)
         // シーンのGui描画
         SceneManager::Instance().DrawGui();
 
-    //    // ポストプロセスのGui描画
-    //    Graphics::Instance().GetPostProcessManager()->DrawGui();
+        // ポストプロセスのGui描画
+        PostProcessManager::Instance().DrawGui();
 
         // 入力管理クラスのGUI描画
         Input::Instance().DrawGui();

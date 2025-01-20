@@ -1,11 +1,21 @@
 #include "GaussianFilter.h"
 #include <imgui.h>
 
+#include "../../Library/Graphics/Graphics.h"
+
+void GaussianFilter::Update(float elapsedTime)
+{
+	data.textureSize.x = Graphics::Instance().GetScreenWidth();
+	data.textureSize.y = Graphics::Instance().GetScreenHeight();
+}
+
 // デバッグGui描画
 void GaussianFilter::DrawGui()
 {
 	if (ImGui::Begin(u8"ガウスフィルター"))
 	{
+		if (ImGui::Button("reset"))
+			ClearData();
 		ImGui::SliderInt("kernel", &data.kernelSize, 1, KERNEL_MAX);
 		ImGui::SliderFloat("sigma", &data.sigma, 1.0f, 10.0f);
 		if (ImGui::TreeNode("Resource"))
@@ -60,5 +70,27 @@ void GaussianFilter::CalcGaussianFilterConstant(Constants& constant, const Datas
 	for (int i = 0; i < kernelSize * kernelSize; i++)
 	{
 		constant.weights[i].z /= sum;
+	}
+}
+
+std::unordered_map<std::string, float> GaussianFilter::GetCurrentData()
+{
+	std::unordered_map<std::string, float> parameter;
+	parameter["kernelSize"] = (float)data.kernelSize;
+	parameter["sigma"] = data.sigma;
+	return parameter;
+}
+
+void GaussianFilter::SetData(std::unordered_map<std::string, float>& parameter)
+{
+	{
+		auto iter = parameter.find("kernelSize");
+		if (iter != parameter.end())
+			data.kernelSize = (int)(*iter).second;
+	}
+	{
+		auto iter = parameter.find("sigma");
+		if (iter != parameter.end())
+			data.sigma = (*iter).second;
 	}
 }

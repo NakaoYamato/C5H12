@@ -210,6 +210,7 @@
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp" />
     <ClCompile Include="Library\Resource\ModelResource.cpp" />
+    <ClCompile Include="Library\Scene\Scene.cpp" />
     <ClCompile Include="Library\Scene\SceneLoading.cpp" />
     <ClCompile Include="Library\Scene\SceneManager.cpp" />
     <ClCompile Include="Library\Scene\Test\SceneDebug.cpp" />

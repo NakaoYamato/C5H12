@@ -19,16 +19,16 @@ public:
 	virtual void Finalize() = 0;
 
 	// 更新処理
-	virtual void Update(float elapsedTime) = 0;
+	virtual void Update(float elapsedTime);
 
 	// 1秒ごとの更新処理
 	virtual void FixedUpdate() {};
 
 	// 描画処理
-	virtual void Render() = 0;
+	virtual void Render();
 
 	// Gui描画処理
-	virtual void DrawGui() {}
+	virtual void DrawGui();
 
 	// 自身を新規のポインタで渡す
 	virtual std::shared_ptr<Scene> GetNewShared() = 0;

@@ -20,6 +20,7 @@ enum class PostProcessType
 	VignettePP,
 	ChromaticAberrationPP,
 	BloomPP,
+	RobertsCrossPP,
 
 	MAX_PostProcessType
 };

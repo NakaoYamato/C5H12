@@ -216,6 +216,15 @@
     <ClCompile Include="Library\PostProcess\Vignette\Vignette.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Component\Animator.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Ramp\RampShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -455,6 +464,15 @@
     <ClInclude Include="Library\PostProcess\Vignette\Vignette.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Component\Animator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Ramp\RampShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -516,5 +534,7 @@
     <FxCompile Include="HLSL\SkyMap\SkyBoxPS.hlsl" />
     <FxCompile Include="HLSL\SkyMap\SkyMapPS.hlsl" />
     <FxCompile Include="HLSL\SkyMap\SkyMapVS.hlsl" />
+    <FxCompile Include="HLSL\Model\Ramp\RampPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\RobertsCross\RobertsCrossPS.hlsl" />
   </ItemGroup>
 </Project>

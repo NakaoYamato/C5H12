@@ -216,7 +216,12 @@ void SceneDebug::Render()
 
     //--------------------------------------------------------------------------------------
     // ポストエフェクトの処理
-    PostProcessManager::Instance().ApplyEffect(rc, modelAndShadowRenderFrame->GetColorSRV().GetAddressOf());
+    ID3D11ShaderResourceView* srv[] =
+    {
+        modelAndShadowRenderFrame->GetColorSRV().Get(),
+        modelAndShadowRenderFrame->GetDepthSRV().Get(),
+    };
+    PostProcessManager::Instance().ApplyEffect(rc, srv);
     // ポストエフェクトの処理終了
     //--------------------------------------------------------------------------------------
 

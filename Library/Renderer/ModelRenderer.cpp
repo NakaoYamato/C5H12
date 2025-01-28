@@ -262,7 +262,7 @@ public:
 		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
 		// ブレンドステート設定
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
 		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye_);
 		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front_);

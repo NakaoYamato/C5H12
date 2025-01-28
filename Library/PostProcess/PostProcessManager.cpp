@@ -12,6 +12,7 @@
 #include "../PostProcess/RadialBlur/RadialBlur.h"
 #include "../PostProcess/Vignette/Vignette.h"
 #include "../PostProcess/ChromaticAberration/ChromaticAberration.h"
+#include "../PostProcess/RobertsCross/RobertsCross.h"
 
 void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32_t height)
 {
@@ -71,6 +72,14 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::ChromaticAberrationPP)].second;
 		name = TO_STRING_U8(ChromaticAberration);
 	}
+	{
+		// RobertsCross
+		postProcesses_[static_cast<int>(PostProcessType::RobertsCrossPP)].first =
+			std::make_unique<RobertsCross>(device,
+				width, height);
+		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
+		name = TO_STRING_U8(RobertsCross);
+	}
 
 	// ブルーム用
 	bloomRenderFrame_ = std::make_unique<FrameBuffer>(device, width, height);
@@ -105,9 +114,12 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 	dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::PointWrap));
+	// RobertsCross
+	PostProcessBase* robertsCrossPP = GetPostProcess(PostProcessType::RobertsCrossPP);
+	robertsCrossPP->Render(dc, srcSRV, 0, 2);
 	// ラジアルブラー
 	PostProcessBase* radialBlurPP = GetPostProcess(PostProcessType::RadialBlurPP);
-	radialBlurPP->Render(dc, srcSRV, 0, 1);
+	radialBlurPP->Render(dc, robertsCrossPP->GetColorSRV().GetAddressOf(), 0, 1);
 	// 色収差
 	PostProcessBase* chromaticAberrationPP = GetPostProcess(PostProcessType::ChromaticAberrationPP);
 	chromaticAberrationPP->Render(dc, radialBlurPP->GetColorSRV().GetAddressOf(), 0, 1);

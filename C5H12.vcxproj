@@ -201,6 +201,7 @@
     <ClCompile Include="Library\PostProcess\PostProcessBase.cpp" />
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
     <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
+    <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp" />
     <ClCompile Include="Library\PostProcess\Tonemapping\Tonemapping.cpp" />
     <ClCompile Include="Library\PostProcess\Vignette\Vignette.cpp" />
     <ClCompile Include="Library\Renderer\ModelRenderer.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="Library\PostProcess\PostProcessBase.h" />
     <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
     <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
+    <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h" />
     <ClInclude Include="Library\PostProcess\Tonemapping\Tonemapping.h" />
     <ClInclude Include="Library\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Library\Renderer\ModelRenderer.h" />
@@ -425,6 +427,12 @@
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\RadialBlur\RadialBlurPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\PostProcess\RobertsCross\RobertsCrossPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\Tonemapping\TonemappingPS.hlsl">

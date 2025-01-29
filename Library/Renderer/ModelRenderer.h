@@ -43,6 +43,8 @@ namespace ModelRenderer
     /// <param name="renderType"></param>
     void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType);
 
+    void DrawMesh(ModelResource::Mesh* mesh, const Vector4& color, ShaderId shaderId, ModelRenderType renderType);
+
     /// <summary>
     /// インスタンシングモデルの描画
     /// </summary>

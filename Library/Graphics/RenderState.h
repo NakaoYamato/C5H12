@@ -39,6 +39,8 @@ enum class BlendState
 
 	Alpha,
 
+	MultipleRenderTargets,	// マルチレンダーターゲット用
+
 	EnumCount
 };
 

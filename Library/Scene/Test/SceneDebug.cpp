@@ -16,6 +16,14 @@
 #include "../../Library/Component/ModelController.h"
 #include "../../Library/Component/Animator.h"
 
+
+#include "../../Library/PostProcess/PostProcessManager.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
+
+#include "../../Library/Renderer/ModelRenderer.h"
+#include "../../Library/Renderer/PrimitiveRenderer.h"
+#include "../../Library/Renderer/ShapeRenderer.h"
+
 //èâä˙âª
 void SceneDebug::Initialize()
 {

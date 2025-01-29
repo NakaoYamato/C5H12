@@ -168,6 +168,7 @@
     <ClCompile Include="Library\DebugSupporter\DebugSupporter.cpp" />
     <ClCompile Include="Library\DebugSupporter\Renderer\DebugRenderer.cpp" />
     <ClCompile Include="Library\Graphics\ConstantBufferManager.cpp" />
+    <ClCompile Include="Library\Graphics\GBuffer.cpp" />
     <ClCompile Include="Library\Graphics\Graphics.cpp" />
     <ClCompile Include="Library\Graphics\RenderState.cpp" />
     <ClCompile Include="Library\ImGui\imgui-docking\imgui.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="Library\DebugSupporter\Input\DebugInput.h" />
     <ClInclude Include="Library\DebugSupporter\Renderer\DebugRenderer.h" />
     <ClInclude Include="Library\Graphics\ConstantBufferManager.h" />
+    <ClInclude Include="Library\Graphics\GBuffer.h" />
     <ClInclude Include="Library\Graphics\Graphics.h" />
     <ClInclude Include="Library\Graphics\RenderContext.h" />
     <ClInclude Include="Library\Graphics\RenderState.h" />

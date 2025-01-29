@@ -193,6 +193,11 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 
 		cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
 			1024 * 4, 1024 * 4);
+
+		gBuffer = std::make_unique<GBuffer>(device.Get(), 
+			static_cast<UINT>(GetScreenWidth()),
+			static_cast<UINT>(GetScreenHeight()),
+			3);
 	}
 }
 

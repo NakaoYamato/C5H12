@@ -9,6 +9,7 @@
 
 #include "RenderState.h"
 #include "ConstantBufferManager.h"
+#include "GBuffer.h"
 #include "../PostProcess/FrameBuffer.h"
 #include "../PostProcess/CascadedShadowMap/CascadedShadowMap.h"
 #include "../2D/Sprite.h"
@@ -94,6 +95,9 @@ public:
 	// 定数バッファの管理者取得
 	[[nodiscard]] ConstantBufferManager* GetConstantBufferManager() { return constantBufferManager.get(); }
 
+	// マルチレンダーターゲット取得
+	[[nodiscard]] GBuffer* GetGBuffer() { return gBuffer.get(); }
+
 	// PIXEL_SHADER_TYPEでピクセルシェーダを指定して描画
 	void Blit(ID3D11ShaderResourceView** shaderResourceView,
 		uint32_t startSlot, uint32_t numViews,
@@ -133,6 +137,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaders[static_cast<int>(FullscreenQuadPS::FullscreenQuadPSMax)];
 	// カスケードシャドウマップ
 	std::unique_ptr<CascadedShadowMap> cascadedShadowMap;
+	// マルチレンダーターゲットの管理者
+	std::unique_ptr<GBuffer> gBuffer;
 
 private:
 	// スクリーンの大きさ

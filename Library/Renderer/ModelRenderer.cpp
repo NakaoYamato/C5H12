@@ -41,16 +41,21 @@ struct InstancingModelCB// インスタンシングモデル用
 #pragma region Info
 struct DrawInfo
 {
-	Model* model = nullptr;
-	Vector4                 color{ 1,1,1,1 };
+	//ShaderBase*			shader = nullptr;
+	//ModelRenderType		modelType = ModelRenderType::Dynamic;
+	Model*				model = nullptr;
+	const ModelResource::Mesh* mesh = nullptr;
+	Vector4				color{ 1,1,1,1 };
+	float				distance = 0.0f;
 };
 struct TransparencyDrawInfo
 {
-	ShaderBase* shader = nullptr;
-	Model* model = nullptr;
-	const ModelResource::Mesh* mesh = nullptr;
-	Vector4                 color{ 1,1,1,1 };
-	float					distance = 0.0f;
+	ShaderId					shaderId = ShaderId::Basic;
+	ModelRenderType				renderType = ModelRenderType::Dynamic;
+	Model*						model = nullptr;
+	const ModelResource::Mesh*	mesh = nullptr;
+	Vector4						color{ 1,1,1,1 };
+	float						distance = 0.0f;
 };
 // インスタンシング描画用
 struct InstancingDrawInfo
@@ -80,9 +85,10 @@ namespace ModelRenderer
 	DrawInfoMap                             staticBoneDrawInfomap_;
 	InstancingDrawInfoMap                   instancingDrawInfoMap_;
 
+	//std::vector<DrawInfo>					opaqueDrawInfo_;
+
 	// 透明描画
-	std::vector<TransparencyDrawInfo>		dynamicTransparencies_;
-	std::vector<TransparencyDrawInfo>		staticTransparencies_;
+	std::vector<TransparencyDrawInfo>		transparencyDrawInfos_;
 
 	// 各定数バッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	dynamicBoneCB_;
@@ -150,122 +156,73 @@ namespace ModelRenderer
 		}
 
 		// DynamicBoneModelのメッシュ描画
-		void DrawDynamicBoneMesh(const RenderContext& rc,
-			const DirectX::XMVECTOR& CameraPosition,
-			const DirectX::XMVECTOR& CameraFront,
+		static void DrawDynamicBoneMesh(const RenderContext& rc,
+			ShaderBase* shader,
 			Model* model,
-			const Vector4& materialColor,
-			ShaderBase* shader)
+			const ModelResource::Mesh* mesh,
+			const Vector4& materialColor)
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
-			const ModelResource* resource = model->GetResource();
 			const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
-			for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+
+			uint32_t stride{ sizeof(ModelResource::Vertex) };
+			uint32_t offset{ 0 };
+			dc->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
+			dc->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			// スケルトン用定数バッファ
+			if (mesh->bones.size() > 0)
 			{
-				// 透明度があるメッシュならTransparencyDrawInfoに登録
-				if (resource->GetMaterials().at(mesh.materialIndex).colors.at("Diffuse").w < 1.0f ||
-					materialColor.w < 1.0f)
+				for (size_t i = 0; i < mesh->bones.size(); ++i)
 				{
-					TransparencyDrawInfo& transparencyDrawInfo = dynamicTransparencies_.emplace_back();
-					transparencyDrawInfo.shader = shader;
-					transparencyDrawInfo.model = model;
-					transparencyDrawInfo.mesh = &mesh;
-					transparencyDrawInfo.color = materialColor;
-					// カメラとの距離を算出
-					DirectX::XMVECTOR Position = DirectX::XMVectorSet(
-						nodes[mesh.nodeIndex].worldTransform._41,
-						nodes[mesh.nodeIndex].worldTransform._42,
-						nodes[mesh.nodeIndex].worldTransform._43,
-						0.0f);
-					DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
-					transparencyDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
-
-					continue;
+					const ModelResource::Bone& bone = mesh->bones.at(i);
+					DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
+					DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+					DirectX::XMMATRIX Bone = Offset * World;
+					DirectX::XMStoreFloat4x4(&cbDynamicSkeleton_.boneTransforms[i], Bone);
 				}
-
-				uint32_t stride{ sizeof(ModelResource::Vertex) };
-				uint32_t offset{ 0 };
-				dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-				dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-				dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-				// スケルトン用定数バッファ
-				if (mesh.bones.size() > 0)
-				{
-					for (size_t i = 0; i < mesh.bones.size(); ++i)
-					{
-						const ModelResource::Bone& bone = mesh.bones.at(i);
-						DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
-						DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
-						DirectX::XMMATRIX Bone = Offset * World;
-						DirectX::XMStoreFloat4x4(&cbDynamicSkeleton_.boneTransforms[i], Bone);
-					}
-				}
-				else
-				{
-					cbDynamicSkeleton_.boneTransforms[0] = nodes[mesh.nodeIndex].worldTransform;
-				}
-				cbDynamicSkeleton_.materialColor = materialColor;
-
-				dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
-
-				// シェーダーの更新処理
-				shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
-
-				dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 			}
+			else
+			{
+				cbDynamicSkeleton_.boneTransforms[0] = nodes[mesh->nodeIndex].worldTransform;
+			}
+			cbDynamicSkeleton_.materialColor = materialColor;
+
+			dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
+
+			// シェーダーの更新処理
+			shader->Update(rc, &model->GetResource()->GetMaterials().at(mesh->materialIndex));
+
+			dc->DrawIndexed(static_cast<UINT>(mesh->indices.size()), 0, 0);
 		}
 
 		// StaticBoneModelのメッシュ描画
-		void DrawStaticBoneModel(const RenderContext& rc,
-			const DirectX::XMVECTOR& CameraPosition,
-			const DirectX::XMVECTOR& CameraFront,
+		static void DrawStaticBoneModel(const RenderContext& rc,
+			ShaderBase* shader,
 			Model* model,
-			const Vector4& materialColor,
-			ShaderBase* shader)
+			const ModelResource::Mesh* mesh,
+			const Vector4& materialColor)
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			const ModelResource* resource = model->GetResource();
 			const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
-			for (const ModelResource::Mesh& mesh : resource->GetMeshes())
-			{
-				// 透明度があるメッシュならTransparencyDrawInfoに登録
-				if (resource->GetMaterials().at(mesh.materialIndex).colors.at("Diffuse").w < 1.0f ||
-					materialColor.w < 1.0f)
-				{
-					TransparencyDrawInfo& transparencyDrawInfo = staticTransparencies_.emplace_back();
-					transparencyDrawInfo.shader = shader;
-					transparencyDrawInfo.model = model;
-					transparencyDrawInfo.mesh = &mesh;
-					transparencyDrawInfo.color = materialColor;
-					// カメラとの距離を算出
-					DirectX::XMVECTOR Position = DirectX::XMVectorSet(
-						nodes[mesh.nodeIndex].worldTransform._41,
-						nodes[mesh.nodeIndex].worldTransform._42,
-						nodes[mesh.nodeIndex].worldTransform._43,
-						0.0f);
-					DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
-					transparencyDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
 
-					continue;
-				}
+			uint32_t stride{ sizeof(ModelResource::Vertex) };
+			uint32_t offset{ 0 };
+			dc->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
+			dc->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-				uint32_t stride{ sizeof(ModelResource::Vertex) };
-				uint32_t offset{ 0 };
-				dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-				dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-				dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			// スケルトン用定数バッファ
+			cbStaticSkeleton_.world = nodes[mesh->nodeIndex].worldTransform;
+			cbStaticSkeleton_.materialColor = materialColor;
+			dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
 
-				// スケルトン用定数バッファ
-				cbStaticSkeleton_.world = nodes[mesh.nodeIndex].worldTransform;
-				cbStaticSkeleton_.materialColor = materialColor;
-				dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
+			// シェーダーの更新処理
+			shader->Update(rc, &resource->GetMaterials().at(mesh->materialIndex));
 
-				// シェーダーの更新処理
-				shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
-
-				dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
-			}
+			dc->DrawIndexed(static_cast<UINT>(mesh->indices.size()), 0, 0);
 		}
 	}
 
@@ -364,23 +321,42 @@ namespace ModelRenderer
 	}
 	void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
 	{
-		// 描画タイプに応じて登録
-		switch (renderType)
+		// モデルに含まれるメッシュの色を確認して不透明処理か半透明処理に振り分ける
+		const ModelResource* resource = model->GetResource();
+		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
+		for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 		{
-		case ModelRenderType::Dynamic:
-			dynamicBoneDrawInfomap_[shaderId].push_back({ model,color });
-			break;
-		case ModelRenderType::Static:
-			staticBoneDrawInfomap_[shaderId].push_back({ model,color });
-			break;
-		case ModelRenderType::Instancing:
-			assert(!"Please Call \"DrawInstancing\"");
-			break;
-		default:
-			assert(!"ModelRenderType Overflow");
-			break;
+			// 透明度があるメッシュならTransparencyDrawInfoに登録
+			if (resource->GetMaterials().at(mesh.materialIndex).colors.at("Diffuse").w < 1.0f ||
+				color.w < 1.0f)
+			{
+				auto& transparencyDrawInfo = transparencyDrawInfos_.emplace_back();
+				transparencyDrawInfo.shaderId = shaderId;
+				transparencyDrawInfo.renderType = renderType;
+				transparencyDrawInfo.model = model;
+				transparencyDrawInfo.mesh = &mesh;
+				transparencyDrawInfo.color = color;
+			}
+
+			// 描画タイプに応じて登録
+			switch (renderType)
+			{
+			case ModelRenderType::Dynamic:
+				dynamicBoneDrawInfomap_[shaderId].push_back({ model, &mesh, color });
+				break;
+			case ModelRenderType::Static:
+				staticBoneDrawInfomap_[shaderId].push_back({ model, &mesh, color });
+				break;
+			case ModelRenderType::Instancing:
+				assert(!"Please Call \"DrawInstancing\"");
+				break;
+			default:
+				assert(!"ModelRenderType Overflow");
+				break;
+			}
 		}
 	}
+
 	void DrawInstancing(Model* model, const Vector4& color, ShaderId shaderId, const DirectX::XMFLOAT4X4& world)
 	{
 		// 過去に登録しているか確認
@@ -400,11 +376,11 @@ namespace ModelRenderer
 			instancingDrawInfoMap_[model] = newInfo;
 		}
 	}
-	void Render(const RenderContext& rc)
+
+	/// 不透明描画実行
+	void RenderOpaque(const RenderContext& rc)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;
-
-		// シーン用定数バッファはこの関数を呼ぶ前に行う
 
 		// サンプラステート設定
 		ID3D11SamplerState* samplerStates[] =
@@ -419,9 +395,6 @@ namespace ModelRenderer
 
 		// ブレンドステート設定
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
-
-		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye_);
-		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front_);
 
 		// ボーンの影響度があるモデルの描画
 		{
@@ -438,7 +411,7 @@ namespace ModelRenderer
 				for (auto& drawInfo : drawInfomap.second)
 				{
 					// メッシュ描画
-					Helper::DrawDynamicBoneMesh(rc, CameraPosition, CameraFront, drawInfo.model, drawInfo.color, shader);
+					Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
 				}
 
 				shader->End(rc);
@@ -462,7 +435,7 @@ namespace ModelRenderer
 				for (auto& drawInfo : drawInfomap.second)
 				{
 					// メッシュ描画
-					Helper::DrawStaticBoneModel(rc, CameraPosition, CameraFront, drawInfo.model, drawInfo.color, shader);
+					Helper::DrawStaticBoneModel(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
 				}
 
 				shader->End(rc);
@@ -472,106 +445,83 @@ namespace ModelRenderer
 
 		// インスタンシングモデルの描画
 		Helper::RenderInstancing(rc);
+	}
+
+	/// 半透明描画実行
+	void RenderTransparency(const RenderContext& rc)
+	{
+		ID3D11DeviceContext* dc = rc.deviceContext;
+
+		// サンプラステート設定
+		ID3D11SamplerState* samplerStates[] =
+		{
+			rc.renderState->GetSamplerState(SamplerState::LinearWrap)
+		};
+		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+
+		// レンダーステート設定
+		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
 		// ブレンドステート設定
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
-		// カメラから遠い順にソート
-		std::sort(dynamicTransparencies_.begin(), dynamicTransparencies_.end(),
-			[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
-			{
-				return lhs.distance > rhs.distance;
-			});
-		std::sort(staticTransparencies_.begin(), staticTransparencies_.end(),
-			[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
-			{
-				return lhs.distance > rhs.distance;
-			});
+		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye_);
+		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front_);
 
-		// 半透明描画処理
+		// カメラとの距離計算
 		{
-			// ボーンの影響度があるモデルの描画
+			for (TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos_)
 			{
-				dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-				for (const TransparencyDrawInfo& transparencyDrawInfo : dynamicTransparencies_)
-				{
-					ShaderBase* shader = transparencyDrawInfo.shader;
-
-					shader->Begin(rc);
-
-					const std::vector<ModelResource::Node>& nodes = transparencyDrawInfo.model->GetPoseNodes();
-					const ModelResource::Mesh& mesh = *transparencyDrawInfo.mesh;
-					uint32_t stride{ sizeof(ModelResource::Vertex) };
-					uint32_t offset{ 0 };
-					dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-					dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-					dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-					// スケルトン用定数バッファ
-					if (mesh.bones.size() > 0)
-					{
-						for (size_t i = 0; i < mesh.bones.size(); ++i)
-						{
-							const ModelResource::Bone& bone = mesh.bones.at(i);
-							DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
-							DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
-							DirectX::XMMATRIX Bone = Offset * World;
-							DirectX::XMStoreFloat4x4(&cbDynamicSkeleton_.boneTransforms[i], Bone);
-						}
-					}
-					else
-					{
-						cbDynamicSkeleton_.boneTransforms[0] = nodes[mesh.nodeIndex].worldTransform;
-					}
-					cbDynamicSkeleton_.materialColor = transparencyDrawInfo.color;
-
-					dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
-
-					// シェーダーの更新処理
-					shader->Update(rc, &transparencyDrawInfo.model->GetResource()->GetMaterials().at(mesh.materialIndex));
-
-					dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
-
-					shader->End(rc);
-				}
-				dynamicTransparencies_.clear();
-			}
-
-			// ボーンの影響度がないモデルの描画
-			{
-				dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-				for (const TransparencyDrawInfo& transparencyDrawInfo : staticTransparencies_)
-				{
-					ShaderBase* shader = transparencyDrawInfo.shader;
-
-					shader->Begin(rc);
-
-					const std::vector<ModelResource::Node>& nodes = transparencyDrawInfo.model->GetPoseNodes();
-					const ModelResource::Mesh& mesh = *transparencyDrawInfo.mesh;
-					uint32_t stride{ sizeof(ModelResource::Vertex) };
-					uint32_t offset{ 0 };
-					dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-					dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-					dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-					// スケルトン用定数バッファ
-					cbStaticSkeleton_.world = nodes[mesh.nodeIndex].worldTransform;
-					cbStaticSkeleton_.materialColor = transparencyDrawInfo.color;
-					dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
-
-					// シェーダーの更新処理
-					shader->Update(rc, &transparencyDrawInfo.model->GetResource()->GetMaterials().at(mesh.materialIndex));
-
-					dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
-
-					shader->End(rc);
-				}
-				staticTransparencies_.clear();
+				const std::vector<ModelResource::Node>& nodes = transparencyDrawInfo.model->GetPoseNodes();
+				const ModelResource::Mesh* mesh = transparencyDrawInfo.mesh;
+				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
+					nodes[mesh->nodeIndex].worldTransform._41,
+					nodes[mesh->nodeIndex].worldTransform._42,
+					nodes[mesh->nodeIndex].worldTransform._43,
+					0.0f);
+				DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
+				transparencyDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
 			}
 		}
+
+		// カメラから遠い順にソート
+		std::sort(transparencyDrawInfos_.begin(), transparencyDrawInfos_.end(),
+			[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
+			{
+				return lhs.distance > rhs.distance;
+			});
+
+		// 描画
+		for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos_)
+		{
+			ShaderBase* shader = shaders_[static_cast<int>(transparencyDrawInfo.renderType)][transparencyDrawInfo.shaderId].get();
+
+			shader->Begin(rc);
+
+			switch (transparencyDrawInfo.renderType)
+			{
+			case ModelRenderType::Dynamic:
+				// 定数バッファ設定
+				dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+				Helper::DrawDynamicBoneMesh(rc, shader, transparencyDrawInfo.model, transparencyDrawInfo.mesh, transparencyDrawInfo.color);
+				break;
+			case ModelRenderType::Static:
+				dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+				Helper::DrawStaticBoneModel(rc, shader, transparencyDrawInfo.model, transparencyDrawInfo.mesh, transparencyDrawInfo.color);
+				break;
+			case ModelRenderType::Instancing:
+
+				break;
+			}
+
+			shader->End(rc);
+		}
+		transparencyDrawInfos_.clear();
 	}
+
 	void CastShadow(const RenderContext& rc)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;

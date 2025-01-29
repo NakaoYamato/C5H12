@@ -14,8 +14,9 @@ Texture2D environmentMap : register(t10);
 float4 main(VS_OUT pin) : SV_TARGET
 {
     float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * pin.materialColor;
+    diffuseColor.a = pin.materialColor.a;
     // TODO ˆ—‚ªd‚¢
-    clip(diffuseColor.a < 0.1f ? -1 : 1);
+    //clip(diffuseColor.a < 0.1f ? -1 : 1);
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
     
     // TODO : DiffuseColor alpha 

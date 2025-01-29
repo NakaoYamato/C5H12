@@ -55,10 +55,18 @@ namespace ModelRenderer
     void DrawInstancing(Model* model, const Vector4& color, ShaderId shaderId, const DirectX::XMFLOAT4X4& world);
 
     /// <summary>
-    /// 描画実行
+    /// 不透明描画実行
+    /// シーン用定数バッファはこの関数を呼ぶ前に行う
     /// </summary>
     /// <param name="rc"></param>
-    void Render(const RenderContext& rc);
+    void RenderOpaque(const RenderContext& rc);
+
+    /// <summary>
+    /// 半透明描画実行
+    /// シーン用定数バッファはこの関数を呼ぶ前に行う
+    /// </summary>
+    /// <param name="rc"></param>
+    void RenderTransparency(const RenderContext& rc);
 
     /// <summary>
     /// 影描画実行

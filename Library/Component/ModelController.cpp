@@ -25,7 +25,7 @@ void ModelController::Render(const RenderContext& rc)
 // ‰e•`‰æ
 void ModelController::CastShadow(const RenderContext& rc)
 {
-	ModelRenderer::Draw(model.get(), color, ShaderId::CascadedShadowMap, renderType);
+	ModelRenderer::Draw(model.get(), VECTOR4_WHITE, ShaderId::CascadedShadowMap, renderType);
 }
 
 // GUI•`‰æ

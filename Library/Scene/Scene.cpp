@@ -79,14 +79,21 @@ void Scene::Render()
     {
         // ゲームオブジェクトの描画
         ActorManager::Render(rc);
-        // モデルの描画
-        ModelRenderer::Render(rc);
 
-        // シェイプ描画
-        ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+        // 不透明描画
+        {
+            // モデルの不透明描画
+            ModelRenderer::RenderOpaque(rc);
 
-        // プリミティブ描画
-        PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+            // シェイプ描画
+            ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+
+            // プリミティブ描画
+            PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+        }
+
+        // モデルの半透明描画
+        ModelRenderer::RenderTransparency(rc);
 
         // デバッグ描画
         Debug::Renderer::Render(Camera::Instance().GetView(), Camera::Instance().GetProjection());

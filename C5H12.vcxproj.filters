@@ -141,9 +141,6 @@
     <ClCompile Include="Library\3D\SkyMap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\Basic\BasicShader.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -386,9 +383,6 @@
     <ClInclude Include="Library\3D\SkyMap.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\Basic\BasicShader.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -502,14 +496,11 @@
     <None Include="HLSL\PostProcess\GaussianFilter\GaussianFilter.hlsli" />
     <None Include="HLSL\ShapeRenderer\ShapeRenderer.hlsli" />
     <None Include="HLSL\SkyMap\SkyMap.hlsli" />
+    <None Include="HLSL\GBuffer\GBuffer.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererVS.hlsl" />
-    <FxCompile Include="HLSL\Model\Basic\BasicBatchingVS.hlsl" />
-    <FxCompile Include="HLSL\Model\Basic\BasicInstancedVS.hlsl" />
-    <FxCompile Include="HLSL\Model\Basic\BasicPS.hlsl" />
-    <FxCompile Include="HLSL\Model\Basic\BasicVS.hlsl" />
     <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowBatchingVS.hlsl" />
     <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowGS.hlsl" />
     <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowInstancedVS.hlsl" />
@@ -545,5 +536,7 @@
     <FxCompile Include="HLSL\SkyMap\SkyMapVS.hlsl" />
     <FxCompile Include="HLSL\Model\Ramp\RampPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\RobertsCross\RobertsCrossPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Phong\PhongGBPS.hlsl" />
+    <FxCompile Include="HLSL\GBuffer\DeferredRenderingPS.hlsl" />
   </ItemGroup>
 </Project>

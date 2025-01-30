@@ -215,7 +215,6 @@
     <ClCompile Include="Library\Scene\SceneLoading.cpp" />
     <ClCompile Include="Library\Scene\SceneManager.cpp" />
     <ClCompile Include="Library\Scene\Test\SceneDebug.cpp" />
-    <ClCompile Include="Library\Shader\Basic\BasicShader.cpp" />
     <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
@@ -299,7 +298,6 @@
     <ClInclude Include="Library\Scene\SceneLoading.h" />
     <ClInclude Include="Library\Scene\SceneManager.h" />
     <ClInclude Include="Library\Scene\Test\SceneDebug.h" />
-    <ClInclude Include="Library\Shader\Basic\BasicShader.h" />
     <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h" />
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
@@ -309,6 +307,7 @@
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
     <None Include="HLSL\Function\ShadingFunctions.hlsli" />
     <None Include="HLSL\Function\ToMatrix.hlsli" />
+    <None Include="HLSL\GBuffer\GBuffer.hlsli" />
     <None Include="HLSL\Model\CascadedShadow\CascadedShadow.hlsli" />
     <None Include="HLSL\Model\Light.hlsli" />
     <None Include="HLSL\Model\ModelInputLayout.hlsli" />
@@ -334,21 +333,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\Model\Basic\BasicBatchingVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\Model\Basic\BasicInstancedVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\Model\Basic\BasicPS.hlsl">
+    <FxCompile Include="HLSL\GBuffer\DeferredRenderingPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\Model\Basic\BasicVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Model\CascadedShadow\CascadedShadowBatchingVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -369,6 +358,12 @@
     <FxCompile Include="HLSL\Model\Phong\PhongBatchingVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\Phong\PhongGBPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Model\Phong\PhongInstancedVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

@@ -72,36 +72,45 @@ void Scene::Render()
     // ライト定数バッファの設定
     cbManager->SetCB(dc, 3, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
 
+    // ゲームオブジェクトの描画
+    ActorManager::Render(rc);
+
     //--------------------------------------------------------------------------------------
-    // レンダーターゲットをフレームバッファ0番に設定
-    FrameBuffer* modelRenderBuffer = graphics.GetFrameBuffer(0);
-    modelRenderBuffer->ClearAndActive(dc);
+    // GBufferに書き込み
+    GBuffer* gBuffer = graphics.GetGBuffer();
+    gBuffer->ClearAndActive(dc);
     {
-        // ゲームオブジェクトの描画
-        ActorManager::Render(rc);
-
-        // 不透明描画
-        {
-            // モデルの不透明描画
-            ModelRenderer::RenderOpaque(rc);
-
-            // シェイプ描画
-            ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
-
-            // プリミティブ描画
-            PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
-        }
-
-        // モデルの半透明描画
+        // モデルの描画
+        ModelRenderer::RenderOpaque(rc);
         ModelRenderer::RenderTransparency(rc);
 
-        // デバッグ描画
-        Debug::Renderer::Render(Camera::Instance().GetView(), Camera::Instance().GetProjection());
+        // シェイプ描画
+        ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+
+        // プリミティブ描画
+        PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
     }
-    modelRenderBuffer->Deactivate(dc);
-    // フレームバッファ0番の処理終了
+    gBuffer->Deactivate(dc);
+    // GBufferに書き込み終了
     //--------------------------------------------------------------------------------------
 
+    // GBufferのデータを書き出し
+    {
+        ID3D11ShaderResourceView* srvs[]
+        {
+            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DiffuseColorSRV)).Get(),
+            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::AmbientColorSRV)).Get(),
+            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::SpecularColorSRV)).Get(),
+            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldPositionSRV)).Get(),
+            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldNormalSRV)).Get(),
+            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DepthSRV)).Get(),
+        };
+        graphics.Blit(
+            srvs,
+            0, _countof(srvs),
+            FullscreenQuadPS::DeferredRenderingPS);
+    }
+    return;
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
@@ -112,7 +121,6 @@ void Scene::Render()
 
         // モデルの影描画処理
         ModelRenderer::CastShadow(rc);
-
     }
     cascadedShadowMap->Deactivate(rc);
     // カスケードシャドウマップの処理終了
@@ -128,8 +136,8 @@ void Scene::Render()
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
         ID3D11ShaderResourceView* srvs[]
         {
-            modelRenderBuffer->GetColorSRV().Get(), // color_map
-            modelRenderBuffer->GetDepthSRV().Get(), // depth_map
+            gBuffer->GetRenderTargetSRV(0).Get(), // color_map
+            gBuffer->GetDepthStencilSRV().Get(), // depth_map
             cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
         };
         // cascadedShadowMapの定数バッファ更新

@@ -18,7 +18,7 @@ PhongShader::PhongShader(ID3D11Device* device,
 
 	// ピクセルシェーダ
 	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/PhongPS.cso",
+		"./Data/Shader/PhongGBPS.cso",
 		pixelShader_.ReleaseAndGetAddressOf());
 
 

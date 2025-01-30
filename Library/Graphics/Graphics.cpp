@@ -190,6 +190,8 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 			pixelShaders[static_cast<int>(FullscreenQuadPS::EmbeddedPS)].ReleaseAndGetAddressOf());
 		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/CascadedShadowMapPS.cso",
 			pixelShaders[static_cast<int>(FullscreenQuadPS::CascadedPS)].ReleaseAndGetAddressOf());
+		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/DeferredRenderingPS.cso",
+			pixelShaders[static_cast<int>(FullscreenQuadPS::DeferredRenderingPS)].ReleaseAndGetAddressOf());
 
 		cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
 			1024 * 4, 1024 * 4);
@@ -197,7 +199,7 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		gBuffer = std::make_unique<GBuffer>(device.Get(), 
 			static_cast<UINT>(GetScreenWidth()),
 			static_cast<UINT>(GetScreenHeight()),
-			3);
+			static_cast<UINT>(GBufferSRVType::GBufferSRVTypeMAX));
 	}
 }
 

@@ -34,7 +34,6 @@ void ModelController::DrawGui()
 	ImGui::ColorEdit4("color", &color.x);
 	static const char* shaderTypeName[] =
 	{
-		u8"Basic",
 		u8"Phong",
 		u8"Ramp",
 	};

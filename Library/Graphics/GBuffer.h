@@ -7,6 +7,18 @@
 
 static constexpr UINT MAX_GBUFFER_COUNT = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
+enum GBufferSRVType
+{
+	DiffuseColorSRV,
+	AmbientColorSRV,
+	SpecularColorSRV,
+	WorldPositionSRV,
+	WorldNormalSRV,
+	DepthSRV,
+
+	GBufferSRVTypeMAX,
+};
+
 class GBuffer
 {
 public:

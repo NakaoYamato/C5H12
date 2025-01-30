@@ -233,7 +233,7 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
         {
             GpuResourceManager::MakeDummyTexture(device,
                 material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
-                0xFFFFFF00,// ダミーならアルファが0 
+                0xFFFFFFFF,// ダミーならアルファが0 
                 16);
         }
     }

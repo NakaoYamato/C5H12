@@ -20,6 +20,7 @@ enum class FullscreenQuadPS
 {
 	EmbeddedPS,	// 通常の処理
 	CascadedPS,	// カスケードシャドウ
+	DeferredRenderingPS,
 
 	FullscreenQuadPSMax,
 };

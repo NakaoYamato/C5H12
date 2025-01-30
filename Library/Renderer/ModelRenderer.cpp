@@ -1,7 +1,6 @@
 #include "ModelRenderer.h"
 
 #include "../ResourceManager/GpuResourceManager.h"
-#include "../../Shader/Basic/BasicShader.h"
 #include "../../Shader/Phong/PhongShader.h"
 #include "../../Shader/Ramp/RampShader.h"
 
@@ -50,7 +49,7 @@ struct DrawInfo
 };
 struct TransparencyDrawInfo
 {
-	ShaderId					shaderId = ShaderId::Basic;
+	ShaderId					shaderId = ShaderId::Phong;
 	ModelRenderType				renderType = ModelRenderType::Dynamic;
 	Model*						model = nullptr;
 	const ModelResource::Mesh*	mesh = nullptr;
@@ -261,10 +260,6 @@ namespace ModelRenderer
 			const size_t type = static_cast<int>(ModelRenderType::Dynamic);
 			ShaderMap& shaderMap = shaders_[type];
 
-			shaderMap[ShaderId::Basic] = std::make_unique<BasicShader>(device,
-				"./Data/Shader/BasicVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
 			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
 				"./Data/Shader/PhongVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
@@ -281,10 +276,6 @@ namespace ModelRenderer
 			// StaticBoneModel
 			const size_t type = static_cast<int>(ModelRenderType::Static);
 			ShaderMap& shaderMap = shaders_[type];
-
-			shaderMap[ShaderId::Basic] = std::make_unique<BasicShader>(device,
-				"./Data/Shader/BasicBatchingVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
 				"./Data/Shader/PhongBatchingVS.cso",
@@ -303,9 +294,6 @@ namespace ModelRenderer
 			const size_t type = static_cast<int>(ModelRenderType::Instancing);
 			ShaderMap& shaderMap = shaders_[type];
 
-			shaderMap[ShaderId::Basic] = std::make_unique<BasicShader>(device,
-				"./Data/Shader/BasicInstancedVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
 				"./Data/Shader/PhongInstancedVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));

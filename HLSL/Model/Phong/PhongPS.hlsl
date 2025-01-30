@@ -24,11 +24,10 @@ float4 main(VS_OUT pin) : SV_TARGET
              3, 11, 1, 9,
             15, 7, 13, 5
         };
-        int x = ((int) pin.position.x) % 4;
-        int y = ((int) pin.position.y) % 4;
+        uint x = ((uint) pin.position.x) % 4;
+        uint y = ((uint) pin.position.y) % 4;
         float dither = (float) dither_pattern[x + y * 4] / 16.0f;
         clip(diffuseColor.a - dither);
-
     }
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
     

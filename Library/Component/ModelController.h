@@ -45,7 +45,7 @@ public:
 
 private:
 	std::unique_ptr<Model> model;
-	ShaderId shaderId = ShaderId::Basic;
+	ShaderId shaderId = ShaderId::Phong;
 	ModelRenderType renderType = ModelRenderType::Dynamic;
 	Vector4 color{ 1,1,1,1 };
 };

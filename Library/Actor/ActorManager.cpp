@@ -2,17 +2,10 @@
 
 #include <imgui.h>
 
-#include "../../External/nameof/include/nameof.hpp"
-#include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
+#include "../Converter/ToString.h"
+
 
 #include "../../Library/Graphics/Graphics.h"
-
-/// <summary>
-/// enumをstringに変換
-/// </summary>
-/// <param name="index"></param>
-/// <returns>string</returns>
-#define GET_ENUM_NAME(index) nameof::nameof_enum(magic_enum::enum_value<ActorTag>(index)).data()
 
 namespace ActorManager
 {
@@ -169,7 +162,7 @@ namespace ActorManager
 		const RenderState* renderState = rc.renderState;
 
 		// レンダーステート設定
-		dc->OMSetBlendState(renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+		dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 		dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 		dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
@@ -259,7 +252,7 @@ namespace ActorManager
 		{
 			for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 			{
-				if (ImGui::TreeNodeEx(GET_ENUM_NAME(i), ImGuiTreeNodeFlags_DefaultOpen))
+				if (ImGui::TreeNodeEx(ToString<ActorTag>(i).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					for (auto& actor : updateActors_[i])
 					{

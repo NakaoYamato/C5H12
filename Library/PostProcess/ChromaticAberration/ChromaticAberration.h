@@ -8,7 +8,7 @@ class ChromaticAberration : public PostProcessBase
 public:
     struct Constants
     {
-        float aberrationAmount = 0.005f;
+        float aberrationAmount = 0.000f;
         unsigned int    maxSamples = 16;
         DirectX::XMFLOAT2 chromaticAberrationDummy;
 

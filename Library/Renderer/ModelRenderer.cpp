@@ -336,6 +336,7 @@ namespace ModelRenderer
 				transparencyDrawInfo.model = model;
 				transparencyDrawInfo.mesh = &mesh;
 				transparencyDrawInfo.color = color;
+				continue;
 			}
 
 			// •`‰æƒ^ƒCƒv‚É‰ž‚¶‚Ä“o˜^

@@ -49,7 +49,7 @@ void Scene::Render()
     }
 
     // レンダーステート設定
-    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
+    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
     dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 

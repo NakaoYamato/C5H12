@@ -15,21 +15,6 @@ float4 main(VS_OUT pin) : SV_TARGET
 {
     float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * pin.materialColor;
     diffuseColor.a = pin.materialColor.a; 
-    // ƒfƒUƒŠƒ“ƒO
-    {
-        static const int dither_pattern[16] =
-        {
-            0, 8, 2, 10,
-            12, 4, 14, 6,
-             3, 11, 1, 9,
-            15, 7, 13, 5
-        };
-        int x = ((int) pin.position.x) % 4;
-        int y = ((int) pin.position.y) % 4;
-        float dither = (float) dither_pattern[x + y * 4] / 16.0f;
-        clip(diffuseColor.a - dither);
-
-    }
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
     
     // TODO : DiffuseColor alpha 

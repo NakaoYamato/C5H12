@@ -61,44 +61,44 @@ public:
 #pragma region コンポーネント関係
 	// コンポーネント追加
 	template<class T, class... Args>
-	std::shared_ptr<T> AddComponent(Args... args)
+	T* AddComponent(Args... args)
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
 		components_.emplace_back(component);
-		return component;
+		return component.get();
 	}
 
 	// コンポーネント取得
 	template<class T>
-	std::shared_ptr<T> GetComponent()
+	T* GetComponent()
 	{
 		for (std::shared_ptr<Component>& component : components_)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
-			return p;
+			return p.get();
 		}
 		return nullptr;
 	}
 
 	// 当たり判定コンポーネント
 	template<class T, class... Args>
-	std::shared_ptr<T> AddCollider(Args... args)
+	T* AddCollider(Args... args)
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
 		colliderComponents_.emplace_back(component);
-		return component;
+		return component.get();
 	}
 	template<class T>
-	std::shared_ptr<T> GetCollider()
+	T* GetCollider()
 	{
 		for (std::shared_ptr<ColliderComponent>& component : colliderComponents_)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
-			return p;
+			return p.get();
 		}
 		return nullptr;
 	}

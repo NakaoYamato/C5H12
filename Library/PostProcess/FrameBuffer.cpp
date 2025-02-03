@@ -96,7 +96,7 @@ void FrameBuffer::Activate(ID3D11DeviceContext* immediateContext)
 		dsv.Get());
 }
 
-void FrameBuffer::ClearAndActive(ID3D11DeviceContext* immediateContext,
+void FrameBuffer::ClearAndActivate(ID3D11DeviceContext* immediateContext,
 	const Vector4& color, const float& depth)
 {
 	Clear(immediateContext, color, depth);

@@ -125,7 +125,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	chromaticAberrationPP->Render(dc, radialBlurPP->GetColorSRV().GetAddressOf(), 0, 1);
 
 	// ƒuƒ‹[ƒ€“K‰ž
-	bloomRenderFrame_->ClearAndActive(dc);
+	bloomRenderFrame_->ClearAndActivate(dc);
 	{
 		ID3D11ShaderResourceView* srvs[] =
 		{

@@ -162,7 +162,6 @@
     <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
     <ClCompile Include="Library\Component\ModelController.cpp" />
     <ClCompile Include="Library\Component\ShapeController.cpp" />
-    <ClCompile Include="Library\Component\SkyMapController.cpp" />
     <ClCompile Include="Library\Converter\ToString.cpp" />
     <ClCompile Include="Library\DebugSupporter\Camera\DebugCamera.cpp" />
     <ClCompile Include="Library\DebugSupporter\DebugSupporter.cpp" />
@@ -237,7 +236,6 @@
     <ClInclude Include="Library\Component\Light\PointLightController.h" />
     <ClInclude Include="Library\Component\ModelController.h" />
     <ClInclude Include="Library\Component\ShapeController.h" />
-    <ClInclude Include="Library\Component\SkyMapController.h" />
     <ClInclude Include="Library\Converter\ToString.h" />
     <ClInclude Include="Library\DebugSupporter\Camera\DebugCamera.h" />
     <ClInclude Include="Library\DebugSupporter\DebugSupporter.h" />

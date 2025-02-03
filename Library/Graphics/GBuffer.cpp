@@ -196,7 +196,7 @@ void GBuffer::DrawGui()
 void GBuffer::CreateSRV(ID3D11DeviceContext* immediateContext)
 {
 	// フレームバッファ開始
-	frameBuffer_->ClearAndActive(immediateContext);
+	frameBuffer_->ClearAndActivate(immediateContext);
 
 	// GBufferのデータを書き出し
 	ID3D11ShaderResourceView* srvs[]

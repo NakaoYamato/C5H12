@@ -42,8 +42,6 @@ namespace ModelRenderer
     /// <param name="renderType"></param>
     void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType);
 
-    void DrawMesh(ModelResource::Mesh* mesh, const Vector4& color, ShaderId shaderId, ModelRenderType renderType);
-
     /// <summary>
     /// インスタンシングモデルの描画
     /// </summary>
@@ -54,18 +52,11 @@ namespace ModelRenderer
     void DrawInstancing(Model* model, const Vector4& color, ShaderId shaderId, const DirectX::XMFLOAT4X4& world);
 
     /// <summary>
-    /// 不透明描画実行
+    /// 描画実行
     /// シーン用定数バッファはこの関数を呼ぶ前に行う
     /// </summary>
     /// <param name="rc"></param>
-    void RenderOpaque(const RenderContext& rc);
-
-    /// <summary>
-    /// 半透明描画実行
-    /// シーン用定数バッファはこの関数を呼ぶ前に行う
-    /// </summary>
-    /// <param name="rc"></param>
-    void RenderTransparency(const RenderContext& rc);
+    void Render(const RenderContext& rc);
 
     /// <summary>
     /// 影描画実行

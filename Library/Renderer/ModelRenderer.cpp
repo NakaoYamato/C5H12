@@ -40,21 +40,10 @@ struct InstancingModelCB// インスタンシングモデル用
 #pragma region Info
 struct DrawInfo
 {
-	//ShaderBase*			shader = nullptr;
-	//ModelRenderType		modelType = ModelRenderType::Dynamic;
 	Model*				model = nullptr;
 	const ModelResource::Mesh* mesh = nullptr;
 	Vector4				color{ 1,1,1,1 };
 	float				distance = 0.0f;
-};
-struct TransparencyDrawInfo
-{
-	ShaderId					shaderId = ShaderId::Phong;
-	ModelRenderType				renderType = ModelRenderType::Dynamic;
-	Model*						model = nullptr;
-	const ModelResource::Mesh*	mesh = nullptr;
-	Vector4						color{ 1,1,1,1 };
-	float						distance = 0.0f;
 };
 // インスタンシング描画用
 struct InstancingDrawInfo
@@ -83,11 +72,6 @@ namespace ModelRenderer
 	DrawInfoMap                             dynamicBoneDrawInfomap_;
 	DrawInfoMap                             staticBoneDrawInfomap_;
 	InstancingDrawInfoMap                   instancingDrawInfoMap_;
-
-	//std::vector<DrawInfo>					opaqueDrawInfo_;
-
-	// 透明描画
-	std::vector<TransparencyDrawInfo>		transparencyDrawInfos_;
 
 	// 各定数バッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	dynamicBoneCB_;
@@ -309,24 +293,10 @@ namespace ModelRenderer
 	}
 	void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
 	{
-		// モデルに含まれるメッシュの色を確認して不透明処理か半透明処理に振り分ける
 		const ModelResource* resource = model->GetResource();
 		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 		for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 		{
-			// 透明度があるメッシュならTransparencyDrawInfoに登録
-			if (resource->GetMaterials().at(mesh.materialIndex).colors.at("Diffuse").w < 1.0f ||
-				color.w < 1.0f)
-			{
-				auto& transparencyDrawInfo = transparencyDrawInfos_.emplace_back();
-				transparencyDrawInfo.shaderId = shaderId;
-				transparencyDrawInfo.renderType = renderType;
-				transparencyDrawInfo.model = model;
-				transparencyDrawInfo.mesh = &mesh;
-				transparencyDrawInfo.color = color;
-				continue;
-			}
-
 			// 描画タイプに応じて登録
 			switch (renderType)
 			{
@@ -366,8 +336,8 @@ namespace ModelRenderer
 		}
 	}
 
-	/// 不透明描画実行
-	void RenderOpaque(const RenderContext& rc)
+	/// 描画実行
+	void Render(const RenderContext& rc)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -383,7 +353,7 @@ namespace ModelRenderer
 		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
 		// ブレンドステート設定
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
 
 		// ボーンの影響度があるモデルの描画
 		{
@@ -434,81 +404,6 @@ namespace ModelRenderer
 
 		// インスタンシングモデルの描画
 		Helper::RenderInstancing(rc);
-	}
-
-	/// 半透明描画実行
-	void RenderTransparency(const RenderContext& rc)
-	{
-		ID3D11DeviceContext* dc = rc.deviceContext;
-
-		// サンプラステート設定
-		ID3D11SamplerState* samplerStates[] =
-		{
-			rc.renderState->GetSamplerState(SamplerState::LinearWrap)
-		};
-		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-
-		// レンダーステート設定
-		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-
-		// ブレンドステート設定
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-
-		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye_);
-		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front_);
-
-		// カメラとの距離計算
-		{
-			for (TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos_)
-			{
-				const std::vector<ModelResource::Node>& nodes = transparencyDrawInfo.model->GetPoseNodes();
-				const ModelResource::Mesh* mesh = transparencyDrawInfo.mesh;
-				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
-					nodes[mesh->nodeIndex].worldTransform._41,
-					nodes[mesh->nodeIndex].worldTransform._42,
-					nodes[mesh->nodeIndex].worldTransform._43,
-					0.0f);
-				DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
-				transparencyDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
-			}
-		}
-
-		// カメラから遠い順にソート
-		std::sort(transparencyDrawInfos_.begin(), transparencyDrawInfos_.end(),
-			[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
-			{
-				return lhs.distance > rhs.distance;
-			});
-
-		// 描画
-		for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos_)
-		{
-			ShaderBase* shader = shaders_[static_cast<int>(transparencyDrawInfo.renderType)][transparencyDrawInfo.shaderId].get();
-
-			shader->Begin(rc);
-
-			switch (transparencyDrawInfo.renderType)
-			{
-			case ModelRenderType::Dynamic:
-				// 定数バッファ設定
-				dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-				Helper::DrawDynamicBoneMesh(rc, shader, transparencyDrawInfo.model, transparencyDrawInfo.mesh, transparencyDrawInfo.color);
-				break;
-			case ModelRenderType::Static:
-				dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-				Helper::DrawStaticBoneModel(rc, shader, transparencyDrawInfo.model, transparencyDrawInfo.mesh, transparencyDrawInfo.color);
-				break;
-			case ModelRenderType::Instancing:
-
-				break;
-			}
-
-			shader->End(rc);
-		}
-		transparencyDrawInfos_.clear();
 	}
 
 	void CastShadow(const RenderContext& rc)

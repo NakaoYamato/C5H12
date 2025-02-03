@@ -58,7 +58,7 @@ public:
     // ‰e‚Ì¶¬ŠJn
     void Activate(const RenderContext& rc,
         const UINT& cbSlot);
-    void ClearAndActive(const RenderContext& rc,
+    void ClearAndActivate(const RenderContext& rc,
         const UINT& cbSlot);
 
     // ‰e‚Ì¶¬I—¹

@@ -177,9 +177,6 @@
     <ClCompile Include="Library\Component\Light\PointLightController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Component\SkyMapController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -426,9 +423,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\Light\PointLightController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\Component\SkyMapController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\PostProcess\PostProcessManager.h">

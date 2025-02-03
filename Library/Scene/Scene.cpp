@@ -61,6 +61,8 @@ void Scene::Render()
     rc.lightDirection = { 1,0,0,0 };
     rc.lightColor = { 1,1,1,1 };
     rc.lightAmbientColor = { 0,0,0,0 };
+    if (skyMap_)
+        rc.environmentMap = skyMap_->GetSRV();
 
     // 描画の前処理
     ActorManager::RenderPreprocess(rc);
@@ -81,8 +83,7 @@ void Scene::Render()
     gBuffer->ClearAndActivate(dc);
     {
         // モデルの描画
-        ModelRenderer::RenderOpaque(rc);
-        ModelRenderer::RenderTransparency(rc);
+        ModelRenderer::Render(rc);
 
         // シェイプ描画
         ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
@@ -97,7 +98,7 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
-    cascadedShadowMap->ClearAndActive(rc, 3/*cb_slot*/);
+    cascadedShadowMap->ClearAndActivate(rc, 3/*cb_slot*/);
     {
         // ゲームオブジェクトの影描画処理
         ActorManager::CastShadow(rc);
@@ -112,8 +113,12 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
     FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
-    modelAndShadowRenderFrame->ClearAndActive(dc);
+    modelAndShadowRenderFrame->ClearAndActivate(dc);
     {
+        // 空の描画
+        if (skyMap_)
+            skyMap_->Blit(rc);
+
         // 影の描画
         // cascadedShadowMapにある深度情報から
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
@@ -126,9 +131,9 @@ void Scene::Render()
         // cascadedShadowMapの定数バッファ更新
         cascadedShadowMap->UpdateCSMConstants(rc);
         // レンダーステート設定
-        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
         // サンプラーステート設定
         dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
         dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
@@ -152,7 +157,7 @@ void Scene::Render()
     PostProcessManager::Instance().ApplyEffect(rc, srv);
     // ポストエフェクトの処理終了
     //--------------------------------------------------------------------------------------
-
+    
     // サンプラーステート設定
     {
         ID3D11SamplerState* samplerStates[] =
@@ -185,4 +190,10 @@ void Scene::DrawGui()
 {
     //　ゲームオブジェクトのGui表示
     ActorManager::DrawGui();
+}
+
+// スカイマップ設定
+void Scene::SetSkyMap(const wchar_t* filename)
+{
+    skyMap_ = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename);
 }

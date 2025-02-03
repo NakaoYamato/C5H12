@@ -2,6 +2,7 @@
 
 #include <d3d11.h>
 #include <memory>
+#include "../../Library/3D/SkyMap.h"
 
 //---------------------------------------------------
 //  シーン基底クラス
@@ -39,6 +40,9 @@ public:
 	// 準備完了設定
 	void SetReady() { ready_ = true; }
 
+	// スカイマップ設定
+	void SetSkyMap(const wchar_t* filename);
 private:
+	std::unique_ptr<SkyMap> skyMap_;
 	bool ready_ = false;
 };

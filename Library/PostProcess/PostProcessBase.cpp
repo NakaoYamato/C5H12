@@ -24,7 +24,7 @@ void PostProcessBase::Render(ID3D11DeviceContext* immediateContext,
 	uint32_t startSlot, uint32_t numViews)
 {
 	// フレームバッファ開始
-	frameBuffer->ClearAndActive(immediateContext);
+	frameBuffer->ClearAndActivate(immediateContext);
 
 	// 定数バッファの更新
 	UpdateConstantBuffer(immediateContext, constantBuffer.Get());

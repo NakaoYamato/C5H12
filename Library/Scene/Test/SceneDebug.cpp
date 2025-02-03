@@ -8,7 +8,6 @@
 #include "../../Library/Actor/ActorManager.h"
 
 // コンポーネント
-#include "../../Library/Component/SkyMapController.h"
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Component/Light/PointLightController.h"
 
@@ -35,11 +34,9 @@ void SceneDebug::Initialize()
     );
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
+    SetSkyMap(L"./Data/SkyMap/S0.dds");
+
     // オブジェクト作成
-    {
-        std::shared_ptr<Actor> skyMap = ActorManager::Create(u8"スカイマップ", ActorTag::DrawContextParameter);
-        skyMap->AddComponent<SkyMapController>(L"./Data/SkyMap/S0.dds");
-    }
     {
         std::shared_ptr<Actor> light = ActorManager::Create(u8"Light", ActorTag::DrawContextParameter);
         auto lc = light->AddComponent<LightController>();

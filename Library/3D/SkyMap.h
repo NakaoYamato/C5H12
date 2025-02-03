@@ -15,11 +15,14 @@ public:
 
     void Blit(const RenderContext& rc);
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
-
+    ID3D11ShaderResourceView* const* GetSRV() {
+        return shaderResourceView.GetAddressOf();
+    }
 private:
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader[2];
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
 
     struct Constants
     {

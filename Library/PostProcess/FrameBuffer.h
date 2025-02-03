@@ -28,7 +28,7 @@ public:
 
 	void Activate(ID3D11DeviceContext* immediateContext);
 
-	void ClearAndActive(ID3D11DeviceContext* immediateContext,
+	void ClearAndActivate(ID3D11DeviceContext* immediateContext,
 		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 1.0f),
 		const float& depth = 1.0f);
 

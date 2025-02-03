@@ -39,7 +39,7 @@ void SkyMap::Blit(const RenderContext& rc)
 	// ブレンドステートをアルファブレンドにする
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 	// 深度テストOFF
-	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 1);
+	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
 	// カリングを行わない
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 

@@ -218,7 +218,7 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 	immediateContext->RSSetViewports(1, &viewport);
 }
 
-void CascadedShadowMap::ClearAndActive(const RenderContext& rc,
+void CascadedShadowMap::ClearAndActivate(const RenderContext& rc,
 	const UINT& cbSlot)
 {
 	Clear(rc.deviceContext);

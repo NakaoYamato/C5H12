@@ -24,7 +24,7 @@ private:
     // 光源からの光の向き
     Vector4 direction_ = { -0.2f,-0.45f,0.85f,0.0f };
     Vector4 color_ = { 1.0f,1.0f,1.0f,1.0f };
-    Vector4 ambientColor_ = { 0.0f,0.0f,0.0f,1.0f };
+    Vector4 ambientColor_ = { 1.0f,1.0f,1.0f,1.0f };
 
     // デバッグ用
     int currentIndex_ = 0;

@@ -32,8 +32,7 @@ PS_GB_OUT main(VS_OUT pin)
         clip(diffuseColor.a - dither);
     }
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
-    float4 ambientColor = ambient_color * Ka;
-    
+    float4 ambientColor = Ka;
     float3x3 mat =
     {
         normalize(pin.world_tangent.xyz),

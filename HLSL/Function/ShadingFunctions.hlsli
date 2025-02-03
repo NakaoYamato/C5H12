@@ -48,7 +48,7 @@ float3 CalcHalfLambert(float3 N, float3 L, float3 C, float3 K)
 // L :入射ベクトル（正規化）
 // C :ライト色
 // RimPower :リムライトの強さ
-float3 CalcRimLight(float3 N, float3 E, float3 L, float3 C, float RimPower = 3.0f)
+float3 CalcRimLight(float3 N, float3 E, float3 L, float3 C, float RimPower = 5.0f)
 {
     float rim = 1.0f - saturate(dot(N, -E));
     return C * pow(rim, RimPower) * saturate(dot(L, -E));

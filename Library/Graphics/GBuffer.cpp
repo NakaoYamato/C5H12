@@ -1,6 +1,7 @@
 #include "GBuffer.h"
 
 #include <vector>
+#include <imgui.h>
 
 #include "../HRTrace.h"
 #include "../../ResourceManager/GpuResourceManager.h"
@@ -84,6 +85,15 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height, UINT bufferCount
 		viewports[buffer_index].TopLeftX = 0.0f;
 		viewports[buffer_index].TopLeftY = 0.0f;
 	}
+
+	textureSize_.x = static_cast<float>(width);
+	textureSize_.y = static_cast<float>(height);
+	frameBuffer_ = std::make_unique<FrameBuffer>(device,
+		width, height);
+	fullscreenQuad_ = std::make_unique<Sprite>(device,
+		L"",
+		"./Data/Shader/FullscreenQuadVS.cso",
+		"./Data/Shader/DeferredRenderingPS.cso");
 }
 
 GBuffer::~GBuffer()
@@ -115,7 +125,7 @@ void GBuffer::Activate(ID3D11DeviceContext* immediateContext)
 	immediateContext->OMSetRenderTargets(bufferCount, tempRTVs.data(), dsv.Get());
 }
 
-void GBuffer::ClearAndActive(ID3D11DeviceContext* immediateContext, const Vector4& color, const float& depth)
+void GBuffer::ClearAndActivate(ID3D11DeviceContext* immediateContext, const Vector4& color, const float& depth)
 {
 	Clear(immediateContext, color, depth);
 	Activate(immediateContext);
@@ -140,4 +150,70 @@ void GBuffer::Deactivate(ID3D11DeviceContext* immediateContext)
 	{
 		cachedDSV->Release();
 	}
+
+	CreateSRV(immediateContext);
+}
+
+void GBuffer::DrawGui()
+{
+#if USE_IMGUI
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu(u8"GBuffer"))
+		{
+			ImGui::Checkbox(u8"SRV", &drawGui_);
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
+	if (drawGui_)
+	{
+		if (ImGui::Begin("GBuffer"))
+		{
+			static float sizeFactor = 0.3f;
+			ImGui::DragFloat("TextureSize", &sizeFactor);
+			Vector2 size = textureSize_ * sizeFactor;
+			for (size_t i = 0; i < static_cast<GBufferSRVType>(GBufferSRVType::GBufferSRVTypeMAX); ++i)
+			{
+				ImGui::Image(renderTargetSRVs[i].Get(),
+					{ size.x ,size.y });
+			}
+
+			ImGui::Image(depthStencilSRV.Get(),
+				{ size.x ,size.y });
+
+			ImGui::Image(frameBuffer_->GetColorSRV().Get(),
+				{ size.x ,size.y });
+		}
+		ImGui::End();
+	}
+#endif
+}
+
+void GBuffer::CreateSRV(ID3D11DeviceContext* immediateContext)
+{
+	// フレームバッファ開始
+	frameBuffer_->ClearAndActive(immediateContext);
+
+	// GBufferのデータを書き出し
+	ID3D11ShaderResourceView* srvs[]
+	{
+		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DiffuseColorSRV)).Get(),
+		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::AmbientColorSRV)).Get(),
+		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::SpecularColorSRV)).Get(),
+		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldPositionSRV)).Get(),
+		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldNormalSRV)).Get(),
+		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DepthSRV)).Get(),
+	};
+
+	// 描画処理
+	fullscreenQuad_->Blit(immediateContext,
+		srvs,
+		0, _countof(srvs));
+
+	//　フレームバッファ停止
+	frameBuffer_->Deactivate(immediateContext);
 }

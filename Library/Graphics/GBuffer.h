@@ -3,7 +3,10 @@
 #include <d3d11.h>
 #include <wrl.h>
 #include <cstdint>
+#include <memory>
 #include "../Math/Vector.h"
+#include "../PostProcess/FrameBuffer.h"
+#include "../2D/Sprite.h"
 
 static constexpr UINT MAX_GBUFFER_COUNT = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
@@ -31,11 +34,13 @@ public:
 
 	void Activate(ID3D11DeviceContext* immediateContext);
 
-	void ClearAndActive(ID3D11DeviceContext* immediateContext,
+	void ClearAndActivate(ID3D11DeviceContext* immediateContext,
 		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 1.0f),
 		const float& depth = 1.0f);
 
 	void Deactivate(ID3D11DeviceContext* immediateContext);
+
+	void DrawGui();
 
 #pragma region アクセサ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetRenderTargetSRV(UINT index) {
@@ -44,7 +49,14 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthStencilSRV() {
 		return depthStencilSRV;
 	}
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() {
+		return frameBuffer_->GetColorSRV();
+	}
 #pragma endregion
+
+private:
+	void CreateSRV(ID3D11DeviceContext* immediateContext);
 
 private:
 	const UINT bufferCount;
@@ -58,4 +70,10 @@ private:
 	D3D11_VIEWPORT cachedViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};
 	ID3D11RenderTargetView* cachedRTVs[MAX_GBUFFER_COUNT]{};
 	ID3D11DepthStencilView* cachedDSV{};
+
+	Vector2 textureSize_{};
+	std::unique_ptr<FrameBuffer> frameBuffer_;
+	std::unique_ptr<Sprite> fullscreenQuad_;
+
+	bool drawGui_ = false;
 };

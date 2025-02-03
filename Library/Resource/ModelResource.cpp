@@ -193,8 +193,8 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
         aMaterial->Get(AI_MATKEY_NAME, aMaterialName);
         material.name = aMaterialName.C_Str();
 
-        // ディフューズ色
         aiColor3D aColor;
+        // ディフューズ色
         if (AI_SUCCESS == aMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aColor))
         {
             material.colors["Diffuse"] = AssimpHelper::ToFloat4(aColor);

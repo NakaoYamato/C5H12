@@ -78,7 +78,7 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // GBufferに書き込み
     GBuffer* gBuffer = graphics.GetGBuffer();
-    gBuffer->ClearAndActive(dc);
+    gBuffer->ClearAndActivate(dc);
     {
         // モデルの描画
         ModelRenderer::RenderOpaque(rc);
@@ -93,24 +93,7 @@ void Scene::Render()
     gBuffer->Deactivate(dc);
     // GBufferに書き込み終了
     //--------------------------------------------------------------------------------------
-
-    // GBufferのデータを書き出し
-    {
-        ID3D11ShaderResourceView* srvs[]
-        {
-            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DiffuseColorSRV)).Get(),
-            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::AmbientColorSRV)).Get(),
-            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::SpecularColorSRV)).Get(),
-            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldPositionSRV)).Get(),
-            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldNormalSRV)).Get(),
-            gBuffer->GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DepthSRV)).Get(),
-        };
-        graphics.Blit(
-            srvs,
-            0, _countof(srvs),
-            FullscreenQuadPS::DeferredRenderingPS);
-    }
-    return;
+    
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
@@ -136,7 +119,7 @@ void Scene::Render()
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
         ID3D11ShaderResourceView* srvs[]
         {
-            gBuffer->GetRenderTargetSRV(0).Get(), // color_map
+            gBuffer->GetColorSRV().Get(), // color_map
             gBuffer->GetDepthStencilSRV().Get(), // depth_map
             cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
         };

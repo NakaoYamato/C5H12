@@ -243,6 +243,9 @@ void Framework::Render(float elapsedTime)
         // カスケードシャドウマップのGUI
         Graphics::Instance().GetCascadedShadowMap()->DrawGui();
 
+        // GBufferGUI
+        Graphics::Instance().GetGBuffer()->DrawGui();
+
         // デバッグのGui描画
         Debug::DrawGui();
     }

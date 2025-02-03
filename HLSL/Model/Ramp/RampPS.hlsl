@@ -29,7 +29,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     // ノーマルテクスチャ法線をワールドへ変換
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     
-    float3 ambient = ambient_color.rgb * Ka.rgb;
+    float3 ambient = world_ambient.rgb * Ka.rgb;
     
     float3 directionalDiffuse = CalcRampShading(rampMap, samplerStates[ANISOTROPIC],
     N, L, directional_light_color.rgb, Kd.rgb);

@@ -6,7 +6,7 @@
 // 光源定数バッファ
 cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
 {
-    float4 ambient_color;
+    float4 world_ambient;
     float4 directional_light_direction;
     float4 directional_light_color;
     PointLight pointLights[8];
@@ -60,11 +60,12 @@ PS_OUT main(VsOut pin)
         pointSpecular += CalcPhongSpecular(worldNormal, LP, E, pointLights[i].color.rgb, specularColor.rgb) * attenuation;
     }
     
-    float4 color = ambientColor;
-    color.rgb += (diffuseColor.rgb * (directionalDiffuse + pointDiffuse));
+    float4 color = float4(0.0f, 0.0f, 0.0f, diffuseColor.a);
+    color.rgb += diffuseColor.rgb * saturate(world_ambient.rgb + ambientColor.rgb + directionalDiffuse + pointDiffuse);
     color.rgb += directionalSpecular + pointSpecular;
     // リムライト処理
-    color.rgb += CalcRimLight(worldNormal, E, L, directional_light_color.rgb);
+    // TODO : RimPower
+    //color.rgb += CalcRimLight(worldNormal, E, L, directional_light_color.rgb);
     
     PS_OUT pout = (PS_OUT) 0;
     pout.color = color;

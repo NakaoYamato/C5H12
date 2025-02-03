@@ -32,7 +32,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
     
     // TODO : DiffuseColor alpha 
-    float3 ambient = ambient_color.rgb * Ka.rgb;
+    float3 ambient = world_ambient.rgb * Ka.rgb;
     
     // フォンシェーディング用変数
     float3 E = normalize(pin.world_position.xyz - camera_position.xyz);

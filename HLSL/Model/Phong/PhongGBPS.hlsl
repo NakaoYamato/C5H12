@@ -16,7 +16,7 @@ Texture2D environmentMap : register(t10);
 
 PS_GB_OUT main(VS_OUT pin)
 {
-    float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * pin.materialColor;
+    float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Kd * pin.materialColor;
     // ƒfƒUƒŠƒ“ƒO
     {
         static const int dither_pattern[16] =

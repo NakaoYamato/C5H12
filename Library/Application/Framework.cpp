@@ -292,9 +292,9 @@ void Framework::CalcFrameStatus()
         outs << fps_ << "/" << "FrameTime:" << 1000.0f / fps_ << "(ms)";
         SetWindowTextA(hwnd_, outs.str().c_str());
 #else
-        SetWindowTextW(hwnd, L"タイトル");
-        //outs << fps << "/" << "FrameTime:" << 1000.0f / fps << "(ms)";
-        //SetWindowTextA(hwnd, outs.str().c_str());
+        //SetWindowTextW(hwnd_, L"タイトル");
+        outs << fps_ << "/" << "FrameTime:" << 1000.0f / fps_ << "(ms)";
+        SetWindowTextA(hwnd_, outs.str().c_str());
 #endif
 
         // 1秒が過ぎたフラグをオン

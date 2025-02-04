@@ -28,12 +28,13 @@ struct PS_OUT
 PS_OUT main(VsOut pin)
 {
     float4 diffuseColor     = textureMaps[DIFFUSE_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
-    float4 ambientColor     = textureMaps[AMBIENT_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
-    float4 specularColor    = textureMaps[SPECULAR_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
+    //float4 ambientColor     = textureMaps[AMBIENT_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
+    float4 colorFactor      = textureMaps[COLOR_FACTOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
     float3 worldPosition    = textureMaps[WORLD_POSITION_TEXTURE].Sample(point_sampler_state, pin.texcoord).xyz;
     float3 worldNormal      = textureMaps[WORLD_NORMAL_TEXTURE].Sample(point_sampler_state, pin.texcoord).xyz;
     float  depth            = textureMaps[DEPTH_TEXTURE].Sample(point_sampler_state, pin.texcoord).x;
     
+    float4 specularColor = float4(colorFactor.x, colorFactor.x, colorFactor.x, 1.0f);
     //{
     //    PS_OUT pout = (PS_OUT) 0;
     //    pout.color = diffuseColor;
@@ -67,7 +68,7 @@ PS_OUT main(VsOut pin)
     }
     
     float4 color = float4(0.0f, 0.0f, 0.0f, diffuseColor.a);
-    color.rgb += diffuseColor.rgb * saturate(world_ambient.rgb + ambientColor.rgb + directionalDiffuse + pointDiffuse);
+    color.rgb += diffuseColor.rgb * saturate(world_ambient.rgb /*+ ambientColor.rgb*/ + directionalDiffuse + pointDiffuse);
     color.rgb += directionalSpecular + pointSpecular;
     // ÉäÉÄÉâÉCÉgèàóù
     // TODO : RimPower

@@ -58,8 +58,6 @@ void SceneDebug::Initialize()
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);
         player->GetTransform().SetLengthScale(0.01f);
-        //auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/HPmaid1.fbx");
-        //auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/Test/Test.fbx");
         auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/HPmaidEyeBone.fbx");
         auto animator = player->AddComponent<Animator>(modelCont->GetModel());
     }

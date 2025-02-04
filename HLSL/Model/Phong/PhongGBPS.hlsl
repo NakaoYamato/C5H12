@@ -32,7 +32,6 @@ PS_GB_OUT main(VS_OUT pin)
         clip(diffuseColor.a - dither);
     }
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
-    float4 ambientColor = Ka;
     float3x3 mat =
     {
         normalize(pin.world_tangent.xyz),
@@ -43,12 +42,11 @@ PS_GB_OUT main(VS_OUT pin)
     // ノーマルテクスチャ法線をワールドへ変換
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     
-    PS_GB_OUT pout = (PS_GB_OUT) 0;
-    pout.diffuseColor = diffuseColor;
-    pout.ambientColor = ambientColor;
-    pout.specularColor = specularColor;
-    pout.worldPosition = pin.world_position;
-    pout.worldNormal = float4(N, 1.0f);
+    //PS_GB_OUT pout = (PS_GB_OUT) 0;
+    //pout.diffuseColor = diffuseColor;
+    //pout.specularColor = specularColor;
+    //pout.worldPosition = pin.world_position;
+    //pout.worldNormal = float4(N, 1.0f);
     
-    return pout;
+    return CreateOutputData(diffuseColor, specularColor.x, pin.world_position, float4(N, 1.0f));
 }

@@ -16,6 +16,6 @@ struct PS_GB_OUT
 #define SPECULAR_COLOR_TEXTURE  2
 #define WORLD_POSITION_TEXTURE  3
 #define WORLD_NORMAL_TEXTURE    4
-//#define DEPTH_TEXTURE           5
+#define DEPTH_TEXTURE           5
 
-#define TEXTURE_MAX             5
+#define TEXTURE_MAX             6

@@ -197,9 +197,9 @@ void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 	{
 		tempSRVs.push_back(GetRenderTargetSRV(i).Get());
 	}
-	//tempSRVs.push_back(depthStencilSRV.Get());
+	tempSRVs.push_back(depthStencilSRV.Get());
 	// •`‰æˆ—
 	fullscreenQuad_->Blit(immediateContext,
 		tempSRVs.data(),
-		0, bufferCount);
+		0, bufferCount + 1);
 }

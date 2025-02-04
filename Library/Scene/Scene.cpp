@@ -153,7 +153,7 @@ void Scene::Render()
         ID3D11ShaderResourceView* srvs[]
         {
             renderFrame->GetColorSRV().Get(), // color_map
-            gBuffer->GetDepthSRV().Get(), // depth_map
+            renderFrame->GetDepthSRV().Get(), // depth_map
             cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
         };
         // cascadedShadowMapの定数バッファ更新

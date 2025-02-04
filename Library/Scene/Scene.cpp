@@ -78,12 +78,44 @@ void Scene::Render()
     ActorManager::Render(rc);
 
     //--------------------------------------------------------------------------------------
-    // GBufferに書き込み
+    // GBuffer生成
     GBuffer* gBuffer = graphics.GetGBuffer();
     gBuffer->ClearAndActivate(dc);
     {
         // モデルの描画
         ModelRenderer::Render(rc);
+    }
+    gBuffer->Deactivate(dc);
+    // GBuffer生成終了
+    //--------------------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------------------
+    // フレームバッファ0番に空、GBuffer、その他レンダラーを描画
+    FrameBuffer* renderFrame = graphics.GetFrameBuffer(0);
+    renderFrame->ClearAndActivate(dc, Vector4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
+    {
+        // 空の描画
+        if (skyMap_)
+        {
+            // ブレンドステートをアルファブレンドにする
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+            // 深度テストOFF
+            dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 1);
+            // カリングを行わない
+            dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+            skyMap_->Blit(rc);
+        }
+
+        // GBufferのデータを書き出し
+        {
+            // レンダーステート設定
+            dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+            dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+
+            gBuffer->Blit(dc);
+        }
 
         // シェイプ描画
         ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
@@ -91,36 +123,9 @@ void Scene::Render()
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
     }
-    gBuffer->Deactivate(dc);
-    // GBufferに書き込み終了
+    renderFrame->Deactivate(dc);
+    // フレームバッファ0番の処理終了
     //--------------------------------------------------------------------------------------
-    
-    {
-        gBuffer->frameBuffer_->ClearAndActivate(dc);
-
-        // 空の描画
-        if (skyMap_)
-            skyMap_->Blit(rc);
-
-        // レンダーステート設定
-        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-
-        // GBufferのデータを書き出し
-        std::vector<ID3D11ShaderResourceView*> tempSRVs;
-        for (UINT i = 0; i < gBuffer->bufferCount; ++i)
-        {
-            tempSRVs.push_back(gBuffer->GetRenderTargetSRV(i).Get());
-        }
-        // 描画処理
-        gBuffer->fullscreenQuad_->Blit(dc,
-            tempSRVs.data(),
-            0, gBuffer->bufferCount);
-
-        //　フレームバッファ停止
-        gBuffer->frameBuffer_->Deactivate(dc);
-    }
 
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
@@ -151,8 +156,8 @@ void Scene::Render()
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
         ID3D11ShaderResourceView* srvs[]
         {
-            gBuffer->GetColorSRV().Get(), // color_map
-            gBuffer->GetDepthStencilSRV().Get(), // depth_map
+            renderFrame->GetColorSRV().Get(), // color_map
+            renderFrame->GetDepthSRV().Get(), // depth_map
             cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
         };
         // cascadedShadowMapの定数バッファ更新

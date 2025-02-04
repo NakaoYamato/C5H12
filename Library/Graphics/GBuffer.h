@@ -29,18 +29,21 @@ public:
 	virtual ~GBuffer();
 
 	void Clear(ID3D11DeviceContext* immediateContext,
-		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 1.0f),
+		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 0.0f),
 		const float& depth = 1.0f) const;
 
 	void Activate(ID3D11DeviceContext* immediateContext);
 
 	void ClearAndActivate(ID3D11DeviceContext* immediateContext,
-		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 1.0f),
+		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 0.0f),
 		const float& depth = 1.0f);
 
 	void Deactivate(ID3D11DeviceContext* immediateContext);
 
 	void DrawGui();
+
+	// GBufferのデータを書き出し
+	void Blit(ID3D11DeviceContext* immediateContext);
 
 #pragma region アクセサ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetRenderTargetSRV(UINT index) {
@@ -58,8 +61,6 @@ public:
 	std::unique_ptr<FrameBuffer> frameBuffer_;
 	std::unique_ptr<Sprite> fullscreenQuad_;
 	const UINT bufferCount;
-private:
-	void CreateSRV(ID3D11DeviceContext* immediateContext);
 private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvs[MAX_GBUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> renderTargetSRVs[MAX_GBUFFER_COUNT];

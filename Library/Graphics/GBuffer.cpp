@@ -155,8 +155,6 @@ void GBuffer::Deactivate(ID3D11DeviceContext* immediateContext)
 	{
 		cachedDSV->Release();
 	}
-
-	//CreateSRV(immediateContext);
 }
 
 void GBuffer::DrawGui()
@@ -198,12 +196,9 @@ void GBuffer::DrawGui()
 #endif
 }
 
-void GBuffer::CreateSRV(ID3D11DeviceContext* immediateContext)
+// GBufferのデータを書き出し
+void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 {
-	// フレームバッファ開始
-	frameBuffer_->ClearAndActivate(immediateContext);
-
-	// GBufferのデータを書き出し
 	std::vector<ID3D11ShaderResourceView*> tempSRVs;
 	for (UINT i = 0; i < bufferCount; ++i)
 	{
@@ -213,7 +208,4 @@ void GBuffer::CreateSRV(ID3D11DeviceContext* immediateContext)
 	fullscreenQuad_->Blit(immediateContext,
 		tempSRVs.data(),
 		0, bufferCount);
-
-	//　フレームバッファ停止
-	frameBuffer_->Deactivate(immediateContext);
 }

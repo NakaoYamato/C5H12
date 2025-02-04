@@ -36,13 +36,6 @@ void SkyMap::Blit(const RenderContext& rc)
 	Microsoft::WRL::ComPtr<ID3D11Buffer> cacheBuffer;
 	dc->PSGetConstantBuffers(CBIndex, 1, cacheBuffer.ReleaseAndGetAddressOf());
 
-	// ブレンドステートをアルファブレンドにする
-	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	// 深度テストOFF
-	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-	// カリングを行わない
-	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-
 	dc->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	dc->IASetInputLayout(NULL);

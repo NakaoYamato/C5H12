@@ -95,6 +95,33 @@ void Scene::Render()
     // GBufferに書き込み終了
     //--------------------------------------------------------------------------------------
     
+    {
+        gBuffer->frameBuffer_->ClearAndActivate(dc);
+
+        // 空の描画
+        if (skyMap_)
+            skyMap_->Blit(rc);
+
+        // レンダーステート設定
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+
+        // GBufferのデータを書き出し
+        std::vector<ID3D11ShaderResourceView*> tempSRVs;
+        for (UINT i = 0; i < gBuffer->bufferCount; ++i)
+        {
+            tempSRVs.push_back(gBuffer->GetRenderTargetSRV(i).Get());
+        }
+        // 描画処理
+        gBuffer->fullscreenQuad_->Blit(dc,
+            tempSRVs.data(),
+            0, gBuffer->bufferCount);
+
+        //　フレームバッファ停止
+        gBuffer->frameBuffer_->Deactivate(dc);
+    }
+
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
@@ -113,7 +140,7 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
     FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
-    modelAndShadowRenderFrame->ClearAndActivate(dc);
+    modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4(0.0f,0.0f,0.0f,0.0f), 0.0f);
     {
         // 空の描画
         if (skyMap_)

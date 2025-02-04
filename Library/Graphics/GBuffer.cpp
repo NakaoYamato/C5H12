@@ -107,7 +107,12 @@ void GBuffer::Clear(ID3D11DeviceContext* immediateContext, const Vector4& color,
 	{
 		immediateContext->ClearRenderTargetView(rtvs[buffer_index].Get(), c);
 	}
-	immediateContext->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH, depth, 0);
+	immediateContext->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, 0);
+
+	c[0] = c[1] = c[2] = c[3] = 1.0f;
+	//	深度値を復元するため、0(最近面)ではなく1(最遠面)でクリアしておく
+	immediateContext->ClearRenderTargetView(rtvs[GBufferSRVType::DepthSRV].Get(), c);
+
 }
 
 void GBuffer::Activate(ID3D11DeviceContext* immediateContext)
@@ -151,7 +156,7 @@ void GBuffer::Deactivate(ID3D11DeviceContext* immediateContext)
 		cachedDSV->Release();
 	}
 
-	CreateSRV(immediateContext);
+	//CreateSRV(immediateContext);
 }
 
 void GBuffer::DrawGui()
@@ -199,20 +204,15 @@ void GBuffer::CreateSRV(ID3D11DeviceContext* immediateContext)
 	frameBuffer_->ClearAndActivate(immediateContext);
 
 	// GBufferのデータを書き出し
-	ID3D11ShaderResourceView* srvs[]
+	std::vector<ID3D11ShaderResourceView*> tempSRVs;
+	for (UINT i = 0; i < bufferCount; ++i)
 	{
-		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DiffuseColorSRV)).Get(),
-		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::AmbientColorSRV)).Get(),
-		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::SpecularColorSRV)).Get(),
-		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldPositionSRV)).Get(),
-		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::WorldNormalSRV)).Get(),
-		GetRenderTargetSRV(static_cast<UINT>(GBufferSRVType::DepthSRV)).Get(),
-	};
-
+		tempSRVs.push_back(GetRenderTargetSRV(i).Get());
+	}
 	// 描画処理
 	fullscreenQuad_->Blit(immediateContext,
-		srvs,
-		0, _countof(srvs));
+		tempSRVs.data(),
+		0, bufferCount);
 
 	//　フレームバッファ停止
 	frameBuffer_->Deactivate(immediateContext);

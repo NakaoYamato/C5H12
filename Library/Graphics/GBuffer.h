@@ -55,11 +55,12 @@ public:
 	}
 #pragma endregion
 
+	std::unique_ptr<FrameBuffer> frameBuffer_;
+	std::unique_ptr<Sprite> fullscreenQuad_;
+	const UINT bufferCount;
 private:
 	void CreateSRV(ID3D11DeviceContext* immediateContext);
-
 private:
-	const UINT bufferCount;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvs[MAX_GBUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> renderTargetSRVs[MAX_GBUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv;
@@ -72,8 +73,6 @@ private:
 	ID3D11DepthStencilView* cachedDSV{};
 
 	Vector2 textureSize_{};
-	std::unique_ptr<FrameBuffer> frameBuffer_;
-	std::unique_ptr<Sprite> fullscreenQuad_;
 
 	bool drawGui_ = false;
 };

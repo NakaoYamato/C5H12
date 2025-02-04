@@ -193,9 +193,11 @@
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
     <ClCompile Include="Library\PostProcess\Bloom\Bloom.cpp" />
+    <ClCompile Include="Library\PostProcess\CameraPass\CameraPass.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
     <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
     <ClCompile Include="Library\PostProcess\ColorFilter\ColorFilter.cpp" />
+    <ClCompile Include="Library\PostProcess\FinalPass\FinalPass.cpp" />
     <ClCompile Include="Library\PostProcess\FrameBuffer.cpp" />
     <ClCompile Include="Library\PostProcess\GaussianFilter\GaussianFilter.cpp" />
     <ClCompile Include="Library\PostProcess\PostProcessBase.cpp" />
@@ -274,9 +276,11 @@
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
     <ClInclude Include="Library\PostProcess\Bloom\Bloom.h" />
+    <ClInclude Include="Library\PostProcess\CameraPass\CameraPass.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
     <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />
     <ClInclude Include="Library\PostProcess\ColorFilter\ColorFilter.h" />
+    <ClInclude Include="Library\PostProcess\FinalPass\FinalPass.h" />
     <ClInclude Include="Library\PostProcess\FrameBuffer.h" />
     <ClInclude Include="Library\PostProcess\GaussianFilter\GaussianFilter.h" />
     <ClInclude Include="Library\PostProcess\PostProcessBase.h" />
@@ -312,9 +316,8 @@
     <None Include="HLSL\Model\Phong\Phong.hlsli" />
     <None Include="HLSL\Model\Skinning.hlsli" />
     <None Include="HLSL\PostProcess\Bloom\Bloom.hlsli" />
-    <None Include="HLSL\PostProcess\ColorFilter\ColorFilter.hlsli" />
-    <None Include="HLSL\PostProcess\ColorFilter\FilterFunctions.hlsli" />
     <None Include="HLSL\PostProcess\GaussianFilter\GaussianFilter.hlsli" />
+    <None Include="HLSL\PostProcess\FinalPass\FilterFunctions.hlsli" />
     <None Include="HLSL\PrimitiveRenderer\PrimitiveRenderer.hlsli" />
     <None Include="HLSL\Primitive\Primitive.hlsli" />
     <None Include="HLSL\Scene\SceneConstantBuffer.hlsli" />
@@ -413,8 +416,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\ColorFilter\ColorFilterPS.hlsl">
+    <FxCompile Include="HLSL\PostProcess\FinalPass\FinalPassPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\GaussianFilter\GaussianFilterPS.hlsl">
@@ -429,14 +434,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Tonemapping\TonemappingPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Vignette\VignettePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PrimitiveRenderer\PrimitiveRendererPS.hlsl">

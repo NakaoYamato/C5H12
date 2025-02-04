@@ -13,14 +13,13 @@
 /// </summary>
 enum class PostProcessType
 {
-	ColorFilterPP,
 	GaussianFilterPP,
-	TonemappingPP,
 	RadialBlurPP,
-	VignettePP,
 	ChromaticAberrationPP,
 	BloomPP,
 	RobertsCrossPP,
+
+	FinalPassPP,
 
 	MAX_PostProcessType
 };

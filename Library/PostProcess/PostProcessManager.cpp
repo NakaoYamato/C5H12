@@ -14,16 +14,10 @@
 #include "../PostProcess/ChromaticAberration/ChromaticAberration.h"
 #include "../PostProcess/RobertsCross/RobertsCross.h"
 
+#include "FinalPass/FinalPass.h"
+
 void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32_t height)
 {
-	{
-		// カラーフィルター
-		postProcesses_[static_cast<int>(PostProcessType::ColorFilterPP)].first =
-			std::make_unique<ColorFilter>(device,
-				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::ColorFilterPP)].second;
-		name = TO_STRING_U8(ColorFilter);
-	}
 	{
 		// ガウスブラー(ぼかし)
 		postProcesses_[static_cast<int>(PostProcessType::GaussianFilterPP)].first =
@@ -41,28 +35,12 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 		name = TO_STRING_U8(Bloom);
 	}
 	{
-		// トーンマッピング
-		postProcesses_[static_cast<int>(PostProcessType::TonemappingPP)].first =
-			std::make_unique<Tonemapping>(device,
-				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::TonemappingPP)].second;
-		name = TO_STRING_U8(Tonemapping);
-	}
-	{
 		// ラジアルブラー
 		postProcesses_[static_cast<int>(PostProcessType::RadialBlurPP)].first =
 			std::make_unique<RadialBlur>(device,
 				width, height);
 		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::RadialBlurPP)].second;
 		name = TO_STRING_U8(RadialBlur);
-	}
-	{
-		// ヴィネット
-		postProcesses_[static_cast<int>(PostProcessType::VignettePP)].first =
-			std::make_unique<Vignette>(device,
-				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::VignettePP)].second;
-		name = TO_STRING_U8(Vignette);
 	}
 	{
 		// 色収差
@@ -79,6 +57,14 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 				width, height);
 		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
 		name = TO_STRING_U8(RobertsCross);
+	}
+	{
+		// 最終パス
+		postProcesses_[static_cast<int>(PostProcessType::FinalPassPP)].first =
+			std::make_unique<FinalPass>(device,
+				width, height);
+		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::FinalPassPP)].second;
+		name = TO_STRING_U8(FinalPass);
 	}
 
 	// ブルーム用
@@ -141,17 +127,12 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 	dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::PointWrap));
-	// ヴィネット
-	PostProcessBase* vignettePP = GetPostProcess(PostProcessType::VignettePP);
-	vignettePP->Render(dc, bloomRenderFrame_->GetColorSRV().GetAddressOf(), 0, 1);
-	// カラーフィルター
-	PostProcessBase* colorFilterPP = GetPostProcess(PostProcessType::ColorFilterPP);
-	colorFilterPP->Render(dc, vignettePP->GetColorSRV().GetAddressOf(), 0, 1);
-	// トーンマッピング
-	PostProcessBase* tonemappingPP = GetPostProcess(PostProcessType::TonemappingPP);
-	tonemappingPP->Render(dc, colorFilterPP->GetColorSRV().GetAddressOf(), 0, 1);
 
-	appliedEffectSRV_ = tonemappingPP->GetColorSRV();
+	// 最終パス
+	PostProcessBase* finalPassPP = GetPostProcess(PostProcessType::FinalPassPP);
+	finalPassPP->Render(dc, bloomRenderFrame_->GetColorSRV().GetAddressOf(), 0, 1);
+
+	appliedEffectSRV_ = finalPassPP->GetColorSRV();
 }
 
 void PostProcessManager::DrawGui()

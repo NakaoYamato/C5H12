@@ -45,24 +45,24 @@ public:
 
 #pragma region アクセサ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetRenderTargetSRV(UINT index) {
-		return renderTargetSRVs[index];
+		return renderTargetSRVs_[index];
 	}
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() {
-		return depthStencilSRV;
+		return depthStencilSRV_;
 	}
 #pragma endregion
 private:
-	const UINT bufferCount;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvs[MAX_GBUFFER_COUNT];
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> renderTargetSRVs[MAX_GBUFFER_COUNT];
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthStencilSRV;
-	D3D11_VIEWPORT viewports[MAX_GBUFFER_COUNT];
+	const UINT bufferCount_;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvs_[MAX_GBUFFER_COUNT];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> renderTargetSRVs_[MAX_GBUFFER_COUNT];
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv_;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> depthStencilSRV_;
+	D3D11_VIEWPORT viewports_[MAX_GBUFFER_COUNT];
 
-	UINT viewportCount = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
-	D3D11_VIEWPORT cachedViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};
-	ID3D11RenderTargetView* cachedRTVs[MAX_GBUFFER_COUNT]{};
-	ID3D11DepthStencilView* cachedDSV{};
+	UINT viewportCount_ = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
+	D3D11_VIEWPORT cachedViewports_[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};
+	ID3D11RenderTargetView* cachedRTVs_[MAX_GBUFFER_COUNT]{};
+	ID3D11DepthStencilView* cachedDSV_{};
 
 	Vector2 textureSize_{};
 	std::unique_ptr<Sprite> fullscreenQuad_;

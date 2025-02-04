@@ -193,10 +193,8 @@
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
     <ClCompile Include="Library\PostProcess\Bloom\Bloom.cpp" />
-    <ClCompile Include="Library\PostProcess\CameraPass\CameraPass.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
     <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
-    <ClCompile Include="Library\PostProcess\ColorFilter\ColorFilter.cpp" />
     <ClCompile Include="Library\PostProcess\FinalPass\FinalPass.cpp" />
     <ClCompile Include="Library\PostProcess\FrameBuffer.cpp" />
     <ClCompile Include="Library\PostProcess\GaussianFilter\GaussianFilter.cpp" />
@@ -204,8 +202,6 @@
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
     <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
     <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp" />
-    <ClCompile Include="Library\PostProcess\Tonemapping\Tonemapping.cpp" />
-    <ClCompile Include="Library\PostProcess\Vignette\Vignette.cpp" />
     <ClCompile Include="Library\Renderer\ModelRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
     <ClCompile Include="Library\Renderer\ShapeRenderer.cpp" />
@@ -276,10 +272,8 @@
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
     <ClInclude Include="Library\PostProcess\Bloom\Bloom.h" />
-    <ClInclude Include="Library\PostProcess\CameraPass\CameraPass.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
     <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />
-    <ClInclude Include="Library\PostProcess\ColorFilter\ColorFilter.h" />
     <ClInclude Include="Library\PostProcess\FinalPass\FinalPass.h" />
     <ClInclude Include="Library\PostProcess\FrameBuffer.h" />
     <ClInclude Include="Library\PostProcess\GaussianFilter\GaussianFilter.h" />
@@ -287,8 +281,6 @@
     <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
     <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
     <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h" />
-    <ClInclude Include="Library\PostProcess\Tonemapping\Tonemapping.h" />
-    <ClInclude Include="Library\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Library\Renderer\ModelRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
     <ClInclude Include="Library\Renderer\ShapeRenderer.h" />

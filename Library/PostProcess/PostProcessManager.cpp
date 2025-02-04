@@ -5,12 +5,9 @@
 #include "../Converter/ToString.h"
 #include "../ResourceManager/GpuResourceManager.h"
 
-#include "../PostProcess/ColorFilter/ColorFilter.h"
 #include "../PostProcess/Bloom/Bloom.h"
 #include "../PostProcess/GaussianFilter/GaussianFilter.h"
-#include "../PostProcess/Tonemapping/Tonemapping.h"
 #include "../PostProcess/RadialBlur/RadialBlur.h"
-#include "../PostProcess/Vignette/Vignette.h"
 #include "../PostProcess/ChromaticAberration/ChromaticAberration.h"
 #include "../PostProcess/RobertsCross/RobertsCross.h"
 

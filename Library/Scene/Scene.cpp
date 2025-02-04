@@ -97,8 +97,8 @@ void Scene::Render()
         // 空の描画
         if (skyMap_)
         {
-            // ブレンドステートをアルファブレンドにする
-            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+            // ブレンドなし
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
             // 深度テストOFF
             dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 1);
             // カリングを行わない
@@ -147,17 +147,13 @@ void Scene::Render()
     FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
     modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4(0.0f,0.0f,0.0f,0.0f), 0.0f);
     {
-        // 空の描画
-        if (skyMap_)
-            skyMap_->Blit(rc);
-
         // 影の描画
         // cascadedShadowMapにある深度情報から
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
         ID3D11ShaderResourceView* srvs[]
         {
             renderFrame->GetColorSRV().Get(), // color_map
-            renderFrame->GetDepthSRV().Get(), // depth_map
+            gBuffer->GetDepthSRV().Get(), // depth_map
             cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
         };
         // cascadedShadowMapの定数バッファ更新

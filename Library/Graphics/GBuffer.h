@@ -17,7 +17,6 @@ enum GBufferSRVType
 	SpecularColorSRV,
 	WorldPositionSRV,
 	WorldNormalSRV,
-	DepthSRV,
 
 	GBufferSRVTypeMAX,
 };
@@ -49,7 +48,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetRenderTargetSRV(UINT index) {
 		return renderTargetSRVs[index];
 	}
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthStencilSRV() {
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() {
 		return depthStencilSRV;
 	}
 #pragma endregion

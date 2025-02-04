@@ -107,11 +107,6 @@ void GBuffer::Clear(ID3D11DeviceContext* immediateContext, const Vector4& color,
 		immediateContext->ClearRenderTargetView(rtvs[buffer_index].Get(), c);
 	}
 	immediateContext->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, 0);
-
-	c[0] = c[1] = c[2] = c[3] = 1.0f;
-	//	深度値を復元するため、0(最近面)ではなく1(最遠面)でクリアしておく
-	immediateContext->ClearRenderTargetView(rtvs[GBufferSRVType::DepthSRV].Get(), c);
-
 }
 
 void GBuffer::Activate(ID3D11DeviceContext* immediateContext)
@@ -185,6 +180,7 @@ void GBuffer::DrawGui()
 					{ size.x ,size.y });
 			}
 
+			ImGui::Text(u8"Depth");
 			ImGui::Image(depthStencilSRV.Get(),
 				{ size.x ,size.y });
 		}
@@ -201,6 +197,7 @@ void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 	{
 		tempSRVs.push_back(GetRenderTargetSRV(i).Get());
 	}
+	//tempSRVs.push_back(depthStencilSRV.Get());
 	// 描画処理
 	fullscreenQuad_->Blit(immediateContext,
 		tempSRVs.data(),

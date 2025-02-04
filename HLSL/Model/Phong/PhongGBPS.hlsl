@@ -49,8 +49,6 @@ PS_GB_OUT main(VS_OUT pin)
     pout.specularColor = specularColor;
     pout.worldPosition = pin.world_position;
     pout.worldNormal = float4(N, 1.0f);
-    float4 position = mul(float4(pin.world_position.xyz, 1.0f), view_projection);
-    pout.depth = position.z / position.w;
     
     return pout;
 }

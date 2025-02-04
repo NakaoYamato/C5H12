@@ -18,22 +18,27 @@ Texture2D textureMaps[TEXTURE_MAX] : register(t0);
 SamplerState point_sampler_state : register(s0);
 SamplerState linear_sampler_state : register(s2);
 
-//  gbufferに記録された深度値を出力する
-struct PS_OUT
-{
-    float4 color : SV_TARGET;
-    float depth : SV_DEPTH;
-};
+////  gbufferに記録された深度値を出力する
+//struct PS_OUT
+//{
+//    float4 color : SV_TARGET;
+//    float depth : SV_DEPTH;
+//};
 
-PS_OUT main(VsOut pin)
+float4 main(VsOut pin) : SV_TARGET
 {
     float4 diffuseColor     = textureMaps[DIFFUSE_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
     float4 ambientColor     = textureMaps[AMBIENT_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
     float4 specularColor    = textureMaps[SPECULAR_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
     float3 worldPosition    = textureMaps[WORLD_POSITION_TEXTURE].Sample(point_sampler_state, pin.texcoord).xyz;
     float3 worldNormal      = textureMaps[WORLD_NORMAL_TEXTURE].Sample(point_sampler_state, pin.texcoord).xyz;
-    float  depth            = textureMaps[DEPTH_TEXTURE].Sample(point_sampler_state, pin.texcoord).x;
     
+    //{
+    //    PS_OUT pout = (PS_OUT) 0;
+    //    pout.color = diffuseColor;
+    //    pout.depth = depth;
+    //    return pout;
+    //}
     // フォンシェーディング用変数
     float3 E = normalize(worldPosition.xyz - camera_position.xyz);
     float3 L = normalize(directional_light_direction.xyz);
@@ -67,9 +72,10 @@ PS_OUT main(VsOut pin)
     // TODO : RimPower
     //color.rgb += CalcRimLight(worldNormal, E, L, directional_light_color.rgb);
     
-    PS_OUT pout = (PS_OUT) 0;
-    pout.color = color;
-    pout.depth = depth;
-    return pout;
+    //PS_OUT pout = (PS_OUT) 0;
+    //pout.color = color;
+    //pout.depth = depth;
+    //return pout;
+    return color;
 
 }

@@ -48,4 +48,8 @@ namespace ShapeRenderer
 		ID3D11DeviceContext* dc,
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& projection);
+
+	// TODO:
+	// ‰e•`‰æ
+
 }

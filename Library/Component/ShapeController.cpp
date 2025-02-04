@@ -14,6 +14,11 @@ void ShapeController::Render(const RenderContext& rc)
 	}
 }
 
+// ‰e•`‰æ
+void ShapeController::CastShadow(const RenderContext& rc)
+{
+}
+
 void ShapeController::DrawGui()
 {
 	static const char* shapTypeName[] =

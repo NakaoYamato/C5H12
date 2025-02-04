@@ -5,6 +5,7 @@
 
 #include "../HRTrace.h"
 #include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Converter/ToString.h"
 
 GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height, UINT bufferCount) : 
 	bufferCount(bufferCount)
@@ -88,8 +89,6 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height, UINT bufferCount
 
 	textureSize_.x = static_cast<float>(width);
 	textureSize_.y = static_cast<float>(height);
-	frameBuffer_ = std::make_unique<FrameBuffer>(device,
-		width, height);
 	fullscreenQuad_ = std::make_unique<Sprite>(device,
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
@@ -179,16 +178,14 @@ void GBuffer::DrawGui()
 			static float sizeFactor = 0.3f;
 			ImGui::DragFloat("TextureSize", &sizeFactor);
 			Vector2 size = textureSize_ * sizeFactor;
-			for (size_t i = 0; i < static_cast<GBufferSRVType>(GBufferSRVType::GBufferSRVTypeMAX); ++i)
+			for (size_t i = 0; i < static_cast<size_t>(GBufferSRVType::GBufferSRVTypeMAX); ++i)
 			{
+				ImGui::Text(ToString<GBufferSRVType>(i).c_str());
 				ImGui::Image(renderTargetSRVs[i].Get(),
 					{ size.x ,size.y });
 			}
 
 			ImGui::Image(depthStencilSRV.Get(),
-				{ size.x ,size.y });
-
-			ImGui::Image(frameBuffer_->GetColorSRV().Get(),
 				{ size.x ,size.y });
 		}
 		ImGui::End();

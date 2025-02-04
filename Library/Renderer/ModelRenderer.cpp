@@ -297,22 +297,28 @@ namespace ModelRenderer
 		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 		for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 		{
-			// •`‰æƒ^ƒCƒv‚É‰‚¶‚Ä“o˜^
-			switch (renderType)
-			{
-			case ModelRenderType::Dynamic:
-				dynamicBoneDrawInfomap_[shaderId].push_back({ model, &mesh, color });
-				break;
-			case ModelRenderType::Static:
-				staticBoneDrawInfomap_[shaderId].push_back({ model, &mesh, color });
-				break;
-			case ModelRenderType::Instancing:
-				assert(!"Please Call \"DrawInstancing\"");
-				break;
-			default:
-				assert(!"ModelRenderType Overflow");
-				break;
-			}
+			ModelRenderer::DrawMesh(&mesh, model, color, shaderId, renderType);
+		}
+	}
+
+	/// ƒƒbƒVƒ…•`‰æ
+	void DrawMesh(const ModelResource::Mesh* mesh, Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
+	{
+		// •`‰æƒ^ƒCƒv‚É‰‚¶‚Ä“o˜^
+		switch (renderType)
+		{
+		case ModelRenderType::Dynamic:
+			dynamicBoneDrawInfomap_[shaderId].push_back({ model, mesh, color });
+			break;
+		case ModelRenderType::Static:
+			staticBoneDrawInfomap_[shaderId].push_back({ model, mesh, color });
+			break;
+		case ModelRenderType::Instancing:
+			assert(!"Please Call \"DrawInstancing\"");
+			break;
+		default:
+			assert(!"ModelRenderType Overflow");
+			break;
 		}
 	}
 

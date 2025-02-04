@@ -23,6 +23,9 @@ public:
 	// •`‰æˆ—
 	void Render(const RenderContext& rc) override;
 
+	// ‰e•`‰æ
+	void CastShadow(const RenderContext& rc) override;
+
 	// GUI•`‰æ
 	void DrawGui() override;
 

@@ -246,6 +246,7 @@ void CascadedShadowMap::DrawGui()
 
 			ImGui::SliderFloat("shadowColor", &parametricConstants.shadowColor, +0.0f, +1.0f);
 			ImGui::DragFloat("shadowDepthBias", &parametricConstants.shadowDepthBias, 0.00001f, 0.0f, 0.01f, "%.8f");
+			ImGui::DragFloat("shiftVolume", &parametricConstants.shiftVolume);
 			bool flag = parametricConstants.colorizeCascadedLayer != 0.0f ? true : false;
 			ImGui::Checkbox("colorizeCascadedLayer", &flag);
 			parametricConstants.colorizeCascadedLayer = flag ? 1.0f : 0.0f;

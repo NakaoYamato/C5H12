@@ -50,7 +50,7 @@ private:
         float shadowColor{ 0.2f };
         float shadowDepthBias{ 0.0001f };
         float colorizeCascadedLayer{ 0.0f };
-        float pad{};
+        float shiftVolume{1500.0f};
     };
     Microsoft::WRL::ComPtr<ID3D11Buffer> parametricConstantBuffer;
 

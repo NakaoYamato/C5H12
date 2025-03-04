@@ -12,7 +12,7 @@
 #include "../../Library/Component/Light/PointLightController.h"
 
 #include "../../Library/Component/ShapeController.h"
-#include "../../Library/Component/ModelController.h"
+#include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
 //‰Šú‰»
@@ -53,12 +53,12 @@ void SceneDebug::Initialize()
     {
         auto stage = ActorManager::Create("Stage", ActorTag::Stage);
         stage->GetTransform().SetPositionY(-2.0f);
-        auto modelCont = stage->AddComponent<ModelController>("./Data/Model/Stage/Land/Land1.fbx");
+        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land1.fbx");
     }
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);
         player->GetTransform().SetLengthScale(0.01f);
-        auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/HPmaidEyeBone.fbx");
+        auto modelCont = player->AddComponent<ModelRenderer>("./Data/Model/Player/HPmaidEyeBone.fbx");
         auto animator = player->AddComponent<Animator>(modelCont->GetModel());
     }
     {

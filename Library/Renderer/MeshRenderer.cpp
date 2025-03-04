@@ -1,4 +1,4 @@
-#include "ModelRenderer.h"
+#include "MeshRenderer.h"
 
 #include "../ResourceManager/GpuResourceManager.h"
 #include "../../Shader/Phong/PhongShader.h"
@@ -51,21 +51,21 @@ struct AlphaDrawInfo
 	const ModelResource::Mesh* mesh = nullptr;
 	Vector4				color{ 1,1,1,1 };
 	ShaderBase::Parameter* parameter;
-	ShaderId shaderID;
+	std::string shaderID;
 	ModelRenderType renderType;
 	float			distance = 0.0f;
 };
 // インスタンシング描画用
 struct InstancingDrawInfo
 {
-	ShaderId				shaderId{};
+	std::string				shaderId{};
 	using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
 	std::vector<ModelParameter> modelParameters;
-	ShaderBase::Parameter* parameter;
+	ShaderBase::Parameter* parameter = nullptr;
 };
 #pragma endregion
 
-namespace ModelRenderer
+namespace MeshRenderer
 {
 	// 定数バッファのデータ
 	// サイズが大きいので関数内で定義するとスタック警告がでるため静的に確保
@@ -74,13 +74,13 @@ namespace ModelRenderer
 	InstancingModelCB	cbInstancingSkeleton_{};
 
 	// シェーダーの配列
-	using ShaderMap = std::unordered_map<ShaderId, std::unique_ptr<ShaderBase>>;
+	using ShaderMap = std::unordered_map<std::string, std::unique_ptr<ShaderBase>>;
 	ShaderMap deferredShaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 	ShaderMap forwardShaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 	std::unique_ptr<ShaderBase> cascadedSMShader_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
 	// 各モデルタイプのInfo
-	using DrawInfoMap = std::unordered_map<ShaderId, std::vector<DrawInfo>>;
+	using DrawInfoMap = std::unordered_map<std::string, std::vector<DrawInfo>>;
 	using InstancingDrawInfoMap = std::unordered_map<Model*, InstancingDrawInfo>;
 	DrawInfoMap                             dynamicInfomap_;
 	DrawInfoMap                             staticInfomap_;
@@ -265,12 +265,12 @@ namespace ModelRenderer
 					const size_t type = static_cast<int>(ModelRenderType::Dynamic);
 					ShaderMap& shaderMap = deferredShaders_[type];
 
-					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongVS.cso",
 						"./Data/Shader/PhongGBPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+					shaderMap["Ramp"] = std::make_unique<RampShader>(device,
 						"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
@@ -279,12 +279,12 @@ namespace ModelRenderer
 					const size_t type = static_cast<int>(ModelRenderType::Static);
 					ShaderMap& shaderMap = deferredShaders_[type];
 
-					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",
 						"./Data/Shader/PhongGBPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+					shaderMap["Ramp"] = std::make_unique<RampShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
@@ -293,12 +293,12 @@ namespace ModelRenderer
 					const size_t type = static_cast<int>(ModelRenderType::Instancing);
 					ShaderMap& shaderMap = deferredShaders_[type];
 
-					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongInstancedVS.cso",
 						"./Data/Shader/PhongGBPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+					shaderMap["Ramp"] = std::make_unique<RampShader>(device,
 						"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
@@ -311,13 +311,9 @@ namespace ModelRenderer
 					const size_t type = static_cast<int>(ModelRenderType::Dynamic);
 					ShaderMap& shaderMap = forwardShaders_[type];
 
-					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongVS.cso",
 						"./Data/Shader/PhongPS.cso",
-						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
-						"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{
@@ -325,13 +321,9 @@ namespace ModelRenderer
 					const size_t type = static_cast<int>(ModelRenderType::Static);
 					ShaderMap& shaderMap = forwardShaders_[type];
 
-					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",
 						"./Data/Shader/PhongPS.cso",
-						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
-						"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{
@@ -339,13 +331,9 @@ namespace ModelRenderer
 					const size_t type = static_cast<int>(ModelRenderType::Instancing);
 					ShaderMap& shaderMap = forwardShaders_[type];
 
-					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongInstancedVS.cso",
 						"./Data/Shader/PhongPS.cso",
-						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
-						"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 			}
@@ -365,25 +353,12 @@ namespace ModelRenderer
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 		}
 	}
-	void Draw(Model* model, 
-		const Vector4& color,
-		ShaderId shaderId, 
-		ModelRenderType renderType,
-		ShaderBase::Parameter* parameter)
-	{
-		const ModelResource* resource = model->GetResource();
-		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
-		for (const ModelResource::Mesh& mesh : resource->GetMeshes())
-		{
-			ModelRenderer::DrawMesh(&mesh, model, color, shaderId, renderType, parameter);
-		}
-	}
 
 	/// メッシュ描画
-	void DrawMesh(const ModelResource::Mesh* mesh,
+	void Draw(const ModelResource::Mesh* mesh,
 		Model* model,
 		const Vector4& color, 
-		ShaderId shaderId,
+		std::string shaderId,
 		ModelRenderType renderType,
 		ShaderBase::Parameter* parameter)
 	{
@@ -414,7 +389,7 @@ namespace ModelRenderer
 
 	void DrawInstancing(Model* model, 
 		const Vector4& color, 
-		ShaderId shaderId, 
+		std::string shaderId,
 		const DirectX::XMFLOAT4X4& world,
 		ShaderBase::Parameter* parameter)
 	{
@@ -430,9 +405,9 @@ namespace ModelRenderer
 		else
 		{
 			// ない場合は新規で登録
-			//instancingInfoMap_[model].parameter = parameter;
-			//instancingInfoMap_[model].shaderId = shaderId;
-			//instancingInfoMap_[model].modelParameters.push_back(modelParameter);
+			instancingInfoMap_[model].parameter = parameter;
+			instancingInfoMap_[model].shaderId = shaderId;
+			instancingInfoMap_[model].modelParameters.push_back(modelParameter);
 		}
 	}
 
@@ -470,6 +445,7 @@ namespace ModelRenderer
 			for (auto& drawInfomap : dynamicInfomap_)
 			{
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
+				assert(shader/*shadersに含まれないshaderを参照した*/);
 				shader->Begin(rc);
 
 				for (auto& drawInfo : drawInfomap.second)
@@ -494,6 +470,7 @@ namespace ModelRenderer
 			for (auto& drawInfomap : staticInfomap_)
 			{
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
+				assert(shader/*shadersに含まれないshaderを参照した*/);
 				shader->Begin(rc);
 
 				for (auto& drawInfo : drawInfomap.second)
@@ -564,6 +541,7 @@ namespace ModelRenderer
 				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfo.shaderID].get();
+				assert(shader/*shadersに含まれないshaderを参照した*/);
 				shader->Begin(rc);
 
 				// メッシュ描画
@@ -579,6 +557,7 @@ namespace ModelRenderer
 				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfo.shaderID].get();
+				assert(shader/*shadersに含まれないshaderを参照した*/);
 				shader->Begin(rc);
 
 				// メッシュ描画
@@ -712,5 +691,16 @@ namespace ModelRenderer
 
 		// インスタンシングモデルの描画
 		//Helper::RenderInstancing(rc);
+	}
+
+
+	std::vector<const char*> GetShaderNames(ModelRenderType type)
+	{
+		std::vector<const char*> shaderNames;
+		for (auto& [name, shader] : deferredShaders_[static_cast<int>(type)])
+		{
+			shaderNames.push_back(name.c_str());
+		}
+		return shaderNames;
 	}
 }

@@ -7,7 +7,7 @@
 #include "../ResourceManager/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
 //#include "../Effekseer/EffectManager.h"
-#include "../Renderer/ModelRenderer.h"
+#include "../Renderer/MeshRenderer.h"
 #include "../Renderer/PrimitiveRenderer.h"
 #include "../Renderer/ShapeRenderer.h"
 
@@ -153,7 +153,7 @@ bool Framework::Initialize() const
     Graphics::Instance().Initialize(hwnd_, FULLSCREEN);
 
     // ŠeíƒŒƒ“ƒ_ƒ‰[ì¬
-    ModelRenderer::Initialize(Graphics::Instance().GetDevice());
+    MeshRenderer::Initialize(Graphics::Instance().GetDevice());
     PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
     ShapeRenderer::Initialize(Graphics::Instance().GetDevice());
 

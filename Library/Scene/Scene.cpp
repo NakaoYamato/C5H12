@@ -5,7 +5,7 @@
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
-#include "../../Library/Renderer/ModelRenderer.h"
+#include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 #include "../../Library/Renderer/ShapeRenderer.h"
 
@@ -85,7 +85,7 @@ void Scene::Render()
         gBuffer->ClearAndActivate(dc);
         {
             // モデルの描画
-            ModelRenderer::RenderOpaque(rc, true);
+            MeshRenderer::RenderOpaque(rc, true);
         }
         gBuffer->Deactivate(dc);
     }
@@ -123,11 +123,11 @@ void Scene::Render()
         else
         {
             // フォワードレンダリング
-            ModelRenderer::RenderOpaque(rc, false);
+            MeshRenderer::RenderOpaque(rc, false);
         }
 
         // モデルの描画
-        ModelRenderer::RenderAlpha(rc);
+        MeshRenderer::RenderAlpha(rc);
 
         // シェイプ描画
         ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
@@ -148,7 +148,7 @@ void Scene::Render()
         ActorManager::CastShadow(rc);
 
         // モデルの影描画処理
-        ModelRenderer::CastShadow(rc);
+        MeshRenderer::CastShadow(rc);
     }
     cascadedShadowMap->Deactivate(rc);
     // カスケードシャドウマップの処理終了

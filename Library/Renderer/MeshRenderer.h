@@ -1,21 +1,10 @@
 #pragma once
 
 #include <unordered_map>
+#include <string>
 
 #include "../3D/Model.h"
 #include "../Shader/ShaderBase.h"
-
-/// <summary>
-/// 使用するシェーダタイプ
-/// </summary>
-enum class ShaderId
-{
-    Phong,
-    Ramp,
-    CascadedShadowMap,
-
-    ShaderIdMax
-};
 
 /// <summary>
 /// 描画タイプ
@@ -29,22 +18,9 @@ enum class ModelRenderType
     ModelRenderTypeMax
 };
 
-namespace ModelRenderer
+namespace MeshRenderer
 {
     void Initialize(ID3D11Device* device);
-
-    /// <summary>
-    /// モデルの描画
-    /// </summary>
-    /// <param name="model"></param>
-    /// <param name="color"></param>
-    /// <param name="shaderId"></param>
-    /// <param name="renderType"></param>
-    void Draw(Model* model, 
-        const Vector4& color,
-        ShaderId shaderId, 
-        ModelRenderType renderType, 
-        ShaderBase::Parameter* parameter);
 
     /// <summary>
     /// メッシュ描画
@@ -54,10 +30,11 @@ namespace ModelRenderer
     /// <param name="color"></param>
     /// <param name="shaderId"></param>
     /// <param name="renderType"></param>
-    void DrawMesh(const ModelResource::Mesh* mesh,
+    void Draw(const ModelResource::Mesh* mesh,
         Model* model,
         const Vector4& color,
-        ShaderId shaderId, ModelRenderType renderType,
+        std::string shaderId, 
+        ModelRenderType renderType,
         ShaderBase::Parameter* parameter);
 
     /// <summary>
@@ -69,7 +46,7 @@ namespace ModelRenderer
     /// <param name="world"></param>
     void DrawInstancing(Model* model, 
         const Vector4& color, 
-        ShaderId shaderId,
+        std::string shaderId,
         const DirectX::XMFLOAT4X4& world,
         ShaderBase::Parameter* parameter);
 
@@ -91,4 +68,11 @@ namespace ModelRenderer
     /// </summary>
     /// <param name="rc"></param>
     void CastShadow(const RenderContext& rc);
+
+    /// <summary>
+    /// ModelRenderTypeのシェーダー名を取得
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    std::vector<const char*> GetShaderNames(ModelRenderType type);
 }

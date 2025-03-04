@@ -160,7 +160,7 @@
     <ClCompile Include="Library\Component\Animator.cpp" />
     <ClCompile Include="Library\Component\Light\LightController.cpp" />
     <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
-    <ClCompile Include="Library\Component\ModelController.cpp" />
+    <ClCompile Include="Library\Component\ModelRenderer.cpp" />
     <ClCompile Include="Library\Component\ShapeController.cpp" />
     <ClCompile Include="Library\Converter\ToString.cpp" />
     <ClCompile Include="Library\DebugSupporter\Camera\DebugCamera.cpp" />
@@ -202,7 +202,7 @@
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
     <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
     <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp" />
-    <ClCompile Include="Library\Renderer\ModelRenderer.cpp" />
+    <ClCompile Include="Library\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
     <ClCompile Include="Library\Renderer\ShapeRenderer.cpp" />
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
@@ -232,7 +232,7 @@
     <ClInclude Include="Library\Component\Component.h" />
     <ClInclude Include="Library\Component\Light\LightController.h" />
     <ClInclude Include="Library\Component\Light\PointLightController.h" />
-    <ClInclude Include="Library\Component\ModelController.h" />
+    <ClInclude Include="Library\Component\ModelRenderer.h" />
     <ClInclude Include="Library\Component\ShapeController.h" />
     <ClInclude Include="Library\Converter\ToString.h" />
     <ClInclude Include="Library\DebugSupporter\Camera\DebugCamera.h" />
@@ -281,7 +281,7 @@
     <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
     <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
     <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h" />
-    <ClInclude Include="Library\Renderer\ModelRenderer.h" />
+    <ClInclude Include="Library\Renderer\MeshRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
     <ClInclude Include="Library\Renderer\ShapeRenderer.h" />
     <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />

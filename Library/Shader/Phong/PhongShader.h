@@ -7,6 +7,7 @@ class PhongShader : public ShaderBase
 public:
 	PhongShader(ID3D11Device* device,
 		const char* vsName,
+		const char* psName,
 		D3D11_INPUT_ELEMENT_DESC* inputDescs, UINT inputSize);
 	~PhongShader() override = default;
 

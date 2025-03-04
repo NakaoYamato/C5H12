@@ -43,7 +43,15 @@ struct DrawInfo
 	Model*				model = nullptr;
 	const ModelResource::Mesh* mesh = nullptr;
 	Vector4				color{ 1,1,1,1 };
-	float				distance = 0.0f;
+};
+struct AlphaDrawInfo
+{
+	Model* model = nullptr;
+	const ModelResource::Mesh* mesh = nullptr;
+	Vector4				color{ 1,1,1,1 };
+	ShaderId shaderID;
+	ModelRenderType renderType;
+	float			distance = 0.0f;
 };
 // インスタンシング描画用
 struct InstancingDrawInfo
@@ -64,14 +72,19 @@ namespace ModelRenderer
 
 	// シェーダーの配列
 	using ShaderMap = std::unordered_map<ShaderId, std::unique_ptr<ShaderBase>>;
-	ShaderMap shaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
+	ShaderMap deferredShaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
+	ShaderMap forwardShaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
+	std::unique_ptr<ShaderBase> cascadedSMShader_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
 	// 各モデルタイプのInfo
 	using DrawInfoMap = std::unordered_map<ShaderId, std::vector<DrawInfo>>;
 	using InstancingDrawInfoMap = std::unordered_map<Model*, InstancingDrawInfo>;
-	DrawInfoMap                             dynamicBoneDrawInfomap_;
-	DrawInfoMap                             staticBoneDrawInfomap_;
-	InstancingDrawInfoMap                   instancingDrawInfoMap_;
+	DrawInfoMap                             dynamicInfomap_;
+	DrawInfoMap                             staticInfomap_;
+	//DrawInfoMap                             dynamicTransparencyInfomap_;
+	//DrawInfoMap                             staticTransparencyInfomap_;
+	std::vector<AlphaDrawInfo> alphaDrawInfomap_;
+	InstancingDrawInfoMap                   instancingInfoMap_;
 
 	// 各定数バッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	dynamicBoneCB_;
@@ -123,19 +136,19 @@ namespace ModelRenderer
 				};
 
 			// 不透明描画処理
-			for (auto& drawInfomap : instancingDrawInfoMap_)
+			for (auto& drawInfomap : instancingInfoMap_)
 			{
 				Model* model = drawInfomap.first;
 				InstancingDrawInfo& drawInfo = drawInfomap.second;
 
-				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderId].get();
+				ShaderBase* shader = deferredShaders_[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderId].get();
 				shader->Begin(rc);
 
 				DrawModel(model, drawInfo, shader);
 
 				shader->End(rc);
 			}
-			instancingDrawInfoMap_.clear();
+			instancingInfoMap_.clear();
 		}
 
 		// DynamicBoneModelのメッシュ描画
@@ -240,55 +253,111 @@ namespace ModelRenderer
 
 		// シェーダー作成
 		{
-			// DynamicBoneModel
-			const size_t type = static_cast<int>(ModelRenderType::Dynamic);
-			ShaderMap& shaderMap = shaders_[type];
+			// デファードレンダリング用
+			{
+				{
+					// DynamicBoneModel
+					const size_t type = static_cast<int>(ModelRenderType::Dynamic);
+					ShaderMap& shaderMap = deferredShaders_[type];
 
-			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
-				"./Data/Shader/PhongVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+						"./Data/Shader/PhongVS.cso",
+						"./Data/Shader/PhongGBPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-			shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
-				"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+						"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				}
+				{
+					// StaticBoneModel
+					const size_t type = static_cast<int>(ModelRenderType::Static);
+					ShaderMap& shaderMap = deferredShaders_[type];
 
-			shaderMap[ShaderId::CascadedShadowMap] = std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/CascadedShadowVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-		}
-		{
-			// StaticBoneModel
-			const size_t type = static_cast<int>(ModelRenderType::Static);
-			ShaderMap& shaderMap = shaders_[type];
+					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+						"./Data/Shader/PhongBatchingVS.cso",
+						"./Data/Shader/PhongGBPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
-				"./Data/Shader/PhongBatchingVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+						"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				}
+				{
+					// InstancingModel
+					const size_t type = static_cast<int>(ModelRenderType::Instancing);
+					ShaderMap& shaderMap = deferredShaders_[type];
 
-			shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
-				"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+						"./Data/Shader/PhongInstancedVS.cso",
+						"./Data/Shader/PhongGBPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-			shaderMap[ShaderId::CascadedShadowMap] = std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/CascadedShadowBatchingVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-		}
-		{
-			// InstancingModel
-			const size_t type = static_cast<int>(ModelRenderType::Instancing);
-			ShaderMap& shaderMap = shaders_[type];
+					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+						"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				}
+			}
 
-			shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
-				"./Data/Shader/PhongInstancedVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+			// フォワードレンダリング用
+			{
+				{
+					// DynamicBoneModel
+					const size_t type = static_cast<int>(ModelRenderType::Dynamic);
+					ShaderMap& shaderMap = forwardShaders_[type];
 
-			shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
-				"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+						"./Data/Shader/PhongVS.cso",
+						"./Data/Shader/PhongPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-			shaderMap[ShaderId::CascadedShadowMap] = std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/CascadedShadowInstancedVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+						"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				}
+				{
+					// StaticBoneModel
+					const size_t type = static_cast<int>(ModelRenderType::Static);
+					ShaderMap& shaderMap = forwardShaders_[type];
+
+					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+						"./Data/Shader/PhongBatchingVS.cso",
+						"./Data/Shader/PhongPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+						"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				}
+				{
+					// InstancingModel
+					const size_t type = static_cast<int>(ModelRenderType::Instancing);
+					ShaderMap& shaderMap = forwardShaders_[type];
+
+					shaderMap[ShaderId::Phong] = std::make_unique<PhongShader>(device,
+						"./Data/Shader/PhongInstancedVS.cso",
+						"./Data/Shader/PhongPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap[ShaderId::Ramp] = std::make_unique<RampShader>(device,
+						"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				}
+			}
+
+			// カスケードシャドウマップ用
+			cascadedSMShader_[static_cast<int>(ModelRenderType::Dynamic)] = 
+				std::make_unique<CascadedShadowMapShader>(device,
+					"./Data/Shader/CascadedShadowVS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+			cascadedSMShader_[static_cast<int>(ModelRenderType::Static)] = 
+				std::make_unique<CascadedShadowMapShader>(device,
+					"./Data/Shader/CascadedShadowBatchingVS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+			cascadedSMShader_[static_cast<int>(ModelRenderType::Instancing)] =
+				std::make_unique<CascadedShadowMapShader>(device,
+					"./Data/Shader/CascadedShadowInstancedVS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 		}
 	}
 	void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
@@ -304,14 +373,21 @@ namespace ModelRenderer
 	/// メッシュ描画
 	void DrawMesh(const ModelResource::Mesh* mesh, Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
 	{
+		const float alpha = model->GetResource()->GetMaterials().at(mesh->materialIndex).colors.at("Diffuse").w;
 		// 描画タイプに応じて登録
 		switch (renderType)
 		{
 		case ModelRenderType::Dynamic:
-			dynamicBoneDrawInfomap_[shaderId].push_back({ model, mesh, color });
+			if (color.w < 1.0f || alpha < 1.0f)
+				alphaDrawInfomap_.push_back({ model, mesh, color ,shaderId, renderType, 0.0f });
+			else
+				dynamicInfomap_[shaderId].push_back({ model, mesh, color });
 			break;
 		case ModelRenderType::Static:
-			staticBoneDrawInfomap_[shaderId].push_back({ model, mesh, color });
+			if (color.w < 1.0f || alpha < 1.0f)
+				alphaDrawInfomap_.push_back({ model, mesh, color ,shaderId, renderType, 0.0f });
+			else
+				staticInfomap_[shaderId].push_back({ model, mesh, color });
 			break;
 		case ModelRenderType::Instancing:
 			assert(!"Please Call \"DrawInstancing\"");
@@ -325,9 +401,9 @@ namespace ModelRenderer
 	void DrawInstancing(Model* model, const Vector4& color, ShaderId shaderId, const DirectX::XMFLOAT4X4& world)
 	{
 		// 過去に登録しているか確認
-		auto iter = instancingDrawInfoMap_.find(model);
+		auto iter = instancingInfoMap_.find(model);
 
-		if (iter != instancingDrawInfoMap_.end())
+		if (iter != instancingInfoMap_.end())
 		{
 			// 既に登録している場合はパラメータを追加
 			(*iter).second.modelParameters.push_back(std::make_pair(color, world));
@@ -338,12 +414,12 @@ namespace ModelRenderer
 			InstancingDrawInfo newInfo;
 			newInfo.shaderId = shaderId;
 			newInfo.modelParameters.push_back(std::make_pair(color, world));
-			instancingDrawInfoMap_[model] = newInfo;
+			instancingInfoMap_[model] = newInfo;
 		}
 	}
 
 	/// 描画実行
-	void Render(const RenderContext& rc)
+	void RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -359,7 +435,12 @@ namespace ModelRenderer
 		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
 		// ブレンドステート設定
-		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
+		if (writeGBuffer)
+			dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
+		else
+			dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+
+		auto shaders = writeGBuffer ? deferredShaders_ : forwardShaders_;
 
 		// ボーンの影響度があるモデルの描画
 		{
@@ -368,9 +449,9 @@ namespace ModelRenderer
 			dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 
 			// 不透明描画処理
-			for (auto& drawInfomap : dynamicBoneDrawInfomap_)
+			for (auto& drawInfomap : dynamicInfomap_)
 			{
-				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
+				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
 				shader->Begin(rc);
 
 				for (auto& drawInfo : drawInfomap.second)
@@ -381,7 +462,7 @@ namespace ModelRenderer
 
 				shader->End(rc);
 			}
-			dynamicBoneDrawInfomap_.clear();
+			dynamicInfomap_.clear();
 		}
 
 		// ボーンの影響度がないモデルの描画
@@ -392,9 +473,9 @@ namespace ModelRenderer
 			dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 
 			// 不透明描画処理
-			for (auto& drawInfomap : staticBoneDrawInfomap_)
+			for (auto& drawInfomap : staticInfomap_)
 			{
-				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
+				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
 				shader->Begin(rc);
 
 				for (auto& drawInfo : drawInfomap.second)
@@ -405,13 +486,95 @@ namespace ModelRenderer
 
 				shader->End(rc);
 			}
-			staticBoneDrawInfomap_.clear();
+			staticInfomap_.clear();
 		}
 
 		// インスタンシングモデルの描画
 		Helper::RenderInstancing(rc);
 	}
 
+	/// 半透明描画
+	void RenderAlpha(const RenderContext& rc)
+	{
+		ID3D11DeviceContext* dc = rc.deviceContext;
+
+		// サンプラステート設定
+		ID3D11SamplerState* samplerStates[] =
+		{
+			rc.renderState->GetSamplerState(SamplerState::LinearWrap)
+		};
+		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+
+		// レンダーステート設定
+		dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+		dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+		// ブレンドステート設定
+		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+
+		// カメラ距離でソート
+		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye_);
+		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front_);
+		for (auto& drawInfo : alphaDrawInfomap_)
+		{
+			const std::vector<ModelResource::Node>& nodes = drawInfo.model->GetPoseNodes();
+			const ModelResource::Mesh* mesh = drawInfo.mesh;
+			DirectX::XMVECTOR Position = DirectX::XMVectorSet(
+				nodes[mesh->nodeIndex].worldTransform._41,
+				nodes[mesh->nodeIndex].worldTransform._42,
+				nodes[mesh->nodeIndex].worldTransform._43,
+				0.0f);
+			DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
+			drawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
+		}
+		std::sort(alphaDrawInfomap_.begin(), alphaDrawInfomap_.end(),
+			[](const AlphaDrawInfo& lhs, const AlphaDrawInfo& rhs)
+			{
+				return lhs.distance > rhs.distance;
+			});
+
+		auto shaders = forwardShaders_;
+
+		for (auto& drawInfo : alphaDrawInfomap_)
+		{
+			switch (drawInfo.renderType)
+			{
+			case ModelRenderType::Dynamic:
+			{
+				// 定数バッファ設定
+				dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+
+				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfo.shaderID].get();
+				shader->Begin(rc);
+
+				// メッシュ描画
+				Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
+
+				shader->End(rc);
+				break;
+			}
+			case ModelRenderType::Static:
+			{
+				// 定数バッファ設定
+				dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+
+				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfo.shaderID].get();
+				shader->Begin(rc);
+
+				// メッシュ描画
+				Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
+
+				shader->End(rc);
+				break;
+			}
+			}
+		}
+		alphaDrawInfomap_.clear();
+	}
+
+	/// 影描画実行
 	void CastShadow(const RenderContext& rc)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;
@@ -436,11 +599,10 @@ namespace ModelRenderer
 			dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 
 			// 不透明描画処理
-			for (auto& drawInfomap : dynamicBoneDrawInfomap_)
+			ShaderBase* shader = cascadedSMShader_[static_cast<int>(ModelRenderType::Dynamic)].get();
+			shader->Begin(rc);
+			for (auto& drawInfomap : dynamicInfomap_)
 			{
-				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
-				shader->Begin(rc);
-
 				for (auto& drawInfo : drawInfomap.second)
 				{
 					// メッシュ描画
@@ -482,10 +644,9 @@ namespace ModelRenderer
 						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 					}
 				}
-
-				shader->End(rc);
 			}
-			dynamicBoneDrawInfomap_.clear();
+			shader->End(rc);
+			dynamicInfomap_.clear();
 		}
 
 		// ボーンの影響度がないモデルの描画
@@ -496,11 +657,10 @@ namespace ModelRenderer
 			dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 
 			// 不透明描画処理
-			for (auto& drawInfomap : staticBoneDrawInfomap_)
+			ShaderBase* shader = cascadedSMShader_[static_cast<int>(ModelRenderType::Static)].get();
+			shader->Begin(rc);
+			for (auto& drawInfomap : staticInfomap_)
 			{
-				ShaderBase* shader = shaders_[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
-				shader->Begin(rc);
-
 				for (auto& drawInfo : drawInfomap.second)
 				{
 					// メッシュ描画
@@ -527,13 +687,12 @@ namespace ModelRenderer
 						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 					}
 				}
-
-				shader->End(rc);
 			}
-			staticBoneDrawInfomap_.clear();
+			shader->End(rc);
+			staticInfomap_.clear();
 		}
 
 		// インスタンシングモデルの描画
-		Helper::RenderInstancing(rc);
+		//Helper::RenderInstancing(rc);
 	}
 }

@@ -61,6 +61,10 @@ void SceneDebug::Initialize()
         auto modelCont = player->AddComponent<ModelController>("./Data/Model/Player/HPmaidEyeBone.fbx");
         auto animator = player->AddComponent<Animator>(modelCont->GetModel());
     }
+    {
+        auto box = ActorManager::Create("box", ActorTag::Player);
+        auto boxC = box->AddComponent<ShapeController>();
+    }
 }
 
 //I—¹‰» 

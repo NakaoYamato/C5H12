@@ -13,26 +13,8 @@ Texture2D environmentMap : register(t10);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-    float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * pin.materialColor;
-    diffuseColor.a = pin.materialColor.a; 
-    // デザリング
-    {
-        static const int dither_pattern[16] =
-        {
-            0, 8, 2, 10,
-            12, 4, 14, 6,
-             3, 11, 1, 9,
-            15, 7, 13, 5
-        };
-        uint x = ((uint) pin.position.x) % 4;
-        uint y = ((uint) pin.position.y) % 4;
-        float dither = (float) dither_pattern[x + y * 4] / 16.0f;
-        clip(diffuseColor.a - dither);
-    }
+    float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Kd * pin.materialColor;
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
-    
-    // TODO : DiffuseColor alpha 
-    float3 ambient = world_ambient.rgb * Ka.rgb;
     
     // フォンシェーディング用変数
     float3 E = normalize(pin.world_position.xyz - camera_position.xyz);
@@ -47,7 +29,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     
     // ハーフランバート処理
-    float3 directionalDiffuse = CalcHalfLambert(N, L, directional_light_color.rgb, Kd.rgb);
+    float3 directionalDiffuse = CalcHalfLambert(N, L, directional_light_color.rgb, diffuseColor.rgb);
     float3 directionalSpecular = CalcPhongSpecular(N, L, E, directional_light_color.rgb, specularColor.rgb);
     
     // 点光源の処理
@@ -64,16 +46,16 @@ float4 main(VS_OUT pin) : SV_TARGET
         float attenuateLength = saturate(1.0f - len / pointLights[i].range);
         float attenuation = attenuateLength * attenuateLength;
         LP /= len;
-        pointDiffuse += CalcLambert(N, LP, pointLights[i].color.rgb, Kd.rgb) * attenuation;
-        pointSpecular += CalcPhongSpecular(N, LP, E, pointLights[i].color.rgb, Ks.rgb) * attenuation;
+        pointDiffuse += CalcLambert(N, LP, pointLights[i].color.rgb, diffuseColor.rgb) * attenuation;
+        pointSpecular += CalcPhongSpecular(N, LP, E, pointLights[i].color.rgb, specularColor.rgb) * attenuation;
     }
     
-    float4 color = float4(ambient, pin.materialColor.a * Kd.a * diffuseColor.a);
-    color.rgb += (diffuseColor.rgb * (directionalDiffuse + pointDiffuse));
+    float4 color = float4(0.0f, 0.0f, 0.0f, diffuseColor.a);
+    color.rgb += diffuseColor.rgb * saturate(world_ambient.rgb /*+ ambientColor.rgb*/ + directionalDiffuse + pointDiffuse);
     color.rgb += directionalSpecular + pointSpecular;
     
     // リムライト処理
-    color.rgb += CalcRimLight(N, E, L, directional_light_color.rgb);
+    //color.rgb += CalcRimLight(N, E, L, directional_light_color.rgb);
     
     // 環境マップ処理
     //color.rgb = CalcSphereEnvironment(environmentMap, samplerStates[ANISOTROPIC],

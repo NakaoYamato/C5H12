@@ -69,7 +69,13 @@ namespace ModelRenderer
     /// シーン用定数バッファはこの関数を呼ぶ前に行う
     /// </summary>
     /// <param name="rc"></param>
-    void Render(const RenderContext& rc);
+    void RenderOpaque(const RenderContext& rc, bool writeGBuffer);
+
+    /// <summary>
+    /// 半透明描画
+    /// </summary>
+    /// <param name="rc"></param>
+    void RenderAlpha(const RenderContext& rc);
 
     /// <summary>
     /// 影描画実行

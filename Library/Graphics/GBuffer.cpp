@@ -159,6 +159,7 @@ void GBuffer::DrawGui()
 	{
 		if (ImGui::BeginMenu(u8"GBuffer"))
 		{
+			ImGui::Checkbox(u8"Active", &isActive_);
 			ImGui::Checkbox(u8"SRV", &drawGui_);
 
 			ImGui::EndMenu();

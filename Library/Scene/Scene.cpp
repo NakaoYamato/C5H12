@@ -80,12 +80,15 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // GBuffer生成
     GBuffer* gBuffer = graphics.GetGBuffer();
-    gBuffer->ClearAndActivate(dc);
+    if (gBuffer->IsActive())
     {
-        // モデルの描画
-        ModelRenderer::Render(rc);
+        gBuffer->ClearAndActivate(dc);
+        {
+            // モデルの描画
+            ModelRenderer::RenderOpaque(rc, true);
+        }
+        gBuffer->Deactivate(dc);
     }
-    gBuffer->Deactivate(dc);
     // GBuffer生成終了
     //--------------------------------------------------------------------------------------
 
@@ -108,6 +111,7 @@ void Scene::Render()
         }
 
         // GBufferのデータを書き出し
+        if (gBuffer->IsActive())
         {
             // レンダーステート設定
             dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -116,6 +120,14 @@ void Scene::Render()
 
             gBuffer->Blit(dc);
         }
+        else
+        {
+            // フォワードレンダリング
+            ModelRenderer::RenderOpaque(rc, false);
+        }
+
+        // モデルの描画
+        ModelRenderer::RenderAlpha(rc);
 
         // シェイプ描画
         ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);

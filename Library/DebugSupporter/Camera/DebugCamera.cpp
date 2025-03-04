@@ -74,7 +74,7 @@ void DebugCamera::Update(float elapsedTime)
         }
         {
             // ズーム
-            eye_ += front * INPUT_IS_MOVED("MouseOldWheel") / 60.0f;
+            eye_ += zoomPower_ * front * INPUT_IS_MOVED("MouseOldWheel") / 60.0f;
         }
 
         // 視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
@@ -125,7 +125,7 @@ void DebugCamera::Update(float elapsedTime)
         {
             // ズーム
 
-            target_ += front * INPUT_IS_MOVED("MouseOldWheel") / 60.0f;
+            target_ += zoomPower_ * front * INPUT_IS_MOVED("MouseOldWheel") / 60.0f;
         }
 
         // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
@@ -147,5 +147,8 @@ void DebugCamera::Update(float elapsedTime)
 // デバッグ用Gui
 void DebugCamera::DrawGui()
 {
+    ImGui::DragFloat("movePower", &movePower_, 0.01f);
+    ImGui::DragFloat("targetMovePower", &targetMovePower_, 0.01f);
+    ImGui::DragFloat("zoomPower", &zoomPower_, 0.01f);
     CameraControllerBase::DrawGui();
 }

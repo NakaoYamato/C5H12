@@ -18,4 +18,5 @@ public:
 private:
 	float movePower_ = 0.01f;
 	float targetMovePower_ = 0.8f;
+	float zoomPower_ = 0.5f;
 };

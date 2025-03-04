@@ -22,12 +22,6 @@ public:
 		D3D11_INPUT_ELEMENT_DESC* inputElementDesc,
 		UINT numElements);
 
-	// ピクセルシェーダー読み込み
-	static HRESULT LoadPixelShader(
-		ID3D11Device* device,
-		const char* filename,
-		ID3D11PixelShader** pixelShader);
-
 	// ピクセルシェーダ作成
 	static void CreatePsFromCso(ID3D11Device* device,
 		const char* csoName, 
@@ -42,6 +36,16 @@ public:
 	static void CreateCsFromCso(ID3D11Device* device,
 		const char* csoName,
 		ID3D11ComputeShader** computeShader);
+
+	// ドメインシェーダー作成
+	static void CreateDsFromCso(ID3D11Device* device,
+		const char* csoName,
+		ID3D11DomainShader** domainShader);
+
+	// ハルシェーダー作成
+	static void CreateHsFromCso(ID3D11Device* device,
+		const char* csoName,
+		ID3D11HullShader** hullShader);
 
 	// テクスチャ読み込み
 	static void LoadTextureFromFile(ID3D11Device* device, const wchar_t* filename,

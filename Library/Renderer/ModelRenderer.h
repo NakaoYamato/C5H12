@@ -40,7 +40,11 @@ namespace ModelRenderer
     /// <param name="color"></param>
     /// <param name="shaderId"></param>
     /// <param name="renderType"></param>
-    void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType);
+    void Draw(Model* model, 
+        const Vector4& color,
+        ShaderId shaderId, 
+        ModelRenderType renderType, 
+        ShaderBase::Parameter* parameter);
 
     /// <summary>
     /// メッシュ描画
@@ -53,7 +57,8 @@ namespace ModelRenderer
     void DrawMesh(const ModelResource::Mesh* mesh,
         Model* model,
         const Vector4& color,
-        ShaderId shaderId, ModelRenderType renderType);
+        ShaderId shaderId, ModelRenderType renderType,
+        ShaderBase::Parameter* parameter);
 
     /// <summary>
     /// インスタンシングモデルの描画
@@ -62,7 +67,11 @@ namespace ModelRenderer
     /// <param name="color"></param>
     /// <param name="shaderId"></param>
     /// <param name="world"></param>
-    void DrawInstancing(Model* model, const Vector4& color, ShaderId shaderId, const DirectX::XMFLOAT4X4& world);
+    void DrawInstancing(Model* model, 
+        const Vector4& color, 
+        ShaderId shaderId,
+        const DirectX::XMFLOAT4X4& world,
+        ShaderBase::Parameter* parameter);
 
     /// <summary>
     /// 描画実行

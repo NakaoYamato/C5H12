@@ -55,7 +55,9 @@ void RampShader::Begin(const RenderContext& rc)
 	dc->PSSetShaderResources(5, 1, rampSRV_.GetAddressOf());
 }
 
-void RampShader::Update(const RenderContext& rc, const ModelResource::Material* material)
+void RampShader::Update(const RenderContext& rc,
+	const ModelResource::Material* material,
+	Parameter* parameter)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 

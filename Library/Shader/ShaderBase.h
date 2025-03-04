@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "../Graphics/RenderContext.h"
 #include "../Resource/ModelResource.h"
 
@@ -9,6 +11,9 @@
 class ShaderBase
 {
 public:
+    // シェーダーに渡すデータ
+    using Parameter = std::unordered_map<std::string, float>;
+public:
     ShaderBase() {}
     virtual ~ShaderBase() {}
 
@@ -17,7 +22,8 @@ public:
 
     // 更新処理
     virtual void Update(const RenderContext& rc,
-        const ModelResource::Material* material) = 0;
+        const ModelResource::Material* material,
+        Parameter* parameter) = 0;
 
     // 終了処理
     virtual void End(const RenderContext& rc)

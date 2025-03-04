@@ -118,34 +118,6 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 	}
 }
 
-// ピクセルシェーダー読み込み
-HRESULT GpuResourceManager::LoadPixelShader(
-	ID3D11Device* device,
-	const char* filename,
-	ID3D11PixelShader** pixelShader)
-{
-	// ファイルを開く
-	FILE* fp = nullptr;
-	fopen_s(&fp, filename, "rb");
-	_ASSERT_EXPR_A(fp, "Pixel Shader File not found");
-
-	// ファイルのサイズを求める
-	fseek(fp, 0, SEEK_END);
-	long size = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	// メモリ上に頂点シェーダーデータを格納する領域を用意する
-	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
-	fread(data.get(), size, 1, fp);
-	fclose(fp);
-
-	// ピクセルシェーダー生成
-	HRESULT hr = device->CreatePixelShader(data.get(), size, nullptr, pixelShader);
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-	return hr;
-}
-
 // ピクセルシェーダ作成
 void GpuResourceManager::CreatePsFromCso(ID3D11Device* device,
 	const char* csoName,
@@ -254,6 +226,58 @@ void GpuResourceManager::CreateCsFromCso(ID3D11Device* device,
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	Debug::Output::String(L"コンピュートシェーダーの作成成功\n");
+	Debug::Output::String("\t");
+	Debug::Output::String(csoName);
+	Debug::Output::String("\n");
+}
+
+// ドメインシェーダー作成
+void GpuResourceManager::CreateDsFromCso(ID3D11Device* device,
+	const char* csoName, 
+	ID3D11DomainShader** domainShader)
+{
+	FILE* fp = nullptr;
+	fopen_s(&fp, csoName, "rb");
+	_ASSERT_EXPR_A(fp, "CSO File not found");
+
+	fseek(fp, 0, SEEK_END);
+	long cso_sz = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	std::unique_ptr<unsigned char[]> cso_data = std::make_unique<unsigned char[]>(cso_sz);
+	fread(cso_data.get(), cso_sz, 1, fp);
+	fclose(fp);
+
+	HRESULT hr = device->CreateDomainShader(cso_data.get(), cso_sz, nullptr, domainShader);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	Debug::Output::String(L"ドメインシェーダーの作成成功\n");
+	Debug::Output::String("\t");
+	Debug::Output::String(csoName);
+	Debug::Output::String("\n");
+}
+
+// ハルシェーダー作成
+void GpuResourceManager::CreateHsFromCso(ID3D11Device* device,
+	const char* csoName, 
+	ID3D11HullShader** hullShader)
+{
+	FILE* fp = nullptr;
+	fopen_s(&fp, csoName, "rb");
+	_ASSERT_EXPR_A(fp, "CSO File not found");
+
+	fseek(fp, 0, SEEK_END);
+	long cso_sz = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	std::unique_ptr<unsigned char[]> cso_data = std::make_unique<unsigned char[]>(cso_sz);
+	fread(cso_data.get(), cso_sz, 1, fp);
+	fclose(fp);
+
+	HRESULT hr = device->CreateHullShader(cso_data.get(), cso_sz, nullptr, hullShader);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	Debug::Output::String(L"ハルシェーダーの作成成功\n");
 	Debug::Output::String("\t");
 	Debug::Output::String(csoName);
 	Debug::Output::String("\n");

@@ -36,7 +36,8 @@ void CascadedShadowMapShader::Begin(const RenderContext& rc)
 }
 
 void CascadedShadowMapShader::Update(const RenderContext&, 
-	const ModelResource::Material*)
+	const ModelResource::Material*,
+	Parameter*)
 {
 	// “Á‚É‚â‚é‚±‚Æ‚Í‚È‚¢
 }

@@ -43,12 +43,14 @@ struct DrawInfo
 	Model*				model = nullptr;
 	const ModelResource::Mesh* mesh = nullptr;
 	Vector4				color{ 1,1,1,1 };
+	ShaderBase::Parameter* parameter;
 };
 struct AlphaDrawInfo
 {
 	Model* model = nullptr;
 	const ModelResource::Mesh* mesh = nullptr;
 	Vector4				color{ 1,1,1,1 };
+	ShaderBase::Parameter* parameter;
 	ShaderId shaderID;
 	ModelRenderType renderType;
 	float			distance = 0.0f;
@@ -57,8 +59,9 @@ struct AlphaDrawInfo
 struct InstancingDrawInfo
 {
 	ShaderId				shaderId{};
-	using ModelParameter = std::pair<Vector4, DirectX::XMFLOAT4X4>;
+	using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
 	std::vector<ModelParameter> modelParameters;
+	ShaderBase::Parameter* parameter;
 };
 #pragma endregion
 
@@ -129,7 +132,7 @@ namespace ModelRenderer
 						dc->UpdateSubresource(instancingCB_.Get(), 0, 0, &cbInstancingSkeleton_, 0, 0);
 
 						// シェーダーの更新処理
-						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
+						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
 
 						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), static_cast<UINT>(modelCount), 0, 0, 0);
 					}
@@ -156,7 +159,8 @@ namespace ModelRenderer
 			ShaderBase* shader,
 			Model* model,
 			const ModelResource::Mesh* mesh,
-			const Vector4& materialColor)
+			const Vector4& materialColor,
+			ShaderBase::Parameter* parameter)
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
@@ -188,7 +192,7 @@ namespace ModelRenderer
 			dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
 
 			// シェーダーの更新処理
-			shader->Update(rc, &model->GetResource()->GetMaterials().at(mesh->materialIndex));
+			shader->Update(rc, &model->GetResource()->GetMaterials().at(mesh->materialIndex), parameter);
 
 			dc->DrawIndexed(static_cast<UINT>(mesh->indices.size()), 0, 0);
 		}
@@ -198,7 +202,8 @@ namespace ModelRenderer
 			ShaderBase* shader,
 			Model* model,
 			const ModelResource::Mesh* mesh,
-			const Vector4& materialColor)
+			const Vector4& materialColor,
+			ShaderBase::Parameter* parameter)
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			const ModelResource* resource = model->GetResource();
@@ -216,7 +221,7 @@ namespace ModelRenderer
 			dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
 
 			// シェーダーの更新処理
-			shader->Update(rc, &resource->GetMaterials().at(mesh->materialIndex));
+			shader->Update(rc, &resource->GetMaterials().at(mesh->materialIndex), parameter);
 
 			dc->DrawIndexed(static_cast<UINT>(mesh->indices.size()), 0, 0);
 		}
@@ -360,18 +365,27 @@ namespace ModelRenderer
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 		}
 	}
-	void Draw(Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
+	void Draw(Model* model, 
+		const Vector4& color,
+		ShaderId shaderId, 
+		ModelRenderType renderType,
+		ShaderBase::Parameter* parameter)
 	{
 		const ModelResource* resource = model->GetResource();
 		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 		for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 		{
-			ModelRenderer::DrawMesh(&mesh, model, color, shaderId, renderType);
+			ModelRenderer::DrawMesh(&mesh, model, color, shaderId, renderType, parameter);
 		}
 	}
 
 	/// メッシュ描画
-	void DrawMesh(const ModelResource::Mesh* mesh, Model* model, const Vector4& color, ShaderId shaderId, ModelRenderType renderType)
+	void DrawMesh(const ModelResource::Mesh* mesh,
+		Model* model,
+		const Vector4& color, 
+		ShaderId shaderId,
+		ModelRenderType renderType,
+		ShaderBase::Parameter* parameter)
 	{
 		const float alpha = model->GetResource()->GetMaterials().at(mesh->materialIndex).colors.at("Diffuse").w;
 		// 描画タイプに応じて登録
@@ -379,15 +393,15 @@ namespace ModelRenderer
 		{
 		case ModelRenderType::Dynamic:
 			if (color.w < 1.0f || alpha < 1.0f)
-				alphaDrawInfomap_.push_back({ model, mesh, color ,shaderId, renderType, 0.0f });
+				alphaDrawInfomap_.push_back({ model, mesh, color, parameter, shaderId, renderType, 0.0f });
 			else
-				dynamicInfomap_[shaderId].push_back({ model, mesh, color });
+				dynamicInfomap_[shaderId].push_back({ model, mesh, color, parameter });
 			break;
 		case ModelRenderType::Static:
 			if (color.w < 1.0f || alpha < 1.0f)
-				alphaDrawInfomap_.push_back({ model, mesh, color ,shaderId, renderType, 0.0f });
+				alphaDrawInfomap_.push_back({ model, mesh, color, parameter,shaderId, renderType, 0.0f });
 			else
-				staticInfomap_[shaderId].push_back({ model, mesh, color });
+				staticInfomap_[shaderId].push_back({ model, mesh, color, parameter });
 			break;
 		case ModelRenderType::Instancing:
 			assert(!"Please Call \"DrawInstancing\"");
@@ -398,23 +412,27 @@ namespace ModelRenderer
 		}
 	}
 
-	void DrawInstancing(Model* model, const Vector4& color, ShaderId shaderId, const DirectX::XMFLOAT4X4& world)
+	void DrawInstancing(Model* model, 
+		const Vector4& color, 
+		ShaderId shaderId, 
+		const DirectX::XMFLOAT4X4& world,
+		ShaderBase::Parameter* parameter)
 	{
 		// 過去に登録しているか確認
 		auto iter = instancingInfoMap_.find(model);
 
+		InstancingDrawInfo::ModelParameter modelParameter{ color, world };
 		if (iter != instancingInfoMap_.end())
 		{
 			// 既に登録している場合はパラメータを追加
-			(*iter).second.modelParameters.push_back(std::make_pair(color, world));
+			(*iter).second.modelParameters.push_back(modelParameter);
 		}
 		else
 		{
 			// ない場合は新規で登録
-			InstancingDrawInfo newInfo;
-			newInfo.shaderId = shaderId;
-			newInfo.modelParameters.push_back(std::make_pair(color, world));
-			instancingInfoMap_[model] = newInfo;
+			//instancingInfoMap_[model].parameter = parameter;
+			//instancingInfoMap_[model].shaderId = shaderId;
+			//instancingInfoMap_[model].modelParameters.push_back(modelParameter);
 		}
 	}
 
@@ -457,7 +475,7 @@ namespace ModelRenderer
 				for (auto& drawInfo : drawInfomap.second)
 				{
 					// メッシュ描画
-					Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
+					Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color, drawInfo.parameter);
 				}
 
 				shader->End(rc);
@@ -481,7 +499,7 @@ namespace ModelRenderer
 				for (auto& drawInfo : drawInfomap.second)
 				{
 					// メッシュ描画
-					Helper::DrawStaticBoneModel(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
+					Helper::DrawStaticBoneModel(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color, drawInfo.parameter);
 				}
 
 				shader->End(rc);
@@ -549,7 +567,7 @@ namespace ModelRenderer
 				shader->Begin(rc);
 
 				// メッシュ描画
-				Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
+				Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color, drawInfo.parameter);
 
 				shader->End(rc);
 				break;
@@ -564,7 +582,7 @@ namespace ModelRenderer
 				shader->Begin(rc);
 
 				// メッシュ描画
-				Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color);
+				Helper::DrawDynamicBoneMesh(rc, shader, drawInfo.model, drawInfo.mesh, drawInfo.color, drawInfo.parameter);
 
 				shader->End(rc);
 				break;
@@ -639,7 +657,7 @@ namespace ModelRenderer
 						dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
 
 						// シェーダーの更新処理
-						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
+						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
 
 						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 					}
@@ -682,7 +700,7 @@ namespace ModelRenderer
 						dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
 
 						// シェーダーの更新処理
-						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex));
+						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
 
 						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 					}

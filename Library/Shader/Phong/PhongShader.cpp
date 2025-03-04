@@ -46,7 +46,9 @@ void PhongShader::Begin(const RenderContext& rc)
 	dc->PSSetConstantBuffers(2, _countof(cbs), cbs);
 }
 
-void PhongShader::Update(const RenderContext& rc, const ModelResource::Material* material)
+void PhongShader::Update(const RenderContext& rc, 
+	const ModelResource::Material* material,
+	Parameter* parameter)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 

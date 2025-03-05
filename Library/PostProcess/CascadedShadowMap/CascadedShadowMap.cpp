@@ -264,7 +264,7 @@ void CascadedShadowMap::UpdateCSMConstants(const RenderContext& rc)
 
 	// カスケードシャドウマップのシーン定数バッファ : スロット0
 	Graphics::Instance().GetConstantBufferManager()->SetCB(dc, 0,
-		ConstantBufferType::SceneCB, ConstantUpdateTarget::PIXEL);
+		ConstantBufferType::SceneCB, ConstantUpdateTarget::Pixel);
 
 	// カスケードシャドウマップのパラメーター定数バッファ : スロット2
 	dc->UpdateSubresource(parametricConstantBuffer.Get(), 0, 0, &parametricConstants, 0, 0);

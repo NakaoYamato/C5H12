@@ -43,4 +43,7 @@ public:
         ID3D11ShaderResourceView* srvs[] = { nullptr };
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
     }
+
+    // ƒpƒ‰ƒ[ƒ^‚Ìkeyæ“¾
+    virtual Parameter GetParameterKey()const = 0;
 };

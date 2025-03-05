@@ -21,6 +21,8 @@ public:
 	// 終了処理
 	void End(const RenderContext& rc) override;
 
+	// パラメータのkey取得
+	Parameter GetParameterKey()const override;
 private:
 	struct CbMesh
 	{

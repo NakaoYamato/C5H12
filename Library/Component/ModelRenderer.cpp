@@ -22,7 +22,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 	const std::vector<ModelResource::Node>& nodes = model_->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, model_.get(), color_, shaderId_, renderType_, &shaderParameter_);
+		MeshRenderer::Draw(&mesh, model_.get(), color_, shaderName_, renderType_, &shaderParameter_);
 	}
 }
 
@@ -41,9 +41,9 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 void ModelRenderer::DrawGui()
 {
 	ImGui::ColorEdit4("color", &color_.x);
-	ImGui::Text((u8"現在のシェーダー:" + shaderId_).c_str());
+	ImGui::Text((u8"現在のシェーダー:" + shaderName_).c_str());
 	ImGui::Separator();
-	auto shaderName = MeshRenderer::GetShaderNames(renderType_);
+	auto shaderName = MeshRenderer::GetShaderNames(renderType_, Graphics::Instance().GetGBuffer()->IsActive());
 	if (ImGui::TreeNodeEx(u8"使用可能のシェーダー"))
 	{
 		for (auto& name : shaderName)
@@ -52,7 +52,11 @@ void ModelRenderer::DrawGui()
 			{
 				// ダブルクリックで変更
 				if (ImGui::IsItemClicked())
-					shaderId_ = name;
+				{
+					shaderName_ = name;
+					// パラメータのkye受け取り
+					shaderParameter_ = MeshRenderer::GetShaderParameterKey(renderType_, shaderName_, Graphics::Instance().GetGBuffer()->IsActive());
+				}
 
 				ImGui::TreePop();
 			}
@@ -60,7 +64,10 @@ void ModelRenderer::DrawGui()
 		ImGui::TreePop();
 	}
 	ImGui::Separator();
-
+	for (auto& [name, parameter] : shaderParameter_)
+	{
+		ImGui::DragFloat(name.c_str(), &parameter, 0.1f);
+	}
 	static const char* renderTypeName[] =
 	{
 		u8"DynamicBoneModel",
@@ -70,4 +77,11 @@ void ModelRenderer::DrawGui()
 	ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName));
 	renderType_ = static_cast<ModelRenderType>(rId);
 	model_->DrawGui();
+}
+
+void ModelRenderer::SetShader(std::string name)
+{
+	this->shaderName_ = name;
+	// パラメータのkye受け取り
+	shaderParameter_ = MeshRenderer::GetShaderParameterKey(renderType_, shaderName_, Graphics::Instance().GetGBuffer()->IsActive());
 }

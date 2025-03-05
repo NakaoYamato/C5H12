@@ -115,13 +115,17 @@ void ConstantBufferManager::SetCB(ID3D11DeviceContext* dc,
 	int bit = static_cast<int>(updateTarget);
 	auto SetFromTarget = [&](ID3D11Buffer* const* buffer)->void
 		{
-			if (bit & static_cast<int>(ConstantUpdateTarget::VERTEX))
+			if (bit & static_cast<int>(ConstantUpdateTarget::Vertex))
 				dc->VSSetConstantBuffers(slot, 1, buffer);
-			if (bit & static_cast<int>(ConstantUpdateTarget::GEOMETORY))
+			if (bit & static_cast<int>(ConstantUpdateTarget::Hull))
+				dc->HSSetConstantBuffers(slot, 1, buffer);
+			if (bit & static_cast<int>(ConstantUpdateTarget::Domain))
+				dc->DSSetConstantBuffers(slot, 1, buffer);
+			if (bit & static_cast<int>(ConstantUpdateTarget::Geometory))
 				dc->GSSetConstantBuffers(slot, 1, buffer);
-			if (bit & static_cast<int>(ConstantUpdateTarget::PIXEL))
+			if (bit & static_cast<int>(ConstantUpdateTarget::Pixel))
 				dc->PSSetConstantBuffers(slot, 1, buffer);
-			if (bit & static_cast<int>(ConstantUpdateTarget::COMPUTE))
+			if (bit & static_cast<int>(ConstantUpdateTarget::Compute))
 				dc->CSSetConstantBuffers(slot, 1, buffer);
 		};
 	SetFromTarget(constantBuffers_[bufferIndex].GetAddressOf());

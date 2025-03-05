@@ -1,48 +1,28 @@
-struct VS_CONTROL_POINT_OUTPUT
+#include "Grass.hlsli"
+
+HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(InputPatch<VS_CONTROL_POINT_OUTPUT, CONTROL_POINT_COUNT> input_patch, uint patch_id : SV_PrimitiveID)
 {
-	float3 vPosition : WORLDPOS;
-};
+    HS_CONSTANT_DATA_OUTPUT output;
 
-struct HS_CONTROL_POINT_OUTPUT
-{
-	float3 vPosition : WORLDPOS; 
-};
-
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	float EdgeTessFactor[3]			: SV_TessFactor;
-	float InsideTessFactor			: SV_InsideTessFactor;
-};
-
-#define NUM_CONTROL_POINTS 3
-
-HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip,
-	uint PatchID : SV_PrimitiveID)
-{
-	HS_CONSTANT_DATA_OUTPUT Output;
-
-	Output.EdgeTessFactor[0] = 
-		Output.EdgeTessFactor[1] = 
-		Output.EdgeTessFactor[2] = 
-		Output.InsideTessFactor = 15;
-
-	return Output;
+    const float subdivision = tesselation_max_subdivision;
+    output.tess_factor[0] = subdivision;
+    output.tess_factor[1] = subdivision;
+    output.tess_factor[2] = subdivision;
+    output.inside_tess_factor = subdivision;
+    return output;
 }
 
 [domain("tri")]
-[partitioning("fractional_odd")]
+[partitioning("integer")] // integer, fractional_odd, fractional_even, pow2
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(3)]
 [patchconstantfunc("CalcHSPatchConstants")]
 HS_CONTROL_POINT_OUTPUT main( 
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip, 
+	InputPatch<VS_CONTROL_POINT_OUTPUT, CONTROL_POINT_COUNT> ip,
 	uint i : SV_OutputControlPointID,
 	uint PatchID : SV_PrimitiveID )
 {
-	HS_CONTROL_POINT_OUTPUT Output;
-
-	Output.vPosition = ip[i].vPosition;
-
-	return Output;
+	HS_CONTROL_POINT_OUTPUT output;
+    output = ip[i];
+    return output;
 }

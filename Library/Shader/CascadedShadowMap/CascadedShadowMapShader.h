@@ -24,6 +24,8 @@ public:
 	// 終了処理
 	void End(const RenderContext& rc) override;
 
+	// パラメータのkey取得
+	Parameter GetParameterKey()const override;
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		inputLayout_;

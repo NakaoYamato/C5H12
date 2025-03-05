@@ -52,8 +52,17 @@ void SceneDebug::Initialize()
     }
     {
         auto stage = ActorManager::Create("Stage", ActorTag::Stage);
-        stage->GetTransform().SetPositionY(-2.0f);
-        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land1.fbx");
+        stage->GetTransform().SetPositionY(-2.7f);
+        stage->GetTransform().SetLengthScale(0.1f);
+        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+    }
+    {
+        auto stage = ActorManager::Create("StageGrass", ActorTag::Stage);
+        stage->GetTransform().SetPositionY(-2.7f);
+        stage->GetTransform().SetLengthScale(0.1f);
+        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+        modelCont->SetRenderType(ModelRenderType::Static);
+        modelCont->SetShader("Grass");
     }
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);

@@ -25,11 +25,13 @@ enum class ConstantBufferType
 /// </summary>
 enum class ConstantUpdateTarget : int
 {
-	VERTEX		= 0b0001,
-	GEOMETORY	= 0b0010,
-	PIXEL		= 0b0100,
-	COMPUTE		= 0b1000,
-	ALL			= 0b1111,
+	Vertex		= 0b000001,
+	Hull		= 0b000010,
+	Domain		= 0b000100,
+	Geometory	= 0b001000,
+	Pixel		= 0b010000,
+	Compute		= 0b100000,
+	ALL			= 0b111111,
 };
 
 /// <summary>

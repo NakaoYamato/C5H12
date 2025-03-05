@@ -2,14 +2,14 @@
 
 #include "../ShaderBase.h"
 
-class PhongShader : public ShaderBase
+class GrassShader : public ShaderBase
 {
 public:
-	PhongShader(ID3D11Device* device,
+	GrassShader(ID3D11Device* device,
 		const char* vsName,
 		const char* psName,
 		D3D11_INPUT_ELEMENT_DESC* inputDescs, UINT inputSize);
-	~PhongShader() override = default;
+	~GrassShader() override = default;
 
 	// 開始処理
 	void Begin(const RenderContext& rc) override;
@@ -27,12 +27,16 @@ public:
 private:
 	struct CbMesh
 	{
-		DirectX::XMFLOAT4		Ka;// アンビエント
-		DirectX::XMFLOAT4		Kd;// ディフューズ
-		DirectX::XMFLOAT4		Ks;// スペキュラー
+		float tesselationMaxSubdivision = 5.0f;
+		float bladeHeight = 3.0f;
+		float bladeWidth = 0.15f;
+		float seed = 0.165f;
 	};
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;
+	Microsoft::WRL::ComPtr<ID3D11HullShader>		hullShader;
+	Microsoft::WRL::ComPtr<ID3D11DomainShader>		domainShader;
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	geometryShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixelShader_;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		inputLayout_;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			meshConstantBuffer_;

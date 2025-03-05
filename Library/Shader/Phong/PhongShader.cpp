@@ -83,3 +83,10 @@ void PhongShader::End(const RenderContext& rc)
 	ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
+
+ShaderBase::Parameter PhongShader::GetParameterKey() const
+{
+	ShaderBase::Parameter p;
+	p["test1"] = 0.0f;
+	return p;
+}

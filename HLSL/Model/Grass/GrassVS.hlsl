@@ -1,4 +1,8 @@
-float4 main( float4 pos : POSITION ) : SV_POSITION
+#include "Grass.hlsli"
+
+GRASS_VS_OUT main(VS_IN vin)
 {
-	return pos;
+    GRASS_VS_OUT vout;
+    vout.position = vin.position;
+    return vout;
 }

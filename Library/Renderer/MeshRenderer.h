@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <vector>
 #include <string>
 
 #include "../3D/Model.h"
@@ -73,6 +74,15 @@ namespace MeshRenderer
     /// ModelRenderTypeのシェーダー名を取得
     /// </summary>
     /// <param name="type"></param>
+    /// <param name="deferred"></param>
     /// <returns></returns>
-    std::vector<const char*> GetShaderNames(ModelRenderType type);
+    std::vector<const char*> GetShaderNames(ModelRenderType type, bool deferred);
+
+    /// <summary>
+    /// typeとkeyからパラメータのkeyを取得
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    ShaderBase::Parameter GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred);
 }

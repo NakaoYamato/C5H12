@@ -50,3 +50,8 @@ void CascadedShadowMapShader::End(const RenderContext& rc)
 	dc->IASetInputLayout(nullptr);
 	dc->GSSetShader(nullptr, nullptr, 0);
 }
+
+ShaderBase::Parameter CascadedShadowMapShader::GetParameterKey() const
+{
+	return ShaderBase::Parameter();
+}

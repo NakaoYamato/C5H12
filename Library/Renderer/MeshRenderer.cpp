@@ -3,6 +3,7 @@
 #include "../ResourceManager/GpuResourceManager.h"
 #include "../../Shader/Phong/PhongShader.h"
 #include "../../Shader/Ramp/RampShader.h"
+#include "../../Shader/Grass/GrassShader.h"
 
 #include "../../Shader/CascadedShadowMap/CascadedShadowMapShader.h"
 
@@ -287,6 +288,11 @@ namespace MeshRenderer
 					shaderMap["Ramp"] = std::make_unique<RampShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap["Grass"] = std::make_unique<GrassShader>(device,
+						"./Data/Shader/GrassVS.cso",
+						"./Data/Shader/GrassGBPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{
 					// InstancingModel
@@ -324,6 +330,11 @@ namespace MeshRenderer
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",
 						"./Data/Shader/PhongPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap["Grass"] = std::make_unique<GrassShader>(device,
+						"./Data/Shader/GrassVS.cso",
+						"./Data/Shader/GrassPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{
@@ -439,6 +450,7 @@ namespace MeshRenderer
 		{
 			// 定数バッファ設定
 			dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+			dc->GSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 			dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 
 			// 不透明描画処理
@@ -464,6 +476,7 @@ namespace MeshRenderer
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			// 定数バッファ設定
 			dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+			dc->GSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 			dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 
 			// 不透明描画処理
@@ -538,6 +551,7 @@ namespace MeshRenderer
 			{
 				// 定数バッファ設定
 				dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+				dc->GSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
 
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfo.shaderID].get();
@@ -554,6 +568,7 @@ namespace MeshRenderer
 			{
 				// 定数バッファ設定
 				dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+				dc->GSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
 
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfo.shaderID].get();
@@ -694,13 +709,35 @@ namespace MeshRenderer
 	}
 
 
-	std::vector<const char*> GetShaderNames(ModelRenderType type)
+	std::vector<const char*> GetShaderNames(ModelRenderType type, bool deferred)
 	{
 		std::vector<const char*> shaderNames;
-		for (auto& [name, shader] : deferredShaders_[static_cast<int>(type)])
+		if (deferred)
 		{
-			shaderNames.push_back(name.c_str());
+			for (auto& [name, shader] : deferredShaders_[static_cast<int>(type)])
+			{
+				shaderNames.push_back(name.c_str());
+			}
+		}
+		else
+		{
+			for (auto& [name, shader] : forwardShaders_[static_cast<int>(type)])
+			{
+				shaderNames.push_back(name.c_str());
+			}
 		}
 		return shaderNames;
+	}
+
+	ShaderBase::Parameter GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred)
+	{
+		if (deferred)
+		{
+			return deferredShaders_[static_cast<int>(type)][key]->GetParameterKey();
+		}
+		else
+		{
+			return forwardShaders_[static_cast<int>(type)][key]->GetParameterKey();
+		}
 	}
 }

@@ -93,3 +93,10 @@ void RampShader::End(const RenderContext& rc)
 	ID3D11ShaderResourceView* rampsrvs[] = { nullptr };
 	dc->PSSetShaderResources(5, 1, rampsrvs);
 }
+
+ShaderBase::Parameter RampShader::GetParameterKey() const
+{
+	ShaderBase::Parameter p;
+	p["test2"] = 0.0f;
+	return p;
+}

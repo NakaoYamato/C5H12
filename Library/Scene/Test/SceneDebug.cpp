@@ -63,6 +63,7 @@ void SceneDebug::Initialize()
         auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
         modelCont->SetRenderType(ModelRenderType::Static);
         modelCont->SetShader("Grass");
+        modelCont->SetColor(VECTOR4_GREEN);
     }
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);

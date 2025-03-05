@@ -31,6 +31,9 @@ private:
 		float bladeHeight = 3.0f;
 		float bladeWidth = 0.15f;
 		float seed = 0.165f;
+
+		float lodDistanceMax = 80.0f;
+		float dummy[3]{};
 	};
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;

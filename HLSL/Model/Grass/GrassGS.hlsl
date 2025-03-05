@@ -56,17 +56,10 @@ cbuffer CbSkeleton : register(b1)
 [maxvertexcount(3)]
 void main(triangle DS_OUT input[3], inout TriangleStream<GS_OUT> output)
 {
-    float4 positions[3];
-    positions[0] = mul(input[0].position, worldTransform);
-    positions[1] = mul(input[1].position, worldTransform);
-    positions[2] = mul(input[2].position, worldTransform);
-
-    float4 midpoint_position = (positions[0] + positions[1] + positions[2]) / 3;
-    float4 midpoint_normal = float4(normalize(cross(positions[1].xyz - positions[0].xyz, positions[2].xyz - positions[0].xyz)), 0);
+    float4 midpoint_position = (input[0].world_position + input[1].world_position + input[2].world_position) / 3;
+    float4 midpoint_normal = float4(normalize(cross(input[1].world_position.xyz - input[0].world_position.xyz, input[2].world_position.xyz - input[0].world_position.xyz)), 0);
     float4 midpoint_tangent = float4(1, 0, 0, 0);
-
-
-
+    
 	// GRASS.02
     const float noise_factor = noise(midpoint_position.xz * noise_seed_multiplier);
     float height = lerp(grass_blade_height * 0.2, grass_blade_height, noise_factor); // GRASS.02

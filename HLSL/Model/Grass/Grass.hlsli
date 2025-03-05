@@ -4,7 +4,7 @@
 
 class GRASS_VS_OUT
 {
-    float4 position : POSITION;
+    float4 world_position : POSITION;
 };
 
 typedef GRASS_VS_OUT VS_CONTROL_POINT_OUTPUT;
@@ -34,6 +34,9 @@ cbuffer MESH_CONSTANT_BUFFER : register(b2)
     float grass_blade_width;
 	// GRASS.02
     float noise_seed_multiplier;
+    
+    float lod_distance_max;
+    float3 grassDummy;
 }
 
 // 光源定数バッファ

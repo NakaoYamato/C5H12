@@ -7,8 +7,8 @@ DS_OUT main(
 	const OutputPatch<HS_CONTROL_POINT_OUTPUT, CONTROL_POINT_COUNT> patch)
 {
     DS_OUT output;
-    output.position = patch[0].position * domain.x + patch[1].position * domain.y + patch[2].position * domain.z;
-    output.position.w = 1;
+    output.world_position = patch[0].world_position * domain.x + patch[1].world_position * domain.y + patch[2].world_position * domain.z;
+    output.world_position.w = 1;
 
     return output;
 }

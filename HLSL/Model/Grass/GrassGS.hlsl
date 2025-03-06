@@ -53,37 +53,65 @@ cbuffer CbSkeleton : register(b1)
     row_major float4x4 worldTransform;
 }
 
-[maxvertexcount(3)]
+[maxvertexcount(6)]
 void main(triangle DS_OUT input[3], inout TriangleStream<GS_OUT> output)
 {
     float4 midpoint_position = (input[0].world_position + input[1].world_position + input[2].world_position) / 3;
     float4 midpoint_normal = float4(normalize(cross(input[1].world_position.xyz - input[0].world_position.xyz, input[2].world_position.xyz - input[0].world_position.xyz)), 0);
     float4 midpoint_tangent = float4(1, 0, 0, 0);
+    float4 midpoint_binormal = float4(0, 0, 1, 0);
     
 	// GRASS.02
     const float noise_factor = noise(midpoint_position.xz * noise_seed_multiplier);
-    float height = lerp(grass_blade_height * 0.2, grass_blade_height, noise_factor); // GRASS.02
+    const float noise_factor1 = noise(midpoint_position.zx * noise_seed_multiplier);
+    float height = lerp(grass_blade_height * 0.2, grass_blade_height, noise_factor1); // GRASS.02
     float width = lerp(grass_blade_width * 0.2, grass_blade_width, noise_factor); // GRASS.02
     midpoint_position.xz += (noise_factor * 2.0 - 1.0) * 0.5;
     float4x4 R = angle_axis(noise_factor * 3.14159265358979, midpoint_normal.xyz);
     midpoint_tangent = mul(midpoint_tangent, R);
+    midpoint_binormal = float4(normalize(cross(midpoint_normal.xyz, midpoint_tangent.xyz)), 0.0f);
 	
-
-
     GS_OUT element;
     element.normal = midpoint_normal;
+    
+    GS_OUT top_element;
+    {
+        top_element.normal = midpoint_normal;
+        top_element.position = midpoint_position + midpoint_normal * height;
+        top_element.position.x += sin(total_elapsed_time) * wind_directionX;
+        top_element.position.z += sin(total_elapsed_time) * wind_directionZ;
+        top_element.sv_position = mul(top_element.position, view_projection);
+        top_element.texcoord = float2(0.5, 0.0);
+    }
 
-    element.position = midpoint_position + midpoint_normal * height;
-    element.sv_position = mul(element.position, view_projection);
-    element.texcoord = float2(0.5, 0.0);
-    output.Append(element);
+    // 上頂点
+    output.Append(top_element);
 
+    // 右頂点
     element.position = midpoint_position + midpoint_tangent * width;
     element.sv_position = mul(element.position, view_projection);
     element.texcoord = float2(0.0, 1.0);
     output.Append(element);
 
+    // 左頂点
     element.position = midpoint_position - midpoint_tangent * width;
+    element.sv_position = mul(element.position, view_projection);
+    element.texcoord = float2(1.0, 1.0);
+    output.Append(element);
+    
+    output.RestartStrip();
+    
+    // 上頂点
+    output.Append(top_element);
+
+    // 右頂点
+    element.position = midpoint_position + midpoint_binormal * width;
+    element.sv_position = mul(element.position, view_projection);
+    element.texcoord = float2(0.0, 1.0);
+    output.Append(element);
+
+    // 左頂点
+    element.position = midpoint_position - midpoint_binormal * width;
     element.sv_position = mul(element.position, view_projection);
     element.texcoord = float2(1.0, 1.0);
     output.Append(element);

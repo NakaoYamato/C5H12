@@ -65,6 +65,9 @@ void GrassShader::Update(const RenderContext& rc,
 	cbMesh.bladeWidth					= (*parameter)["bladeWidth"];
 	cbMesh.seed							= (*parameter)["seed"];
 	cbMesh.lodDistanceMax				= (*parameter)["lodDistanceMax"];
+	cbMesh.totalElapsedTime				= (*parameter)["totalElapsedTime"];
+	cbMesh.windDirectionX				= (*parameter)["windDirectionX"];
+	cbMesh.windDirectionZ				= (*parameter)["windDirectionZ"];
 	dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
 
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
@@ -97,5 +100,8 @@ ShaderBase::Parameter GrassShader::GetParameterKey() const
     p["bladeWidth"] = cb.bladeWidth;
     p["seed"] = cb.seed;
     p["lodDistanceMax"] = cb.lodDistanceMax;
+    p["totalElapsedTime"] = cb.totalElapsedTime;
+    p["windDirectionX"] = cb.windDirectionX;
+    p["windDirectionZ"] = cb.windDirectionZ;
     return p;
 }

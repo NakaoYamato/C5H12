@@ -36,7 +36,9 @@ cbuffer MESH_CONSTANT_BUFFER : register(b2)
     float noise_seed_multiplier;
     
     float lod_distance_max;
-    float3 grassDummy;
+    float total_elapsed_time;
+    float wind_directionX;
+    float wind_directionZ;
 }
 
 // 光源定数バッファ

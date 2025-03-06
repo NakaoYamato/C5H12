@@ -33,7 +33,9 @@ private:
 		float seed = 0.165f;
 
 		float lodDistanceMax = 80.0f;
-		float dummy[3]{};
+		float totalElapsedTime = 0.0f;
+		float windDirectionX = 1.0f;
+		float windDirectionZ = 0.0f;
 	};
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;

@@ -216,6 +216,7 @@
     <ClCompile Include="Library\Shader\Grass\GrassShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
+    <ClCompile Include="Source\Component\Stage\GrassController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
@@ -298,6 +299,7 @@
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
+    <ClInclude Include="Source\Component\Stage\GrassController.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

@@ -37,7 +37,7 @@ public:
 	Model* GetModel() { return model_.get(); }
 	const ShaderBase::Parameter& GetShaderParameter()const { return shaderParameter_; }
 	const ShaderBase::Parameter& GetShadowParameter()const { return shadowParameter_; }
-	std::string GetShaderId()const { return shaderName_; }
+	std::string GetShaderName()const { return shaderName_; }
 	ModelRenderType GetRenderType()const { return renderType_; }
 	const Vector4& GetColor()const { return color_; }
 

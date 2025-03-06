@@ -198,8 +198,7 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 
 		gBuffer = std::make_unique<GBuffer>(device.Get(), 
 			static_cast<UINT>(GetScreenWidth()),
-			static_cast<UINT>(GetScreenHeight()),
-			static_cast<UINT>(GBufferSRVType::GBufferSRVTypeMAX));
+			static_cast<UINT>(GetScreenHeight()));
 	}
 }
 

@@ -23,7 +23,7 @@ enum GBufferSRVType
 class GBuffer
 {
 public:
-	GBuffer(ID3D11Device* device, UINT width, UINT height, UINT bufferCount);
+	GBuffer(ID3D11Device* device, UINT width, UINT height);
 	virtual ~GBuffer();
 
 	void Clear(ID3D11DeviceContext* immediateContext,
@@ -54,7 +54,7 @@ public:
 	bool IsActive()const { return isActive_; }
 #pragma endregion
 private:
-	const UINT bufferCount_;
+	const UINT bufferCount_ = GBufferSRVType::GBufferSRVTypeMAX;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtvs_[MAX_GBUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> renderTargetSRVs_[MAX_GBUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv_;

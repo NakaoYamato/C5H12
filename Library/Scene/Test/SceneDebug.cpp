@@ -15,6 +15,8 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
+#include "../../Source/Component/Stage/GrassController.h"
+
 //‰Šú‰»
 void SceneDebug::Initialize()
 {
@@ -64,6 +66,7 @@ void SceneDebug::Initialize()
         modelCont->SetRenderType(ModelRenderType::Static);
         modelCont->SetShader("Grass");
         modelCont->SetColor(VECTOR4_GREEN);
+        auto grassController = stage->AddComponent<GrassController>();
     }
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);

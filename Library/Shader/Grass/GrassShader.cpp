@@ -48,8 +48,8 @@ void GrassShader::Begin(const RenderContext& rc)
 	{
 		meshConstantBuffer_.Get(),
 	};
-	dc->HSSetConstantBuffers(2, _countof(cbs), cbs);
-	dc->GSSetConstantBuffers(2, _countof(cbs), cbs);
+	dc->HSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
+	dc->GSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
 }
 
 void GrassShader::Update(const RenderContext& rc, 
@@ -87,8 +87,8 @@ void GrassShader::End(const RenderContext& rc)
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* cbs[] = { nullptr };
-	dc->HSSetConstantBuffers(2, _countof(cbs), cbs);
-	dc->GSSetConstantBuffers(2, _countof(cbs), cbs);
+	dc->HSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
+	dc->GSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
 }
 
 ShaderBase::Parameter GrassShader::GetParameterKey() const

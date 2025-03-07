@@ -32,6 +32,7 @@ private:
 		DirectX::XMFLOAT4		Ks;// スペキュラー
 	};
 
+	static constexpr int CBIndex_ = 2;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixelShader_;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		inputLayout_;

@@ -38,6 +38,7 @@ private:
 		float windDirectionZ = 0.0f;
 	};
 
+	static constexpr int CBIndex_ = 2;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;
 	Microsoft::WRL::ComPtr<ID3D11HullShader>		hullShader;
 	Microsoft::WRL::ComPtr<ID3D11DomainShader>		domainShader;

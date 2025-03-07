@@ -43,7 +43,7 @@ void PhongShader::Begin(const RenderContext& rc)
 	{
 		meshConstantBuffer_.Get(),
 	};
-	dc->PSSetConstantBuffers(2, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
 }
 
 void PhongShader::Update(const RenderContext& rc, 
@@ -77,7 +77,7 @@ void PhongShader::End(const RenderContext& rc)
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* cbs[] = { nullptr };
-	dc->PSSetConstantBuffers(1, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
 
 	// シェーダーリソースビュー設定解除
 	ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };

@@ -52,11 +52,7 @@ void ModelRenderer::DrawGui()
 			{
 				// ダブルクリックで変更
 				if (ImGui::IsItemClicked())
-				{
-					shaderName_ = name;
-					// パラメータのkye受け取り
-					shaderParameter_ = MeshRenderer::GetShaderParameterKey(renderType_, shaderName_, Graphics::Instance().GetGBuffer()->IsActive());
-				}
+					SetShader(name);
 
 				ImGui::TreePop();
 			}
@@ -74,7 +70,11 @@ void ModelRenderer::DrawGui()
 		u8"StaticBoneModel",
 	};
 	int rId = static_cast<int>(renderType_);
-	ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName));
+	if (ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName)))
+	{
+		// エラー防止のためPhongに変更
+		SetShader("Phong");
+	}
 	renderType_ = static_cast<ModelRenderType>(rId);
 	model_->DrawGui();
 }

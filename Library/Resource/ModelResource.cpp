@@ -292,6 +292,7 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
         LoadTexture(aiTextureType_NORMALS, material.textureDatas["Normal"].filename);
         // スペキュラー取得
         LoadTexture(aiTextureType_SPECULAR, material.textureDatas["Specular"].filename);
+        // TODO : 要エミッシブテクスチャ aiTextureType_EMISSIVE
     }
 }
 

@@ -54,24 +54,30 @@ void SceneDebug::Initialize()
     }
     {
         auto stage = ActorManager::Create("Stage", ActorTag::Stage);
-        stage->GetTransform().SetPositionY(-2.7f);
-        stage->GetTransform().SetLengthScale(0.1f);
-        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+
+        //stage->GetTransform().SetPositionY(-2.7f);
+        //stage->GetTransform().SetLengthScale(0.1f);
+        //auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+
+        stage->GetTransform().SetLengthScale(0.01f);
+        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Test/test.fbx");
+
+        modelCont->SetRenderType(ModelRenderType::Static);
     }
     {
-        auto stage = ActorManager::Create("StageGrass", ActorTag::Stage);
-        stage->GetTransform().SetPositionY(-2.7f);
-        stage->GetTransform().SetLengthScale(0.1f);
-        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
-        modelCont->SetRenderType(ModelRenderType::Static);
-        modelCont->SetShader("Grass");
-        modelCont->SetColor(VECTOR4_GREEN);
-        auto grassController = stage->AddComponent<GrassController>();
+        //auto stage = ActorManager::Create("StageGrass", ActorTag::Stage);
+        //stage->GetTransform().SetPositionY(-2.7f);
+        //stage->GetTransform().SetLengthScale(0.1f);
+        //auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+        //modelCont->SetRenderType(ModelRenderType::Static);
+        //modelCont->SetShader("Grass");
+        //modelCont->SetColor(VECTOR4_GREEN);
+        //auto grassController = stage->AddComponent<GrassController>();
     }
     {
         auto player = ActorManager::Create("Player", ActorTag::Player);
         player->GetTransform().SetLengthScale(0.01f);
-        auto modelCont = player->AddComponent<ModelRenderer>("./Data/Model/Player/HPmaidEyeBone.fbx");
+        auto modelCont = player->AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_09_Warrior.fbx");
         auto animator = player->AddComponent<Animator>(modelCont->GetModel());
     }
     {

@@ -67,14 +67,15 @@ struct PSGBufferTextures
 #define TEXTURE_MAX             5
 
 //  ピクセルシェーダーの出力用構造体からGBufferData情報に変換
-GBufferData DecodeGBuffer(PSGBufferTextures textures, float2 uv, matrix inverse_view_projection)
+//  texturesはregister(t0)から開始している前提
+GBufferData DecodeGBuffer(Texture2D textures[TEXTURE_MAX], SamplerState state, float2 uv, matrix inverse_view_projection)
 {
     //  各テクスチャから情報を取得
-    float4 baseMapData      = textures.baseMap.Sample(textures.state, uv);
-    float4 normalMapData    = textures.normalMap.Sample(textures.state, uv);
-    float4 emissiveMapData  = textures.emissiveMap.Sample(textures.state, uv);
-    float4 parameterMapData = textures.parameterMap.Sample(textures.state, uv);
-    float  depth            = textures.depth.Sample(textures.state, uv).x;
+    float4 baseMapData      = textures[BASE_COLOR_TEXTURE].Sample(state, uv);
+    float4 normalMapData    = textures[WORLD_NORMAL_TEXTURE].Sample(state, uv);
+    float4 emissiveMapData  = textures[EMISSIVE_COLOR_TEXTURE].Sample(state, uv);
+    float4 parameterMapData = textures[PARAMETER_TEXTURE].Sample(state, uv);
+    float depth             = textures[DEPTH_TEXTURE].Sample(state, uv).x;
     
     GBufferData ret;
     ret.baseColor = baseMapData.rgb;

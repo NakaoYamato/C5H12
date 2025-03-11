@@ -27,22 +27,14 @@ struct PS_OUT
 
 PS_OUT main(VsOut pin)
 {
-    PSGBufferTextures textures;
-    textures.baseMap = textureMaps[BASE_COLOR_TEXTURE];
-    textures.normalMap = textureMaps[WORLD_NORMAL_TEXTURE];
-    textures.emissiveMap = textureMaps[EMISSIVE_COLOR_TEXTURE];
-    textures.parameterMap = textureMaps[PARAMETER_TEXTURE];
-    textures.depth = textureMaps[DEPTH_TEXTURE];
-    textures.state = point_sampler_state;
-    GBufferData decodeData = DecodeGBuffer(textures, pin.texcoord, inv_view_projection);
+    // GBufferからデータを取得
+    GBufferData decodeData = DecodeGBuffer(textureMaps, point_sampler_state, pin.texcoord, inv_view_projection);
+    
+    // decodeData.baseColorにアルファ値がないのでそのままだとskymapが埋もれてしまう
+    // 対策として深度値からクリップしている
+    clip(0.999999f - decodeData.depth);
     
     float4 specularColor = float4(decodeData.specular, decodeData.specular, decodeData.specular, 1.0f);
-    //{
-    //    PS_OUT pout = (PS_OUT) 0;
-    //    pout.color = diffuseColor;
-    //    pout.depth = depth;
-    //    return pout;
-    //}
     // フォンシェーディング用変数
     float3 E = normalize(decodeData.worldPosition.xyz - camera_position.xyz);
     float3 L = normalize(directional_light_direction.xyz);

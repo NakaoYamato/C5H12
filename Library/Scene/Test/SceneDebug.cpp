@@ -15,6 +15,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
+#include "../../Source/Actor/Character/PlayerActor.h"
 #include "../../Source/Component/Stage/GrassController.h"
 
 //初期化
@@ -40,20 +41,20 @@ void SceneDebug::Initialize()
 
     // オブジェクト作成
     {
-        std::shared_ptr<Actor> light = ActorManager::Create(u8"Light", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = ActorManager::Register(u8"Light", ActorTag::DrawContextParameter);
         auto lc = light->AddComponent<LightController>();
         lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
     }
     {
-        std::shared_ptr<Actor> light = ActorManager::Create(u8"PointLight0", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = ActorManager::Register(u8"PointLight0", ActorTag::DrawContextParameter);
         light->AddComponent<PointLightController>();
     }
     {
-        std::shared_ptr<Actor> light = ActorManager::Create(u8"PointLight1", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = ActorManager::Register(u8"PointLight1", ActorTag::DrawContextParameter);
         light->AddComponent<PointLightController>();
     }
     {
-        auto stage = ActorManager::Create("Stage", ActorTag::Stage);
+        auto stage = ActorManager::Register("Stage", ActorTag::Stage);
 
         //stage->GetTransform().SetPositionY(-2.7f);
         //stage->GetTransform().SetLengthScale(0.1f);
@@ -75,14 +76,11 @@ void SceneDebug::Initialize()
         //auto grassController = stage->AddComponent<GrassController>();
     }
     {
-        auto player = ActorManager::Create("Player", ActorTag::Player);
-        player->GetTransform().SetLengthScale(0.01f);
-        auto modelCont = player->AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_09_Warrior.fbx");
-        auto animator = player->AddComponent<Animator>(modelCont->GetModel());
+        auto player = ActorManager::Register<PlayerActor>("Player", ActorTag::Player);
     }
     {
-        auto box = ActorManager::Create("box", ActorTag::Player);
-        auto boxC = box->AddComponent<ShapeController>();
+        //auto box = ActorManager::Register("box", ActorTag::Player);
+        //auto boxC = box->AddComponent<ShapeController>();
     }
 }
 

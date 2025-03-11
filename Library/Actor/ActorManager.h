@@ -49,22 +49,22 @@ namespace ActorManager
 	// Gui描画
 	void DrawGui();
 
-	/// <summary>
-	/// アクターの作成
-	/// </summary>
-	/// <param name="name">オブジェクトの名前（重複不可）</param>
-	/// <param name="tag">タグ</param>
-	/// <returns>オブジェクトの実体</returns>
-	std::shared_ptr<Actor> Create(const std::string& name, ActorTag tag);
-
 	namespace Find
 	{
 		/// <summary>
-		/// 指定要素の取得
+		/// 指定要素の取得(updateActorsから検索)
 		/// </summary>
 		/// <param name="tag">検索するタグ</param>
 		/// <returns>そのタグに含まれる全要素</returns>
 		ActorMap& ByTag(ActorTag tag);
+
+		/// <summary>
+		/// 指定要素の取得(startActorsから検索)
+		/// </summary>
+		/// <param name="tag">検索するタグ</param>
+		/// <returns>そのタグに含まれる全要素</returns>
+		ActorMap& ByTagInStartActors(ActorTag tag);
+
 		/// <summary>
 		/// 指定要素の取得
 		/// </summary>
@@ -83,6 +83,47 @@ namespace ActorManager
 
 	}
 
+	/// <summary>
+	/// アクターの登録
+	/// </summary>
+	/// <typeparam name="T">Actorを継承したクラス</typeparam>
+	/// <param name="name"></param>
+	/// <param name="tag"></param>
+	/// <returns></returns>
+	template<class T>
+	static std::shared_ptr<T> Register(const std::string& name, ActorTag tag)
+	{
+#ifdef _DEBUG
+		if (Find::ByName(name, tag))
+			assert(!"名前の重複");
+#endif
+		std::shared_ptr<T> actor = std::make_shared<T>();
+		actor->SetName(name.c_str());
+
+		// 当たり判定フラグを設定
+		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+		{
+			actor->SetJudgeTagFlag(static_cast<ActorTag>(i), true);
+		}
+		actor->SetJudgeTagFlag(ActorTag::DrawContextParameter, false);
+
+		//　startActorsに登録
+		Find::ByTagInStartActors(tag).emplace_back(actor);
+
+		return actor;
+	}
+	
+	/// <summary>
+	/// アクターの作成
+	/// </summary>
+	/// <param name="name">オブジェクトの名前（重複不可）</param>
+	/// <param name="tag">タグ</param>
+	/// <returns>オブジェクトの実体</returns>
+	static std::shared_ptr<Actor> Register(const std::string& name, ActorTag tag)
+	{
+		return Register<Actor>(name, tag);
+	}
+	
 	// 要素の全削除
 	void Clear();
 

@@ -318,40 +318,16 @@ namespace ActorManager
 		}
 	}
 
-	/// アクターの作成
-	std::shared_ptr<Actor> Create(const std::string& name, ActorTag tag)
-	{
-#ifdef _DEBUG
-		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		{
-			for (auto& actor : updateActors_[i])
-			{
-				if (name == actor->GetName())
-					assert(!"名前の重複");
-			}
-		}
-#endif
-		std::shared_ptr<Actor> actor = std::make_shared<Actor>();
-		actor->SetName(name.c_str());
-
-		// 当たり判定フラグを設定
-		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		{
-			actor->SetJudgeTagFlag(static_cast<ActorTag>(i), true);
-		}
-		actor->SetJudgeTagFlag(ActorTag::DrawContextParameter, false);
-
-		startActors_[static_cast<size_t>(tag)].emplace_back(actor);
-
-		return actor;
-	}
-
 	namespace Find
 	{
 		/// 指定要素の取得
 		ActorMap& ByTag(ActorTag tag)
 		{
 			return updateActors_[static_cast<size_t>(tag)];
+		}
+		ActorMap& ByTagInStartActors(ActorTag tag)
+		{
+			return startActors_[static_cast<size_t>(tag)];
 		}
 		std::shared_ptr<Actor> ByName(const std::string& name, ActorTag tag)
 		{

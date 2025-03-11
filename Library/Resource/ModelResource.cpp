@@ -221,6 +221,24 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
         {
             material.colors["Specular"] = DirectX::XMFLOAT4({ 1.0f,1.0f,1.0,1.0f });
         }
+        // ラフネス値
+        float aFactor = 0.0f;
+        if (AI_SUCCESS == aMaterial->Get(AI_MATKEY_ROUGHNESS_FACTOR, aFactor))
+        {
+            material.colors["PBRFactor"].y = aFactor;
+        }
+        else
+        {
+            material.colors["PBRFactor"].y = 0.5f;
+        }
+        if (AI_SUCCESS == aMaterial->Get(AI_MATKEY_METALLIC_FACTOR, aFactor))
+        {
+            material.colors["PBRFactor"].z = aFactor;
+        }
+        else
+        {
+            material.colors["PBRFactor"].z = 0.0f;
+        }
 
         // テクスチャ取得関数
         // dummyTextureValue : 16進数でABGRの順番

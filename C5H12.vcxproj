@@ -214,6 +214,7 @@
     <ClCompile Include="Library\Scene\Test\SceneDebug.cpp" />
     <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp" />
     <ClCompile Include="Library\Shader\Grass\GrassShader.cpp" />
+    <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
     <ClCompile Include="Source\Actor\Character\PlayerActor.cpp" />
@@ -297,6 +298,7 @@
     <ClInclude Include="Library\Scene\Test\SceneDebug.h" />
     <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h" />
     <ClInclude Include="Library\Shader\Grass\GrassShader.h" />
+    <ClInclude Include="Library\Shader\PBR\PBRShader.h" />
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
@@ -313,6 +315,7 @@
     <None Include="HLSL\Model\Light.hlsli" />
     <None Include="HLSL\Model\ModelInputLayout.hlsli" />
     <None Include="HLSL\Model\Phong\Phong.hlsli" />
+    <None Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRendering.hlsli" />
     <None Include="HLSL\Model\Skinning.hlsli" />
     <None Include="HLSL\PostProcess\Bloom\Bloom.hlsli" />
     <None Include="HLSL\PostProcess\GaussianFilter\GaussianFilter.hlsli" />
@@ -424,6 +427,18 @@
     <FxCompile Include="HLSL\Model\Phong\PhongVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingGBPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Model\Ramp\RampPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

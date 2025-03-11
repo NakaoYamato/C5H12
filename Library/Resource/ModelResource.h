@@ -59,7 +59,7 @@ public:
 	{
 		std::string name;
 		// 色情報
-		// Key : Diffuse, Ambient, Specular
+		// Key : Diffuse, Ambient, Specular, PBRFactor(g:Roughness, b:Metalness)
 		std::unordered_map<std::string, DirectX::XMFLOAT4> colors;
 
 		// テクスチャとそのSRVをまとめたデータ

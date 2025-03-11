@@ -4,6 +4,7 @@
 #include "../../Shader/Phong/PhongShader.h"
 #include "../../Shader/Ramp/RampShader.h"
 #include "../../Shader/Grass/GrassShader.h"
+#include "../../Shader/PBR/PBRShader.h"
 
 #include "../../Shader/CascadedShadowMap/CascadedShadowMapShader.h"
 
@@ -321,6 +322,10 @@ namespace MeshRenderer
 						"./Data/Shader/PhongVS.cso",
 						"./Data/Shader/PhongPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+					shaderMap["PBR"] = std::make_unique<PBRShader>(device,
+						"./Data/Shader/PhongVS.cso",
+						"./Data/Shader/PhysicalBasedRenderingPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{
 					// StaticBoneModel
@@ -335,6 +340,11 @@ namespace MeshRenderer
 					shaderMap["Grass"] = std::make_unique<GrassShader>(device,
 						"./Data/Shader/GrassVS.cso",
 						"./Data/Shader/GrassPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap["PBR"] = std::make_unique<PBRShader>(device,
+						"./Data/Shader/PhongBatchingVS.cso",
+						"./Data/Shader/PhysicalBasedRenderingPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{

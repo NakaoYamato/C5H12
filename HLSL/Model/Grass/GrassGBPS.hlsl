@@ -16,6 +16,12 @@ PS_GB_OUT main(GS_OUT pin)
     float diffuse_factor = max(0, dot(N, L) * 0.5 + 0.5);
     const float3 root_color = float3(0.2, 0.1, 0);
     float4 diffuseColor = float4(lerp(materialColor.rgb, root_color, pin.texcoord.y) * diffuse_factor, 1);
-
-    return CreateOutputData(diffuseColor, 0.0f, pin.position, float4(N, 1.0f));
+    
+    return CreateOutputData(
+    diffuseColor.rgb,
+    0.0f,
+    N,
+    0.0f,
+    float3(0.0f, 0.0f, 0.0f),
+    0.0f);
 }

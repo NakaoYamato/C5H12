@@ -60,9 +60,15 @@ void PhongShader::Update(const RenderContext& rc,
 	dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
-	dc->PSSetShaderResources(0, 1, material->textureDatas.at("Diffuse").textureSRV.GetAddressOf());
-	dc->PSSetShaderResources(1, 1, material->textureDatas.at("Normal").textureSRV.GetAddressOf());
-	dc->PSSetShaderResources(2, 1, material->textureDatas.at("Specular").textureSRV.GetAddressOf());
+	ID3D11ShaderResourceView* srvs[] = 
+	{
+		material->textureDatas.at("Diffuse").textureSRV.Get(),
+		material->textureDatas.at("Normal").textureSRV.Get(),
+		material->textureDatas.at("Specular").textureSRV.Get(),
+		material->textureDatas.at("Roughness").textureSRV.Get(),
+		material->textureDatas.at("Emissive").textureSRV.Get()
+	};
+	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
 void PhongShader::End(const RenderContext& rc)
@@ -80,13 +86,19 @@ void PhongShader::End(const RenderContext& rc)
 	dc->PSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
 
 	// シェーダーリソースビュー設定解除
-	ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };
+	ID3D11ShaderResourceView* srvs[] =
+	{
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr
+	};
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
 ShaderBase::Parameter PhongShader::GetParameterKey() const
 {
 	ShaderBase::Parameter p;
-	p["test1"] = 0.0f;
 	return p;
 }

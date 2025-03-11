@@ -9,6 +9,8 @@ SamplerState samplerStates[3] : register(s0);
 Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D specularMap : register(t2);
+Texture2D roughnessMap : register(t3);
+Texture2D emissiveMap : register(t4);
 
 // 環境マッピング
 Texture2D environmentMap : register(t10);
@@ -31,6 +33,7 @@ PS_GB_OUT main(VS_OUT pin)
         //float dither = (float) dither_pattern[x + y * 4] / 16.0f;
         //clip(diffuseColor.a - dither);
     }
+    float4 emissiveColor = emissiveMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord);
     float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
     float3x3 mat =
     {
@@ -48,5 +51,11 @@ PS_GB_OUT main(VS_OUT pin)
     //pout.worldPosition = pin.world_position;
     //pout.worldNormal = float4(N, 1.0f);
     
-    return CreateOutputData(diffuseColor, specularColor.x, pin.world_position, float4(N, 1.0f));
+    return CreateOutputData(
+    diffuseColor.rgb,
+    specularColor.x,
+    N,
+    0.0f,
+    emissiveColor.rgb, 
+    0.0f);
 }

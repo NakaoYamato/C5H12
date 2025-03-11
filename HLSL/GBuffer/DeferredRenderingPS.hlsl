@@ -27,14 +27,16 @@ struct PS_OUT
 
 PS_OUT main(VsOut pin)
 {
-    float4 diffuseColor     = textureMaps[DIFFUSE_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
-    //float4 ambientColor     = textureMaps[AMBIENT_COLOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
-    float4 colorFactor      = textureMaps[COLOR_FACTOR_TEXTURE].Sample(point_sampler_state, pin.texcoord);
-    float3 worldPosition    = textureMaps[WORLD_POSITION_TEXTURE].Sample(point_sampler_state, pin.texcoord).xyz;
-    float3 worldNormal      = textureMaps[WORLD_NORMAL_TEXTURE].Sample(point_sampler_state, pin.texcoord).xyz;
-    float  depth            = textureMaps[DEPTH_TEXTURE].Sample(point_sampler_state, pin.texcoord).x;
+    PSGBufferTextures textures;
+    textures.baseMap = textureMaps[BASE_COLOR_TEXTURE];
+    textures.normalMap = textureMaps[WORLD_NORMAL_TEXTURE];
+    textures.emissiveMap = textureMaps[EMISSIVE_COLOR_TEXTURE];
+    textures.parameterMap = textureMaps[PARAMETER_TEXTURE];
+    textures.depth = textureMaps[DEPTH_TEXTURE];
+    textures.state = point_sampler_state;
+    GBufferData decodeData = DecodeGBuffer(textures, pin.texcoord, inv_view_projection);
     
-    float4 specularColor = float4(colorFactor.x, colorFactor.x, colorFactor.x, 1.0f);
+    float4 specularColor = float4(decodeData.specular, decodeData.specular, decodeData.specular, 1.0f);
     //{
     //    PS_OUT pout = (PS_OUT) 0;
     //    pout.color = diffuseColor;
@@ -42,12 +44,12 @@ PS_OUT main(VsOut pin)
     //    return pout;
     //}
     // フォンシェーディング用変数
-    float3 E = normalize(worldPosition.xyz - camera_position.xyz);
+    float3 E = normalize(decodeData.worldPosition.xyz - camera_position.xyz);
     float3 L = normalize(directional_light_direction.xyz);
     
     // ハーフランバート処理
-    float3 directionalDiffuse = CalcHalfLambert(worldNormal, L, directional_light_color.rgb, diffuseColor.rgb);
-    float3 directionalSpecular = CalcPhongSpecular(worldNormal, L, E, directional_light_color.rgb, specularColor.rgb);
+    float3 directionalDiffuse = CalcHalfLambert(decodeData.worldNormal, L, directional_light_color.rgb, decodeData.baseColor.rgb);
+    float3 directionalSpecular = CalcPhongSpecular(decodeData.worldNormal, L, E, directional_light_color.rgb, specularColor.rgb);
     
     // 点光源の処理
     float3 pointDiffuse = 0;
@@ -56,19 +58,19 @@ PS_OUT main(VsOut pin)
     {
         if (pointLights[i].isAlive != 1)
             continue;
-        float3 LP = worldPosition.xyz - pointLights[i].position.xyz;
+        float3 LP = decodeData.worldPosition.xyz - pointLights[i].position.xyz;
         float len = length(LP);
         if (len >= pointLights[i].range)
             continue;
         float attenuateLength = saturate(1.0f - len / pointLights[i].range);
         float attenuation = attenuateLength * attenuateLength;
         LP /= len;
-        pointDiffuse += CalcLambert(worldNormal, LP, pointLights[i].color.rgb, diffuseColor.rgb) * attenuation;
-        pointSpecular += CalcPhongSpecular(worldNormal, LP, E, pointLights[i].color.rgb, specularColor.rgb) * attenuation;
+        pointDiffuse += CalcLambert(decodeData.worldNormal, LP, pointLights[i].color.rgb, decodeData.baseColor.rgb) * attenuation;
+        pointSpecular += CalcPhongSpecular(decodeData.worldNormal, LP, E, pointLights[i].color.rgb, specularColor.rgb) * attenuation;
     }
     
-    float4 color = float4(0.0f, 0.0f, 0.0f, diffuseColor.a);
-    color.rgb += diffuseColor.rgb * saturate(world_ambient.rgb /*+ ambientColor.rgb*/ + directionalDiffuse + pointDiffuse);
+    float4 color = float4(decodeData.emissiveColor.r, decodeData.emissiveColor.g, decodeData.emissiveColor.b, 1.0f);
+    color.rgb += decodeData.baseColor.rgb * saturate(world_ambient.rgb /*+ ambientColor.rgb*/ + directionalDiffuse + pointDiffuse);
     color.rgb += directionalSpecular + pointSpecular;
     // リムライト処理
     // TODO : RimPower
@@ -76,6 +78,6 @@ PS_OUT main(VsOut pin)
     
     PS_OUT pout = (PS_OUT) 0;
     pout.color = color;
-    pout.depth = depth;
+    pout.depth = decodeData.depth;
     return pout;
 }

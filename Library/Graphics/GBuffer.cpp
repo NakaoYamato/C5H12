@@ -50,10 +50,10 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 
 	// RTVとSRVの作成
 	// フォーマットを変えることで画面の質が良くなるはずだが重くなるので下げている
-	CreateRTVandSRV(rtvs_[GBufferSRVType::DiffuseColorSRV],		renderTargetSRVs_[GBufferSRVType::DiffuseColorSRV],		DXGI_FORMAT_R16G16B16A16_FLOAT);
-	CreateRTVandSRV(rtvs_[GBufferSRVType::ColorFactorSRV],		renderTargetSRVs_[GBufferSRVType::ColorFactorSRV],		DXGI_FORMAT_R16G16B16A16_FLOAT);
-	CreateRTVandSRV(rtvs_[GBufferSRVType::WorldPositionSRV],	renderTargetSRVs_[GBufferSRVType::WorldPositionSRV],	DXGI_FORMAT_R16G16B16A16_FLOAT);
+	CreateRTVandSRV(rtvs_[GBufferSRVType::BaseColorSRV],		renderTargetSRVs_[GBufferSRVType::BaseColorSRV],		DXGI_FORMAT_R16G16B16A16_FLOAT);
 	CreateRTVandSRV(rtvs_[GBufferSRVType::WorldNormalSRV],		renderTargetSRVs_[GBufferSRVType::WorldNormalSRV],		DXGI_FORMAT_R16G16B16A16_FLOAT);
+	CreateRTVandSRV(rtvs_[GBufferSRVType::EmissiveSRV],			renderTargetSRVs_[GBufferSRVType::EmissiveSRV],			DXGI_FORMAT_R16G16B16A16_FLOAT);
+	CreateRTVandSRV(rtvs_[GBufferSRVType::ParameterSRV],		renderTargetSRVs_[GBufferSRVType::ParameterSRV],		DXGI_FORMAT_R16G16B16A16_FLOAT);
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depth_stencil_buffer;
 	D3D11_TEXTURE2D_DESC texture2d_desc = {};

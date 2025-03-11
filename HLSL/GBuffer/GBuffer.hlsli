@@ -1,32 +1,93 @@
 // ピクセルシェーダーへの出力用構造体
 struct PS_GB_OUT
 {
-    float4 diffuseColor     : SV_TARGET0;
-    //float4 ambientColor     : SV_TARGET1;
-    float4 colorFactor    : SV_TARGET1;
-    float4 worldPosition    : SV_TARGET2;
-    float4 worldNormal      : SV_TARGET3;
+    float4 baseColor      : SV_TARGET0;
+    float4 worldNormal    : SV_TARGET1;
+    float4 emissiveColor  : SV_TARGET2;
+    float4 parameter      : SV_TARGET3;
     
     // depthはDepthStencilViewとして存在
     //float depth             : SV_TARGET5;
 };
 
-#define DIFFUSE_COLOR_TEXTURE   0
-//#define AMBIENT_COLOR_TEXTURE   1
-#define COLOR_FACTOR_TEXTURE  1
-#define WORLD_POSITION_TEXTURE  2
-#define WORLD_NORMAL_TEXTURE    3
+//------------------------------------------------------
+// 書き込み用
+PS_GB_OUT CreateOutputData(
+float3 baseColor,
+float specular,
+float3 worldNormal,
+float metallic,
+float3 emissiveColor,
+float roughness)
+{
+    PS_GB_OUT output = (PS_GB_OUT) 0;
+    output.baseColor.rgb = baseColor;
+    output.baseColor.a = specular;
+    output.worldNormal.xyz = worldNormal;
+    output.worldNormal.a = metallic;
+    output.emissiveColor.rgb = emissiveColor;
+    output.emissiveColor.a = roughness;
+    return output;
+}
+// 書き込み用
+//------------------------------------------------------
+
+//------------------------------------------------------
+// 読み込み用
+// GBuffer用構造体
+struct GBufferData
+{
+    float3 baseColor;
+    float3 worldPosition;
+    float3 worldNormal;
+    float3 emissiveColor;
+    float specular;
+    float metallic;
+    float roughness;
+    float depth;
+};
+
+//  GBufferテクスチャ受け渡し用構造体
+struct PSGBufferTextures
+{
+    Texture2D baseMap;
+    Texture2D normalMap;
+    Texture2D emissiveMap;
+    Texture2D parameterMap;
+    Texture2D depth;
+    SamplerState state;
+};
+
+#define BASE_COLOR_TEXTURE      0
+#define WORLD_NORMAL_TEXTURE    1
+#define EMISSIVE_COLOR_TEXTURE  2
+#define PARAMETER_TEXTURE       3
 #define DEPTH_TEXTURE           4
 
 #define TEXTURE_MAX             5
 
-// GBufferに書き込む
-PS_GB_OUT CreateOutputData(float4 diffuseColor, float specular, float4 worldPosition, float4 worldNormal)
+//  ピクセルシェーダーの出力用構造体からGBufferData情報に変換
+GBufferData DecodeGBuffer(PSGBufferTextures textures, float2 uv, matrix inverse_view_projection)
 {
-    PS_GB_OUT output = (PS_GB_OUT) 0;
-    output.diffuseColor = diffuseColor;
-    output.colorFactor.x = specular;
-    output.worldPosition = worldPosition;
-    output.worldNormal = worldNormal;
-    return output;
+    //  各テクスチャから情報を取得
+    float4 baseMapData      = textures.baseMap.Sample(textures.state, uv);
+    float4 normalMapData    = textures.normalMap.Sample(textures.state, uv);
+    float4 emissiveMapData  = textures.emissiveMap.Sample(textures.state, uv);
+    float4 parameterMapData = textures.parameterMap.Sample(textures.state, uv);
+    float  depth            = textures.depth.Sample(textures.state, uv).x;
+    
+    GBufferData ret;
+    ret.baseColor = baseMapData.rgb;
+    float4 position = float4(uv.x * 2.0f - 1.0f, uv.y * -2.0f + 1.0f, depth, 1);
+    position = mul(position, inverse_view_projection);
+    ret.worldPosition = position.xyz / position.w;
+    ret.worldNormal = normalMapData.xyz;
+    ret.emissiveColor = emissiveMapData.rgb;
+    ret.specular = baseMapData.a;
+    ret.metallic = normalMapData.a;
+    ret.roughness = emissiveMapData.a;
+    ret.depth = depth;
+    return ret;
 }
+// 読み込み用
+//------------------------------------------------------

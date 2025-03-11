@@ -73,7 +73,7 @@ public:
 			template<class T>
 			void serialize(T& archive);
 		};
-		// Key	: Diffuse, Normal, Specular,Roughness
+		// Key	: Diffuse, Normal, Specular,Roughness,Emissive
 		std::unordered_map<std::string, TextureData> textureDatas;
 
 		// シリアライズ

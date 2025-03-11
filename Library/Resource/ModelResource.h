@@ -67,11 +67,13 @@ public:
 		{
 			std::string filename;
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
+			DWORD dummyTextureValue;
+			UINT dummyTextureDimension;
 			// シリアライズ
 			template<class T>
 			void serialize(T& archive);
 		};
-		// Key	: Diffuse, Normal, Specular
+		// Key	: Diffuse, Normal, Specular,Roughness
 		std::unordered_map<std::string, TextureData> textureDatas;
 
 		// シリアライズ

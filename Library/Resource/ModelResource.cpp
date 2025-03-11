@@ -223,7 +223,8 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
         }
 
         // テクスチャ取得関数
-        auto LoadTexture = [&](aiTextureType aTextureType, std::string& textureFilename)
+        // dummyTextureValue : 16進数でABGRの順番
+        auto LoadTexture = [&](aiTextureType aTextureType, Material::TextureData& textureData, DWORD dummyTextureValue, UINT dummyTextureDimension)
             {
                 // テクスチャファイルパス取得
                 aiString aTextureFilePath;
@@ -276,23 +277,28 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
                         }
 
                         // テクスチャファイルパスを格納
-                        textureFilename = textureFilePath.string();
+                        textureData.filename = textureFilePath.string();
                     }
                     else
                     {
                         // テクスチャファイルパスをそのまま格納
-                        textureFilename = aTextureFilePath.C_Str();
+                        textureData.filename = aTextureFilePath.C_Str();
                     }
                 }
+                textureData.dummyTextureValue = dummyTextureValue;
+                textureData.dummyTextureDimension = dummyTextureDimension;
             };
 
         // ディフューズテクスチャ取得
-        LoadTexture(aiTextureType_DIFFUSE, material.textureDatas["Diffuse"].filename);
+        LoadTexture(aiTextureType_DIFFUSE, material.textureDatas["Diffuse"], 0xFFFFFFFF, 16);
         // ノーマルテクスチャ取得
-        LoadTexture(aiTextureType_NORMALS, material.textureDatas["Normal"].filename);
+        LoadTexture(aiTextureType_NORMALS, material.textureDatas["Normal"], 0xFFFF7F7F, 16);
         // スペキュラー取得
-        LoadTexture(aiTextureType_SPECULAR, material.textureDatas["Specular"].filename);
-        // TODO : 要エミッシブテクスチャ aiTextureType_EMISSIVE
+        LoadTexture(aiTextureType_SPECULAR, material.textureDatas["Specular"], 0xFFFFFFFF, 16);
+        // ラフネス取得
+        LoadTexture(aiTextureType_SHININESS, material.textureDatas["Roughness"], 0xFF777777, 16);
+        // エミッシブ取得
+        LoadTexture(aiTextureType_EMISSIVE, material.textureDatas["Emissive"], 0xFF000000, 16);
     }
 }
 
@@ -747,7 +753,9 @@ template<class T>
 inline void ModelResource::Material::TextureData::serialize(T& archive)
 {
     archive(
-        CEREAL_NVP(filename)
+        CEREAL_NVP(filename),
+        CEREAL_NVP(dummyTextureValue),
+        CEREAL_NVP(dummyTextureDimension)
     );
 }
 

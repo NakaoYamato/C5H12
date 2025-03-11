@@ -20,6 +20,7 @@ struct PS_GB_OUT
 
 #define TEXTURE_MAX             5
 
+// GBuffer‚É‘‚«‚Ş
 PS_GB_OUT CreateOutputData(float4 diffuseColor, float specular, float4 worldPosition, float4 worldNormal)
 {
     PS_GB_OUT output = (PS_GB_OUT) 0;

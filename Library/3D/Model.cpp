@@ -101,6 +101,12 @@ void Model::DrawGui()
                     {
                         ImGui::ColorEdit4(key.c_str(), &color.x);
                     }
+                    for (auto& [key, texture] : material.textureDatas)
+                    {
+                        ImGui::Text(key.c_str());
+                        static float textureSize = 512.0f;
+                        ImGui::Image(texture.textureSRV.Get(), { textureSize ,textureSize });
+                    }
                     ImGui::TreePop();
                 }
             }
@@ -188,53 +194,92 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
     // シェーダーリソースビューの作成
     for (ModelResource::Material& material : resource->GetAddressMaterials())
     {
-        if (material.textureDatas.at("Diffuse").filename.size() > 0)
+        for (auto& [key, textureData] : material.textureDatas)
         {
-            std::filesystem::path path(fbx_filename);
-            path.replace_filename(material.textureDatas.at("Diffuse").filename);
-            D3D11_TEXTURE2D_DESC texture2d_desc;
-            GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-                material.textureDatas.at("Diffuse").textureSRV.ReleaseAndGetAddressOf(),
-                &texture2d_desc);
+            if (textureData.filename.size() > 0)
+            {
+                std::filesystem::path path(fbx_filename);
+                path.replace_filename(textureData.filename);
+                D3D11_TEXTURE2D_DESC texture2d_desc;
+                GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
+                    textureData.textureSRV.ReleaseAndGetAddressOf(),
+                    &texture2d_desc);
+            }
+            else
+            {
+                GpuResourceManager::MakeDummyTexture(device,
+                    textureData.textureSRV.ReleaseAndGetAddressOf(),
+                    textureData.dummyTextureValue,
+                    textureData.dummyTextureDimension);
+            }
         }
-        else
-        {
-            GpuResourceManager::MakeDummyTexture(device,
-                material.textureDatas.at("Diffuse").textureSRV.ReleaseAndGetAddressOf(),
-                0xFFFFFFFF,
-                16);
-        }
-        if (material.textureDatas.at("Normal").filename.size() > 0)
-        {
-            std::filesystem::path path(fbx_filename);
-            path.replace_filename(material.textureDatas.at("Normal").filename);
-            D3D11_TEXTURE2D_DESC texture2d_desc;
-            GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-                material.textureDatas.at("Normal").textureSRV.ReleaseAndGetAddressOf(),
-                &texture2d_desc);
-        }
-        else
-        {
-            GpuResourceManager::MakeDummyTexture(device,
-                material.textureDatas.at("Normal").textureSRV.ReleaseAndGetAddressOf(),
-                0xFFFF7F7F, // Normal == 0xFFFF7F7F
-                16);
-        }
-        if (material.textureDatas.at("Specular").filename.size() > 0)
-        {
-            std::filesystem::path path(fbx_filename);
-            path.replace_filename(material.textureDatas.at("Specular").filename);
-            D3D11_TEXTURE2D_DESC texture2d_desc;
-            GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-                material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
-                &texture2d_desc);
-        }
-        else
-        {
-            GpuResourceManager::MakeDummyTexture(device,
-                material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
-                0xFFFFFFFF,// ダミーならアルファが0 
-                16);
-        }
+
+        //if (material.textureDatas.at("Diffuse").filename.size() > 0)
+        //{
+        //    std::filesystem::path path(fbx_filename);
+        //    path.replace_filename(material.textureDatas.at("Diffuse").filename);
+        //    D3D11_TEXTURE2D_DESC texture2d_desc;
+        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
+        //        material.textureDatas.at("Diffuse").textureSRV.ReleaseAndGetAddressOf(),
+        //        &texture2d_desc);
+        //}
+        //else
+        //{
+        //    GpuResourceManager::MakeDummyTexture(device,
+        //        material.textureDatas.at("Diffuse").textureSRV.ReleaseAndGetAddressOf(),
+        //        0xFFFFFFFF,
+        //        16);
+        //}
+
+        //if (material.textureDatas.at("Normal").filename.size() > 0)
+        //{
+        //    std::filesystem::path path(fbx_filename);
+        //    path.replace_filename(material.textureDatas.at("Normal").filename);
+        //    D3D11_TEXTURE2D_DESC texture2d_desc;
+        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
+        //        material.textureDatas.at("Normal").textureSRV.ReleaseAndGetAddressOf(),
+        //        &texture2d_desc);
+        //}
+        //else
+        //{
+        //    GpuResourceManager::MakeDummyTexture(device,
+        //        material.textureDatas.at("Normal").textureSRV.ReleaseAndGetAddressOf(),
+        //        0xFFFF7F7F, // Normal == 0xFFFF7F7F
+        //        16);
+        //}
+
+        //if (material.textureDatas.at("Specular").filename.size() > 0)
+        //{
+        //    std::filesystem::path path(fbx_filename);
+        //    path.replace_filename(material.textureDatas.at("Specular").filename);
+        //    D3D11_TEXTURE2D_DESC texture2d_desc;
+        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
+        //        material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
+        //        &texture2d_desc);
+        //}
+        //else
+        //{
+        //    GpuResourceManager::MakeDummyTexture(device,
+        //        material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
+        //        0xFFFFFFFF,// ダミーならアルファが0 
+        //        16);
+        //}
+
+        //if (material.textureDatas.at("Roughness").filename.size() > 0)
+        //{
+        //    std::filesystem::path path(fbx_filename);
+        //    path.replace_filename(material.textureDatas.at("Roughness").filename);
+        //    D3D11_TEXTURE2D_DESC texture2d_desc;
+        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
+        //        material.textureDatas.at("Roughness").textureSRV.ReleaseAndGetAddressOf(),
+        //        &texture2d_desc);
+        //}
+        //else
+        //{
+        //    GpuResourceManager::MakeDummyTexture(device,
+        //        material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
+        //        0xFFFFFFFF,// ダミーならアルファが0 
+        //        16);
+        //}
     }
 }

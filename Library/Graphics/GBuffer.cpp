@@ -101,6 +101,10 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/DeferredRenderingPS.cso");
+	PBR_FQ_ = std::make_unique<Sprite>(device,
+		L"",
+		"./Data/Shader/FullscreenQuadVS.cso",
+		"./Data/Shader/PBRDeferredRenderingPS.cso");
 }
 
 GBuffer::~GBuffer()
@@ -168,6 +172,7 @@ void GBuffer::DrawGui()
 		{
 			ImGui::Checkbox(u8"Active", &isActive_);
 			ImGui::Checkbox(u8"SRV", &drawGui_);
+			ImGui::Checkbox(u8"usePBR", &usePBR_);
 
 			ImGui::EndMenu();
 		}
@@ -208,7 +213,16 @@ void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 	}
 	tempSRVs.push_back(depthStencilSRV_.Get());
 	// •`‰æˆ—
-	fullscreenQuad_->Blit(immediateContext,
-		tempSRVs.data(),
-		0, bufferCount_ + 1);
+	if (usePBR_)
+	{
+		PBR_FQ_->Blit(immediateContext,
+			tempSRVs.data(),
+			0, bufferCount_ + 1);
+	}
+	else
+	{
+		fullscreenQuad_->Blit(immediateContext,
+			tempSRVs.data(),
+			0, bufferCount_ + 1);
+	}
 }

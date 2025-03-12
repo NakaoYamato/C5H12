@@ -68,7 +68,9 @@ private:
 
 	Vector2 textureSize_{};
 	std::unique_ptr<Sprite> fullscreenQuad_;
+	std::unique_ptr<Sprite> PBR_FQ_;
 
 	bool drawGui_ = false;
 	bool isActive_ = true;
+	bool usePBR_ = true;
 };

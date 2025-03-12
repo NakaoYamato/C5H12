@@ -275,6 +275,11 @@ namespace MeshRenderer
 					shaderMap["Ramp"] = std::make_unique<RampShader>(device,
 						"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap["PBR"] = std::make_unique<PBRShader>(device,
+						"./Data/Shader/PhongVS.cso",
+						"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{
 					// StaticBoneModel
@@ -293,6 +298,11 @@ namespace MeshRenderer
 					shaderMap["Grass"] = std::make_unique<GrassShader>(device,
 						"./Data/Shader/GrassVS.cso",
 						"./Data/Shader/GrassGBPS.cso",
+						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+					shaderMap["PBR"] = std::make_unique<PBRShader>(device,
+						"./Data/Shader/PhongBatchingVS.cso",
+						"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
 						modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				}
 				{

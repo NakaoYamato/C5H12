@@ -225,6 +225,12 @@
     <ClCompile Include="Source\Component\Stage\GrassController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Shader\PBR\PBRShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Actor\Character\PlayerActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -470,6 +476,12 @@
     <ClInclude Include="Source\Component\Stage\GrassController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Shader\PBR\PBRShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Actor\Character\PlayerActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -491,6 +503,7 @@
     <None Include="HLSL\GBuffer\GBuffer.hlsli" />
     <None Include="HLSL\Model\Grass\Grass.hlsli" />
     <None Include="HLSL\PostProcess\FinalPass\FilterFunctions.hlsli" />
+    <None Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRendering.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -536,5 +549,8 @@
     <FxCompile Include="HLSL\Model\Grass\GrassVS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\FinalPass\FinalPassPS.hlsl" />
     <FxCompile Include="HLSL\Model\Grass\GrassGBPS.hlsl" />
+    <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingGBPS.hlsl" />
+    <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingPS.hlsl" />
+    <FxCompile Include="HLSL\GBuffer\PBRDeferredRenderingPS.hlsl" />
   </ItemGroup>
 </Project>

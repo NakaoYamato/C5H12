@@ -59,7 +59,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     
     // ŠÂ‹«ƒ}ƒbƒvˆ—
     //color.rgb = CalcSphereEnvironment(environmentMap, samplerStates[ANISOTROPIC],
-				//					color.rgb, N, E, 0.0f);
+				//					color.rgb, N, E, 0.5f);
     
     return color;
 }

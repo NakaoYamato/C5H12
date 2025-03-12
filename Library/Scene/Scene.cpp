@@ -62,7 +62,11 @@ void Scene::Render()
     rc.lightColor = { 1,1,1,1 };
     rc.lightAmbientColor = { 0,0,0,0 };
     if (skyMap_)
+    {
         rc.environmentMap = skyMap_->GetSRV();
+        // スカイマップのSRVを設定
+        dc->PSSetShaderResources(10, 1, skyMap_->GetSRV());
+    }
 
     // 描画の前処理
     ActorManager::RenderPreprocess(rc);

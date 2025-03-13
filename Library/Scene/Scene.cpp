@@ -63,9 +63,12 @@ void Scene::Render()
     rc.lightAmbientColor = { 0,0,0,0 };
     if (skyMap_)
     {
-        rc.environmentMap = skyMap_->GetSRV();
+        rc.environmentMap = skyMap_->GetSRV().GetAddressOf();
         // スカイマップのSRVを設定
-        dc->PSSetShaderResources(10, 1, skyMap_->GetSRV());
+        dc->PSSetShaderResources(10, 1, skyMap_->GetSRV().GetAddressOf());
+        dc->PSSetShaderResources(11, 1, skyMap_->GetDiffuseSRV().GetAddressOf());
+        dc->PSSetShaderResources(12, 1, skyMap_->GetSpecularSRV().GetAddressOf());
+        dc->PSSetShaderResources(13, 1, skyMap_->GetLutGGXSRV().GetAddressOf());
     }
 
     // 描画の前処理
@@ -237,7 +240,7 @@ void Scene::DrawGui()
 }
 
 // スカイマップ設定
-void Scene::SetSkyMap(const wchar_t* filename)
+void Scene::SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM)
 {
-    skyMap_ = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename);
+    skyMap_ = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename, diffuseIEM, specularIDM);
 }

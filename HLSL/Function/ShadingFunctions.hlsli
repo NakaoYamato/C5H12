@@ -1,3 +1,6 @@
+#ifndef __SHADING_FUNCTIONS_HLSLI__
+#define __SHADING_FUNCTIONS_HLSLI__
+
 //	ガンマ係数
 static const float GammaFactor = 2.2f;
 
@@ -235,3 +238,99 @@ void DirectBRDF(float3 diffuseReflectance,
 	//	鏡面反射BRDF
     outSpecular = SpecularBRDF(NdotV, NdotL, NdotH, F, roughness) * irradiance;
 }
+//--------------------------------------------
+//	ルックアップテーブルからGGX項を取得
+//--------------------------------------------
+//brdf_sample_point	: サンプリングポイント
+//lut_ggx_map       : GGXルックアップテーブル
+//state             : 参照時のサンプラーステート
+float4 SampleLutGGX(float2 brdf_sample_point, Texture2D lut_ggx_map, SamplerState state)
+{
+    return lut_ggx_map.Sample(state, brdf_sample_point);
+}
+
+//--------------------------------------------
+//	キューブマップから照度を取得
+//--------------------------------------------
+//v                     : サンプリング方向
+//diffuse_iem_cube_map  : 事前計算拡散反射IBLキューブマップ
+//state                 : 参照時のサンプラーステート
+float4 SampleDiffuseIEM(float3 v, TextureCube diffuse_iem_cube_map, SamplerState state)
+{
+    return diffuse_iem_cube_map.Sample(state, v);
+}
+
+//--------------------------------------------
+//	キューブマップから放射輝度を取得
+//--------------------------------------------
+//v	                        : サンプリング方向
+//roughness                 : 粗さ
+//specular_pmrem_cube_map   : 事前計算鏡面反射IBLキューブマップ
+//state                     : 参照時のサンプラーステート
+float4 SampleSpecularPMREM(float3 v, float roughness, TextureCube specular_pmrem_cube_map, SamplerState state)
+{
+    //  ミップマップによって粗さを表現するため、段階を算出
+    uint width, height, mip_maps;
+    specular_pmrem_cube_map.GetDimensions(0, width, height, mip_maps);
+    float lod = roughness * float(mip_maps - 1);
+    return specular_pmrem_cube_map.SampleLevel(state, v, lod);
+}
+
+//--------------------------------------------
+//	粗さを考慮したフレネル項の近似式
+//--------------------------------------------
+//F0	    : 垂直入射時の反射率
+//VdotN 	: 視線ベクトルと法線ベクトルとの内積
+//roughness	: 粗さ
+float3 CalcFresnelRoughness(float3 f0, float NdotV, float roughness)
+{
+    return f0 + (max((float3) (1.0f - roughness), f0) - f0) * pow(saturate(1.0f - NdotV), 5.0f);
+}
+
+//--------------------------------------------
+//	拡散反射IBL
+//--------------------------------------------
+//normal                : 法線(正規化済み)
+//eye_vector		    : 視線ベクトル(正規化済み)
+//roughness				: 粗さ
+//diffuse_reflectance	: 入射光のうち拡散反射になる割合
+//F0					: 垂直入射時のフレネル反射色
+//diffuse_iem_cube_map  : 事前計算拡散反射IBLキューブマップ
+//state                 : 参照時のサンプラーステート
+float3 DiffuseIBL(float3 normal, float3 eye_vector, float roughness, float3 diffuse_reflectance, float3 f0, TextureCube diffuse_iem_cube_map, SamplerState state)
+{
+    float3 N = normal;
+    float3 V = -eye_vector;
+
+    //  間接拡散反射光の反射率計算
+    float NdotV = max(0.0001f, dot(N, V));
+    float3 kD = 1.0f - CalcFresnelRoughness(f0, NdotV, roughness);
+
+    float3 irradiance = SampleDiffuseIEM(normal, diffuse_iem_cube_map, state).rgb;
+    return diffuse_reflectance * irradiance * kD;
+}
+
+//--------------------------------------------
+//	鏡面反射IBL
+//--------------------------------------------
+//normal				    : 法線ベクトル(正規化済み)
+//eye_vector			    : 視線ベクトル(正規化済み)
+//roughness				    : 粗さ
+//F0					    : 垂直入射時のフレネル反射色
+//lut_ggx_map               : GGXルックアップテーブル
+//specular_pmrem_cube_map   : 事前計算鏡面反射IBLキューブマップ
+//state                     : 参照時のサンプラーステート
+float3 SpecularIBL(float3 normal, float3 eye_vector, float roughness, float3 f0, Texture2D lut_ggx_map, TextureCube specular_pmrem_cube_map, SamplerState state)
+{
+    float3 N = normal;
+    float3 V = -eye_vector;
+
+    float NdotV = max(0.0001f, dot(N, V));
+    float3 R = normalize(reflect(-V, N));
+    float3 specular_light = SampleSpecularPMREM(R, roughness, specular_pmrem_cube_map, state).rgb;
+
+    float2 brdf_sample_point = saturate(float2(NdotV, roughness));
+    float2 env_brdf = SampleLutGGX(brdf_sample_point, lut_ggx_map, state).rg;
+    return specular_light * (f0 * env_brdf.x + env_brdf.y);
+}
+#endif	//	__SHADING_FUNCTIONS_HLSLI__

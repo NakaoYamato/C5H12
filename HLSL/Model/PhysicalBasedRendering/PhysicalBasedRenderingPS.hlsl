@@ -10,8 +10,10 @@ SamplerState samplerStates[3] : register(s0);
 #define EMISSIVE_TEXTURE 3
 Texture2D textureMaps[4] : register(t0);
 
-// 環境マッピング
-Texture2D environmentMap : register(t10);
+//  IBL用テクスチャ
+TextureCube diffuse_iem : register(t11);
+TextureCube specular_pmrem : register(t12);
+Texture2D lut_ggx : register(t13);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
@@ -92,9 +94,9 @@ float4 main(VS_OUT pin) : SV_TARGET
         }
     }
     
-	//	IBL処理
-    //total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, environmentMap, samplerStates[LINEAR]);
-    //total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[LINEAR]);
+    // IBL処理
+    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, samplerStates[LINEAR]);
+    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[LINEAR]);
 
 	//	色生成
     float3 color = total_diffuse + total_specular + emissiveColor;

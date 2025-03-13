@@ -41,7 +41,7 @@ public:
 	void SetReady() { ready_ = true; }
 
 	// スカイマップ設定
-	void SetSkyMap(const wchar_t* filename);
+	void SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM);
 private:
 	std::unique_ptr<SkyMap> skyMap_;
 	bool ready_ = false;

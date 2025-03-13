@@ -51,7 +51,7 @@ private:
 	std::unique_ptr<Model> model_;
 	ShaderBase::Parameter shaderParameter_;
 	ShaderBase::Parameter shadowParameter_;
-	std::string shaderName_ = "Phong";
+	std::string shaderName_ = "PBR";
 	ModelRenderType renderType_ = ModelRenderType::Dynamic;
 	Vector4 color_{ 1,1,1,1 };
 };

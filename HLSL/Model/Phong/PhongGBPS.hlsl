@@ -55,7 +55,7 @@ PS_GB_OUT main(VS_OUT pin)
     diffuseColor.rgb,
     specularColor.x,
     N,
-    0.0f,
+    0.5f,
     emissiveColor.rgb, 
-    0.0f);
+    0.5f);
 }

@@ -18,6 +18,11 @@ Texture2D textureMaps[TEXTURE_MAX] : register(t0);
 SamplerState point_sampler_state : register(s0);
 SamplerState linear_sampler_state : register(s2);
 
+//  IBL用テクスチャ
+TextureCube diffuse_iem : register(t11);
+TextureCube specular_pmrem : register(t12);
+Texture2D lut_ggx : register(t13);
+
 //  gbufferに記録された深度値を出力する
 struct PS_OUT
 {
@@ -93,6 +98,10 @@ PS_OUT main(VsOut pin)
         }
     }
     
+    // IBL処理
+    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, linear_sampler_state);
+    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, linear_sampler_state);
+
 	//	色生成
     float3 color = total_diffuse + total_specular + emissiveColor;    
     PS_OUT pout = (PS_OUT) 0;

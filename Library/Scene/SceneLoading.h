@@ -11,6 +11,9 @@ public:
 		nextScene_(std::move(nextScene)) {}
 	~SceneLoading()override {}
 
+	// –¼‘Oæ“¾
+	const char* GetName()const { return u8"Loading"; }
+
 	//‰Šú‰»
 	void Initialize()override;
 

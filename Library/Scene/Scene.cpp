@@ -9,15 +9,19 @@
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 #include "../../Library/Renderer/ShapeRenderer.h"
 
-#include "../../Library/Actor/ActorManager.h"
+// 終了化
+void Scene::Finalize()
+{
+    _actorManager.Clear();
+}
 
 //更新処理
 void Scene::Update(float elapsedTime)
 {
     // ゲームオブジェクトの更新
-    ActorManager::Update(elapsedTime);
+    _actorManager.Update(elapsedTime);
     // 当たり判定処理
-    ActorManager::Judge();
+    _actorManager.Judge();
 }
 
 //描画処理
@@ -63,18 +67,18 @@ void Scene::Render()
     rc.lightDirection = { 1,0,0,0 };
     rc.lightColor = { 1,1,1,1 };
     rc.lightAmbientColor = { 0,0,0,0 };
-    if (skyMap_)
+    if (_skyMap)
     {
-        rc.environmentMap = skyMap_->GetSRV().GetAddressOf();
+        rc.environmentMap = _skyMap->GetSRV().GetAddressOf();
         // スカイマップのSRVを設定
-        dc->PSSetShaderResources(10, 1, skyMap_->GetSRV().GetAddressOf());
-        dc->PSSetShaderResources(11, 1, skyMap_->GetDiffuseSRV().GetAddressOf());
-        dc->PSSetShaderResources(12, 1, skyMap_->GetSpecularSRV().GetAddressOf());
-        dc->PSSetShaderResources(13, 1, skyMap_->GetLutGGXSRV().GetAddressOf());
+        dc->PSSetShaderResources(10, 1, _skyMap->GetSRV().GetAddressOf());
+        dc->PSSetShaderResources(11, 1, _skyMap->GetDiffuseSRV().GetAddressOf());
+        dc->PSSetShaderResources(12, 1, _skyMap->GetSpecularSRV().GetAddressOf());
+        dc->PSSetShaderResources(13, 1, _skyMap->GetLutGGXSRV().GetAddressOf());
     }
 
     // 描画の前処理
-    ActorManager::RenderPreprocess(rc);
+    _actorManager.RenderPreprocess(rc);
 
     // シーン定数バッファ、ライト定数バッファの更新
     cbManager->Update(rc);
@@ -84,7 +88,7 @@ void Scene::Render()
     cbManager->SetCB(dc, 3, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
 
     // ゲームオブジェクトの描画
-    ActorManager::Render(rc);
+    _actorManager.Render(rc);
 
     //--------------------------------------------------------------------------------------
     // GBuffer生成
@@ -107,7 +111,7 @@ void Scene::Render()
     renderFrame->ClearAndActivate(dc, Vector4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
     {
         // 空の描画
-        if (skyMap_)
+        if (_skyMap)
         {
             // ブレンドなし
             dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
@@ -116,7 +120,7 @@ void Scene::Render()
             // カリングを行わない
             dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
-            skyMap_->Blit(rc);
+            _skyMap->Blit(rc);
         }
 
         // GBufferのデータを書き出し
@@ -154,7 +158,7 @@ void Scene::Render()
     cascadedShadowMap->ClearAndActivate(rc, 3/*cb_slot*/);
     {
         // ゲームオブジェクトの影描画処理
-        ActorManager::CastShadow(rc);
+        _actorManager.CastShadow(rc);
 
         // モデルの影描画処理
         MeshRenderer::CastShadow(rc);
@@ -233,18 +237,18 @@ void Scene::Render()
     dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
     // 3D描画後の描画処理
-    ActorManager::DelayedRender(rc);
+    _actorManager.DelayedRender(rc);
 }
 
 // デバッグ用Gui描画
 void Scene::DrawGui()
 {
     //　ゲームオブジェクトのGui表示
-    ActorManager::DrawGui();
+    _actorManager.DrawGui();
 }
 
 // スカイマップ設定
 void Scene::SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM)
 {
-    skyMap_ = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename, diffuseIEM, specularIDM);
+    _skyMap = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename, diffuseIEM, specularIDM);
 }

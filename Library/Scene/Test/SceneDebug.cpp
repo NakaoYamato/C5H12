@@ -5,8 +5,6 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Camera/Camera.h"
 
-#include "../../Library/Actor/ActorManager.h"
-
 // コンポーネント
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Component/Light/PointLightController.h"
@@ -41,22 +39,23 @@ void SceneDebug::Initialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/diffuse_iem.dds",
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
+    ActorManager& actorManager = GetActorManager();
     // オブジェクト作成
     {
-        std::shared_ptr<Actor> light = ActorManager::Register(u8"Light", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
         auto lc = light->AddComponent<LightController>();
         lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
     }
     {
-        std::shared_ptr<Actor> light = ActorManager::Register(u8"PointLight0", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight0", ActorTag::DrawContextParameter);
         light->AddComponent<PointLightController>();
     }
     {
-        std::shared_ptr<Actor> light = ActorManager::Register(u8"PointLight1", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight1", ActorTag::DrawContextParameter);
         light->AddComponent<PointLightController>();
     }
     {
-        auto stage = ActorManager::Register("Stage", ActorTag::Stage);
+        auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
 
         //stage->GetTransform().SetPositionY(-2.7f);
         //stage->GetTransform().SetLengthScale(0.1f);
@@ -68,7 +67,7 @@ void SceneDebug::Initialize()
         modelCont->SetRenderType(ModelRenderType::Static);
     }
     {
-        //auto stage = ActorManager::Create("StageGrass", ActorTag::Stage);
+        //auto stage = actorManager.Create("StageGrass", ActorTag::Stage);
         //stage->GetTransform().SetPositionY(-2.7f);
         //stage->GetTransform().SetLengthScale(0.1f);
         //auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
@@ -78,16 +77,10 @@ void SceneDebug::Initialize()
         //auto grassController = stage->AddComponent<GrassController>();
     }
     {
-        auto player = ActorManager::Register<PlayerActor>("Player", ActorTag::Player);
+        auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
     }
     {
-        //auto box = ActorManager::Register("box", ActorTag::Player);
+        //auto box = actorManager.Register("box", ActorTag::Player);
         //auto boxC = box->AddComponent<ShapeController>();
     }
-}
-
-//終了化 
-void SceneDebug::Finalize()
-{
-    ActorManager::Clear();
 }

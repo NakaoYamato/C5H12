@@ -23,8 +23,12 @@ enum class ActorTag
 
 using ActorMap = std::vector<std::shared_ptr<Actor>>;
 
-namespace ActorManager
+class ActorManager
 {
+public:
+	ActorManager() {}
+	~ActorManager() {}
+
 	// 更新処理
 	void Update(float elapsedTime);
 
@@ -49,89 +53,79 @@ namespace ActorManager
 	// Gui描画
 	void DrawGui();
 
-	namespace Find
-	{
-		/// <summary>
-		/// 指定要素の取得(updateActorsから検索)
-		/// </summary>
-		/// <param name="tag">検索するタグ</param>
-		/// <returns>そのタグに含まれる全要素</returns>
-		ActorMap& ByTag(ActorTag tag);
-
-		/// <summary>
-		/// 指定要素の取得(startActorsから検索)
-		/// </summary>
-		/// <param name="tag">検索するタグ</param>
-		/// <returns>そのタグに含まれる全要素</returns>
-		ActorMap& ByTagInStartActors(ActorTag tag);
-
-		/// <summary>
-		/// 指定要素の取得
-		/// </summary>
-		/// <param name="name">検索する名前</param>
-		/// <param name="tag">検索する際の補助、GameObjectTagMax指定で全タグから検索</param>
-		/// <returns>成功でポインタ、失敗でnullptr</returns>
-		std::shared_ptr<Actor> ByName(const std::string& name, ActorTag tag = ActorTag::ActorTagMax);
-
-		/// <summary>
-		/// 指定要素を開始アクターから取得
-		/// </summary>
-		/// <param name="name">検索する名前</param>
-		/// <param name="tag">検索する際の補助、GameObjectTagMax指定で全タグから検索</param>
-		/// <returns>成功でポインタ、失敗でnullptr</returns>
-		std::shared_ptr<Actor> ByNameFromStartActor(const std::string& name, ActorTag tag = ActorTag::ActorTagMax);
-
-	}
+#pragma region 要素の取得
+	/// <summary>
+	/// 指定要素の取得(updateActorsから検索)
+	/// </summary>
+	/// <param name="tag">検索するタグ</param>
+	/// <returns>そのタグに含まれる全要素</returns>
+	ActorMap& FindByTag(ActorTag tag);
 
 	/// <summary>
-	/// アクターの登録
+	/// 指定要素の取得(startActorsから検索)
 	/// </summary>
-	/// <typeparam name="T">Actorを継承したクラス</typeparam>
-	/// <param name="name"></param>
+	/// <param name="tag">検索するタグ</param>
+	/// <returns>そのタグに含まれる全要素</returns>
+	ActorMap& FindByTagInStartActors(ActorTag tag);
+
+	/// <summary>
+	/// 指定要素の取得
+	/// </summary>
+	/// <param name="name">検索する名前</param>
+	/// <param name="tag">検索する際の補助、GameObjectTagMax指定で全タグから検索</param>
+	/// <returns>成功でポインタ、失敗でnullptr</returns>
+	std::shared_ptr<Actor> FindByName(const std::string& name, ActorTag tag = ActorTag::ActorTagMax);
+
+	/// <summary>
+	/// 指定要素を開始アクターから取得
+	/// </summary>
+	/// <param name="name">検索する名前</param>
+	/// <param name="tag">検索する際の補助、GameObjectTagMax指定で全タグから検索</param>
+	/// <returns>成功でポインタ、失敗でnullptr</returns>
+	std::shared_ptr<Actor> FindByNameFromStartActor(const std::string& name, ActorTag tag = ActorTag::ActorTagMax);
+#pragma endregion
+
+	/// <summary>
+	/// アクター登録
+	/// </summary>
+	/// <param name="actor"></param>
 	/// <param name="tag"></param>
-	/// <returns></returns>
-	template<class T>
-	static std::shared_ptr<T> Register(const std::string& name, ActorTag tag)
-	{
-#ifdef _DEBUG
-		if (Find::ByName(name, tag))
-			assert(!"名前の重複");
-#endif
-		std::shared_ptr<T> actor = std::make_shared<T>();
-		actor->SetName(name.c_str());
+	void Register(std::shared_ptr<Actor> actor, ActorTag tag);
 
-		// 当たり判定フラグを設定
-		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		{
-			actor->SetJudgeTagFlag(static_cast<ActorTag>(i), true);
-		}
-		actor->SetJudgeTagFlag(ActorTag::DrawContextParameter, false);
-
-		//　startActorsに登録
-		Find::ByTagInStartActors(tag).emplace_back(actor);
-
-		return actor;
-	}
-	
+#pragma region 要素の削除
 	/// <summary>
-	/// アクターの作成
+	/// ポインタから要素を削除
 	/// </summary>
-	/// <param name="name">オブジェクトの名前（重複不可）</param>
+	/// <param name="actor">要素</param>
+	void Remove(std::shared_ptr<Actor> actor);
+
+	/// <summary>
+	/// 名前から要素を削除
+	/// </summary>
+	/// <param name="name">要素の名前</param>
+	void Remove(const std::string& name);
+
+	/// <summary>
+	/// タグに含まれる要素を全削除
+	/// </summary>
 	/// <param name="tag">タグ</param>
-	/// <returns>オブジェクトの実体</returns>
-	static std::shared_ptr<Actor> Register(const std::string& name, ActorTag tag)
-	{
-		return Register<Actor>(name, tag);
-	}
-	
+	void Remove(ActorTag tag);
+
 	// 要素の全削除
 	void Clear();
-
-	// 指定要素の削除
-	void Remove(std::shared_ptr<Actor> actor);
-	void Remove(const std::string& name);
-	void Remove(ActorTag tag);
+#pragma endregion
 
 	// ゲームスピードの設定
 	void SetGameSpeed(ActorTag tag, float scale, float duration);
-}
+
+private:
+	ActorMap startActors_[static_cast<size_t>(ActorTag::ActorTagMax)];
+	ActorMap updateActors_[static_cast<size_t>(ActorTag::ActorTagMax)];
+	std::set<std::shared_ptr<Actor>> selectionActors_;
+	std::set<std::shared_ptr<Actor>> removeActors_;
+
+	// GUIで選択しているオブジェクト
+	std::unordered_map<std::string, bool> showGuiObjects_;
+
+	std::pair<float, float> gameSpeeds_[static_cast<size_t>(ActorTag::ActorTagMax)];
+};

@@ -8,11 +8,11 @@ public:
 	SceneDebug() {}
 	~SceneDebug()override {}
 
+	// 名前取得
+	const char* GetName()const { return u8"Debug"; }
+
 	//初期化
 	void Initialize()override;
-
-	//終了化 
-	void Finalize()override;
 
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override

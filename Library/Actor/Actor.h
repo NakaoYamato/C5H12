@@ -12,6 +12,7 @@
 class Component;
 class ColliderComponent;
 enum class ActorTag;
+class Scene;
 
 /// <summary>
 /// ゲームオブジェクトの基底クラス
@@ -117,6 +118,7 @@ public:
 	Transform& GetTransform() { return transform_; }
 	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return judgeTags_; }
 
+	void SetScene(Scene* scene) { this->_scene = scene; }
 	void SetParent(std::shared_ptr<Actor> parent) {
 		this->parent_ = parent;
 		parent->children_.push_back(shared_from_this());
@@ -135,6 +137,8 @@ public:
 
 #pragma endregion
 protected:
+	Scene* _scene = nullptr;
+
 	std::weak_ptr<Actor>	parent_;
 	std::vector<std::weak_ptr<Actor>> children_;
 

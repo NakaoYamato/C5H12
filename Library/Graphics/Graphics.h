@@ -9,21 +9,9 @@
 
 #include "RenderState.h"
 #include "ConstantBufferManager.h"
-#include "GBuffer.h"
-#include "../PostProcess/FrameBuffer.h"
-#include "../PostProcess/CascadedShadowMap/CascadedShadowMap.h"
-#include "../2D/Sprite.h"
+#include "RenderingManager.h"
 
 //#define X3DGP_FULLSCREEN
-
-enum class FullscreenQuadPS
-{
-	EmbeddedPS,	// 通常の処理
-	CascadedPS,	// カスケードシャドウ
-	DeferredRenderingPS,
-
-	FullscreenQuadPSMax,
-};
 
 class Graphics
 {
@@ -87,27 +75,11 @@ public:
 	// スクリーン高さ取得
 	[[nodiscard]] float GetScreenHeight() const { return static_cast<float>(framebufferDimensions_.cy); }
 
-	// フレームバッファ取得
-	[[nodiscard]] FrameBuffer* GetFrameBuffer(int index) { return frameBufferes[index].get(); }
-
-	// カスケードシャドウマップ取得
-	[[nodiscard]] CascadedShadowMap* GetCascadedShadowMap() { return cascadedShadowMap.get(); }
-
 	// 定数バッファの管理者取得
 	[[nodiscard]] ConstantBufferManager* GetConstantBufferManager() { return constantBufferManager.get(); }
+	// 描画管理者取得
+	[[nodiscard]] RenderingManager* GetRenderingManager() { return _renderingManager.get(); }
 
-	// マルチレンダーターゲット取得
-	[[nodiscard]] GBuffer* GetGBuffer() { return gBuffer.get(); }
-
-	// PIXEL_SHADER_TYPEでピクセルシェーダを指定して描画
-	void Blit(ID3D11ShaderResourceView** shaderResourceView,
-		uint32_t startSlot, uint32_t numViews,
-		FullscreenQuadPS shaderType = FullscreenQuadPS::EmbeddedPS);
-
-	// この関数の使用者側でピクセルシェーダを指定して描画
-	void Blit(ID3D11ShaderResourceView** shaderResourceView,
-		uint32_t startSlot, uint32_t numViews,
-		ID3D11PixelShader* pixelShader);
 private:
 	// フルスクリーン用（福井先生の秘密フォルダx3dgp.fullscreen参照）
 	// 高性能アダプターの取得
@@ -132,14 +104,8 @@ private:
 	std::unique_ptr<RenderState>					renderState;
 	// 定数バッファの管理者
 	std::unique_ptr<ConstantBufferManager> constantBufferManager;
-	// オフスクリーンレンダリングの管理者
-	std::unique_ptr<FrameBuffer> frameBufferes[4];
-	std::unique_ptr<Sprite> fullscreenQuad;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShaders[static_cast<int>(FullscreenQuadPS::FullscreenQuadPSMax)];
-	// カスケードシャドウマップ
-	std::unique_ptr<CascadedShadowMap> cascadedShadowMap;
-	// マルチレンダーターゲットの管理者
-	std::unique_ptr<GBuffer> gBuffer;
+	// 描画管理者
+	std::unique_ptr<RenderingManager> _renderingManager;
 
 private:
 	// スクリーンの大きさ

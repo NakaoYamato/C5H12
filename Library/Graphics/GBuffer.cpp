@@ -166,40 +166,24 @@ void GBuffer::Deactivate(ID3D11DeviceContext* immediateContext)
 void GBuffer::DrawGui()
 {
 #if USE_IMGUI
-	if (ImGui::BeginMainMenuBar())
+	if (ImGui::Begin("GBuffer"))
 	{
-		if (ImGui::BeginMenu(u8"GBuffer"))
+		ImGui::Checkbox(u8"usePBR", &usePBR_);
+		static float sizeFactor = 0.3f;
+		ImGui::DragFloat("TextureSize", &sizeFactor);
+		Vector2 size = textureSize_ * sizeFactor;
+		for (size_t i = 0; i < static_cast<size_t>(GBufferSRVType::GBufferSRVTypeMAX); ++i)
 		{
-			ImGui::Checkbox(u8"Active", &isActive_);
-			ImGui::Checkbox(u8"SRV", &drawGui_);
-			ImGui::Checkbox(u8"usePBR", &usePBR_);
-
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMainMenuBar();
-	}
-
-	if (drawGui_)
-	{
-		if (ImGui::Begin("GBuffer"))
-		{
-			static float sizeFactor = 0.3f;
-			ImGui::DragFloat("TextureSize", &sizeFactor);
-			Vector2 size = textureSize_ * sizeFactor;
-			for (size_t i = 0; i < static_cast<size_t>(GBufferSRVType::GBufferSRVTypeMAX); ++i)
-			{
-				ImGui::Text(ToString<GBufferSRVType>(i).c_str());
-				ImGui::Image(renderTargetSRVs_[i].Get(),
-					{ size.x ,size.y });
-			}
-
-			ImGui::Text(u8"Depth");
-			ImGui::Image(depthStencilSRV_.Get(),
+			ImGui::Text(ToString<GBufferSRVType>(i).c_str());
+			ImGui::Image(renderTargetSRVs_[i].Get(),
 				{ size.x ,size.y });
 		}
-		ImGui::End();
+
+		ImGui::Text(u8"Depth");
+		ImGui::Image(depthStencilSRV_.Get(),
+			{ size.x ,size.y });
 	}
+	ImGui::End();
 #endif
 }
 

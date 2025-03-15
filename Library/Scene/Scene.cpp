@@ -28,8 +28,10 @@ void Scene::Render()
     ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
     ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
 
+    // 各種マネジャー取得
     RenderState* renderState = graphics.GetRenderState();
     ConstantBufferManager* cbManager = graphics.GetConstantBufferManager();
+    RenderingManager* renderingManager = graphics.GetRenderingManager();
 
     FLOAT color[] = { 0.2f,0.2f,0.2f,1.0f };
     dc->ClearRenderTargetView(rtv, color);
@@ -86,8 +88,8 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // GBuffer生成
-    GBuffer* gBuffer = graphics.GetGBuffer();
-    if (gBuffer->IsActive())
+    GBuffer* gBuffer = renderingManager->GetGBuffer();
+    if (renderingManager->RenderingDeferred())
     {
         gBuffer->ClearAndActivate(dc);
         {
@@ -101,7 +103,7 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // フレームバッファ0番に空、GBuffer、その他レンダラーを描画
-    FrameBuffer* renderFrame = graphics.GetFrameBuffer(0);
+    FrameBuffer* renderFrame = renderingManager->GetFrameBuffer(0);
     renderFrame->ClearAndActivate(dc, Vector4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
     {
         // 空の描画
@@ -118,7 +120,7 @@ void Scene::Render()
         }
 
         // GBufferのデータを書き出し
-        if (gBuffer->IsActive())
+        if (renderingManager->RenderingDeferred())
         {
             // レンダーステート設定
             dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -148,7 +150,7 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
-    CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
+    CascadedShadowMap* cascadedShadowMap = renderingManager->GetCascadedShadowMap();
     cascadedShadowMap->ClearAndActivate(rc, 3/*cb_slot*/);
     {
         // ゲームオブジェクトの影描画処理
@@ -163,7 +165,7 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
-    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
+    FrameBuffer* modelAndShadowRenderFrame = renderingManager->GetFrameBuffer(1);
     modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4(0.0f,0.0f,0.0f,0.0f), 0.0f);
     {
         // 影の描画
@@ -185,7 +187,8 @@ void Scene::Render()
         dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
         dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
 
-        graphics.Blit(
+        renderingManager->Blit(
+            dc,
             srvs,
             0, _countof(srvs),
             FullscreenQuadPS::CascadedPS);
@@ -218,7 +221,8 @@ void Scene::Render()
     }
     dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
     // バックバッファに描画
-    graphics.Blit(
+    renderingManager->Blit(
+        dc,
         PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
         0, 1,
         FullscreenQuadPS::EmbeddedPS);

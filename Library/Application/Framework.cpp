@@ -240,11 +240,8 @@ void Framework::Render(float elapsedTime)
         // 入力管理クラスのGUI描画
         Input::Instance().DrawGui();
 
-        // カスケードシャドウマップのGUI
-        Graphics::Instance().GetCascadedShadowMap()->DrawGui();
-
-        // GBufferGUI
-        Graphics::Instance().GetGBuffer()->DrawGui();
+        // 描画管理者のGUI描画
+        Graphics::Instance().GetRenderingManager()->DrawGui();
 
         // デバッグのGui描画
         Debug::DrawGui();

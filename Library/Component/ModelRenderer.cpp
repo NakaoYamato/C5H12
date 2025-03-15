@@ -43,7 +43,7 @@ void ModelRenderer::DrawGui()
 	ImGui::ColorEdit4("color", &color_.x);
 	ImGui::Text((u8"現在のシェーダー:" + shaderName_).c_str());
 	ImGui::Separator();
-	auto shaderName = MeshRenderer::GetShaderNames(renderType_, Graphics::Instance().GetGBuffer()->IsActive());
+	auto shaderName = MeshRenderer::GetShaderNames(renderType_, Graphics::Instance().GetRenderingManager()->RenderingDeferred());
 	if (ImGui::TreeNodeEx(u8"使用可能のシェーダー"))
 	{
 		for (auto& name : shaderName)
@@ -83,5 +83,5 @@ void ModelRenderer::SetShader(std::string name)
 {
 	this->shaderName_ = name;
 	// パラメータのkye受け取り
-	shaderParameter_ = MeshRenderer::GetShaderParameterKey(renderType_, shaderName_, Graphics::Instance().GetGBuffer()->IsActive());
+	shaderParameter_ = MeshRenderer::GetShaderParameterKey(renderType_, shaderName_, Graphics::Instance().GetRenderingManager()->RenderingDeferred());
 }

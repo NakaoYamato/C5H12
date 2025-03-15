@@ -50,8 +50,6 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() {
 		return depthStencilSRV_;
 	}
-
-	bool IsActive()const { return isActive_; }
 #pragma endregion
 private:
 	const UINT bufferCount_ = GBufferSRVType::GBufferSRVTypeMAX;
@@ -70,7 +68,5 @@ private:
 	std::unique_ptr<Sprite> fullscreenQuad_;
 	std::unique_ptr<Sprite> PBR_FQ_;
 
-	bool drawGui_ = false;
-	bool isActive_ = true;
 	bool usePBR_ = true;
 };

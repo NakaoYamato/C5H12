@@ -235,26 +235,21 @@ void CascadedShadowMap::Deactivate(const RenderContext& rc)
 void CascadedShadowMap::DrawGui()
 {
 #if USE_IMGUI
-	if (ImGui::BeginMainMenuBar())
+	if (ImGui::Begin(u8"カスケードシャドウマップ"))
 	{
-		if (ImGui::BeginMenu(u8"カスケードシャドウマップ"))
-		{
-			ImGui::SliderFloat("criticalDepthValue", &criticalDepthValue, 0.0f, +1000.0f);
-			ImGui::SliderFloat("splitSchemeWeight", &splitSchemeWeight, 0.0f, +1.0f);
-			ImGui::SliderFloat("zMult", &zMult, 1.0f, +100.0f);
-			ImGui::Checkbox("fitToCascade", &fitToCascade);
+		ImGui::SliderFloat("criticalDepthValue", &criticalDepthValue, 0.0f, +1000.0f);
+		ImGui::SliderFloat("splitSchemeWeight", &splitSchemeWeight, 0.0f, +1.0f);
+		ImGui::SliderFloat("zMult", &zMult, 1.0f, +100.0f);
+		ImGui::Checkbox("fitToCascade", &fitToCascade);
 
-			ImGui::SliderFloat("shadowColor", &parametricConstants.shadowColor, +0.0f, +1.0f);
-			ImGui::DragFloat("shadowDepthBias", &parametricConstants.shadowDepthBias, 0.00001f, 0.0f, 0.01f, "%.8f");
-			ImGui::DragFloat("shiftVolume", &parametricConstants.shiftVolume);
-			bool flag = parametricConstants.colorizeCascadedLayer != 0.0f ? true : false;
-			ImGui::Checkbox("colorizeCascadedLayer", &flag);
-			parametricConstants.colorizeCascadedLayer = flag ? 1.0f : 0.0f;
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMainMenuBar();
+		ImGui::SliderFloat("shadowColor", &parametricConstants.shadowColor, +0.0f, +1.0f);
+		ImGui::DragFloat("shadowDepthBias", &parametricConstants.shadowDepthBias, 0.00001f, 0.0f, 0.01f, "%.8f");
+		ImGui::DragFloat("shiftVolume", &parametricConstants.shiftVolume);
+		bool flag = parametricConstants.colorizeCascadedLayer != 0.0f ? true : false;
+		ImGui::Checkbox("colorizeCascadedLayer", &flag);
+		parametricConstants.colorizeCascadedLayer = flag ? 1.0f : 0.0f;
 	}
+	ImGui::End();
 #endif
 }
 

@@ -10,13 +10,6 @@
 #include "../Component/Component.h"
 #include "../Component/Collider/ColliderComponent.h"
 
-/// <summary>
-/// enum‚ğstring‚É•ÏŠ·
-/// </summary>
-/// <param name="index"></param>
-/// <returns>string</returns>
-#define GET_ENUM_NAME(index) nameof::nameof_enum(magic_enum::enum_value<ActorTag>(index)).data()
-
 // ŠJnˆ—
 void Actor::Start()
 {

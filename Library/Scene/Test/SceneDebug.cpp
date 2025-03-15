@@ -19,6 +19,8 @@
 //‰Šú‰»
 void SceneDebug::Initialize()
 {
+    Scene::Initialize();
+
     float screenWidth = Graphics::Instance().GetScreenWidth();
     float screenHeight = Graphics::Instance().GetScreenHeight();
     // ƒJƒƒ‰‰Šúİ’è

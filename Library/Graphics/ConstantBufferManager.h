@@ -109,8 +109,8 @@ private:
 
 private:
 	// 定数バッファ
-	SceneConstantBuffer sceneCB_{};
-	LightConstantBuffer lightCB_{};
+	SceneConstantBuffer _sceneCB{};
+	LightConstantBuffer _lightCB{};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	constantBuffers_[static_cast<size_t>(ConstantBufferType::CBtypeMax)];
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	_constantBuffers[static_cast<size_t>(ConstantBufferType::CBtypeMax)];
 };

@@ -241,7 +241,7 @@ void Framework::Render(float elapsedTime)
         Input::Instance().DrawGui();
 
         // •`‰æŠÇ—ŽÒ‚ÌGUI•`‰æ
-        Graphics::Instance().GetRenderingManager()->DrawGui();
+        Graphics::Instance().DrawGui();
 
         // ƒfƒoƒbƒO‚ÌGui•`‰æ
         Debug::DrawGui();

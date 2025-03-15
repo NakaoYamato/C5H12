@@ -9,6 +9,15 @@
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 #include "../../Library/Renderer/ShapeRenderer.h"
 
+// 初期化
+void Scene::Initialize()
+{
+    _fullscreenQuad = std::make_unique<Sprite>(Graphics::Instance().GetDevice(),
+        L"",
+        "./Data/Shader/FullscreenQuadVS.cso",
+        "./Data/Shader/SpritePS.cso");
+}
+
 // 終了化
 void Scene::Finalize()
 {
@@ -35,7 +44,6 @@ void Scene::Render()
     // 各種マネジャー取得
     RenderState* renderState = graphics.GetRenderState();
     ConstantBufferManager* cbManager = graphics.GetConstantBufferManager();
-    RenderingManager* renderingManager = graphics.GetRenderingManager();
 
     FLOAT color[] = { 0.2f,0.2f,0.2f,1.0f };
     dc->ClearRenderTargetView(rtv, color);
@@ -92,8 +100,8 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // GBuffer生成
-    GBuffer* gBuffer = renderingManager->GetGBuffer();
-    if (renderingManager->RenderingDeferred())
+    GBuffer* gBuffer = graphics.GetGBuffer();
+    if (graphics.RenderingDeferred())
     {
         gBuffer->ClearAndActivate(dc);
         {
@@ -107,7 +115,7 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // フレームバッファ0番に空、GBuffer、その他レンダラーを描画
-    FrameBuffer* renderFrame = renderingManager->GetFrameBuffer(0);
+    FrameBuffer* renderFrame = graphics.GetFrameBuffer(0);
     renderFrame->ClearAndActivate(dc, Vector4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
     {
         // 空の描画
@@ -124,7 +132,7 @@ void Scene::Render()
         }
 
         // GBufferのデータを書き出し
-        if (renderingManager->RenderingDeferred())
+        if (graphics.RenderingDeferred())
         {
             // レンダーステート設定
             dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -154,7 +162,7 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
-    CascadedShadowMap* cascadedShadowMap = renderingManager->GetCascadedShadowMap();
+    CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
     cascadedShadowMap->ClearAndActivate(rc, 3/*cb_slot*/);
     {
         // ゲームオブジェクトの影描画処理
@@ -169,7 +177,7 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
-    FrameBuffer* modelAndShadowRenderFrame = renderingManager->GetFrameBuffer(1);
+    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
     modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4(0.0f,0.0f,0.0f,0.0f), 0.0f);
     {
         // 影の描画
@@ -191,11 +199,9 @@ void Scene::Render()
         dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
         dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
 
-        renderingManager->Blit(
-            dc,
-            srvs,
-            0, _countof(srvs),
-            FullscreenQuadPS::CascadedPS);
+        cascadedShadowMap->Blit(dc,
+            renderFrame->GetColorSRV().GetAddressOf(),
+            renderFrame->GetDepthSRV().GetAddressOf());
     }
     modelAndShadowRenderFrame->Deactivate(dc);
     // フレームバッファ1番の処理終了
@@ -225,11 +231,11 @@ void Scene::Render()
     }
     dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
     // バックバッファに描画
-    renderingManager->Blit(
+    _fullscreenQuad->Blit(
         dc,
         PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
-        0, 1,
-        FullscreenQuadPS::EmbeddedPS);
+        0, 1
+    );
 
     // レンダーステート設定
     dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);

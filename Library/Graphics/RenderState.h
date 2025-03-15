@@ -65,38 +65,38 @@ public:
 	// サンプラステート取得
 	ID3D11SamplerState* GetSamplerState(SamplerState state) const
 	{
-		return samplerStates_[static_cast<int>(state)].Get();
+		return _samplerStates[static_cast<int>(state)].Get();
 	}
 	ID3D11SamplerState*const* GetAddressOfSamplerState(SamplerState state) const
 	{
-		return samplerStates_[static_cast<int>(state)].GetAddressOf();
+		return _samplerStates[static_cast<int>(state)].GetAddressOf();
 	}
 
 	// デプスステート取得
 	ID3D11DepthStencilState* GetDepthStencilState(DepthState state) const
 	{
-		return depthStencilStates_[static_cast<int>(state)].Get();
+		return _depthStencilStates[static_cast<int>(state)].Get();
 	}
 
 	// ブレンドステート取得
 	ID3D11BlendState* GetBlendState(BlendState state) const
 	{
-		return blendStates_[static_cast<int>(state)].Get();
+		return _blendStates[static_cast<int>(state)].Get();
 	}
 	ID3D11BlendState*const* GetAddressOfBlendState(BlendState state) const
 	{
-		return blendStates_[static_cast<int>(state)].GetAddressOf();
+		return _blendStates[static_cast<int>(state)].GetAddressOf();
 	}
 
 	// ラスタライザーステート取得
 	ID3D11RasterizerState* GetRasterizerState(RasterizerState state) const
 	{
-		return rasterizerStates_[static_cast<int>(state)].Get();
+		return _rasterizerStates[static_cast<int>(state)].Get();
 	}
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerStates_[static_cast<int>(SamplerState::EnumCount)];
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilStates_[static_cast<int>(DepthState::EnumCount)];
-	Microsoft::WRL::ComPtr<ID3D11BlendState>		blendStates_[static_cast<int>(BlendState::EnumCount)];
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterizerStates_[static_cast<int>(RasterizerState::EnumCount)];
+	Microsoft::WRL::ComPtr<ID3D11SamplerState>		_samplerStates[static_cast<int>(SamplerState::EnumCount)];
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depthStencilStates[static_cast<int>(DepthState::EnumCount)];
+	Microsoft::WRL::ComPtr<ID3D11BlendState>		_blendStates[static_cast<int>(BlendState::EnumCount)];
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	_rasterizerStates[static_cast<int>(RasterizerState::EnumCount)];
 };

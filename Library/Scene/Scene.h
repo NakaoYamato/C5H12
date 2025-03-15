@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <memory>
 
+#include "../../Library/2D/Sprite.h"
 #include "../../Library/3D/SkyMap.h"
 #include "../../Library/Actor/ActorManager.h"
 
@@ -19,7 +20,7 @@ public:
 	virtual const char* GetName() const = 0;
 
 	// èâä˙âª
-	virtual void Initialize() = 0;
+	virtual void Initialize();
 
 	// èIóπâª
 	virtual void Finalize();
@@ -69,6 +70,7 @@ public:
 	ActorManager& GetActorManager() { return _actorManager; }
 
 private:
+	std::unique_ptr<Sprite> _fullscreenQuad;
 	std::unique_ptr<SkyMap> _skyMap;
 	ActorManager _actorManager;
 	bool _ready = false;

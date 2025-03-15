@@ -25,7 +25,7 @@ public:
 	void DrawGui() override;
 
 	// アクセサ
-	PointLight& GetLight() { return light_; }
+	PointLight& GetLight() { return _light; }
 private:
-	PointLight light_;
+	PointLight _light;
 };

@@ -26,7 +26,7 @@ public:
     GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t height) :
         PostProcessBase(device, width, height, "./Data/Shader/GaussianFilterPS.cso", sizeof(Constants)) {
         // 初期値の設定
-        startData = GetCurrentData();
+        _startData = GetCurrentData();
     };
     ~GaussianFilter()override {}
 
@@ -49,6 +49,6 @@ private:
     // データのセット
     void SetData(std::unordered_map<std::string, float>& parameter) override;
 private:
-    Constants constant{};
-    Datas data{};
+    Constants _constant{};
+    Datas _data{};
 };

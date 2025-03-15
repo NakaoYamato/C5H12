@@ -6,7 +6,7 @@
 std::shared_ptr<ModelResource> ModelResourceManager::LoadModelResource(const char* filename)
 {
 	// すでに読み込まれていたらリソースを返す
-	for (auto& model : models_)
+	for (auto& model : _models)
 	{
 		if (model.first == filename)
 		{
@@ -20,7 +20,7 @@ std::shared_ptr<ModelResource> ModelResourceManager::LoadModelResource(const cha
 	resource->Load(filename);
 
 	// 登録
-	models_[filename] = resource;
+	_models[filename] = resource;
 
 	return resource;
 }
@@ -32,7 +32,7 @@ void ModelResourceManager::DrawGui()
 	{
 		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			ImGui::Checkbox(u8"モデルリソース", &showGui_);
+			ImGui::Checkbox(u8"モデルリソース", &_showGui);
 
 			ImGui::EndMenu();
 		}
@@ -40,13 +40,13 @@ void ModelResourceManager::DrawGui()
 		ImGui::EndMainMenuBar();
 	}
 
-	if (showGui_)
+	if (_showGui)
 	{
 		if (ImGui::Begin(u8"モデルリソースマネージャー"))
 		{
 			if (ImGui::TreeNode(u8"読み込んだモデル"))
 			{
-				for (const auto& [str, reource] : models_)
+				for (const auto& [str, reource] : _models)
 				{
 					ImGui::Text(u8"%s", str.c_str());
 				}

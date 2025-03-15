@@ -13,56 +13,56 @@ void ActorManager::Update(float elapsedTime)
 	// 開始関数の呼び出し
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
-		for (auto& actor : startActors_[i])
+		for (auto& actor : _startActors[i])
 		{
 			actor->Start();
-			updateActors_[i].emplace_back(actor);
+			_updateActors[i].emplace_back(actor);
 		}
-		startActors_[i].clear();
+		_startActors[i].clear();
 	}
 
 	// 更新処理
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
 		float deltaTime = elapsedTime;
-		auto& [timeScale, duration] = gameSpeeds_[i];
+		auto& [timeScale, duration] = _gameSpeeds[i];
 		if (duration > 0.0f)
 		{
 			duration -= elapsedTime;
 			deltaTime *= timeScale;
 		}
 
-		for (auto& actor : updateActors_[i])
+		for (auto& actor : _updateActors[i])
 		{
 			actor->Update(deltaTime);
 		}
 	}
 
 	// 削除処理
-	for (const std::shared_ptr<Actor>& actor : removeActors_)
+	for (const std::shared_ptr<Actor>& actor : _removeActors)
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
-			std::vector<std::shared_ptr<Actor>>::iterator itStart = std::find(startActors_[i].begin(), startActors_[i].end(), actor);
-			if (itStart != startActors_[i].end())
+			std::vector<std::shared_ptr<Actor>>::iterator itStart = std::find(_startActors[i].begin(), _startActors[i].end(), actor);
+			if (itStart != _startActors[i].end())
 			{
-				startActors_[i].erase(itStart);
+				_startActors[i].erase(itStart);
 			}
 
-			std::vector<std::shared_ptr<Actor>>::iterator itUpdate = std::find(updateActors_[i].begin(), updateActors_[i].end(), actor);
-			if (itUpdate != updateActors_[i].end())
+			std::vector<std::shared_ptr<Actor>>::iterator itUpdate = std::find(_updateActors[i].begin(), _updateActors[i].end(), actor);
+			if (itUpdate != _updateActors[i].end())
 			{
-				updateActors_[i].erase(itUpdate);
+				_updateActors[i].erase(itUpdate);
 			}
 
-			std::set<std::shared_ptr<Actor>>::iterator itSelection = selectionActors_.find(actor);
-			if (itSelection != selectionActors_.end())
+			std::set<std::shared_ptr<Actor>>::iterator itSelection = _selectionActors.find(actor);
+			if (itSelection != _selectionActors.end())
 			{
-				selectionActors_.erase(itSelection);
+				_selectionActors.erase(itSelection);
 			}
 		}
 	}
-	removeActors_.clear();
+	_removeActors.clear();
 }
 
 // 1秒ごとの更新処理
@@ -70,7 +70,7 @@ void ActorManager::FixedUpdate()
 {
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
-		for (auto& actor : updateActors_[i])
+		for (auto& actor : _updateActors[i])
 		{
 			actor->FixedUpdate();
 		}
@@ -84,13 +84,13 @@ void ActorManager::Judge()
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
-			actorSize += updateActors_[i].size();
+			actorSize += _updateActors[i].size();
 		}
 	}
 	// 総当たりで処理
 	for (size_t srcTag = 0; srcTag < static_cast<size_t>(ActorTag::ActorTagMax); ++srcTag)
 	{
-		for (auto& srcActor : updateActors_[srcTag])
+		for (auto& srcActor : _updateActors[srcTag])
 		{
 			// 起動チェック
 			if (!srcActor->IsActive())
@@ -108,7 +108,7 @@ void ActorManager::Judge()
 				if (srcTag > dstTagIndex)
 					continue;
 
-				for (auto& dstActor : updateActors_[dstTagIndex])
+				for (auto& dstActor : _updateActors[dstTagIndex])
 				{
 					// 起動チェック
 					if (!dstActor->IsActive())
@@ -136,7 +136,7 @@ void ActorManager::RenderPreprocess(RenderContext& rc)
 	// rcにパラメータを設定
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
-		for (auto& actor : updateActors_[i])
+		for (auto& actor : _updateActors[i])
 		{
 			actor->RenderPreprocess(rc);
 		}
@@ -176,7 +176,7 @@ void ActorManager::Render(const RenderContext& rc)
 
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
-		for (auto& actor : updateActors_[i])
+		for (auto& actor : _updateActors[i])
 		{
 			actor->Render(rc);
 #ifdef _DEBUG
@@ -191,7 +191,7 @@ void ActorManager::CastShadow(const RenderContext& rc)
 {
 	for (size_t i = static_cast<size_t>(ActorTag::Stage); i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
-		for (auto& actor : updateActors_[i])
+		for (auto& actor : _updateActors[i])
 		{
 			actor->CastShadow(rc);
 		}
@@ -223,7 +223,7 @@ void ActorManager::DelayedRender(RenderContext& rc)
 
 	for (size_t i = static_cast<size_t>(ActorTag::Stage); i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
-		for (auto& actor : updateActors_[i])
+		for (auto& actor : _updateActors[i])
 		{
 			actor->DelayedRender(rc);
 		}
@@ -242,7 +242,7 @@ void ActorManager::DrawGui()
 		{
 			if (ImGui::TreeNodeEx(ToString<ActorTag>(i).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				for (auto& actor : updateActors_[i])
+				for (auto& actor : _updateActors[i])
 				{
 					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
 					if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
@@ -250,7 +250,7 @@ void ActorManager::DrawGui()
 						// ダブルクリックで選択
 						if (ImGui::IsItemClicked())
 						{
-							showGuiObjects_[actor->GetName()] = true;
+							_showGuiObjects[actor->GetName()] = true;
 						}
 
 						ImGui::TreePop();
@@ -275,7 +275,7 @@ void ActorManager::DrawGui()
 		if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
 		{
 			// 選んでいるオブジェクトのGUI描画
-			for (auto& [name, showGui] : showGuiObjects_)
+			for (auto& [name, showGui] : _showGuiObjects)
 			{
 				if (showGui == false)
 				{
@@ -302,24 +302,24 @@ void ActorManager::DrawGui()
 	// 選んでいるオブジェクトの削除
 	for (auto& name : eraseNames)
 	{
-		showGuiObjects_.erase(name);
+		_showGuiObjects.erase(name);
 	}
 }
 
 /// 指定要素の取得
 ActorMap& ActorManager::FindByTag(ActorTag tag)
 {
-	return updateActors_[static_cast<size_t>(tag)];
+	return _updateActors[static_cast<size_t>(tag)];
 }
 ActorMap& ActorManager::FindByTagInStartActors(ActorTag tag)
 {
-	return startActors_[static_cast<size_t>(tag)];
+	return _startActors[static_cast<size_t>(tag)];
 }
 std::shared_ptr<Actor> ActorManager::FindByName(const std::string& name, ActorTag tag)
 {
 	if (tag != ActorTag::ActorTagMax)
 	{
-		for (auto& actor : updateActors_[static_cast<size_t>(tag)])
+		for (auto& actor : _updateActors[static_cast<size_t>(tag)])
 		{
 			if (name == actor->GetName())
 				return actor;
@@ -329,7 +329,7 @@ std::shared_ptr<Actor> ActorManager::FindByName(const std::string& name, ActorTa
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
-			for (auto& actor : updateActors_[i])
+			for (auto& actor : _updateActors[i])
 			{
 				if (name == actor->GetName())
 					return actor;
@@ -344,7 +344,7 @@ std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string&
 {
 	if (tag != ActorTag::ActorTagMax)
 	{
-		for (auto& actor : startActors_[static_cast<size_t>(tag)])
+		for (auto& actor : _startActors[static_cast<size_t>(tag)])
 		{
 			if (name == actor->GetName())
 				return actor;
@@ -354,7 +354,7 @@ std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string&
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
-			for (auto& actor : startActors_[i])
+			for (auto& actor : _startActors[i])
 			{
 				if (name == actor->GetName())
 					return actor;
@@ -370,12 +370,12 @@ std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string&
 void ActorManager::Clear()
 {
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		startActors_[i].clear();
+		_startActors[i].clear();
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		updateActors_[i].clear();
+		_updateActors[i].clear();
 
-	selectionActors_.clear();
-	removeActors_.clear();
+	_selectionActors.clear();
+	_removeActors.clear();
 }
 
 void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
@@ -397,7 +397,7 @@ void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
 // 指定要素の削除
 void ActorManager::Remove(std::shared_ptr<Actor> actor)
 {
-	removeActors_.insert(actor);
+	_removeActors.insert(actor);
 }
 void ActorManager::Remove(const std::string& name)
 {
@@ -414,5 +414,5 @@ void ActorManager::Remove(ActorTag tag)
 // ゲームスピードの設定
 void ActorManager::SetGameSpeed(ActorTag tag, float scale, float duration)
 {
-	gameSpeeds_[static_cast<size_t>(tag)] = std::make_pair(scale, duration);
+	_gameSpeeds[static_cast<size_t>(tag)] = std::make_pair(scale, duration);
 }

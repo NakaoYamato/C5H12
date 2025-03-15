@@ -64,15 +64,15 @@ public:
 	template<class T, typename... Arg>
 	void PushScene(const std::string& str, Arg... arg)
 	{
-		sceneDatas_[str] = std::make_unique<T>(arg...);
+		_sceneDatas[str] = std::make_unique<T>(arg...);
 	}
 	
 private:
-	std::shared_ptr<Scene> currentScene_;
-	std::shared_ptr<Scene> nextScene_;
+	std::shared_ptr<Scene> _currentScene;
+	std::shared_ptr<Scene> _nextScene;
 
 	// デバッグ用で保存しているシーン
-	std::unordered_map<std::string, std::unique_ptr<Scene>> sceneDatas_;
+	std::unordered_map<std::string, std::unique_ptr<Scene>> _sceneDatas;
 };
 
 template<class T, typename ...Arg>

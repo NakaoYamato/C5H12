@@ -13,6 +13,8 @@ class ShaderBase
 public:
     // シェーダーに渡すデータ
     using Parameter = std::unordered_map<std::string, float>;
+
+    static constexpr int CBIndex = 2;
 public:
     ShaderBase() {}
     virtual ~ShaderBase() {}

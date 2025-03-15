@@ -5,8 +5,8 @@
 
 void GaussianFilter::Update(float elapsedTime)
 {
-	data.textureSize.x = Graphics::Instance().GetScreenWidth();
-	data.textureSize.y = Graphics::Instance().GetScreenHeight();
+	_data.textureSize.x = Graphics::Instance().GetScreenWidth();
+	_data.textureSize.y = Graphics::Instance().GetScreenHeight();
 }
 
 // デバッグGui描画
@@ -16,8 +16,8 @@ void GaussianFilter::DrawGui()
 	{
 		if (ImGui::Button("reset"))
 			ClearData();
-		ImGui::SliderInt("kernel", &data.kernelSize, 1, KERNEL_MAX);
-		ImGui::SliderFloat("sigma", &data.sigma, 1.0f, 10.0f);
+		ImGui::SliderInt("kernel", &_data.kernelSize, 1, KERNEL_MAX);
+		ImGui::SliderFloat("sigma", &_data.sigma, 1.0f, 10.0f);
 		if (ImGui::TreeNode("Resource"))
 		{
 			static float textureSize = 512.0f;
@@ -36,9 +36,9 @@ void GaussianFilter::UpdateConstantBuffer(ID3D11DeviceContext* immediateContext,
 	ID3D11Buffer* constantBuffer)
 {
 	// フィルターの計算
-	CalcGaussianFilterConstant(constant, data);
+	CalcGaussianFilterConstant(_constant, _data);
 
-	immediateContext->UpdateSubresource(constantBuffer, 0, 0, &constant, 0, 0);
+	immediateContext->UpdateSubresource(constantBuffer, 0, 0, &_constant, 0, 0);
 }
 
 // フィルターの計算
@@ -76,8 +76,8 @@ void GaussianFilter::CalcGaussianFilterConstant(Constants& constant, const Datas
 std::unordered_map<std::string, float> GaussianFilter::GetCurrentData()
 {
 	std::unordered_map<std::string, float> parameter;
-	parameter["kernelSize"] = (float)data.kernelSize;
-	parameter["sigma"] = data.sigma;
+	parameter["kernelSize"] = (float)_data.kernelSize;
+	parameter["sigma"] = _data.sigma;
 	return parameter;
 }
 
@@ -86,11 +86,11 @@ void GaussianFilter::SetData(std::unordered_map<std::string, float>& parameter)
 	{
 		auto iter = parameter.find("kernelSize");
 		if (iter != parameter.end())
-			data.kernelSize = (int)(*iter).second;
+			_data.kernelSize = (int)(*iter).second;
 	}
 	{
 		auto iter = parameter.find("sigma");
 		if (iter != parameter.end())
-			data.sigma = (*iter).second;
+			_data.sigma = (*iter).second;
 	}
 }

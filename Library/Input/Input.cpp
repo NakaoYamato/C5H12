@@ -8,27 +8,27 @@
 Input::Input()
 {
 	// アクションの登録
-	inputActionMap["OK"] = { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
-	inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_THUMB}};
-	inputActionMap["Avoidance"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
-	inputActionMap["Attack1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_A}, {InputType::InputMouse,VK_LBUTTON} };
-	inputActionMap["Attack2"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_X}, {InputType::InputMouse,VK_RBUTTON} };
-	inputActionMap["LookOn"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
+	_inputActionMap["OK"] = { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
+	_inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_THUMB}};
+	_inputActionMap["Avoidance"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
+	_inputActionMap["Attack1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_A}, {InputType::InputMouse,VK_LBUTTON} };
+	_inputActionMap["Attack2"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_X}, {InputType::InputMouse,VK_RBUTTON} };
+	_inputActionMap["LookOn"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
 
-	moveActionMap["AxisLX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
-	moveActionMap["AxisLY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
-	moveActionMap["AxisRX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };
-	moveActionMap["AxisRY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RY} ,{InputType::InputGamepad,GAMEPAD_AXIS_RY} ,{InputType::InputMouse,MOUSE_AXIS_RY} };
-	moveActionMap["MouseMoveX"] = { {InputType::InputMouse,MOUSE_MOVE_X} };
-	moveActionMap["MouseMoveY"] = { {InputType::InputMouse,MOUSE_MOVE_Y} };
-	moveActionMap["MouseWheel"] = { {InputType::InputMouse,MOUSE_WHEEL} };
-	moveActionMap["MouseOldWheel"] = { {InputType::InputMouse,MOUSE_OLD_WHEEL} };
+	_moveActionMap["AxisLX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
+	_moveActionMap["AxisLY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
+	_moveActionMap["AxisRX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };
+	_moveActionMap["AxisRY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RY} ,{InputType::InputGamepad,GAMEPAD_AXIS_RY} ,{InputType::InputMouse,MOUSE_AXIS_RY} };
+	_moveActionMap["MouseMoveX"] = { {InputType::InputMouse,MOUSE_MOVE_X} };
+	_moveActionMap["MouseMoveY"] = { {InputType::InputMouse,MOUSE_MOVE_Y} };
+	_moveActionMap["MouseWheel"] = { {InputType::InputMouse,MOUSE_WHEEL} };
+	_moveActionMap["MouseOldWheel"] = { {InputType::InputMouse,MOUSE_OLD_WHEEL} };
 
 	// 登録したアクションの入力監視情報を格納
-	for (const auto& mapInfo : inputActionMap)
+	for (const auto& mapInfo : _inputActionMap)
 	{
-		lastInput[mapInfo.first] = FALSE;
-		currentInput[mapInfo.first] = FALSE;
+		_lastInput[mapInfo.first] = FALSE;
+		_currentInput[mapInfo.first] = FALSE;
 	}
 }
 
@@ -36,30 +36,30 @@ Input::Input()
 // プログラム開始時に呼び出す
 void Input::Initialize(HWND hwnd)
 {
-	mouseInputObserver = std::make_unique<MouseInputObserver>(hwnd);
-	this->hwnd = hwnd;
+	_mouseInputObserver = std::make_unique<MouseInputObserver>(hwnd);
+	this->_hwnd = hwnd;
 }
 
 /// 更新処理
 void Input::Update()
 {
-	lastInput = currentInput;
+	_lastInput = _currentInput;
 
 	// 入力監視クラスを更新
-	keybordInputObserver.Update();
-	gamePadInputObserver.Update();
-	mouseInputObserver->Update();
+	_keybordInputObserver.Update();
+	_gamePadInputObserver.Update();
+	_mouseInputObserver->Update();
 
 	// 入力情報取得
 	const std::unordered_map<int, BOOL>* inputStates[3] =
 	{
-		&keybordInputObserver.keystates,
-		&gamePadInputObserver.gamepadstates,
-		&mouseInputObserver->mousestates
+		&_keybordInputObserver.keystates,
+		&_gamePadInputObserver.gamepadstates,
+		&_mouseInputObserver->mousestates
 	};
 
 	//それぞれのアクション名に割り当たっている全ての入力をチェック
-	for (const auto& mapInfo : inputActionMap)
+	for (const auto& mapInfo : _inputActionMap)
 	{
 		BOOL isPressed = FALSE;
 		for (const auto& inputInfo : mapInfo.second)
@@ -73,19 +73,19 @@ void Input::Update()
 				break;
 		}
 
-		currentInput[mapInfo.first] = isPressed;
+		_currentInput[mapInfo.first] = isPressed;
 	}
 
 	// 入力量があるアクションの更新
 	const std::unordered_map<int, float>* movedParameters[3] =
 	{
-		&keybordInputObserver.keyparameters,
-		&gamePadInputObserver.gamepadParameters,
-		&mouseInputObserver->mouseParameters,
+		&_keybordInputObserver.keyparameters,
+		&_gamePadInputObserver.gamepadParameters,
+		&_mouseInputObserver->mouseParameters,
 	};
 
 	//それぞれのアクション名に割り当たっている全ての入力をチェック
-	for (const auto& mapInfo : moveActionMap)
+	for (const auto& mapInfo : _moveActionMap)
 	{
 		float moved = 0.0f;
 		for (const auto& movedInfo : mapInfo.second)
@@ -99,7 +99,7 @@ void Input::Update()
 				break;
 		}
 
-		currentMovedParameter[mapInfo.first] = moved;
+		_currentMovedParameter[mapInfo.first] = moved;
 	}
 }
 
@@ -110,7 +110,7 @@ void Input::DrawGui()
 	{
 		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			ImGui::Checkbox(u8"入力情報", &showGui);
+			ImGui::Checkbox(u8"入力情報", &_showGui);
 
 			ImGui::EndMenu();
 		}
@@ -118,19 +118,19 @@ void Input::DrawGui()
 		ImGui::EndMainMenuBar();
 	}
 
-	if (showGui)
+	if (_showGui)
 	{
 		if (ImGui::Begin(u8"入力情報"))
 		{
 			if (ImGui::TreeNode(u8"押下情報"))
 			{
-				for (auto& [str, flag] : currentInput)
+				for (auto& [str, flag] : _currentInput)
 				{
 					bool v = flag == TRUE;
 					ImGui::Checkbox(str.c_str(), &v);
 					if (ImGui::TreeNode(u8"入力対象"))
 					{
-						auto iter = inputActionMap.find(str);
+						auto iter = _inputActionMap.find(str);
 						for (auto& inputMapInfo : (*iter).second)
 						{
 							switch (inputMapInfo.type)
@@ -156,7 +156,7 @@ void Input::DrawGui()
 
 			if (ImGui::TreeNode(u8"入力値"))
 			{
-				for (auto& [str, parameter] : currentMovedParameter)
+				for (auto& [str, parameter] : _currentMovedParameter)
 				{
 					ImGui::Text(u8"%s:%f", str.c_str(), parameter);
 				}
@@ -170,10 +170,10 @@ void Input::DrawGui()
 /// 押されているか確認
 bool Input::IsPressed(const std::string& action) const
 {
-	auto it = currentInput.find(action);
+	auto it = _currentInput.find(action);
 
 	// 要素があるかチェック
-	assert(it != currentInput.end());
+	assert(it != _currentInput.end());
 
 	return it->second;
 }
@@ -184,7 +184,7 @@ bool Input::IsTriggerd(const std::string& action) const
 	// 押されていて
 	if (IsPressed(action))
 	{
-		auto it = lastInput.find(action);
+		auto it = _lastInput.find(action);
 
 		// 直前に押されていたらfalse
 		// 押されていなかったらtrueを返す
@@ -200,7 +200,7 @@ bool Input::IsReleased(const std::string& action) const
 	// 押されていていなくて
 	if (!IsPressed(action))
 	{
-		auto it = lastInput.find(action);
+		auto it = _lastInput.find(action);
 
 		// 直前に押されていたらtrue
 		// 押されていなかったらfalseを返す
@@ -213,23 +213,23 @@ bool Input::IsReleased(const std::string& action) const
 /// 入力量があるアクションの値取得
 float Input::IsMoved(const std::string& action) const
 {
-	auto it = currentMovedParameter.find(action);
+	auto it = _currentMovedParameter.find(action);
 
 	// 要素があるかチェック
-	assert(it != currentMovedParameter.end());
+	assert(it != _currentMovedParameter.end());
 
 	return it->second;
 }
 
 void Input::ClearMapData()
 {
-	for (const auto& mapInfo : inputActionMap)
+	for (const auto& mapInfo : _inputActionMap)
 	{
-		lastInput[mapInfo.first] = FALSE;
-		currentInput[mapInfo.first] = FALSE;
+		_lastInput[mapInfo.first] = FALSE;
+		_currentInput[mapInfo.first] = FALSE;
 	}
-	for (const auto& mapInfo : currentMovedParameter)
+	for (const auto& mapInfo : _currentMovedParameter)
 	{
-		currentMovedParameter[mapInfo.first] = 0.0f;
+		_currentMovedParameter[mapInfo.first] = 0.0f;
 	}
 }

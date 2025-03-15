@@ -6,44 +6,44 @@
 
 ModelRenderer::ModelRenderer(const char* filename)
 {
-	model_ = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
+	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
 }
 
 // 更新処理
 void ModelRenderer::Update(float elapsedTime)
 {
-	model_->UpdateTransform(GetActor()->GetTransform().GetMatrix());
+	_model->UpdateTransform(GetActor()->GetTransform().GetMatrix());
 }
 
 // 描画処理
 void ModelRenderer::Render(const RenderContext& rc)
 {
-	const ModelResource* resource = model_->GetResource();
-	const std::vector<ModelResource::Node>& nodes = model_->GetPoseNodes();
+	const ModelResource* resource = _model->GetResource();
+	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, model_.get(), color_, shaderName_, renderType_, &shaderParameter_);
+		MeshRenderer::Draw(&mesh, _model.get(), _color, _shaderName, _renderType, &_shaderParameter);
 	}
 }
 
 // 影描画
 void ModelRenderer::CastShadow(const RenderContext& rc)
 {
-	const ModelResource* resource = model_->GetResource();
-	const std::vector<ModelResource::Node>& nodes = model_->GetPoseNodes();
+	const ModelResource* resource = _model->GetResource();
+	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, model_.get(), VECTOR4_WHITE, "CascadedShadowMap", renderType_, &shadowParameter_);
+		MeshRenderer::Draw(&mesh, _model.get(), VECTOR4_WHITE, "CascadedShadowMap", _renderType, &_shadowParameter);
 	}
 }
 
 // GUI描画
 void ModelRenderer::DrawGui()
 {
-	ImGui::ColorEdit4("color", &color_.x);
-	ImGui::Text((u8"現在のシェーダー:" + shaderName_).c_str());
+	ImGui::ColorEdit4("color", &_color.x);
+	ImGui::Text((u8"現在のシェーダー:" + _shaderName).c_str());
 	ImGui::Separator();
-	auto shaderName = MeshRenderer::GetShaderNames(renderType_, Graphics::Instance().RenderingDeferred());
+	auto shaderName = MeshRenderer::GetShaderNames(_renderType, Graphics::Instance().RenderingDeferred());
 	if (ImGui::TreeNodeEx(u8"使用可能のシェーダー"))
 	{
 		for (auto& name : shaderName)
@@ -60,7 +60,7 @@ void ModelRenderer::DrawGui()
 		ImGui::TreePop();
 	}
 	ImGui::Separator();
-	for (auto& [name, parameter] : shaderParameter_)
+	for (auto& [name, parameter] : _shaderParameter)
 	{
 		ImGui::DragFloat(name.c_str(), &parameter, 0.1f);
 	}
@@ -69,19 +69,19 @@ void ModelRenderer::DrawGui()
 		u8"DynamicBoneModel",
 		u8"StaticBoneModel",
 	};
-	int rId = static_cast<int>(renderType_);
+	int rId = static_cast<int>(_renderType);
 	if (ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName)))
 	{
 		// エラー防止のためPhongに変更
 		SetShader("Phong");
 	}
-	renderType_ = static_cast<ModelRenderType>(rId);
-	model_->DrawGui();
+	_renderType = static_cast<ModelRenderType>(rId);
+	_model->DrawGui();
 }
 
 void ModelRenderer::SetShader(std::string name)
 {
-	this->shaderName_ = name;
+	this->_shaderName = name;
 	// パラメータのkye受け取り
-	shaderParameter_ = MeshRenderer::GetShaderParameterKey(renderType_, shaderName_, Graphics::Instance().RenderingDeferred());
+	_shaderParameter = MeshRenderer::GetShaderParameterKey(_renderType, _shaderName, Graphics::Instance().RenderingDeferred());
 }

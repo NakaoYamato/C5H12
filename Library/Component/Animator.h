@@ -71,17 +71,17 @@ public:
 #pragma endregion
 public:
 	// アニメーションパラメーター
-	int currentAnimationIndex = -1;
-	float currentAnimationSeconds = 0.0f;
-	bool animationPlaying = false;
-	bool animationLoop = false;
+	int _currentAnimIndex = -1;
+	float _currentAnimSeconds = 0.0f;
+	bool _animPlaying = false;
+	bool _animLoop = false;
 
 	// ブレンドアニメーションパラメーター
-	std::vector<ModelResource::Node> nodeCaches;
-	float animationBlendSeconds = 0.0f;
-	float currentAnimationBlendSeconds = 0.0f;
-	float animationBlendSecondsLength = -1.0f;
-	bool animationBlending = false;
+	std::vector<ModelResource::Node> _nodeCaches;
+	float _animBlendSeconds = 0.0f;
+	float _currentAnimBlendSeconds = 0.0f;
+	float _animBlendSecondsLength = -1.0f;
+	bool _animBlending = false;
 
-	Model* model{};
+	Model* _model{};
 };

@@ -16,5 +16,5 @@ struct DebugInput
 	static const DebugButton BTN_F8 = (1 << 7);
 	static const DebugButton BTN_F9 = (1 << 8);
 
-	DebugButton		buttonData_ = 0;
+	DebugButton		buttonData = 0;
 };

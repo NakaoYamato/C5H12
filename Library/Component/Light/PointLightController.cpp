@@ -7,24 +7,24 @@ void PointLightController::Update(float elapsedTime)
     pos.x = GetActor()->GetTransform().GetWorldPosition().x;
     pos.y = GetActor()->GetTransform().GetWorldPosition().y;
     pos.z = GetActor()->GetTransform().GetWorldPosition().z;
-    light_.SetPosition(pos);
+    _light.SetPosition(pos);
 }
 
 // 描画の前処理
 void PointLightController::RenderPreprocess(RenderContext& rc)
 {
     // rcの設定
-    rc.pointLights.push_back(light_.GetDataPointer());
+    rc.pointLights.push_back(_light.GetDataPointer());
 }
 
 // デバッグ表示
 void PointLightController::DebugRender(const RenderContext& rc)
 {
-    light_.DebugRender();
+    _light.DebugRender();
 }
 
 // GUI描画
 void PointLightController::DrawGui()
 {
-    light_.DrawGui();
+    _light.DrawGui();
 }

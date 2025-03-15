@@ -19,8 +19,8 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	GpuResourceManager::CreateVsFromCso(
 		device,
 		"./Data/Shader/DebugRendererVS.cso",
-		vertexShader.ReleaseAndGetAddressOf(),
-		inputLayout.ReleaseAndGetAddressOf(),
+		_vertexShader.ReleaseAndGetAddressOf(),
+		_inputLayout.ReleaseAndGetAddressOf(),
 		inputElementDesc,
 		_countof(inputElementDesc)
 	);
@@ -29,14 +29,14 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	GpuResourceManager::CreatePsFromCso(
 		device,
 		"./Data/Shader/DebugRendererPS.cso",
-		pixelShader.ReleaseAndGetAddressOf()
+		_pixelShader.ReleaseAndGetAddressOf()
 	);
 
 	// 定数バッファ
 	(void)GpuResourceManager::CreateConstantBuffer(
 		device,
 		sizeof(CbMesh),
-		constantBuffer.GetAddressOf());
+		_constantBuffer.GetAddressOf());
 
 	// 箱メッシュ生成
 	CreateBoxMesh(device, 1.0f, 1.0f, 1.0f);
@@ -68,7 +68,7 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		desc.MiscFlags = 0;
 		desc.StructureByteStride = 0;
-		HRESULT hr = device->CreateBuffer(&desc, nullptr, gridVertexBuffer.GetAddressOf());
+		HRESULT hr = device->CreateBuffer(&desc, nullptr, _gridVertexBuffer.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 }
@@ -80,8 +80,8 @@ void DebugRenderer::DrawBox(
 	const Vector3& size,
 	const Vector4& color)
 {
-	Instance& instance = instances.emplace_back();
-	instance.mesh = &boxMesh;
+	Instance& instance = _instances.emplace_back();
+	instance.mesh = &_boxMesh;
 	instance.color = color;
 
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(size.x, size.y, size.z);
@@ -93,8 +93,8 @@ void DebugRenderer::DrawBox(
 // 箱描画
 void DebugRenderer::DrawBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
 {
-	Instance& instance = instances.emplace_back();
-	instance.mesh = &boxMesh;
+	Instance& instance = _instances.emplace_back();
+	instance.mesh = &_boxMesh;
 	instance.color = color;
 	instance.worldTransform = transform;
 }
@@ -105,8 +105,8 @@ void DebugRenderer::DrawSphere(
 	float radius,
 	const Vector4& color)
 {
-	Instance& instance = instances.emplace_back();
-	instance.mesh = &sphereMesh;
+	Instance& instance = _instances.emplace_back();
+	instance.mesh = &_sphereMesh;
 	instance.color = color;
 
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(radius, radius, radius);
@@ -125,8 +125,8 @@ void DebugRenderer::DrawCapsule(
 
 	// 上半球
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &halfSphereMesh;
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_halfSphereMesh;
 		DirectX::XMVECTOR Position = DirectX::XMVector3Transform(DirectX::XMVectorSet(0, height * 0.5f, 0, 0), Transform);
 		DirectX::XMMATRIX World = DirectX::XMMatrixScaling(radius, radius, radius);
 		World.r[3] = DirectX::XMVectorSetW(Position, 1.0f);
@@ -135,8 +135,8 @@ void DebugRenderer::DrawCapsule(
 	}
 	// 円柱
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &cylinderMesh;
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_cylinderMesh;
 		DirectX::XMMATRIX World;
 		World.r[0] = DirectX::XMVectorScale(Transform.r[0], radius);
 		World.r[1] = DirectX::XMVectorScale(Transform.r[1], height);
@@ -147,8 +147,8 @@ void DebugRenderer::DrawCapsule(
 	}
 	// 下半球
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &halfSphereMesh;
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_halfSphereMesh;
 		DirectX::XMMATRIX World = DirectX::XMMatrixRotationX(DirectX::XM_PI);
 		DirectX::XMVECTOR Position = DirectX::XMVector3Transform(DirectX::XMVectorSet(0, -height * 0.5f, 0, 0), Transform);
 		Transform.r[3] = DirectX::XMVectorSet(0, 0, 0, 1);
@@ -182,8 +182,8 @@ void DebugRenderer::DrawCapsule(const Vector3& start, const Vector3& end, float 
 		// 高さ
 		float length = Vec3Length(target);
 
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &cylinderMesh;
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_cylinderMesh;
 		DirectX::XMMATRIX World = R * T;
 		World.r[0] = DirectX::XMVectorScale(World.r[0], radius);
 		World.r[1] = DirectX::XMVectorScale(World.r[1], length);
@@ -199,8 +199,8 @@ void DebugRenderer::DrawBone(
 	float length,
 	const Vector4& color)
 {
-	Instance& instance = instances.emplace_back();
-	instance.mesh = &boneMesh;
+	Instance& instance = _instances.emplace_back();
+	instance.mesh = &_boneMesh;
 	instance.color = color;
 
 	DirectX::XMMATRIX W = DirectX::XMLoadFloat4x4(&transform);
@@ -221,8 +221,8 @@ void DebugRenderer::DrawArrow(
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q));
 
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &arrowMesh;
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_arrowMesh;
 
 		Vector3 vec = (target - start);
 		// Y軸をstartからtargetにする
@@ -258,22 +258,22 @@ void DebugRenderer::DrawAxis(const DirectX::XMFLOAT4X4& transform)
 {
 	// X軸
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &axisMesh[0];
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_axisMesh[0];
 		instance.color = { 1,0,0,1 };
 		instance.worldTransform = transform;
 	}
 	// Y軸
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &axisMesh[1];
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_axisMesh[1];
 		instance.color = { 0,1,0,1 };
 		instance.worldTransform = transform;
 	}
 	// Z軸
 	{
-		Instance& instance = instances.emplace_back();
-		instance.mesh = &axisMesh[2];
+		Instance& instance = _instances.emplace_back();
+		instance.mesh = &_axisMesh[2];
 		instance.color = { 0,0,1,1 };
 		instance.worldTransform = transform;
 	}
@@ -284,7 +284,7 @@ void DebugRenderer::DrawGrid(int subdivisions, float scale)
 {
 	auto AddVertex = [&](const Vector3& position)
 		{
-			Vector3& v = gridVertices.emplace_back();
+			Vector3& v = _gridVertices.emplace_back();
 			v = position;
 		};
 
@@ -347,7 +347,7 @@ void DebugRenderer::DrawGrid(int subdivisions, float scale)
 
 void DebugRenderer::AddVertex(const Vector3& position)
 {
-	Vector3& v = gridVertices.emplace_back();
+	Vector3& v = _gridVertices.emplace_back();
 	v = position;
 }
 
@@ -423,7 +423,7 @@ void DebugRenderer::CreateBoxMesh(ID3D11Device* device,
 	vertices.emplace_back(positions[7]);
 
 	// メッシュ生成
-	CreateMesh(device, vertices, boxMesh);
+	CreateMesh(device, vertices, _boxMesh);
 }
 
 // 球メッシュ作成
@@ -474,7 +474,7 @@ void DebugRenderer::CreateSphereMesh(ID3D11Device* device, float radius, int sub
 	}
 
 	// メッシュ生成
-	CreateMesh(device, vertices, sphereMesh);
+	CreateMesh(device, vertices, _sphereMesh);
 }
 
 // 半球メッシュ作成
@@ -528,7 +528,7 @@ void DebugRenderer::CreateHalfSphereMesh(ID3D11Device* device, float radius, int
 	}
 
 	// メッシュ生成
-	CreateMesh(device, vertices, halfSphereMesh);
+	CreateMesh(device, vertices, _halfSphereMesh);
 }
 
 // 円柱
@@ -582,7 +582,7 @@ void DebugRenderer::CreateCylinderMesh(ID3D11Device* device,
 	}
 
 	// メッシュ生成
-	CreateMesh(device, vertices, cylinderMesh);
+	CreateMesh(device, vertices, _cylinderMesh);
 }
 
 // 骨メッシュ作成
@@ -631,7 +631,7 @@ void DebugRenderer::CreateBoneMesh(ID3D11Device* device, float length)
 	vertices.emplace_back(positions[1]);
 
 	// メッシュ生成
-	CreateMesh(device, vertices, boneMesh);
+	CreateMesh(device, vertices, _boneMesh);
 }
 
 // 矢印メッシュ作成
@@ -684,7 +684,7 @@ void DebugRenderer::CreateArrowMesh(ID3D11Device* device)
 
 
 	// メッシュ生成
-	CreateMesh(device, vertices, arrowMesh);
+	CreateMesh(device, vertices, _arrowMesh);
 }
 
 // 軸メッシュ作成
@@ -696,7 +696,7 @@ void DebugRenderer::CreateAxis(ID3D11Device* device)
 		vertices.push_back({ 0,0,0 });
 		vertices.push_back({ 1,0,0 });
 		// メッシュ生成
-		CreateMesh(device, vertices, axisMesh[0]);
+		CreateMesh(device, vertices, _axisMesh[0]);
 	}
 	// Y軸
 	{
@@ -704,7 +704,7 @@ void DebugRenderer::CreateAxis(ID3D11Device* device)
 		vertices.push_back({ 0,0,0 });
 		vertices.push_back({ 0,1,0 });
 		// メッシュ生成
-		CreateMesh(device, vertices, axisMesh[1]);
+		CreateMesh(device, vertices, _axisMesh[1]);
 	}
 	// Z軸
 	{
@@ -712,7 +712,7 @@ void DebugRenderer::CreateAxis(ID3D11Device* device)
 		vertices.push_back({ 0,0,0 });
 		vertices.push_back({ 0,0,1 });
 		// メッシュ生成
-		CreateMesh(device, vertices, axisMesh[2]);
+		CreateMesh(device, vertices, _axisMesh[2]);
 	}
 }
 
@@ -723,12 +723,12 @@ void DebugRenderer::Render(
 	const DirectX::XMFLOAT4X4& projection)
 {
 	// シェーダー設定
-	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
-	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
-	dc->IASetInputLayout(inputLayout.Get());
+	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
+	dc->IASetInputLayout(_inputLayout.Get());
 
 	// 定数バッファ設定
-	dc->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+	dc->VSSetConstantBuffers(0, 1, _constantBuffer.GetAddressOf());
 
 	// ビュープロジェクション行列作成
 	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
@@ -744,7 +744,7 @@ void DebugRenderer::Render(
 #ifdef _DEBUG
 	if (!Debug::Input::IsActive(DebugInput::BTN_F7))
 	{
-		for (const Instance& instance : instances)
+		for (const Instance& instance : _instances)
 		{
 			// 頂点バッファ設定
 			dc->IASetVertexBuffers(0, 1, instance.mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
@@ -758,7 +758,7 @@ void DebugRenderer::Render(
 			DirectX::XMStoreFloat4x4(&cbMesh.worldViewProjection, WVP);
 			cbMesh.color = instance.color;
 
-			dc->UpdateSubresource(constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
+			dc->UpdateSubresource(_constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 			// 描画
 			dc->Draw(instance.mesh->vertexCount, 0);
@@ -771,26 +771,26 @@ void DebugRenderer::Render(
 			CbMesh cbMesh;
 			DirectX::XMStoreFloat4x4(&cbMesh.worldViewProjection, WVP);
 			cbMesh.color = { 1,1,1,1 };
-			dc->UpdateSubresource(constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
+			dc->UpdateSubresource(_constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 			// 頂点バッファ設定
 			stride = sizeof(Vector3);
 			offset = 0;
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-			dc->IASetVertexBuffers(0, 1, gridVertexBuffer.GetAddressOf(), &stride, &offset);
+			dc->IASetVertexBuffers(0, 1, _gridVertexBuffer.GetAddressOf(), &stride, &offset);
 
-			UINT totalVertexCount = static_cast<UINT>(gridVertices.size());
+			UINT totalVertexCount = static_cast<UINT>(_gridVertices.size());
 			UINT start = 0;
 			UINT count = (totalVertexCount < VertexCapacity) ? totalVertexCount : VertexCapacity;
 
 			while (start < totalVertexCount)
 			{
 				D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-				HRESULT hr = dc->Map(gridVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+				HRESULT hr = dc->Map(_gridVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-				memcpy(mappedSubresource.pData, &gridVertices[start], sizeof(Vector3) * count);
+				memcpy(mappedSubresource.pData, &_gridVertices[start], sizeof(Vector3) * count);
 
-				dc->Unmap(gridVertexBuffer.Get(), 0);
+				dc->Unmap(_gridVertexBuffer.Get(), 0);
 
 				dc->Draw(count, 0);
 
@@ -800,9 +800,9 @@ void DebugRenderer::Render(
 					count = totalVertexCount - start;
 				}
 			}
-			gridVertices.clear();
+			_gridVertices.clear();
 		}
 	}
 #endif
-	instances.clear();
+	_instances.clear();
 }

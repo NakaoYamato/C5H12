@@ -22,12 +22,12 @@ void ConstantBufferManager::Update(const RenderContext& rc)
 	// シーン定数バッファの更新
 	{
 		ConstantBufferManager::SceneConstantBuffer sceneCB{};
-		DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&rc.camera->view_);
-		DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&rc.camera->projection_);
+		DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&rc.camera->view);
+		DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&rc.camera->projection);
 		DirectX::XMStoreFloat4x4(&sceneCB.viewProjection, V * P);
 		sceneCB.lightDirection = rc.lightDirection;
 		sceneCB.lightColor = rc.lightColor;
-		const DirectX::XMFLOAT3& eye = rc.camera->eye_;
+		const DirectX::XMFLOAT3& eye = rc.camera->eye;
 		sceneCB.cameraPosition.x = eye.x;
 		sceneCB.cameraPosition.y = eye.y;
 		sceneCB.cameraPosition.z = eye.z;

@@ -151,10 +151,10 @@ void Scene::Render()
         MeshRenderer::RenderAlpha(rc);
 
         // シェイプ描画
-        ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+        ShapeRenderer::Render(dc, rc.camera->view, rc.camera->projection);
 
         // プリミティブ描画
-        PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+        PrimitiveRenderer::Render(dc, rc.camera->view, rc.camera->projection);
     }
     renderFrame->Deactivate(dc);
     // フレームバッファ0番の処理終了
@@ -251,6 +251,9 @@ void Scene::DrawGui()
 {
     //　ゲームオブジェクトのGui表示
     _actorManager.DrawGui();
+
+    if(_skyMap)
+        _skyMap->DrawGui();
 }
 
 // スカイマップ設定

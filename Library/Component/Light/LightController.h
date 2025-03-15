@@ -22,7 +22,7 @@ public:
 	void DrawGui() override;
 
 	// アクセサ
-	Light& GetLight() { return light_; }
+	Light& GetLight() { return _light; }
 private:
-	Light light_;
+	Light _light;
 };

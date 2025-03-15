@@ -3,10 +3,10 @@
 #include <imgui.h>
 
 Animator::Animator(Model* model) :
-	model(model)
+	_model(model)
 {
 	// ノードキャッシュの生成
-	nodeCaches.resize(model->GetPoseNodes().size());
+	_nodeCaches.resize(model->GetPoseNodes().size());
 }
 
 // 更新処理
@@ -20,11 +20,11 @@ void Animator::DrawGui()
 {
     if (ImGui::TreeNode(u8"アニメーション"))
     {
-        ImGui::DragFloat("BlendSeconds", &animationBlendSeconds, 0.01f);
-        ImGui::Checkbox("Loop", &animationLoop);
+        ImGui::DragFloat("BlendSeconds", &_animBlendSeconds, 0.01f);
+        ImGui::Checkbox("Loop", &_animLoop);
 
         int index = 0;
-        for (const ModelResource::Animation& animation : model->GetResource()->GetAnimations())
+        for (const ModelResource::Animation& animation : _model->GetResource()->GetAnimations())
         {
             ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf;
 
@@ -35,7 +35,7 @@ void Animator::DrawGui()
                 {
                     if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     {
-                        this->PlayAnimation(index, animationLoop, animationBlendSeconds);
+                        this->PlayAnimation(index, _animLoop, _animBlendSeconds);
                     }
                 }
 
@@ -52,32 +52,32 @@ void Animator::DrawGui()
 // アニメーション更新処理
 void Animator::UpdateAnimation(float elapsedTime)
 {
-    if (currentAnimationIndex == -1)
+    if (_currentAnimIndex == -1)
         return;
-    std::vector<ModelResource::Node> poseNode = model->GetPoseNodes();
+    std::vector<ModelResource::Node> poseNode = _model->GetPoseNodes();
     // アニメーション計算処理
-    ComputeAnimation(currentAnimationIndex, currentAnimationSeconds, poseNode);
+    ComputeAnimation(_currentAnimIndex, _currentAnimSeconds, poseNode);
     // ノード設定
-    model->SetPoseNodes(poseNode);
+    _model->SetPoseNodes(poseNode);
     // アニメーション経過時間更新
     UpdateAnimSeconds(elapsedTime);
 
     // ブレンディング計算処理
-    if (animationBlending)
+    if (_animBlending)
     {
         // ブレンド率計算
-        float rate = currentAnimationBlendSeconds / animationBlendSecondsLength;
+        float rate = _currentAnimBlendSeconds / _animBlendSecondsLength;
 
-        poseNode = ComputeBlending(nodeCaches, model->GetPoseNodes(), rate);
+        poseNode = ComputeBlending(_nodeCaches, _model->GetPoseNodes(), rate);
         // ノード設定
-        model->SetPoseNodes(poseNode);
+        _model->SetPoseNodes(poseNode);
 
         // 時間経過
-        currentAnimationBlendSeconds += elapsedTime;
-        if (currentAnimationBlendSeconds >= animationBlendSecondsLength)
+        _currentAnimBlendSeconds += elapsedTime;
+        if (_currentAnimBlendSeconds >= _animBlendSecondsLength)
         {
-            currentAnimationBlendSeconds = animationBlendSecondsLength;
-            animationBlending = false;
+            _currentAnimBlendSeconds = _animBlendSecondsLength;
+            _animBlending = false;
         }
     }
 }
@@ -86,21 +86,21 @@ void Animator::UpdateAnimation(float elapsedTime)
 void Animator::UpdateAnimSeconds(float elapsedTime)
 {
     // 経過時間
-    currentAnimationSeconds += elapsedTime;
+    _currentAnimSeconds += elapsedTime;
     // 再生時間が終端時間を超えた時
-    const ModelResource::Animation& animation = model->GetResource()->GetAnimations().at(currentAnimationIndex);
-    if (currentAnimationSeconds > animation.secondsLength)
+    const ModelResource::Animation& animation = _model->GetResource()->GetAnimations().at(_currentAnimIndex);
+    if (_currentAnimSeconds > animation.secondsLength)
     {
-        if (animationLoop)
+        if (_animLoop)
         {
             // 再生時間を戻す
-            currentAnimationSeconds -= animation.secondsLength;
+            _currentAnimSeconds -= animation.secondsLength;
         }
         else
         {
             // 再生時間を終了時間にする
-            currentAnimationSeconds = animation.secondsLength;
-            animationPlaying = false;
+            _currentAnimSeconds = animation.secondsLength;
+            _animPlaying = false;
         }
     }
 }
@@ -108,21 +108,21 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
 // アニメーション再生
 void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
 {
-    currentAnimationIndex = index;
-    currentAnimationSeconds = 0;
-    animationLoop = loop;
-    animationPlaying = true;
+    _currentAnimIndex = index;
+    _currentAnimSeconds = 0;
+    _animLoop = loop;
+    _animPlaying = true;
 
     // ブレンドアニメーションパラメーター
-    animationBlending = blendSeconds > 0.0f;
-    currentAnimationBlendSeconds = 0.0f;
-    animationBlendSecondsLength = blendSeconds;
+    _animBlending = blendSeconds > 0.0f;
+    _currentAnimBlendSeconds = 0.0f;
+    _animBlendSecondsLength = blendSeconds;
 
     // 現在の姿勢をキャッシュする
-    for (size_t i = 0; i < model->GetPoseNodes().size(); ++i)
+    for (size_t i = 0; i < _model->GetPoseNodes().size(); ++i)
     {
-        const ModelResource::Node& src = model->GetPoseNodes().at(i);
-        ModelResource::Node& dst = nodeCaches.at(i);
+        const ModelResource::Node& src = _model->GetPoseNodes().at(i);
+        ModelResource::Node& dst = _nodeCaches.at(i);
 
         dst.position = src.position;
         dst.rotation = src.rotation;
@@ -141,18 +141,18 @@ bool Animator::IsPlayAnimation(int index) const
 {
     if (index != -1)
     {
-        if (currentAnimationIndex != index)return false;
+        if (_currentAnimIndex != index)return false;
     }
-    if (currentAnimationIndex < 0)return false;
-    if (currentAnimationIndex >= model->GetResource()->GetAnimations().size()) return false;
-    return animationPlaying;
+    if (_currentAnimIndex < 0)return false;
+    if (_currentAnimIndex >= _model->GetResource()->GetAnimations().size()) return false;
+    return _animPlaying;
 }
 
 // アニメーション計算処理
 void Animator::ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const
 {
     // 指定のアニメーションデータを収集
-    const ModelResource::Animation& animation = model->GetResource()->GetAnimations().at(animationIndex);
+    const ModelResource::Animation& animation = _model->GetResource()->GetAnimations().at(animationIndex);
     const ModelResource::NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
     // 位置
     for (size_t index = 0; index < nodeAnim.positionKeyframes.size() - 1; ++index)
@@ -216,9 +216,9 @@ void Animator::ComputeAnimation(int animationIndex, int nodeIndex, float time, M
 // アニメーション計算処理
 void Animator::ComputeAnimation(int animationIndex, float time, std::vector<ModelResource::Node>& nodePoses) const
 {
-    if (nodePoses.size() != model->GetPoseNodes().size())
+    if (nodePoses.size() != _model->GetPoseNodes().size())
     {
-        nodePoses.resize(model->GetPoseNodes().size());
+        nodePoses.resize(_model->GetPoseNodes().size());
     }
     for (size_t nodeIndex = 0; nodeIndex < nodePoses.size(); ++nodeIndex)
     {
@@ -237,7 +237,7 @@ std::vector<ModelResource::Node> Animator::ComputeBlending(
 
     std::vector<ModelResource::Node> result = pose1;
 
-    size_t count = model->GetPoseNodes().size();
+    size_t count = _model->GetPoseNodes().size();
     for (size_t i = 0; i < count; ++i)
     {
         const ModelResource::Node& node0 = pose0.at(i);
@@ -270,13 +270,13 @@ void Animator::ComputeRootMotion(int animationIndex,
     std::vector<ModelResource::Node>& resultNodePose,
     Vector3& movement) const
 {
-    resultNodePose = model->GetPoseNodes();
+    resultNodePose = _model->GetPoseNodes();
     movement = VECTOR3_ZERO;
 
     std::vector<ModelResource::Node> oldNodes;
     std::vector<ModelResource::Node> currentNodes;
     // 指定のアニメーション姿勢を取得
-    const ModelResource::Animation& animation = model->GetResource()->GetAnimations().at(animationIndex);
+    const ModelResource::Animation& animation = _model->GetResource()->GetAnimations().at(animationIndex);
     ComputeAnimation(animationIndex, oldAnimSeconds, oldNodes);
     ComputeAnimation(animationIndex, currentAnimSeconds, currentNodes);
     ComputeAnimation(animationIndex, currentAnimSeconds, resultNodePose);
@@ -325,10 +325,10 @@ void Animator::ComputeRootMotion(int animationIndex,
 /// アニメーション名から番号取得
 int Animator::GetAnimationIndex(const std::string& key) const
 {
-    const size_t animationSize = model->GetResource()->GetAnimations().size();
+    const size_t animationSize = _model->GetResource()->GetAnimations().size();
     for (size_t i = 0; i < animationSize; ++i)
     {
-        if (model->GetResource()->GetAnimations().at(i).name == key)
+        if (_model->GetResource()->GetAnimations().at(i).name == key)
             return static_cast<int>(i);
     }
     assert(!"アニメーションがありません");

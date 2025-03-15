@@ -34,24 +34,24 @@ public:
 	void DrawGui() override;
 
 	// アクセサ
-	Model* GetModel() { return model_.get(); }
-	const ShaderBase::Parameter& GetShaderParameter()const { return shaderParameter_; }
-	const ShaderBase::Parameter& GetShadowParameter()const { return shadowParameter_; }
-	std::string GetShaderName()const { return shaderName_; }
-	ModelRenderType GetRenderType()const { return renderType_; }
-	const Vector4& GetColor()const { return color_; }
+	Model* GetModel() { return _model.get(); }
+	const ShaderBase::Parameter& GetShaderParameter()const { return _shaderParameter; }
+	const ShaderBase::Parameter& GetShadowParameter()const { return _shadowParameter; }
+	std::string GetShaderName()const { return _shaderName; }
+	ModelRenderType GetRenderType()const { return _renderType; }
+	const Vector4& GetColor()const { return _color; }
 
-	void SetShaderParameter(const ShaderBase::Parameter& parameter) { this->shaderParameter_ = parameter; }
-	void SetShadowParameter(const ShaderBase::Parameter& parameter) { this->shadowParameter_ = parameter; }
+	void SetShaderParameter(const ShaderBase::Parameter& parameter) { this->_shaderParameter = parameter; }
+	void SetShadowParameter(const ShaderBase::Parameter& parameter) { this->_shadowParameter = parameter; }
 	void SetShader(std::string name);
-	void SetRenderType(ModelRenderType type) { this->renderType_ = type; }
-	void SetColor(const Vector4& c) { this->color_ = c; }
+	void SetRenderType(ModelRenderType type) { this->_renderType = type; }
+	void SetColor(const Vector4& c) { this->_color = c; }
 
 private:
-	std::unique_ptr<Model> model_;
-	ShaderBase::Parameter shaderParameter_;
-	ShaderBase::Parameter shadowParameter_;
-	std::string shaderName_ = "PBR";
-	ModelRenderType renderType_ = ModelRenderType::Dynamic;
-	Vector4 color_{ 1,1,1,1 };
+	std::unique_ptr<Model> _model;
+	ShaderBase::Parameter _shaderParameter;
+	ShaderBase::Parameter _shadowParameter;
+	std::string _shaderName = "PBR";
+	ModelRenderType _renderType = ModelRenderType::Dynamic;
+	Vector4 _color{ 1,1,1,1 };
 };

@@ -4,15 +4,15 @@
 void SceneLoading::Initialize()
 {
 	//スレッド開始
-	thread_ = new std::thread(LoadingThread, this);
+	_thread = new std::thread(LoadingThread, this);
 }
 
 void SceneLoading::Finalize()
 {
-	if (thread_ != nullptr && thread_->joinable()) {
-		thread_->join();
-		delete thread_;
-		thread_ = nullptr;
+	if (_thread != nullptr && _thread->joinable()) {
+		_thread->join();
+		delete _thread;
+		_thread = nullptr;
 	}
 }
 
@@ -22,9 +22,9 @@ void SceneLoading::Update(float elapsedTime)
 	float blink_speed = 0.3f;
 	
 	//次のシーンの準備が完了したらシーンを切り替える
-	if (nextScene_->IsReady())
+	if (_nextScene->IsReady())
 	{
-		SceneManager::Instance().ChangeScene(nextScene_);
+		SceneManager::Instance().ChangeScene(_nextScene);
 	}
 }
 
@@ -48,9 +48,9 @@ void SceneLoading::LoadingThread(SceneLoading* scene)
 	(void)CoInitialize(nullptr);
 
 	//次のシーンの初期化を行う
-	scene->nextScene_->Initialize();
+	scene->_nextScene->Initialize();
 
 	CoUninitialize();
 
-	scene->nextScene_->SetReady();
+	scene->_nextScene->SetReady();
 }

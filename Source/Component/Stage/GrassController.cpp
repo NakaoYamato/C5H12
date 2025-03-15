@@ -2,17 +2,17 @@
 
 void GrassController::Start()
 {
-    mr_ = this->GetActor()->GetComponent<ModelRenderer>();
-    assert(mr_.lock()->GetShaderName() == "Grass");
+    _mr = this->GetActor()->GetComponent<ModelRenderer>();
+    assert(_mr.lock()->GetShaderName() == "Grass");
 }
 
 void GrassController::Update(float elapsedTime)
 {
-    auto parameter = mr_.lock()->GetShaderParameter();
+    auto parameter = _mr.lock()->GetShaderParameter();
     auto total = parameter.find("totalElapsedTime");
     if (total != parameter.end())
     {
         parameter["totalElapsedTime"] += elapsedTime;
     }
-    mr_.lock()->SetShaderParameter(parameter);
+    _mr.lock()->SetShaderParameter(parameter);
 }

@@ -7,50 +7,50 @@
 // 更新処理
 void SceneManager::Update(float elapsedTime)
 {
-	if (nextScene_.get() != nullptr)
+	if (_nextScene.get() != nullptr)
 	{
 		// 古いシーンの終了処理
 		Clear();
 
 		// 新しいシーンを設定
-		currentScene_ = std::move(nextScene_);
-		nextScene_.reset();
+		_currentScene = std::move(_nextScene);
+		_nextScene.reset();
 
 		// シーン初期化
-		if (!(currentScene_->IsReady()))
-			currentScene_->Initialize();
+		if (!(_currentScene->IsReady()))
+			_currentScene->Initialize();
 	}
 
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->Update(elapsedTime);
+		_currentScene->Update(elapsedTime);
 	}
 }
 
 // 1秒ごとの更新処理
 void SceneManager::FixedUpdate()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->FixedUpdate();
+		_currentScene->FixedUpdate();
 	}
 }
 
 // 描画処理
 void SceneManager::Render()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->Render();
+		_currentScene->Render();
 	}
 }
 
 // Gui描画
 void SceneManager::DrawGui()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->DrawGui();
+		_currentScene->DrawGui();
 	}
 }
 
@@ -61,7 +61,7 @@ void SceneManager::SceneMenuGui()
 	{
 		if (ImGui::BeginMenu(u8"シーン選択"))
 		{
-			for (auto& [str, scene] : sceneDatas_)
+			for (auto& [str, scene] : _sceneDatas)
 			{
 				if (ImGui::MenuItem(str.c_str()))
 				{
@@ -80,10 +80,10 @@ void SceneManager::SceneMenuGui()
 // シーンクリア
 void SceneManager::Clear()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->Finalize();
-		currentScene_.reset();
+		_currentScene->Finalize();
+		_currentScene.reset();
 	}
 }
 
@@ -91,7 +91,7 @@ void SceneManager::Clear()
 // REGISTER_SCENE_MANAGERで登録したときの名前から切り替え
 void SceneManager::ChangeScene(std::string sceneName)
 {
-	auto& scene = sceneDatas_[sceneName];
+	auto& scene = _sceneDatas[sceneName];
 	assert(scene.get());
 	SceneManager::Instance().ChangeScene(std::make_shared<SceneLoading>(scene->GetNewShared()));
 }
@@ -100,5 +100,5 @@ void SceneManager::ChangeScene(std::string sceneName)
 void SceneManager::ChangeScene(std::shared_ptr<Scene> scene)
 {
 	// 新しいシーンを設定
-	nextScene_ = scene;
+	_nextScene = scene;
 }

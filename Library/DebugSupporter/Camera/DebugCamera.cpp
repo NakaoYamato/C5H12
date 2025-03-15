@@ -16,16 +16,16 @@ void DebugCamera::Update(float elapsedTime)
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
     {
         // 起動した瞬間なら現在の視点と角度を引き継ぐ
-        if (!isActive_)
+        if (!_isActive)
         {
-            eye_ = Camera::Instance().GetEye();
+            _eye = Camera::Instance().GetEye();
             DirectX::XMVECTOR S, R, T;
             DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&Camera::Instance().GetView())));
-            angle_ = QuaternionToRollPitchYaw(R);
+            _angle = QuaternionToRollPitchYaw(R);
         }
 
         // 使用フラグをオン
-        isActive_ = true;
+        _isActive = true;
 
         // ImGuiのウィンドウを選択していたら処理しない
 #ifdef _DEBUG
@@ -37,7 +37,7 @@ void DebugCamera::Update(float elapsedTime)
 #ifdef _ROTATION_EYE
         // カメラ回転値を回転行列に変換
         DirectX::XMMATRIX Transform =
-            DirectX::XMMatrixRotationRollPitchYaw(angle_.x, angle_.y, angle_.z);
+            DirectX::XMMatrixRotationRollPitchYaw(_angle.x, _angle.y, _angle.z);
 
         // 回転行列から右方向、上方向、前方向ベクトルを取り出す
         DirectX::XMVECTOR Right = Transform.r[0];
@@ -49,41 +49,41 @@ void DebugCamera::Update(float elapsedTime)
         DirectX::XMStoreFloat3(&up, Up);
 
         // マウスの移動距離算出
-        float moveX = INPUT_IS_MOVED("MouseMoveX") * movePower_;
-        float moveY = INPUT_IS_MOVED("MouseMoveY") * movePower_;
+        float moveX = INPUT_IS_MOVED("MouseMoveX") * _movePower;
+        float moveY = INPUT_IS_MOVED("MouseMoveY") * _movePower;
         if (::GetAsyncKeyState(VK_RBUTTON) & 0x8000)
         {
             // Y軸回転
-            angle_.y += moveX * 0.5f;
-            if (angle_.y > DirectX::XM_PI)
-                angle_.y -= DirectX::XM_2PI;
-            else if (angle_.y < -DirectX::XM_PI)
-                angle_.y += DirectX::XM_2PI;
+            _angle.y += moveX * 0.5f;
+            if (_angle.y > DirectX::XM_PI)
+                _angle.y -= DirectX::XM_2PI;
+            else if (_angle.y < -DirectX::XM_PI)
+                _angle.y += DirectX::XM_2PI;
             // X軸回転
-            angle_.x += moveY * 0.5f;
-            if (angle_.x > DirectX::XMConvertToRadians(89.9f))
-                angle_.x = DirectX::XMConvertToRadians(89.9f);
-            else if (angle_.x < -DirectX::XMConvertToRadians(89.9f))
-                angle_.x = -DirectX::XMConvertToRadians(89.9f);
+            _angle.x += moveY * 0.5f;
+            if (_angle.x > DirectX::XMConvertToRadians(89.9f))
+                _angle.x = DirectX::XMConvertToRadians(89.9f);
+            else if (_angle.x < -DirectX::XMConvertToRadians(89.9f))
+                _angle.x = -DirectX::XMConvertToRadians(89.9f);
         }
         else if (::GetAsyncKeyState(VK_MBUTTON) & 0x8000)
         {
             // 視点移動
-            eye_ -= right * moveX * targetMovePower_;
-            eye_ += up * moveY * targetMovePower_;
+            _eye -= right * moveX * _targetMovePower;
+            _eye += up * moveY * _targetMovePower;
         }
         {
             // ズーム
-            eye_ += zoomPower_ * front * INPUT_IS_MOVED("MouseOldWheel") / 60.0f;
+            _eye += _zoomPower * front * INPUT_IS_MOVED("MouseOldWheel") / 60.0f;
         }
 
         // 視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
-        target_.x = eye_.x + front.x * range_;
-        target_.y = eye_.y + front.y * range_;
-        target_.z = eye_.z + front.z * range_;
+        _target.x = _eye.x + front.x * _range;
+        _target.y = _eye.y + front.y * _range;
+        _target.z = _eye.z + front.z * _range;
 
         // カメラの視点と注意点を設定
-        Camera::Instance().SetLookAt(eye_, target_, DirectX::XMFLOAT3(0, 1, 0));
+        Camera::Instance().SetLookAt(_eye, _target, DirectX::XMFLOAT3(0, 1, 0));
 #else
         // カメラ回転値を回転行列に変換
         DirectX::XMMATRIX Transform =
@@ -140,15 +140,15 @@ void DebugCamera::Update(float elapsedTime)
     else
     {
         // 使用フラグをオフ
-        isActive_ = false;
+        _isActive = false;
     }
 }
 
 // デバッグ用Gui
 void DebugCamera::DrawGui()
 {
-    ImGui::DragFloat("movePower", &movePower_, 0.01f);
-    ImGui::DragFloat("targetMovePower", &targetMovePower_, 0.01f);
-    ImGui::DragFloat("zoomPower", &zoomPower_, 0.01f);
+    ImGui::DragFloat("movePower", &_movePower, 0.01f);
+    ImGui::DragFloat("targetMovePower", &_targetMovePower, 0.01f);
+    ImGui::DragFloat("zoomPower", &_zoomPower, 0.01f);
     CameraControllerBase::DrawGui();
 }

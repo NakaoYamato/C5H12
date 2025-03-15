@@ -25,7 +25,7 @@ FrameBuffer::FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, 
 	renderTargetViewDesc.Format = texture2dDesc.Format;
 	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	hr = device->CreateRenderTargetView(renderTargetBuffer.Get(), &renderTargetViewDesc,
-		rtv.GetAddressOf());
+		_rtv.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc{};
@@ -33,7 +33,7 @@ FrameBuffer::FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, 
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
 	hr = device->CreateShaderResourceView(renderTargetBuffer.Get(), &shaderResourceViewDesc,
-		srvs[0].GetAddressOf());
+		_srvs[0].GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	if (hasDepthstencil)
@@ -51,49 +51,49 @@ FrameBuffer::FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, 
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		depthStencilViewDesc.Flags = 0;
 		hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilViewDesc,
-			dsv.GetAddressOf());
+			_dsv.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 		shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT; // CASCADED_SHADOW_MAPS
 		shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		hr = device->CreateShaderResourceView(depthStencilBuffer.Get(), &shaderResourceViewDesc,
-			srvs[1].GetAddressOf());
+			_srvs[1].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
-	viewport.Width = static_cast<float>(width);
-	viewport.Height = static_cast<float>(height);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
+	_viewport.Width = static_cast<float>(width);
+	_viewport.Height = static_cast<float>(height);
+	_viewport.MinDepth = 0.0f;
+	_viewport.MaxDepth = 1.0f;
+	_viewport.TopLeftX = 0.0f;
+	_viewport.TopLeftY = 0.0f;
 
 	//ID3D11Buffer‚ÉÝ’è‚·‚éƒf[ƒ^
 	(void)GpuResourceManager::CreateConstantBuffer(device,
 		sizeof(Constants),
-		constantBuffer.ReleaseAndGetAddressOf());
+		_constantBuffer.ReleaseAndGetAddressOf());
 }
 
 void FrameBuffer::Clear(ID3D11DeviceContext* immediateContext,
 	const Vector4& color, const float& depth) const
 {
 	float c[4]{ color.x, color.y, color.z, color.w };
-	immediateContext->ClearRenderTargetView(rtv.Get(), c);
-	if (dsv)
-		immediateContext->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH, depth, 0);
+	immediateContext->ClearRenderTargetView(_rtv.Get(), c);
+	if (_dsv)
+		immediateContext->ClearDepthStencilView(_dsv.Get(), D3D11_CLEAR_DEPTH, depth, 0);
 }
 
 void FrameBuffer::Activate(ID3D11DeviceContext* immediateContext)
 {
-	viewportCount = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
-	immediateContext->RSGetViewports(&viewportCount, cachedViewports);
-	immediateContext->OMGetRenderTargets(1, cachedRTV.ReleaseAndGetAddressOf(),
-		cachedDSV.ReleaseAndGetAddressOf());
+	_viewportCount = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
+	immediateContext->RSGetViewports(&_viewportCount, _cachedViewports);
+	immediateContext->OMGetRenderTargets(1, _cachedRTV.ReleaseAndGetAddressOf(),
+		_cachedDSV.ReleaseAndGetAddressOf());
 
-	immediateContext->RSSetViewports(1, &viewport);
-	immediateContext->OMSetRenderTargets(1, rtv.GetAddressOf(),
-		dsv.Get());
+	immediateContext->RSSetViewports(1, &_viewport);
+	immediateContext->OMSetRenderTargets(1, _rtv.GetAddressOf(),
+		_dsv.Get());
 }
 
 void FrameBuffer::ClearAndActivate(ID3D11DeviceContext* immediateContext,
@@ -105,9 +105,9 @@ void FrameBuffer::ClearAndActivate(ID3D11DeviceContext* immediateContext,
 
 void FrameBuffer::Deactivate(ID3D11DeviceContext* immediateContext)
 {
-	immediateContext->RSSetViewports(viewportCount, cachedViewports);
-	immediateContext->OMSetRenderTargets(1, cachedRTV.GetAddressOf(),
-		cachedDSV.Get());
+	immediateContext->RSSetViewports(_viewportCount, _cachedViewports);
+	immediateContext->OMSetRenderTargets(1, _cachedRTV.GetAddressOf(),
+		_cachedDSV.Get());
 }
 
 void FrameBuffer::Deactivate(ID3D11DeviceContext* immediateContext,
@@ -115,7 +115,7 @@ void FrameBuffer::Deactivate(ID3D11DeviceContext* immediateContext,
 {
 	Constants data{};
 	data.color = high_luminance_color;
-	immediateContext->UpdateSubresource(constantBuffer.Get(), 0, 0, &data, 0, 0);
-	immediateContext->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+	immediateContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &data, 0, 0);
+	immediateContext->PSSetConstantBuffers(0, 1, _constantBuffer.GetAddressOf());
 	Deactivate(immediateContext);
 }

@@ -14,14 +14,14 @@ Sprite::Sprite(ID3D11Device* device,
 	if (filename == L"")
 	{
 		GpuResourceManager::MakeDummyTexture(device,
-			&srv_,
-			&texture2dDesc_,
+			&_srv,
+			&_texture2dDesc,
 			0xFFFFFFFF, 16);
 	}
 	else
 	{
 		GpuResourceManager::LoadTextureFromFile(
-			device, filename, &srv_, &texture2dDesc_);
+			device, filename, &_srv, &_texture2dDesc);
 	}
 
 	// 頂点情報のセット
@@ -46,7 +46,7 @@ Sprite::Sprite(ID3D11Device* device,
 	subresourceData.SysMemPitch = 0;
 	subresourceData.SysMemSlicePitch = 0;
 	HRESULT hr{ S_OK };
-	hr = device->CreateBuffer(&bufferDesc, &subresourceData, &vertexBuffer_);
+	hr = device->CreateBuffer(&bufferDesc, &subresourceData, &_vertexBuffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	// 頂点シェーダーオブジェクトの生成
@@ -60,11 +60,11 @@ Sprite::Sprite(ID3D11Device* device,
 		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
 		D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0}
 	};
-	GpuResourceManager::CreateVsFromCso(device, vsShaderFilename, &vertexShader_, &inputLayout_,
+	GpuResourceManager::CreateVsFromCso(device, vsShaderFilename, &_vertexShader, &_inputLayout,
 		input_element_desc, _countof(input_element_desc));
 
 	// ピクセルシェーダーオブジェクトの生成
-	GpuResourceManager::CreatePsFromCso(device, psShaderFilename, &pixelShader_);
+	GpuResourceManager::CreatePsFromCso(device, psShaderFilename, &_pixelShader);
 }
 
 Sprite::Sprite(ID3D11Device* device,
@@ -94,7 +94,7 @@ Sprite::Sprite(ID3D11Device* device,
 	subresourceData.SysMemPitch = 0;
 	subresourceData.SysMemSlicePitch = 0;
 	HRESULT hr{ S_OK };
-	hr = device->CreateBuffer(&bufferDesc, &subresourceData, &vertexBuffer_);
+	hr = device->CreateBuffer(&bufferDesc, &subresourceData, &_vertexBuffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	// 頂点シェーダーオブジェクトの生成
@@ -108,32 +108,32 @@ Sprite::Sprite(ID3D11Device* device,
 		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,
 		D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0}
 	};
-	GpuResourceManager::CreateVsFromCso(device, vsShaderFilename, &vertexShader_, &inputLayout_,
+	GpuResourceManager::CreateVsFromCso(device, vsShaderFilename, &_vertexShader, &_inputLayout,
 		input_element_desc, _countof(input_element_desc));
 
 	// ピクセルシェーダーオブジェクトの生成
-	GpuResourceManager::CreatePsFromCso(device, psShaderFilename, &pixelShader_);
+	GpuResourceManager::CreatePsFromCso(device, psShaderFilename, &_pixelShader);
 
 	if (srv)
 	{
-		isLoadFile_ = false;
+		_isLoadFile = false;
 		srv.Get()->AddRef();
-		this->srv_ = srv;
+		this->_srv = srv;
 
 		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-		this->srv_->GetResource(resource.GetAddressOf());
+		this->_srv->GetResource(resource.GetAddressOf());
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
 		hr = resource.Get()->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		//texture2d
-		texture2d->GetDesc(&texture2dDesc_);
+		texture2d->GetDesc(&_texture2dDesc);
 	}
 }
 
 Sprite::~Sprite()
 {
-	if (!isLoadFile_)
-		srv_->Release();
+	if (!_isLoadFile)
+		_srv->Release();
 }
 
 /// 描画処理
@@ -167,8 +167,8 @@ void Sprite::Render(ID3D11DeviceContext* dc,
 	float th = texSize.y;
 	if (texSize.x == 0.0f && texSize.y == 0.0f)
 	{
-		tw = static_cast<float>(texture2dDesc_.Width);
-		th = static_cast<float>(texture2dDesc_.Height);
+		tw = static_cast<float>(_texture2dDesc.Width);
+		th = static_cast<float>(_texture2dDesc.Height);
 	}
 
 	Vertex vertices[4] = {};
@@ -207,25 +207,25 @@ void Sprite::Render(ID3D11DeviceContext* dc,
 		vertices[i].texcoord.x = (std::min)(vertices[i].texcoord.x, UV_ADJUST);
 		vertices[i].texcoord.y = (std::min)(vertices[i].texcoord.y, UV_ADJUST);
 
-		vertices[i].texcoord.x = (texPos.x + vertices[i].texcoord.x * tw) / texture2dDesc_.Width;
-		vertices[i].texcoord.y = (texPos.y + vertices[i].texcoord.y * th) / texture2dDesc_.Height;
+		vertices[i].texcoord.x = (texPos.x + vertices[i].texcoord.x * tw) / _texture2dDesc.Width;
+		vertices[i].texcoord.y = (texPos.y + vertices[i].texcoord.y * th) / _texture2dDesc.Height;
 	}
 
 	D3D11_MAPPED_SUBRESOURCE msr;
-	dc->Map(vertexBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	dc->Map(_vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, vertices, sizeof(vertices));
-	dc->Unmap(vertexBuffer_.Get(), 0);
+	dc->Unmap(_vertexBuffer.Get(), 0);
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	dc->IASetVertexBuffers(0, 1, vertexBuffer_.GetAddressOf(), &stride, &offset);
+	dc->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &stride, &offset);
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	dc->IASetInputLayout(inputLayout_.Get());
+	dc->IASetInputLayout(_inputLayout.Get());
 
-	dc->VSSetShader(vertexShader_.Get(), nullptr, 0);
-	dc->PSSetShader(pixelShader_.Get(), nullptr, 0);
+	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 
-	dc->PSSetShaderResources(0, 1, srv_.GetAddressOf());
+	dc->PSSetShaderResources(0, 1, _srv.GetAddressOf());
 
 	dc->Draw(4, 0);
 }
@@ -239,10 +239,10 @@ void Sprite::Blit(ID3D11DeviceContext* immediateContext,
 	immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	immediateContext->IASetInputLayout(nullptr);
 
-	immediateContext->VSSetShader(vertexShader_.Get(), nullptr, 0);
+	immediateContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
 	pixelShader != nullptr ?
 		immediateContext->PSSetShader(pixelShader, nullptr, 0) :
-		immediateContext->PSSetShader(this->pixelShader_.Get(), nullptr, 0);
+		immediateContext->PSSetShader(this->_pixelShader.Get(), nullptr, 0);
 
 	// シェーダーリソースビューの設定
 	immediateContext->PSSetShaderResources(startSlot, numViews, shaderResourceView);

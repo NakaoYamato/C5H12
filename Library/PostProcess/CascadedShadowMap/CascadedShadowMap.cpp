@@ -106,8 +106,8 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 	const UINT& cbSlot)
 {
 	ID3D11DeviceContext* immediateContext = rc.deviceContext;
-	DirectX::XMFLOAT4X4 cameraProjection = rc.camera->projection_;
-	DirectX::XMFLOAT4X4 cameraView = rc.camera->view_;
+	DirectX::XMFLOAT4X4 cameraProjection = rc.camera->projection;
+	DirectX::XMFLOAT4X4 cameraView = rc.camera->view;
 	DirectX::XMFLOAT4 lightDirection = rc.lightDirection;/*TODO : (0,-1,0,0)‚ÅƒGƒ‰[*/
 
 	immediateContext->RSGetViewports(&_viewportCount, _cachedViewports);

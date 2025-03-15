@@ -115,21 +115,21 @@ private:
 	void CreateAxis(ID3D11Device* device);
 
 private:
-	Mesh										boxMesh;
-	Mesh										sphereMesh;
-	Mesh										halfSphereMesh;
-	Mesh										cylinderMesh;
-	Mesh										boneMesh;
-	Mesh										arrowMesh;
-	Mesh										axisMesh[3];// 0:X, 1:Y, 2:Z
-	std::vector<Instance>						instances;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>	inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer;
+	Mesh										_boxMesh;
+	Mesh										_sphereMesh;
+	Mesh										_halfSphereMesh;
+	Mesh										_cylinderMesh;
+	Mesh										_boneMesh;
+	Mesh										_arrowMesh;
+	Mesh										_axisMesh[3];// 0:X, 1:Y, 2:Z
+	std::vector<Instance>						_instances;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>		_constantBuffer;
 
 	// グリッド描画用
 	static const UINT VertexCapacity = 3 * 1024;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	gridVertexBuffer;
-	std::vector<Vector3> gridVertices;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	_gridVertexBuffer;
+	std::vector<Vector3> _gridVertices;
 };

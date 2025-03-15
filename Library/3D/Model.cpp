@@ -15,19 +15,19 @@
 Model::Model(ID3D11Device* device, const char* filename)
 {
     // リソース読み込み
-    resource = ModelResourceManager::Instance().LoadModelResource(filename);
+    _resource = ModelResourceManager::Instance().LoadModelResource(filename);
 
-    assert(resource != nullptr);
+    assert(_resource != nullptr);
 
     // シリアライズ用ファイルパス取得
-    serializePath_ = resource->GetSerializePath();
+    _serializePath = _resource->GetSerializePath();
 
     // ノードデータをコピー
-    poseNode.resize(resource->GetNodes().size());
-    for (size_t i = 0; i < poseNode.size(); ++i)
+    _poseNode.resize(_resource->GetNodes().size());
+    for (size_t i = 0; i < _poseNode.size(); ++i)
     {
-        const ModelResource::Node& node = resource->GetNodes().at(i);
-        ModelResource::Node& copyNode = poseNode.at(i);
+        const ModelResource::Node& node = _resource->GetNodes().at(i);
+        ModelResource::Node& copyNode = _poseNode.at(i);
         // データをコピー
         copyNode.name = node.name;
         copyNode.parentIndex = node.parentIndex;
@@ -37,14 +37,14 @@ Model::Model(ID3D11Device* device, const char* filename)
     }
 
     // 親、子供の再構築
-    for (size_t i = 0; i < poseNode.size(); ++i)
+    for (size_t i = 0; i < _poseNode.size(); ++i)
     {
-        ModelResource::Node& copyNode = poseNode.at(i);
+        ModelResource::Node& copyNode = _poseNode.at(i);
 
         if (copyNode.parentIndex != -1)
         {
-            copyNode.parent = &poseNode.at(copyNode.parentIndex);
-            poseNode.at(copyNode.parentIndex).children.emplace_back(&copyNode);
+            copyNode.parent = &_poseNode.at(copyNode.parentIndex);
+            _poseNode.at(copyNode.parentIndex).children.emplace_back(&copyNode);
         }
     }
 
@@ -60,7 +60,7 @@ Model::Model(ID3D11Device* device, const char* filename)
 // トランスフォーム更新処理
 void Model::UpdateTransform(const DirectX::XMFLOAT4X4& world)
 {
-    for (ModelResource::Node& node : poseNode)
+    for (ModelResource::Node& node : _poseNode)
     {
         // ローカル行列算出
         DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
@@ -93,7 +93,7 @@ void Model::DrawGui()
     {
         if (ImGui::TreeNode(u8"マテリアル"))
         {
-            for (auto& material : resource->GetAddressMaterials())
+            for (auto& material : _resource->GetAddressMaterials())
             {
                 if (ImGui::TreeNodeEx(&material, ImGuiTreeNodeFlags_Leaf, material.name.c_str()))
                 {
@@ -122,7 +122,7 @@ void Model::DrawGui()
                         // ダブルクリックで選択
                         if (ImGui::IsItemClicked())
                         {
-                            debugNodeIndex = GetNodeIndex(node.name);
+                            _debugNodeIndex = GetNodeIndex(node.name);
                         }
                         ImGui::Separator();
                         ImGui::DragFloat3(u8"position", &node.position.x, 0.1f);
@@ -143,26 +143,26 @@ void Model::DrawGui()
                         ImGui::TreePop();
                     }
                 };
-            NodeGui(poseNode.at(0));
+            NodeGui(_poseNode.at(0));
             ImGui::TreePop();
         }
         ImGui::TreePop();
-        ImGui::InputText(u8"ファイルパス", &serializePath_);
+        ImGui::InputText(u8"ファイルパス", &_serializePath);
         if (ImGui::Button(u8"シリアライズ"))
         {
-            resource->Serialize(serializePath_.c_str());
+            _resource->Serialize(_serializePath.c_str());
         }
     }
 
-    if (debugNodeIndex != -1)
+    if (_debugNodeIndex != -1)
     {
-        Debug::Renderer::DrawAxis(poseNode[debugNodeIndex].worldTransform);
+        Debug::Renderer::DrawAxis(_poseNode[_debugNodeIndex].worldTransform);
     }
 }
 
 void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
 {
-    for (ModelResource::Mesh& mesh : resource->GetAddressMeshes())
+    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
     {
         HRESULT hr{ S_OK };
         D3D11_BUFFER_DESC buffer_desc{};
@@ -192,7 +192,7 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
     HRESULT hr{ S_OK };
 
     // シェーダーリソースビューの作成
-    for (ModelResource::Material& material : resource->GetAddressMaterials())
+    for (ModelResource::Material& material : _resource->GetAddressMaterials())
     {
         for (auto& [key, textureData] : material.textureDatas)
         {

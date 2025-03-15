@@ -104,34 +104,34 @@ public:
 	void ClearMapData();
 public:
 	// アクセサ(基本使わない)
-	KeybordInputObserver* GetKeybordInput() { return &keybordInputObserver;	}
-	GamePadInputObserver* GetGamePadInput() { return &gamePadInputObserver;	}
-	MouseInputObserver* GetMouseInput() { return mouseInputObserver.get();	}
+	KeybordInputObserver* GetKeybordInput() { return &_keybordInputObserver;	}
+	GamePadInputObserver* GetGamePadInput() { return &_gamePadInputObserver;	}
+	MouseInputObserver* GetMouseInput() { return _mouseInputObserver.get();	}
 
 private:
 	// 入力とアクションの対応テーブル
 	using InputActionMap = std::unordered_map<std::string, std::vector<InputMapInfo>>;
-	InputActionMap inputActionMap;
+	InputActionMap _inputActionMap;
 	// 現在の押下状態
-	std::unordered_map<std::string, BOOL> currentInput;
+	std::unordered_map<std::string, BOOL> _currentInput;
 	// 直前の押下状態
-	std::unordered_map<std::string, BOOL> lastInput;
+	std::unordered_map<std::string, BOOL> _lastInput;
 
 	/// 入力量があるアクション
-	InputActionMap moveActionMap;
+	InputActionMap _moveActionMap;
 	// 現在の入力量
-	std::unordered_map<std::string, float> currentMovedParameter;
+	std::unordered_map<std::string, float> _currentMovedParameter;
 
 	// キーボードの入力監視クラス
-	KeybordInputObserver keybordInputObserver;
+	KeybordInputObserver _keybordInputObserver;
 	// ゲームパッドの入力監視クラス
-	GamePadInputObserver gamePadInputObserver;
+	GamePadInputObserver _gamePadInputObserver;
 	// マウスの入力監視クラス(ウィンドウのハンドルが必要なため動的に確保)
-	std::unique_ptr<MouseInputObserver> mouseInputObserver;
+	std::unique_ptr<MouseInputObserver> _mouseInputObserver;
 
 	// ウィンドウのハンドル
-	HWND hwnd{};
+	HWND _hwnd{};
 
 	// GUIの表示フラグ
-	bool showGui = false;
+	bool _showGui = false;
 };

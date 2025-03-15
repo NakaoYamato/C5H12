@@ -75,10 +75,10 @@ public:
         const Vector4& color = (Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader_;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader_;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout_;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> _inputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
 
     //--------------------------------------------------------------
     //  ç\ë¢ëÃíËã`

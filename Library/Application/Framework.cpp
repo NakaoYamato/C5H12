@@ -34,15 +34,15 @@ int Framework::Run()
         }
         else
         {
-            tictoc_.Tick();
+            _tictoc.Tick();
             CalcFrameStatus();
-            Update(tictoc_.TimeInterval());
-            if (elapsed1Second_)
+            Update(_tictoc.TimeInterval());
+            if (_elapsed1Second)
             {
                 FixedUpdate();
-                elapsed1Second_ = false;
+                _elapsed1Second = false;
             }
-            Render(tictoc_.TimeInterval());
+            Render(_tictoc.TimeInterval());
         }
     }
 
@@ -97,16 +97,16 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
         case VK_F11:
         case VK_F12:
             // 指定のキーを押すとそのビットを反転
-            Debug::GetDebugInput()->buttonData_ ^= (1 << (wparam - VK_F1));
+            Debug::GetDebugInput()->buttonData ^= (1 << (wparam - VK_F1));
             break;
 #endif
         }
         break;
     case WM_ENTERSIZEMOVE:
-        tictoc_.Stop();
+        _tictoc.Stop();
         break;
     case WM_EXITSIZEMOVE:
-        tictoc_.Start();
+        _tictoc.Start();
         break;
     case WM_MOUSEWHEEL:
         if (Input::Instance().GetMouseInput() != nullptr)
@@ -150,7 +150,7 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 bool Framework::Initialize() const
 {
     // Graphicsの初期化
-    Graphics::Instance().Initialize(hwnd_, FULLSCREEN);
+    Graphics::Instance().Initialize(_hwnd, FULLSCREEN);
 
     // 各種レンダラー作成
     MeshRenderer::Initialize(Graphics::Instance().GetDevice());
@@ -163,7 +163,7 @@ bool Framework::Initialize() const
         static_cast<uint32_t>(Graphics::Instance().GetScreenHeight()));
 
     // 入力監視クラスの初期化
-    Input::Instance().Initialize(hwnd_);
+    Input::Instance().Initialize(_hwnd);
 
     //// エフェクトマネージャー初期化
     //EffectManager::Instance().Initialize();
@@ -175,7 +175,7 @@ bool Framework::Initialize() const
     Debug::Initialize();
 
     // ImGui初期化
-    ImGuiManager::Initialize(hwnd_,
+    ImGuiManager::Initialize(_hwnd,
         Graphics::Instance().GetDevice(),
         Graphics::Instance().GetDeviceContext());
 
@@ -279,15 +279,15 @@ bool Framework::Uninitialize()
 
 void Framework::CalcFrameStatus()
 {
-    ++elapsedFrame_;
-    if ((tictoc_.TimeStamp() - elapsedTime_) >= 1.0f)
+    ++_elapsedFrame;
+    if ((_tictoc.TimeStamp() - _elapsedTime) >= 1.0f)
     {
-        fps_ = static_cast<float>(elapsedFrame_);
+        _fps = static_cast<float>(_elapsedFrame);
         std::ostringstream outs;
         outs.precision(6);
 #if _DEBUG
-        outs << fps_ << "/" << "FrameTime:" << 1000.0f / fps_ << "(ms)";
-        SetWindowTextA(hwnd_, outs.str().c_str());
+        outs << _fps << "/" << "FrameTime:" << 1000.0f / _fps << "(ms)";
+        SetWindowTextA(_hwnd, outs.str().c_str());
 #else
         //SetWindowTextW(hwnd_, L"タイトル");
         outs << fps_ << "/" << "FrameTime:" << 1000.0f / fps_ << "(ms)";
@@ -295,9 +295,9 @@ void Framework::CalcFrameStatus()
 #endif
 
         // 1秒が過ぎたフラグをオン
-        elapsed1Second_ = true;
+        _elapsed1Second = true;
 
-        elapsedFrame_ = 0;
-        elapsedTime_ += 1.0f;
+        _elapsedFrame = 0;
+        _elapsedTime += 1.0f;
     }
 }

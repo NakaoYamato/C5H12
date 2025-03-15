@@ -7,18 +7,18 @@
 /// </summary>
 struct CameraData
 {
-	DirectX::XMFLOAT4X4		view_{};
-	DirectX::XMFLOAT4X4		projection_{};
+	DirectX::XMFLOAT4X4		view{};
+	DirectX::XMFLOAT4X4		projection{};
 
-	Vector3		eye_{};
-	Vector3		focus_{};
+	Vector3		eye{};
+	Vector3		focus{};
 
-	Vector3		up_{};
-	Vector3		front_{};
-	Vector3		right_{};
+	Vector3		up{};
+	Vector3		front{};
+	Vector3		right{};
 
-	float fovY_ = 0;
-	float aspect_ = 0;
-	float nearZ_ = 0;
-	float farZ_ = 0;
+	float fovY = 0;
+	float aspect = 0;
+	float nearZ = 0;
+	float farZ = 0;
 };

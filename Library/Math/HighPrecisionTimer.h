@@ -12,12 +12,12 @@ public:
 		LONGLONG countsPerSec{};
 		// 精度を取得する
 		QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&countsPerSec));
-		secondsPerCount = 1.0 / static_cast<double>(countsPerSec);
+		_secondsPerCount = 1.0 / static_cast<double>(countsPerSec);
 
 		// 現在のカウンタ値を取得
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&thisTime));
-		baseTime = thisTime;
-		lastTime = thisTime;
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&_thisTime));
+		_baseTime = _thisTime;
+		_lastTime = _thisTime;
 	}
 
 	// コピーを防ぐ
@@ -30,14 +30,14 @@ public:
 	// Reset関数が呼び出されてからの経過時間（ｓ）を取得
 	float TimeStamp()const
 	{
-		if (stopped)
+		if (_stopped)
 		{
 			// 止まっている時間を返す
 			//                     |<--pausedTime-->|
 			// ----*---------------*-----------------*------------*------------*------> time
 			//  baseTime       stopTime        startTime     stopTime    thisTime
 			return static_cast<float>(
-				((stopTime - pausedTime) - baseTime) * secondsPerCount
+				((_stopTime - _pausedTime) - _baseTime) * _secondsPerCount
 			);
 		}
 		else
@@ -47,7 +47,7 @@ public:
 			// ----*---------------*-----------------*------------*------> time
 			//  baseTime       stopTime        startTime     thisTime
 			return static_cast<float>(
-				((thisTime - pausedTime) - baseTime) * secondsPerCount
+				((_thisTime - _pausedTime) - _baseTime) * _secondsPerCount
 			);
 		}
 	}
@@ -55,18 +55,18 @@ public:
 	// 経過時間（elapsedTime）(s)を取得
 	float TimeInterval() const
 	{
-		return static_cast<float>(deltaTime);
+		return static_cast<float>(_deltaTime);
 	}
 
 	// メッセージループの前に呼び出す
 	void Reset()
 	{
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&thisTime));
-		baseTime = thisTime;
-		lastTime = thisTime;
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&_thisTime));
+		_baseTime = _thisTime;
+		_lastTime = _thisTime;
 
-		stopTime = 0;
-		stopped = false;
+		_stopTime = 0;
+		_stopped = false;
 	}
 
 	// ウィンドウがアクティブになったら呼び出す
@@ -79,55 +79,55 @@ public:
 		//                     |<-------d------->|
 		// ----*---------------*-----------------*------------> time
 		//  baseTime       stopTime        startTime     
-		if (stopped)
+		if (_stopped)
 		{
-			pausedTime += (startTime - stopTime);
-			lastTime = startTime;
-			stopTime = 0;
-			stopped = false;
+			_pausedTime += (startTime - _stopTime);
+			_lastTime = startTime;
+			_stopTime = 0;
+			_stopped = false;
 		}
 	}
 
 	// ウィンドウが非アクティブになったら呼び出す
 	void Stop() 
 	{
-		if (!stopped)
+		if (!_stopped)
 		{
-			QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&stopTime));
-			stopped = true;
+			QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&_stopTime));
+			_stopped = true;
 		}
 	}
 
 	void Tick() // Call every frame.
 	{
-		if (stopped)
+		if (_stopped)
 		{
-			deltaTime = 0.0;
+			_deltaTime = 0.0;
 			return;
 		}
 
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&thisTime));
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&_thisTime));
 		// このフレームと前のフレームとの時間差。
-		deltaTime = (thisTime - lastTime) * secondsPerCount;
+		_deltaTime = (_thisTime - _lastTime) * _secondsPerCount;
 
 		// 最終時間を更新
-		lastTime = thisTime;
+		_lastTime = _thisTime;
 
 		// delataTimeが負になる場合があるので対応
-		if (deltaTime < 0.0)
+		if (_deltaTime < 0.0)
 		{
-			deltaTime = 0.0;
+			_deltaTime = 0.0;
 		}
 	}
 private:
-	double secondsPerCount{ 0.0 };
-	double deltaTime{ 0.0 };
+	double _secondsPerCount{ 0.0 };
+	double _deltaTime{ 0.0 };
 
-	LONGLONG baseTime{};
-	LONGLONG pausedTime{};
-	LONGLONG stopTime{};
-	LONGLONG lastTime{};
-	LONGLONG thisTime{};
+	LONGLONG _baseTime{};
+	LONGLONG _pausedTime{};
+	LONGLONG _stopTime{};
+	LONGLONG _lastTime{};
+	LONGLONG _thisTime{};
 
-	bool stopped = false;
+	bool _stopped = false;
 };

@@ -3,27 +3,29 @@
 
 #include "../HRTrace.h"
 
+#include <imgui.h>
 SkyMap::SkyMap(ID3D11Device* device, const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM)
 {
 	D3D11_TEXTURE2D_DESC texture2d_desc;
-	GpuResourceManager::LoadTextureFromFile(device, filename, shaderResourceView_.GetAddressOf(), &texture2d_desc);
+	GpuResourceManager::LoadTextureFromFile(device, filename, _shaderResourceView.GetAddressOf(), &texture2d_desc);
 
 	if (texture2d_desc.MiscFlags & D3D11_RESOURCE_MISC_TEXTURECUBE)
 	{
-		isTextureCube_ = true;
+		_isTextureCube = true;
 	}
 
-	GpuResourceManager::CreateVsFromCso(device, ".\\Data\\Shader\\SkyMapVS.cso", vertexShader_.GetAddressOf(), NULL, NULL, 0);
-	GpuResourceManager::CreatePsFromCso(device, ".\\Data\\Shader\\SkyMapPS.cso", pixelShader_[0].GetAddressOf());
-	GpuResourceManager::CreatePsFromCso(device, ".\\Data\\Shader\\SkyBoxPS.cso", pixelShader_[1].GetAddressOf());
+	GpuResourceManager::CreateVsFromCso(device, ".\\Data\\Shader\\SkyMapVS.cso", _vertexShader.GetAddressOf(), NULL, NULL, 0);
+	GpuResourceManager::CreatePsFromCso(device, ".\\Data\\Shader\\SkyMapPS.cso", _pixelShader[0].GetAddressOf());
+	GpuResourceManager::CreatePsFromCso(device, ".\\Data\\Shader\\SkyBoxPS.cso", _pixelShader[1].GetAddressOf());
 
 	if(diffuseIEM)
-		GpuResourceManager::LoadTextureFromFile(device, diffuseIEM, diffuseIEMSRV_.GetAddressOf(), &texture2d_desc);
+		GpuResourceManager::LoadTextureFromFile(device, diffuseIEM, _diffuseIEMSRV.GetAddressOf(), &texture2d_desc);
 	if(specularIDM)
-		GpuResourceManager::LoadTextureFromFile(device, diffuseIEM, specularIEMSRV_.GetAddressOf(), &texture2d_desc);
-	GpuResourceManager::LoadTextureFromFile(device, L"./Data/SkyMap/lut_ggx.DDS", lutGGXSRV_.GetAddressOf(), &texture2d_desc);
-	//GpuResourceManager::LoadTextureFromFile(device, L"./Data/SkyMap/lut_charlie.DDS", lutGGXSRV_.GetAddressOf(), &texture2d_desc);
-	//GpuResourceManager::LoadTextureFromFile(device, L"./Data/SkyMap/lut_sheen_E.DDS", lutGGXSRV_.GetAddressOf(), &texture2d_desc);
+		GpuResourceManager::LoadTextureFromFile(device, diffuseIEM, _specularIEMSRV.GetAddressOf(), &texture2d_desc);
+
+	GpuResourceManager::LoadTextureFromFile(device, L"./Data/SkyMap/lut_ggx.DDS", _lutSRVs[0].GetAddressOf(), &texture2d_desc);
+	GpuResourceManager::LoadTextureFromFile(device, L"./Data/SkyMap/lut_charlie.DDS", _lutSRVs[1].GetAddressOf(), &texture2d_desc);
+	GpuResourceManager::LoadTextureFromFile(device, L"./Data/SkyMap/lut_sheen_E.DDS", _lutSRVs[2].GetAddressOf(), &texture2d_desc);
 
 	D3D11_BUFFER_DESC buffer_desc{};
 	buffer_desc.ByteWidth = sizeof(Constants);
@@ -32,7 +34,7 @@ SkyMap::SkyMap(ID3D11Device* device, const wchar_t* filename, const wchar_t* dif
 	buffer_desc.CPUAccessFlags = 0;
 	buffer_desc.MiscFlags = 0;
 	buffer_desc.StructureByteStride = 0;
-	HRESULT hr = device->CreateBuffer(&buffer_desc, nullptr, constantBuffer_.GetAddressOf());
+	HRESULT hr = device->CreateBuffer(&buffer_desc, nullptr, _constantBuffer.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }
 
@@ -48,21 +50,46 @@ void SkyMap::Blit(const RenderContext& rc)
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	dc->IASetInputLayout(NULL);
 
-	dc->VSSetShader(vertexShader_.Get(), 0, 0);
-	dc->PSSetShader(isTextureCube_ ? pixelShader_[1].Get() : pixelShader_[0].Get(), 0, 0);
+	dc->VSSetShader(_vertexShader.Get(), 0, 0);
+	dc->PSSetShader(_isTextureCube ? _pixelShader[1].Get() : _pixelShader[0].Get(), 0, 0);
 
-	dc->PSSetShaderResources(0, 1, shaderResourceView_.GetAddressOf());
+	dc->PSSetShaderResources(0, 1, _shaderResourceView.GetAddressOf());
 
-	DirectX::XMMATRIX        VP = DirectX::XMLoadFloat4x4(&rc.camera->view_) *
-		DirectX::XMLoadFloat4x4(&rc.camera->projection_);
+	DirectX::XMMATRIX        VP = DirectX::XMLoadFloat4x4(&rc.camera->view) *
+		DirectX::XMLoadFloat4x4(&rc.camera->projection);
 	Constants data;
 	DirectX::XMStoreFloat4x4(&data.inverseViewProjection, DirectX::XMMatrixInverse(NULL, VP));
 
-	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &data, 0, 0);
-	dc->PSSetConstantBuffers(CBIndex, 1, constantBuffer_.GetAddressOf());
+	dc->UpdateSubresource(_constantBuffer.Get(), 0, 0, &data, 0, 0);
+	dc->PSSetConstantBuffers(CBIndex, 1, _constantBuffer.GetAddressOf());
 	dc->Draw(4, 0);
 
 	dc->VSSetShader(NULL, 0, 0);
 	dc->PSSetShader(NULL, 0, 0);
 	dc->PSSetConstantBuffers(CBIndex, 1, cacheBuffer.GetAddressOf());
+}
+
+void SkyMap::DrawGui()
+{
+#if USE_IMGUI
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu(u8"描画管理"))
+		{
+			ImGui::Checkbox(u8"スカイマップ", &_drawGui);
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
+	if (_drawGui)
+	{
+		if (ImGui::Begin(u8"スカイマップ"))
+		{
+			ImGui::SliderInt(u8"ルックアップテーブル番号", &_lutIndex, 0, LUT_INDEX_MAX - 1);
+		}
+		ImGui::End();
+	}
+#endif
 }

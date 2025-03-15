@@ -12,21 +12,21 @@ PhongShader::PhongShader(ID3D11Device* device,
 	GpuResourceManager::CreateVsFromCso(
 		device,
 		vsName,
-		vertexShader_.ReleaseAndGetAddressOf(),
-		inputLayout_.ReleaseAndGetAddressOf(),
+		_vertexShader.ReleaseAndGetAddressOf(),
+		_inputLayout.ReleaseAndGetAddressOf(),
 		inputDescs,
 		inputSize);
 
 	// ピクセルシェーダ
 	GpuResourceManager::CreatePsFromCso(device,
 		psName,
-		pixelShader_.ReleaseAndGetAddressOf());
+		_pixelShader.ReleaseAndGetAddressOf());
 
 
 	// メッシュ用定数バッファ
 	(void)GpuResourceManager::CreateConstantBuffer(device,
 		sizeof(CbMesh),
-		meshConstantBuffer_.ReleaseAndGetAddressOf());
+		_meshConstantBuffer.ReleaseAndGetAddressOf());
 }
 
 void PhongShader::Begin(const RenderContext& rc)
@@ -34,16 +34,16 @@ void PhongShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(inputLayout_.Get());
-	dc->VSSetShader(vertexShader_.Get(), nullptr, 0);
-	dc->PSSetShader(pixelShader_.Get(), nullptr, 0);
+	dc->IASetInputLayout(_inputLayout.Get());
+	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 
 	// 定数バッファ設定
 	ID3D11Buffer* cbs[] =
 	{
-		meshConstantBuffer_.Get(),
+		_meshConstantBuffer.Get(),
 	};
-	dc->PSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 }
 
 void PhongShader::Update(const RenderContext& rc, 
@@ -57,7 +57,7 @@ void PhongShader::Update(const RenderContext& rc,
 	cbMesh.Ka = material->colors.at("Ambient");
 	cbMesh.Kd = material->colors.at("Diffuse");
 	cbMesh.Ks = material->colors.at("Specular");
-	dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
+	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
 	ID3D11ShaderResourceView* srvs[] = 
@@ -83,7 +83,7 @@ void PhongShader::End(const RenderContext& rc)
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* cbs[] = { nullptr };
-	dc->PSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 
 	// シェーダーリソースビュー設定解除
 	ID3D11ShaderResourceView* srvs[] =

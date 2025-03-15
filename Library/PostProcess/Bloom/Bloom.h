@@ -36,12 +36,12 @@ private:
         ID3D11Buffer* constantBuffer) override;
 
 private:
-    Constants data{};
+    Constants _data{};
 
     // 高輝度抽出用
-    std::unique_ptr<FrameBuffer> glowExtraction;
+    std::unique_ptr<FrameBuffer> _glowExtraction;
     // ブルーム用
-    std::unique_ptr<FrameBuffer> bloomFrameBuffer[DownSampledCount][2];
+    std::unique_ptr<FrameBuffer> _bloomFrameBuffer[DownSampledCount][2];
 
     enum BLOOM_PIXEL_TYPE
     {
@@ -52,11 +52,11 @@ private:
         //UPSAMPLING_PS, // -> PostProcessBase側で行う
         BLOOM_PIXEL_TYPE_MAX
     };
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> bloomPixelShaders[BLOOM_PIXEL_TYPE::BLOOM_PIXEL_TYPE_MAX];
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _bloomPixelShaders[BLOOM_PIXEL_TYPE::BLOOM_PIXEL_TYPE_MAX];
 
     // ブルーム用ステート
-    Microsoft::WRL::ComPtr<ID3D11SamplerState>		samplerState;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
-    Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState>		_samplerState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depthStencilState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> _blendState;
 };

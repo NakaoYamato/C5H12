@@ -34,32 +34,32 @@ public:
 	virtual void DrawGui() {}
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() {
-		return frameBuffer->GetColorSRV();
+		return _frameBuffer->GetColorSRV();
 	}
 
 	// フレームバッファの深度値情報を取得
 	ID3D11DepthStencilView* GetDepthStencilView() {
-		return frameBuffer->GetDSV().Get();
+		return _frameBuffer->GetDSV().Get();
 	}
 
 	// 初期のデータの取得
-	const std::unordered_map<std::string, float>& GetStartData()const { return startData; }
+	const std::unordered_map<std::string, float>& GetStartData()const { return _startData; }
 	// 現在のデータの取得
 	virtual std::unordered_map<std::string, float> GetCurrentData() { return std::unordered_map<std::string, float>(); };
 	// データの設定
 	virtual void SetData(std::unordered_map<std::string, float>& parameter) {};
 	// データの初期化
-	virtual void ClearData() { SetData(startData); };
+	virtual void ClearData() { SetData(_startData); };
 
 protected:
 	// 定数バッファの更新
 	virtual void UpdateConstantBuffer(ID3D11DeviceContext* immediateContext, ID3D11Buffer* constantBuffer) = 0;
 
 protected:
-	std::unique_ptr<FrameBuffer> frameBuffer;
-	std::unique_ptr<Sprite> fullscreenQuad;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
+	std::unique_ptr<FrameBuffer> _frameBuffer;
+	std::unique_ptr<Sprite> _fullscreenQuad;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
 
-	std::unordered_map<std::string, float> startData;
+	std::unordered_map<std::string, float> _startData;
 };

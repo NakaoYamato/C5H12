@@ -28,16 +28,16 @@ public:
     void DebugRender();
 
     // アクセサ
-    const Data& GetData()const { return data_; }
-    Data* GetDataPointer() { return &data_; }
-    const Vector4& GetPosition()const { return data_.position; }
-    const Vector4& GetColor()const { return data_.color; }
-    float GetRange()const { return data_.range; }
+    const Data& GetData()const { return _data; }
+    Data* GetDataPointer() { return &_data; }
+    const Vector4& GetPosition()const { return _data.position; }
+    const Vector4& GetColor()const { return _data.color; }
+    float GetRange()const { return _data.range; }
 
-    void SetPosition(const Vector4& v) { data_.position = v; }
-    void SetColor(const Vector4& v) { data_.color = v; }
-    void SetRange(const float r) { data_.range = r; }
-    void SetActiveFlag(bool b) { data_.isAlive = b == true ? 1 : 0; }
+    void SetPosition(const Vector4& v) { _data.position = v; }
+    void SetColor(const Vector4& v) { _data.color = v; }
+    void SetRange(const float r) { _data.range = r; }
+    void SetActiveFlag(bool b) { _data.isAlive = b == true ? 1 : 0; }
 private:
-    Data data_;
+    Data _data;
 };

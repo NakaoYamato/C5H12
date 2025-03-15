@@ -174,19 +174,19 @@ public:
 	void AppendAnimations(ModelResource* animationResource);
 
 	// アクセサ
-	const std::vector<Node>& GetNodes() const { return nodes_; }
-	const std::vector<Mesh>& GetMeshes() const { return meshes_; }
-	const std::vector<Material>& GetMaterials() const { return materials_; }
-	const std::vector<Animation>& GetAnimations() const { return animations_; }
-	const std::string& GetSerializePath() const { return serializePath_; }
+	const std::vector<Node>& GetNodes() const { return _nodes; }
+	const std::vector<Mesh>& GetMeshes() const { return _meshes; }
+	const std::vector<Material>& GetMaterials() const { return _materials; }
+	const std::vector<Animation>& GetAnimations() const { return _animations; }
+	const std::string& GetSerializePath() const { return _serializePath; }
 
-	std::vector<Mesh>& GetAddressMeshes() { return meshes_; }
-	std::vector<Material>& GetAddressMaterials() { return materials_; }
+	std::vector<Mesh>& GetAddressMeshes() { return _meshes; }
+	std::vector<Material>& GetAddressMaterials() { return _materials; }
 
 	// 指定のマテリアルのSRVを変更
 	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)
 	{
-		materials_.at(materialIndex).textureDatas.at(textureKey).textureSRV = srv;
+		_materials.at(materialIndex).textureDatas.at(textureKey).textureSRV = srv;
 	}
 
 	// シリアライズ
@@ -226,16 +226,16 @@ private:
 	static int GetNodeIndex(const std::vector<Node>& nodes, const char* name);
 
 private:
-	std::filesystem::path filepath_;
-	std::string serializePath_{};
+	std::filesystem::path _filepath;
+	std::string _serializePath{};
 
-	Assimp::Importer aImporter_;
-	const aiScene* aScene_ = nullptr;
+	Assimp::Importer _aImporter;
+	const aiScene* _aScene = nullptr;
 
-	std::vector<Node> nodes_;
-	std::vector<Mesh> meshes_;
-	std::vector<Material> materials_;
-	std::vector<Animation> animations_;
+	std::vector<Node> _nodes;
+	std::vector<Mesh> _meshes;
+	std::vector<Material> _materials;
+	std::vector<Animation> _animations;
 
-	std::map<const aiNode*, int> nodeIndexMap_;
+	std::map<const aiNode*, int> _nodeIndexMap;
 };

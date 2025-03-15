@@ -19,6 +19,6 @@ public:
 	void Update(float elapsedTime) override;
 
 private:
-	std::weak_ptr<ModelRenderer> mr_;
+	std::weak_ptr<ModelRenderer> _mr;
 };
 

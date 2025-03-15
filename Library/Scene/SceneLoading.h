@@ -8,7 +8,7 @@ class SceneLoading : public Scene
 {
 public:
 	SceneLoading(std::shared_ptr<Scene>&& nextScene) :
-		nextScene_(std::move(nextScene)) {}
+		_nextScene(std::move(nextScene)) {}
 	~SceneLoading()override {}
 
 	// –¼‘OŽæ“¾
@@ -36,8 +36,8 @@ private:
 	static void LoadingThread(SceneLoading* scene);
 
 private:
-	std::shared_ptr<Scene> nextScene_;
-	std::thread* thread_ = nullptr;
+	std::shared_ptr<Scene> _nextScene;
+	std::thread* _thread = nullptr;
 };
 
 

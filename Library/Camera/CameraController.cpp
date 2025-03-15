@@ -6,11 +6,11 @@
 // デバッグ用Gui
 void CameraControllerBase::DrawGui()
 {
-    ImGui::DragFloat3("target", &target_.x);
-    ImGui::DragFloat3("eye", &eye_.x);
-    Vector3 deg = Vec3ConvertToDegrees(angle_);
+    ImGui::DragFloat3("target", &_target.x);
+    ImGui::DragFloat3("eye", &_eye.x);
+    Vector3 deg = Vec3ConvertToDegrees(_angle);
     if (ImGui::DragFloat3("angle", &deg.x))
     {
-        angle_ = Vec3ConvertToRadians(deg);
+        _angle = Vec3ConvertToRadians(deg);
     }
 }

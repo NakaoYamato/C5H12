@@ -66,7 +66,7 @@ public:
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
-		components_.emplace_back(component);
+		_components.emplace_back(component);
 		return component;
 	}
 
@@ -74,7 +74,7 @@ public:
 	template<class T>
 	std::shared_ptr<T> GetComponent()
 	{
-		for (std::shared_ptr<Component>& component : components_)
+		for (std::shared_ptr<Component>& component : _components)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
@@ -89,13 +89,13 @@ public:
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
-		colliderComponents_.emplace_back(component);
+		_colliders.emplace_back(component);
 		return component;
 	}
 	template<class T>
 	std::shared_ptr<T> GetCollider()
 	{
-		for (std::shared_ptr<ColliderComponent>& component : colliderComponents_)
+		for (std::shared_ptr<ColliderComponent>& component : _colliders)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
@@ -105,54 +105,54 @@ public:
 	}
 	std::shared_ptr<ColliderComponent> GetCollider(size_t index)
 	{
-		return colliderComponents_[index];
+		return _colliders[index];
 	}
-	size_t GetColliderComponentSize()const { return colliderComponents_.size(); }
+	size_t GetColliderComponentSize()const { return _colliders.size(); }
 #pragma endregion
 
 
 #pragma region アクセサ
-	std::weak_ptr<Actor> GetParent() { return parent_; }
-	std::vector<std::weak_ptr<Actor>> GetChildren() { return children_; };
-	const char* GetName() const { return name_.c_str(); }
-	Transform& GetTransform() { return transform_; }
-	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return judgeTags_; }
+	std::weak_ptr<Actor> GetParent() { return _parent; }
+	std::vector<std::weak_ptr<Actor>> GetChildren() { return _children; };
+	const char* GetName() const { return _name.c_str(); }
+	Transform& GetTransform() { return _transform; }
+	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return _judgeTags; }
 
 	void SetScene(Scene* scene) { this->_scene = scene; }
 	void SetParent(std::shared_ptr<Actor> parent) {
-		this->parent_ = parent;
-		parent->children_.push_back(shared_from_this());
+		this->_parent = parent;
+		parent->_children.push_back(shared_from_this());
 	}
-	void SetName(const char* name) { this->name_ = name; }
-	void SetTransform(const Transform& t) { this->transform_ = t; }
-	void SetActiveFlag(bool b) { this->isActive_ = b; }
-	void SetShowFlag(bool b) { this->isShowing_ = b; }
-	void SetDrawDebugFlag(bool b) { this->drawDebug_ = b; }
+	void SetName(const char* name) { this->_name = name; }
+	void SetTransform(const Transform& t) { this->_transform = t; }
+	void SetActiveFlag(bool b) { this->_isActive = b; }
+	void SetShowFlag(bool b) { this->_isShowing = b; }
+	void SetDrawDebugFlag(bool b) { this->_drawDebug = b; }
 	// そのタグに対して当たり判定を行うかのフラグをセット
-	void SetJudgeTagFlag(ActorTag tag, bool f) { judgeTags_[tag] = f; }
+	void SetJudgeTagFlag(ActorTag tag, bool f) { _judgeTags[tag] = f; }
 
-	bool IsActive()const { return isActive_; }
-	bool IsShowing()const { return isShowing_; }
-	bool DrawDebug()const { return drawDebug_; }
+	bool IsActive()const { return _isActive; }
+	bool IsShowing()const { return _isShowing; }
+	bool DrawDebug()const { return _drawDebug; }
 
 #pragma endregion
 protected:
 	Scene* _scene = nullptr;
 
-	std::weak_ptr<Actor>	parent_;
-	std::vector<std::weak_ptr<Actor>> children_;
+	std::weak_ptr<Actor>	_parent;
+	std::vector<std::weak_ptr<Actor>> _children;
 
-	std::string			name_;
-	Transform			transform_;
+	std::string			_name;
+	Transform			_transform;
 
-	bool				isActive_ = true;
-	bool				isShowing_ = true;
-	bool				drawDebug_ = true;
+	bool				_isActive = true;
+	bool				_isShowing = true;
+	bool				_drawDebug = true;
 
-	std::vector<std::shared_ptr<Component>>	components_;
+	std::vector<std::shared_ptr<Component>>	_components;
 	// 当たり判定コンポーネント
-	std::vector<std::shared_ptr<ColliderComponent>>	colliderComponents_;
+	std::vector<std::shared_ptr<ColliderComponent>>	_colliders;
 
 	// 各タグに対して当たり判定を行うかのフラグ
-	std::unordered_map<ActorTag, bool> judgeTags_;
+	std::unordered_map<ActorTag, bool> _judgeTags;
 };

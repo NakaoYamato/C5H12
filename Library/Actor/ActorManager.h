@@ -119,13 +119,13 @@ public:
 	void SetGameSpeed(ActorTag tag, float scale, float duration);
 
 private:
-	ActorMap startActors_[static_cast<size_t>(ActorTag::ActorTagMax)];
-	ActorMap updateActors_[static_cast<size_t>(ActorTag::ActorTagMax)];
-	std::set<std::shared_ptr<Actor>> selectionActors_;
-	std::set<std::shared_ptr<Actor>> removeActors_;
+	ActorMap _startActors[static_cast<size_t>(ActorTag::ActorTagMax)];
+	ActorMap _updateActors[static_cast<size_t>(ActorTag::ActorTagMax)];
+	std::set<std::shared_ptr<Actor>> _selectionActors;
+	std::set<std::shared_ptr<Actor>> _removeActors;
 
 	// GUIで選択しているオブジェクト
-	std::unordered_map<std::string, bool> showGuiObjects_;
+	std::unordered_map<std::string, bool> _showGuiObjects;
 
-	std::pair<float, float> gameSpeeds_[static_cast<size_t>(ActorTag::ActorTagMax)];
+	std::pair<float, float> _gameSpeeds[static_cast<size_t>(ActorTag::ActorTagMax)];
 };

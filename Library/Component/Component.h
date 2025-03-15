@@ -54,11 +54,11 @@ public:
 	virtual void DrawGui() {}
 
 	// アクター設定
-	void SetActor(std::shared_ptr<Actor> actor) { this->actor_ = actor; }
+	void SetActor(std::shared_ptr<Actor> actor) { this->_actor = actor; }
 
 	// アクター取得
-	std::shared_ptr<Actor> GetActor() { return actor_.lock(); }
+	std::shared_ptr<Actor> GetActor() { return _actor.lock(); }
 
 private:
-	std::weak_ptr<Actor>	actor_;
+	std::weak_ptr<Actor>	_actor;
 };

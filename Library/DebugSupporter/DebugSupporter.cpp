@@ -22,7 +22,7 @@ namespace Debug
         /// 指定のボタンが有効化かどうか
         bool IsActive(DebugButton button)
         {
-            return debugInput_.buttonData_ & button;
+            return debugInput_.buttonData & button;
         }
     }
 
@@ -134,7 +134,7 @@ namespace Debug
                         ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, color);
                         if (ImGui::MenuItem(name.c_str()))
                         {
-                            Debug::GetDebugInput()->buttonData_ ^= key;
+                            Debug::GetDebugInput()->buttonData ^= key;
                         }
                         ImGui::PopStyleColor();
                     };

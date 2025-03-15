@@ -28,7 +28,7 @@ public:
 
 private:
 	using ModelMap = std::map<std::string, std::weak_ptr<ModelResource>>;
-	ModelMap		models_;
+	ModelMap		_models;
 
-	bool showGui_ = false;
+	bool _showGui = false;
 };

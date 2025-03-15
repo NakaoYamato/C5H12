@@ -19,7 +19,7 @@ public:
             "./Data/Shader/RobertsCrossPS.cso",
             sizeof(Constants)) {
         // ‰Šú’l‚Ìİ’è
-        startData = GetCurrentData();
+        _startData = GetCurrentData();
     }
     ~RobertsCross()override {}
 
@@ -36,5 +36,5 @@ private:
         ID3D11Buffer* constantBuffer) override;
 
 private:
-    Constants data{};
+    Constants _data{};
 };

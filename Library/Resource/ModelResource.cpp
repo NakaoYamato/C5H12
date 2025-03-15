@@ -81,42 +81,42 @@ namespace AssimpHelper
 // モデルの読み込み
 void ModelResource::Load(std::string filename)
 {
-    filepath_ = filename;
+    _filepath = filename;
 
     std::filesystem::path serializePath(filename);
 
     // シリアライズの確認
     serializePath.replace_extension(".cereal");
-    serializePath_ = serializePath.generic_string();
+    _serializePath = serializePath.generic_string();
     if (std::filesystem::exists(serializePath))
     {
         // シリアライズ読み込み
         Deserialize(serializePath.string().c_str());
 
         // ノードの構築
-        BuildNode(nodes_);
+        BuildNode(_nodes);
 
         // ボーンの構築
-        BuildBone(meshes_, nodes_);
+        BuildBone(_meshes, _nodes);
 
         // メッシュのノード構築
-        for (Mesh& mesh : meshes_)
+        for (Mesh& mesh : _meshes)
         {
-            mesh.node = &nodes_.at(mesh.nodeIndex);
+            mesh.node = &_nodes.at(mesh.nodeIndex);
         }
 
         return;
     }
 
     // 拡張子取得
-    std::string extension = filepath_.extension().string();
+    std::string extension = _filepath.extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
 
     // FBXファイルの場合は特殊なインポートオプションを設定
     if (extension == ".fbx")
     {
         // $AssimpFBX$がついたノードの生成を抑制
-        aImporter_.SetPropertyInteger(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+        _aImporter.SetPropertyInteger(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
     }
 
     // インポート時のフラグ
@@ -126,26 +126,26 @@ void ModelResource::Load(std::string filename)
         aiProcess_PopulateArmatureData;     // ボーンの参照データを取得
 
     // ファイル読み込み
-    aScene_ = aImporter_.ReadFile(filename, flag);
-    _ASSERT_EXPR_A(aScene_, "3D Model File not found");
+    _aScene = _aImporter.ReadFile(filename, flag);
+    _ASSERT_EXPR_A(_aScene, "3D Model File not found");
 
     // ノードの読み込み
-    LoadNodes(nodes_);
+    LoadNodes(_nodes);
 
     // ノードの構築
-    BuildNode(nodes_);
+    BuildNode(_nodes);
 
     // メッシュの読み込み
-    LoadMeshes(meshes_, nodes_);
+    LoadMeshes(_meshes, _nodes);
 
     // ボーンの構築
-    BuildBone(meshes_, nodes_);
+    BuildBone(_meshes, _nodes);
 
     // テクスチャの読み込み
-    LoadMaterials(materials_);
+    LoadMaterials(_materials);
 
     // アニメーションの読み込み
-    LoadAnimations(animations_, nodes_);
+    LoadAnimations(_animations, _nodes);
 
     // シリアライズ
     Serialize(serializePath.string().c_str());
@@ -154,11 +154,11 @@ void ModelResource::Load(std::string filename)
 // アニメーションの追加
 void ModelResource::AppendAnimations(ModelResource* animationResource)
 {
-    for (auto& animationData : animationResource->animations_)
+    for (auto& animationData : animationResource->_animations)
     {
         ModelResource::Animation animation{};
         animation = animationData;
-        this->animations_.push_back(animation);
+        this->_animations.push_back(animation);
     }
 }
 
@@ -166,26 +166,26 @@ void ModelResource::AppendAnimations(ModelResource* animationResource)
 void ModelResource::LoadNodes(std::vector<Node>& nodes)
 {
     // ルートノードから探査
-    TraverseNode(nodes, aScene_->mRootNode, -1);
+    TraverseNode(nodes, _aScene->mRootNode, -1);
 }
 
 // メッシュの読み込み
 void ModelResource::LoadMeshes(std::vector<Mesh>& meshes, std::vector<Node>& nodes)
 {
     // nodesから探査
-    TraverseMesh(meshes, nodes, aScene_->mRootNode);
+    TraverseMesh(meshes, nodes, _aScene->mRootNode);
 }
 
 // テクスチャの読み込み
 void ModelResource::LoadMaterials(std::vector<Material>& materials)
 {
     // ディレクトリパス取得
-    std::filesystem::path dirpath(filepath_.parent_path());
+    std::filesystem::path dirpath(_filepath.parent_path());
 
-    materials.resize(aScene_->mNumMaterials);
-    for (uint32_t aMaterialIndex = 0; aMaterialIndex < aScene_->mNumMaterials; ++aMaterialIndex)
+    materials.resize(_aScene->mNumMaterials);
+    for (uint32_t aMaterialIndex = 0; aMaterialIndex < _aScene->mNumMaterials; ++aMaterialIndex)
     {
-        const aiMaterial* aMaterial = aScene_->mMaterials[aMaterialIndex];
+        const aiMaterial* aMaterial = _aScene->mMaterials[aMaterialIndex];
         Material& material = materials.at(aMaterialIndex);
 
         // マテリアル名
@@ -249,7 +249,7 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
                 if (AI_SUCCESS == aMaterial->GetTexture(aTextureType, 0, &aTextureFilePath))
                 {
                     // テクスチャが埋め込みか確認
-                    const aiTexture* aTexture = aScene_->GetEmbeddedTexture(aTextureFilePath.C_Str());
+                    const aiTexture* aTexture = _aScene->GetEmbeddedTexture(aTextureFilePath.C_Str());
                     if (aTexture != nullptr)
                     {
                         // テクスチャファイルパス作成
@@ -323,9 +323,9 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
 // アニメーションの読み込み
 void ModelResource::LoadAnimations(std::vector<Animation>& animations, const std::vector<Node>& nodes)
 {
-    for (uint32_t aAnimationIndex = 0; aAnimationIndex < aScene_->mNumAnimations; ++aAnimationIndex)
+    for (uint32_t aAnimationIndex = 0; aAnimationIndex < _aScene->mNumAnimations; ++aAnimationIndex)
     {
-        const aiAnimation* aAnimation = aScene_->mAnimations[aAnimationIndex];
+        const aiAnimation* aAnimation = _aScene->mAnimations[aAnimationIndex];
         Animation& animation = animations.emplace_back();
 
         // アニメーション情報
@@ -433,11 +433,11 @@ void ModelResource::TraverseNode(std::vector<Node>& nodes,
     int parentIndex)
 {
     // aiNode* からNode のインデックを取得できるようにする
-    std::map<const aiNode*, int>::iterator it = nodeIndexMap_.find(aNode);
-    if (it == nodeIndexMap_.end())
+    std::map<const aiNode*, int>::iterator it = _nodeIndexMap.find(aNode);
+    if (it == _nodeIndexMap.end())
     {
         // 過去に登録していなければ、登録
-        nodeIndexMap_[aNode] = static_cast<int>(nodes.size());
+        _nodeIndexMap[aNode] = static_cast<int>(nodes.size());
     }
 
     // トランスフォームデータ取得
@@ -470,7 +470,7 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
     // メッシュデータ取得
     for (uint32_t aMeshIndex = 0; aMeshIndex < aNode->mNumMeshes; ++aMeshIndex)
     {
-        const aiMesh* aMesh = aScene_->mMeshes[aNode->mMeshes[aMeshIndex]];
+        const aiMesh* aMesh = _aScene->mMeshes[aNode->mMeshes[aMeshIndex]];
 
         // メッシュデータ格納
         Mesh& mesh = meshes.emplace_back();
@@ -583,7 +583,7 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
 
                 // ボーンデータ取得
                 Bone& bone = mesh.bones.emplace_back();
-                bone.nodeIndex = nodeIndexMap_[aBone->mNode];
+                bone.nodeIndex = _nodeIndexMap[aBone->mNode];
                 bone.offsetTransform = AssimpHelper::ToFloat4X4(aBone->mOffsetMatrix);
             }
 
@@ -633,7 +633,7 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
         mesh.materialIndex = static_cast<int>(aMesh->mMaterialIndex);
 
         // ノードの番号設定
-        mesh.nodeIndex = nodeIndexMap_[aNode];
+        mesh.nodeIndex = _nodeIndexMap[aNode];
         // 参照ノード設定
         mesh.node = &nodes.at(mesh.nodeIndex);
     }
@@ -701,10 +701,10 @@ void ModelResource::Serialize(const char* filename)
         try
         {
             archive(
-                CEREAL_NVP(nodes_),
-                CEREAL_NVP(meshes_),
-                CEREAL_NVP(materials_),
-                CEREAL_NVP(animations_)
+                CEREAL_NVP(_nodes),
+                CEREAL_NVP(_meshes),
+                CEREAL_NVP(_materials),
+                CEREAL_NVP(_animations)
             );
         }
         catch (...)
@@ -725,10 +725,10 @@ void ModelResource::Deserialize(const char* filename)
         try
         {
             archive(
-                CEREAL_NVP(nodes_),
-                CEREAL_NVP(meshes_),
-                CEREAL_NVP(materials_),
-                CEREAL_NVP(animations_)
+                CEREAL_NVP(_nodes),
+                CEREAL_NVP(_meshes),
+                CEREAL_NVP(_materials),
+                CEREAL_NVP(_animations)
             );
         }
         catch (...)

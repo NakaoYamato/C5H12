@@ -4,19 +4,19 @@
 void LightController::RenderPreprocess(RenderContext& rc)
 {
     // rcの設定
-    rc.lightDirection = light_.GetDirection();
-    rc.lightColor = light_.GetColor();
-    rc.lightAmbientColor = light_.GetAmbientColor();
+    rc.lightDirection = _light.GetDirection();
+    rc.lightColor = _light.GetColor();
+    rc.lightAmbientColor = _light.GetAmbientColor();
 }
 
 // デバッグ表示
 void LightController::DebugRender(const RenderContext& rc)
 {
-    light_.DebugRender();
+    _light.DebugRender();
 }
 
 // GUI描画
 void LightController::DrawGui()
 {
-    light_.DrawGui();
+    _light.DrawGui();
 }

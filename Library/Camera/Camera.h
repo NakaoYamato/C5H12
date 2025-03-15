@@ -27,28 +27,28 @@ public:
 	void SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ);
 
 	// ビュー行列取得
-	const DirectX::XMFLOAT4X4& GetView() const { return data_.view_; }
+	const DirectX::XMFLOAT4X4& GetView() const { return _data.view; }
 
 	// プロジェクション行列取得
-	const DirectX::XMFLOAT4X4& GetProjection() const { return data_.projection_; }
+	const DirectX::XMFLOAT4X4& GetProjection() const { return _data.projection; }
 
 	// 視点取得
-	const Vector3& GetEye() const { return data_.eye_; }
+	const Vector3& GetEye() const { return _data.eye; }
 
 	// 注視点取得
-	const Vector3& GetFocus() const { return data_.focus_; }
+	const Vector3& GetFocus() const { return _data.focus; }
 
 	// 上方向取得
-	const Vector3& GetUp() const { return data_.up_; }
+	const Vector3& GetUp() const { return _data.up; }
 
 	// 前方向取得
-	const Vector3& GetFront() const { return data_.front_; }
+	const Vector3& GetFront() const { return _data.front; }
 
 	// 右方向取得
-	const Vector3& GetRight() const { return data_.right_; }
+	const Vector3& GetRight() const { return _data.right; }
 
 	// データ取得
-	const CameraData& GetDate() const { return data_; }
+	const CameraData& GetDate() const { return _data; }
 private:
-	CameraData data_;
+	CameraData _data;
 };

@@ -11,27 +11,27 @@ RampShader::RampShader(ID3D11Device* device,
 	GpuResourceManager::CreateVsFromCso(
 		device,
 		vsName,
-		vertexShader_.ReleaseAndGetAddressOf(),
-		inputLayout_.ReleaseAndGetAddressOf(),
+		_vertexShader.ReleaseAndGetAddressOf(),
+		_inputLayout.ReleaseAndGetAddressOf(),
 		inputDescs,
 		inputSize);
 
 	// ピクセルシェーダ
 	GpuResourceManager::CreatePsFromCso(device,
 		"./Data/Shader/RampPS.cso",
-		pixelShader_.ReleaseAndGetAddressOf());
+		_pixelShader.ReleaseAndGetAddressOf());
 
 
 	// メッシュ用定数バッファ
 	(void)GpuResourceManager::CreateConstantBuffer(device,
 		sizeof(CbMesh),
-		meshConstantBuffer_.ReleaseAndGetAddressOf());
+		_meshConstantBuffer.ReleaseAndGetAddressOf());
 
 	// ランプシェーディング用テクスチャ読み込み
 	D3D11_TEXTURE2D_DESC texture2dDesc{};
 	GpuResourceManager::LoadTextureFromFile(device,
 		L"./Data/Texture/Ramp/ramp.png",
-		rampSRV_.ReleaseAndGetAddressOf(),
+		_rampSRV.ReleaseAndGetAddressOf(),
 		&texture2dDesc);
 }
 
@@ -40,19 +40,19 @@ void RampShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(inputLayout_.Get());
-	dc->VSSetShader(vertexShader_.Get(), nullptr, 0);
-	dc->PSSetShader(pixelShader_.Get(), nullptr, 0);
+	dc->IASetInputLayout(_inputLayout.Get());
+	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 
 	// 定数バッファ設定
 	ID3D11Buffer* cbs[] =
 	{
-		meshConstantBuffer_.Get(),
+		_meshConstantBuffer.Get(),
 	};
-	dc->PSSetConstantBuffers(2, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 
 	// ランプシェーディング用テクスチャ設定
-	dc->PSSetShaderResources(5, 1, rampSRV_.GetAddressOf());
+	dc->PSSetShaderResources(5, 1, _rampSRV.GetAddressOf());
 }
 
 void RampShader::Update(const RenderContext& rc,
@@ -66,7 +66,7 @@ void RampShader::Update(const RenderContext& rc,
 	cbMesh.Ka = material->colors.at("Ambient");
 	cbMesh.Kd = material->colors.at("Diffuse");
 	cbMesh.Ks = material->colors.at("Specular");
-	dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
+	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
 	dc->PSSetShaderResources(0, 1, material->textureDatas.at("Diffuse").textureSRV.GetAddressOf());
@@ -84,7 +84,7 @@ void RampShader::End(const RenderContext& rc)
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* cbs[] = { nullptr };
-	dc->PSSetConstantBuffers(1, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 
 	// シェーダーリソースビュー設定解除
 	ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };

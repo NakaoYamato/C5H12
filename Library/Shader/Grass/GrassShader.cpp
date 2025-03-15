@@ -8,27 +8,27 @@ GrassShader::GrassShader(ID3D11Device* device, const char* vsName, const char* p
 	GpuResourceManager::CreateVsFromCso(
 		device,
 		vsName,
-		vertexShader_.ReleaseAndGetAddressOf(),
-		inputLayout_.ReleaseAndGetAddressOf(),
+		_vertexShader.ReleaseAndGetAddressOf(),
+		_inputLayout.ReleaseAndGetAddressOf(),
 		inputDescs,
 		inputSize);
 
 	// ハルシェーダー作成
-	GpuResourceManager::CreateHsFromCso(device, "./Data/Shader/GrassHS.cso", hullShader.ReleaseAndGetAddressOf());
+	GpuResourceManager::CreateHsFromCso(device, "./Data/Shader/GrassHS.cso", _hullShader.ReleaseAndGetAddressOf());
 
 	// ドメインシェーダー作成
-	GpuResourceManager::CreateDsFromCso(device, "./Data/Shader/GrassDS.cso", domainShader.ReleaseAndGetAddressOf());
+	GpuResourceManager::CreateDsFromCso(device, "./Data/Shader/GrassDS.cso", _domainShader.ReleaseAndGetAddressOf());
 	
 	// ジオメトリシェーダー作成
-	GpuResourceManager::CreateGsFromCso(device, "./Data/Shader/GrassGS.cso", geometryShader.ReleaseAndGetAddressOf());
+	GpuResourceManager::CreateGsFromCso(device, "./Data/Shader/GrassGS.cso", _geometryShader.ReleaseAndGetAddressOf());
 
 	// ピクセルシェーダ
-	GpuResourceManager::CreatePsFromCso(device, psName,	pixelShader_.ReleaseAndGetAddressOf());
+	GpuResourceManager::CreatePsFromCso(device, psName,	_pixelShader.ReleaseAndGetAddressOf());
 
 	// メッシュ用定数バッファ
 	(void)GpuResourceManager::CreateConstantBuffer(device,
 		sizeof(CbMesh),
-		meshConstantBuffer_.ReleaseAndGetAddressOf());
+		_meshConstantBuffer.ReleaseAndGetAddressOf());
 }
 
 void GrassShader::Begin(const RenderContext& rc)
@@ -36,20 +36,20 @@ void GrassShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(inputLayout_.Get());
-	dc->VSSetShader(vertexShader_.Get(),	nullptr, 0);
-	dc->HSSetShader(hullShader.Get(),		nullptr, 0);
-	dc->DSSetShader(domainShader.Get(),		nullptr, 0);
-	dc->GSSetShader(geometryShader.Get(),	nullptr, 0);
-	dc->PSSetShader(pixelShader_.Get(),		nullptr, 0);
+	dc->IASetInputLayout(_inputLayout.Get());
+	dc->VSSetShader(_vertexShader.Get(),	nullptr, 0);
+	dc->HSSetShader(_hullShader.Get(),		nullptr, 0);
+	dc->DSSetShader(_domainShader.Get(),		nullptr, 0);
+	dc->GSSetShader(_geometryShader.Get(),	nullptr, 0);
+	dc->PSSetShader(_pixelShader.Get(),		nullptr, 0);
 
 	// 定数バッファ設定
 	ID3D11Buffer* cbs[] =
 	{
-		meshConstantBuffer_.Get(),
+		_meshConstantBuffer.Get(),
 	};
-	dc->HSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
-	dc->GSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
+	dc->HSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
+	dc->GSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 }
 
 void GrassShader::Update(const RenderContext& rc, 
@@ -68,7 +68,7 @@ void GrassShader::Update(const RenderContext& rc,
 	cbMesh.totalElapsedTime				= (*parameter)["totalElapsedTime"];
 	cbMesh.windDirectionX				= (*parameter)["windDirectionX"];
 	cbMesh.windDirectionZ				= (*parameter)["windDirectionZ"];
-	dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
+	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 }
@@ -87,8 +87,8 @@ void GrassShader::End(const RenderContext& rc)
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* cbs[] = { nullptr };
-	dc->HSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
-	dc->GSSetConstantBuffers(CBIndex_, _countof(cbs), cbs);
+	dc->HSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
+	dc->GSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 }
 
 ShaderBase::Parameter GrassShader::GetParameterKey() const

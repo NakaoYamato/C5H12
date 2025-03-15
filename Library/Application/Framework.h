@@ -25,7 +25,7 @@ public:
 	static std::wstring filePath;
 
 	// コンストラクタ
-	Framework(HWND hwnd) : hwnd_(hwnd) {}
+	Framework(HWND hwnd) : _hwnd(hwnd) {}
 	~Framework() {}
 
 	// Frameworkのコピーを防ぐ
@@ -52,16 +52,16 @@ private:
 
 private:
 	// フレームレートの計算
-	HighPrecisionTimer tictoc_ = {};
-	uint32_t elapsedFrame_{};
-	float elapsedTime_{};
-	float fps_{};
+	HighPrecisionTimer _tictoc = {};
+	uint32_t _elapsedFrame{};
+	float _elapsedTime{};
+	float _fps{};
 
 	void CalcFrameStatus();
 
 	// 1秒が経過したフラグ
-	bool elapsed1Second_ = false;
+	bool _elapsed1Second = false;
 private:
 	// メインウィンドウのハンドル
-	CONST HWND hwnd_ = {};
+	CONST HWND _hwnd = {};
 };

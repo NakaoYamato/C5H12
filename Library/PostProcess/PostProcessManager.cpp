@@ -17,58 +17,58 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 {
 	{
 		// ガウスブラー(ぼかし)
-		postProcesses_[static_cast<int>(PostProcessType::GaussianFilterPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].first =
 			std::make_unique<GaussianFilter>(device,
 				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::GaussianFilterPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].second;
 		name = TO_STRING_U8(GaussianFilter);
 	}
 	{
 		// 河瀬式ブルーム
-		postProcesses_[static_cast<int>(PostProcessType::BloomPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::BloomPP)].first =
 			std::make_unique<Bloom>(device,
 				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::BloomPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomPP)].second;
 		name = TO_STRING_U8(Bloom);
 	}
 	{
 		// ラジアルブラー
-		postProcesses_[static_cast<int>(PostProcessType::RadialBlurPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::RadialBlurPP)].first =
 			std::make_unique<RadialBlur>(device,
 				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::RadialBlurPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RadialBlurPP)].second;
 		name = TO_STRING_U8(RadialBlur);
 	}
 	{
 		// 色収差
-		postProcesses_[static_cast<int>(PostProcessType::ChromaticAberrationPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::ChromaticAberrationPP)].first =
 			std::make_unique<ChromaticAberration>(device,
 				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::ChromaticAberrationPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::ChromaticAberrationPP)].second;
 		name = TO_STRING_U8(ChromaticAberration);
 	}
 	{
 		// RobertsCross
-		postProcesses_[static_cast<int>(PostProcessType::RobertsCrossPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].first =
 			std::make_unique<RobertsCross>(device,
 				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
 		name = TO_STRING_U8(RobertsCross);
 	}
 	{
 		// 最終パス
-		postProcesses_[static_cast<int>(PostProcessType::FinalPassPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::FinalPassPP)].first =
 			std::make_unique<FinalPass>(device,
 				width, height);
-		auto& [name, flag] = postProcesses_[static_cast<int>(PostProcessType::FinalPassPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::FinalPassPP)].second;
 		name = TO_STRING_U8(FinalPass);
 	}
 
 	// ブルーム用
-	bloomRenderFrame_ = std::make_unique<FrameBuffer>(device, width, height);
+	_bloomRenderFrame = std::make_unique<FrameBuffer>(device, width, height);
 	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/AddBloomPS.cso",
-		bloomPS_.ReleaseAndGetAddressOf());
-	fullscreenQuad_ = std::make_unique<Sprite>(device, L"",
+		_bloomPS.ReleaseAndGetAddressOf());
+	_fullscreenQuad = std::make_unique<Sprite>(device, L"",
 		".\\Data\\Shader\\FullscreenQuadVS.cso");
 }
 
@@ -77,10 +77,10 @@ void PostProcessManager::Update(float elapsedTime)
 	for (size_t i = 0; i < static_cast<int>(PostProcessType::MAX_PostProcessType); ++i)
 	{
 		// 要素チェック
-		if (postProcesses_[i].first == nullptr)continue;
+		if (_postProcesses[i].first == nullptr)continue;
 
 		// 更新処理
-		postProcesses_[i].first->Update(elapsedTime);
+		_postProcesses[i].first->Update(elapsedTime);
 	}
 }
 
@@ -108,7 +108,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	chromaticAberrationPP->Render(dc, radialBlurPP->GetColorSRV().GetAddressOf(), 0, 1);
 
 	// ブルーム適応
-	bloomRenderFrame_->ClearAndActivate(dc);
+	_bloomRenderFrame->ClearAndActivate(dc);
 	{
 		ID3D11ShaderResourceView* srvs[] =
 		{
@@ -118,18 +118,18 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 		// 高輝度抽出し、ぼかしたものを加算描画
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
 		dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
-		fullscreenQuad_->Blit(dc, srvs, 0, _countof(srvs), bloomPS_.Get());
+		_fullscreenQuad->Blit(dc, srvs, 0, _countof(srvs), _bloomPS.Get());
 	}
-	bloomRenderFrame_->Deactivate(dc);
+	_bloomRenderFrame->Deactivate(dc);
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 	dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::PointWrap));
 
 	// 最終パス
 	PostProcessBase* finalPassPP = GetPostProcess(PostProcessType::FinalPassPP);
-	finalPassPP->Render(dc, bloomRenderFrame_->GetColorSRV().GetAddressOf(), 0, 1);
+	finalPassPP->Render(dc, _bloomRenderFrame->GetColorSRV().GetAddressOf(), 0, 1);
 
-	appliedEffectSRV_ = finalPassPP->GetColorSRV();
+	_appliedEffectSRV = finalPassPP->GetColorSRV();
 }
 
 void PostProcessManager::DrawGui()
@@ -141,7 +141,7 @@ void PostProcessManager::DrawGui()
 		{
 			for (size_t i = 0; i < static_cast<int>(PostProcessType::MAX_PostProcessType); ++i)
 			{
-				GuiFlag& guiFlag = postProcesses_[i].second;
+				GuiFlag& guiFlag = _postProcesses[i].second;
 				ImGui::Checkbox(guiFlag.first.c_str(), &guiFlag.second);
 			}
 			ImGui::EndMenu();
@@ -152,14 +152,14 @@ void PostProcessManager::DrawGui()
 
 	for (size_t i = 0; i < static_cast<int>(PostProcessType::MAX_PostProcessType); ++i)
 	{
-		GuiFlag& guiFlag = postProcesses_[i].second;
+		GuiFlag& guiFlag = _postProcesses[i].second;
 		if (guiFlag.second == false)
 			continue;
 
 		// 要素チェック
-		if (postProcesses_[i].first == nullptr)continue;
+		if (_postProcesses[i].first == nullptr)continue;
 
 		// Gui描画
-		postProcesses_[i].first->DrawGui();
+		_postProcesses[i].first->DrawGui();
 	}
 }

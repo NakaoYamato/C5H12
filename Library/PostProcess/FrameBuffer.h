@@ -37,20 +37,20 @@ public:
 		const Vector4& high_luminance_color);
 
 	// アクセサ
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRTV() { return rtv; }
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDSV() { return dsv; }
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() { return srvs[0]; }
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() { return srvs[1]; }
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRTV() { return _rtv; }
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDSV() { return _dsv; }
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() { return _srvs[0]; }
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() { return _srvs[1]; }
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[2];
-	D3D11_VIEWPORT viewport;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer{};
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _rtv;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _dsv;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _srvs[2];
+	D3D11_VIEWPORT _viewport;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>		_constantBuffer{};
 
-	UINT viewportCount{ D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE };
-	D3D11_VIEWPORT cachedViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> cachedRTV;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> cachedDSV;
+	UINT _viewportCount{ D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE };
+	D3D11_VIEWPORT _cachedViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _cachedRTV;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _cachedDSV;
 };

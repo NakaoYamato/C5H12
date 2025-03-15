@@ -9,21 +9,21 @@ Bloom::Bloom(ID3D11Device* device, uint32_t width, uint32_t height) :
 {
 	// ピクセルシェーダ作成
 	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/GlowExtractionPS.cso",
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::GLOW_EXTRACTION_PS].ReleaseAndGetAddressOf());
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::GLOW_EXTRACTION_PS].ReleaseAndGetAddressOf());
 	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/BloomDownsamplingPS.cso",
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::DOWNSAMPLING_PS].ReleaseAndGetAddressOf());
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::DOWNSAMPLING_PS].ReleaseAndGetAddressOf());
 	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/BloomHorizontalPS.cso",
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::HORIZONTAL_PS].ReleaseAndGetAddressOf());
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::HORIZONTAL_PS].ReleaseAndGetAddressOf());
 	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/BloomVerticalPS.cso",
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::VERTICAL_PS].ReleaseAndGetAddressOf());
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::VERTICAL_PS].ReleaseAndGetAddressOf());
 
-	glowExtraction = std::make_unique<FrameBuffer>(device, width, height, false);
+	_glowExtraction = std::make_unique<FrameBuffer>(device, width, height, false);
 	for (size_t i = 0; i < DownSampledCount; ++i)
 	{
-		bloomFrameBuffer[i][0] = std::make_unique<FrameBuffer>(device, width >> i, height >> i, false);
-		bloomFrameBuffer[i][1] = std::make_unique<FrameBuffer>(device, width >> i, height >> i, false);
+		_bloomFrameBuffer[i][0] = std::make_unique<FrameBuffer>(device, width >> i, height >> i, false);
+		_bloomFrameBuffer[i][1] = std::make_unique<FrameBuffer>(device, width >> i, height >> i, false);
 	}
-	frameBuffer = std::make_unique<FrameBuffer>(device,	width, height, false);
+	_frameBuffer = std::make_unique<FrameBuffer>(device,	width, height, false);
 
 	{
 		D3D11_SAMPLER_DESC sampler_desc{};
@@ -40,7 +40,7 @@ Bloom::Bloom(ID3D11Device* device, uint32_t width, uint32_t height) :
 		sampler_desc.BorderColor[1] = 0;
 		sampler_desc.BorderColor[2] = 0;
 		sampler_desc.BorderColor[3] = 0;
-		HRESULT hr = device->CreateSamplerState(&sampler_desc, samplerState.GetAddressOf());
+		HRESULT hr = device->CreateSamplerState(&sampler_desc, _samplerState.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_RASTERIZER_DESC rasterizer_desc{};
@@ -54,14 +54,14 @@ Bloom::Bloom(ID3D11Device* device, uint32_t width, uint32_t height) :
 		rasterizer_desc.ScissorEnable = FALSE;
 		rasterizer_desc.MultisampleEnable = FALSE;
 		rasterizer_desc.AntialiasedLineEnable = FALSE;
-		hr = device->CreateRasterizerState(&rasterizer_desc, rasterizerState.GetAddressOf());
+		hr = device->CreateRasterizerState(&rasterizer_desc, _rasterizerState.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_DEPTH_STENCIL_DESC depth_stencil_desc{};
 		depth_stencil_desc.DepthEnable = FALSE;
 		depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 		depth_stencil_desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-		hr = device->CreateDepthStencilState(&depth_stencil_desc, depthStencilState.GetAddressOf());
+		hr = device->CreateDepthStencilState(&depth_stencil_desc, _depthStencilState.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_BLEND_DESC blend_desc{};
@@ -75,12 +75,12 @@ Bloom::Bloom(ID3D11Device* device, uint32_t width, uint32_t height) :
 		blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 		blend_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		hr = device->CreateBlendState(&blend_desc, blendState.GetAddressOf());
+		hr = device->CreateBlendState(&blend_desc, _blendState.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
 	// 初期値の設定
-	startData = GetCurrentData();
+	_startData = GetCurrentData();
 }
 
 // 描画処理
@@ -100,72 +100,72 @@ void Bloom::Render(ID3D11DeviceContext* immediateContext, ID3D11ShaderResourceVi
 	immediateContext->OMGetBlendState(cached_blend_state.GetAddressOf(), blend_factor, &sample_mask);
 
 	// ブルーム用ステート設定
-	immediateContext->OMSetDepthStencilState(depthStencilState.Get(), 0);
-	immediateContext->RSSetState(rasterizerState.Get());
-	immediateContext->OMSetBlendState(blendState.Get(), nullptr, 0xFFFFFFFF);
-	immediateContext->PSSetSamplers(8, 1, samplerState.GetAddressOf());
+	immediateContext->OMSetDepthStencilState(_depthStencilState.Get(), 0);
+	immediateContext->RSSetState(_rasterizerState.Get());
+	immediateContext->OMSetBlendState(_blendState.Get(), nullptr, 0xFFFFFFFF);
+	immediateContext->PSSetSamplers(8, 1, _samplerState.GetAddressOf());
 
 	// 定数バッファの更新
-	UpdateConstantBuffer(immediateContext, constantBuffer.Get());
-	immediateContext->PSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
+	UpdateConstantBuffer(immediateContext, _constantBuffer.Get());
+	immediateContext->PSSetConstantBuffers(1, 1, _constantBuffer.GetAddressOf());
 
 	// 高輝度抽出
-	glowExtraction->Clear(immediateContext, { 0, 0, 0, 1 });
-	glowExtraction->Activate(immediateContext);
-	fullscreenQuad->Blit(immediateContext, shaderResourceView, 0, 1,
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::GLOW_EXTRACTION_PS].Get());
-	glowExtraction->Deactivate(immediateContext);
+	_glowExtraction->Clear(immediateContext, { 0, 0, 0, 1 });
+	_glowExtraction->Activate(immediateContext);
+	_fullscreenQuad->Blit(immediateContext, shaderResourceView, 0, 1,
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::GLOW_EXTRACTION_PS].Get());
+	_glowExtraction->Deactivate(immediateContext);
 	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
 	// Gaussian blur
 	// Efficient Gaussian blur with linear sampling
 	// http://rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/
 	// Downsampling
-	bloomFrameBuffer[0][0]->Clear(immediateContext, { 0, 0, 0, 1 });
-	bloomFrameBuffer[0][0]->Activate(immediateContext);
-	fullscreenQuad->Blit(immediateContext, glowExtraction->GetColorSRV().GetAddressOf(), 0, 1,
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::DOWNSAMPLING_PS].Get());
-	bloomFrameBuffer[0][0]->Deactivate(immediateContext);
+	_bloomFrameBuffer[0][0]->Clear(immediateContext, { 0, 0, 0, 1 });
+	_bloomFrameBuffer[0][0]->Activate(immediateContext);
+	_fullscreenQuad->Blit(immediateContext, _glowExtraction->GetColorSRV().GetAddressOf(), 0, 1,
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::DOWNSAMPLING_PS].Get());
+	_bloomFrameBuffer[0][0]->Deactivate(immediateContext);
 	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
 	// Ping-pong gaussian blur
-	bloomFrameBuffer[0][1]->Clear(immediateContext, { 0, 0, 0, 1 });
-	bloomFrameBuffer[0][1]->Activate(immediateContext);
-	fullscreenQuad->Blit(immediateContext, bloomFrameBuffer[0][0]->GetColorSRV().GetAddressOf(), 0, 1,
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::HORIZONTAL_PS].Get());
-	bloomFrameBuffer[0][1]->Deactivate(immediateContext);
+	_bloomFrameBuffer[0][1]->Clear(immediateContext, { 0, 0, 0, 1 });
+	_bloomFrameBuffer[0][1]->Activate(immediateContext);
+	_fullscreenQuad->Blit(immediateContext, _bloomFrameBuffer[0][0]->GetColorSRV().GetAddressOf(), 0, 1,
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::HORIZONTAL_PS].Get());
+	_bloomFrameBuffer[0][1]->Deactivate(immediateContext);
 	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
-	bloomFrameBuffer[0][0]->Clear(immediateContext, { 0, 0, 0, 1 });
-	bloomFrameBuffer[0][0]->Activate(immediateContext);
-	fullscreenQuad->Blit(immediateContext, bloomFrameBuffer[0][1]->GetColorSRV().GetAddressOf(), 0, 1,
-		bloomPixelShaders[BLOOM_PIXEL_TYPE::VERTICAL_PS].Get());
-	bloomFrameBuffer[0][0]->Deactivate(immediateContext);
+	_bloomFrameBuffer[0][0]->Clear(immediateContext, { 0, 0, 0, 1 });
+	_bloomFrameBuffer[0][0]->Activate(immediateContext);
+	_fullscreenQuad->Blit(immediateContext, _bloomFrameBuffer[0][1]->GetColorSRV().GetAddressOf(), 0, 1,
+		_bloomPixelShaders[BLOOM_PIXEL_TYPE::VERTICAL_PS].Get());
+	_bloomFrameBuffer[0][0]->Deactivate(immediateContext);
 	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
 	for (size_t downsampledIndex = 1; downsampledIndex < DownSampledCount; ++downsampledIndex)
 	{
 		// Downsampling
-		bloomFrameBuffer[downsampledIndex][0]->Clear(immediateContext, { 0, 0, 0, 1 });
-		bloomFrameBuffer[downsampledIndex][0]->Activate(immediateContext);
-		fullscreenQuad->Blit(immediateContext, bloomFrameBuffer[downsampledIndex - 1][0]->GetColorSRV().GetAddressOf(), 0, 1,
-			bloomPixelShaders[BLOOM_PIXEL_TYPE::DOWNSAMPLING_PS].Get());
-		bloomFrameBuffer[downsampledIndex][0]->Deactivate(immediateContext);
+		_bloomFrameBuffer[downsampledIndex][0]->Clear(immediateContext, { 0, 0, 0, 1 });
+		_bloomFrameBuffer[downsampledIndex][0]->Activate(immediateContext);
+		_fullscreenQuad->Blit(immediateContext, _bloomFrameBuffer[downsampledIndex - 1][0]->GetColorSRV().GetAddressOf(), 0, 1,
+			_bloomPixelShaders[BLOOM_PIXEL_TYPE::DOWNSAMPLING_PS].Get());
+		_bloomFrameBuffer[downsampledIndex][0]->Deactivate(immediateContext);
 		immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
 		// Ping-pong gaussian blur
-		bloomFrameBuffer[downsampledIndex][1]->Activate(immediateContext);
-		bloomFrameBuffer[downsampledIndex][1]->Clear(immediateContext, { 0, 0, 0, 1 });
-		fullscreenQuad->Blit(immediateContext, bloomFrameBuffer[downsampledIndex][0]->GetColorSRV().GetAddressOf(), 0, 1,
-			bloomPixelShaders[BLOOM_PIXEL_TYPE::HORIZONTAL_PS].Get());
-		bloomFrameBuffer[downsampledIndex][1]->Deactivate(immediateContext);
+		_bloomFrameBuffer[downsampledIndex][1]->Activate(immediateContext);
+		_bloomFrameBuffer[downsampledIndex][1]->Clear(immediateContext, { 0, 0, 0, 1 });
+		_fullscreenQuad->Blit(immediateContext, _bloomFrameBuffer[downsampledIndex][0]->GetColorSRV().GetAddressOf(), 0, 1,
+			_bloomPixelShaders[BLOOM_PIXEL_TYPE::HORIZONTAL_PS].Get());
+		_bloomFrameBuffer[downsampledIndex][1]->Deactivate(immediateContext);
 		immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
-		bloomFrameBuffer[downsampledIndex][0]->Clear(immediateContext, { 0, 0, 0, 1 });
-		bloomFrameBuffer[downsampledIndex][0]->Activate(immediateContext);
-		fullscreenQuad->Blit(immediateContext, bloomFrameBuffer[downsampledIndex][1]->GetColorSRV().GetAddressOf(), 0, 1,
-			bloomPixelShaders[BLOOM_PIXEL_TYPE::VERTICAL_PS].Get());
-		bloomFrameBuffer[downsampledIndex][0]->Deactivate(immediateContext);
+		_bloomFrameBuffer[downsampledIndex][0]->Clear(immediateContext, { 0, 0, 0, 1 });
+		_bloomFrameBuffer[downsampledIndex][0]->Activate(immediateContext);
+		_fullscreenQuad->Blit(immediateContext, _bloomFrameBuffer[downsampledIndex][1]->GetColorSRV().GetAddressOf(), 0, 1,
+			_bloomPixelShaders[BLOOM_PIXEL_TYPE::VERTICAL_PS].Get());
+		_bloomFrameBuffer[downsampledIndex][0]->Deactivate(immediateContext);
 		immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
 	}
 
@@ -173,7 +173,7 @@ void Bloom::Render(ID3D11DeviceContext* immediateContext, ID3D11ShaderResourceVi
 	std::vector<ID3D11ShaderResourceView*> srvs;
 	for (size_t downsampledIndex = 0; downsampledIndex < DownSampledCount; ++downsampledIndex)
 	{
-		srvs.push_back(bloomFrameBuffer[downsampledIndex][0]->GetColorSRV().Get());
+		srvs.push_back(_bloomFrameBuffer[downsampledIndex][0]->GetColorSRV().Get());
 	}
 	PostProcessBase::Render(immediateContext, srvs.data(), 0, DownSampledCount);
 	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
@@ -197,8 +197,8 @@ void Bloom::DrawGui()
 	{
 		if (ImGui::Button("reset"))
 			ClearData();
-		ImGui::SliderFloat("extractionThreshold", &data.extractionThreshold, +0.0f, +1.0f);
-		ImGui::SliderFloat("intensity", &data.intensity, +0.0f, +5.0f);
+		ImGui::SliderFloat("extractionThreshold", &_data.extractionThreshold, +0.0f, +1.0f);
+		ImGui::SliderFloat("intensity", &_data.intensity, +0.0f, +5.0f);
 		if (ImGui::TreeNode("Resource"))
 		{
 			static float textureSize = 512.0f;
@@ -215,8 +215,8 @@ void Bloom::DrawGui()
 std::unordered_map<std::string, float> Bloom::GetCurrentData()
 {
 	std::unordered_map<std::string, float> parameter;
-	parameter["extractionThreshold"] = data.extractionThreshold;
-	parameter["intensity"] = data.intensity;
+	parameter["extractionThreshold"] = _data.extractionThreshold;
+	parameter["intensity"] = _data.intensity;
 	return parameter;
 }
 
@@ -225,17 +225,17 @@ void Bloom::SetData(std::unordered_map<std::string, float>& parameter)
 	{
 		auto iter = parameter.find("extractionThreshold");
 		if (iter != parameter.end())
-			data.extractionThreshold = (*iter).second;
+			_data.extractionThreshold = (*iter).second;
 	}
 	{
 		auto iter = parameter.find("intensity");
 		if (iter != parameter.end())
-			data.intensity = (*iter).second;
+			_data.intensity = (*iter).second;
 	}
 }
 
 // 定数バッファの更新
 void Bloom::UpdateConstantBuffer(ID3D11DeviceContext* immediateContext, ID3D11Buffer* constantBuffer)
 {
-	immediateContext->UpdateSubresource(constantBuffer, 0, 0, &data, 0, 0);
+	immediateContext->UpdateSubresource(constantBuffer, 0, 0, &_data, 0, 0);
 }

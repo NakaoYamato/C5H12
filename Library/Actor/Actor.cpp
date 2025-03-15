@@ -14,11 +14,11 @@
 void Actor::Start()
 {
 	// 各コンポーネントのスタート処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Start();
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->Start();
 	}
@@ -28,14 +28,14 @@ void Actor::Start()
 void Actor::Update(float elapsedTime)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
 	// 各コンポーネントの更新処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Update(elapsedTime);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->Update(elapsedTime);
 	}
@@ -43,30 +43,30 @@ void Actor::Update(float elapsedTime)
 	const DirectX::XMFLOAT4X4* ParentMatrix = nullptr;
 	// 親がいるときの処理
 	// トランスフォーム更新
-	if (!parent_.expired())
+	if (!_parent.expired())
 	{
 		// 親の起動チェック
-		if (!parent_.lock()->IsActive())
-			this->isActive_ = false;
+		if (!_parent.lock()->IsActive())
+			this->_isActive = false;
 
-		ParentMatrix = &parent_.lock()->GetTransform().GetMatrix();
+		ParentMatrix = &_parent.lock()->GetTransform().GetMatrix();
 	}
 	// トランスフォーム更新
-	transform_.UpdateTransform(ParentMatrix);
+	_transform.UpdateTransform(ParentMatrix);
 }
 
 // 1秒ごとの更新処理
 void Actor::FixedUpdate()
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
 	// 各コンポーネントの1秒ごとの更新処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->FixedUpdate();
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->FixedUpdate();
 	}
@@ -76,14 +76,14 @@ void Actor::FixedUpdate()
 void Actor::RenderPreprocess(RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
 	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->RenderPreprocess(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->RenderPreprocess(rc);
 	}
@@ -93,15 +93,15 @@ void Actor::RenderPreprocess(RenderContext& rc)
 void Actor::Render(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
-	if (!isShowing_)return;
+	if (!_isActive)return;
+	if (!_isShowing)return;
 
 	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Render(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->Render(rc);
 	}
@@ -111,15 +111,15 @@ void Actor::Render(const RenderContext& rc)
 void Actor::DebugRender(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
-	if (!drawDebug_)return;
+	if (!_isActive)return;
+	if (!_drawDebug)return;
 
 	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->DebugRender(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->DebugRender(rc);
 	}
@@ -129,9 +129,9 @@ void Actor::DebugRender(const RenderContext& rc)
 void Actor::CastShadow(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->CastShadow(rc);
 	}
@@ -141,9 +141,9 @@ void Actor::CastShadow(const RenderContext& rc)
 void Actor::DelayedRender(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->DelayedRender(rc);
 	}
@@ -154,15 +154,15 @@ void Actor::DrawGui()
 {
 	if (ImGui::CollapsingHeader("Flags", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Checkbox(u8"Active", &isActive_);
-		ImGui::Checkbox(u8"Show", &isShowing_);
-		ImGui::Checkbox(u8"DrawDebug", &drawDebug_);
+		ImGui::Checkbox(u8"Active", &_isActive);
+		ImGui::Checkbox(u8"Show", &_isShowing);
+		ImGui::Checkbox(u8"DrawDebug", &_drawDebug);
 	}
 
 	// トランスフォーム
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		transform_.DrawGui();
+		_transform.DrawGui();
 	}
 
 	static ImGuiTabBarFlags tab_bar_flags =
@@ -174,7 +174,7 @@ void Actor::DrawGui()
 		if (ImGui::BeginTabItem(u8"コンポーネント"))
 		{
 			// 各コンポーネントのGUI
-			for (std::shared_ptr<Component>& component : components_)
+			for (std::shared_ptr<Component>& component : _components)
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -190,14 +190,14 @@ void Actor::DrawGui()
 		{
 			ImGui::Separator();
 			ImGui::Text(u8"当たり判定を除く対象");
-			for (auto& [tag, flag] : judgeTags_)
+			for (auto& [tag, flag] : _judgeTags)
 			{
 				ImGui::Checkbox(nameof::nameof_enum(tag).data(), &flag);
 			}
 			ImGui::Separator();
 
 			int index = 0;
-			for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+			for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -221,13 +221,13 @@ void Actor::DrawGui()
 void Actor::Judge(Actor* other)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
 	Vector3 hitPosition{};
 	Vector3 hitNormal{};
 	float penetration{};
 	// 当たり判定コンポーネントの検索
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		// 接触対象の当たり判定コンポーネントの検索
 		const size_t otherComponentSize = other->GetColliderComponentSize();
@@ -252,11 +252,11 @@ void Actor::Judge(Actor* other)
 void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3& hitNormal, const float& penetration)
 {
 	// 各コンポーネントの接触処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->OnCollision(other, hitPosition, hitNormal, penetration);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
 	{
 		collider->OnCollision(other, hitPosition, hitNormal, penetration);
 	}

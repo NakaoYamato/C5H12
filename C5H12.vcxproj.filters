@@ -231,6 +231,9 @@
     <ClCompile Include="Library\PostProcess\GlowExtraction\GlowExtraction.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\PostProcess\DepthOfField\DepthOfField.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -482,6 +485,9 @@
     <ClInclude Include="Library\PostProcess\GlowExtraction\GlowExtraction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\PostProcess\DepthOfField\DepthOfField.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -552,5 +558,6 @@
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingGBPS.hlsl" />
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingPS.hlsl" />
     <FxCompile Include="HLSL\GBuffer\PBRDeferredRenderingPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\DepthOfField\DepthOfFieldPS.hlsl" />
   </ItemGroup>
 </Project>

@@ -202,6 +202,9 @@ void Framework::Update(float elapsedTime)
     // シーンの更新
     SceneManager::Instance().Update(elapsedTime);
 
+    // ポストエフェクトの更新
+    PostProcessManager::Instance().Update(elapsedTime);
+
     //// 3Dエフェクト更新
     //EffectManager::Instance().Update(elapsedTime);
 }

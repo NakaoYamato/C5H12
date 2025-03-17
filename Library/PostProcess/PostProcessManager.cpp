@@ -10,6 +10,7 @@
 #include "../PostProcess/RadialBlur/RadialBlur.h"
 #include "../PostProcess/ChromaticAberration/ChromaticAberration.h"
 #include "../PostProcess/RobertsCross/RobertsCross.h"
+#include "../PostProcess/DepthOfField/DepthOfField.h"
 
 #include "FinalPass/FinalPass.h"
 
@@ -24,7 +25,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 		name = u8"ブルーム用高輝度抽出";
 	}
 	{
-		// ブルーム用ガウスブラー(ぼかし)
+		// ブルーム用ぼかし
 		_postProcesses[static_cast<int>(PostProcessType::BloomGaussianFilterPP)].first =
 			std::make_unique<GaussianFilter>(device,
 				width, height);
@@ -32,12 +33,20 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 		name = u8"ブルーム用ぼかし";
 	}
 	{
-		// ガウスブラー(ぼかし)
+		// 被写体深度用ぼかし
 		_postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].first =
 			std::make_unique<GaussianFilter>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].second;
-		name = _TO_STRING_U8(GaussianFilter);
+		name = u8"被写体深度用ぼかし";
+	}
+	{
+		// 被写体深度
+		_postProcesses[static_cast<int>(PostProcessType::DepthOfFieldPP)].first =
+			std::make_unique<DepthOfField>(device,
+				width, height);
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::DepthOfFieldPP)].second;
+		name = u8"被写体深度";
 	}
 	{
 		// ラジアルブラー
@@ -100,13 +109,26 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
+	// 被写体深度用ぼかし作成
+	PostProcessBase* dofGradationPP = GetPostProcess(PostProcessType::GaussianFilterPP);
+	dofGradationPP->Render(dc, &colorSRV, 0, 1);
+	// 被写体深度
+	PostProcessBase* dofPP = GetPostProcess(PostProcessType::DepthOfFieldPP);
+	{
+		ID3D11ShaderResourceView* srv[] =
+		{
+			colorSRV, depthSRV, dofGradationPP->GetColorSRV().Get()
+		};
+		dofPP->Render(dc, srv, 0, _countof(srv));
+	}
+
 	// 高輝度抽出
 	PostProcessBase* glowPP = GetPostProcess(PostProcessType::BloomGlowExtractionPP);
-	glowPP->Render(dc, &colorSRV, 0, 1);
+	glowPP->Render(dc, dofPP->GetColorSRV().GetAddressOf(), 0, 1);
 
-	// ブルーム作成
-	PostProcessBase* bloomPP = GetPostProcess(PostProcessType::BloomGaussianFilterPP);
-	bloomPP->Render(dc, glowPP->GetColorSRV().GetAddressOf(), 0, 1);
+	// ブルーム用ぼかし作成
+	PostProcessBase* bloomGradationPP = GetPostProcess(PostProcessType::BloomGaussianFilterPP);
+	bloomGradationPP->Render(dc, glowPP->GetColorSRV().GetAddressOf(), 0, 1);
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 	// RobertsCross
@@ -114,7 +136,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	{
 		ID3D11ShaderResourceView* srv[] =
 		{
-			colorSRV, depthSRV,
+			dofPP->GetColorSRV().Get(), depthSRV,
 		};
 		robertsCrossPP->Render(dc, srv, 0, _countof(srv));
 	}
@@ -131,7 +153,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 		ID3D11ShaderResourceView* srvs[] =
 		{
 			chromaticAberrationPP->GetColorSRV().Get(),
-			bloomPP->GetColorSRV().Get()
+			bloomGradationPP->GetColorSRV().Get()
 		};
 		// 高輝度抽出し、ぼかしたものを加算描画
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);

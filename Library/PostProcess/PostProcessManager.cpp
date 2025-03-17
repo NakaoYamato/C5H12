@@ -5,7 +5,7 @@
 #include "../Converter/ToString.h"
 #include "../ResourceManager/GpuResourceManager.h"
 
-#include "../PostProcess/Bloom/Bloom.h"
+#include "../PostProcess/GlowExtraction/GlowExtraction.h"
 #include "../PostProcess/GaussianFilter/GaussianFilter.h"
 #include "../PostProcess/RadialBlur/RadialBlur.h"
 #include "../PostProcess/ChromaticAberration/ChromaticAberration.h"
@@ -16,20 +16,28 @@
 void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32_t height)
 {
 	{
+		// ブルーム用高輝度抽出
+		_postProcesses[static_cast<int>(PostProcessType::BloomGlowExtractionPP)].first =
+			std::make_unique<GlowExtraction>(device,
+				width, height);
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGlowExtractionPP)].second;
+		name = u8"BloomGlowExtraction";
+	}
+	{
+		// ブルーム用ガウスブラー(ぼかし)
+		_postProcesses[static_cast<int>(PostProcessType::BloomGaussianFilterPP)].first =
+			std::make_unique<GaussianFilter>(device,
+				width, height);
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGaussianFilterPP)].second;
+		name = u8"BloomGaussianFilter";
+	}
+	{
 		// ガウスブラー(ぼかし)
 		_postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].first =
 			std::make_unique<GaussianFilter>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].second;
 		name = _TO_STRING_U8(GaussianFilter);
-	}
-	{
-		// 河瀬式ブルーム
-		_postProcesses[static_cast<int>(PostProcessType::BloomPP)].first =
-			std::make_unique<Bloom>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomPP)].second;
-		name = _TO_STRING_U8(Bloom);
 	}
 	{
 		// ラジアルブラー
@@ -85,21 +93,31 @@ void PostProcessManager::Update(float elapsedTime)
 }
 
 void PostProcessManager::ApplyEffect(RenderContext& rc,
-	ID3D11ShaderResourceView** srcSRV)
+	ID3D11ShaderResourceView* colorSRV,
+	ID3D11ShaderResourceView* depthSRV)
 {
 	// 参考:https://docs.unity3d.com/ja/Packages/com.unity.render-pipelines.high-definition@10.5/manual/Post-Processing-Execution-Order.html
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
+	// 高輝度抽出
+	PostProcessBase* glowPP = GetPostProcess(PostProcessType::BloomGlowExtractionPP);
+	glowPP->Render(dc, &colorSRV, 0, 1);
+
 	// ブルーム作成
-	PostProcessBase* bloomPP = GetPostProcess(PostProcessType::BloomPP);
-	bloomPP->Render(dc, srcSRV, 0, 1);
+	PostProcessBase* bloomPP = GetPostProcess(PostProcessType::BloomGaussianFilterPP);
+	bloomPP->Render(dc, glowPP->GetColorSRV().GetAddressOf(), 0, 1);
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	dc->PSSetSamplers(0, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::PointWrap));
 	// RobertsCross
 	PostProcessBase* robertsCrossPP = GetPostProcess(PostProcessType::RobertsCrossPP);
-	robertsCrossPP->Render(dc, srcSRV, 0, 2);
+	{
+		ID3D11ShaderResourceView* srv[] =
+		{
+			colorSRV, depthSRV,
+		};
+		robertsCrossPP->Render(dc, srv, 0, _countof(srv));
+	}
 	// ラジアルブラー
 	PostProcessBase* radialBlurPP = GetPostProcess(PostProcessType::RadialBlurPP);
 	radialBlurPP->Render(dc, robertsCrossPP->GetColorSRV().GetAddressOf(), 0, 1);

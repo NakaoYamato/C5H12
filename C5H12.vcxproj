@@ -192,12 +192,12 @@
     <ClCompile Include="Library\Math\Quaternion.cpp" />
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
-    <ClCompile Include="Library\PostProcess\Bloom\Bloom.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
     <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
     <ClCompile Include="Library\PostProcess\FinalPass\FinalPass.cpp" />
     <ClCompile Include="Library\PostProcess\FrameBuffer.cpp" />
     <ClCompile Include="Library\PostProcess\GaussianFilter\GaussianFilter.cpp" />
+    <ClCompile Include="Library\PostProcess\GlowExtraction\GlowExtraction.cpp" />
     <ClCompile Include="Library\PostProcess\PostProcessBase.cpp" />
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
     <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
@@ -275,12 +275,12 @@
     <ClInclude Include="Library\Math\Random.h" />
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
-    <ClInclude Include="Library\PostProcess\Bloom\Bloom.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
     <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />
     <ClInclude Include="Library\PostProcess\FinalPass\FinalPass.h" />
     <ClInclude Include="Library\PostProcess\FrameBuffer.h" />
     <ClInclude Include="Library\PostProcess\GaussianFilter\GaussianFilter.h" />
+    <ClInclude Include="Library\PostProcess\GlowExtraction\GlowExtraction.h" />
     <ClInclude Include="Library\PostProcess\PostProcessBase.h" />
     <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
     <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
@@ -457,23 +457,23 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Bloom\BloomDownsamplingPS.hlsl">
+    <FxCompile Include="HLSL\PostProcess\GaussianFilter\DownsamplingPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Bloom\BloomHorizontalPS.hlsl">
+    <FxCompile Include="HLSL\PostProcess\GaussianFilter\HorizontalFilterPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Bloom\BloomUpsamplingPS.hlsl">
+    <FxCompile Include="HLSL\PostProcess\GaussianFilter\UpsamplingPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Bloom\BloomVerticalPS.hlsl">
+    <FxCompile Include="HLSL\PostProcess\GaussianFilter\VerticalFilterPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\Bloom\GlowExtractionPS.hlsl">
+    <FxCompile Include="HLSL\PostProcess\GlowExtraction\GlowExtractionPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -489,10 +489,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\GaussianFilter\GaussianFilterPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\RadialBlur\RadialBlurPS.hlsl">

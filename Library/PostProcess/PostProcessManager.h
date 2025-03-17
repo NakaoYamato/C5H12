@@ -13,10 +13,11 @@
 /// </summary>
 enum class PostProcessType
 {
+	BloomGlowExtractionPP,
+	BloomGaussianFilterPP,
 	GaussianFilterPP,
 	RadialBlurPP,
 	ChromaticAberrationPP,
-	BloomPP,
 	RobertsCrossPP,
 
 	FinalPassPP,
@@ -49,9 +50,11 @@ public:
 	/// ポストプロセスをかける
 	/// </summary>
 	/// <param name="rc"></param>
-	/// <param name="srcSRV"></param>
+	/// <param name="colorSRV"></param>
+	/// <param name="depthSRV"></param>
 	void ApplyEffect(RenderContext& rc,
-		ID3D11ShaderResourceView** srcSRV);
+		ID3D11ShaderResourceView* colorSRV,
+		ID3D11ShaderResourceView* depthSRV);
 
 	// Gui描画
 	void DrawGui();

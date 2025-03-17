@@ -1,12 +1,12 @@
 #include "../../Sprite/Sprite.hlsli"
 SamplerState linearBorderBlackSampler : register(s8);
 
-Texture2D hdr_color_buffer_texture : register(t0);
+Texture2D textureMap : register(t0);
 
 float4 main(VsOut pin) : SV_TARGET
 {
     uint mip_level = 0, width, height, number_of_levels;
-    hdr_color_buffer_texture.GetDimensions(mip_level, width, height, number_of_levels);
+    textureMap.GetDimensions(mip_level, width, height, number_of_levels);
     const float aspect_ratio = width / height;
 
 #if 1
@@ -14,11 +14,11 @@ float4 main(VsOut pin) : SV_TARGET
     const float offset[3] = { 0.0, 1.3846153846, 3.2307692308 };
     const float weight[3] = { 0.2270270270, 0.3162162162, 0.0702702703 };
 
-    float4 sampled_color = hdr_color_buffer_texture.Sample(linearBorderBlackSampler, pin.texcoord) * weight[0];
+    float4 sampled_color = textureMap.Sample(linearBorderBlackSampler, pin.texcoord) * weight[0];
     for (int i = 1; i < 3; i++)
     {
-        sampled_color += hdr_color_buffer_texture.Sample(linearBorderBlackSampler, pin.texcoord + float2(0.0, offset[i] / height)) * weight[i];
-        sampled_color += hdr_color_buffer_texture.Sample(linearBorderBlackSampler, pin.texcoord - float2(0.0, offset[i] / height)) * weight[i];
+        sampled_color += textureMap.Sample(linearBorderBlackSampler, pin.texcoord + float2(offset[i] / width, 0.0)) * weight[i];
+        sampled_color += textureMap.Sample(linearBorderBlackSampler, pin.texcoord - float2(offset[i] / width, 0.0)) * weight[i];
     }
 #else
 	//https://software.intel.com/en-us/blogs/2014/07/15/an-investigation-of-fast-real-time-gpu-based-image-blur-algorithms
@@ -27,8 +27,8 @@ float4 main(VsOut pin) : SV_TARGET
 	float4 sampled_color = 0;
 	for (int i = 0; i < 2; i++)
 	{
-		sampled_color += hdr_color_buffer_texture.Sample(linearBorderBlackSampler, pin.texcoord + float2(0.0, offset[i]) / height) * weight[i];
-		sampled_color += hdr_color_buffer_texture.Sample(linearBorderBlackSampler, pin.texcoord - float2(0.0, offset[i]) / height) * weight[i];
+		sampled_color += textureMap.Sample(linearBorderBlackSampler, pin.texcoord + float2(offset[i], 0.0) / width) * weight[i];
+		sampled_color += textureMap.Sample(linearBorderBlackSampler, pin.texcoord - float2(offset[i], 0.0) / width) * weight[i];
 	}
 #endif
     return sampled_color;

@@ -205,12 +205,9 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // ポストエフェクトの処理
-    ID3D11ShaderResourceView* srv[] =
-    {
+    PostProcessManager::Instance().ApplyEffect(rc, 
         modelAndShadowRenderFrame->GetColorSRV().Get(),
-        renderFrame->GetDepthSRV().Get(),
-    };
-    PostProcessManager::Instance().ApplyEffect(rc, srv);
+        renderFrame->GetDepthSRV().Get());
     // ポストエフェクトの処理終了
     //--------------------------------------------------------------------------------------
     

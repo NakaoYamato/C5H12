@@ -4,20 +4,7 @@
 
 void RobertsCross::DrawGui()
 {
-	if (ImGui::Begin(u8"RobertsCross"))
-	{
-		ImGui::Checkbox("enable", reinterpret_cast<bool*>(&_data.enable));
-		if (ImGui::TreeNode("Resource"))
-		{
-			static float textureSize = 512.0f;
-			ImGui::DragFloat("TextureSize", &textureSize);
-			ImGui::Image(GetColorSRV().Get(),
-				{ textureSize ,textureSize });
-
-			ImGui::TreePop();
-		}
-	}
-	ImGui::End();
+	ImGui::Checkbox("enable", reinterpret_cast<bool*>(&_data.enable));
 }
 
 std::unordered_map<std::string, float> RobertsCross::GetCurrentData()

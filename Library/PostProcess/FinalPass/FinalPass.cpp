@@ -8,58 +8,40 @@ void FinalPass::Update(float elapsedTime)
 
 void FinalPass::DrawGui()
 {
-	if (ImGui::Begin(u8"FinalPass"))
+	if (ImGui::TreeNode(u8"色調補正"))
 	{
-		if (ImGui::Button("reset"))
-			ClearData();
-		ImGui::Separator();
+		ImGui::DragFloat("hueShift", &_data.hueShift, 1.0f);
+		ImGui::DragFloat("saturation", &_data.saturation, 0.01f);
+		ImGui::DragFloat("brightness", &_data.brightness, 0.01f);
 
-		if (ImGui::TreeNode(u8"色調補正"))
-		{
-			ImGui::DragFloat("hueShift", &_data.hueShift, 1.0f);
-			ImGui::DragFloat("saturation", &_data.saturation, 0.01f);
-			ImGui::DragFloat("brightness", &_data.brightness, 0.01f);
-
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode(u8"トーンマッピング"))
-		{
-			ImGui::SliderFloat("exposure", &_data.exposure, 0.0f, 10.0f);
-			ImGui::SliderInt("toneType", &_data.toneType, 0, 2);
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode(u8"ヴィネット"))
-		{
-			ImGui::ColorEdit3("color", &_data.vignetteColor.x);
-			ImGui::SliderFloat2("center", &_data.vignetteCenter.x, 0, 1);
-			float vignetteIntensity = _data.vignetteIntensity / 3.0f;
-			ImGui::SliderFloat("intensity", &vignetteIntensity, 0.0f, +1.0f);
-			_data.vignetteIntensity = vignetteIntensity * 3.0f;
-			float vignetteSmoothness = _data.vignetteSmoothness / 5.0f;
-			ImGui::SliderFloat("smoothness", &vignetteSmoothness, 0.0f, +1.0f);
-			_data.vignetteSmoothness = std::max<float>(0.000001f, vignetteSmoothness * 5.0f);
-			bool roundedFlag = _data.vignetteRounded == 1;
-			ImGui::Checkbox("rounded", &roundedFlag);
-			_data.vignetteRounded = roundedFlag ? 1 : 0;
-			float vignetteRoundness = (-_data.vignetteRoundness + 6.0f) / 5.0f;
-			ImGui::SliderFloat("roundness", &vignetteRoundness, 0.0f, +1.0f);
-			_data.vignetteRoundness = 6.0f * (1.0f - vignetteRoundness) + vignetteRoundness;
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Resource"))
-		{
-			static float textureSize = 512.0f;
-			ImGui::DragFloat("TextureSize", &textureSize);
-			ImGui::Image(GetColorSRV().Get(),
-				{ textureSize ,textureSize });
-
-			ImGui::TreePop();
-		}
+		ImGui::TreePop();
 	}
-	ImGui::End();
+
+	if (ImGui::TreeNode(u8"トーンマッピング"))
+	{
+		ImGui::SliderFloat("exposure", &_data.exposure, 0.0f, 10.0f);
+		ImGui::SliderInt("toneType", &_data.toneType, 0, 2);
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode(u8"ヴィネット"))
+	{
+		ImGui::ColorEdit3("color", &_data.vignetteColor.x);
+		ImGui::SliderFloat2("center", &_data.vignetteCenter.x, 0, 1);
+		float vignetteIntensity = _data.vignetteIntensity / 3.0f;
+		ImGui::SliderFloat("intensity", &vignetteIntensity, 0.0f, +1.0f);
+		_data.vignetteIntensity = vignetteIntensity * 3.0f;
+		float vignetteSmoothness = _data.vignetteSmoothness / 5.0f;
+		ImGui::SliderFloat("smoothness", &vignetteSmoothness, 0.0f, +1.0f);
+		_data.vignetteSmoothness = std::max<float>(0.000001f, vignetteSmoothness * 5.0f);
+		bool roundedFlag = _data.vignetteRounded == 1;
+		ImGui::Checkbox("rounded", &roundedFlag);
+		_data.vignetteRounded = roundedFlag ? 1 : 0;
+		float vignetteRoundness = (-_data.vignetteRoundness + 6.0f) / 5.0f;
+		ImGui::SliderFloat("roundness", &vignetteRoundness, 0.0f, +1.0f);
+		_data.vignetteRoundness = 6.0f * (1.0f - vignetteRoundness) + vignetteRoundness;
+		ImGui::TreePop();
+	}
 }
 
 // 現在のデータの取得

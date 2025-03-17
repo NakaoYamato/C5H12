@@ -4,22 +4,7 @@
 
 void GlowExtraction::DrawGui()
 {
-	if (ImGui::Begin(u8"çÇãPìxíäèo"))
-	{
-		if (ImGui::Button("reset"))
-			ClearData();
-		ImGui::SliderFloat("extractionThreshold", &_data.extractionThreshold, +0.0f, +1.0f);
-		if (ImGui::TreeNode("Resource"))
-		{
-			static float textureSize = 512.0f;
-			ImGui::DragFloat("TextureSize", &textureSize);
-			ImGui::Image(GetColorSRV().Get(),
-				{ textureSize ,textureSize });
-
-			ImGui::TreePop();
-		}
-	}
-	ImGui::End();
+	ImGui::SliderFloat("extractionThreshold", &_data.extractionThreshold, +0.0f, +1.0f);
 }
 
 std::unordered_map<std::string, float> GlowExtraction::GetCurrentData()

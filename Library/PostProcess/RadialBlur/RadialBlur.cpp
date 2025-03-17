@@ -9,25 +9,10 @@ void RadialBlur::Update(float elapsedTime)
 // デバッグGui描画
 void RadialBlur::DrawGui()
 {
-	if (ImGui::Begin(u8"ラジアルブラー"))
-	{
-		if (ImGui::Button("reset"))
-			ClearData();
-		ImGui::SliderFloat("blurRadius", &_data.blurRadius, 0.001f, +100.0f);
-		ImGui::SliderInt("blurSamplingCount", &_data.blurSamplingCount, 1, 100);
-		ImGui::SliderFloat2("blurCenter", &_data.blurCenter.x, 0.0f, 1.0f);
-		ImGui::SliderFloat("blurMaskRadius", &_data.blurMaskRadius, 0, 300.0f);
-		if (ImGui::TreeNode("Resource"))
-		{
-			static float textureSize = 512.0f;
-			ImGui::DragFloat("TextureSize", &textureSize);
-			ImGui::Image(GetColorSRV().Get(),
-				{ textureSize ,textureSize });
-
-			ImGui::TreePop();
-		}
-	}
-	ImGui::End();
+	ImGui::SliderFloat("blurRadius", &_data.blurRadius, 0.001f, +100.0f);
+	ImGui::SliderInt("blurSamplingCount", &_data.blurSamplingCount, 1, 100);
+	ImGui::SliderFloat2("blurCenter", &_data.blurCenter.x, 0.0f, 1.0f);
+	ImGui::SliderFloat("blurMaskRadius", &_data.blurMaskRadius, 0, 300.0f);
 }
 
 // 現在のデータの取得

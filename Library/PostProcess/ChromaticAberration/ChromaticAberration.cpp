@@ -9,21 +9,15 @@ void ChromaticAberration::Update(float elapsedTime)
 // デバッグGui描画
 void ChromaticAberration::DrawGui()
 {
-	if (ImGui::Begin(u8"色収差"))
-	{
-		if (ImGui::Button("reset"))
-			ClearData();
-		float chromaticAberrationAmount = _data.aberrationAmount * 100.0f;
-		ImGui::SliderFloat("amount", &chromaticAberrationAmount, 0.0f, +1.0f);
-		_data.aberrationAmount = chromaticAberrationAmount * 0.01f;
-		int chromaticAberrationMaxSamples = _data.maxSamples;
-		ImGui::SliderInt("max sample", &chromaticAberrationMaxSamples, 0, 100);
-		_data.maxSamples = chromaticAberrationMaxSamples;
-		ImGui::SliderFloat3("shift 0", &_data.shift[0].x, 0.0f, +1.0f);
-		ImGui::SliderFloat3("shift 1", &_data.shift[1].x, 0.0f, +1.0f);
-		ImGui::SliderFloat3("shift 2", &_data.shift[2].x, 0.0f, +1.0f);
-	}
-	ImGui::End();
+	float chromaticAberrationAmount = _data.aberrationAmount * 100.0f;
+	ImGui::SliderFloat("amount", &chromaticAberrationAmount, 0.0f, +1.0f);
+	_data.aberrationAmount = chromaticAberrationAmount * 0.01f;
+	int chromaticAberrationMaxSamples = _data.maxSamples;
+	ImGui::SliderInt("max sample", &chromaticAberrationMaxSamples, 0, 100);
+	_data.maxSamples = chromaticAberrationMaxSamples;
+	ImGui::SliderFloat3("shift 0", &_data.shift[0].x, 0.0f, +1.0f);
+	ImGui::SliderFloat3("shift 1", &_data.shift[1].x, 0.0f, +1.0f);
+	ImGui::SliderFloat3("shift 2", &_data.shift[2].x, 0.0f, +1.0f);
 }
 
 std::unordered_map<std::string, float> ChromaticAberration::GetCurrentData()

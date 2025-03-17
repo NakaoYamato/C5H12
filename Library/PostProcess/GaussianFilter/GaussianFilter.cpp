@@ -183,22 +183,7 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 // デバッグGui描画
 void GaussianFilter::DrawGui()
 {
-	if (ImGui::Begin(u8"ガウスフィルター"))
-	{
-		if (ImGui::Button("reset"))
-			ClearData();
-		ImGui::SliderFloat("intensity", &_data.intensity, +0.0f, +5.0f);
-		if (ImGui::TreeNode("Resource"))
-		{
-			static float textureSize = 512.0f;
-			ImGui::DragFloat("TextureSize", &textureSize);
-			ImGui::Image(GetColorSRV().Get(),
-				{ textureSize ,textureSize });
-
-			ImGui::TreePop();
-		}
-	}
-	ImGui::End();
+	ImGui::SliderFloat("intensity", &_data.intensity, +0.0f, +5.0f);
 }
 
 // 定数バッファの更新

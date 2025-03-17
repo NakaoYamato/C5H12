@@ -21,7 +21,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<GlowExtraction>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGlowExtractionPP)].second;
-		name = u8"BloomGlowExtraction";
+		name = u8"ブルーム用高輝度抽出";
 	}
 	{
 		// ブルーム用ガウスブラー(ぼかし)
@@ -29,7 +29,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<GaussianFilter>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGaussianFilterPP)].second;
-		name = u8"BloomGaussianFilter";
+		name = u8"ブルーム用ぼかし";
 	}
 	{
 		// ガウスブラー(ぼかし)
@@ -53,7 +53,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<ChromaticAberration>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::ChromaticAberrationPP)].second;
-		name = _TO_STRING_U8(ChromaticAberration);
+		name = u8"色収差";
 	}
 	{
 		// RobertsCross
@@ -61,7 +61,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<RobertsCross>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
-		name = _TO_STRING_U8(RobertsCross);
+		name = u8"RobertsCross";
 	}
 	{
 		// 最終パス
@@ -178,6 +178,23 @@ void PostProcessManager::DrawGui()
 		if (_postProcesses[i].first == nullptr)continue;
 
 		// Gui描画
-		_postProcesses[i].first->DrawGui();
+		if (ImGui::Begin(_postProcesses[i].second.first.c_str()))
+		{
+			if (ImGui::Button("reset"))
+				_postProcesses[i].first->ClearData();
+			ImGui::Separator();
+			_postProcesses[i].first->DrawGui();
+
+			if (ImGui::TreeNode("Resource"))
+			{
+				static float textureSize = 512.0f;
+				ImGui::DragFloat("TextureSize", &textureSize);
+				ImGui::Image(_postProcesses[i].first->GetColorSRV().Get(),
+					{ textureSize ,textureSize });
+
+				ImGui::TreePop();
+			}
+		}
+		ImGui::End();
 	}
 }

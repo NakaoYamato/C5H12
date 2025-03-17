@@ -15,10 +15,10 @@
 class Input;
 
 // マクロ
-#define INPUT_IS_PRESSED(action) Input::Instance().IsPressed(action)
-#define INPUT_IS_TRIGGERD(action) Input::Instance().IsTriggerd(action)
-#define INPUT_IS_RELEASED(action) Input::Instance().IsReleased(action)
-#define INPUT_IS_MOVED(action) Input::Instance().IsMoved(action)
+#define _INPUT_IS_PRESSED(action) Input::Instance().IsPressed(action)
+#define _INPUT_IS_TRIGGERD(action) Input::Instance().IsTriggerd(action)
+#define _INPUT_IS_RELEASED(action) Input::Instance().IsReleased(action)
+#define _INPUT_IS_MOVED(action) Input::Instance().IsMoved(action)
 
 /// <summary>
 /// 入力情報監視クラス

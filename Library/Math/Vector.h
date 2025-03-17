@@ -3,29 +3,34 @@
 #include "Easing.h"
 
 #include <DirectXMath.h>
-//**************************************************************
-// XMFLOAT の便利化
-//**************************************************************
-//------< プロトタイプ宣言 >-------------------------
+
+#pragma region プロトタイプ宣言
 class Vector2;
 class Vector3;
 class Vector4;
+#pragma endregion
 
-//--------------------------------------------------
-// マクロ
-//--------------------------------------------------
-#define VECTOR2_ZERO Vector2(0.0f, 0.0f)
-#define VECTOR3_ZERO Vector3(0.0f, 0.0f, 0.0f)
-#define VECTOR4_ZERO Vector4(0.0f, 0.0f, 0.0f, 0.0f)
-#define VECTOR4_BLACK Vector4(0.0f, 0.0f, 0.0f, 0.0f)
-#define VECTOR4_WHITE Vector4(1.0f, 1.0f, 1.0f, 1.0f)
-#define VECTOR4_RED Vector4(1.0f, 0.0f, 0.0f, 1.0f)
-#define VECTOR4_GREEN Vector4(0.0f, 1.0f, 0.0f, 1.0f)
-#define VECTOR4_BLUE Vector4(0.0f, 0.0f, 1.0f, 1.0f)
+#pragma region 定義
+#define _VECTOR2_ZERO   Vector2(0.0f, 0.0f)
 
-//--------------------------------------------------
-// 関数
-//--------------------------------------------------
+#define _VECTOR3_ZERO   Vector3(0.0f, 0.0f, 0.0f)
+#define _VECTOR3_RIGHT  Vector3(1.0f, 0.0f, 0.0f)
+#define _VECTOR3_UP     Vector3(0.0f, 1.0f, 0.0f)
+#define _VECTOR3_FRONT  Vector3(0.0f, 0.0f, 1.0f)
+
+#define _VECTOR4_RIGHT  Vector4(1.0f, 0.0f, 0.0f, 0.0f)
+#define _VECTOR4_UP     Vector4(0.0f, 1.0f, 0.0f, 0.0f)
+#define _VECTOR4_FRONT  Vector4(0.0f, 0.0f, 1.0f, 0.0f)
+#define _VECTOR4_ZERO   Vector4(0.0f, 0.0f, 0.0f, 0.0f)
+#define _VECTOR4_BLACK  Vector4(0.0f, 0.0f, 0.0f, 0.0f)
+#define _VECTOR4_WHITE  Vector4(1.0f, 1.0f, 1.0f, 1.0f)
+#define _VECTOR4_GRAY   Vector4(0.2f, 0.2f, 0.2f, 1.0f)
+#define _VECTOR4_RED    Vector4(1.0f, 0.0f, 0.0f, 1.0f)
+#define _VECTOR4_GREEN  Vector4(0.0f, 1.0f, 0.0f, 1.0f)
+#define _VECTOR4_BLUE   Vector4(0.0f, 0.0f, 1.0f, 1.0f)
+#pragma endregion
+
+#pragma region 関数
 //--------------------------------------------------------------
 //  VECTOR2の長さの二乗を取得
 float   Vec2LengthSq(const Vector2&);
@@ -85,7 +90,7 @@ Vector3 Vec3TransformNormal(const Vector3& src, const DirectX::XMMATRIX& M);
 /// <param name="normalVec">正規化されたベクトル</param>
 /// <returns>ラジアン</returns>
 Vector3 Vec3CalcAngle(const Vector3& normalVec);
-
+#pragma endregion
 
 //--------------------------------------------------
 // 構造体

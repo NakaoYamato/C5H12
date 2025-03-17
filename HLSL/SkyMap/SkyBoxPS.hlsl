@@ -1,9 +1,7 @@
 #include "SkyMap.hlsli"
 
-#define POINT 0
-#define LINEAR 1
-#define ANISOTROPIC 2
-SamplerState sampler_states[3] : register(s0);
+#include "../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 TextureCube skybox : register(t0); // latitude-longitude mapped texture
 
 float4 main(VsOut pin) : SV_TARGET
@@ -12,5 +10,5 @@ float4 main(VsOut pin) : SV_TARGET
     R /= R.w;
 
     const float lod = 0;
-    return skybox.SampleLevel(sampler_states[LINEAR], R.xyz, lod);
+    return skybox.SampleLevel(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], R.xyz, lod);
 }

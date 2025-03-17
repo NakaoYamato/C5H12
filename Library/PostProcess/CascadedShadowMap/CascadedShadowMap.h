@@ -15,6 +15,8 @@
 //         https://learn.microsoft.com/en-us/windows/win32/dxtecharts/cascaded-shadow-maps
 //         https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-10-parallel-split-shadow-maps-programmable-gpus
 
+#define _CASCADED_SHADOW_MAP_CB_SLOT_INDEX 3
+
 class CascadedShadowMap
 {
 public:
@@ -34,20 +36,12 @@ public:
     };
 
     CascadedShadowMap(ID3D11Device* device, UINT width, UINT height, UINT cascadeCount = 4);
-    virtual ~CascadedShadowMap() = default;
-
-    CascadedShadowMap() = delete;
-    CascadedShadowMap(const CascadedShadowMap&) = delete;
-    CascadedShadowMap(const CascadedShadowMap&&) noexcept = delete;
-    CascadedShadowMap& operator =(CascadedShadowMap&) = delete;
-    CascadedShadowMap& operator =(CascadedShadowMap&&) noexcept = delete;
-
+    ~CascadedShadowMap() {}
 public:
     // âeÇÃê∂ê¨äJén
     void Activate(const RenderContext& rc,
         const UINT& cbSlot);
-    void ClearAndActivate(const RenderContext& rc,
-        const UINT& cbSlot);
+    void ClearAndActivate(const RenderContext& rc);
 
     // âeÇÃê∂ê¨èIóπ
     void Deactivate(const RenderContext& rc);

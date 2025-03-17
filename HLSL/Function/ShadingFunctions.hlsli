@@ -2,10 +2,10 @@
 #define __SHADING_FUNCTIONS_HLSLI__
 
 //	ƒKƒ“ƒ}ŒW”
-static const float GammaFactor = 2.2f;
+static const float _GAMMA_FACTOR = 2.2f;
 
 //	‰~ü—¦
-static const float PI = 3.141592654f;
+static const float _PI = 3.141592654f;
 
 //--------------------------------------------------
 // ƒ‰ƒ“ƒo[ƒgŠgU”½ËŒvZŠÖ”
@@ -139,7 +139,7 @@ float RGB2Luminance(float3 rgb)
 //diffuseReflectance	: “üËŒõ‚Ì‚¤‚¿ŠgU”½Ë‚É‚È‚éŠ„‡
 float3 DiffuseBRDF(float3 diffuseReflectance)
 {
-    return diffuseReflectance / PI;
+    return diffuseReflectance / _PI;
 }
 
 //--------------------------------------------
@@ -161,7 +161,7 @@ float CalcNormalDistributionFunction(float NdotH, float roughness)
 {
     float a = roughness * roughness;
     float b = (NdotH * NdotH) * (a - 1.0f) + 1.0f;
-    return a / (PI * b * b);
+    return a / (_PI * b * b);
 }
 
 //--------------------------------------------

@@ -21,7 +21,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<GaussianFilter>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].second;
-		name = TO_STRING_U8(GaussianFilter);
+		name = _TO_STRING_U8(GaussianFilter);
 	}
 	{
 		// 河瀬式ブルーム
@@ -29,7 +29,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<Bloom>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomPP)].second;
-		name = TO_STRING_U8(Bloom);
+		name = _TO_STRING_U8(Bloom);
 	}
 	{
 		// ラジアルブラー
@@ -37,7 +37,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<RadialBlur>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RadialBlurPP)].second;
-		name = TO_STRING_U8(RadialBlur);
+		name = _TO_STRING_U8(RadialBlur);
 	}
 	{
 		// 色収差
@@ -45,7 +45,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<ChromaticAberration>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::ChromaticAberrationPP)].second;
-		name = TO_STRING_U8(ChromaticAberration);
+		name = _TO_STRING_U8(ChromaticAberration);
 	}
 	{
 		// RobertsCross
@@ -53,7 +53,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<RobertsCross>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
-		name = TO_STRING_U8(RobertsCross);
+		name = _TO_STRING_U8(RobertsCross);
 	}
 	{
 		// 最終パス
@@ -61,7 +61,7 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 			std::make_unique<FinalPass>(device,
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::FinalPassPP)].second;
-		name = TO_STRING_U8(FinalPass);
+		name = _TO_STRING_U8(FinalPass);
 	}
 
 	// ブルーム用

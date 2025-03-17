@@ -2,7 +2,7 @@
 #include <math.h>
 #include <cmath>
 
-#define M_PI        3.14159265358979323846264338327950288f
+#define _M_PI        3.14159265358979323846264338327950288f
 
 // ï‚äÆèàóù
 inline float EasingLerp(float src, float dst, float t, float(*Easing)(float))
@@ -19,15 +19,15 @@ class Easings
 public:
     static float EaseInSine(float x)
     {
-        return (1 - cosf((x * M_PI) / 2.0f));
+        return (1 - cosf((x * _M_PI) / 2.0f));
     }
     static float EaseOutSine(float x)
     {
-        return (sinf((x * M_PI) / 2.0f));
+        return (sinf((x * _M_PI) / 2.0f));
     }
     static float EaseInOutSine(float x)
     {
-        return -(cosf(M_PI * x) - 1.0f) / 2.0f;
+        return -(cosf(_M_PI * x) - 1.0f) / 2.0f;
     }
     static float EaseInCubic(float x)
     {
@@ -58,7 +58,7 @@ public:
     }
     static float EaseInElastic(float x)
     {
-        const float c4 = (2.0f * M_PI) / 3.0f;
+        const float c4 = (2.0f * _M_PI) / 3.0f;
 
         return x == 0.0f
             ? 0.0f
@@ -69,7 +69,7 @@ public:
     }
     static float EaseOutElastic(float x)
     {
-        const float c4 = (2.0f * M_PI) / 3.0f;
+        const float c4 = (2.0f * _M_PI) / 3.0f;
 
         return x == 0.0f
             ? 0.0f
@@ -79,7 +79,7 @@ public:
     }
     static float EaseInOutElastic(float x)
     {
-        const float c5 = (2.0f * M_PI) / 4.5f;
+        const float c5 = (2.0f * _M_PI) / 4.5f;
 
         return x == 0.0f
             ? 0.0f

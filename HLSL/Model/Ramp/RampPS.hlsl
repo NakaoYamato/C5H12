@@ -1,8 +1,6 @@
 #include "../Phong/Phong.hlsli"
-#define POINT 0
-#define LINEAR 1
-#define ANISOTROPIC 2
-SamplerState samplerStates[3] : register(s0);
+#include "../../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
 
@@ -13,7 +11,7 @@ Texture2D environmentMap : register(t10);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-    float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * pin.materialColor;
+    float4 diffuseColor = diffuseMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * pin.materialColor;
     // TODO 処理が重い
     clip(diffuseColor.a < 0.1f ? -1 : 1);
 	
@@ -25,13 +23,13 @@ float4 main(VS_OUT pin) : SV_TARGET
         normalize(pin.binormal.xyz),
         normalize(pin.world_normal.xyz)
     };
-    float3 N = normalMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord).rgb;
+    float3 N = normalMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
     // ノーマルテクスチャ法線をワールドへ変換
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     
     float3 ambient = world_ambient.rgb * Ka.rgb;
     
-    float3 directionalDiffuse = CalcRampShading(rampMap, samplerStates[ANISOTROPIC],
+    float3 directionalDiffuse = CalcRampShading(rampMap, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX],
     N, L, directional_light_color.rgb, Kd.rgb);
     
     float3 directionalSpecular = CalcPhongSpecular(N, L, E, directional_light_color.rgb, Ks.rgb);

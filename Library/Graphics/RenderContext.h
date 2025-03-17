@@ -16,9 +16,9 @@ struct RenderContext
 	const RenderState* renderState;
 	const CameraData* camera;
 	// ÉâÉCÉgèÓïÒ
-	Vector4 lightDirection = { 0.0f,-1.0f,0.0f,0.0f };
-	Vector4 lightColor = { 1.0f,1.0f,1.0f,1.0f };
-	Vector4 lightAmbientColor = { 1.0f,1.0f,1.0f,1.0f };
+	Vector4 lightDirection		= _VECTOR4_UP;
+	Vector4 lightColor			= _VECTOR4_WHITE;
+	Vector4 lightAmbientColor	= _VECTOR4_WHITE;
 	ID3D11ShaderResourceView* const* environmentMap = nullptr;
 	std::vector<const PointLight::Data*> pointLights;
 };

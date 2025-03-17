@@ -33,7 +33,7 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, _model.get(), VECTOR4_WHITE, "CascadedShadowMap", _renderType, &_shadowParameter);
+		MeshRenderer::Draw(&mesh, _model.get(), _VECTOR4_WHITE, "CascadedShadowMap", _renderType, &_shadowParameter);
 	}
 }
 

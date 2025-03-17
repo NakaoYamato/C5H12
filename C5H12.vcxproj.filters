@@ -504,6 +504,7 @@
     <None Include="HLSL\Model\Grass\Grass.hlsli" />
     <None Include="HLSL\PostProcess\FinalPass\FilterFunctions.hlsli" />
     <None Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRendering.hlsli" />
+    <None Include="HLSL\Define\SamplerStateDefine.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />

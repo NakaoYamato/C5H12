@@ -6,10 +6,10 @@
 class GaussianFilter : public PostProcessBase
 {
 public:
-#define KERNEL_MAX 25
+#define _KERNEL_MAX 25
     struct Constants
     {
-        DirectX::XMFLOAT4 weights[KERNEL_MAX * KERNEL_MAX];
+        DirectX::XMFLOAT4 weights[_KERNEL_MAX * _KERNEL_MAX];
         float kernelSize;
         DirectX::XMFLOAT2 texcel;
         float dummy;

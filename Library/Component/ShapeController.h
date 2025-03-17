@@ -36,7 +36,7 @@ public:
 	void SetColor(const Vector4& color) { this->_color = color; }
 private:
 	ShapeType _type;
-	Vector4 _color = VECTOR4_WHITE;
+	Vector4 _color = _VECTOR4_WHITE;
 	float _radius = 0.5f;
 	float _height = 1.0f;
 };

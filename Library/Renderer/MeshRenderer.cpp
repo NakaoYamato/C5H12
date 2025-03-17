@@ -673,7 +673,7 @@ namespace MeshRenderer
 						// シェーダーの更新処理
 						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
 
-						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
+						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 					}
 				}
 			}
@@ -716,7 +716,7 @@ namespace MeshRenderer
 						// シェーダーの更新処理
 						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
 
-						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
+						dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 					}
 				}
 			}

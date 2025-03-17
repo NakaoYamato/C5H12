@@ -6,7 +6,7 @@
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 
 // 変数の文字列化
-#define TO_STRING_U8(str) std::string(#str)
+#define _TO_STRING_U8(str) std::string(#str)
 
 /// <summary>
 /// ワイド文字列からマルチバイト文字へ変換

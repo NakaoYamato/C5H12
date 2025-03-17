@@ -271,7 +271,7 @@ void Animator::ComputeRootMotion(int animationIndex,
     Vector3& movement) const
 {
     resultNodePose = _model->GetPoseNodes();
-    movement = VECTOR3_ZERO;
+    movement = _VECTOR3_ZERO;
 
     std::vector<ModelResource::Node> oldNodes;
     std::vector<ModelResource::Node> currentNodes;

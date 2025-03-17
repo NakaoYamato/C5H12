@@ -2,7 +2,7 @@
 #include "../ShaderBase.h"
 
 // カスケードシャドウマップの書き込む先の数
-#define CASCADED_SHADOW_MAPS_SIZE 3
+#define _CASCADED_SHADOW_MAPS_SIZE 3
 
 // カスケードシャドウマップを描画するためのシェーダー
 class CascadedShadowMapShader : public ShaderBase

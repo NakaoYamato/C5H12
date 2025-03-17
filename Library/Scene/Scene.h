@@ -7,9 +7,20 @@
 #include "../../Library/3D/SkyMap.h"
 #include "../../Library/Actor/ActorManager.h"
 
-//---------------------------------------------------
-//  シーン基底クラス
-//---------------------------------------------------
+#pragma region 定義
+#define _RENDER_FRAME_INDEX         0
+#define _APPLY_SHADOW_FRAME_INDEX   1
+
+#define _SKYMAP_COLOR_SRV_SLOT_INDEX	10 
+#define _SKYMAP_DIFFUSE_SRV_SLOT_INDEX	11 
+#define _SKYMAP_SPECULAR_SRV_SLOT_INDEX 12 
+#define _SKYMAP_LUT_SRV_SLOT_INDEX		13 
+
+#define _SCENE_CB_SLOT_INDEX 0
+#define _LIGHT_CB_SLOT_INDEX 3
+#pragma endregion
+
+// シーン基底クラス
 class Scene
 {
 public:

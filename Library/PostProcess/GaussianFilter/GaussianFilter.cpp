@@ -16,7 +16,7 @@ void GaussianFilter::DrawGui()
 	{
 		if (ImGui::Button("reset"))
 			ClearData();
-		ImGui::SliderInt("kernel", &_data.kernelSize, 1, KERNEL_MAX);
+		ImGui::SliderInt("kernel", &_data.kernelSize, 1, _KERNEL_MAX);
 		ImGui::SliderFloat("sigma", &_data.sigma, 1.0f, 10.0f);
 		if (ImGui::TreeNode("Resource"))
 		{

@@ -14,9 +14,9 @@ cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
 
 #include "../Function/ShadingFunctions.hlsli"
 
-Texture2D textureMaps[TEXTURE_MAX] : register(t0);
-SamplerState point_sampler_state : register(s0);
-SamplerState linear_sampler_state : register(s2);
+Texture2D textureMaps[_TEXTURE_MAX] : register(t0);
+#include "../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 //  gbufferに記録された深度値を出力する
 struct PS_OUT
@@ -28,7 +28,7 @@ struct PS_OUT
 PS_OUT main(VsOut pin)
 {
     // GBufferからデータを取得
-    GBufferData decodeData = DecodeGBuffer(textureMaps, point_sampler_state, pin.texcoord, inv_view_projection);
+    GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, inv_view_projection);
     
     // decodeData.baseColorにアルファ値がないのでそのままだとskymapが埋もれてしまう
     // 対策として深度値からクリップしている

@@ -16,7 +16,7 @@ struct SceneRegister
 // シーンマネージャーのGUIに登録するためのマクロ
 // type : Scene継承クラス
 // sceneName : GUIに登録する名前
-#define REGISTER_SCENE_MANAGER(type, sceneName) \
+#define _REGISTER_SCENE_MANAGER(type, sceneName) \
 static SceneRegister<type> type##register(sceneName)
 
 //---------------------------------------------------

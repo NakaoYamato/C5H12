@@ -1,8 +1,6 @@
 #include "PhysicalBasedRendering.hlsli"
-#define POINT 0
-#define LINEAR 1
-#define ANISOTROPIC 2
-SamplerState samplerStates[3] : register(s0);
+#include "../../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 #define BASECOLOR_TEXTURE 0
 #define ROUGHNESS_TEXTURE 1
@@ -20,17 +18,17 @@ float4 main(VS_OUT pin) : SV_TARGET
 	// ベースカラー取得
     float4 baseColor = pin.materialColor;
     {
-        float4 sampled = textureMaps[BASECOLOR_TEXTURE].Sample(samplerStates[ANISOTROPIC], pin.texcoord);
-        sampled.rgb = pow(sampled.rgb, GammaFactor);
+        float4 sampled = textureMaps[BASECOLOR_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
+        sampled.rgb = pow(sampled.rgb, _GAMMA_FACTOR);
         baseColor *= sampled;
     }
 	
 	//	自己発光色取得
-    float3 emissiveColor = textureMaps[EMISSIVE_TEXTURE].Sample(samplerStates[ANISOTROPIC], pin.texcoord).rgb;
-    emissiveColor.rgb = pow(emissiveColor.rgb, GammaFactor);
+    float3 emissiveColor = textureMaps[EMISSIVE_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
+    emissiveColor.rgb = pow(emissiveColor.rgb, _GAMMA_FACTOR);
     
     // 法線・従法線・接線取得
-    float3 N = textureMaps[NORMAL_TEXTURE].Sample(samplerStates[ANISOTROPIC], pin.texcoord).rgb;
+    float3 N = textureMaps[NORMAL_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
     // ノーマルテクスチャ法線をワールドへ変換
     float3x3 mat =
     {
@@ -44,7 +42,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     float roughness = roughness_factor;
     float metalness = metalness_factor;
     {
-        float4 sampled = textureMaps[ROUGHNESS_TEXTURE].Sample(samplerStates[LINEAR], pin.texcoord);
+        float4 sampled = textureMaps[ROUGHNESS_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
         roughness *= sampled.g;
     }
     
@@ -95,10 +93,10 @@ float4 main(VS_OUT pin) : SV_TARGET
     }
     
     // IBL処理
-    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, samplerStates[LINEAR]);
-    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[LINEAR]);
+    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
+    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
 
 	//	色生成
     float3 color = total_diffuse + total_specular + emissiveColor;
-    return float4(pow(color.rgb, 1.0f / GammaFactor), baseColor.a);
+    return float4(pow(color.rgb, 1.0f / _GAMMA_FACTOR), baseColor.a);
 }

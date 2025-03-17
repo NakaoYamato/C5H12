@@ -1,3 +1,5 @@
+#ifndef __TO_MATRIX_HLSLI__
+#define __TO_MATRIX_HLSLI__
 
 //  ägèkçsóÒê∂ê¨
 float4x4 ToMatrixScaling(float3 scale)
@@ -83,3 +85,5 @@ float4x4 ToMatrixTranslation(float3 translation)
     m._44 = 1.0f;
     return m;
 }
+
+#endif // __TO_MATRIX_HLSLI__

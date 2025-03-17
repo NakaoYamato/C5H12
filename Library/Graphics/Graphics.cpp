@@ -294,6 +294,7 @@ void Graphics::DrawGui()
 	{
 		if (ImGui::BeginMenu(u8"描画管理"))
 		{
+			ImGui::Checkbox(u8"フレームバッファ", &_drawFrameBuffer);
 			ImGui::Checkbox(u8"デファードレンダリング", &_renderingDeferred);
 			ImGui::Checkbox(u8"シャドウマップ", &_drawCSMGui);
 			ImGui::Checkbox(u8"GBuffer", &_drawGBGui);
@@ -303,6 +304,26 @@ void Graphics::DrawGui()
 
 		ImGui::EndMainMenuBar();
 	}
+	// フレームバッファGUI
+	if (_drawFrameBuffer)
+	{
+		if (ImGui::Begin(u8"フレームバッファ"))
+		{
+			static float textureSize = 256.0f;
+			ImGui::DragFloat("TextureSize", &textureSize);
+			for (UINT bufferIndex = 0; bufferIndex < 4; ++bufferIndex)
+			{
+				ImGui::Text(u8"%d", bufferIndex);
+				ImGui::Image(_frameBufferes[bufferIndex]->GetColorSRV().Get(),
+					{ textureSize ,textureSize });
+				ImGui::SameLine();
+				ImGui::Image(_frameBufferes[bufferIndex]->GetDepthSRV().Get(),
+					{ textureSize ,textureSize });
+			}
+		}
+		ImGui::End();
+	}
+
 	// カスケードシャドウマップGUI
 	if (_drawCSMGui)
 		GetCascadedShadowMap()->DrawGui();

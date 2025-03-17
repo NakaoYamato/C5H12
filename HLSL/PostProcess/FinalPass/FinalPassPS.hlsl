@@ -27,11 +27,12 @@ cbuffer CONSTANT_BUFFER : register(b1)
 };
 
 Texture2D texture0 : register(t0);
-SamplerState sampler0 : register(s0);
+#include "../../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 float4 main(VsOut pin) : SV_TARGET
 {
-    float4 color = texture0.Sample(sampler0, pin.texcoord);
+    float4 color = texture0.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
     
     // カラーフィルター
 #if 1

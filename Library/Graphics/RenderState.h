@@ -4,13 +4,14 @@
 #include <d3d11.h>
 
 // サンプラステート
+// 番号がスロット番号に対応
 enum class SamplerState
 {
 	PointWrap,
 	PointClamp,
 	LinearWrap,
 	LinearClamp,
-	BorderPoint,	// カスケードシャドウマップ
+	BorderPoint,
 	Comparison,		// カスケードシャドウマップ
 
 	EnumCount

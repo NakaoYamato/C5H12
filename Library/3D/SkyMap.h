@@ -26,7 +26,7 @@ public:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetSRV() { return _shaderResourceView; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDiffuseSRV() { return _diffuseIEMSRV; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetSpecularSRV() { return _specularIEMSRV; }
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetLutGGXSRV() { return _lutSRVs[_lutIndex]; }
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetLutSRV() { return _lutSRVs[_lutIndex]; }
 #pragma endregion
 private:
     Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;

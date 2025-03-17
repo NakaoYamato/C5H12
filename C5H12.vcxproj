@@ -307,6 +307,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
+    <None Include="HLSL\Define\SamplerStateDefine.hlsli" />
     <None Include="HLSL\Function\ShadingFunctions.hlsli" />
     <None Include="HLSL\Function\ToMatrix.hlsli" />
     <None Include="HLSL\GBuffer\GBuffer.hlsli" />

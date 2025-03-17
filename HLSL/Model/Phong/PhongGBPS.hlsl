@@ -2,10 +2,8 @@
 
 #include "../../GBuffer/GBuffer.hlsli"
 
-#define POINT 0
-#define LINEAR 1
-#define ANISOTROPIC 2
-SamplerState samplerStates[3] : register(s0);
+#include "../../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D specularMap : register(t2);
@@ -18,7 +16,7 @@ Texture2D environmentMap : register(t10);
 
 PS_GB_OUT main(VS_OUT pin)
 {
-    float4 diffuseColor = diffuseMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Kd * pin.materialColor;
+    float4 diffuseColor = diffuseMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Kd * pin.materialColor;
     // デザリング
     {
         //static const int dither_pattern[16] =
@@ -33,15 +31,15 @@ PS_GB_OUT main(VS_OUT pin)
         //float dither = (float) dither_pattern[x + y * 4] / 16.0f;
         //clip(diffuseColor.a - dither);
     }
-    float4 emissiveColor = emissiveMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord);
-    float4 specularColor = specularMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord) * Ks.rgba;
+    float4 emissiveColor = emissiveMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
+    float4 specularColor = specularMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Ks.rgba;
     float3x3 mat =
     {
         normalize(pin.world_tangent.xyz),
         normalize(pin.binormal.xyz),
         normalize(pin.world_normal.xyz)
     };
-    float3 N = normalMap.Sample(samplerStates[ANISOTROPIC], pin.texcoord).rgb;
+    float3 N = normalMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
     // ノーマルテクスチャ法線をワールドへ変換
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     

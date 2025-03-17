@@ -14,9 +14,9 @@ cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
 
 #include "../Function/ShadingFunctions.hlsli"
 
-Texture2D textureMaps[TEXTURE_MAX] : register(t0);
-SamplerState point_sampler_state : register(s0);
-SamplerState linear_sampler_state : register(s2);
+Texture2D textureMaps[_TEXTURE_MAX] : register(t0);
+#include "../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 //  IBL用テクスチャ
 TextureCube diffuse_iem : register(t11);
@@ -33,7 +33,7 @@ struct PS_OUT
 PS_OUT main(VsOut pin)
 {
     // GBufferからデータを取得
-    GBufferData decodeData = DecodeGBuffer(textureMaps, point_sampler_state, pin.texcoord, inv_view_projection);
+    GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, inv_view_projection);
     
     // decodeData.baseColorにアルファ値がないのでそのままだとskymapが埋もれてしまう
     // 対策として深度値からクリップしている
@@ -99,13 +99,13 @@ PS_OUT main(VsOut pin)
     }
     
     // IBL処理
-    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, linear_sampler_state);
-    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, linear_sampler_state);
+    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
+    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
 
 	//	色生成
     float3 color = total_diffuse + total_specular + emissiveColor;    
     PS_OUT pout = (PS_OUT) 0;
-    pout.color = float4(pow(color.rgb, 1.0f / GammaFactor), 1.0f);
+    pout.color = float4(pow(color.rgb, 1.0f / _GAMMA_FACTOR), 1.0f);
     pout.depth = decodeData.depth;
     return pout;
 }

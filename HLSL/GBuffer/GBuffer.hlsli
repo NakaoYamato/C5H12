@@ -58,24 +58,24 @@ struct PSGBufferTextures
     SamplerState state;
 };
 
-#define BASE_COLOR_TEXTURE      0
-#define WORLD_NORMAL_TEXTURE    1
-#define EMISSIVE_COLOR_TEXTURE  2
-#define PARAMETER_TEXTURE       3
-#define DEPTH_TEXTURE           4
+static const uint _BASE_COLOR_TEXTURE        = 0;
+static const uint _WORLD_NORMAL_TEXTURE      = 1;
+static const uint _EMISSIVE_COLOR_TEXTURE    = 2;
+static const uint _PARAMETER_TEXTURE         = 3;
+static const uint _DEPTH_TEXTURE             = 4;
 
-#define TEXTURE_MAX             5
+static const uint _TEXTURE_MAX = _DEPTH_TEXTURE + 1;
 
 //  ピクセルシェーダーの出力用構造体からGBufferData情報に変換
 //  texturesはregister(t0)から開始している前提
-GBufferData DecodeGBuffer(Texture2D textures[TEXTURE_MAX], SamplerState state, float2 uv, matrix inverse_view_projection)
+GBufferData DecodeGBuffer(Texture2D textures[_TEXTURE_MAX], SamplerState state, float2 uv, matrix inverse_view_projection)
 {
     //  各テクスチャから情報を取得
-    float4 baseMapData      = textures[BASE_COLOR_TEXTURE].Sample(state, uv);
-    float4 normalMapData    = textures[WORLD_NORMAL_TEXTURE].Sample(state, uv);
-    float4 emissiveMapData  = textures[EMISSIVE_COLOR_TEXTURE].Sample(state, uv);
-    float4 parameterMapData = textures[PARAMETER_TEXTURE].Sample(state, uv);
-    float depth             = textures[DEPTH_TEXTURE].Sample(state, uv).x;
+    float4 baseMapData      = textures[_BASE_COLOR_TEXTURE].Sample(state, uv);
+    float4 normalMapData    = textures[_WORLD_NORMAL_TEXTURE].Sample(state, uv);
+    float4 emissiveMapData  = textures[_EMISSIVE_COLOR_TEXTURE].Sample(state, uv);
+    float4 parameterMapData = textures[_PARAMETER_TEXTURE].Sample(state, uv);
+    float depth             = textures[_DEPTH_TEXTURE].Sample(state, uv).x;
     
     GBufferData ret;
     ret.baseColor = baseMapData.rgb;

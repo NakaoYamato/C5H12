@@ -45,6 +45,7 @@ void Scene::Render()
     RenderState* renderState = graphics.GetRenderState();
     ConstantBufferManager* cbManager = graphics.GetConstantBufferManager();
 
+    // グレーで初期化
     FLOAT color[] = { 0.2f,0.2f,0.2f,1.0f };
     dc->ClearRenderTargetView(rtv, color);
     dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -52,14 +53,30 @@ void Scene::Render()
 
     // サンプラーステート設定
     {
-        ID3D11SamplerState* samplerStates[] =
+        std::vector<ID3D11SamplerState*> samplerStates;
+        for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
         {
-            renderState->GetSamplerState(SamplerState::PointWrap),
-            renderState->GetSamplerState(SamplerState::PointClamp),
-            renderState->GetSamplerState(SamplerState::LinearWrap),
-            renderState->GetSamplerState(SamplerState::LinearClamp)
-        };
-        dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+            samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
+        }
+        dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+    }
+
+    // レンダーコンテキスト作成
+    RenderContext rc{};
+    rc.deviceContext = dc;
+    rc.renderState = graphics.GetRenderState();
+    rc.camera = &Camera::Instance().GetDate();
+    rc.lightDirection = _VECTOR4_RIGHT;
+    rc.lightColor = _VECTOR4_WHITE;
+    rc.lightAmbientColor = _VECTOR4_BLACK;
+    if (_skyMap)
+    {
+        rc.environmentMap = _skyMap->GetSRV().GetAddressOf();
+        // スカイマップのSRVを設定
+        dc->PSSetShaderResources(_SKYMAP_COLOR_SRV_SLOT_INDEX,      1, _skyMap->GetSRV().GetAddressOf());
+        dc->PSSetShaderResources(_SKYMAP_DIFFUSE_SRV_SLOT_INDEX,    1, _skyMap->GetDiffuseSRV().GetAddressOf());
+        dc->PSSetShaderResources(_SKYMAP_SPECULAR_SRV_SLOT_INDEX,   1, _skyMap->GetSpecularSRV().GetAddressOf());
+        dc->PSSetShaderResources(_SKYMAP_LUT_SRV_SLOT_INDEX,        1, _skyMap->GetLutSRV().GetAddressOf());
     }
 
     // レンダーステート設定
@@ -67,33 +84,15 @@ void Scene::Render()
     dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
-    // レンダーコンテキスト作成
-    RenderContext rc{};
-    rc.deviceContext = dc;
-    rc.renderState = graphics.GetRenderState();
-    rc.camera = &Camera::Instance().GetDate();
-    rc.lightDirection = { 1,0,0,0 };
-    rc.lightColor = { 1,1,1,1 };
-    rc.lightAmbientColor = { 0,0,0,0 };
-    if (_skyMap)
-    {
-        rc.environmentMap = _skyMap->GetSRV().GetAddressOf();
-        // スカイマップのSRVを設定
-        dc->PSSetShaderResources(10, 1, _skyMap->GetSRV().GetAddressOf());
-        dc->PSSetShaderResources(11, 1, _skyMap->GetDiffuseSRV().GetAddressOf());
-        dc->PSSetShaderResources(12, 1, _skyMap->GetSpecularSRV().GetAddressOf());
-        dc->PSSetShaderResources(13, 1, _skyMap->GetLutGGXSRV().GetAddressOf());
-    }
-
     // 描画の前処理
     _actorManager.RenderPreprocess(rc);
 
     // シーン定数バッファ、ライト定数バッファの更新
     cbManager->Update(rc);
     // シーン定数バッファの設定
-    cbManager->SetCB(dc, 0, ConstantBufferType::SceneCB, ConstantUpdateTarget::ALL);
+    cbManager->SetCB(dc, _SCENE_CB_SLOT_INDEX, ConstantBufferType::SceneCB, ConstantUpdateTarget::ALL);
     // ライト定数バッファの設定
-    cbManager->SetCB(dc, 3, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
+    cbManager->SetCB(dc, _LIGHT_CB_SLOT_INDEX, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
 
     // ゲームオブジェクトの描画
     _actorManager.Render(rc);
@@ -115,8 +114,8 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // フレームバッファ0番に空、GBuffer、その他レンダラーを描画
-    FrameBuffer* renderFrame = graphics.GetFrameBuffer(0);
-    renderFrame->ClearAndActivate(dc, Vector4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
+    FrameBuffer* renderFrame = graphics.GetFrameBuffer(_RENDER_FRAME_INDEX);
+    renderFrame->ClearAndActivate(dc, _VECTOR4_ZERO, 1.0f);
     {
         // 空の描画
         if (_skyMap)
@@ -137,7 +136,7 @@ void Scene::Render()
             // レンダーステート設定
             dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
             dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
 
             gBuffer->Blit(dc);
         }
@@ -163,7 +162,7 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
-    cascadedShadowMap->ClearAndActivate(rc, 3/*cb_slot*/);
+    cascadedShadowMap->ClearAndActivate(rc);
     {
         // ゲームオブジェクトの影描画処理
         _actorManager.CastShadow(rc);
@@ -177,8 +176,8 @@ void Scene::Render()
 
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
-    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
-    modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4(0.0f,0.0f,0.0f,0.0f), 0.0f);
+    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(_APPLY_SHADOW_FRAME_INDEX);
+    modelAndShadowRenderFrame->ClearAndActivate(dc, _VECTOR4_ZERO, 0.0f);
     {
         // 影の描画
         // cascadedShadowMapにある深度情報から
@@ -195,9 +194,6 @@ void Scene::Render()
         dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-        // サンプラーステート設定
-        dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
-        dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
 
         cascadedShadowMap->Blit(dc,
             renderFrame->GetColorSRV().GetAddressOf(),
@@ -212,7 +208,7 @@ void Scene::Render()
     ID3D11ShaderResourceView* srv[] =
     {
         modelAndShadowRenderFrame->GetColorSRV().Get(),
-        modelAndShadowRenderFrame->GetDepthSRV().Get(),
+        renderFrame->GetDepthSRV().Get(),
     };
     PostProcessManager::Instance().ApplyEffect(rc, srv);
     // ポストエフェクトの処理終了

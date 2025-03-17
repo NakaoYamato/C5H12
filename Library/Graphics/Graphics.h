@@ -127,6 +127,7 @@ private:
 
 	// デバッグ用
 	bool _renderingDeferred = true;
+	bool _drawFrameBuffer = false;
 	bool _drawCSMGui = false;
 	bool _drawGBGui = false;
 private:

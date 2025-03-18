@@ -33,7 +33,10 @@ public:
         //   0.0312 - visible limit (slower)
         float edgeThresholdMin = 0.0833f;
 
-        DirectX::XMFLOAT3 dummy;
+        // 使用フラグ
+        float useFlag = 1.0f;
+
+        DirectX::XMFLOAT2 dummy;
     };
 public:
     FXAA(ID3D11Device* device, uint32_t width, uint32_t height) :

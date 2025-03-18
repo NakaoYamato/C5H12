@@ -1254,7 +1254,11 @@ FxaaFloat4 FxaaPixelShader(
     if( horzSpan) posM.y += pixelOffsetSubpix * lengthSign;
     #if (FXAA_DISCARD == 1)
         return FxaaTexTop(tex, posM);
-    #else
+#else
+    {
+        // TODO : ‚È‚ñ‚Å‚©‚í‚©‚ç‚ñ
+        return FxaaTexTop(tex, posM);
+    }
         return FxaaFloat4(FxaaTexTop(tex, posM).xyz, lumaM);
     #endif
 }

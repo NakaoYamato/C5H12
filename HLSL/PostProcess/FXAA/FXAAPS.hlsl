@@ -1,8 +1,10 @@
 #include "../../Sprite/Sprite.hlsli"
 #define FXAA_PC 1
 #define FXAA_HLSL_5 1
-#define FXAA_QUALITY__PRESET 12
-#define FXAA_GREEN_AS_LUMA 1
+//#define FXAA_GREEN_AS_LUMA 0
+//#define FXAA_DISCARD 1
+#define FXAA_QUALITY__PRESET 39
+//#define FXAA_GREEN_AS_LUMA 1
 #include "FXAA.hlsl"
 
 cbuffer CONSTANT_BUFFER : register(b1)
@@ -32,7 +34,10 @@ cbuffer CONSTANT_BUFFER : register(b1)
     //   0.0312 - visible limit (slower)
     float edgeThresholdMin;
     
-    float3 dummy;
+    // 使用フラグ
+    float useFlag;
+    
+    float2 dummy;
 }
 
 Texture2D texture0 : register(t0);
@@ -41,6 +46,9 @@ SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 float4 main(VsOut pin) : SV_TARGET
 {
+    if (!useFlag)
+        return texture0.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
+    
     FxaaTex InputFXAATex = { samplerStates[_LINEAR_CLAMP_SAMPLER_INDEX], texture0 };
     return FxaaPixelShader(
         pin.texcoord,                       // FxaaFloat2 pos,
@@ -60,5 +68,4 @@ float4 main(VsOut pin) : SV_TARGET
         0.0f, // FxaaFloat fxaaConsoleEdgeThresholdMin,
         FxaaFloat4(0.0f, 0.0f, 0.0f, 0.0f) // FxaaFloat fxaaConsole360ConstDir,
     );
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }

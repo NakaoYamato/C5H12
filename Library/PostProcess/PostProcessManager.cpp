@@ -120,6 +120,10 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
+	// アンチエイリアス
+	PostProcessBase* fxaaPP = GetPostProcess(PostProcessType::FXAAPP);
+	fxaaPP->Render(dc, &colorSRV, 0, 1);
+
 #ifdef _USE_DOF
 	// 被写体深度用ぼかし作成
 	PostProcessBase* dofGradationPP = GetPostProcess(PostProcessType::DepthOfFieldGradationPP);
@@ -129,7 +133,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	{
 		ID3D11ShaderResourceView* srv[] =
 		{
-			colorSRV, depthSRV, dofGradationPP->GetColorSRV().Get()
+			fxaaPP->GetColorSRV().Get(), depthSRV, dofGradationPP->GetColorSRV().Get()
 		};
 		dofPP->Render(dc, srv, 0, _countof(srv));
 	}
@@ -140,7 +144,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 #ifdef _USE_DOF
 	glowPP->Render(dc, dofPP->GetColorSRV().GetAddressOf(), 0, 1);
 #else
-	glowPP->Render(dc, &colorSRV, 0, 1);
+	glowPP->Render(dc, fxaaPP->GetColorSRV().GetAddressOf(), 0, 1);
 #endif
 
 	// ブルーム用ぼかし作成
@@ -156,7 +160,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 #ifdef _USE_DOF
 			dofPP->GetColorSRV().Get(), depthSRV,
 #else
-			colorSRV, depthSRV,
+			fxaaPP->GetColorSRV().Get(), depthSRV,
 #endif
 		};
 		robertsCrossPP->Render(dc, srv, 0, _countof(srv));
@@ -190,11 +194,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	PostProcessBase* finalPassPP = GetPostProcess(PostProcessType::FinalPassPP);
 	finalPassPP->Render(dc, _bloomRenderFrame->GetColorSRV().GetAddressOf(), 0, 1);
 
-	// アンチエイリアス
-	PostProcessBase* fxaaPP = GetPostProcess(PostProcessType::FXAAPP);
-	fxaaPP->Render(dc, finalPassPP->GetColorSRV().GetAddressOf(), 0, 1);
-
-	_appliedEffectSRV = fxaaPP->GetColorSRV();
+	_appliedEffectSRV = finalPassPP->GetColorSRV();
 }
 
 void PostProcessManager::DrawGui()

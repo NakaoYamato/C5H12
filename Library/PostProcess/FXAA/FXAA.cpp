@@ -4,6 +4,9 @@
 
 void FXAA::DrawGui()
 {
+	bool flag = _data.useFlag != 0.0f;
+	ImGui::Checkbox("use", &flag);
+	_data.useFlag = flag ? 1.0f : 0.0f;
 	ImGui::DragFloat("subpix", &_data.subpix, 0.01f, 0.0f, 1.0f);
 	ImGui::DragFloat("edgeThreshold", &_data.edgeThreshold, 0.01f, 0.0f, 1.0f);
 	ImGui::DragFloat("edgeThresholdMin", &_data.edgeThresholdMin, 0.01f, 0.0f, 1.0f);

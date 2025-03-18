@@ -2,10 +2,6 @@
 
 #include <imgui.h>
 
-void FinalPass::Update(float elapsedTime)
-{
-}
-
 void FinalPass::DrawGui()
 {
 	if (ImGui::TreeNode(u8"êFí≤ï‚ê≥"))

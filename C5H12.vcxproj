@@ -197,6 +197,7 @@
     <ClCompile Include="Library\PostProcess\DepthOfField\DepthOfField.cpp" />
     <ClCompile Include="Library\PostProcess\FinalPass\FinalPass.cpp" />
     <ClCompile Include="Library\PostProcess\FrameBuffer.cpp" />
+    <ClCompile Include="Library\PostProcess\FXAA\FXAA.cpp" />
     <ClCompile Include="Library\PostProcess\GaussianFilter\GaussianFilter.cpp" />
     <ClCompile Include="Library\PostProcess\GlowExtraction\GlowExtraction.cpp" />
     <ClCompile Include="Library\PostProcess\PostProcessBase.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="Library\PostProcess\DepthOfField\DepthOfField.h" />
     <ClInclude Include="Library\PostProcess\FinalPass\FinalPass.h" />
     <ClInclude Include="Library\PostProcess\FrameBuffer.h" />
+    <ClInclude Include="Library\PostProcess\FXAA\FXAA.h" />
     <ClInclude Include="Library\PostProcess\GaussianFilter\GaussianFilter.h" />
     <ClInclude Include="Library\PostProcess\GlowExtraction\GlowExtraction.h" />
     <ClInclude Include="Library\PostProcess\PostProcessBase.h" />
@@ -460,6 +462,15 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\DepthOfField\DepthOfFieldPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <None Include="HLSL\PostProcess\FXAA\FXAA.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <FxCompile Include="HLSL\PostProcess\FXAA\FXAAPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

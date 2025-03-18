@@ -11,8 +11,11 @@
 #include "../PostProcess/ChromaticAberration/ChromaticAberration.h"
 #include "../PostProcess/RobertsCross/RobertsCross.h"
 #include "../PostProcess/DepthOfField/DepthOfField.h"
+#include "../PostProcess/FXAA/FXAA.h"
 
 #include "FinalPass/FinalPass.h"
+
+//#define _USE_DOF
 
 void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32_t height)
 {
@@ -26,18 +29,18 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 	}
 	{
 		// ブルーム用ぼかし
-		_postProcesses[static_cast<int>(PostProcessType::BloomGaussianFilterPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::BloomGradationPP)].first =
 			std::make_unique<GaussianFilter>(device,
 				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGaussianFilterPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGradationPP)].second;
 		name = u8"ブルーム用ぼかし";
 	}
 	{
 		// 被写体深度用ぼかし
-		_postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].first =
+		_postProcesses[static_cast<int>(PostProcessType::DepthOfFieldGradationPP)].first =
 			std::make_unique<GaussianFilter>(device,
 				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::GaussianFilterPP)].second;
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::DepthOfFieldGradationPP)].second;
 		name = u8"被写体深度用ぼかし";
 	}
 	{
@@ -71,6 +74,14 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 				width, height);
 		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
 		name = u8"RobertsCross";
+	}
+	{
+		// アンチエイリアス
+		_postProcesses[static_cast<int>(PostProcessType::FXAAPP)].first =
+			std::make_unique<FXAA>(device,
+				width, height);
+		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::FXAAPP)].second;
+		name = u8"アンチエイリアス";
 	}
 	{
 		// 最終パス
@@ -109,8 +120,9 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
+#ifdef _USE_DOF
 	// 被写体深度用ぼかし作成
-	PostProcessBase* dofGradationPP = GetPostProcess(PostProcessType::GaussianFilterPP);
+	PostProcessBase* dofGradationPP = GetPostProcess(PostProcessType::DepthOfFieldGradationPP);
 	dofGradationPP->Render(dc, &colorSRV, 0, 1);
 	// 被写体深度
 	PostProcessBase* dofPP = GetPostProcess(PostProcessType::DepthOfFieldPP);
@@ -121,13 +133,18 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 		};
 		dofPP->Render(dc, srv, 0, _countof(srv));
 	}
+#endif
 
 	// 高輝度抽出
 	PostProcessBase* glowPP = GetPostProcess(PostProcessType::BloomGlowExtractionPP);
+#ifdef _USE_DOF
 	glowPP->Render(dc, dofPP->GetColorSRV().GetAddressOf(), 0, 1);
+#else
+	glowPP->Render(dc, &colorSRV, 0, 1);
+#endif
 
 	// ブルーム用ぼかし作成
-	PostProcessBase* bloomGradationPP = GetPostProcess(PostProcessType::BloomGaussianFilterPP);
+	PostProcessBase* bloomGradationPP = GetPostProcess(PostProcessType::BloomGradationPP);
 	bloomGradationPP->Render(dc, glowPP->GetColorSRV().GetAddressOf(), 0, 1);
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
@@ -136,7 +153,11 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	{
 		ID3D11ShaderResourceView* srv[] =
 		{
+#ifdef _USE_DOF
 			dofPP->GetColorSRV().Get(), depthSRV,
+#else
+			colorSRV, depthSRV,
+#endif
 		};
 		robertsCrossPP->Render(dc, srv, 0, _countof(srv));
 	}
@@ -169,7 +190,11 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	PostProcessBase* finalPassPP = GetPostProcess(PostProcessType::FinalPassPP);
 	finalPassPP->Render(dc, _bloomRenderFrame->GetColorSRV().GetAddressOf(), 0, 1);
 
-	_appliedEffectSRV = finalPassPP->GetColorSRV();
+	// アンチエイリアス
+	PostProcessBase* fxaaPP = GetPostProcess(PostProcessType::FXAAPP);
+	fxaaPP->Render(dc, finalPassPP->GetColorSRV().GetAddressOf(), 0, 1);
+
+	_appliedEffectSRV = fxaaPP->GetColorSRV();
 }
 
 void PostProcessManager::DrawGui()

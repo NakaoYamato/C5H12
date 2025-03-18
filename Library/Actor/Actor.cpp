@@ -152,7 +152,7 @@ void Actor::DelayedRender(const RenderContext& rc)
 // Gui•`‰æ
 void Actor::DrawGui()
 {
-	if (ImGui::CollapsingHeader("Flags", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Flags"))
 	{
 		ImGui::Checkbox(u8"Active", &_isActive);
 		ImGui::Checkbox(u8"Show", &_isShowing);

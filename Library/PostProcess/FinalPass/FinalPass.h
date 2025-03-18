@@ -39,9 +39,6 @@ public:
     };
     ~FinalPass()override {}
 
-    // 更新処理
-    void Update(float elapsedTime)override;
-
     // デバッグGui描画
     void DrawGui()override;
 

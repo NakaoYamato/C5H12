@@ -14,12 +14,16 @@
 enum class PostProcessType
 {
 	BloomGlowExtractionPP,
-	BloomGaussianFilterPP,
-	GaussianFilterPP,
+	BloomGradationPP,
+
+	DepthOfFieldGradationPP,
 	DepthOfFieldPP,
+
 	RadialBlurPP,
 	ChromaticAberrationPP,
 	RobertsCrossPP,
+
+	FXAAPP,
 
 	FinalPassPP,
 

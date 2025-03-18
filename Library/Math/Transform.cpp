@@ -68,9 +68,7 @@ void Transform::DrawGui()
     ImGui::DragFloat3("position", &_position.x, 0.1f);
     ImGui::DragFloat3("scale", &_scale.x, 0.1f);
     Vector3 degree = Vec3ConvertToDegrees(_angle);
-    ImGui::DragFloat(u8"XŽ²", &degree.x);
-    ImGui::DragFloat(u8"YŽ²", &degree.y);
-    ImGui::DragFloat(u8"ZŽ²", &degree.z);
+    ImGui::DragFloat3("angle", &degree.x);
     _angle = Vec3ConvertToRadians(degree);
     Vector3 wp = GetWorldPosition();
     ImGui::DragFloat3("world position", &wp.x, 0.1f);

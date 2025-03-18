@@ -250,7 +250,7 @@ void ActorManager::DrawGui()
 						// ダブルクリックで選択
 						if (ImGui::IsItemClicked())
 						{
-							_showGuiObjects[actor->GetName()] = true;
+							_showGuiObj = actor->GetName();
 						}
 
 						ImGui::TreePop();
@@ -264,46 +264,18 @@ void ActorManager::DrawGui()
 	ImGui::End();
 	ImGui::PopStyleColor();
 
-	// 選んでいるオブジェクトの削除用コンテナ
-	std::vector<std::string> eraseNames;
-	if (ImGui::Begin(u8"選択中のゲームオブジェクト"))
+	if (ImGui::Begin(u8"インスペクター"))
 	{
-		static ImGuiTabBarFlags tab_bar_flags =
-			ImGuiTabBarFlags_AutoSelectNewTabs |
-			ImGuiTabBarFlags_Reorderable |
-			ImGuiTabBarFlags_FittingPolicyResizeDown;
-		if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+		// 選んでいるオブジェクトのGUI描画
+		Actor* object = FindByName(_showGuiObj).get();
+		if (object)
 		{
-			// 選んでいるオブジェクトのGUI描画
-			for (auto& [name, showGui] : _showGuiObjects)
-			{
-				if (showGui == false)
-				{
-					eraseNames.push_back(name);
-					continue;
-				}
+			ImGui::Text(_showGuiObj.c_str());
 
-				Actor* object = FindByName(name).get();
-				if (object)
-				{
-					if (ImGui::BeginTabItem(name.c_str(), &showGui))
-					{
-						object->DrawGui();
-
-						ImGui::EndTabItem();
-					}
-				}
-			}
-			ImGui::EndTabBar();
+			object->DrawGui();
 		}
 	}
 	ImGui::End();
-
-	// 選んでいるオブジェクトの削除
-	for (auto& name : eraseNames)
-	{
-		_showGuiObjects.erase(name);
-	}
 }
 
 /// 指定要素の取得

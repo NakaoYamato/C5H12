@@ -125,7 +125,7 @@ private:
 	std::set<std::shared_ptr<Actor>> _removeActors;
 
 	// GUIで選択しているオブジェクト
-	std::unordered_map<std::string, bool> _showGuiObjects;
+	std::string _showGuiObj = "";
 
 	std::pair<float, float> _gameSpeeds[static_cast<size_t>(ActorTag::ActorTagMax)];
 };

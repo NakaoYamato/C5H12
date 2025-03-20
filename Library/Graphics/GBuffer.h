@@ -13,6 +13,8 @@ static constexpr UINT GBUFFER_RTV_COUNT = 4;
 // DirectX11で同時に登録できるレンダーターゲットの上限
 static constexpr UINT MAX_GBUFFER_COUNT = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
+static constexpr UINT GBUFFER_NORMAL_MAP_INDEX = 1;
+
 class GBuffer
 {
 public:

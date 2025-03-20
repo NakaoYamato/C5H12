@@ -83,18 +83,18 @@ GaussianFilter::GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t he
 void GaussianFilter::Render(ID3D11DeviceContext* immediateContext, 
 	ID3D11ShaderResourceView** shaderResourceView, uint32_t startSlot, uint32_t numViews)
 {
-	ID3D11ShaderResourceView* null_shader_resource_view{};
-	ID3D11ShaderResourceView* cached_shader_resource_views[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
-	immediateContext->PSGetShaderResources(0, DownSampledCount, cached_shader_resource_views);
+	ID3D11ShaderResourceView* nullSRV{};
+	ID3D11ShaderResourceView* cachedSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
+	immediateContext->PSGetShaderResources(0, DownSampledCount, cachedSRV);
 	// 現在設定しているステートを取得
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  cached_depth_stencil_state;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>  cached_rasterizer_state;
-	Microsoft::WRL::ComPtr<ID3D11BlendState>  cached_blend_state;
-	FLOAT blend_factor[4];
-	UINT sample_mask;
-	immediateContext->OMGetDepthStencilState(cached_depth_stencil_state.GetAddressOf(), 0);
-	immediateContext->RSGetState(cached_rasterizer_state.GetAddressOf());
-	immediateContext->OMGetBlendState(cached_blend_state.GetAddressOf(), blend_factor, &sample_mask);
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  cachedDSS;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState>  cachedRS;
+	Microsoft::WRL::ComPtr<ID3D11BlendState>  cachedBS;
+	FLOAT blendFactor[4];
+	UINT sampleMask;
+	immediateContext->OMGetDepthStencilState(cachedDSS.GetAddressOf(), 0);
+	immediateContext->RSGetState(cachedRS.GetAddressOf());
+	immediateContext->OMGetBlendState(cachedBS.GetAddressOf(), blendFactor, &sampleMask);
 
 	// ブルーム用ステート設定
 	immediateContext->OMSetDepthStencilState(_depthStencilState.Get(), 0);
@@ -116,7 +116,7 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 	_fullscreenQuad->Blit(immediateContext, shaderResourceView, 0, 1,
 		_pixelShaders[PIXEL_SHADER_TYPE::DOWNSAMPLING_PS].Get());
 	_pingPongFrameBuffer[0][0]->Deactivate(immediateContext);
-	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+	immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
 	// Ping-pong gaussian blur
 	_pingPongFrameBuffer[0][1]->Clear(immediateContext, { 0, 0, 0, 1 });
@@ -124,14 +124,14 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 	_fullscreenQuad->Blit(immediateContext, _pingPongFrameBuffer[0][0]->GetColorSRV().GetAddressOf(), 0, 1,
 		_pixelShaders[PIXEL_SHADER_TYPE::HORIZONTAL_PS].Get());
 	_pingPongFrameBuffer[0][1]->Deactivate(immediateContext);
-	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+	immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
 	_pingPongFrameBuffer[0][0]->Clear(immediateContext, { 0, 0, 0, 1 });
 	_pingPongFrameBuffer[0][0]->Activate(immediateContext);
 	_fullscreenQuad->Blit(immediateContext, _pingPongFrameBuffer[0][1]->GetColorSRV().GetAddressOf(), 0, 1,
 		_pixelShaders[PIXEL_SHADER_TYPE::VERTICAL_PS].Get());
 	_pingPongFrameBuffer[0][0]->Deactivate(immediateContext);
-	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+	immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
 	for (size_t downsampledIndex = 1; downsampledIndex < DownSampledCount; ++downsampledIndex)
 	{
@@ -141,7 +141,7 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 		_fullscreenQuad->Blit(immediateContext, _pingPongFrameBuffer[downsampledIndex - 1][0]->GetColorSRV().GetAddressOf(), 0, 1,
 			_pixelShaders[PIXEL_SHADER_TYPE::DOWNSAMPLING_PS].Get());
 		_pingPongFrameBuffer[downsampledIndex][0]->Deactivate(immediateContext);
-		immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+		immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
 		// Ping-pong gaussian blur
 		_pingPongFrameBuffer[downsampledIndex][1]->Activate(immediateContext);
@@ -149,14 +149,14 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 		_fullscreenQuad->Blit(immediateContext, _pingPongFrameBuffer[downsampledIndex][0]->GetColorSRV().GetAddressOf(), 0, 1,
 			_pixelShaders[PIXEL_SHADER_TYPE::HORIZONTAL_PS].Get());
 		_pingPongFrameBuffer[downsampledIndex][1]->Deactivate(immediateContext);
-		immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+		immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
 		_pingPongFrameBuffer[downsampledIndex][0]->Clear(immediateContext, { 0, 0, 0, 1 });
 		_pingPongFrameBuffer[downsampledIndex][0]->Activate(immediateContext);
 		_fullscreenQuad->Blit(immediateContext, _pingPongFrameBuffer[downsampledIndex][1]->GetColorSRV().GetAddressOf(), 0, 1,
 			_pixelShaders[PIXEL_SHADER_TYPE::VERTICAL_PS].Get());
 		_pingPongFrameBuffer[downsampledIndex][0]->Deactivate(immediateContext);
-		immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+		immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 	}
 
 	// Upsampling
@@ -166,15 +166,15 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 		srvs.push_back(_pingPongFrameBuffer[downsampledIndex][0]->GetColorSRV().Get());
 	}
 	PostProcessBase::Render(immediateContext, srvs.data(), 0, DownSampledCount);
-	immediateContext->PSSetShaderResources(0, 1, &null_shader_resource_view);
+	immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
 	// 変更したステートを元に戻す
-	immediateContext->OMSetDepthStencilState(cached_depth_stencil_state.Get(), 0);
-	immediateContext->RSSetState(cached_rasterizer_state.Get());
-	immediateContext->OMSetBlendState(cached_blend_state.Get(), blend_factor, sample_mask);
+	immediateContext->OMSetDepthStencilState(cachedDSS.Get(), 0);
+	immediateContext->RSSetState(cachedRS.Get());
+	immediateContext->OMSetBlendState(cachedBS.Get(), blendFactor, sampleMask);
 
-	immediateContext->PSSetShaderResources(0, DownSampledCount, cached_shader_resource_views);
-	for (ID3D11ShaderResourceView* cached_shader_resource_view : cached_shader_resource_views)
+	immediateContext->PSSetShaderResources(0, DownSampledCount, cachedSRV);
+	for (ID3D11ShaderResourceView* cached_shader_resource_view : cachedSRV)
 	{
 		if (cached_shader_resource_view) cached_shader_resource_view->Release();
 	}

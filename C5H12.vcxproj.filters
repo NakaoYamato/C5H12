@@ -234,6 +234,12 @@
     <ClCompile Include="Library\PostProcess\DepthOfField\DepthOfField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\PostProcess\FXAA\FXAA.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -488,6 +494,12 @@
     <ClInclude Include="Library\PostProcess\DepthOfField\DepthOfField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\PostProcess\FXAA\FXAA.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -511,6 +523,7 @@
     <None Include="HLSL\PostProcess\FinalPass\FilterFunctions.hlsli" />
     <None Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRendering.hlsli" />
     <None Include="HLSL\Define\SamplerStateDefine.hlsli" />
+    <None Include="HLSL\PostProcess\FXAA\FXAA.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -559,5 +572,7 @@
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingPS.hlsl" />
     <FxCompile Include="HLSL\GBuffer\PBRDeferredRenderingPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\DepthOfField\DepthOfFieldPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\FXAA\FXAAPS.hlsl" />
+    <FxCompile Include="HLSL\PostProcess\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl" />
   </ItemGroup>
 </Project>

@@ -13,17 +13,19 @@
 /// </summary>
 enum class PostProcessType
 {
-	BloomGlowExtractionPP,
-	BloomGradationPP,
+	ScreenSpaceReflectionPP,
+
+	FXAAPP,
 
 	DepthOfFieldGradationPP,
 	DepthOfFieldPP,
 
+	BloomGlowExtractionPP,
+	BloomGradationPP,
+
 	RadialBlurPP,
 	ChromaticAberrationPP,
 	RobertsCrossPP,
-
-	FXAAPP,
 
 	FinalPassPP,
 

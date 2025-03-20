@@ -12,85 +12,51 @@
 #include "../PostProcess/RobertsCross/RobertsCross.h"
 #include "../PostProcess/DepthOfField/DepthOfField.h"
 #include "../PostProcess/FXAA/FXAA.h"
+#include "../PostProcess/ScreenSpaceReflection/ScreenSpaceReflection.h"
 
 #include "FinalPass/FinalPass.h"
+
+#include "../../Library/Graphics/Graphics.h"
 
 //#define _USE_DOF
 
 void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32_t height)
 {
-	{
-		// ブルーム用高輝度抽出
-		_postProcesses[static_cast<int>(PostProcessType::BloomGlowExtractionPP)].first =
-			std::make_unique<GlowExtraction>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGlowExtractionPP)].second;
-		name = u8"ブルーム用高輝度抽出";
-	}
-	{
-		// ブルーム用ぼかし
-		_postProcesses[static_cast<int>(PostProcessType::BloomGradationPP)].first =
-			std::make_unique<GaussianFilter>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::BloomGradationPP)].second;
-		name = u8"ブルーム用ぼかし";
-	}
-	{
-		// 被写体深度用ぼかし
-		_postProcesses[static_cast<int>(PostProcessType::DepthOfFieldGradationPP)].first =
-			std::make_unique<GaussianFilter>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::DepthOfFieldGradationPP)].second;
-		name = u8"被写体深度用ぼかし";
-	}
-	{
-		// 被写体深度
-		_postProcesses[static_cast<int>(PostProcessType::DepthOfFieldPP)].first =
-			std::make_unique<DepthOfField>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::DepthOfFieldPP)].second;
-		name = u8"被写体深度";
-	}
-	{
-		// ラジアルブラー
-		_postProcesses[static_cast<int>(PostProcessType::RadialBlurPP)].first =
-			std::make_unique<RadialBlur>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RadialBlurPP)].second;
-		name = _TO_STRING_U8(RadialBlur);
-	}
-	{
-		// 色収差
-		_postProcesses[static_cast<int>(PostProcessType::ChromaticAberrationPP)].first =
-			std::make_unique<ChromaticAberration>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::ChromaticAberrationPP)].second;
-		name = u8"色収差";
-	}
-	{
-		// RobertsCross
-		_postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].first =
-			std::make_unique<RobertsCross>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::RobertsCrossPP)].second;
-		name = u8"RobertsCross";
-	}
-	{
-		// アンチエイリアス
-		_postProcesses[static_cast<int>(PostProcessType::FXAAPP)].first =
-			std::make_unique<FXAA>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::FXAAPP)].second;
-		name = u8"アンチエイリアス";
-	}
-	{
-		// 最終パス
-		_postProcesses[static_cast<int>(PostProcessType::FinalPassPP)].first =
-			std::make_unique<FinalPass>(device,
-				width, height);
-		auto& [name, flag] = _postProcesses[static_cast<int>(PostProcessType::FinalPassPP)].second;
-		name = _TO_STRING_U8(FinalPass);
-	}
+#define _CREATE_PP(className, type, guiName) \
+{\
+	_postProcesses[static_cast<int>(type)].first = std::make_unique<className>(device, width, height); \
+	auto& [name, flag] = _postProcesses[static_cast<int>(type)].second; \
+	name = guiName; \
+}
+	// SSR
+	_CREATE_PP(ScreenSpaceReflection, PostProcessType::ScreenSpaceReflectionPP, u8"SSR");
+
+	// アンチエイリアス
+	_CREATE_PP(FXAA, PostProcessType::FXAAPP, u8"アンチエイリアス");
+
+	// ブルーム用高輝度抽出
+	_CREATE_PP(GlowExtraction, PostProcessType::BloomGlowExtractionPP, u8"ブルーム用高輝度抽出");
+
+	// ブルーム用ぼかし
+	_CREATE_PP(GaussianFilter, PostProcessType::BloomGradationPP, u8"ブルーム用ぼかし");
+
+	// 被写体深度用ぼかし
+	_CREATE_PP(GaussianFilter, PostProcessType::DepthOfFieldGradationPP, u8"被写体深度用ぼかし");
+
+	// 被写体深度
+	_CREATE_PP(DepthOfField, PostProcessType::DepthOfFieldPP, u8"被写体深度");
+
+	// ラジアルブラー
+	_CREATE_PP(RadialBlur, PostProcessType::RadialBlurPP, _TO_STRING_U8(RadialBlur));
+
+	// 色収差
+	_CREATE_PP(ChromaticAberration, PostProcessType::ChromaticAberrationPP, u8"色収差");
+
+	// RobertsCross
+	_CREATE_PP(RobertsCross, PostProcessType::RobertsCrossPP, u8"RobertsCross");
+
+	// 最終パス
+	_CREATE_PP(FinalPass, PostProcessType::FinalPassPP, _TO_STRING_U8(FinalPass));
 
 	// ブルーム用
 	_bloomRenderFrame = std::make_unique<FrameBuffer>(device, width, height);
@@ -122,7 +88,24 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	// アンチエイリアス
 	PostProcessBase* fxaaPP = GetPostProcess(PostProcessType::FXAAPP);
-	fxaaPP->Render(dc, &colorSRV, 0, 1);
+	// デファードレンダリングを行っている時SSR
+	if (Graphics::Instance().RenderingDeferred())
+	{
+		PostProcessBase* ssrPP = GetPostProcess(PostProcessType::ScreenSpaceReflectionPP);
+		{
+			ID3D11ShaderResourceView* srv[] =
+			{
+				colorSRV, depthSRV, Graphics::Instance().GetGBuffer()->GetRenderTargetSRV(GBUFFER_NORMAL_MAP_INDEX).Get()
+			};
+			ssrPP->Render(dc, srv, 0, _countof(srv));
+		}
+		fxaaPP->Render(dc, ssrPP->GetColorSRV().GetAddressOf(), 0, 1);
+	}
+	else
+	{
+
+		fxaaPP->Render(dc, &colorSRV, 0, 1);
+	}
 
 #ifdef _USE_DOF
 	// 被写体深度用ぼかし作成

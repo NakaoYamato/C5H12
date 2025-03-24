@@ -9,7 +9,6 @@
 //#include "../Effekseer/EffectManager.h"
 #include "../Renderer/MeshRenderer.h"
 #include "../Renderer/PrimitiveRenderer.h"
-#include "../Renderer/ShapeRenderer.h"
 
 #include "../Scene/SceneManager.h"
 
@@ -155,7 +154,6 @@ bool Framework::Initialize() const
     // 各種レンダラー作成
     MeshRenderer::Initialize(Graphics::Instance().GetDevice());
     PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
-    ShapeRenderer::Initialize(Graphics::Instance().GetDevice());
 
     // ポストプロセス管理者初期化
     PostProcessManager::Instance().Initialize(Graphics::Instance().GetDevice(),

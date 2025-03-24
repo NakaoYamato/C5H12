@@ -6,7 +6,7 @@
 
 ModelRenderer::ModelRenderer(const char* filename)
 {
-	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
+	LoadModel(filename);
 }
 
 // 更新処理
@@ -84,4 +84,10 @@ void ModelRenderer::SetShader(std::string name)
 	this->_shaderName = name;
 	// パラメータのkye受け取り
 	_shaderParameter = MeshRenderer::GetShaderParameterKey(_renderType, _shaderName, Graphics::Instance().RenderingDeferred());
+}
+
+// モデルの読み込み
+void ModelRenderer::LoadModel(const char* filename)
+{
+	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
 }

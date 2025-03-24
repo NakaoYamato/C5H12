@@ -70,31 +70,29 @@ struct InstancingDrawInfo
 namespace MeshRenderer
 {
 	// 定数バッファのデータ
-	// サイズが大きいので関数内で定義するとスタック警告がでるため静的に確保
-	DynamicBoneCB		cbDynamicSkeleton_{};
-	StaticBoneCB		cbStaticSkeleton_{};
-	InstancingModelCB	cbInstancingSkeleton_{};
+	// サイズが大きいく関数内で定義するとスタック警告がでるため静的に確保
+	DynamicBoneCB		_cbDynamicSkeleton{};
+	StaticBoneCB		_cbStaticSkeleton{};
+	InstancingModelCB	_cbInstancingSkeleton{};
 
 	// シェーダーの配列
 	using ShaderMap = std::unordered_map<std::string, std::unique_ptr<ShaderBase>>;
-	ShaderMap deferredShaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
-	ShaderMap forwardShaders_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
-	std::unique_ptr<ShaderBase> cascadedSMShader_[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
+	ShaderMap _deferredShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
+	ShaderMap _forwardShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
+	std::unique_ptr<ShaderBase> _cascadedSMShader[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
 	// 各モデルタイプのInfo
 	using DrawInfoMap = std::unordered_map<std::string, std::vector<DrawInfo>>;
 	using InstancingDrawInfoMap = std::unordered_map<Model*, InstancingDrawInfo>;
-	DrawInfoMap                             dynamicInfomap_;
-	DrawInfoMap                             staticInfomap_;
-	//DrawInfoMap                             dynamicTransparencyInfomap_;
-	//DrawInfoMap                             staticTransparencyInfomap_;
-	std::vector<AlphaDrawInfo> alphaDrawInfomap_;
-	InstancingDrawInfoMap                   instancingInfoMap_;
+	DrawInfoMap                             _dynamicInfomap;
+	DrawInfoMap                             _staticInfomap;
+	std::vector<AlphaDrawInfo>				_alphaDrawInfomap;
+	InstancingDrawInfoMap                   _instancingInfoMap;
 
 	// 各定数バッファ
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	dynamicBoneCB_;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	staticBoneCB_;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	instancingCB_;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	_dynamicBoneCB;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	_staticBoneCB;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	_instancingCB;
 
 	namespace Helper
 	{
@@ -103,8 +101,8 @@ namespace MeshRenderer
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, instancingCB_.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, instancingCB_.GetAddressOf());
+			dc->VSSetConstantBuffers(1, 1, _instancingCB.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, _instancingCB.GetAddressOf());
 
 			// モデルの描画関数
 			auto DrawModel = [&](Model* model, InstancingDrawInfo& drawInfo, ShaderBase* shader)->void
@@ -127,11 +125,11 @@ namespace MeshRenderer
 						size_t modelCount = 0;
 						for (auto& [color, world] : drawInfo.modelParameters)
 						{
-							cbInstancingSkeleton_.materialColor[modelCount] = color;
-							cbInstancingSkeleton_.world[modelCount] = world;
+							_cbInstancingSkeleton.materialColor[modelCount] = color;
+							_cbInstancingSkeleton.world[modelCount] = world;
 							modelCount++;
 						}
-						dc->UpdateSubresource(instancingCB_.Get(), 0, 0, &cbInstancingSkeleton_, 0, 0);
+						dc->UpdateSubresource(_instancingCB.Get(), 0, 0, &_cbInstancingSkeleton, 0, 0);
 
 						// シェーダーの更新処理
 						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
@@ -141,19 +139,19 @@ namespace MeshRenderer
 				};
 
 			// 不透明描画処理
-			for (auto& drawInfomap : instancingInfoMap_)
+			for (auto& drawInfomap : _instancingInfoMap)
 			{
 				Model* model = drawInfomap.first;
 				InstancingDrawInfo& drawInfo = drawInfomap.second;
 
-				ShaderBase* shader = deferredShaders_[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderId].get();
+				ShaderBase* shader = _deferredShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderId].get();
 				shader->Begin(rc);
 
 				DrawModel(model, drawInfo, shader);
 
 				shader->End(rc);
 			}
-			instancingInfoMap_.clear();
+			_instancingInfoMap.clear();
 		}
 
 		// DynamicBoneModelのメッシュ描画
@@ -182,16 +180,16 @@ namespace MeshRenderer
 					DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
 					DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
 					DirectX::XMMATRIX Bone = Offset * World;
-					DirectX::XMStoreFloat4x4(&cbDynamicSkeleton_.boneTransforms[i], Bone);
+					DirectX::XMStoreFloat4x4(&_cbDynamicSkeleton.boneTransforms[i], Bone);
 				}
 			}
 			else
 			{
-				cbDynamicSkeleton_.boneTransforms[0] = nodes[mesh->nodeIndex].worldTransform;
+				_cbDynamicSkeleton.boneTransforms[0] = nodes[mesh->nodeIndex].worldTransform;
 			}
-			cbDynamicSkeleton_.materialColor = materialColor;
+			_cbDynamicSkeleton.materialColor = materialColor;
 
-			dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
+			dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);
 
 			// シェーダーの更新処理
 			shader->Update(rc, &model->GetResource()->GetMaterials().at(mesh->materialIndex), parameter);
@@ -218,9 +216,9 @@ namespace MeshRenderer
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			// スケルトン用定数バッファ
-			cbStaticSkeleton_.world = nodes[mesh->nodeIndex].worldTransform;
-			cbStaticSkeleton_.materialColor = materialColor;
-			dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
+			_cbStaticSkeleton.world = nodes[mesh->nodeIndex].worldTransform;
+			_cbStaticSkeleton.materialColor = materialColor;
+			dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
 
 			// シェーダーの更新処理
 			shader->Update(rc, &resource->GetMaterials().at(mesh->materialIndex), parameter);
@@ -235,17 +233,17 @@ namespace MeshRenderer
 		GpuResourceManager::CreateConstantBuffer(
 			device,
 			sizeof(DynamicBoneCB),
-			dynamicBoneCB_.GetAddressOf());
+			_dynamicBoneCB.GetAddressOf());
 		// アニメーションなしモデル用定数バッファ
 		GpuResourceManager::CreateConstantBuffer(
 			device,
 			sizeof(StaticBoneCB),
-			staticBoneCB_.GetAddressOf());
+			_staticBoneCB.GetAddressOf());
 		// インスタンシングモデル用定数バッファ
 		GpuResourceManager::CreateConstantBuffer(
 			device,
 			sizeof(InstancingModelCB),
-			instancingCB_.GetAddressOf());
+			_instancingCB.GetAddressOf());
 
 		// インプットレイアウト
 		D3D11_INPUT_ELEMENT_DESC modelInputDesc[]
@@ -265,7 +263,7 @@ namespace MeshRenderer
 				{
 					// DynamicBoneModel
 					const size_t type = static_cast<int>(ModelRenderType::Dynamic);
-					ShaderMap& shaderMap = deferredShaders_[type];
+					ShaderMap& shaderMap = _deferredShaders[type];
 
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongVS.cso",
@@ -284,7 +282,7 @@ namespace MeshRenderer
 				{
 					// StaticBoneModel
 					const size_t type = static_cast<int>(ModelRenderType::Static);
-					ShaderMap& shaderMap = deferredShaders_[type];
+					ShaderMap& shaderMap = _deferredShaders[type];
 
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",
@@ -308,7 +306,7 @@ namespace MeshRenderer
 				{
 					// InstancingModel
 					const size_t type = static_cast<int>(ModelRenderType::Instancing);
-					ShaderMap& shaderMap = deferredShaders_[type];
+					ShaderMap& shaderMap = _deferredShaders[type];
 
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongInstancedVS.cso",
@@ -326,7 +324,7 @@ namespace MeshRenderer
 				{
 					// DynamicBoneModel
 					const size_t type = static_cast<int>(ModelRenderType::Dynamic);
-					ShaderMap& shaderMap = forwardShaders_[type];
+					ShaderMap& shaderMap = _forwardShaders[type];
 
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongVS.cso",
@@ -340,7 +338,7 @@ namespace MeshRenderer
 				{
 					// StaticBoneModel
 					const size_t type = static_cast<int>(ModelRenderType::Static);
-					ShaderMap& shaderMap = forwardShaders_[type];
+					ShaderMap& shaderMap = _forwardShaders[type];
 
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongBatchingVS.cso",
@@ -360,7 +358,7 @@ namespace MeshRenderer
 				{
 					// InstancingModel
 					const size_t type = static_cast<int>(ModelRenderType::Instancing);
-					ShaderMap& shaderMap = forwardShaders_[type];
+					ShaderMap& shaderMap = _forwardShaders[type];
 
 					shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 						"./Data/Shader/PhongInstancedVS.cso",
@@ -370,15 +368,15 @@ namespace MeshRenderer
 			}
 
 			// カスケードシャドウマップ用
-			cascadedSMShader_[static_cast<int>(ModelRenderType::Dynamic)] = 
+			_cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)] = 
 				std::make_unique<CascadedShadowMapShader>(device,
 					"./Data/Shader/CascadedShadowVS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-			cascadedSMShader_[static_cast<int>(ModelRenderType::Static)] = 
+			_cascadedSMShader[static_cast<int>(ModelRenderType::Static)] = 
 				std::make_unique<CascadedShadowMapShader>(device,
 					"./Data/Shader/CascadedShadowBatchingVS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-			cascadedSMShader_[static_cast<int>(ModelRenderType::Instancing)] =
+			_cascadedSMShader[static_cast<int>(ModelRenderType::Instancing)] =
 				std::make_unique<CascadedShadowMapShader>(device,
 					"./Data/Shader/CascadedShadowInstancedVS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
@@ -399,15 +397,15 @@ namespace MeshRenderer
 		{
 		case ModelRenderType::Dynamic:
 			if (color.w < 1.0f || alpha < 1.0f)
-				alphaDrawInfomap_.push_back({ model, mesh, color, parameter, shaderId, renderType, 0.0f });
+				_alphaDrawInfomap.push_back({ model, mesh, color, parameter, shaderId, renderType, 0.0f });
 			else
-				dynamicInfomap_[shaderId].push_back({ model, mesh, color, parameter });
+				_dynamicInfomap[shaderId].push_back({ model, mesh, color, parameter });
 			break;
 		case ModelRenderType::Static:
 			if (color.w < 1.0f || alpha < 1.0f)
-				alphaDrawInfomap_.push_back({ model, mesh, color, parameter,shaderId, renderType, 0.0f });
+				_alphaDrawInfomap.push_back({ model, mesh, color, parameter,shaderId, renderType, 0.0f });
 			else
-				staticInfomap_[shaderId].push_back({ model, mesh, color, parameter });
+				_staticInfomap[shaderId].push_back({ model, mesh, color, parameter });
 			break;
 		case ModelRenderType::Instancing:
 			assert(!"Please Call \"DrawInstancing\"");
@@ -425,10 +423,10 @@ namespace MeshRenderer
 		ShaderBase::Parameter* parameter)
 	{
 		// 過去に登録しているか確認
-		auto iter = instancingInfoMap_.find(model);
+		auto iter = _instancingInfoMap.find(model);
 
 		InstancingDrawInfo::ModelParameter modelParameter{ color, world };
-		if (iter != instancingInfoMap_.end())
+		if (iter != _instancingInfoMap.end())
 		{
 			// 既に登録している場合はパラメータを追加
 			(*iter).second.modelParameters.push_back(modelParameter);
@@ -436,9 +434,9 @@ namespace MeshRenderer
 		else
 		{
 			// ない場合は新規で登録
-			instancingInfoMap_[model].parameter = parameter;
-			instancingInfoMap_[model].shaderId = shaderId;
-			instancingInfoMap_[model].modelParameters.push_back(modelParameter);
+			_instancingInfoMap[model].parameter = parameter;
+			_instancingInfoMap[model].shaderId = shaderId;
+			_instancingInfoMap[model].modelParameters.push_back(modelParameter);
 		}
 	}
 
@@ -464,17 +462,17 @@ namespace MeshRenderer
 		else
 			dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
-		auto shaders = writeGBuffer ? deferredShaders_ : forwardShaders_;
+		auto shaders = writeGBuffer ? _deferredShaders : _forwardShaders;
 
 		// ボーンの影響度があるモデルの描画
 		{
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-			dc->GSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+			dc->VSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+			dc->GSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
 
 			// 不透明描画処理
-			for (auto& drawInfomap : dynamicInfomap_)
+			for (auto& drawInfomap : _dynamicInfomap)
 			{
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
 				assert(shader/*shadersに含まれないshaderを参照した*/);
@@ -488,19 +486,19 @@ namespace MeshRenderer
 
 				shader->End(rc);
 			}
-			dynamicInfomap_.clear();
+			_dynamicInfomap.clear();
 		}
 
 		// ボーンの影響度がないモデルの描画
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-			dc->GSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+			dc->VSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+			dc->GSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
 
 			// 不透明描画処理
-			for (auto& drawInfomap : staticInfomap_)
+			for (auto& drawInfomap : _staticInfomap)
 			{
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
 				assert(shader/*shadersに含まれないshaderを参照した*/);
@@ -514,7 +512,7 @@ namespace MeshRenderer
 
 				shader->End(rc);
 			}
-			staticInfomap_.clear();
+			_staticInfomap.clear();
 		}
 
 		// インスタンシングモデルの描画
@@ -543,7 +541,7 @@ namespace MeshRenderer
 		// カメラ距離でソート
 		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye);
 		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front);
-		for (auto& drawInfo : alphaDrawInfomap_)
+		for (auto& drawInfo : _alphaDrawInfomap)
 		{
 			const std::vector<ModelResource::Node>& nodes = drawInfo.model->GetPoseNodes();
 			const ModelResource::Mesh* mesh = drawInfo.mesh;
@@ -555,24 +553,24 @@ namespace MeshRenderer
 			DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
 			drawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
 		}
-		std::sort(alphaDrawInfomap_.begin(), alphaDrawInfomap_.end(),
+		std::sort(_alphaDrawInfomap.begin(), _alphaDrawInfomap.end(),
 			[](const AlphaDrawInfo& lhs, const AlphaDrawInfo& rhs)
 			{
 				return lhs.distance > rhs.distance;
 			});
 
-		auto shaders = forwardShaders_;
+		auto shaders = _forwardShaders;
 
-		for (auto& drawInfo : alphaDrawInfomap_)
+		for (auto& drawInfo : _alphaDrawInfomap)
 		{
 			switch (drawInfo.renderType)
 			{
 			case ModelRenderType::Dynamic:
 			{
 				// 定数バッファ設定
-				dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-				dc->GSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-				dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+				dc->VSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+				dc->GSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+				dc->PSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
 
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfo.shaderID].get();
 				assert(shader/*shadersに含まれないshaderを参照した*/);
@@ -587,9 +585,9 @@ namespace MeshRenderer
 			case ModelRenderType::Static:
 			{
 				// 定数バッファ設定
-				dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-				dc->GSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-				dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+				dc->VSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+				dc->GSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+				dc->PSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
 
 				ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfo.shaderID].get();
 				assert(shader/*shadersに含まれないshaderを参照した*/);
@@ -603,7 +601,7 @@ namespace MeshRenderer
 			}
 			}
 		}
-		alphaDrawInfomap_.clear();
+		_alphaDrawInfomap.clear();
 	}
 
 	/// 影描画実行
@@ -627,13 +625,13 @@ namespace MeshRenderer
 		// ボーンの影響度があるモデルの描画
 		{
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, dynamicBoneCB_.GetAddressOf());
+			dc->VSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
 
 			// 不透明描画処理
-			ShaderBase* shader = cascadedSMShader_[static_cast<int>(ModelRenderType::Dynamic)].get();
+			ShaderBase* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)].get();
 			shader->Begin(rc);
-			for (auto& drawInfomap : dynamicInfomap_)
+			for (auto& drawInfomap : _dynamicInfomap)
 			{
 				for (auto& drawInfo : drawInfomap.second)
 				{
@@ -659,16 +657,16 @@ namespace MeshRenderer
 								DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
 								DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
 								DirectX::XMMATRIX Bone = Offset * World;
-								DirectX::XMStoreFloat4x4(&cbDynamicSkeleton_.boneTransforms[i], Bone);
+								DirectX::XMStoreFloat4x4(&_cbDynamicSkeleton.boneTransforms[i], Bone);
 							}
 						}
 						else
 						{
-							cbDynamicSkeleton_.boneTransforms[0] = nodes[mesh.nodeIndex].worldTransform;
+							_cbDynamicSkeleton.boneTransforms[0] = nodes[mesh.nodeIndex].worldTransform;
 						}
-						cbDynamicSkeleton_.materialColor = color;
+						_cbDynamicSkeleton.materialColor = color;
 
-						dc->UpdateSubresource(dynamicBoneCB_.Get(), 0, 0, &cbDynamicSkeleton_, 0, 0);
+						dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);
 
 						// シェーダーの更新処理
 						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
@@ -678,20 +676,20 @@ namespace MeshRenderer
 				}
 			}
 			shader->End(rc);
-			dynamicInfomap_.clear();
+			_dynamicInfomap.clear();
 		}
 
 		// ボーンの影響度がないモデルの描画
 		{
 			ID3D11DeviceContext* dc = rc.deviceContext;
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, staticBoneCB_.GetAddressOf());
+			dc->VSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+			dc->PSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
 
 			// 不透明描画処理
-			ShaderBase* shader = cascadedSMShader_[static_cast<int>(ModelRenderType::Static)].get();
+			ShaderBase* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Static)].get();
 			shader->Begin(rc);
-			for (auto& drawInfomap : staticInfomap_)
+			for (auto& drawInfomap : _staticInfomap)
 			{
 				for (auto& drawInfo : drawInfomap.second)
 				{
@@ -709,9 +707,9 @@ namespace MeshRenderer
 						dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 						// スケルトン用定数バッファ
-						cbStaticSkeleton_.world = nodes[mesh.nodeIndex].worldTransform;
-						cbStaticSkeleton_.materialColor = color;
-						dc->UpdateSubresource(staticBoneCB_.Get(), 0, 0, &cbStaticSkeleton_, 0, 0);
+						_cbStaticSkeleton.world = nodes[mesh.nodeIndex].worldTransform;
+						_cbStaticSkeleton.materialColor = color;
+						dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
 
 						// シェーダーの更新処理
 						shader->Update(rc, &resource->GetMaterials().at(mesh.materialIndex), drawInfo.parameter);
@@ -721,7 +719,7 @@ namespace MeshRenderer
 				}
 			}
 			shader->End(rc);
-			staticInfomap_.clear();
+			_staticInfomap.clear();
 		}
 
 		// インスタンシングモデルの描画
@@ -734,14 +732,14 @@ namespace MeshRenderer
 		std::vector<const char*> shaderNames;
 		if (deferred)
 		{
-			for (auto& [name, shader] : deferredShaders_[static_cast<int>(type)])
+			for (auto& [name, shader] : _deferredShaders[static_cast<int>(type)])
 			{
 				shaderNames.push_back(name.c_str());
 			}
 		}
 		else
 		{
-			for (auto& [name, shader] : forwardShaders_[static_cast<int>(type)])
+			for (auto& [name, shader] : _forwardShaders[static_cast<int>(type)])
 			{
 				shaderNames.push_back(name.c_str());
 			}
@@ -753,11 +751,11 @@ namespace MeshRenderer
 	{
 		if (deferred)
 		{
-			return deferredShaders_[static_cast<int>(type)][key]->GetParameterKey();
+			return _deferredShaders[static_cast<int>(type)][key]->GetParameterKey();
 		}
 		else
 		{
-			return forwardShaders_[static_cast<int>(type)][key]->GetParameterKey();
+			return _forwardShaders[static_cast<int>(type)][key]->GetParameterKey();
 		}
 	}
 }

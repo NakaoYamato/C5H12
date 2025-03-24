@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "ModelRenderer.h"
 
 enum class ShapeType
 {
@@ -11,32 +11,31 @@ enum class ShapeType
 	ShapeTypeMax,
 };
 
-class ShapeController : public Component
+class ShapeController : public ModelRenderer
 {
 public:
-	ShapeController(ShapeType type = ShapeType::Box) : _type(type){}
+	ShapeController(ShapeType type = ShapeType::Box) : 
+		ModelRenderer(GetShapeModelFilename(type)),
+		_type(type){}
 	~ShapeController()override {}
 
 	// 名前取得
 	const char* GetName()const { return "ShapeController"; }
 
-	// 描画処理
-	void Render(const RenderContext& rc) override;
-
-	// 影描画
-	void CastShadow(const RenderContext& rc) override;
-
 	// GUI描画
 	void DrawGui() override;
 
+#pragma region アクセサ
 	ShapeType GetType()const { return _type; }
-	const Vector4& GetColor()const { return _color; }
 
 	void SetType(ShapeType type) { this->_type = type; }
-	void SetColor(const Vector4& color) { this->_color = color; }
+#pragma endregion
+private:
+	// タイプに合わせたモデルのファイルパス取得
+	const char* GetShapeModelFilename(ShapeType type) const;
+
 private:
 	ShapeType _type;
-	Vector4 _color = _VECTOR4_WHITE;
 	float _radius = 0.5f;
 	float _height = 1.0f;
 };

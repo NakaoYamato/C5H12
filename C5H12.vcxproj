@@ -207,7 +207,6 @@
     <ClCompile Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.cpp" />
     <ClCompile Include="Library\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
-    <ClCompile Include="Library\Renderer\ShapeRenderer.cpp" />
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp" />
     <ClCompile Include="Library\Resource\ModelResource.cpp" />
@@ -293,7 +292,6 @@
     <ClInclude Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.h" />
     <ClInclude Include="Library\Renderer\MeshRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
-    <ClInclude Include="Library\Renderer\ShapeRenderer.h" />
     <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />
     <ClInclude Include="Library\ResourceManager\ModelResourceManager.h" />
     <ClInclude Include="Library\Resource\ModelResource.h" />

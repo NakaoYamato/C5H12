@@ -7,7 +7,6 @@
 
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/PrimitiveRenderer.h"
-#include "../../Library/Renderer/ShapeRenderer.h"
 
 // 初期化
 void Scene::Initialize()
@@ -148,9 +147,6 @@ void Scene::Render()
 
         // モデルの描画
         MeshRenderer::RenderAlpha(rc);
-
-        // シェイプ描画
-        ShapeRenderer::Render(dc, rc.camera->view, rc.camera->projection);
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->view, rc.camera->projection);

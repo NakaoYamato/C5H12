@@ -33,7 +33,7 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
-	// アクセサ
+#pragma region アクセサ
 	Model* GetModel() { return _model.get(); }
 	const ShaderBase::Parameter& GetShaderParameter()const { return _shaderParameter; }
 	const ShaderBase::Parameter& GetShadowParameter()const { return _shadowParameter; }
@@ -46,6 +46,10 @@ public:
 	void SetShader(std::string name);
 	void SetRenderType(ModelRenderType type) { this->_renderType = type; }
 	void SetColor(const Vector4& c) { this->_color = c; }
+#pragma endregion
+protected:
+	// モデルの読み込み
+	void LoadModel(const char* filename);
 
 private:
 	std::unique_ptr<Model> _model;

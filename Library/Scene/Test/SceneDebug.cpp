@@ -82,7 +82,7 @@ void SceneDebug::Initialize()
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
     }
     {
-        //auto box = actorManager.Register("box", ActorTag::Player);
-        //auto boxC = box->AddComponent<ShapeController>();
+        auto box = RegisterActor<Actor>("box", ActorTag::Player);
+        auto boxC = box->AddComponent<ShapeController>();
     }
 }

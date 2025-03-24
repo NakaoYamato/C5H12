@@ -389,20 +389,20 @@ namespace MeshRenderer
 		const Vector4& color, 
 		std::string shaderId,
 		ModelRenderType renderType,
+		BlendType blendType,
 		ShaderBase::Parameter* parameter)
 	{
-		const float alpha = model->GetResource()->GetMaterials().at(mesh->materialIndex).colors.at("Diffuse").w;
 		// •`‰æƒ^ƒCƒv‚É‰ž‚¶‚Ä“o˜^
 		switch (renderType)
 		{
 		case ModelRenderType::Dynamic:
-			if (color.w < 1.0f || alpha < 1.0f)
+			if (blendType == BlendType::Alpha)
 				_alphaDrawInfomap.push_back({ model, mesh, color, parameter, shaderId, renderType, 0.0f });
 			else
 				_dynamicInfomap[shaderId].push_back({ model, mesh, color, parameter });
 			break;
 		case ModelRenderType::Static:
-			if (color.w < 1.0f || alpha < 1.0f)
+			if (blendType == BlendType::Alpha)
 				_alphaDrawInfomap.push_back({ model, mesh, color, parameter,shaderId, renderType, 0.0f });
 			else
 				_staticInfomap[shaderId].push_back({ model, mesh, color, parameter });

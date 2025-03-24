@@ -57,5 +57,6 @@ private:
 	ShaderBase::Parameter _shadowParameter;
 	std::string _shaderName = "PBR";
 	ModelRenderType _renderType = ModelRenderType::Dynamic;
+	BlendType _blendType = BlendType::Opaque;
 	Vector4 _color{ 1,1,1,1 };
 };

@@ -29,6 +29,22 @@ float roughness)
     output.emissiveColor.a = roughness;
     return output;
 }
+
+// デザリング
+void Dithering(float2 position, float alpha)
+{
+    static const int dither_pattern[16] =
+    {
+             0, 8, 2, 10,
+            12, 4, 14, 6,
+             3, 11, 1, 9,
+            15, 7, 13, 5
+    };
+    uint x = ((uint) position.x) % 4;
+    uint y = ((uint) position.y) % 4;
+    float dither = (float) dither_pattern[x + y * 4] / 16.0f;
+    clip(alpha - dither);
+}
 // 書き込み用
 //------------------------------------------------------
 

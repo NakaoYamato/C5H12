@@ -18,7 +18,9 @@ PS_GB_OUT main(VS_OUT pin)
         sampled.rgb = pow(sampled.rgb, _GAMMA_FACTOR);
         baseColor *= sampled;
     }
-	
+    // デザリング
+    Dithering(pin.position.xy, baseColor.a);
+    
 	//	自己発光色取得
     float3 emissiveColor = textureMaps[EMISSIVE_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
     emissiveColor.rgb = pow(emissiveColor.rgb, _GAMMA_FACTOR);

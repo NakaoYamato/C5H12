@@ -22,7 +22,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, _model.get(), _color, _shaderName, _renderType, &_shaderParameter);
+		MeshRenderer::Draw(&mesh, _model.get(), _color, _shaderName, _renderType, _blendType, &_shaderParameter);
 	}
 }
 
@@ -33,7 +33,7 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, _model.get(), _VECTOR4_WHITE, "CascadedShadowMap", _renderType, &_shadowParameter);
+		MeshRenderer::Draw(&mesh, _model.get(), _VECTOR4_WHITE, "CascadedShadowMap", _renderType, BlendType::Opaque, &_shadowParameter);
 	}
 }
 
@@ -72,10 +72,20 @@ void ModelRenderer::DrawGui()
 	int rId = static_cast<int>(_renderType);
 	if (ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName)))
 	{
+		_renderType = static_cast<ModelRenderType>(rId);
 		// エラー防止のためPhongに変更
 		SetShader("Phong");
 	}
-	_renderType = static_cast<ModelRenderType>(rId);
+	static const char* blendTypeName[] =
+	{
+		u8"Opaque",
+		u8"Alpha",
+	};
+	int bId = static_cast<int>(_blendType);
+	if (ImGui::Combo(u8"ブレンドタイプ", &bId, blendTypeName, _countof(blendTypeName)))
+	{
+		_blendType = static_cast<BlendType>(bId);
+	}
 	_model->DrawGui();
 }
 

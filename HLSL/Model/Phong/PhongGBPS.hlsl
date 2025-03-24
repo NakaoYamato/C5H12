@@ -18,19 +18,8 @@ PS_GB_OUT main(VS_OUT pin)
 {
     float4 diffuseColor = diffuseMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Kd * pin.materialColor;
     // ƒfƒUƒŠƒ“ƒO
-    {
-        //static const int dither_pattern[16] =
-        //{
-        //    0, 8, 2, 10,
-        //    12, 4, 14, 6,
-        //     3, 11, 1, 9,
-        //    15, 7, 13, 5
-        //};
-        //uint x = ((uint) pin.position.x) % 4;
-        //uint y = ((uint) pin.position.y) % 4;
-        //float dither = (float) dither_pattern[x + y * 4] / 16.0f;
-        //clip(diffuseColor.a - dither);
-    }
+    Dithering(pin.position.xy, diffuseColor.a);
+    
     float4 emissiveColor = emissiveMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
     float4 specularColor = specularMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Ks.rgba;
     float3x3 mat =

@@ -8,7 +8,7 @@
 #include "../Shader/ShaderBase.h"
 
 /// <summary>
-/// 描画タイプ
+/// モデルタイプ
 /// </summary>
 enum class ModelRenderType
 {
@@ -17,6 +17,17 @@ enum class ModelRenderType
     Instancing,    // GPUインスタンシング使用
 
     ModelRenderTypeMax
+};
+
+/// <summary>
+/// ブレンドタイプ
+/// </summary>
+enum class BlendType
+{
+    Opaque,
+    Alpha,
+
+    BlendTypeMax
 };
 
 namespace MeshRenderer
@@ -36,6 +47,7 @@ namespace MeshRenderer
         const Vector4& color,
         std::string shaderId, 
         ModelRenderType renderType,
+        BlendType blendType,
         ShaderBase::Parameter* parameter);
 
     /// <summary>

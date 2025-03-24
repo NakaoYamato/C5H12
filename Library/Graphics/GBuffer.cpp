@@ -96,14 +96,32 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 
 	_textureSize.x = static_cast<float>(width);
 	_textureSize.y = static_cast<float>(height);
-	_fullscreenQuads[RenderingType::Phong] = std::make_unique<Sprite>(device,
+	_gbufferFullscreenQuads[RenderingType::Phong] = std::make_unique<Sprite>(device,
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/DeferredRenderingPS.cso");
-	_fullscreenQuads[RenderingType::PBR] = std::make_unique<Sprite>(device,
+	_gbufferFullscreenQuads[RenderingType::PBR] = std::make_unique<Sprite>(device,
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/PBRDeferredRenderingPS.cso");
+
+	_frameBuffer = std::make_unique<FrameBuffer>(device,
+		width, height);
+	_fullscreenQuad = std::make_unique<Sprite>(device,
+		L"",
+		"./Data/Shader/FullscreenQuadVS.cso",
+		"./Data/Shader/SpriteWithDepthPS.cso");
+
+	// SSR用変数初期化
+	_ssrFullscreenQuad = std::make_unique<Sprite>(device,
+		L"",
+		"./Data/Shader/FullscreenQuadVS.cso",
+		"./Data/Shader/ScreenSpaceReflectionPS.cso");
+
+	// 定数バッファ作成
+	(void)GpuResourceManager::CreateConstantBuffer(device,
+		sizeof(SSRConstants),
+		_ssrConstantBuffer.ReleaseAndGetAddressOf());
 }
 
 GBuffer::~GBuffer()
@@ -173,6 +191,15 @@ void GBuffer::DrawGui()
 			u8"PBR",
 		}; 
 		ImGui::Combo(u8"描画タイプ", &_renderingType, renderTypeName, _countof(renderTypeName));
+		ImGui::Checkbox(u8"SSR使用", &_useSSR);
+		if (_useSSR && ImGui::TreeNode(u8"SSRパラメータ"))
+		{
+			ImGui::DragFloat(u8"refrectionIntensity", &_ssrConstants.refrectionIntensity, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat(u8"maxDistance", &_ssrConstants.maxDistance, 0.1f);
+			ImGui::DragFloat(u8"resolution", &_ssrConstants.resolution, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat(u8"thickness", &_ssrConstants.thickness, 0.01f, 0.0f, 1.0f);
+			ImGui::TreePop();
+		}
 		static float sizeFactor = 0.3f;
 		ImGui::DragFloat("TextureSize", &sizeFactor);
 		Vector2 size = _textureSize * sizeFactor;
@@ -193,14 +220,45 @@ void GBuffer::DrawGui()
 // GBufferのデータを書き出し
 void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 {
-	std::vector<ID3D11ShaderResourceView*> tempSRVs;
-	for (UINT i = 0; i < GBUFFER_RTV_COUNT; ++i)
+	_frameBuffer->ClearAndActivate(immediateContext);
 	{
-		tempSRVs.push_back(GetRenderTargetSRV(i).Get());
+		std::vector<ID3D11ShaderResourceView*> tempSRVs;
+		for (UINT i = 0; i < GBUFFER_RTV_COUNT; ++i)
+		{
+			tempSRVs.push_back(GetRenderTargetSRV(i).Get());
+		}
+		tempSRVs.push_back(_depthStencilSRV.Get());
+		// 描画タイプに合わせたライティング処理
+		_gbufferFullscreenQuads[_renderingType]->Blit(immediateContext,
+			tempSRVs.data(),
+			0, GBUFFER_RTV_COUNT + 1);
 	}
-	tempSRVs.push_back(_depthStencilSRV.Get());
-	// 描画処理
-	_fullscreenQuads[_renderingType]->Blit(immediateContext,
-		tempSRVs.data(),
-		0, GBUFFER_RTV_COUNT + 1);
+	_frameBuffer->Deactivate(immediateContext);
+
+	// 書き出し
+	if (_useSSR)
+	{
+		// 定数バッファの設定
+		immediateContext->UpdateSubresource(_ssrConstantBuffer.Get(), 0, 0, &_ssrConstants, 0, 0);
+		immediateContext->PSSetConstantBuffers(SSR_CONSTANT_BUFFER_INDEX, 1, _ssrConstantBuffer.GetAddressOf());
+
+		ID3D11ShaderResourceView* srv[] =
+		{
+			_frameBuffer->GetColorSRV().Get(),
+			GetDepthSRV().Get(),
+			GetRenderTargetSRV(GBUFFER_NORMAL_MAP_INDEX).Get()
+		};
+		_ssrFullscreenQuad->Blit(immediateContext,
+			srv, 0, _countof(srv));
+	}
+	else
+	{
+		ID3D11ShaderResourceView* srv[] =
+		{
+			_frameBuffer->GetColorSRV().Get(),
+			GetDepthSRV().Get()
+		};
+		_fullscreenQuad->Blit(immediateContext,
+			srv, 0, _countof(srv));
+	}
 }

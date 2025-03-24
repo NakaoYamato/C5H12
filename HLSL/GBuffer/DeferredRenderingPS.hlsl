@@ -28,7 +28,7 @@ struct PS_OUT
 PS_OUT main(VsOut pin)
 {
     // GBufferからデータを取得
-    GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, inv_view_projection);
+    GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, invViewProjection);
     
     // decodeData.baseColorにアルファ値がないのでそのままだとskymapが埋もれてしまう
     // 対策として深度値からクリップしている
@@ -36,7 +36,7 @@ PS_OUT main(VsOut pin)
     
     float4 specularColor = float4(decodeData.specular, decodeData.specular, decodeData.specular, 1.0f);
     // フォンシェーディング用変数
-    float3 E = normalize(decodeData.worldPosition.xyz - camera_position.xyz);
+    float3 E = normalize(decodeData.worldPosition.xyz - cameraPosition.xyz);
     float3 L = normalize(directional_light_direction.xyz);
     
     // ハーフランバート処理

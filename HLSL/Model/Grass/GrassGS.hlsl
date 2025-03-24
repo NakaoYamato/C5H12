@@ -80,7 +80,7 @@ void main(triangle DS_OUT input[3], inout TriangleStream<GS_OUT> output)
         top_element.position = midpoint_position + midpoint_normal * height;
         top_element.position.x += sin(total_elapsed_time) * wind_directionX;
         top_element.position.z += sin(total_elapsed_time) * wind_directionZ;
-        top_element.sv_position = mul(top_element.position, view_projection);
+        top_element.sv_position = mul(top_element.position, viewProjection);
         top_element.texcoord = float2(0.5, 0.0);
     }
 
@@ -89,13 +89,13 @@ void main(triangle DS_OUT input[3], inout TriangleStream<GS_OUT> output)
 
     // 右頂点
     element.position = midpoint_position + midpoint_tangent * width;
-    element.sv_position = mul(element.position, view_projection);
+    element.sv_position = mul(element.position, viewProjection);
     element.texcoord = float2(0.0, 1.0);
     output.Append(element);
 
     // 左頂点
     element.position = midpoint_position - midpoint_tangent * width;
-    element.sv_position = mul(element.position, view_projection);
+    element.sv_position = mul(element.position, viewProjection);
     element.texcoord = float2(1.0, 1.0);
     output.Append(element);
     
@@ -106,13 +106,13 @@ void main(triangle DS_OUT input[3], inout TriangleStream<GS_OUT> output)
 
     // 右頂点
     element.position = midpoint_position + midpoint_binormal * width;
-    element.sv_position = mul(element.position, view_projection);
+    element.sv_position = mul(element.position, viewProjection);
     element.texcoord = float2(0.0, 1.0);
     output.Append(element);
 
     // 左頂点
     element.position = midpoint_position - midpoint_binormal * width;
-    element.sv_position = mul(element.position, view_projection);
+    element.sv_position = mul(element.position, viewProjection);
     element.texcoord = float2(1.0, 1.0);
     output.Append(element);
 

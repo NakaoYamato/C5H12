@@ -1,12 +1,9 @@
 #include "../../Sprite/Sprite.hlsli"
+#include "../../Scene/SceneConstantBuffer.hlsli"
 
-cbuffer SSR_BUFFER : register(b1)
+cbuffer SSR_BUFFER : register(b6)
 {
-    row_major float4x4 view;
-    row_major float4x4 projection;
-    row_major float4x4 invProjection;
-    row_major float4x4 invViewProjection;
-        // ”½ŽË‹­“x
+    // ”½ŽË‹­“x
     float refrectionIntensity;
     float maxDistance = 15.0f;
     float resolution = 0.3f;

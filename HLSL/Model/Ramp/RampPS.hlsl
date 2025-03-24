@@ -15,7 +15,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     // TODO ˆ—‚ªd‚¢
     clip(diffuseColor.a < 0.1f ? -1 : 1);
 	
-    float3 E = normalize(pin.world_position.xyz - camera_position.xyz);
+    float3 E = normalize(pin.world_position.xyz - cameraPosition.xyz);
     float3 L = normalize(directional_light_direction.xyz);
     float3x3 mat =
     {

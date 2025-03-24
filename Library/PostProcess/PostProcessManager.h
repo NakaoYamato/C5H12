@@ -13,8 +13,6 @@
 /// </summary>
 enum class PostProcessType
 {
-	ScreenSpaceReflectionPP,
-
 	FXAAPP,
 
 	DepthOfFieldGradationPP,

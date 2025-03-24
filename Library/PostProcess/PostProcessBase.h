@@ -58,7 +58,6 @@ protected:
 protected:
 	std::unique_ptr<FrameBuffer> _frameBuffer;
 	std::unique_ptr<Sprite> _fullscreenQuad;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
 
 	std::unordered_map<std::string, float> _startData;

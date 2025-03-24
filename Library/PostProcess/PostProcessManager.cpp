@@ -12,11 +12,8 @@
 #include "../PostProcess/RobertsCross/RobertsCross.h"
 #include "../PostProcess/DepthOfField/DepthOfField.h"
 #include "../PostProcess/FXAA/FXAA.h"
-#include "../PostProcess/ScreenSpaceReflection/ScreenSpaceReflection.h"
 
 #include "FinalPass/FinalPass.h"
-
-#include "../../Library/Graphics/Graphics.h"
 
 //#define _USE_DOF
 
@@ -28,9 +25,6 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 	auto& [name, flag] = _postProcesses[static_cast<int>(type)].second; \
 	name = guiName; \
 }
-	// SSR
-	_CREATE_PP(ScreenSpaceReflection, PostProcessType::ScreenSpaceReflectionPP, u8"SSR");
-
 	// アンチエイリアス
 	_CREATE_PP(FXAA, PostProcessType::FXAAPP, u8"アンチエイリアス");
 
@@ -88,24 +82,7 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	// アンチエイリアス
 	PostProcessBase* fxaaPP = GetPostProcess(PostProcessType::FXAAPP);
-	// デファードレンダリングを行っている時SSR
-	if (Graphics::Instance().RenderingDeferred())
-	{
-		PostProcessBase* ssrPP = GetPostProcess(PostProcessType::ScreenSpaceReflectionPP);
-		{
-			ID3D11ShaderResourceView* srv[] =
-			{
-				colorSRV, depthSRV, Graphics::Instance().GetGBuffer()->GetRenderTargetSRV(GBUFFER_NORMAL_MAP_INDEX).Get()
-			};
-			ssrPP->Render(dc, srv, 0, _countof(srv));
-		}
-		fxaaPP->Render(dc, ssrPP->GetColorSRV().GetAddressOf(), 0, 1);
-	}
-	else
-	{
-
-		fxaaPP->Render(dc, &colorSRV, 0, 1);
-	}
+	fxaaPP->Render(dc, &colorSRV, 0, 1);
 
 #ifdef _USE_DOF
 	// 被写体深度用ぼかし作成

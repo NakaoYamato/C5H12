@@ -56,7 +56,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 F0 = lerp(0.04f, albedo.rgb, metalness);
 
 	//	視線ベクトル
-    float3 V = normalize(pin.world_position.xyz - camera_position.xyz);
+    float3 V = normalize(pin.world_position.xyz - cameraPosition.xyz);
     
 	//	直接光のシェーディング
     float3 total_diffuse = 0, total_specular = 0;

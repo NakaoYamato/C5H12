@@ -135,7 +135,7 @@ void Scene::Render()
             // レンダーステート設定
             dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
             dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
             gBuffer->Blit(dc);
         }

@@ -33,7 +33,7 @@ struct PS_OUT
 PS_OUT main(VsOut pin)
 {
     // GBufferからデータを取得
-    GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, inv_view_projection);
+    GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, invViewProjection);
     
     // decodeData.baseColorにアルファ値がないのでそのままだとskymapが埋もれてしまう
     // 対策として深度値からクリップしている
@@ -62,7 +62,7 @@ PS_OUT main(VsOut pin)
     float3 F0 = lerp(0.04f, albedo.rgb, metalness);
 
 	//	視線ベクトル
-    float3 V = normalize(decodeData.worldPosition.xyz - camera_position.xyz);
+    float3 V = normalize(decodeData.worldPosition.xyz - cameraPosition.xyz);
     
 	//	直接光のシェーディング
     float3 total_diffuse = 0, total_specular = 0;

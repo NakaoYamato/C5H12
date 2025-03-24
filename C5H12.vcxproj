@@ -204,7 +204,6 @@
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
     <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
     <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp" />
-    <ClCompile Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.cpp" />
     <ClCompile Include="Library\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
@@ -289,7 +288,6 @@
     <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
     <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
     <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h" />
-    <ClInclude Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.h" />
     <ClInclude Include="Library\Renderer\MeshRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
     <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />
@@ -328,7 +326,6 @@
     <None Include="HLSL\PrimitiveRenderer\PrimitiveRenderer.hlsli" />
     <None Include="HLSL\Primitive\Primitive.hlsli" />
     <None Include="HLSL\Scene\SceneConstantBuffer.hlsli" />
-    <None Include="HLSL\ShapeRenderer\ShapeRenderer.hlsli" />
     <None Include="HLSL\SkyMap\SkyMap.hlsli" />
     <None Include="HLSL\Sprite\Sprite.hlsli" />
   </ItemGroup>
@@ -467,6 +464,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="HLSL\Sprite\SpriteWithDepthPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <None Include="HLSL\PostProcess\FXAA\FXAA.hlsl">
       <FileType>Document</FileType>
     </None>
@@ -520,7 +523,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\PostProcess\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl">
+    <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -539,14 +542,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Primitive\PrimitiveVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

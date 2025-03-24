@@ -14,7 +14,7 @@ VS_OUT main(VS_IN vin)
     vout.world_normal = normalize(SkinningPosition(vin.normal, vin.boneWeights, vin.boneIndices));
     vout.world_tangent = normalize(SkinningPosition(vin.tangent, vin.boneWeights, vin.boneIndices));
     
-    vout.position = mul(vout.world_position, view_projection);
+    vout.position = mul(vout.world_position, viewProjection);
     vout.world_tangent.w = sigma;
     vout.binormal.xyz = normalize(cross(vout.world_normal.xyz, vout.world_tangent.xyz));
 	

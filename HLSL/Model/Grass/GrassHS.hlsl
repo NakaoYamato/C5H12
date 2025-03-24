@@ -4,7 +4,7 @@
 //  https://github.com/chsxf/unity-built-in-shaders/blob/07bb37ed606e733343b7dadb2ce3b03421daa4b5/Shaders/CGIncludes/Tessellation.cginc#L81
 float CalcDistanceTessFactor(float4 wpos, float minDist, float maxDist, float tess)
 {
-    float dist = distance(wpos.xyz, camera_position.xyz);
+    float dist = distance(wpos.xyz, cameraPosition.xyz);
     float f = clamp(1.0 - (dist - minDist) / (maxDist - minDist), 0.001f, 1.0f) * tess;
     return f;
 }

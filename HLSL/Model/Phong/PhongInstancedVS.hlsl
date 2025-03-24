@@ -19,7 +19,7 @@ VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
     vout.world_normal = normalize(mul(vin.normal, worldTransform[instance_id]));
     vout.world_tangent = normalize(mul(vin.tangent, worldTransform[instance_id]));
     
-    vout.position = mul(vout.world_position, view_projection);
+    vout.position = mul(vout.world_position, viewProjection);
     vout.world_tangent.w = sigma;
     vout.binormal.xyz = normalize(cross(vout.world_normal.xyz, vout.world_tangent.xyz));
 	

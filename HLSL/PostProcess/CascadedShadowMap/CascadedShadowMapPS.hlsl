@@ -39,11 +39,11 @@ float4 main(VsOut pin) : SV_TARGET
     position_ndc.w = 1;
 
 	// ndc to view space
-    float4 position_view_space = mul(position_ndc, inv_projection);
+    float4 position_view_space = mul(position_ndc, invProjection);
     position_view_space = position_view_space / position_view_space.w;
 	
 	// ndc to world space
-    float4 position_world_space = mul(position_ndc, inv_view_projection);
+    float4 position_world_space = mul(position_ndc, invViewProjection);
     position_world_space = position_world_space / position_world_space.w;
 
 	

@@ -26,12 +26,7 @@ void Light::DrawGui()
             DirectX::XMMatrixTranslation(_lightStart.x, _lightStart.y, _lightStart.z));
         const DirectX::XMFLOAT4X4& view = Camera::Instance().GetView();
         const DirectX::XMFLOAT4X4& projection = Camera::Instance().GetProjection();
-        if (ImGuizmo::Manipulate(
-            &view._11, &projection._11,
-            ImGuizmo::TRANSLATE,
-            ImGuizmo::WORLD,
-            &transform._11,
-            nullptr))
+        if (Debug::Guizmo(view, projection, &transform))
         {
             _lightStart.x = transform._41;
             _lightStart.y = transform._42;
@@ -49,12 +44,7 @@ void Light::DrawGui()
             DirectX::XMMatrixTranslation(_lightEnd.x, _lightEnd.y, _lightEnd.z));
         const DirectX::XMFLOAT4X4& view = Camera::Instance().GetView();
         const DirectX::XMFLOAT4X4& projection = Camera::Instance().GetProjection();
-        if (ImGuizmo::Manipulate(
-            &view._11, &projection._11,
-            ImGuizmo::TRANSLATE,
-            ImGuizmo::WORLD,
-            &transform._11,
-            nullptr))
+        if (Debug::Guizmo(view, projection, &transform))
         {
             _lightEnd.x = transform._41;
             _lightEnd.y = transform._42;

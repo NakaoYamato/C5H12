@@ -112,17 +112,11 @@ public:
 
 
 #pragma region アクセサ
-	std::weak_ptr<Actor> GetParent() { return _parent; }
-	std::vector<std::weak_ptr<Actor>> GetChildren() { return _children; };
 	const char* GetName() const { return _name.c_str(); }
 	Transform& GetTransform() { return _transform; }
 	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return _judgeTags; }
 
 	void SetScene(Scene* scene) { this->_scene = scene; }
-	void SetParent(std::shared_ptr<Actor> parent) {
-		this->_parent = parent;
-		parent->_children.push_back(shared_from_this());
-	}
 	void SetName(const char* name) { this->_name = name; }
 	void SetTransform(const Transform& t) { this->_transform = t; }
 	void SetActiveFlag(bool b) { this->_isActive = b; }
@@ -139,15 +133,13 @@ public:
 protected:
 	Scene* _scene = nullptr;
 
-	std::weak_ptr<Actor>	_parent;
-	std::vector<std::weak_ptr<Actor>> _children;
-
 	std::string			_name;
 	Transform			_transform;
 
 	bool				_isActive = true;
 	bool				_isShowing = true;
 	bool				_drawDebug = true;
+	bool				_useGuizmo = true;
 
 	std::vector<std::shared_ptr<Component>>	_components;
 	// 当たり判定コンポーネント

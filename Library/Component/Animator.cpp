@@ -20,6 +20,7 @@ void Animator::DrawGui()
 {
     if (ImGui::TreeNode(u8"アニメーション"))
     {
+        ImGui::DragFloat("CurrentAnimSeconds", &_currentAnimSeconds, 0.01f);
         ImGui::DragFloat("BlendSeconds", &_animBlendSeconds, 0.01f);
         ImGui::Checkbox("Loop", &_animLoop);
 

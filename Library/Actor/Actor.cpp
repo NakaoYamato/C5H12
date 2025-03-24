@@ -10,6 +10,10 @@
 #include "../Component/Component.h"
 #include "../Component/Collider/ColliderComponent.h"
 
+#include "../Camera/Camera.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
+#include <ImGuizmo.h>
+
 // 開始処理
 void Actor::Start()
 {
@@ -40,19 +44,8 @@ void Actor::Update(float elapsedTime)
 		collider->Update(elapsedTime);
 	}
 
-	const DirectX::XMFLOAT4X4* ParentMatrix = nullptr;
-	// 親がいるときの処理
 	// トランスフォーム更新
-	if (!_parent.expired())
-	{
-		// 親の起動チェック
-		if (!_parent.lock()->IsActive())
-			this->_isActive = false;
-
-		ParentMatrix = &_parent.lock()->GetTransform().GetMatrix();
-	}
-	// トランスフォーム更新
-	_transform.UpdateTransform(ParentMatrix);
+	_transform.UpdateTransform(nullptr);
 }
 
 // 1秒ごとの更新処理
@@ -152,11 +145,30 @@ void Actor::DelayedRender(const RenderContext& rc)
 // Gui描画
 void Actor::DrawGui()
 {
+	if (_useGuizmo)
+	{
+		DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
+		if (Debug::Guizmo(Camera::Instance().GetView(), Camera::Instance().GetProjection(),
+			&transform))
+		{
+			DirectX::XMVECTOR S, R, T;
+			DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMLoadFloat4x4(&transform));
+			Vector3 s, r, t;
+			DirectX::XMStoreFloat3(&s, S);
+			DirectX::XMStoreFloat3(&t, T);
+			r = QuaternionToRollPitchYaw(R);
+			_transform.SetPosition(t);
+			_transform.SetScale(s / _transform.GetLengthScale());
+			_transform.SetAngle(r);
+		}
+	}
+
 	if (ImGui::CollapsingHeader("Flags"))
 	{
 		ImGui::Checkbox(u8"Active", &_isActive);
 		ImGui::Checkbox(u8"Show", &_isShowing);
 		ImGui::Checkbox(u8"DrawDebug", &_drawDebug);
+		ImGui::Checkbox(u8"UseGuizmo", &_useGuizmo);
 	}
 
 	// トランスフォーム

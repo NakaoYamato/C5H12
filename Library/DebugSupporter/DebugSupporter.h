@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #include "Input/DebugInput.h"
 #include "Camera/DebugCamera.h"
@@ -155,6 +156,15 @@ namespace Debug
 	/// 更新処理
 	/// </summary>
 	void Update(float elapsedTime);
+
+	/// <summary>
+	/// ギズモ使用
+	/// </summary>
+	/// <param name="transform"></param>
+	bool Guizmo(
+		const DirectX::XMFLOAT4X4& view,
+		const DirectX::XMFLOAT4X4& projection,
+		DirectX::XMFLOAT4X4* transform);
 
 	/// <summary>
 	/// デバッグGUI表示

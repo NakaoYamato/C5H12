@@ -39,12 +39,14 @@ public:
 	const ShaderBase::Parameter& GetShadowParameter()const { return _shadowParameter; }
 	std::string GetShaderName()const { return _shaderName; }
 	ModelRenderType GetRenderType()const { return _renderType; }
+	BlendType GetBlendType()const { return _blendType; }
 	const Vector4& GetColor()const { return _color; }
 
 	void SetShaderParameter(const ShaderBase::Parameter& parameter) { this->_shaderParameter = parameter; }
 	void SetShadowParameter(const ShaderBase::Parameter& parameter) { this->_shadowParameter = parameter; }
 	void SetShader(std::string name);
 	void SetRenderType(ModelRenderType type) { this->_renderType = type; }
+	void SetBlendType(BlendType type) { this->_blendType = type; }
 	void SetColor(const Vector4& c) { this->_color = c; }
 #pragma endregion
 protected:

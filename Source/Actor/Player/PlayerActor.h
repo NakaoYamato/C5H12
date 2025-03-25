@@ -7,6 +7,6 @@ class PlayerActor : public Actor
 public:
 	~PlayerActor()override {}
 
-	// ŠJnˆ—
-	void Start()override;
+	// ¶¬ˆ—
+	void OnCreate() override;
 };

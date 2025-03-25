@@ -74,6 +74,7 @@ public:
 		actor->SetName(name.c_str());
 		actor->SetScene(this);
 		_actorManager.Register(actor, tag);
+		actor->OnCreate();
 		return actor;
 	}
 

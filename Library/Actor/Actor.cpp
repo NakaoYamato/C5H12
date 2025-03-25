@@ -45,7 +45,7 @@ void Actor::Update(float elapsedTime)
 	}
 
 	// トランスフォーム更新
-	_transform.UpdateTransform(nullptr);
+	UpdateTransform();
 }
 
 // 1秒ごとの更新処理
@@ -272,4 +272,10 @@ void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3&
 	{
 		collider->OnCollision(other, hitPosition, hitNormal, penetration);
 	}
+}
+
+// トランスフォーム更新
+void Actor::UpdateTransform()
+{
+	_transform.UpdateTransform(nullptr);
 }

@@ -23,6 +23,9 @@ public:
 	Actor() {}
 	virtual ~Actor() {};
 
+	// 生成時処理
+	virtual void OnCreate() {};
+
 	// 開始処理
 	virtual void Start();
 
@@ -130,6 +133,10 @@ public:
 	bool DrawDebug()const { return _drawDebug; }
 
 #pragma endregion
+protected:
+	// トランスフォーム更新
+	virtual void UpdateTransform();
+
 protected:
 	Scene* _scene = nullptr;
 

@@ -13,7 +13,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
-#include "../../Source/Actor/Character/PlayerActor.h"
+#include "../../Source/Actor/Player/PlayerActor.h"
 #include "../../Source/Component/Stage/GrassController.h"
 
 //èâä˙âª

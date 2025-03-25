@@ -218,7 +218,9 @@
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
-    <ClCompile Include="Source\Actor\Character\PlayerActor.cpp" />
+    <ClCompile Include="Source\Actor\Player\PlayerActor.cpp" />
+    <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp" />
+    <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
     <ClCompile Include="Source\Component\Stage\GrassController.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -304,7 +306,10 @@
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
-    <ClInclude Include="Source\Actor\Character\PlayerActor.h" />
+    <ClInclude Include="Source\Actor\Player\PlayerActor.h" />
+    <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h" />
+    <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h" />
+    <ClInclude Include="Source\Actor\WeaponActor.h" />
     <ClInclude Include="Source\Component\Stage\GrassController.h" />
   </ItemGroup>
   <ItemGroup>

@@ -159,9 +159,6 @@
     <ClCompile Include="Library\Actor\ActorManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Renderer\ShapeRenderer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Component\ShapeController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -225,7 +222,7 @@
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Character\PlayerActor.cpp">
+    <ClCompile Include="Source\Actor\Player\PlayerActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\PostProcess\GlowExtraction\GlowExtraction.cpp">
@@ -237,7 +234,10 @@
     <ClCompile Include="Library\PostProcess\FXAA\FXAA.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.cpp">
+    <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -422,9 +422,6 @@
     <ClInclude Include="Library\Component\Collider\ColliderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Renderer\ShapeRenderer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Library\Component\ShapeController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -485,7 +482,7 @@
     <ClInclude Include="Library\Shader\PBR\PBRShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Character\PlayerActor.h">
+    <ClInclude Include="Source\Actor\Player\PlayerActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\PostProcess\GlowExtraction\GlowExtraction.h">
@@ -497,7 +494,13 @@
     <ClInclude Include="Library\PostProcess\FXAA\FXAA.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\PostProcess\ScreenSpaceReflection\ScreenSpaceReflection.h">
+    <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Actor\WeaponActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -516,7 +519,6 @@
     <None Include="HLSL\Sprite\Sprite.hlsli" />
     <None Include="HLSL\PostProcess\Bloom\Bloom.hlsli" />
     <None Include="HLSL\PostProcess\GaussianFilter\GaussianFilter.hlsli" />
-    <None Include="HLSL\ShapeRenderer\ShapeRenderer.hlsli" />
     <None Include="HLSL\SkyMap\SkyMap.hlsli" />
     <None Include="HLSL\GBuffer\GBuffer.hlsli" />
     <None Include="HLSL\Model\Grass\Grass.hlsli" />
@@ -552,8 +554,6 @@
     <FxCompile Include="HLSL\PostProcess\CascadedShadowMap\CascadedShadowMapPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\ChromaticAberration\ChromaticAberrationPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\RadialBlur\RadialBlurPS.hlsl" />
-    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererPS.hlsl" />
-    <FxCompile Include="HLSL\ShapeRenderer\ShapeRendererVS.hlsl" />
     <FxCompile Include="HLSL\SkyMap\SkyBoxPS.hlsl" />
     <FxCompile Include="HLSL\SkyMap\SkyMapPS.hlsl" />
     <FxCompile Include="HLSL\SkyMap\SkyMapVS.hlsl" />
@@ -573,6 +573,7 @@
     <FxCompile Include="HLSL\GBuffer\PBRDeferredRenderingPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\DepthOfField\DepthOfFieldPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\FXAA\FXAAPS.hlsl" />
-    <FxCompile Include="HLSL\PostProcess\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\SpriteWithDepthPS.hlsl" />
+    <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl" />
   </ItemGroup>
 </Project>

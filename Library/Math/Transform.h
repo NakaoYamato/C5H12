@@ -41,11 +41,14 @@ public:
 	float GetLengthScale()const { return _lengthScale; }
 
 	void SetPosition(const Vector3& v) { this->_position = v; }
+	void SetPosition(const float& v) { this->_position.x = v; this->_position.y = v; this->_position.z = v; }
 	void SetPositionX(float f) { this->_position.x = f; }
 	void SetPositionY(float f) { this->_position.y = f; }
 	void SetPositionZ(float f) { this->_position.z = f; }
 	void SetScale(const Vector3& v) { this->_scale = v; }
+	void SetScale(const float& v) { this->_scale.x = v; this->_scale.y = v; this->_scale.z = v; }
 	void SetAngle(const Vector3& v) { this->_angle = v; }
+	void SetAngle(const float& v) { this->_angle.x = v; this->_angle.y = v; this->_angle.z = v; }
 	void SetAngleX(float f) { this->_angle.x = f; }
 	void SetAngleY(float f) { this->_angle.y = f; }
 	void SetAngleZ(float f) { this->_angle.z = f; }

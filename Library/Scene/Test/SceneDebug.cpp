@@ -16,6 +16,8 @@
 #include "../../Source/Actor/Player/PlayerActor.h"
 #include "../../Source/Component/Stage/GrassController.h"
 
+#include "../../Source/Actor/Dragon/DragonActor.h"
+
 //èâä˙âª
 void SceneDebug::Initialize()
 {
@@ -84,5 +86,9 @@ void SceneDebug::Initialize()
     {
         auto box = RegisterActor<Actor>("box", ActorTag::Player);
         auto boxC = box->AddComponent<ShapeController>();
+    }
+
+    {
+        auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
     }
 }

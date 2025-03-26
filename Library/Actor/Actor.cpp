@@ -145,24 +145,6 @@ void Actor::DelayedRender(const RenderContext& rc)
 // Gui•`‰æ
 void Actor::DrawGui()
 {
-	if (_useGuizmo)
-	{
-		DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
-		if (Debug::Guizmo(Camera::Instance().GetView(), Camera::Instance().GetProjection(),
-			&transform))
-		{
-			DirectX::XMVECTOR S, R, T;
-			DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMLoadFloat4x4(&transform));
-			Vector3 s, r, t;
-			DirectX::XMStoreFloat3(&s, S);
-			DirectX::XMStoreFloat3(&t, T);
-			r = QuaternionToRollPitchYaw(R);
-			_transform.SetPosition(t);
-			_transform.SetScale(s / _transform.GetLengthScale());
-			_transform.SetAngle(r);
-		}
-	}
-
 	if (ImGui::CollapsingHeader("Flags"))
 	{
 		ImGui::Checkbox(u8"Active", &_isActive);
@@ -226,6 +208,24 @@ void Actor::DrawGui()
 		}
 
 		ImGui::EndTabBar();
+	}
+
+	if (_useGuizmo)
+	{
+		DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
+		if (Debug::Guizmo(Camera::Instance().GetView(), Camera::Instance().GetProjection(),
+			&transform))
+		{
+			DirectX::XMVECTOR S, R, T;
+			DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMLoadFloat4x4(&transform));
+			Vector3 s, r, t;
+			DirectX::XMStoreFloat3(&s, S);
+			DirectX::XMStoreFloat3(&t, T);
+			r = QuaternionToRollPitchYaw(R);
+			_transform.SetPosition(t);
+			_transform.SetScale(s / _transform.GetLengthScale());
+			_transform.SetAngle(r);
+		}
 	}
 }
 

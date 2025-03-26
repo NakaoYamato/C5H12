@@ -152,12 +152,98 @@ void ModelResource::Load(std::string filename)
 }
 
 // アニメーションの追加
-void ModelResource::AppendAnimations(ModelResource* animationResource)
+void ModelResource::AppendAnimations(std::string filename, 
+    const DirectX::XMFLOAT3& rootStartAngle)
 {
+    ModelResource modelResource;
+    modelResource.Load(filename);
+    AppendAnimations(&modelResource, rootStartAngle);
+}
+
+// アニメーションの追加
+void ModelResource::AppendAnimations(ModelResource* animationResource, const DirectX::XMFLOAT3& rootStartAngle)
+{
+    // thisとanimationResourceのノードを一致させるマップ作成
+    std::unordered_map<std::string, size_t> nodeMap;
+    {
+        size_t index = 0;
+        for (auto& node : this->GetNodes())
+        {
+            nodeMap[node.name] = index;
+            index++;
+        }
+    }
+
     for (auto& animationData : animationResource->_animations)
     {
         ModelResource::Animation animation{};
-        animation = animationData;
+        //animation = animationData;
+        animation.name = animationData.name;
+        animation.secondsLength = animationData.secondsLength;
+        animation.nodeAnims.resize(this->GetNodes().size());
+        for (auto& node : this->GetNodes())
+        {
+            size_t srcIndex = GetNodeIndex(this->GetNodes(), node.name.c_str());
+            size_t dstIndex = GetNodeIndex(animationResource->GetNodes(), node.name.c_str());
+            if (dstIndex != -1)
+            {
+                animation.nodeAnims[srcIndex] = animationData.nodeAnims[dstIndex];
+            }
+        }
+        // アニメーションがなかったノードに対して初期姿勢を追加
+        for (size_t nodeIndex = 0; nodeIndex < animation.nodeAnims.size(); ++nodeIndex)
+        {
+            const Node& node = this->GetNodes().at(nodeIndex);
+            NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
+
+            // 移動
+            if (nodeAnim.positionKeyframes.size() == 0)
+            {
+                VectorKeyframe& keyframe = nodeAnim.positionKeyframes.emplace_back();
+                keyframe.seconds = 0.0f;
+                keyframe.value = node.position;
+            }
+            if (nodeAnim.positionKeyframes.size() == 1)
+            {
+                VectorKeyframe& keyframe = nodeAnim.positionKeyframes.emplace_back();
+                keyframe.seconds = animation.secondsLength;
+                keyframe.value = nodeAnim.positionKeyframes.at(0).value;
+            }
+            // 回転
+            if (nodeAnim.rotationKeyframes.size() == 0)
+            {
+                QuaternionKeyframe& keyframe = nodeAnim.rotationKeyframes.emplace_back();
+                keyframe.seconds = 0.0f;
+                keyframe.value = node.rotation;
+            }
+            if (nodeAnim.rotationKeyframes.size() == 1)
+            {
+                QuaternionKeyframe& keyframe = nodeAnim.rotationKeyframes.emplace_back();
+                keyframe.seconds = animation.secondsLength;
+                keyframe.value = nodeAnim.rotationKeyframes.at(0).value;
+            }
+            // スケール
+            if (nodeAnim.scaleKeyframes.size() == 0)
+            {
+                VectorKeyframe& keyframe = nodeAnim.scaleKeyframes.emplace_back();
+                keyframe.seconds = 0.0f;
+                keyframe.value = node.scale;
+            }
+            if (nodeAnim.scaleKeyframes.size() == 1)
+            {
+                VectorKeyframe& keyframe = nodeAnim.scaleKeyframes.emplace_back();
+                keyframe.seconds = animation.secondsLength;
+                keyframe.value = nodeAnim.scaleKeyframes.at(0).value;
+            }
+        }
+
+        // 初期回転値設定
+        for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)
+        {
+            DirectX::XMStoreFloat4(&rotation.value,
+                DirectX::XMQuaternionRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&rootStartAngle)));
+        }
+
         this->_animations.push_back(animation);
     }
 }
@@ -320,12 +406,12 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
     }
 }
 
-// アニメーションの読み込み
-void ModelResource::LoadAnimations(std::vector<Animation>& animations, const std::vector<Node>& nodes)
+void ModelResource::LoadAnimations(const aiScene* aScene,
+    std::vector<Animation>& animations, const std::vector<Node>& nodes)
 {
-    for (uint32_t aAnimationIndex = 0; aAnimationIndex < _aScene->mNumAnimations; ++aAnimationIndex)
+    for (uint32_t aAnimationIndex = 0; aAnimationIndex < aScene->mNumAnimations; ++aAnimationIndex)
     {
-        const aiAnimation* aAnimation = _aScene->mAnimations[aAnimationIndex];
+        const aiAnimation* aAnimation = aScene->mAnimations[aAnimationIndex];
         Animation& animation = animations.emplace_back();
 
         // アニメーション情報
@@ -425,6 +511,12 @@ void ModelResource::LoadAnimations(std::vector<Animation>& animations, const std
             }
         }
     }
+}
+
+// アニメーションの読み込み
+void ModelResource::LoadAnimations(std::vector<Animation>& animations, const std::vector<Node>& nodes)
+{
+    LoadAnimations(this->_aScene, animations, nodes);
 }
 
 // ノードの再帰読み込み

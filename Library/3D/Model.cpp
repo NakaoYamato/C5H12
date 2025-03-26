@@ -150,7 +150,7 @@ void Model::DrawGui()
         ImGui::InputText(u8"ファイルパス", &_serializePath);
         if (ImGui::Button(u8"シリアライズ"))
         {
-            _resource->Serialize(_serializePath.c_str());
+            ReSerialize();
         }
     }
 
@@ -158,6 +158,11 @@ void Model::DrawGui()
     {
         Debug::Renderer::DrawAxis(_poseNode[_debugNodeIndex].worldTransform);
     }
+}
+
+void Model::ReSerialize()
+{
+    _resource->Serialize(_serializePath.c_str());
 }
 
 void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)

@@ -5,8 +5,10 @@
 // メッシュ定数バッファ
 cbuffer MESH_CONSTANT_BUFFER : register(b2)
 {
-    float roughness_factor;
-    float metalness_factor;
+    float4 meshBaseColor;
+    
+    float roughnessFactor;
+    float metalnessFactor;
     float2 dummy;
 }
 

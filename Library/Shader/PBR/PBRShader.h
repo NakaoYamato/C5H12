@@ -27,6 +27,8 @@ public:
 private:
 	struct CbMesh
 	{
+		DirectX::XMFLOAT4 baseColor;
+
 		float roughness;
 		float metalness;
 		float dummy[2];

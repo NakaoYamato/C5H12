@@ -52,6 +52,7 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Material* m
 	Vector4 pbrFactor = material->colors.at("PBRFactor");
 	// メッシュ用定数バッファ更新
 	CbMesh cbMesh{};
+	cbMesh.baseColor = material->colors.at("Diffuse");
 	cbMesh.roughness = pbrFactor.y;
 	cbMesh.metalness = pbrFactor.z;
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);

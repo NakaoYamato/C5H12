@@ -11,7 +11,7 @@ void PlayerActor::OnCreate()
 {
 	GetTransform().SetLengthScale(0.01f);
 	// コンポーネント追加
-	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_09_Warrior.fbx");
+	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
 	auto animator = AddComponent<Animator>(modelRenderer->GetModel());
 
 	// 剣生成

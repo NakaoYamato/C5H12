@@ -46,6 +46,10 @@ public:
 	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNode = nodes; }
 
 	const char* GetFilepath()const { return _serializePath.c_str(); }
+
+	// 再シリアライズ
+	void ReSerialize();
+
 protected:
 	void CreateComObject(ID3D11Device* device, const char* fbx_filename);
 

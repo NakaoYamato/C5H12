@@ -67,8 +67,8 @@ public:
 		{
 			std::string filename;
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
-			DWORD dummyTextureValue;
-			UINT dummyTextureDimension;
+			DWORD dummyTextureValue = 0;
+			UINT dummyTextureDimension = 0;
 			// シリアライズ
 			template<class T>
 			void serialize(T& archive);
@@ -171,7 +171,13 @@ public:
 	void Load(std::string filename);
 
 	// アニメーションの追加
-	void AppendAnimations(ModelResource* animationResource);
+	// rootStartAngle = オイラー角
+	void AppendAnimations(std::string filename,
+		const DirectX::XMFLOAT3& rootStartAngle = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+	// アニメーションの追加
+	// rootStartAngle = オイラー角
+	void AppendAnimations(ModelResource* animationResource, 
+		const DirectX::XMFLOAT3& rootStartAngle = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	// アクセサ
 	const std::vector<Node>& GetNodes() const { return _nodes; }
@@ -206,6 +212,7 @@ private:
 	void LoadMaterials(std::vector<Material>& materials);
 
 	// アニメーションの読み込み
+	static void LoadAnimations(const aiScene* _aScene, std::vector<Animation>& animations, const std::vector<Node>& nodes);
 	void LoadAnimations(std::vector<Animation>& animations, const std::vector<Node>& nodes);
 
 private:

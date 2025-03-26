@@ -12,7 +12,7 @@ Texture2D textureMaps[4] : register(t0);
 PS_GB_OUT main(VS_OUT pin)
 {
 	// ベースカラー取得
-    float4 baseColor = pin.materialColor;
+    float4 baseColor = pin.materialColor * meshBaseColor;
     {
         float4 sampled = textureMaps[BASECOLOR_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
         sampled.rgb = pow(sampled.rgb, _GAMMA_FACTOR);
@@ -37,11 +37,12 @@ PS_GB_OUT main(VS_OUT pin)
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     
 	//	金属質・粗さ取得
-    float roughness = roughness_factor;
-    float metalness = metalness_factor;
+    float roughness = roughnessFactor;
+    float metalness = metalnessFactor;
     {
         float4 sampled = textureMaps[ROUGHNESS_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
         roughness *= sampled.g;
+        metalness *= sampled.b;
     }
     
     return CreateOutputData(

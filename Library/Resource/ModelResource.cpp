@@ -152,16 +152,19 @@ void ModelResource::Load(std::string filename)
 }
 
 // アニメーションの追加
-void ModelResource::AppendAnimations(std::string filename, 
+void ModelResource::AppendAnimations(std::string filename,
+    std::string animationName,
     const DirectX::XMFLOAT3& rootStartAngle)
 {
     ModelResource modelResource;
     modelResource.Load(filename);
-    AppendAnimations(&modelResource, rootStartAngle);
+    AppendAnimations(&modelResource, animationName, rootStartAngle);
 }
 
 // アニメーションの追加
-void ModelResource::AppendAnimations(ModelResource* animationResource, const DirectX::XMFLOAT3& rootStartAngle)
+void ModelResource::AppendAnimations(ModelResource* animationResource,
+    std::string animationName, 
+    const DirectX::XMFLOAT3& rootStartAngle)
 {
     // thisとanimationResourceのノードを一致させるマップ作成
     std::unordered_map<std::string, size_t> nodeMap;
@@ -174,11 +177,14 @@ void ModelResource::AppendAnimations(ModelResource* animationResource, const Dir
         }
     }
 
+    size_t animationIndex = 0;
     for (auto& animationData : animationResource->_animations)
     {
         ModelResource::Animation animation{};
-        //animation = animationData;
-        animation.name = animationData.name;
+        animation.name = animationName;
+        if(animationIndex > 0)
+            animation.name += std::to_string(animationIndex);
+        animationIndex++;
         animation.secondsLength = animationData.secondsLength;
         animation.nodeAnims.resize(this->GetNodes().size());
         for (auto& node : this->GetNodes())

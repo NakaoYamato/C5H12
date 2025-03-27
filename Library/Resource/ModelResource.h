@@ -173,10 +173,12 @@ public:
 	// アニメーションの追加
 	// rootStartAngle = オイラー角
 	void AppendAnimations(std::string filename,
+		std::string animationName,
 		const DirectX::XMFLOAT3& rootStartAngle = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 	// アニメーションの追加
 	// rootStartAngle = オイラー角
-	void AppendAnimations(ModelResource* animationResource, 
+	void AppendAnimations(ModelResource* animationResource,
+		std::string animationName,
 		const DirectX::XMFLOAT3& rootStartAngle = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	// アクセサ

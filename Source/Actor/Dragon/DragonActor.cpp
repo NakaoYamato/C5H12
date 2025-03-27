@@ -20,23 +20,39 @@ void DragonActor::OnCreate()
 	{
 		DirectX::XMFLOAT3 rootStartAngle = { 0.0f, 0.0f, 0.0f };
 
-		static const char* filenames[] =
+		static std::tuple<const char*, const char*, DirectX::XMFLOAT3> animParams[] =
 		{
-			"./Data/Model/Dragons/Animation/Attacks/WD_Attack_FireBreath.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle_02_Look.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle_02_Look_Right.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle_03_Shake.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle_Combat.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle_Combat_Rage.fbx",
-			"./Data/Model/Dragons/Animation/Idle/WD_Idle_Rage.fbx",
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Bite_Front.fbx" ,	"AttackBiteFront" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Bite_Left.fbx" ,	"AttackBiteLeft" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Bite_Right.fbx" ,	"AttackBiteRight" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_FireBall.fbx" ,		"AttackFireBall" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_FireBreath.fbx" ,	"AttackFireBreath" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_FireBreath_Swipe.fbx" ,	"AttackFireSwipe" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Fly_Legs Mask.fbx" ,	"AttackFlyLegsMask" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Fly_Melee Mask.fbx" ,	"AttackFlyMeleeMask" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Special1.fbx" ,		"AttackSpecial1" ,	{ 90.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Tail_Left.fbx" ,	"AttackTailLeft" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Tail_Right.fbx" ,	"AttackTailRight" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Wing_Fist_Left.fbx" ,	"AttackWingFistLeft" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Wing_Fist_Right.fbx" ,	"AttackWingFistRight" ,	{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Wing_Swipe_Left.fbx" ,	"AttackWingSwipeLeft" ,	{ 90.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_Attack_Wing_Swipe_Right.fbx" ,	"AttackWingSwipeRight" ,	{ 90.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Attacks/WD_FireMask.fbx" ,			"FireMask" ,	{ 0.0f, 0.0f, 0.0f } },
+			
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle.fbx" ,					"Idle01" ,				{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle_02_Look.fbx" ,			"Idle02Look" ,			{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle_02_Look_Right.fbx" ,		"Idle02LookRight" ,		{ 90.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle_03_Shake.fbx" ,			"Idle03Shake" ,			{ 0.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle_Combat.fbx" ,			"IdleCombat" ,			{ 90.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle_Combat_Rage.fbx" ,		"IdleCombatRage" ,		{ 90.0f, 0.0f, 0.0f } },
+			{ "./Data/Model/Dragons/Animation/Idle/WD_Idle_Rage.fbx" ,				"IdleRage" ,			{ 90.0f, 0.0f, 0.0f } },
 		};
-
-		for (auto& filename : filenames)
+		for (auto& [filename, animationName, rootStartAng] : animParams)
 		{
 			modelRenderer->GetModel()->GetResource()->AppendAnimations(
 				filename,
-				rootStartAngle);
+				animationName,
+				rootStartAng);
 		}
 
 		modelRenderer->GetModel()->ReSerialize();

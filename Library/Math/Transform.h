@@ -11,6 +11,34 @@ enum COORDINATE_TYPE
 	LHS_Z_UP = 3,
 };
 
+static const DirectX::XMFLOAT4X4 COORDINATE_SYSTEM_TRANSFORMS[]
+{
+	{
+		-1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	},
+	{
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	},
+	{
+		-1,0,0,0,
+		0,0,-1,0,
+		0,1,0,0,
+		0,0,0,1
+	},
+	{
+		-1,0,0,0,
+		0,0,1,0,
+		0,1,0,0,
+		0,0,0,1
+	},
+};
+
 class Transform
 {
 public:

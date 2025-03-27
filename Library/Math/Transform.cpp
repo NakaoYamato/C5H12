@@ -4,33 +4,6 @@
 
 void Transform::UpdateTransform(const DirectX::XMFLOAT4X4* parent)
 {
-    static const DirectX::XMFLOAT4X4 COORDINATE_SYSTEM_TRANSFORMS[]
-    {
-        {
-            -1,0,0,0,
-            0,1,0,0,
-            0,0,1,0,
-            0,0,0,1
-        },
-        {
-            1,0,0,0,
-            0,1,0,0,
-            0,0,1,0,
-            0,0,0,1
-        },
-        {
-            -1,0,0,0,
-            0,0,-1,0,
-            0,1,0,0,
-            0,0,0,1
-        },
-        {
-            -1,0,0,0,
-            0,0,1,0,
-            0,1,0,0,
-            0,0,0,1
-        },
-    };
     DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[_coordinateType]) *
         DirectX::XMMatrixScaling(_lengthScale, _lengthScale,_lengthScale) };
 

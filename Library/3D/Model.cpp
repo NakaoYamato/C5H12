@@ -103,9 +103,12 @@ void Model::DrawGui()
                     }
                     for (auto& [key, texture] : material.textureDatas)
                     {
-                        ImGui::Text(key.c_str());
-                        static float textureSize = 512.0f;
+                        static float textureSize = 128.0f;
                         ImGui::Image(texture.textureSRV.Get(), { textureSize ,textureSize });
+                        ImGui::SameLine();
+                        ImGui::Text(key.c_str());
+                        ImGui::SameLine();
+                        ImGui::Text(std::string("\n" + texture.filename).c_str());
                     }
                     ImGui::TreePop();
                 }

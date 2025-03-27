@@ -705,7 +705,7 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
                 vertex.boneIndex.w = boneInfluence.indices[3];
 
                 //float f = (vertex.boneWeight.x + vertex.boneWeight.y + vertex.boneWeight.z + vertex.boneWeight.w);
-                //if (f > 1.0f)
+                //if (f > 1.0f + FLT_EPSILON)
                 //{
                 //    vertex.boneWeight.x = 1.0f;
                 //    vertex.boneWeight.y = 0.0f;

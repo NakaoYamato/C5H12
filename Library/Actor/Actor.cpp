@@ -216,14 +216,18 @@ void Actor::DrawGui()
 		if (Debug::Guizmo(Camera::Instance().GetView(), Camera::Instance().GetProjection(),
 			&transform))
 		{
+			DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
+			DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[_transform.GetCoordinateType()]) *
+				DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };
+			M = DirectX::XMMatrixInverse(nullptr, C) * M;
 			DirectX::XMVECTOR S, R, T;
-			DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMLoadFloat4x4(&transform));
+			DirectX::XMMatrixDecompose(&S, &R, &T, M);
 			Vector3 s, r, t;
 			DirectX::XMStoreFloat3(&s, S);
 			DirectX::XMStoreFloat3(&t, T);
 			r = QuaternionToRollPitchYaw(R);
 			_transform.SetPosition(t);
-			_transform.SetScale(s / _transform.GetLengthScale());
+			_transform.SetScale(s);
 			_transform.SetAngle(r);
 		}
 	}

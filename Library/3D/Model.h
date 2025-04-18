@@ -43,6 +43,7 @@ public:
 	// ÉQÉbÉ^Å[
 	ModelResource* GetResource() { return _resource.get(); }
 	const std::vector<ModelResource::Node>& GetPoseNodes()const { return _poseNode; }
+	std::vector<ModelResource::Node>& GetAddressPoseNodes() { return _poseNode; }
 	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNode = nodes; }
 
 	const char* GetFilepath()const { return _serializePath.c_str(); }

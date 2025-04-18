@@ -90,6 +90,9 @@ void ModelResource::Load(std::string filename)
     _serializePath = serializePath.generic_string();
     if (std::filesystem::exists(serializePath))
     {
+        // シリアライズされていることを保存
+        _isSerialized = true;
+
         // シリアライズ読み込み
         Deserialize(serializePath.string().c_str());
 
@@ -108,6 +111,9 @@ void ModelResource::Load(std::string filename)
         return;
     }
 
+    // シリアライズされていない
+    _isSerialized = false;
+
     // 拡張子取得
     std::string extension = _filepath.extension().string();
     std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
@@ -121,7 +127,7 @@ void ModelResource::Load(std::string filename)
 
     // インポート時のフラグ
     uint32_t flag =
-        aiProcess_Triangulate |             // 三角化化
+        aiProcess_Triangulate |             // 三角形化
         aiProcess_JoinIdenticalVertices |   // 重複頂点のマージ
         aiProcess_PopulateArmatureData;     // ボーンの参照データを取得
 
@@ -243,6 +249,18 @@ void ModelResource::AppendAnimations(ModelResource* animationResource,
 
         this->_animations.push_back(animation);
     }
+}
+
+int ModelResource::FindNodeByName(std::string name)
+{
+    int i = 0;
+    for (auto& node : _nodes)
+    {
+        if (node.name == name)
+            return i;
+        i++;
+    }
+    return -1;
 }
 
 // ノードの読み込み

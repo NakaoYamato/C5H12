@@ -8,7 +8,7 @@
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 
 #include "../Component/Component.h"
-#include "../Component/Collider/ColliderComponent.h"
+#include "../Component/Collider/ColliderBaseComponent.h"
 
 #include "../Camera/Camera.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
@@ -22,7 +22,7 @@ void Actor::Start()
 	{
 		component->Start();
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->Start();
 	}
@@ -39,7 +39,7 @@ void Actor::Update(float elapsedTime)
 	{
 		component->Update(elapsedTime);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->Update(elapsedTime);
 	}
@@ -59,7 +59,7 @@ void Actor::FixedUpdate()
 	{
 		component->FixedUpdate();
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->FixedUpdate();
 	}
@@ -76,7 +76,7 @@ void Actor::RenderPreprocess(RenderContext& rc)
 	{
 		component->RenderPreprocess(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->RenderPreprocess(rc);
 	}
@@ -94,7 +94,7 @@ void Actor::Render(const RenderContext& rc)
 	{
 		component->Render(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->Render(rc);
 	}
@@ -112,7 +112,7 @@ void Actor::DebugRender(const RenderContext& rc)
 	{
 		component->DebugRender(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->DebugRender(rc);
 	}
@@ -191,7 +191,7 @@ void Actor::DrawGui()
 			ImGui::Separator();
 
 			int index = 0;
-			for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+			for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -243,13 +243,13 @@ void Actor::Judge(Actor* other)
 	Vector3 hitNormal{};
 	float penetration{};
 	// 当たり判定コンポーネントの検索
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		// 接触対象の当たり判定コンポーネントの検索
 		const size_t otherComponentSize = other->GetColliderComponentSize();
 		for (size_t i = 0; i < otherComponentSize; ++i)
 		{
-			std::shared_ptr<ColliderComponent> otherComponent = other->GetCollider(i);
+			std::shared_ptr<ColliderBaseComponent> otherComponent = other->GetCollider(i);
 
 			// 当たり判定処理
 			const bool result = collider->Judge(other, otherComponent.get(),
@@ -272,7 +272,7 @@ void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3&
 	{
 		component->OnCollision(other, hitPosition, hitNormal, penetration);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
 	{
 		collider->OnCollision(other, hitPosition, hitNormal, penetration);
 	}

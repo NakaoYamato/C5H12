@@ -12,8 +12,10 @@ class Vector4;
 
 #pragma region ’è‹`
 #define _VECTOR2_ZERO   Vector2(0.0f, 0.0f)
+#define _VECTOR2_ONE    Vector2(1.0f, 1.0f)
 
 #define _VECTOR3_ZERO   Vector3(0.0f, 0.0f, 0.0f)
+#define _VECTOR3_ONE    Vector3(1.0f, 1.0f, 1.0f)
 #define _VECTOR3_RIGHT  Vector3(1.0f, 0.0f, 0.0f)
 #define _VECTOR3_UP     Vector3(0.0f, 1.0f, 0.0f)
 #define _VECTOR3_FRONT  Vector3(0.0f, 0.0f, 1.0f)

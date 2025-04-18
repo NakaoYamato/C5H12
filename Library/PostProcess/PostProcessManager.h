@@ -23,7 +23,6 @@ enum class PostProcessType
 
 	RadialBlurPP,
 	ChromaticAberrationPP,
-	RobertsCrossPP,
 
 	FinalPassPP,
 

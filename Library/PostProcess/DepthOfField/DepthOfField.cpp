@@ -8,10 +8,7 @@
 void DepthOfField::Update(float elapsedTime)
 {
     // ƒJƒƒ‰î•ñ‚ğæ“¾
-    DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&Camera::Instance().GetView());
-    DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&Camera::Instance().GetProjection());
-    _data.view = Camera::Instance().GetView();
-    DirectX::XMStoreFloat4x4(&_data.invViewProjection, DirectX::XMMatrixInverse(nullptr, V * P));
+    _data.cameraClipDistance = Vector4(Camera::Instance().GetFocus() - Camera::Instance().GetEye());
 }
 
 void DepthOfField::DrawGui()

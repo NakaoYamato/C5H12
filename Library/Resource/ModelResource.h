@@ -179,16 +179,22 @@ public:
 	void AppendAnimations(ModelResource* animationResource,
 		std::string animationName);
 
-	// アクセサ
+#pragma region アクセサ
 	const std::vector<Node>& GetNodes() const { return _nodes; }
 	const std::vector<Mesh>& GetMeshes() const { return _meshes; }
 	const std::vector<Material>& GetMaterials() const { return _materials; }
 	const std::vector<Animation>& GetAnimations() const { return _animations; }
 	const std::string& GetSerializePath() const { return _serializePath; }
 
-	std::vector<Animation>& GetAddressAnimations() { return _animations; }
+	std::vector<Node>& GetAddressNodes() { return _nodes; }
 	std::vector<Mesh>& GetAddressMeshes() { return _meshes; }
 	std::vector<Material>& GetAddressMaterials() { return _materials; }
+	std::vector<Animation>& GetAddressAnimations() { return _animations; }
+
+	// 名前からノード番号を取得
+	int FindNodeByName(std::string name);
+
+#pragma endregion
 
 	// 指定のマテリアルのSRVを変更
 	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)
@@ -215,6 +221,8 @@ public:
 	// デシリアライズ
 	void Deserialize(const char* filename);
 
+	// 読み込んだデータがシリアライズされていたかどうか
+	bool IsSerialized()const { return _isSerialized; }
 private:
 	// ノードの読み込み
 	void LoadNodes(std::vector<Node>& nodes);
@@ -249,6 +257,8 @@ private:
 private:
 	std::filesystem::path _filepath;
 	std::string _serializePath{};
+	// 読み込んだデータがシリアライズされていたかどうか
+	bool _isSerialized = false;
 
 	Assimp::Importer _aImporter;
 	const aiScene* _aScene = nullptr;

@@ -5,7 +5,7 @@
 /// <summary>
 /// 当たり判定コンポーネント基底クラス
 /// </summary>
-class ColliderComponent : public Component
+class ColliderBaseComponent : public Component
 {
 public:
     /// <summary>
@@ -17,6 +17,6 @@ public:
     /// <param name="hitNormal">接触面のotherからthisに向かう法線</param>
     /// <param name="penetration">めり込み量</param>
     /// <returns></returns>
-    virtual bool Judge(Actor* other, ColliderComponent* collider,
+    virtual bool Judge(Actor* other, ColliderBaseComponent* collider,
         Vector3& hitPosition, Vector3& hitNormal, float& penetration) = 0;
 };

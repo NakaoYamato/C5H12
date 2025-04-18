@@ -46,9 +46,6 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 	// 色収差
 	_CREATE_PP(ChromaticAberration, PostProcessType::ChromaticAberrationPP, u8"色収差");
 
-	// RobertsCross
-	_CREATE_PP(RobertsCross, PostProcessType::RobertsCrossPP, u8"RobertsCross");
-
 	// 最終パス
 	_CREATE_PP(FinalPass, PostProcessType::FinalPassPP, _TO_STRING_U8(FinalPass));
 
@@ -112,22 +109,13 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 	bloomGradationPP->Render(dc, glowPP->GetColorSRV().GetAddressOf(), 0, 1);
 
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	// RobertsCross
-	PostProcessBase* robertsCrossPP = GetPostProcess(PostProcessType::RobertsCrossPP);
-	{
-		ID3D11ShaderResourceView* srv[] =
-		{
-#ifdef _USE_DOF
-			dofPP->GetColorSRV().Get(), depthSRV,
-#else
-			fxaaPP->GetColorSRV().Get(), depthSRV,
-#endif
-		};
-		robertsCrossPP->Render(dc, srv, 0, _countof(srv));
-	}
 	// ラジアルブラー
 	PostProcessBase* radialBlurPP = GetPostProcess(PostProcessType::RadialBlurPP);
-	radialBlurPP->Render(dc, robertsCrossPP->GetColorSRV().GetAddressOf(), 0, 1);
+#ifdef _USE_DOF
+	radialBlurPP->Render(dc, dofPP->GetColorSRV().GetAddressOf(), 0, 1);
+#else
+	radialBlurPP->Render(dc, fxaaPP->GetColorSRV().GetAddressOf(), 0, 1);
+#endif
 	// 色収差
 	PostProcessBase* chromaticAberrationPP = GetPostProcess(PostProcessType::ChromaticAberrationPP);
 	chromaticAberrationPP->Render(dc, radialBlurPP->GetColorSRV().GetAddressOf(), 0, 1);

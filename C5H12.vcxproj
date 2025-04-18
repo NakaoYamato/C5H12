@@ -161,6 +161,7 @@
     <ClCompile Include="Library\Component\Light\LightController.cpp" />
     <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
     <ClCompile Include="Library\Component\ModelRenderer.cpp" />
+    <ClCompile Include="Library\Component\Rigidbody.cpp" />
     <ClCompile Include="Library\Component\ShapeController.cpp" />
     <ClCompile Include="Library\Converter\ToString.cpp" />
     <ClCompile Include="Library\DebugSupporter\Camera\DebugCamera.cpp" />
@@ -222,6 +223,7 @@
     <ClCompile Include="Source\Actor\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Component\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Component\Stage\GrassController.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -236,11 +238,12 @@
     <ClInclude Include="Library\Camera\CameraController.h" />
     <ClInclude Include="Library\Camera\CameraData.h" />
     <ClInclude Include="Library\Component\Animator.h" />
-    <ClInclude Include="Library\Component\Collider\ColliderComponent.h" />
+    <ClInclude Include="Library\Component\Collider\ColliderBaseComponent.h" />
     <ClInclude Include="Library\Component\Component.h" />
     <ClInclude Include="Library\Component\Light\LightController.h" />
     <ClInclude Include="Library\Component\Light\PointLightController.h" />
     <ClInclude Include="Library\Component\ModelRenderer.h" />
+    <ClInclude Include="Library\Component\Rigidbody.h" />
     <ClInclude Include="Library\Component\ShapeController.h" />
     <ClInclude Include="Library\Converter\ToString.h" />
     <ClInclude Include="Library\DebugSupporter\Camera\DebugCamera.h" />
@@ -312,6 +315,7 @@
     <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h" />
     <ClInclude Include="Source\Actor\WeaponActor.h" />
+    <ClInclude Include="Source\Component\Player\PlayerInput.h" />
     <ClInclude Include="Source\Component\Stage\GrassController.h" />
   </ItemGroup>
   <ItemGroup>

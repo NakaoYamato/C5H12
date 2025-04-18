@@ -7,13 +7,12 @@ class DepthOfField : public PostProcessBase
 public:
     struct Constants
     {
-        DirectX::XMFLOAT4X4		view{};
-        DirectX::XMFLOAT4X4		invViewProjection{};
+        Vector4 cameraClipDistance;
 
         //	フォーカス距離
-        float focusDistance = 25.0f;
+        float focusDistance = 13.0f;
         //	粗さ調整
-        float dofRange = 20.0f;
+        float dofRange = 56.0f;
         float dummy[2];
     };
 public:

@@ -10,7 +10,7 @@
 
 // 前方宣言
 class Component;
-class ColliderComponent;
+class ColliderBaseComponent;
 enum class ActorTag;
 class Scene;
 
@@ -98,7 +98,7 @@ public:
 	template<class T>
 	std::shared_ptr<T> GetCollider()
 	{
-		for (std::shared_ptr<ColliderComponent>& component : _colliders)
+		for (std::shared_ptr<ColliderBaseComponent>& component : _colliders)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
@@ -106,7 +106,7 @@ public:
 		}
 		return nullptr;
 	}
-	std::shared_ptr<ColliderComponent> GetCollider(size_t index)
+	std::shared_ptr<ColliderBaseComponent> GetCollider(size_t index)
 	{
 		return _colliders[index];
 	}
@@ -150,7 +150,7 @@ protected:
 
 	std::vector<std::shared_ptr<Component>>	_components;
 	// 当たり判定コンポーネント
-	std::vector<std::shared_ptr<ColliderComponent>>	_colliders;
+	std::vector<std::shared_ptr<ColliderBaseComponent>>	_colliders;
 
 	// 各タグに対して当たり判定を行うかのフラグ
 	std::unordered_map<ActorTag, bool> _judgeTags;

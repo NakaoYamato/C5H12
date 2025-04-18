@@ -153,18 +153,16 @@ void ModelResource::Load(std::string filename)
 
 // アニメーションの追加
 void ModelResource::AppendAnimations(std::string filename,
-    std::string animationName,
-    const DirectX::XMFLOAT3& rootStartAngle)
+    std::string animationName)
 {
     ModelResource modelResource;
     modelResource.Load(filename);
-    AppendAnimations(&modelResource, animationName, rootStartAngle);
+    AppendAnimations(&modelResource, animationName);
 }
 
 // アニメーションの追加
 void ModelResource::AppendAnimations(ModelResource* animationResource,
-    std::string animationName, 
-    const DirectX::XMFLOAT3& rootStartAngle)
+    std::string animationName)
 {
     // thisとanimationResourceのノードを一致させるマップ作成
     std::unordered_map<std::string, size_t> nodeMap;
@@ -243,13 +241,6 @@ void ModelResource::AppendAnimations(ModelResource* animationResource,
             }
         }
 
-        // 初期回転値設定
-        for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)
-        {
-            DirectX::XMStoreFloat4(&rotation.value,
-                DirectX::XMQuaternionRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&rootStartAngle)));
-        }
-
         this->_animations.push_back(animation);
     }
 }
@@ -317,7 +308,7 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
         float aFactor = 0.0f;
         if (AI_SUCCESS == aMaterial->Get(AI_MATKEY_ROUGHNESS_FACTOR, aFactor))
         {
-            material.colors["PBRFactor"].y = aFactor;
+            material.colors["PBRFactor"].y = std::clamp(aFactor, 0.0f, 1.0f);
         }
         else
         {
@@ -325,7 +316,7 @@ void ModelResource::LoadMaterials(std::vector<Material>& materials)
         }
         if (AI_SUCCESS == aMaterial->Get(AI_MATKEY_METALLIC_FACTOR, aFactor))
         {
-            material.colors["PBRFactor"].z = aFactor;
+            material.colors["PBRFactor"].z = std::clamp(aFactor, 0.0f, 1.0f);
         }
         else
         {

@@ -173,13 +173,11 @@ public:
 	// アニメーションの追加
 	// rootStartAngle = オイラー角
 	void AppendAnimations(std::string filename,
-		std::string animationName,
-		const DirectX::XMFLOAT3& rootStartAngle = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+		std::string animationName);
 	// アニメーションの追加
 	// rootStartAngle = オイラー角
 	void AppendAnimations(ModelResource* animationResource,
-		std::string animationName,
-		const DirectX::XMFLOAT3& rootStartAngle = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+		std::string animationName);
 
 	// アクセサ
 	const std::vector<Node>& GetNodes() const { return _nodes; }
@@ -188,6 +186,7 @@ public:
 	const std::vector<Animation>& GetAnimations() const { return _animations; }
 	const std::string& GetSerializePath() const { return _serializePath; }
 
+	std::vector<Animation>& GetAddressAnimations() { return _animations; }
 	std::vector<Mesh>& GetAddressMeshes() { return _meshes; }
 	std::vector<Material>& GetAddressMaterials() { return _materials; }
 
@@ -195,6 +194,19 @@ public:
 	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)
 	{
 		_materials.at(materialIndex).textureDatas.at(textureKey).textureSRV = srv;
+	}
+	// 指定のマテリアルのSRVを変更
+	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, std::string materialName, std::string textureKey)
+	{
+		for (auto& material : _materials)
+		{
+			if (material.name == materialName)
+			{
+				material.textureDatas.at(textureKey).textureSRV = srv;
+				return;
+			}
+		}
+		assert(!"Material Not Find!!");
 	}
 
 	// シリアライズ

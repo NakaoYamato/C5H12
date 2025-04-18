@@ -20,6 +20,14 @@ void Animator::DrawGui()
 {
     if (ImGui::TreeNode(u8"アニメーション"))
     {
+        if (_currentAnimIndex >= 0)
+        {
+            ImGui::Text(u8"再生中のアニメーション:");
+            ImGui::SameLine();
+            ImGui::Text(_model->GetResource()->GetAnimations()[_currentAnimIndex].name.c_str());
+
+            ImGui::Separator();
+        }
         ImGui::DragFloat("CurrentAnimSeconds", &_currentAnimSeconds, 0.01f);
         ImGui::DragFloat("BlendSeconds", &_animBlendSeconds, 0.01f);
         ImGui::Checkbox("Loop", &_animLoop);

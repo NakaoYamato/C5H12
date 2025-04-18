@@ -159,7 +159,11 @@ void Model::DrawGui()
 
     if (_debugNodeIndex != -1)
     {
-        Debug::Renderer::DrawAxis(_poseNode[_debugNodeIndex].worldTransform);
+        DirectX::XMFLOAT4X4 worldTransform = _poseNode[_debugNodeIndex].worldTransform;
+        worldTransform._11 = 1.0f;
+        worldTransform._22 = 1.0f;
+        worldTransform._33 = 1.0f;
+        Debug::Renderer::DrawAxis(worldTransform);
     }
 }
 

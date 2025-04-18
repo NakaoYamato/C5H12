@@ -150,6 +150,9 @@ void Scene::Render()
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->view, rc.camera->projection);
+
+        // デバッグ描画
+        Debug::Renderer::Render(rc.camera->view, rc.camera->projection);
     }
     renderFrame->Deactivate(dc);
     // フレームバッファ0番の処理終了

@@ -14,7 +14,10 @@
 
 // 垂直同期間隔設定
 int Framework::syncInterval = 0;
+// ドロップされたファイルパス
 std::wstring Framework::filePath;
+
+static bool imguiProfilerIsPause = false;
 
 int Framework::Run()
 {
@@ -175,7 +178,10 @@ bool Framework::Initialize() const
     // ImGui初期化
     ImGuiManager::Initialize(_hwnd,
         Graphics::Instance().GetDevice(),
-        Graphics::Instance().GetDeviceContext());
+        Graphics::Instance().GetDeviceContext(),
+        &imguiProfilerIsPause,
+        [](bool pause) {imguiProfilerIsPause = pause; },
+        /*static_cast<int>(JobSystem::Instance().GetNumThreads()) + 1*/9);
 
     return true;
 }

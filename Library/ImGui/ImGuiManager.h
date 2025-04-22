@@ -30,7 +30,8 @@ private:
 	~ImGuiManager() {}
 
 public:
-	static void Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc);
+	static void Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc, 
+		bool* isPaused, void (*setPause)(bool), int maxThreads);
 
 	static void Uninitialize();
 

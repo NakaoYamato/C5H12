@@ -119,6 +119,14 @@ public:
 			_deltaTime = 0.0;
 		}
 	}
+
+	float GetMilliseconds() const
+	{
+		LONGLONG counter;
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&counter));
+		float ms = (float)(1000.0f * (counter - _baseTime) * _secondsPerCount);
+		return ms;
+	}
 private:
 	double _secondsPerCount{ 0.0 };
 	double _deltaTime{ 0.0 };

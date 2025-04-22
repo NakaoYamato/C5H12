@@ -1,10 +1,12 @@
 #include "ImGuiManager.h"
 
+#include "ImGuiProfiler.h"
 #include "./ImGuizmo/ImGuizmo.h"
 
 HWND ImGuiManager::hWnd;
 
-void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc)
+void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc,
+	bool* isPaused, void (*setPause)(bool), int maxThreads)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -28,10 +30,16 @@ void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceConte
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_::ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.2f);
+
+
+	ProfileInitialize(isPaused, setPause, maxThreads);
+
+	ProfileThreadName(0, "Main Thread");
 }
 
 void ImGuiManager::Uninitialize()
 {
+	ProfileShutdown();
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
@@ -42,6 +50,7 @@ void ImGuiManager::Update()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+	ProfileNewFrame();
 
 	DockSpace();
 
@@ -55,6 +64,8 @@ void ImGuiManager::Update()
 
 void ImGuiManager::Render()
 {
+	ProfileDrawUI();
+
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

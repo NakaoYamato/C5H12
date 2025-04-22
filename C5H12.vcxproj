@@ -179,6 +179,7 @@
     <ClCompile Include="Library\ImGui\imgui-docking\imgui_stdlib.cpp" />
     <ClCompile Include="Library\ImGui\imgui-docking\imgui_widgets.cpp" />
     <ClCompile Include="Library\ImGui\ImGuiManager.cpp" />
+    <ClCompile Include="Library\ImGui\ImGuiProfiler.cpp" />
     <ClCompile Include="Library\ImGui\ImGuizmo\ImCurveEdit.cpp" />
     <ClCompile Include="Library\ImGui\ImGuizmo\ImGradient.cpp" />
     <ClCompile Include="Library\ImGui\ImGuizmo\ImGuizmo.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="Library\ImGui\imgui-docking\imstb_textedit.h" />
     <ClInclude Include="Library\ImGui\imgui-docking\imstb_truetype.h" />
     <ClInclude Include="Library\ImGui\ImGuiManager.h" />
+    <ClInclude Include="Library\ImGui\ImGuiProfiler.h" />
     <ClInclude Include="Library\ImGui\ImGuizmo\ImCurveEdit.h" />
     <ClInclude Include="Library\ImGui\ImGuizmo\ImGradient.h" />
     <ClInclude Include="Library\ImGui\ImGuizmo\ImGuizmo.h" />

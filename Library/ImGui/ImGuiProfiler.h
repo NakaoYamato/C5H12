@@ -41,7 +41,7 @@ namespace ImGuiControl
     /// <summary>
     /// ImGuiで各スレッドの処理時間を可視化するクラス
     /// </summary>
-    class ImGuiProfiler
+    class Profiler
     {
     public:
         static constexpr int DefaultMaxThreads = 9; // デフォルトの固定スレッド数
@@ -132,7 +132,7 @@ namespace ImGuiControl
         void RefreshFrameSelection(double recordsMaxTime);
     };
 
-    extern ImGuiProfiler globalInstance;
+    extern Profiler globalInstance;
 
     struct ProfileScope
     {

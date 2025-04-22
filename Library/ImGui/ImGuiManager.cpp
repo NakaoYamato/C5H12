@@ -64,8 +64,6 @@ void ImGuiManager::Update()
 
 void ImGuiManager::Render()
 {
-	ProfileDrawUI();
-
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

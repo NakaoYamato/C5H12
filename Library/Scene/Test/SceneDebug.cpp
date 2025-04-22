@@ -91,4 +91,10 @@ void SceneDebug::Initialize()
     {
         auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
     }
+    {
+        auto dragon = RegisterActor<DragonActor>("Dragon1", ActorTag::Enemy);
+    }
+    {
+        auto dragon = RegisterActor<DragonActor>("Dragon2", ActorTag::Enemy);
+    }
 }

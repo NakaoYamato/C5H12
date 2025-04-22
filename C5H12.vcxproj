@@ -189,6 +189,7 @@
     <ClCompile Include="Library\Input\ManagedTarget\GamePadInput.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\KeybordInput.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\MouseInput.cpp" />
+    <ClCompile Include="Library\JobSystem\JobSystem.cpp" />
     <ClCompile Include="Library\Light\Light.cpp" />
     <ClCompile Include="Library\Light\PointLight.cpp" />
     <ClCompile Include="Library\Math\Quaternion.cpp" />
@@ -276,6 +277,7 @@
     <ClInclude Include="Library\Input\ManagedTarget\GamePadInput.h" />
     <ClInclude Include="Library\Input\ManagedTarget\KeybordInput.h" />
     <ClInclude Include="Library\Input\ManagedTarget\MouseInput.h" />
+    <ClInclude Include="Library\JobSystem\JobSystem.h" />
     <ClInclude Include="Library\Light\Light.h" />
     <ClInclude Include="Library\Light\PointLight.h" />
     <ClInclude Include="Library\Math\Easing.h" />

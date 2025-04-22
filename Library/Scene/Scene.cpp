@@ -2,6 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Camera/Camera.h"
+#include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
@@ -28,6 +29,10 @@ void Scene::Update(float elapsedTime)
 {
     // ゲームオブジェクトの更新
     _actorManager.Update(elapsedTime);
+
+    // ジョブシステムの処理待機
+	//JobSystem::Instance().WaitCalculationJob();
+
     // 当たり判定処理
     _actorManager.Judge();
 }

@@ -4,6 +4,7 @@
 
 #include "../Converter/ToString.h"
 
+#include "../../Library/JobSystem/JobSystem.h"
 
 #include "../../Library/Graphics/Graphics.h"
 
@@ -21,20 +22,54 @@ void ActorManager::Update(float elapsedTime)
 		_startActors[i].clear();
 	}
 
-	// 更新処理
-	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+	if (JobSystem::Instance().UseMultiThread())
 	{
-		float deltaTime = elapsedTime;
-		auto& [timeScale, duration] = _gameSpeeds[i];
-		if (duration > 0.0f)
+		std::vector<std::future<void>> jobResults;
+		// 更新処理
+		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
-			duration -= elapsedTime;
-			deltaTime *= timeScale;
-		}
+			float deltaTime = elapsedTime;
+			auto& [timeScale, duration] = _gameSpeeds[i];
+			if (duration > 0.0f)
+			{
+				duration -= elapsedTime;
+				deltaTime *= timeScale;
+			}
 
-		for (auto& actor : _updateActors[i])
+			for (auto& actor : _updateActors[i])
+			{
+				jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Animation",
+					ImGuiControl::Profiler::Color::Blue,
+					[&]()
+					{
+						actor->Update(deltaTime);
+					}
+				));
+			}
+		}
+		// すべてのジョブの終了を待機
+		for (auto& result : jobResults)
 		{
-			actor->Update(deltaTime);
+			result.get();
+		}
+	}
+	else
+	{
+		// 更新処理
+		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+		{
+			float deltaTime = elapsedTime;
+			auto& [timeScale, duration] = _gameSpeeds[i];
+			if (duration > 0.0f)
+			{
+				duration -= elapsedTime;
+				deltaTime *= timeScale;
+			}
+
+			for (auto& actor : _updateActors[i])
+			{
+				actor->Update(deltaTime);
+			}
 		}
 	}
 

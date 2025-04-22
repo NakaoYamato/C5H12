@@ -4,7 +4,7 @@
 #include <thread>
 using namespace ImGuiControl;
 
-ImGuiProfiler ImGuiControl::globalInstance;
+Profiler ImGuiControl::globalInstance;
 
 static inline unsigned int MultiplyColor(unsigned int c, float intensity)
 {
@@ -35,7 +35,7 @@ int FrameOffsetToFrameIndex(int currentFrameIndex, int frameIndexOffset, int max
     return PositiveModulo(currentFrameIndex - frameIndexOffset, maxFrames);
 }
 
-void ImGuiProfiler::Initialize(bool* isPaused, void(*setPause)(bool), int maxThreads)
+void Profiler::Initialize(bool* isPaused, void(*setPause)(bool), int maxThreads)
 {
     MaxThreads = maxThreads; // 実行時に設定可能なスレッド数
     _isPausedPtr = isPaused;
@@ -63,11 +63,11 @@ void ImGuiProfiler::Initialize(bool* isPaused, void(*setPause)(bool), int maxThr
     }
 }
 
-void ImGuiProfiler::Shutdown()
+void Profiler::Shutdown()
 {
 }
 
-void ImGuiProfiler::NewFrame()
+void Profiler::NewFrame()
 {
     if (IsPaused())
         return;
@@ -91,7 +91,7 @@ void ImGuiProfiler::NewFrame()
     frame.endTime = -1;
 }
 
-void ImGuiProfiler::PushSectionInternal(int threadIndex, const char* sectionName, unsigned int color, const char* fileName, int line)
+void Profiler::PushSectionInternal(int threadIndex, const char* sectionName, unsigned int color, const char* fileName, int line)
 {
     if (IsPaused())
         return;
@@ -130,7 +130,7 @@ void ImGuiProfiler::PushSectionInternal(int threadIndex, const char* sectionName
     thread.callStackDepth++;
 }
 
-void ImGuiProfiler::PopSectionInternal(int threadIndex)
+void Profiler::PopSectionInternal(int threadIndex)
 {
     if (IsPaused())
         return;
@@ -143,7 +143,7 @@ void ImGuiProfiler::PopSectionInternal(int threadIndex)
     thread.activeSectionIndex = section.parentSectionIndex;
 }
 
-void ImGuiProfiler::DrawUI()
+void Profiler::DrawUI()
 {
     bool showBorders = false;
 
@@ -206,10 +206,6 @@ void ImGuiProfiler::DrawUI()
     //-------------------------------------------------------------------------
     char buffer[255];
     auto& style = ImGui::GetStyle();
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
-    ImGui::Begin("Profiler", &_isWindowOpen);
-
     //-------------------------------------------------------------------------
     // Controls
     //-------------------------------------------------------------------------
@@ -686,12 +682,9 @@ void ImGuiProfiler::DrawUI()
     }
 
     ImGui::PopStyleVar(); // ImGuiStyleVar_ItemSpacing
-    ImGui::End();
-    ImGui::PopStyleVar(); // ImGuiStyleVar_FrameRounding
-    ImGui::PopStyleVar(); // ImGuiStyleVar_WindowPadding
 }
 
-void ImGuiProfiler::RefreshFrameSelection(double recordsMaxTime)
+void Profiler::RefreshFrameSelection(double recordsMaxTime)
 {
     int sectionAreaStartIndex = -1;
     int sectionAreaEndIndex = -1;

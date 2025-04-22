@@ -1,5 +1,7 @@
 #include "Animator.h"
 
+#include "../../Library/JobSystem/JobSystem.h"
+
 #include <imgui.h>
 
 Animator::Animator(Model* model) :
@@ -12,7 +14,31 @@ Animator::Animator(Model* model) :
 // 更新処理
 void Animator::Update(float elapsedTime)
 {
-	UpdateAnimation(elapsedTime);
+
+    //std::vector<std::future<void>> jobResults;
+    //// ジョブシステムに計算を任せる
+    //jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Animation",
+    //    ImGuiControl::Profiler::Color::Green,
+    //    [&]()
+    //    {
+    //        UpdateAnimation(elapsedTime);
+    //    }
+    //));
+
+    //// すべてのジョブの終了を待機
+    //for (auto& result : jobResults)
+    //{
+    //    result.get();
+    //}
+
+    //JobSystem::Instance().jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Animation",
+    //    ImGuiControl::Profiler::Color::Green,
+    //    [&]()
+    //    {
+    //        UpdateAnimation(elapsedTime);
+    //    }
+    //));
+    UpdateAnimation(elapsedTime);
 }
 
 // GUI描画
@@ -63,11 +89,11 @@ void Animator::UpdateAnimation(float elapsedTime)
 {
     if (_currentAnimIndex == -1)
         return;
-    std::vector<ModelResource::Node> poseNode = _model->GetPoseNodes();
+    std::vector<ModelResource::Node>& poseNode = _model->GetPoseNodes();
     // アニメーション計算処理
     ComputeAnimation(_currentAnimIndex, _currentAnimSeconds, poseNode);
     // ノード設定
-    _model->SetPoseNodes(poseNode);
+    //_model->SetPoseNodes(poseNode);
     // アニメーション経過時間更新
     UpdateAnimSeconds(elapsedTime);
 

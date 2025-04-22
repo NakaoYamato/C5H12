@@ -9,6 +9,7 @@
 //#include "../Effekseer/EffectManager.h"
 #include "../Renderer/MeshRenderer.h"
 #include "../Renderer/PrimitiveRenderer.h"
+#include "../JobSystem/JobSystem.h"
 
 #include "../Scene/SceneManager.h"
 
@@ -175,13 +176,16 @@ bool Framework::Initialize() const
     // デバッグの初期化
     Debug::Initialize();
 
+	// ジョブシステム初期化
+    JobSystem::Instance().Initialize();
+
     // ImGui初期化
     ImGuiManager::Initialize(_hwnd,
         Graphics::Instance().GetDevice(),
         Graphics::Instance().GetDeviceContext(),
         &imguiProfilerIsPause,
         [](bool pause) {imguiProfilerIsPause = pause; },
-        /*static_cast<int>(JobSystem::Instance().GetNumThreads()) + 1*/9);
+        static_cast<int>(JobSystem::Instance().GetNumThreads()) + 1);
 
     return true;
 }
@@ -250,6 +254,9 @@ void Framework::Render(float elapsedTime)
         // 描画管理者のGUI描画
         Graphics::Instance().DrawGui();
 
+        // ジョブシステムのGUI描画
+        JobSystem::Instance().DrawGui();
+
         // デバッグのGui描画
         Debug::DrawGui();
     }
@@ -272,6 +279,9 @@ bool Framework::Uninitialize()
 
     // エフェクトマネージャー終了化
     //EffectManager::Instance().Finalize();
+
+    // ジョブシステム終了
+    JobSystem::Instance().Finalize();
 
     // フルスクリーン時の終了処理
     BOOL fullscreen = 0;

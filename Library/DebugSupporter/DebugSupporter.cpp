@@ -5,6 +5,7 @@
 #include <debugapi.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
+#include <mutex>
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Converter/ToString.h"
@@ -15,6 +16,7 @@ namespace Debug
     DebugInput                  _debugInput;
     DebugCamera                 _debugCamera;
     std::unique_ptr<DebugRenderer> _debugRenderer;
+	std::mutex                 _debugMutex;
 
     bool _showCameraGui = false;
     bool _useGuizmo = false;
@@ -36,13 +38,23 @@ namespace Debug
         /// デバッグ文字出力
         void String(std::string str)
         {
+			std::lock_guard<std::mutex> lock(_debugMutex);
             _debugStrings.push_back(str);
             OutputDebugStringA(str.c_str());
         }
         void String(std::wstring str)
         {
+            std::lock_guard<std::mutex> lock(_debugMutex);
             _debugStrings.push_back(ToString(str));
             OutputDebugStringW(str.c_str());
+        }
+        void String(int value)
+        {
+			Output::String(std::to_string(value));
+        }
+        void String(float value)
+        {
+            Output::String(std::to_string(value));
         }
     }
 

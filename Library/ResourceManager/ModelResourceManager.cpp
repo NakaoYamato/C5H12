@@ -5,6 +5,9 @@
 
 std::shared_ptr<ModelResource> ModelResourceManager::LoadModelResource(const char* filename)
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
+
 	// すでに読み込まれていたらリソースを返す
 	for (auto& model : _models)
 	{

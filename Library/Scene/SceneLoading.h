@@ -38,6 +38,8 @@ private:
 private:
 	std::shared_ptr<Scene> _nextScene;
 	std::thread* _thread = nullptr;
+
+	float _loadingTimer = 0.0f;
 };
 
 

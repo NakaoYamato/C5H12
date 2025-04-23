@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <mutex>
 #include "../Resource/ModelResource.h"
 
 // モデルのリソースマネージャー
@@ -29,6 +30,9 @@ public:
 private:
 	using ModelMap = std::map<std::string, std::weak_ptr<ModelResource>>;
 	ModelMap		_models;
+
+	// 複数スレッドでのアクセスを防ぐためのミューテックス
+	std::mutex _mutex;
 
 	bool _showGui = false;
 };

@@ -1,6 +1,8 @@
 #include "SceneLoading.h"
 #include "../Graphics/Graphics.h"
 
+#include "../DebugSupporter/DebugSupporter.h"
+
 void SceneLoading::Initialize()
 {
 	//スレッド開始
@@ -18,12 +20,12 @@ void SceneLoading::Finalize()
 
 void SceneLoading::Update(float elapsedTime)
 {
-	//点滅速度(大きいほど早い)
-	float blink_speed = 0.3f;
-	
+	_loadingTimer += elapsedTime;
+
 	//次のシーンの準備が完了したらシーンを切り替える
 	if (_nextScene->IsReady())
 	{
+		Debug::Output::String(_loadingTimer);
 		SceneManager::Instance().ChangeScene(_nextScene);
 	}
 }

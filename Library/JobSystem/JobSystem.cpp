@@ -64,8 +64,9 @@ void JobSystem::WaitCalculationJob()
 
 void JobSystem::WorkerThread(size_t threadIndex)
 {
-	Debug::Output::String(L"スレッド開始:");
-	Debug::Output::String(std::to_string(threadIndex + 1) + "\n");
+	//Debug::Output::String(L"スレッド開始:");
+	//Debug::Output::String((int)threadIndex + 1);
+	//Debug::Output::String("\n");
     while (true)
     {
         Job job;
@@ -82,8 +83,12 @@ void JobSystem::WorkerThread(size_t threadIndex)
 
         if (job.task)
         {
+			//std::wstring str = L"タスク開始:" + std::to_wstring(threadIndex + 1) + L"\n";
+   //         Debug::Output::String(str);
             ProfileScopedSection_3(static_cast<int>(threadIndex + 1), job.name, job.color);
             job.task();
+            //str = L"\tタスク終了:" + std::to_wstring(threadIndex + 1) + L"\n";
+            //Debug::Output::String(str);
 
 			//jobCount.fetch_sub(1);
 			//if (jobCount.load() == 0)

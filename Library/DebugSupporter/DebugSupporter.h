@@ -33,6 +33,16 @@ namespace Debug
 		/// </summary>
 		/// <param name="str"></param>
 		void String(std::wstring str);
+		/// <summary>
+		/// デバッグ文字出力
+		/// </summary>
+		/// <param name="value"></param>
+		void String(int value);
+		/// <summary>
+		/// デバッグ文字出力
+		/// </summary>
+		/// <param name="value"></param>
+		void String(float value);
 	}
 
 	namespace Renderer

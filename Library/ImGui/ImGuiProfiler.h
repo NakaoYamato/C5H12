@@ -70,8 +70,8 @@ namespace ImGuiControl
         inline void LockCriticalSection2() {}
         inline void UnLockCriticalSection2() {}
 
-        inline bool IsPaused() const { return _isPausedPtr != nullptr && *_isPausedPtr; }
-        inline void SetPause(bool value) const { if (_setPause != nullptr) { _setPause(value); } }
+        inline bool IsPaused() { return _isPausedPtr != nullptr && *_isPausedPtr; }
+        inline void SetPause(bool value) { if (_setPause != nullptr) { _setPause(value); } }
 
         struct Section
         {
@@ -117,7 +117,7 @@ namespace ImGuiControl
         int                     _frameIndex = 0;
         std::vector<Thread>      _threads;
         bool*                   _isPausedPtr = nullptr;
-        void                    (*_setPause)(bool);
+        void                    (*_setPause)(bool) = nullptr;
 
         // Ui
         double      _timeOffset = 0.0;

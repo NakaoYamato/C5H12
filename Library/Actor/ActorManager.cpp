@@ -24,6 +24,9 @@ void ActorManager::Update(float elapsedTime)
 
 	if (JobSystem::Instance().UseMultiThread())
 	{
+		// 全体の計算時間
+		ProfileScopedSection_2(0, ActorManager, ImGuiControl::Profiler::Dark);
+
 		std::vector<std::future<void>> jobResults;
 		// 更新処理
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
@@ -38,7 +41,7 @@ void ActorManager::Update(float elapsedTime)
 
 			for (auto& actor : _updateActors[i])
 			{
-				jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Animation",
+				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(actor->GetName(),
 					ImGuiControl::Profiler::Color::Blue,
 					[&]()
 					{
@@ -68,6 +71,9 @@ void ActorManager::Update(float elapsedTime)
 
 			for (auto& actor : _updateActors[i])
 			{
+				// 各アクターの計算時間
+				ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Dark);
+
 				actor->Update(deltaTime);
 			}
 		}
@@ -316,14 +322,20 @@ void ActorManager::DrawGui()
 /// 指定要素の取得
 ActorMap& ActorManager::FindByTag(ActorTag tag)
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	return _updateActors[static_cast<size_t>(tag)];
 }
 ActorMap& ActorManager::FindByTagInStartActors(ActorTag tag)
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	return _startActors[static_cast<size_t>(tag)];
 }
 std::shared_ptr<Actor> ActorManager::FindByName(const std::string& name, ActorTag tag)
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	if (tag != ActorTag::ActorTagMax)
 	{
 		for (auto& actor : _updateActors[static_cast<size_t>(tag)])
@@ -349,6 +361,8 @@ std::shared_ptr<Actor> ActorManager::FindByName(const std::string& name, ActorTa
 }
 std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string& name, ActorTag tag)
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	if (tag != ActorTag::ActorTagMax)
 	{
 		for (auto& actor : _startActors[static_cast<size_t>(tag)])
@@ -376,6 +390,8 @@ std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string&
 // 要素の全削除
 void ActorManager::Clear()
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		_startActors[i].clear();
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
@@ -391,6 +407,8 @@ void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
 	if (FindByName(actor->GetName(), tag))
 		assert(!"名前の重複");
 #endif
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	// 当たり判定フラグを設定
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
@@ -398,12 +416,14 @@ void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
 	}
 	actor->SetJudgeTagFlag(ActorTag::DrawContextParameter, false);
 	//　startActorsに登録
-	FindByTagInStartActors(tag).emplace_back(actor);
+	_startActors[static_cast<size_t>(tag)].emplace_back(actor);
 }
 
 // 指定要素の削除
 void ActorManager::Remove(std::shared_ptr<Actor> actor)
 {
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
 	_removeActors.insert(actor);
 }
 void ActorManager::Remove(const std::string& name)

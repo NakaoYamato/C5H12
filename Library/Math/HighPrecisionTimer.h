@@ -124,7 +124,7 @@ public:
 	{
 		LONGLONG counter;
 		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&counter));
-		float ms = (float)(1000.0f * (counter - _baseTime) * _secondsPerCount);
+		float ms = 1000.0f * (float)((counter - _baseTime) * _secondsPerCount);
 		return ms;
 	}
 private:

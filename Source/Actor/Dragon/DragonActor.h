@@ -31,6 +31,9 @@ public:
 	// 生成時処理
 	void OnCreate() override;
 
+	// 開始関数
+	void Start() override;
+
 	// 更新処理
 	void Update(float elapsedTime) override;
 

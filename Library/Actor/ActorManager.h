@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <memory>
+#include <mutex>
 
 #include "Actor.h"
 
@@ -123,6 +124,9 @@ private:
 	ActorMap _updateActors[static_cast<size_t>(ActorTag::ActorTagMax)];
 	std::set<std::shared_ptr<Actor>> _selectionActors;
 	std::set<std::shared_ptr<Actor>> _removeActors;
+
+	// 複数スレッドでのアクセスを防ぐためのミューテックス
+	std::mutex _mutex;
 
 	// GUIで選択しているオブジェクト
 	std::string _showGuiObj = "";

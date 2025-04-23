@@ -72,7 +72,7 @@ void Profiler::NewFrame()
     if (IsPaused())
         return;
 
-    _timer.Tick();
+    //_timer.Tick();
 
     float time = _timer.GetMilliseconds();
 
@@ -185,7 +185,7 @@ void Profiler::DrawUI()
     float threadTitleHeight = 20.0f;
     float threadSpacing = 10.0f;
     unsigned int threadTitleBackColor = 0x60000000;
-    unsigned int threadBackColor = 0x40000000;
+    unsigned int threadBackColor = 0x40404040;
 
     // Sections
     float sectionHeight = 20;
@@ -240,6 +240,9 @@ void Profiler::DrawUI()
         {
             ImGui::OpenPopup("FamesMaxDurationPopup");
         }
+
+        ImGui::SameLine();
+        ImGui::Text(std::to_string(_timeDuration).c_str());
 
         if (ImGui::BeginPopup("FamesMaxDurationPopup"))
         {
@@ -445,7 +448,7 @@ void Profiler::DrawUI()
         ImGui::BeginChild(ImGui::GetID("Infos"), ImVec2(threadTitleWidth, threadTitleHeight), showBorders);
 
         int callStackDepth = 0;
-        if (ImGui::TreeNode(buffer, buffer))
+        if (ImGui::TreeNodeEx(buffer, ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_None))
         {
             callStackDepth = threadInfo.maxCallStackDepth;
             ImGui::TreePop();
@@ -521,6 +524,8 @@ void Profiler::DrawUI()
                 ImGui::SetTooltip("%s (%5.3f ms)\n%s(%d)\n",
                     section.name, endTime - section.startTime,
                     section.fileName, section.line);
+                //ImGui::SetTooltip("start:%f\nend:%f\n",
+                //    section.startTime, endTime);
             }
         }
 

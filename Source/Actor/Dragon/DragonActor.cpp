@@ -31,6 +31,12 @@ void DragonActor::OnCreate()
 	}
 }
 
+// 開始関数
+void DragonActor::Start()
+{
+	Actor::Start();
+}
+
 // 更新処理
 void DragonActor::Update(float elapsedTime)
 {

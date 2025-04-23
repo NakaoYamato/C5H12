@@ -211,7 +211,7 @@ bool Input::IsReleased(const std::string& action) const
 }
 
 /// 入力量があるアクションの値取得
-float Input::IsMoved(const std::string& action) const
+float Input::IsAxis(const std::string& action) const
 {
 	auto it = _currentMovedParameter.find(action);
 

@@ -3,6 +3,10 @@
 #include "../../Scene/Scene.h"
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
+#include "../../Library/Component/Rigidbody.h"
+#include "../../Source/Component/Player/PlayerInput.h"
+#include "../../Source/Component/Player/PlayerController.h"
+
 #include "PlayerSwordActor.h"
 #include "PlayerShieldActor.h"
 
@@ -13,6 +17,9 @@ void PlayerActor::OnCreate()
 	// コンポーネント追加
 	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
 	auto animator = AddComponent<Animator>(modelRenderer->GetModel());
+	auto rigidbody = AddComponent<Rigidbody>();
+	auto playerInput = AddComponent<PlayerInput>();
+	auto playerController = AddComponent<PlayerController>();
 
 	// 剣生成
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(u8"PlayerSword", ActorTag::Player);

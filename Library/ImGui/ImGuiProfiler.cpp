@@ -536,6 +536,7 @@ void Profiler::DrawUI()
     //-------------------------------------------------------------------------
     // Interactions on the section area 
     //-------------------------------------------------------------------------
+    if (interactionAreaSize.x != 0.0f && interactionAreaSize.y != 0.0f)
     {
         ImGui::SetCursorScreenPos(interactionAreaMin);
         ImGui::InvisibleButton("", interactionAreaSize);

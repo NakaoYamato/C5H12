@@ -18,7 +18,7 @@ class Input;
 #define _INPUT_IS_PRESSED(action) Input::Instance().IsPressed(action)
 #define _INPUT_IS_TRIGGERD(action) Input::Instance().IsTriggerd(action)
 #define _INPUT_IS_RELEASED(action) Input::Instance().IsReleased(action)
-#define _INPUT_IS_MOVED(action) Input::Instance().IsMoved(action)
+#define _INPUT_IS_AXIS(action) Input::Instance().IsAxis(action)
 
 /// <summary>
 /// 入力情報監視クラス
@@ -99,7 +99,7 @@ public:
 	/// </summary>
 	/// <param name="action">調べたいアクションの名前</param>
 	/// <returns></returns>
-	float IsMoved(const std::string& action)const;
+	float IsAxis(const std::string& action)const;
 
 	void ClearMapData();
 public:

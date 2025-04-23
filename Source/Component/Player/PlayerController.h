@@ -1,0 +1,25 @@
+#pragma once
+
+#include "../../Library/Component/Component.h"
+#include "../../Library/Component/Rigidbody.h"
+#include "PlayerInput.h"
+
+class PlayerController : public Component
+{
+public:
+	PlayerController() {}
+	~PlayerController() override {}
+
+	// 名前取得
+	const char* GetName() const override { return "PlayerController"; }
+
+	// 開始処理
+	void Start() override;
+
+	// 更新処理
+	void Update(float elapsedTime) override;
+
+private:
+	std::weak_ptr<Rigidbody> _rigidbody;
+	std::weak_ptr<PlayerInput> _playerInput;
+};

@@ -1,6 +1,6 @@
 #include "DebugCamera.h"
 
-#include "../../Library/Camera/Camera.h"
+#include "../../Library/Scene/SceneManager.h"
 #include "../../Library/Input/Input.h"
 #include "../DebugSupporter.h"
 #include "../../Library/Math/Quaternion.h"
@@ -15,12 +15,14 @@ void DebugCamera::Update(float elapsedTime)
     // F4を押していたら起動
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
     {
+        // ローディング等でカメラがないときは処理しない
+		auto& mainCamera = SceneManager::Instance().GetCurrentScene()->GetMainCamera();
         // 起動した瞬間なら現在の視点と角度を引き継ぐ
         if (!_isActive)
         {
-            _eye = Camera::Instance().GetEye();
+            _eye = mainCamera.GetEye();
             DirectX::XMVECTOR S, R, T;
-            DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&Camera::Instance().GetView())));
+            DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&mainCamera.GetView())));
             _angle = QuaternionToRollPitchYaw(R);
         }
 
@@ -83,7 +85,7 @@ void DebugCamera::Update(float elapsedTime)
         _target.z = _eye.z + front.z * _range;
 
         // カメラの視点と注意点を設定
-        Camera::Instance().SetLookAt(_eye, _target, DirectX::XMFLOAT3(0, 1, 0));
+        mainCamera.SetLookAt(_eye, _target, DirectX::XMFLOAT3(0, 1, 0));
 #else
         // カメラ回転値を回転行列に変換
         DirectX::XMMATRIX Transform =

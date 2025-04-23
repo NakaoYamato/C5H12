@@ -70,6 +70,10 @@ public:
 		_sceneDatas[str] = std::make_unique<T>(arg...);
 	}
 	
+	std::shared_ptr<Scene> GetCurrentScene()
+	{
+		return _currentScene;
+	}
 private:
 	std::shared_ptr<Scene> _currentScene;
 	std::shared_ptr<Scene> _nextScene;

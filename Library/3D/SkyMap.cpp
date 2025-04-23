@@ -55,8 +55,8 @@ void SkyMap::Blit(const RenderContext& rc)
 
 	dc->PSSetShaderResources(0, 1, _shaderResourceView.GetAddressOf());
 
-	DirectX::XMMATRIX        VP = DirectX::XMLoadFloat4x4(&rc.camera->view) *
-		DirectX::XMLoadFloat4x4(&rc.camera->projection);
+	DirectX::XMMATRIX        VP = DirectX::XMLoadFloat4x4(&rc.camera->GetView()) *
+		DirectX::XMLoadFloat4x4(&rc.camera->GetProjection());
 	Constants data;
 	DirectX::XMStoreFloat4x4(&data.inverseViewProjection, DirectX::XMMatrixInverse(NULL, VP));
 

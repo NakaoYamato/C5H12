@@ -2,13 +2,15 @@
 
 #include <imgui.h>
 
+#include "../../Library/Scene/SceneManager.h"
 #include "../../Library/Camera/Camera.h"
 
 // XVˆ—
 void DepthOfField::Update(float elapsedTime)
 {
+    auto& mainCamera = SceneManager::Instance().GetCurrentScene()->GetMainCamera();
     // ƒJƒƒ‰î•ñ‚ğæ“¾
-    _data.cameraClipDistance = Vector4(Camera::Instance().GetFocus() - Camera::Instance().GetEye());
+    _data.cameraClipDistance = Vector4(mainCamera.GetFocus() - mainCamera.GetEye());
 }
 
 void DepthOfField::DrawGui()

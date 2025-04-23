@@ -10,7 +10,7 @@
 #include "../Component/Component.h"
 #include "../Component/Collider/ColliderBaseComponent.h"
 
-#include "../Camera/Camera.h"
+#include "../Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include <ImGuizmo.h>
 
@@ -193,12 +193,14 @@ void Actor::DrawGui()
 		ImGui::EndTabBar();
 	}
 
+	// ギズモ表示
 	if (_useGuizmo)
 	{
 		DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
-		if (Debug::Guizmo(Camera::Instance().GetView(), Camera::Instance().GetProjection(),
+		if (Debug::Guizmo(GetScene()->GetMainCamera().GetView(), GetScene()->GetMainCamera().GetProjection(),
 			&transform))
 		{
+			// 親子関係、単位を考慮して行列から位置、回転、スケールを取得
 			DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
 			DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[_transform.GetCoordinateType()]) *
 				DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };

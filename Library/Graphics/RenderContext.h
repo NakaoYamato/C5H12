@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../Camera/CameraData.h"
+#include "../Camera/Camera.h"
 #include "RenderState.h"
 #include "../Math/Vector.h"
 #include "Light.h"
@@ -14,7 +14,7 @@ struct RenderContext
 {
 	ID3D11DeviceContext* deviceContext = nullptr;
 	const RenderState* renderState = nullptr;
-	const CameraData* camera = nullptr;
+	const Camera* camera = nullptr;
 	// ÉâÉCÉgèÓïÒ
 	Vector4 lightDirection		= _VECTOR4_UP;
 	Vector4 lightColor			= _VECTOR4_WHITE;

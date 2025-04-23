@@ -9,6 +9,7 @@
 
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/Component/Light/LightController.h"
+#include "../../Library/Camera/Camera.h"
 
 #pragma region 定義
 #define _RENDER_FRAME_INDEX         0
@@ -81,6 +82,7 @@ public:
 		return actor;
 	}
 
+#pragma region アクセサ
 	// アクター管理者取得
 	ActorManager& GetActorManager() { return _actorManager; }
 
@@ -89,13 +91,23 @@ public:
 		return _renderContext;
 	}
 
+	// 平行光源取得
+	std::shared_ptr<LightController> GetDirectionalLight() {
+		return _directionalLight.lock();
+	}
+	// カメラ取得
+	Camera& GetMainCamera() {
+		return _camera;
+	}
+#pragma endregion
 private:
-	std::unique_ptr<Sprite> _fullscreenQuad;
-	std::unique_ptr<SkyMap> _skyMap;
+	std::unique_ptr<Sprite>			_fullscreenQuad;
+	std::unique_ptr<SkyMap>			_skyMap;
 
-	std::weak_ptr<LightController> _directionalLight;
+	std::weak_ptr<LightController>	_directionalLight;
+	Camera							_camera = {};
 
-	RenderContext _renderContext;
-	ActorManager _actorManager;
-	bool _ready = false;
+	RenderContext					_renderContext;
+	ActorManager					_actorManager;
+	bool							_ready = false;
 };

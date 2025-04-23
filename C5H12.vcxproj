@@ -153,6 +153,7 @@
     <ClCompile Include="Library\3D\SkyMap.cpp" />
     <ClCompile Include="Library\Actor\Actor.cpp" />
     <ClCompile Include="Library\Actor\ActorManager.cpp" />
+    <ClCompile Include="Library\Actor\Camera\MainCamera.cpp" />
     <ClCompile Include="Library\Application\Framework.cpp" />
     <ClCompile Include="Library\Application\Main.cpp" />
     <ClCompile Include="Library\Camera\Camera.cpp" />
@@ -237,10 +238,10 @@
     <ClInclude Include="Library\3D\SkyMap.h" />
     <ClInclude Include="Library\Actor\Actor.h" />
     <ClInclude Include="Library\Actor\ActorManager.h" />
+    <ClInclude Include="Library\Actor\Camera\MainCamera.h" />
     <ClInclude Include="Library\Application\Framework.h" />
     <ClInclude Include="Library\Camera\Camera.h" />
     <ClInclude Include="Library\Camera\CameraController.h" />
-    <ClInclude Include="Library\Camera\CameraData.h" />
     <ClInclude Include="Library\Component\Animator.h" />
     <ClInclude Include="Library\Component\Collider\ColliderBaseComponent.h" />
     <ClInclude Include="Library\Component\Component.h" />

@@ -539,8 +539,8 @@ namespace MeshRenderer
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
 		// カメラ距離でソート
-		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->eye);
-		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->front);
+		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
+		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
 		for (auto& drawInfo : _alphaDrawInfomap)
 		{
 			const std::vector<ModelResource::Node>& nodes = drawInfo.model->GetPoseNodes();

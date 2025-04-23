@@ -1,7 +1,6 @@
 #include "Scene.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/Camera/Camera.h"
 #include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
@@ -10,6 +9,7 @@
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 
 #include "../../Library/Component/Light/LightController.h"
+#include "../../Library/Actor/Camera/MainCamera.h"
 
 // 初期化
 void Scene::Initialize()
@@ -25,6 +25,9 @@ void Scene::Initialize()
         std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
         _directionalLight = light->AddComponent<LightController>();
         light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(60.0f));
+    }
+    {
+        auto mainCamera = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::DrawContextParameter);
     }
 }
 
@@ -82,7 +85,7 @@ void Scene::Render()
     RenderContext& rc = GetRenderContext();
     rc.deviceContext = dc;
     rc.renderState = graphics.GetRenderState();
-    rc.camera = &Camera::Instance().GetDate();
+    rc.camera = &GetMainCamera();
     rc.lightDirection = _VECTOR4_RIGHT;
     rc.lightColor = _VECTOR4_WHITE;
     rc.lightAmbientColor = _VECTOR4_BLACK;
@@ -171,10 +174,10 @@ void Scene::Render()
         MeshRenderer::RenderAlpha(rc);
 
         // プリミティブ描画
-        PrimitiveRenderer::Render(dc, rc.camera->view, rc.camera->projection);
+        PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
 
         // デバッグ描画
-        Debug::Renderer::Render(rc.camera->view, rc.camera->projection);
+        Debug::Renderer::Render(rc.camera->GetView(), rc.camera->GetProjection());
     }
     renderFrame->Deactivate(dc);
     // フレームバッファ0番の処理終了

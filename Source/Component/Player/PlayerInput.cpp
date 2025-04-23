@@ -1,7 +1,7 @@
 #include "PlayerInput.h"
 
 #include "../../Library/Input/Input.h"
-#include "../../Camera/Camera.h"
+#include "../../Library/Scene/Scene.h"
 
 #include <imgui.h>
 
@@ -17,8 +17,8 @@ void PlayerInput::Update(float elapsedTime)
 	Vector2 lAxisValue = Vector2(_INPUT_IS_AXIS("AxisLX"), _INPUT_IS_AXIS("AxisLY"));
 
 	// ƒJƒƒ‰‚Ì³–Ê•ûŒü‚Æ‰E•ûŒü‚ğæ“¾
-	Vector3 frontVec = Camera::Instance().GetFront();
-	Vector3 rightVec = Camera::Instance().GetRight();
+	Vector3 frontVec = GetActor()->GetScene()->GetMainCamera().GetFront();
+	Vector3 rightVec = GetActor()->GetScene()->GetMainCamera().GetRight();
 
 	// Y²‚Ì¬•ª‚ğ0‚É‚µ‚Ä³‹K‰»
 	frontVec.y = 0.0f;

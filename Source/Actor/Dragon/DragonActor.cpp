@@ -11,6 +11,8 @@
 // ¶¬ˆ—
 void DragonActor::OnCreate()
 {
+	Actor::OnCreate();
+
 	GetTransform().SetCoordinateType(COORDINATE_TYPE::RHS_Z_UP);
 	GetTransform().SetLengthScale(0.01f);
 

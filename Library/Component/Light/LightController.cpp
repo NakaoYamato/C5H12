@@ -1,7 +1,7 @@
 #include "LightController.h"
 
 #include "../../DebugSupporter/DebugSupporter.h"
-#include "../../Camera/Camera.h"
+#include "../../Scene/Scene.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -13,8 +13,8 @@ void LightController::DebugRender(const RenderContext& rc)
     // ƒqƒGƒ‰ƒ‹ƒL[‚É•\Ž¦’†‚Ì‚Ý•`‰æ
     if (GetActor()->DrawHierarchy())
     {
-        const DirectX::XMFLOAT4X4& view = Camera::Instance().GetView();
-        const DirectX::XMFLOAT4X4& projection = Camera::Instance().GetProjection();
+        const DirectX::XMFLOAT4X4& view = GetActor()->GetScene()->GetMainCamera().GetView();
+        const DirectX::XMFLOAT4X4& projection = GetActor()->GetScene()->GetMainCamera().GetProjection();
         if (Debug::Guizmo(view, projection, &transform, ImGuizmo::OPERATION::ROTATE))
         {
             DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);

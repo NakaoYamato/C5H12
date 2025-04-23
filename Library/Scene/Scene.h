@@ -7,6 +7,9 @@
 #include "../../Library/3D/SkyMap.h"
 #include "../../Library/Actor/ActorManager.h"
 
+#include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/Component/Light/LightController.h"
+
 #pragma region 定義
 #define _RENDER_FRAME_INDEX         0
 #define _APPLY_SHADOW_FRAME_INDEX   1
@@ -81,9 +84,16 @@ public:
 	// アクター管理者取得
 	ActorManager& GetActorManager() { return _actorManager; }
 
+	// RenderContext取得
+	RenderContext& GetRenderContext() { return _renderContext; }
+
 private:
 	std::unique_ptr<Sprite> _fullscreenQuad;
 	std::unique_ptr<SkyMap> _skyMap;
+
+	std::weak_ptr<LightController> _directionalLight;
+
+	RenderContext _renderContext;
 	ActorManager _actorManager;
 	bool _ready = false;
 };

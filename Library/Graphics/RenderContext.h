@@ -12,9 +12,9 @@
 /// </summary>
 struct RenderContext
 {
-	ID3D11DeviceContext* deviceContext;
-	const RenderState* renderState;
-	const CameraData* camera;
+	ID3D11DeviceContext* deviceContext = nullptr;
+	const RenderState* renderState = nullptr;
+	const CameraData* camera = nullptr;
 	// ÉâÉCÉgèÓïÒ
 	Vector4 lightDirection		= _VECTOR4_UP;
 	Vector4 lightColor			= _VECTOR4_WHITE;

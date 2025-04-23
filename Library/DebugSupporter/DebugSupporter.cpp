@@ -129,13 +129,17 @@ namespace Debug
     bool Guizmo(
         const DirectX::XMFLOAT4X4& view, 
         const DirectX::XMFLOAT4X4& projection,
-        DirectX::XMFLOAT4X4* transform)
+        DirectX::XMFLOAT4X4* transform,
+        int guizmoOperation)
     {
         // 1フレームに複数のギズモを使用できないようにしている
         if (_useGuizmo)return false;
         _useGuizmo = true;
         return ImGuizmo::Manipulate(
-            &view._11, &projection._11, _guizmoOperation, _guizmoMode,
+            &view._11, &projection._11,
+            guizmoOperation != -1 ?
+                (ImGuizmo::OPERATION)guizmoOperation : _guizmoOperation,
+            _guizmoMode,
             &transform->_11,
             nullptr);
     }

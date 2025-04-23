@@ -9,6 +9,8 @@
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 
+#include "../../Library/Component/Light/LightController.h"
+
 // 初期化
 void Scene::Initialize()
 {
@@ -16,6 +18,13 @@ void Scene::Initialize()
         L"",
         "./Data/Shader/FullscreenQuadVS.cso",
         "./Data/Shader/SpritePS.cso");
+
+    // 必須オブジェクト生成
+    ActorManager& actorManager = GetActorManager();
+    {
+        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
+        _directionalLight = light->AddComponent<LightController>();
+    }
 }
 
 // 終了化
@@ -66,7 +75,7 @@ void Scene::Render()
     }
 
     // レンダーコンテキスト作成
-    RenderContext rc{};
+    RenderContext& rc = GetRenderContext();
     rc.deviceContext = dc;
     rc.renderState = graphics.GetRenderState();
     rc.camera = &Camera::Instance().GetDate();
@@ -82,6 +91,13 @@ void Scene::Render()
         dc->PSSetShaderResources(_SKYMAP_SPECULAR_SRV_SLOT_INDEX,   1, _skyMap->GetSpecularSRV().GetAddressOf());
         dc->PSSetShaderResources(_SKYMAP_LUT_SRV_SLOT_INDEX,        1, _skyMap->GetLutSRV().GetAddressOf());
     }
+    if (_directionalLight.lock())
+    {
+		auto light = _directionalLight.lock();
+		rc.lightDirection = light->GetDirection();
+		rc.lightColor = light->GetColor();
+		rc.lightAmbientColor = light->GetAmbientColor();
+	}
 
     // レンダーステート設定
     dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);

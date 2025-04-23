@@ -35,18 +35,33 @@ void JobSystem::Finalize()
 
 void JobSystem::DrawGui()
 {
-    if (ImGui::Begin("JobSystem"))
+    // メニューバー
+    if (ImGui::BeginMainMenuBar())
     {
+        if (ImGui::BeginMenu(u8"デバッグ"))
         {
-            std::unique_lock<std::mutex> lock(queueMutex);
-            ImGui::Text(u8"タスク数: %d", jobQueue.size());
+            ImGui::Checkbox("JobSystem", &_drawGui);
+            ImGui::EndMenu();
         }
-        ImGui::Text(u8"タスク総数: %d", jobSumCount.load());
-		ImGui::Checkbox("UseMultiThread", &_useMultiThread);
 
-        ProfileDrawUI();
+        ImGui::EndMainMenuBar();
     }
-	ImGui::End();
+
+    if (_drawGui)
+    {
+        if (ImGui::Begin("JobSystem"))
+        {
+            {
+                std::unique_lock<std::mutex> lock(queueMutex);
+                ImGui::Text(u8"タスク数: %d", jobQueue.size());
+            }
+            ImGui::Text(u8"タスク総数: %d", jobSumCount.load());
+            ImGui::Checkbox("UseMultiThread", &_useMultiThread);
+
+            ProfileDrawUI();
+        }
+        ImGui::End();
+    }
 }
 
 // ジョブの計算を待機

@@ -4,7 +4,6 @@
 #include "../../Library/Camera/Camera.h"
 
 // コンポーネント
-#include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Component/Light/PointLightController.h"
 #include "../../Library/Component/ShapeController.h"
 
@@ -37,11 +36,6 @@ void SceneDragonDebug::Initialize()
 
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
-    {
-        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
-        auto lc = light->AddComponent<LightController>();
-        lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
-    }
     {
         auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
 

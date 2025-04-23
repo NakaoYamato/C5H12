@@ -84,6 +84,7 @@ private:
     std::atomic<int> jobSumCount;
 
 #pragma region デバッグ用
+	bool _drawGui = false; // GUIを描画するか
     bool _useMultiThread = true;
 #pragma endregion
 

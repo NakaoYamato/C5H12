@@ -174,7 +174,8 @@ namespace Debug
 	bool Guizmo(
 		const DirectX::XMFLOAT4X4& view,
 		const DirectX::XMFLOAT4X4& projection,
-		DirectX::XMFLOAT4X4* transform);
+		DirectX::XMFLOAT4X4* transform,
+		int guizmoOperation = -1);
 
 	/// <summary>
 	/// デバッグGUI表示

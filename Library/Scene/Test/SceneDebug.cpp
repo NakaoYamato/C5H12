@@ -7,7 +7,6 @@
 #include "../../Library/JobSystem/JobSystem.h"
 
 // コンポーネント
-#include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Component/Light/PointLightController.h"
 
 #include "../../Library/Component/ShapeController.h"
@@ -52,15 +51,6 @@ void SceneDebug::Initialize()
         // あんま早くならん
         std::vector<std::future<void>> jobResults;
 
-        jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Light",
-            ImGuiControl::Profiler::Color::Blue,
-            [&]()
-            {
-                std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
-                auto lc = light->AddComponent<LightController>();
-                lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
-            }
-        ));
         jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Light",
             ImGuiControl::Profiler::Color::Blue,
             [&]()
@@ -128,11 +118,6 @@ void SceneDebug::Initialize()
     }
     else
     {
-        {
-            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
-            auto lc = light->AddComponent<LightController>();
-            lc->GetLight().SetDirection({ -0.012f,-0.819f,0.574f, 0.0f });
-        }
         {
             std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight0", ActorTag::DrawContextParameter);
             light->AddComponent<PointLightController>();

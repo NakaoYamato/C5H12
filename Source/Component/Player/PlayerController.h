@@ -19,7 +19,12 @@ public:
 	// XVˆ—
 	void Update(float elapsedTime) override;
 
+	// GUI•`‰æ
+	void DrawGui() override;
+
 private:
 	std::weak_ptr<Rigidbody> _rigidbody;
 	std::weak_ptr<PlayerInput> _playerInput;
+
+	float _moveSpeed = 10.0f;
 };

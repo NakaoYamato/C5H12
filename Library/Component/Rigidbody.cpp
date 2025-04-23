@@ -24,6 +24,14 @@ void Rigidbody::Update(float elapsedTime)
 		return;
 	}
 
+	// 空気抗力計算
+	{
+		float currentVelocityLenSq = Vec3LengthSq(_linearVelocity);
+		float dragFactor = 0.5f * _dragCoefficient * currentVelocityLenSq;
+		Vector3  dragForce = Vec3Normalize(_linearVelocity) * -dragFactor;
+		AddForce(dragForce);
+	}
+
 	//力(accumulated_force)から加速度(linear_acceleration)を算出し速度(linear_velocity)を更新する
 	_oldLinearVelocity = _linearVelocity;
 	DirectX::XMVECTOR linearAcceleration = {};
@@ -82,18 +90,19 @@ void Rigidbody::Update(float elapsedTime)
 // GUI描画
 void Rigidbody::DrawGui()
 {
-	ImGui::DragFloat3("linear velocity", &_linearVelocity.x, 0.01f);
-	ImGui::DragFloat3("angular velocity", &_angularVelocity.x, 0.01f);
+	ImGui::DragFloat3(u8"並進速度", &_linearVelocity.x, 0.01f);
+	ImGui::DragFloat3(u8"角速度", &_angularVelocity.x, 0.01f);
 
 	ImGui::Separator();
-	ImGui::DragFloat3("old position", &_oldPosition.x, 0.01f);
-	ImGui::DragFloat3("old linear velocity", &_oldLinearVelocity.x, 0.01f);
-	ImGui::DragFloat3("old angular velocity", &_oldAngularVelocity.x, 0.01f);
+	ImGui::DragFloat3(u8"前のフレームの位置", &_oldPosition.x, 0.01f);
+	ImGui::DragFloat3(u8"前のフレームの並進速度", &_oldLinearVelocity.x, 0.01f);
+	ImGui::DragFloat3(u8"前のフレームの角速度", &_oldAngularVelocity.x, 0.01f);
 
 	ImGui::Separator();
-	ImGui::DragFloat("mass", &_inertialMass, 0.01f);
-	ImGui::DragFloat("static friction", &_staticFriction, 0.01f);
-	ImGui::DragFloat("dynamic friction", &_dynamicFriction, 0.01f);
+	ImGui::DragFloat(u8"慣性質量", &_inertialMass, 0.01f);
+	ImGui::DragFloat(u8"抗力係数", &_dragCoefficient, 0.01f);
+	ImGui::DragFloat(u8"静止摩擦係数", &_staticFriction, 0.01f);
+	ImGui::DragFloat(u8"動摩擦係数", &_dynamicFriction, 0.01f);
 }
 
 void Rigidbody::AddForce(const DirectX::XMVECTOR& force)

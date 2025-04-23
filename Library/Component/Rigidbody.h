@@ -37,6 +37,7 @@ public:
 #pragma region アクセサ
 	const Vector3& GetLinearVelocity() const { return _linearVelocity; }
 	const Vector3& GetAngularVelocity() const { return _angularVelocity; }
+	float GetDragCoefficient() const { return _dragCoefficient; }
 	float GetInertialMass() const { return _inertialMass; }
 	float GetStaticFriction() const { return _staticFriction; }
 	float GetDynamicFriction() const { return _dynamicFriction; }
@@ -45,6 +46,7 @@ public:
 	void SetLinearVelocity(const Vector3& linearVelocity) { _linearVelocity = linearVelocity; }
 	// *注意*　下手に使うと物理挙動が変わる
 	void SetAngularVelocity(const Vector3& angularVelocity) { _angularVelocity = angularVelocity; }
+	void SetDragCoefficient(float dragCoefficient) { _dragCoefficient = dragCoefficient; }
 	void SetInertialMass(float inertialMass) { _inertialMass = inertialMass; }
 	void SetStaticFriction(float staticFriction) { _staticFriction = staticFriction; }
 	void SetDynamicFriction(float dynamicFriction) { _dynamicFriction = dynamicFriction; }
@@ -104,10 +106,8 @@ private:
 	Vector3				_accumulatedForce = {};		//力のアキュムレータ
 	Vector3				_accumulatedTorque = {};	//トルクアキュムレータ
 
-	// 各形状に対しての反発係数(0 < e < 1)
-	float				_restitutionVsSphere = 0.6f;
-	float				_restitutionVsPlane = 0.3f;
-	float				_restitutionVsBox = 0.6f;
+	// 抗力係数
+	float _dragCoefficient = 0.5f;
 
 	// 静止摩擦係数
 	float				_staticFriction = 0.5f;

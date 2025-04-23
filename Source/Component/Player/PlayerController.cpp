@@ -1,5 +1,7 @@
 #include "PlayerController.h"
 
+#include <imgui.h>
+
 void PlayerController::Start()
 {
 	_rigidbody = GetActor()->GetComponent<Rigidbody>();
@@ -14,7 +16,13 @@ void PlayerController::Update(float elapsedTime)
 		Vector3 movement = playerInput->GetMovement();
 		if (movement.x != 0.0f || movement.z != 0.0f)
 		{
-			_rigidbody.lock()->AddForce(movement);
+			_rigidbody.lock()->AddForce(movement * _moveSpeed);
 		}
 	}
+}
+
+// GUI•`‰æ
+void PlayerController::DrawGui()
+{
+	ImGui::DragFloat("MoveSpeed", &_moveSpeed, 0.01f, 0.0f, 100.0f);
 }

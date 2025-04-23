@@ -137,6 +137,9 @@ protected:
 	// トランスフォーム更新
 	virtual void UpdateTransform();
 
+	// ギズモ描画
+	virtual void DrawGuizmo();
+
 protected:
 	Scene* _scene = nullptr;
 

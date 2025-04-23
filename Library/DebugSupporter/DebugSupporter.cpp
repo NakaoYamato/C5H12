@@ -130,7 +130,8 @@ namespace Debug
         const DirectX::XMFLOAT4X4& view, 
         const DirectX::XMFLOAT4X4& projection,
         DirectX::XMFLOAT4X4* transform,
-        int guizmoOperation)
+        int guizmoOperation,
+        int guizmoMode)
     {
         // 1フレームに複数のギズモを使用できないようにしている
         if (_useGuizmo)return false;
@@ -139,7 +140,8 @@ namespace Debug
             &view._11, &projection._11,
             guizmoOperation != -1 ?
                 (ImGuizmo::OPERATION)guizmoOperation : _guizmoOperation,
-            _guizmoMode,
+            guizmoMode != -1 ?
+                (ImGuizmo::MODE)guizmoMode : _guizmoMode,
             &transform->_11,
             nullptr);
     }

@@ -22,6 +22,9 @@ protected:
 		_transform.UpdateTransform(&_parentNode->worldTransform);
 	}
 
+	// ÉMÉYÉÇï`âÊ
+	void DrawGuizmo() override;
+
 protected:
 	Actor* _owner = nullptr;
 	const ModelResource::Node* _parentNode = nullptr;

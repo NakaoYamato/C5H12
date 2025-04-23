@@ -15,7 +15,7 @@ void LightController::DebugRender(const RenderContext& rc)
     {
         const DirectX::XMFLOAT4X4& view = GetActor()->GetScene()->GetMainCamera().GetView();
         const DirectX::XMFLOAT4X4& projection = GetActor()->GetScene()->GetMainCamera().GetProjection();
-        if (Debug::Guizmo(view, projection, &transform, ImGuizmo::OPERATION::ROTATE))
+        if (Debug::Guizmo(view, projection, &transform, ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL))
         {
             DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
             DirectX::XMVECTOR S, R, T;

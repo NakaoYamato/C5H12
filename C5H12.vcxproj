@@ -225,6 +225,7 @@
     <ClCompile Include="Source\Actor\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Actor\WeaponActor.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Component\Stage\GrassController.cpp" />

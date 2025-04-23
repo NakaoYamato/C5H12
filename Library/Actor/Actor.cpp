@@ -196,25 +196,7 @@ void Actor::DrawGui()
 	// ギズモ表示
 	if (_useGuizmo)
 	{
-		DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
-		if (Debug::Guizmo(GetScene()->GetMainCamera().GetView(), GetScene()->GetMainCamera().GetProjection(),
-			&transform))
-		{
-			// 親子関係、単位を考慮して行列から位置、回転、スケールを取得
-			DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
-			DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[_transform.GetCoordinateType()]) *
-				DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };
-			M = DirectX::XMMatrixInverse(nullptr, C) * M;
-			DirectX::XMVECTOR S, R, T;
-			DirectX::XMMatrixDecompose(&S, &R, &T, M);
-			Vector3 s, r, t;
-			DirectX::XMStoreFloat3(&s, S);
-			DirectX::XMStoreFloat3(&t, T);
-			r = QuaternionToRollPitchYaw(R);
-			_transform.SetPosition(t);
-			_transform.SetScale(s);
-			_transform.SetAngle(r);
-		}
+		DrawGuizmo();
 	}
 }
 
@@ -267,4 +249,28 @@ void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3&
 void Actor::UpdateTransform()
 {
 	_transform.UpdateTransform(nullptr);
+}
+
+// ギズモ描画
+void Actor::DrawGuizmo()
+{
+	DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
+	if (Debug::Guizmo(GetScene()->GetMainCamera().GetView(), GetScene()->GetMainCamera().GetProjection(),
+		&transform))
+	{
+		// 単位を考慮した行列から位置、回転、スケールを取得
+		DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
+		DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[_transform.GetCoordinateType()]) *
+			DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };
+		M = DirectX::XMMatrixInverse(nullptr, C) * M;
+		DirectX::XMVECTOR S, R, T;
+		DirectX::XMMatrixDecompose(&S, &R, &T, M);
+		Vector3 s, r, t;
+		DirectX::XMStoreFloat3(&s, S);
+		DirectX::XMStoreFloat3(&t, T);
+		r = QuaternionToRollPitchYaw(R);
+		_transform.SetPosition(t);
+		_transform.SetScale(s);
+		_transform.SetAngle(r);
+	}
 }

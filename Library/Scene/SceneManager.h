@@ -35,6 +35,9 @@ public:
 		return ins_;
 	}
 
+	// 初期化
+	void Initialize();
+
 	// 更新処理
 	void Update(float elapsedTime);
 
@@ -73,6 +76,9 @@ private:
 
 	// デバッグ用で保存しているシーン
 	std::unordered_map<std::string, std::unique_ptr<Scene>> _sceneDatas;
+
+	// Debugビルドでのデフォルトシーン
+	std::string _defaultSceneName = "";
 };
 
 template<class T, typename ...Arg>

@@ -170,8 +170,8 @@ bool Framework::Initialize() const
     //// エフェクトマネージャー初期化
     //EffectManager::Instance().Initialize();
 
-    // シーンの初期設定
-    SceneManager::Instance().ChangeScene(u8"デバッグ");
+    // シーンの初期化
+    SceneManager::Instance().Initialize();
 
     // デバッグの初期化
     Debug::Initialize();

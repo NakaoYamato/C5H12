@@ -22,4 +22,4 @@ public:
 };
 
 // メニューバーに登録
-_REGISTER_SCENE_MANAGER(SceneDebug, u8"デバッグ");
+_REGISTER_SCENE_MANAGER(SceneDebug, u8"Debug");

@@ -85,7 +85,9 @@ public:
 	ActorManager& GetActorManager() { return _actorManager; }
 
 	// RenderContextŽæ“¾
-	RenderContext& GetRenderContext() { return _renderContext; }
+	RenderContext& GetRenderContext() {
+		return _renderContext;
+	}
 
 private:
 	std::unique_ptr<Sprite> _fullscreenQuad;

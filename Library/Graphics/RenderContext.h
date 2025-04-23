@@ -5,7 +5,7 @@
 #include "../Camera/CameraData.h"
 #include "RenderState.h"
 #include "../Math/Vector.h"
-#include "../Light/PointLight.h"
+#include "Light.h"
 
 /// <summary>
 /// •`‰æ—pî•ñ‚ğŠi”[‚·‚é\‘¢‘Ì
@@ -20,5 +20,5 @@ struct RenderContext
 	Vector4 lightColor			= _VECTOR4_WHITE;
 	Vector4 lightAmbientColor	= _VECTOR4_WHITE;
 	ID3D11ShaderResourceView* const* environmentMap = nullptr;
-	std::vector<const PointLight::Data*> pointLights;
+	std::vector<const PointLight*> pointLights;
 };

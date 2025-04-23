@@ -61,7 +61,7 @@ public:
 		DirectX::XMFLOAT4 ambientColor{};
 		DirectX::XMFLOAT4 directionalLightDirection{};
 		DirectX::XMFLOAT4 directionalLightColor{ 1,0,0,1 };
-		PointLight::Data pointLights[8];
+		PointLight pointLights[8];
 	};
 
 public:

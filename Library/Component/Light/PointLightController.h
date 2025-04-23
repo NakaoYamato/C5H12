@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../Component.h"
-#include "../../Library/Light/PointLight.h"
+#include "../../Library/Graphics/Light.h"
+
+#include <mutex>
 
 class PointLightController : public Component
 {
@@ -15,9 +17,6 @@ public:
 	// 更新処理
 	void Update(float elapsedTime) override;
 
-	// 描画の前処理
-	void RenderPreprocess(RenderContext& rc) override;
-
 	// デバッグ表示
 	void DebugRender(const RenderContext& rc) override;
 
@@ -28,4 +27,5 @@ public:
 	PointLight& GetLight() { return _light; }
 private:
 	PointLight _light;
+	static std::mutex _renderContextMutex;
 };

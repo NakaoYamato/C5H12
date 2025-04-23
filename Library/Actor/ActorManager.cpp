@@ -171,19 +171,6 @@ void ActorManager::Judge()
 	}
 }
 
-// 描画の前処理
-void ActorManager::RenderPreprocess(RenderContext& rc)
-{
-	// rcにパラメータを設定
-	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-	{
-		for (auto& actor : _updateActors[i])
-		{
-			actor->RenderPreprocess(rc);
-		}
-	}
-}
-
 // 描画処理
 void ActorManager::Render(const RenderContext& rc)
 {
@@ -288,6 +275,8 @@ void ActorManager::DrawGui()
 					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
 					if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
 					{
+						actor->SetDrawHierarchyFlag(false);
+
 						// ダブルクリックで選択
 						if (ImGui::IsItemClicked())
 						{
@@ -312,6 +301,8 @@ void ActorManager::DrawGui()
 		if (object)
 		{
 			ImGui::Text(_showGuiObj.c_str());
+
+			object->SetDrawHierarchyFlag(true);
 
 			object->DrawGui();
 		}

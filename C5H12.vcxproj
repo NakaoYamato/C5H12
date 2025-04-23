@@ -190,7 +190,6 @@
     <ClCompile Include="Library\Input\ManagedTarget\KeybordInput.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\MouseInput.cpp" />
     <ClCompile Include="Library\JobSystem\JobSystem.cpp" />
-    <ClCompile Include="Library\Light\PointLight.cpp" />
     <ClCompile Include="Library\Math\Quaternion.cpp" />
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
@@ -258,6 +257,7 @@
     <ClInclude Include="Library\Graphics\ConstantBufferManager.h" />
     <ClInclude Include="Library\Graphics\GBuffer.h" />
     <ClInclude Include="Library\Graphics\Graphics.h" />
+    <ClInclude Include="Library\Graphics\Light.h" />
     <ClInclude Include="Library\Graphics\RenderContext.h" />
     <ClInclude Include="Library\Graphics\RenderState.h" />
     <ClInclude Include="Library\HRTrace.h" />
@@ -281,7 +281,6 @@
     <ClInclude Include="Library\Input\ManagedTarget\KeybordInput.h" />
     <ClInclude Include="Library\Input\ManagedTarget\MouseInput.h" />
     <ClInclude Include="Library\JobSystem\JobSystem.h" />
-    <ClInclude Include="Library\Light\PointLight.h" />
     <ClInclude Include="Library\Math\Easing.h" />
     <ClInclude Include="Library\Math\HighPrecisionTimer.h" />
     <ClInclude Include="Library\Math\Quaternion.h" />

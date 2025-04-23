@@ -35,9 +35,6 @@ public:
 	// 1秒ごとの更新処理
 	virtual void FixedUpdate();
 
-	// 描画の前処理
-	virtual void RenderPreprocess(RenderContext& rc);
-
 	// 描画処理
 	virtual void Render(const RenderContext& rc);
 
@@ -115,6 +112,7 @@ public:
 
 
 #pragma region アクセサ
+	Scene* GetScene() { return _scene; }
 	const char* GetName() const { return _name.c_str(); }
 	Transform& GetTransform() { return _transform; }
 	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return _judgeTags; }
@@ -125,13 +123,15 @@ public:
 	void SetActiveFlag(bool b) { this->_isActive = b; }
 	void SetShowFlag(bool b) { this->_isShowing = b; }
 	void SetDrawDebugFlag(bool b) { this->_drawDebug = b; }
-	// そのタグに対して当たり判定を行うかのフラグをセット
-	void SetJudgeTagFlag(ActorTag tag, bool f) { _judgeTags[tag] = f; }
+	void SetDrawHierarchyFlag(bool b) { this->_drawHierarchy = b; }
 
 	bool IsActive()const { return _isActive; }
 	bool IsShowing()const { return _isShowing; }
 	bool DrawDebug()const { return _drawDebug; }
+	bool DrawHierarchy()const { return _drawHierarchy; }
 
+	// そのタグに対して当たり判定を行うかのフラグをセット
+	void SetJudgeTagFlag(ActorTag tag, bool f) { _judgeTags[tag] = f; }
 #pragma endregion
 protected:
 	// トランスフォーム更新
@@ -147,6 +147,7 @@ protected:
 	bool				_isShowing = true;
 	bool				_drawDebug = true;
 	bool				_useGuizmo = true;
+	bool 				_drawHierarchy = false;
 
 	std::vector<std::shared_ptr<Component>>	_components;
 	// 当たり判定コンポーネント

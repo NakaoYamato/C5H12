@@ -24,6 +24,7 @@ void Scene::Initialize()
     {
         std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
         _directionalLight = light->AddComponent<LightController>();
+        light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(60.0f));
     }
 }
 
@@ -36,6 +37,9 @@ void Scene::Finalize()
 //更新処理
 void Scene::Update(float elapsedTime)
 {
+    // RCのデータをクリア
+	GetRenderContext().pointLights.clear();
+
     // ゲームオブジェクトの更新
     _actorManager.Update(elapsedTime);
 
@@ -103,9 +107,6 @@ void Scene::Render()
     dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
     dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
     dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-
-    // 描画の前処理
-    _actorManager.RenderPreprocess(rc);
 
     // シーン定数バッファ、ライト定数バッファの更新
     cbManager->Update(rc);

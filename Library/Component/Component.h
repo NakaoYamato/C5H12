@@ -23,9 +23,6 @@ public:
 	// 1•b‚²‚Æ‚ÌXVˆ—
 	virtual void FixedUpdate() {}
 
-	// •`‰æ‚Ì‘Oˆ—
-	virtual void RenderPreprocess(RenderContext& rc) {}
-
 	// •`‰æˆ—
 	virtual void Render(const RenderContext& rc) {}
 

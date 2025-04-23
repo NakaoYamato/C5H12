@@ -59,14 +59,14 @@ void SceneDebug::Initialize()
                 light->AddComponent<PointLightController>();
             }
         ));
-        jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Light",
-            ImGuiControl::Profiler::Color::Blue,
-            [&]()
-            {
-                std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight1", ActorTag::DrawContextParameter);
-                light->AddComponent<PointLightController>();
-            }
-        ));
+        //jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Light",
+        //    ImGuiControl::Profiler::Color::Blue,
+        //    [&]()
+        //    {
+        //        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight1", ActorTag::DrawContextParameter);
+        //        light->AddComponent<PointLightController>();
+        //    }
+        //));
         jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Stage",
             ImGuiControl::Profiler::Color::Dark,
             [&]()
@@ -124,6 +124,14 @@ void SceneDebug::Initialize()
         }
         {
             std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight1", ActorTag::DrawContextParameter);
+            light->AddComponent<PointLightController>();
+        }
+        {
+            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight2", ActorTag::DrawContextParameter);
+            light->AddComponent<PointLightController>();
+        }
+        {
+            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight3", ActorTag::DrawContextParameter);
             light->AddComponent<PointLightController>();
         }
         {

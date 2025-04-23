@@ -65,23 +65,6 @@ void Actor::FixedUpdate()
 	}
 }
 
-// 描画の前処理
-void Actor::RenderPreprocess(RenderContext& rc)
-{
-	// 起動チェック
-	if (!_isActive)return;
-
-	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : _components)
-	{
-		component->RenderPreprocess(rc);
-	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
-	{
-		collider->RenderPreprocess(rc);
-	}
-}
-
 // 描画処理
 void Actor::Render(const RenderContext& rc)
 {

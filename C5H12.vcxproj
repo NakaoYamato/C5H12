@@ -229,9 +229,9 @@
     <ClCompile Include="Source\Component\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Component\Stage\GrassController.cpp" />
-    <ClCompile Include="Source\Scene\Debug\SceneCollisionDebug.cpp" />
-    <ClCompile Include="Source\Scene\Debug\SceneDragonDebug.cpp" />
-    <ClCompile Include="Source\Scene\Debug\ScenePlayerDebug.cpp" />
+    <ClCompile Include="Source\Scene\Test\SceneCollisionDebug.cpp" />
+    <ClCompile Include="Source\Scene\Test\SceneDragonDebug.cpp" />
+    <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
@@ -327,9 +327,9 @@
     <ClInclude Include="Source\Component\Player\PlayerController.h" />
     <ClInclude Include="Source\Component\Player\PlayerInput.h" />
     <ClInclude Include="Source\Component\Stage\GrassController.h" />
-    <ClInclude Include="Source\Scene\Debug\SceneCollisionDebug.h" />
-    <ClInclude Include="Source\Scene\Debug\SceneDragonDebug.h" />
-    <ClInclude Include="Source\Scene\Debug\ScenePlayerDebug.h" />
+    <ClInclude Include="Source\Scene\Test\SceneCollisionDebug.h" />
+    <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
+    <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

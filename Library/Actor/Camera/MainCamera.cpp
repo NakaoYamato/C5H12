@@ -43,10 +43,10 @@ void MainCamera::DrawGui()
 
 void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vector3& up)
 {
-	GetScene()->GetMainCamera().SetLookAt(eye, focus, up);
+	GetScene()->GetMainCamera()->SetLookAt(eye, focus, up);
     // アクターのトランスフォームに適応
 	_transform.SetPosition(eye);
-    DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&GetScene()->GetMainCamera().GetView()));
+    DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&GetScene()->GetMainCamera()->GetView()));
     DirectX::XMVECTOR S, R, T;
     DirectX::XMMatrixDecompose(&S, &R, &T, World);
     Vector3 s, r, t;
@@ -56,5 +56,5 @@ void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vecto
 
 void MainCamera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ)
 {
-	GetScene()->GetMainCamera().SetPerspectiveFov(fovY, aspect, nearZ, farZ);
+	GetScene()->GetMainCamera()->SetPerspectiveFov(fovY, aspect, nearZ, farZ);
 }

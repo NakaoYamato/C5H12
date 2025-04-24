@@ -32,6 +32,11 @@ public:
 		return nullptr;
 	}
 
+	// カメラ取得
+	// ロード中はカメラを使用しないためにnullptr
+	Camera* GetMainCamera() override {
+		return nullptr;
+	}
 private:
 	static void LoadingThread(SceneLoading* scene);
 

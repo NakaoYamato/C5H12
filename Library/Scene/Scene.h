@@ -96,8 +96,8 @@ public:
 		return _directionalLight.lock();
 	}
 	// ƒJƒƒ‰æ“¾
-	Camera& GetMainCamera() {
-		return _camera;
+	virtual Camera* GetMainCamera() {
+		return &_camera;
 	}
 #pragma endregion
 private:

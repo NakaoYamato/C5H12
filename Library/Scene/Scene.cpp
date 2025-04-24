@@ -86,7 +86,7 @@ void Scene::Render()
     RenderContext& rc = GetRenderContext();
     rc.deviceContext = dc;
     rc.renderState = graphics.GetRenderState();
-    rc.camera = &GetMainCamera();
+    rc.camera = GetMainCamera();
     rc.lightDirection = _VECTOR4_RIGHT;
     rc.lightColor = _VECTOR4_WHITE;
     rc.lightAmbientColor = _VECTOR4_BLACK;

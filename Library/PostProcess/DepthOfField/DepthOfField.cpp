@@ -8,9 +8,11 @@
 // XVˆ—
 void DepthOfField::Update(float elapsedTime)
 {
-    auto& mainCamera = SceneManager::Instance().GetCurrentScene()->GetMainCamera();
+    auto mainCamera = SceneManager::Instance().GetCurrentScene()->GetMainCamera();
+    if (mainCamera == nullptr)
+        return;
     // ƒJƒƒ‰î•ñ‚ðŽæ“¾
-    _data.cameraClipDistance = Vector4(mainCamera.GetFocus() - mainCamera.GetEye());
+    _data.cameraClipDistance = Vector4(mainCamera->GetFocus() - mainCamera->GetEye());
 }
 
 void DepthOfField::DrawGui()

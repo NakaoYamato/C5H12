@@ -255,16 +255,19 @@
     <ClCompile Include="Library\Physics\PhysicsManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\ScenePlayerDebug.cpp">
+    <ClCompile Include="Source\Scene\Debug\ScenePlayerDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\SceneDragonDebug.cpp">
+    <ClCompile Include="Source\Scene\Debug\SceneDragonDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Actor\Camera\MainCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Actor\WeaponActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\Debug\SceneCollisionDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -542,16 +545,19 @@
     <ClInclude Include="Library\Physics\PhysicsManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scene\ScenePlayerDebug.h">
+    <ClInclude Include="Source\Scene\Debug\ScenePlayerDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Scene\SceneDragonDebug.h">
+    <ClInclude Include="Source\Scene\Debug\SceneDragonDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Graphics\Light.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Actor\Camera\MainCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scene\Debug\SceneCollisionDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

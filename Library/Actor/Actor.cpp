@@ -255,7 +255,7 @@ void Actor::UpdateTransform()
 void Actor::DrawGuizmo()
 {
 	DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
-	if (Debug::Guizmo(GetScene()->GetMainCamera().GetView(), GetScene()->GetMainCamera().GetProjection(),
+	if (Debug::Guizmo(GetScene()->GetMainCamera()->GetView(), GetScene()->GetMainCamera()->GetProjection(),
 		&transform))
 	{
 		// 単位を考慮した行列から位置、回転、スケールを取得

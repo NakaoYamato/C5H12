@@ -22,6 +22,14 @@ public:
 	void DrawGui() override;
 
 public:
+	void SetModel(Model* model)
+	{
+		_model = model;
+
+		// ノードキャッシュの生成
+		_nodeCaches.resize(model->GetPoseNodes().size());
+	}
+
 #pragma region アニメーション制御
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime);

@@ -157,6 +157,36 @@ namespace Debug
 
 	}
 
+	namespace Dialog
+	{
+		// ダイアログリザルト
+		enum class DialogResult
+		{
+			Yes,
+			No,
+			OK,
+			Cancel
+		};
+
+		// [ファイルを開く]ダイアログボックスを表示
+		DialogResult OpenFileName(
+			std::string& filepath,
+			std::string& currentDirectory,
+			const char* filter = nullptr, 
+			const char* title = nullptr,
+			HWND hwnd = NULL,
+			bool multi_select = false);
+
+		// [ファイルを保存]ダイアログボックスを表示
+		DialogResult SaveFileName(
+			char* filepath, 
+			int size, 
+			const char* filter = nullptr, 
+			const char* title = nullptr,
+			const char* ext = nullptr,
+			HWND hwnd = NULL);
+	}
+
 	/// <summary>
 	/// 初期化
 	/// </summary>

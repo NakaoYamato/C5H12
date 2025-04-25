@@ -10,6 +10,8 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Converter/ToString.h"
 
+static char s_path_buffer[MAX_PATH];
+
 namespace Debug
 {
     std::vector<std::string>    _debugStrings;
@@ -116,6 +118,165 @@ namespace Debug
             _debugRenderer->Render(Graphics::Instance().GetDeviceContext(), view, projection);
         }
     }
+
+    namespace Dialog
+    {
+        DialogResult OpenFileName(
+            std::string& filepath,
+            std::string& currentDirectory,
+            const char* filter,
+            const char* title,
+            HWND hwnd, 
+            bool multi_select)
+        {
+            char path[MAX_PATH]{};
+            // 初期パス設定
+            char dirname[MAX_PATH];
+            if (filepath[0] != '0')
+            {
+                // ディレクトリパス取得
+                ::_splitpath_s(path, nullptr, 0, dirname, MAX_PATH, nullptr, 0, nullptr, 0);
+            }
+            else
+            {
+                path[0] = dirname[0] = '\0';
+            }
+            if ((dirname[0] == '\0'))
+            {
+                strcpy_s(dirname, MAX_PATH, s_path_buffer);
+            }
+            // lpstrInitialDir は \ でないと受け付けない
+            for (char* p = dirname; *p != '\0'; p++)
+            {
+                if (*p == '/')
+                    *p = '\\';
+            }
+
+            if (filter == nullptr)
+            {
+                filter = "All Files\0*.*\0\0";
+            }
+
+            // 構造体セット
+            OPENFILENAMEA ofn;
+            memset(&ofn, 0, sizeof(OPENFILENAMEA));
+            ofn.lStructSize = sizeof(OPENFILENAMEA);
+            ofn.hwndOwner = hwnd;
+            ofn.lpstrFilter = filter;
+            ofn.nFilterIndex = 1;
+            ofn.lpstrFile = path;
+            ofn.nMaxFile = MAX_PATH;
+            ofn.lpstrTitle = title;
+            ofn.lpstrInitialDir = (dirname[0] != '\0') ? dirname : nullptr;
+            ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+            if (multi_select)
+            {
+                ofn.Flags |= OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+            }
+
+            // カレントディレクトリ取得
+            char current_dir[MAX_PATH];
+            if (!::GetCurrentDirectoryA(MAX_PATH, current_dir))
+            {
+                current_dir[0] = '\0';
+            }
+
+            // ダイアログオープン
+            if (::GetOpenFileNameA(&ofn) == FALSE)
+            {
+                return DialogResult::Cancel;
+            }
+
+            // カレントディレクトリ復帰
+            if (current_dir[0] != '\0')
+            {
+                ::SetCurrentDirectoryA(current_dir);
+            }
+
+            // 最終パスを記憶
+            strcpy_s(s_path_buffer, MAX_PATH, path);
+
+            filepath = path;
+            currentDirectory = current_dir;
+
+            return DialogResult::OK;
+        }
+
+        DialogResult SaveFileName(
+            char* filepath, 
+            int size, 
+            const char* filter, 
+            const char* title, 
+            const char* ext, 
+            HWND hwnd)
+        {
+            // 初期パス設定
+            char dirname[MAX_PATH];
+            if (filepath[0] != '0')
+            {
+                // ディレクトリパス取得
+                ::_splitpath_s(filepath, nullptr, 0, dirname, MAX_PATH, nullptr, 0, nullptr, 0);
+            }
+            else
+            {
+                filepath[0] = dirname[0] = '\0';
+            }
+            if ((dirname[0] == '\0'))
+            {
+                strcpy_s(dirname, MAX_PATH, s_path_buffer);
+            }
+            // lpstrInitialDir は \ でないと受け付けない
+            for (char* p = dirname; *p != '\0'; p++)
+            {
+                if (*p == '/')
+                    *p = '\\';
+            }
+
+            if (filter == nullptr)
+            {
+                filter = "All Files\0*.*\0\0";
+            }
+
+            // 構造体セット
+            OPENFILENAMEA	ofn;
+            memset(&ofn, 0, sizeof(OPENFILENAMEA));
+            ofn.lStructSize = sizeof(OPENFILENAMEA);
+            ofn.hwndOwner = hwnd;
+            ofn.lpstrFilter = filter;
+            ofn.nFilterIndex = 1;
+            ofn.lpstrFile = filepath;
+            ofn.nMaxFile = size;
+            ofn.lpstrTitle = title;
+            ofn.lpstrInitialDir = (dirname[0] != '\0') ? dirname : nullptr;
+            ofn.lpstrDefExt = ext;
+            ofn.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+
+            // カレントディレクトリ取得
+            char current_dir[MAX_PATH];
+            if (!::GetCurrentDirectoryA(MAX_PATH, current_dir))
+            {
+                current_dir[0] = '\0';
+            }
+
+            // ダイアログオープン
+            if (::GetSaveFileNameA(&ofn) == FALSE)
+            {
+                return DialogResult::Cancel;
+            }
+
+            // カレントディレクトリ復帰
+            if (current_dir[0] != '\0')
+            {
+                ::SetCurrentDirectoryA(current_dir);
+            }
+
+            // 最終パスを記憶
+            strcpy_s(s_path_buffer, MAX_PATH, filepath);
+
+            return DialogResult::OK;
+        }
+    }
+
     void Initialize()
     {
         _debugRenderer = std::make_unique<DebugRenderer>(Graphics::Instance().GetDevice());

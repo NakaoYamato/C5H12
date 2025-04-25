@@ -4,11 +4,9 @@
 
 #include <imgui.h>
 
-Animator::Animator(Model* model) :
-	_model(model)
+Animator::Animator(Model* model)
 {
-	// ノードキャッシュの生成
-	_nodeCaches.resize(model->GetPoseNodes().size());
+    SetModel(model);
 }
 
 // 更新処理

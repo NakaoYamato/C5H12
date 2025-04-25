@@ -49,7 +49,7 @@ public:
 	void SetBlendType(BlendType type) { this->_blendType = type; }
 	void SetColor(const Vector4& c) { this->_color = c; }
 #pragma endregion
-protected:
+public:
 	// ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İ
 	void LoadModel(const char* filename);
 

@@ -13,6 +13,8 @@ public:
 
 	// 名前取得
 	const char* GetName()const { return u8"Loading"; }
+	// 階層取得(アクセスすることがないのでEndを返す)
+	SceneMenuLevel GetLevel() const { return SceneMenuLevel::LevelEnd; }
 
 	//初期化
 	void Initialize()override;

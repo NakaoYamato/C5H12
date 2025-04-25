@@ -24,6 +24,16 @@
 #define _LIGHT_CB_SLOT_INDEX 3
 #pragma endregion
 
+// シーンをメニューバーに登録する際の階層
+enum class SceneMenuLevel
+{
+	Editor,
+	Debug,
+	Game,
+
+	LevelEnd
+};
+
 // シーン基底クラス
 class Scene
 {
@@ -33,6 +43,8 @@ public:
 
 	// 名前取得
 	virtual const char* GetName() const = 0;
+	// 階層取得
+	virtual SceneMenuLevel GetLevel() const = 0;
 
 	// 初期化
 	virtual void Initialize();

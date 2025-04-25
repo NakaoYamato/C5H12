@@ -7,17 +7,18 @@
 #include "Scene.h"
 
 // シーンマネージャーのGUIに登録するための構造体
-template<class T, typename... Arg>
+template<class T>
 struct SceneRegister
 {
-	SceneRegister(const std::string& str, Arg... arg);
+	SceneRegister();
 };
 
+#pragma region マクロ
 // シーンマネージャーのGUIに登録するためのマクロ
-// type : Scene継承クラス
-// sceneName : GUIに登録する名前
-#define _REGISTER_SCENE_MANAGER(type, sceneName) \
-static SceneRegister<type> type##register(sceneName)
+// type			: Scene継承クラス
+#define _REGISTER_SCENE(type) \
+static SceneRegister<type> type##register;
+#pragma endregion
 
 //---------------------------------------------------
 //  シーン管理クラス
@@ -58,16 +59,17 @@ public:
 
 	// シーン切り替え
 	// REGISTER_SCENE_MANAGERで登録したときの名前から切り替え
-	void ChangeScene(std::string sceneName);
+	void ChangeScene(SceneMenuLevel level, std::string sceneName);
 
 	// シーン切り替え
 	void ChangeScene(std::shared_ptr<Scene> scene);
 
 	// デバッグ用シーンに登録
-	template<class T, typename... Arg>
-	void PushScene(const std::string& str, Arg... arg)
+	template<class T>
+	void PushScene()
 	{
-		_sceneDatas[str] = std::make_unique<T>(arg...);
+		auto scene = std::make_unique<T>();
+		_sceneDatas[static_cast<int>(scene->GetLevel())][scene->GetName()] = std::make_unique<T>();
 	}
 	
 	std::shared_ptr<Scene> GetCurrentScene()
@@ -79,14 +81,15 @@ private:
 	std::shared_ptr<Scene> _nextScene;
 
 	// デバッグ用で保存しているシーン
-	std::unordered_map<std::string, std::unique_ptr<Scene>> _sceneDatas;
+	std::unordered_map<std::string, std::unique_ptr<Scene>> _sceneDatas[static_cast<int>(SceneMenuLevel::LevelEnd)];
 
 	// Debugビルドでのデフォルトシーン
+	int _defaultSceneLevel = static_cast<int>(SceneMenuLevel::Debug);
 	std::string _defaultSceneName = "";
 };
 
-template<class T, typename ...Arg>
-inline SceneRegister<T, Arg...>::SceneRegister(const std::string& str, Arg ...arg)
+template<class T>
+inline SceneRegister<T>::SceneRegister()
 {
-	SceneManager::Instance().PushScene<T>(str, arg...);
+	SceneManager::Instance().PushScene<T>();
 }

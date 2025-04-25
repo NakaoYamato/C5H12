@@ -10,6 +10,8 @@ public:
 
 	// –¼‘Oæ“¾
 	const char* GetName()const { return u8"Debug"; }
+	// ŠK‘wæ“¾
+	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Debug; }
 
 	//‰Šú‰»
 	void Initialize()override;
@@ -22,4 +24,4 @@ public:
 };
 
 // ƒƒjƒ…[ƒo[‚É“o˜^
-_REGISTER_SCENE_MANAGER(SceneDebug, u8"Debug");
+_REGISTER_SCENE(SceneDebug)

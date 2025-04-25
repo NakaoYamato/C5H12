@@ -1,0 +1,32 @@
+#include "SceneModelEditor.h"
+
+#include "../../Library/Graphics/Graphics.h"
+
+#include "../../Library/Component/ModelRenderer.h"
+#include "../../Library/Component/Animator.h"
+
+void SceneModelEditor::Initialize()
+{
+    Scene::Initialize();
+
+    ID3D11Device* device = Graphics::Instance().GetDevice();
+
+    SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
+        L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/diffuse_iem.dds",
+        L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
+
+    // オブジェクト作成
+    ActorManager& actorManager = GetActorManager();
+    {
+        auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
+
+        //stage->GetTransform().SetPositionY(-2.7f);
+        //stage->GetTransform().SetLengthScale(0.1f);
+        //auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+
+        stage->GetTransform().SetLengthScale(0.01f);
+        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Test/test.fbx");
+
+        modelCont->SetRenderType(ModelRenderType::Static);
+    }
+}

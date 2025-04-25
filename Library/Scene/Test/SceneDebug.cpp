@@ -1,7 +1,5 @@
 #include "SceneDebug.h"
 
-#include <imgui.h>
-
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/JobSystem/JobSystem.h"
 

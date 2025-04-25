@@ -5,6 +5,7 @@
 #include "../../Library/Component/Animator.h"
 
 #include "../../Library/ResourceManager/GpuResourceManager.h"
+#include "../../Library/Converter/ToString.h"
 
 #include <imgui.h>
 
@@ -20,16 +21,17 @@ void DragonActor::OnCreate()
 	_modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
 	auto animator = AddComponent<Animator>(_modelRenderer.lock()->GetModel());
 
-	// テクスチャ設定
-	SetModelTexture();
-
 	// モデルがシリアライズされていなければアニメーションを設定
 	if (!_modelRenderer.lock()->GetModel()->GetResource()->IsSerialized())
 	{
-		int index = _modelRenderer.lock()->GetModel()->GetResource()->FindNodeByName("Kuzar3_Horn01");
+		// テクスチャ設定
+		SetModelTexture();
 
 		// モデルのアニメーションを設定
 		SetModelAnimation();
+
+		// 再シリアライズ
+		_modelRenderer.lock()->GetModel()->ReSerialize();
 	}
 }
 
@@ -74,6 +76,8 @@ void DragonActor::DrawGui()
 			{
 				_modelType = static_cast<ModelType>(mt);
 				SetModelTexture();
+				// 再シリアライズ
+				_modelRenderer.lock()->GetModel()->ReSerialize();
 			}
 			static const char* drawHornTypeName[] =
 			{
@@ -104,10 +108,12 @@ void DragonActor::SetModelTexture()
 	auto resource = _modelRenderer.lock()->GetModel()->GetResource();
 	auto SetModelSRV = [&](const wchar_t* filename, std::string materialName, std::string textureKey)
 		{
+			static std::wstring RelativePath = L"./Data/Model/Dragons/";
+
 			// テクスチャからSRV作成
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
 			GpuResourceManager::LoadTextureFromFile(Graphics::Instance().GetDevice(),
-				filename,
+				std::wstring(RelativePath + filename).c_str(),
 				srv.ReleaseAndGetAddressOf(),
 				nullptr);
 
@@ -116,6 +122,7 @@ void DragonActor::SetModelTexture()
 			{
 				if (material.name == materialName)
 				{
+					material.textureDatas.at(textureKey).filename = ToString(filename).c_str();
 					material.textureDatas.at(textureKey).textureSRV = srv;
 					return;
 				}
@@ -124,79 +131,79 @@ void DragonActor::SetModelTexture()
 
 	// 共通部分のテクスチャ
 #pragma region Body
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Body_Normal.png", "Material #25", "Normal");
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Body_EmissionBW.png", "Material #25", "Emissive");
+	SetModelSRV(L"Texture/T_Kuzar_Body_Normal.png", "Material #25", "Normal");
+	SetModelSRV(L"Texture/T_Kuzar_Body_EmissionBW.png", "Material #25", "Emissive");
 #pragma endregion
 #pragma region Spikes
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Spikes_Albedo.png", "Material #26", "Diffuse");
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Spikes_Normal.png", "Material #26", "Normal");
+	SetModelSRV(L"Texture/T_Kuzar_Spikes_Albedo.png", "Material #26", "Diffuse");
+	SetModelSRV(L"Texture/T_Kuzar_Spikes_Normal.png", "Material #26", "Normal");
 #pragma endregion
 #pragma region Wings
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Wings_Normal.png", "Material #31", "Normal");
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Wings_EmissionBW.png", "Material #31", "Emissive");
+	SetModelSRV(L"Texture/T_Kuzar_Wings_Normal.png", "Material #31", "Normal");
+	SetModelSRV(L"Texture/T_Kuzar_Wings_EmissionBW.png", "Material #31", "Emissive");
 #pragma endregion
 #pragma region Horns
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Horns_Color.png", "Horns", "Diffuse");
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Horns_Normal.png", "Horns", "Normal");
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Kuzar_Horns_Emissive.png", "Horns", "Emissive");
+	SetModelSRV(L"Texture/T_Kuzar_Horns_Color.png", "Horns", "Diffuse");
+	SetModelSRV(L"Texture/T_Kuzar_Horns_Normal.png", "Horns", "Normal");
+	SetModelSRV(L"Texture/T_Kuzar_Horns_Emissive.png", "Horns", "Emissive");
 #pragma endregion
 #pragma region Eyes
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Dragon_Eyes_Albedo.png", "Eyes", "Diffuse");
-	SetModelSRV(L"./Data/Model/Dragons/Texture/T_Dragon_Eyes_Normal.png", "Eyes", "Normal");
+	SetModelSRV(L"Texture/T_Dragon_Eyes_Albedo.png", "Eyes", "Diffuse");
+	SetModelSRV(L"Texture/T_Dragon_Eyes_Normal.png", "Eyes", "Normal");
 #pragma endregion
 
 	switch (_modelType)
 	{
 	case DragonActor::ModelType::Brown:
 #pragma region Body
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Brown/T_Kuzar_Brown_Body_Albedo.png", "Material #25", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Brown/T_Kuzar_Brown_Body_Rough_M_AO.png", "Material #25", "Roughness");
+		SetModelSRV(L"Texture/Brown/T_Kuzar_Brown_Body_Albedo.png", "Material #25", "Diffuse");
+		SetModelSRV(L"Texture/Brown/T_Kuzar_Brown_Body_Rough_M_AO.png", "Material #25", "Roughness");
 #pragma region Wings
 #pragma endregion
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Brown/T_Kuzar_Brown_Wings_Albedo.png", "Material #31", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Brown/T_Kuzar_Brown_Wings_Rough_M_AO.png", "Material #31", "Roughness");
+		SetModelSRV(L"Texture/Brown/T_Kuzar_Brown_Wings_Albedo.png", "Material #31", "Diffuse");
+		SetModelSRV(L"Texture/Brown/T_Kuzar_Brown_Wings_Rough_M_AO.png", "Material #31", "Roughness");
 #pragma endregion
 		break;
 	case DragonActor::ModelType::Green:
 #pragma region Body
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Green/T_Kuzar_Green_Body_Albedo.png", "Material #25", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Green/T_Kuzar_Green_Body_Rough_M_AO.png", "Material #25", "Roughness");
+		SetModelSRV(L"Texture/Green/T_Kuzar_Green_Body_Albedo.png", "Material #25", "Diffuse");
+		SetModelSRV(L"Texture/Green/T_Kuzar_Green_Body_Rough_M_AO.png", "Material #25", "Roughness");
 #pragma region Wings
 #pragma endregion
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Green/T_Kuzar_Green_Wings_Albedo.png", "Material #31", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Green/T_Kuzar_Green_Wings_Rough_M_AO.png", "Material #31", "Roughness");
+		SetModelSRV(L"Texture/Green/T_Kuzar_Green_Wings_Albedo.png", "Material #31", "Diffuse");
+		SetModelSRV(L"Texture/Green/T_Kuzar_Green_Wings_Rough_M_AO.png", "Material #31", "Roughness");
 #pragma endregion
 		break;
 	case DragonActor::ModelType::Lava:
 #pragma region Body
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Lava/T_Kuzar_Lava_Body_Albedo.png", "Material #25", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Lava/T_Kuzar_Lava_Body_Rough_M_AO.png", "Material #25", "Roughness");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Lava/T_Kuzar_Lava_Body_Emissive.png", "Material #25", "Emissive");
+		SetModelSRV(L"Texture/Lava/T_Kuzar_Lava_Body_Albedo.png", "Material #25", "Diffuse");
+		SetModelSRV(L"Texture/Lava/T_Kuzar_Lava_Body_Rough_M_AO.png", "Material #25", "Roughness");
+		SetModelSRV(L"Texture/Lava/T_Kuzar_Lava_Body_Emissive.png", "Material #25", "Emissive");
 #pragma region Wings
 #pragma endregion
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Lava/T_Kuzar_Lava_Wings_Albedo.png", "Material #31", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Lava/T_Kuzar_Lava_Wings_Rough_M_AO.png", "Material #31", "Roughness");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Lava/T_Kuzar_Lava_Wings_Emissive.png", "Material #31", "Emissive");
+		SetModelSRV(L"Texture/Lava/T_Kuzar_Lava_Wings_Albedo.png", "Material #31", "Diffuse");
+		SetModelSRV(L"Texture/Lava/T_Kuzar_Lava_Wings_Rough_M_AO.png", "Material #31", "Roughness");
+		SetModelSRV(L"Texture/Lava/T_Kuzar_Lava_Wings_Emissive.png", "Material #31", "Emissive");
 #pragma endregion
 		break;
 	case DragonActor::ModelType::Red:
 #pragma region Body
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Red/T_Kuzar_Red_Body_Albedo.png", "Material #25", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Red/T_Kuzar_Red_Body_Rough_M_AO.png", "Material #25", "Roughness");
+		SetModelSRV(L"Texture/Red/T_Kuzar_Red_Body_Albedo.png", "Material #25", "Diffuse");
+		SetModelSRV(L"Texture/Red/T_Kuzar_Red_Body_Rough_M_AO.png", "Material #25", "Roughness");
 #pragma region Wings
 #pragma endregion
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Red/T_Kuzar_Red_Wings_Albedo.png", "Material #31", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/Red/T_Kuzar_Red_Wings_Rough_M_AO.png", "Material #31", "Roughness");
+		SetModelSRV(L"Texture/Red/T_Kuzar_Red_Wings_Albedo.png", "Material #31", "Diffuse");
+		SetModelSRV(L"Texture/Red/T_Kuzar_Red_Wings_Rough_M_AO.png", "Material #31", "Roughness");
 #pragma endregion
 		break;
 	case DragonActor::ModelType::White:
 #pragma region Body
-		SetModelSRV(L"./Data/Model/Dragons/Texture/White/T_Kuzar_White_Body_Albedo.png", "Material #25", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/White/T_Kuzar_White_Body_Rough_M_AO.png", "Material #25", "Roughness");
+		SetModelSRV(L"Texture/White/T_Kuzar_White_Body_Albedo.png", "Material #25", "Diffuse");
+		SetModelSRV(L"Texture/White/T_Kuzar_White_Body_Rough_M_AO.png", "Material #25", "Roughness");
 #pragma region Wings
 #pragma endregion
-		SetModelSRV(L"./Data/Model/Dragons/Texture/White/T_Kuzar_White_Wings_Albedo.png", "Material #31", "Diffuse");
-		SetModelSRV(L"./Data/Model/Dragons/Texture/White/T_Kuzar_White_Wings_Rough_M_AO.png", "Material #31", "Roughness");
+		SetModelSRV(L"Texture/White/T_Kuzar_White_Wings_Albedo.png", "Material #31", "Diffuse");
+		SetModelSRV(L"Texture/White/T_Kuzar_White_Wings_Rough_M_AO.png", "Material #31", "Roughness");
 #pragma endregion
 		break;
 	}
@@ -381,8 +388,6 @@ void DragonActor::SetModelAnimation()
 			filename,
 			animationName);
 	}
-
-	_modelRenderer.lock()->GetModel()->ReSerialize();
 }
 
 // 使用する角を設定

@@ -63,11 +63,6 @@ public:
 		std::vector<ModelResource::Node>& resultNodePose,
 		Vector3& movement) const;
 
-	/// <summary>
-	/// アニメーション名から番号取得
-	/// </summary>
-	int GetAnimationIndex(const std::string& key) const;
-
 #pragma endregion
 
 #pragma region アクセサ
@@ -79,8 +74,29 @@ public:
 		_nodeCaches.resize(model->GetPoseNodes().size());
 	}
 
+	int GetCurrentAnimIndex()const { return _currentAnimIndex; }
+	float GetCurrentAnimSeconds() const { return _currentAnimSeconds; }
 	bool UseAnimCoordinate()const { return _useAnimCoordinate; }
+
 	void SetUseAnimCoordinate(bool b) { this->_useAnimCoordinate = b; }
+
+	/// <summary>
+	/// アニメーション名から番号取得
+	/// </summary>
+	int GetAnimationIndex(const std::string& key) const;
+
+	/// <summary>
+	/// アニメーション番号から名前取得
+	/// </summary>
+	/// <param name="index"></param>
+	/// <returns></returns>
+	std::string GetAnimationName(int index)const;
+
+	/// <summary>
+	/// 現在のアニメーション名取得
+	/// </summary>
+	/// <returns></returns>
+	std::string GetCurrentAnimationName() const;
 #pragma endregion
 public:
 	// アニメーションパラメーター

@@ -41,10 +41,10 @@ void SceneModelEditor::Update(float elapsedTime)
         0,0,0,1
         ));
 
-    // ボーン表示
     auto model = _modelRenderer.lock()->GetModel();
-    if (model)
+    if (model && _animator.lock()->GetCurrentAnimIndex() != -1)
     {
+        // ボーン表示
         DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         // 親から子どもにボーンをのばす
         for (auto& node : model->GetPoseNodes())
@@ -66,6 +66,36 @@ void SceneModelEditor::Update(float elapsedTime)
                 );
             }
         }
+
+        float animCurrentTime = _animator.lock()->GetCurrentAnimSeconds();
+        // 当たり判定表示
+        for (auto& keyframe : _animCollisionData.GetKeyframes(_animator.lock()->GetCurrentAnimationName()))
+        {
+            if (animCurrentTime > keyframe.startSeconds &&
+                animCurrentTime < keyframe.endSeconds)
+            {
+                auto& node = model->GetPoseNodes()[keyframe.nodeIndex];
+                DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&keyframe.position));
+                DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(keyframe.angle.x, keyframe.angle.y, keyframe.angle.z);
+                DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&keyframe.scale));
+                DirectX::XMFLOAT4X4 transform = {};
+
+                DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
+
+                switch (keyframe.shapeType)
+                {
+                case AnimationCollisionData::ShapeType::Box:
+                    Debug::Renderer::DrawBox(transform, _VECTOR4_WHITE);
+                    break;
+                case AnimationCollisionData::ShapeType::Sphere:
+                    Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), keyframe.scale.x, _VECTOR4_WHITE);
+                    break;
+                case AnimationCollisionData::ShapeType::Capsule:
+                    Debug::Renderer::DrawCapsule(transform, 1.0f, 1.0f, _VECTOR4_WHITE);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -83,11 +113,36 @@ void SceneModelEditor::DrawGui()
         ImGui::Text(u8"カレントディレクトリ：%s", _currentDirectory.c_str());
         ImGui::Text(u8"相対パス：%s", _relativePath.c_str());
         ImGui::Separator();
+        ImGui::Text(u8"アニメーション判定");
+        if (_animator.lock()->GetCurrentAnimIndex() != -1)
+        {
+            if (ImGui::TreeNode(u8"現在のアニメーション判定"))
+            {
+                _animCollisionData.DrawGui(_animator.lock()->GetCurrentAnimationName(), _nodeNames);
+
+                ImGui::TreePop();
+            }
+        }
+        if (ImGui::TreeNode(u8"すべてのアニメーション判定"))
+        {
+            _animCollisionData.DrawGuiAll(_nodeNames);
+
+            ImGui::TreePop();
+        }
+        if (ImGui::Button(u8"判定の書き出し"))
+        {
+            std::filesystem::path serializePath(_filepath);
+            serializePath.replace_extension(".animCol");
+            _animCollisionData.Serialize(serializePath.string().c_str());
+        }
+
+        ImGui::Separator();
 
         ImGui::ColorEdit4(u8"ボーンの色", &_boneColor.x);
     }
     ImGui::End();
 
+    // ファイル操作
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu(u8"ファイル"))
@@ -114,6 +169,32 @@ void SceneModelEditor::DrawGui()
 
                 _modelRenderer.lock()->LoadModel(_filepath.c_str());
                 _animator.lock()->SetModel(_modelRenderer.lock()->GetModel());
+
+                _nodeNames.clear();
+                // ノードの名前を全取得
+                for (auto& node : _modelRenderer.lock()->GetModel()->GetPoseNodes())
+                {
+                    _nodeNames.push_back(node.name.c_str());
+                }
+
+                // 判定のシリアライズの確認
+                std::filesystem::path serializePath(_filepath);
+                serializePath.replace_extension(".animCol");
+                if (std::filesystem::exists(serializePath))
+                {
+                    // デシリアライズ
+                    _animCollisionData.Deserialize(serializePath.string().c_str());
+                }
+                else
+                {
+                    // 新規作成
+                    _animCollisionData.Clear();
+                    // アニメーション名を登録
+                    for (auto& animation : _modelRenderer.lock()->GetModel()->GetResource()->GetAnimations())
+                    {
+                        _animCollisionData.AddKeyFrames(animation.name);
+                    }
+                }
             }
 
             ImGui::EndMenu();

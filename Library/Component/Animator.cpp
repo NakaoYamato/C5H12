@@ -370,3 +370,17 @@ int Animator::GetAnimationIndex(const std::string& key) const
     assert(!"アニメーションがありません");
     return -1;
 }
+
+/// アニメーション番号から名前取得
+std::string Animator::GetAnimationName(int index) const
+{
+    assert(index < _model->GetResource()->GetAnimations().size());
+    assert(index >= 0);
+
+    return _model->GetResource()->GetAnimations()[index].name;
+}
+
+std::string Animator::GetCurrentAnimationName() const
+{
+    return GetAnimationName(_currentAnimIndex);
+}

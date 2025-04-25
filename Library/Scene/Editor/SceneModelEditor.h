@@ -5,6 +5,8 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
+#include "../../Library/Physics/Collision/AnimationCollisionData.h"
+
 class SceneModelEditor : public Scene
 {
 public:
@@ -40,8 +42,11 @@ private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
 
+	AnimationCollisionData _animCollisionData;
+
 	// デバッグ用
 	Vector4 _boneColor = _VECTOR4_RED;
+	std::vector<const char*> _nodeNames;
 };
 
 // メニューバーに登録

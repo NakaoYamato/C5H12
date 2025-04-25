@@ -12,30 +12,6 @@ Animator::Animator(Model* model)
 // 更新処理
 void Animator::Update(float elapsedTime)
 {
-
-    //std::vector<std::future<void>> jobResults;
-    //// ジョブシステムに計算を任せる
-    //jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Animation",
-    //    ImGuiControl::Profiler::Color::Green,
-    //    [&]()
-    //    {
-    //        UpdateAnimation(elapsedTime);
-    //    }
-    //));
-
-    //// すべてのジョブの終了を待機
-    //for (auto& result : jobResults)
-    //{
-    //    result.get();
-    //}
-
-    //JobSystem::Instance().jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Animation",
-    //    ImGuiControl::Profiler::Color::Green,
-    //    [&]()
-    //    {
-    //        UpdateAnimation(elapsedTime);
-    //    }
-    //));
     UpdateAnimation(elapsedTime);
 }
 
@@ -44,20 +20,36 @@ void Animator::DrawGui()
 {
     if (ImGui::TreeNode(u8"アニメーション"))
     {
+        auto& animations = _model->GetResource()->GetAddressAnimations();
         if (_currentAnimIndex >= 0)
         {
+            auto& currentAnimation = animations[_currentAnimIndex];
             ImGui::Text(u8"再生中のアニメーション:");
             ImGui::SameLine();
-            ImGui::Text(_model->GetResource()->GetAnimations()[_currentAnimIndex].name.c_str());
+            ImGui::Text(animations[_currentAnimIndex].name.c_str());
+            static const char* coordinates[4] =
+            {
+                u8"右手Y軸UP",
+                u8"左手Y軸UP",
+                u8"右手Z軸UP",
+                u8"左手Z軸UP"
+            };
+            int type = static_cast<int>(currentAnimation.coordinateType);
+            if (ImGui::Combo(u8"座標系", &type, coordinates, 4))
+            {
+                currentAnimation.coordinateType = static_cast<CoordinateType>(type);
+                this->PlayAnimation(_currentAnimIndex, _animLoop, _animBlendSeconds);
+            }
+            ImGui::SliderFloat(u8"経過時間", &_currentAnimSeconds, 0.0f, currentAnimation.secondsLength);
 
             ImGui::Separator();
         }
-        ImGui::DragFloat("CurrentAnimSeconds", &_currentAnimSeconds, 0.01f);
-        ImGui::DragFloat("BlendSeconds", &_animBlendSeconds, 0.01f);
-        ImGui::Checkbox("Loop", &_animLoop);
+        ImGui::DragFloat(u8"ブレンド時間", &_animBlendSeconds, 0.01f);
+        ImGui::Checkbox(u8"ループ", &_animLoop);
+        ImGui::Checkbox(u8"アニメーションの座標系使か", &_useAnimCoordinate);
 
         int index = 0;
-        for (const ModelResource::Animation& animation : _model->GetResource()->GetAnimations())
+        for (const ModelResource::Animation& animation : animations)
         {
             ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf;
 
@@ -85,6 +77,7 @@ void Animator::DrawGui()
 // アニメーション更新処理
 void Animator::UpdateAnimation(float elapsedTime)
 {
+    // アニメーションが設定されていなければ処理しない
     if (_currentAnimIndex == -1)
         return;
     std::vector<ModelResource::Node>& poseNode = _model->GetPoseNodes();
@@ -118,6 +111,9 @@ void Animator::UpdateAnimation(float elapsedTime)
 // アニメーション経過時間更新
 void Animator::UpdateAnimSeconds(float elapsedTime)
 {
+    // 再生中でなければ処理しない
+    if (!_animPlaying)
+        return;
     // 経過時間
     _currentAnimSeconds += elapsedTime;
     // 再生時間が終端時間を超えた時
@@ -141,6 +137,7 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
 // アニメーション再生
 void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
 {
+    // フラグを再設定
     _currentAnimIndex = index;
     _currentAnimSeconds = 0;
     _animLoop = loop;
@@ -150,6 +147,12 @@ void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
     _animBlending = blendSeconds > 0.0f;
     _currentAnimBlendSeconds = 0.0f;
     _animBlendSecondsLength = blendSeconds;
+
+    // アニメーションの座標系を使用
+    if (_useAnimCoordinate)
+        GetActor()->GetTransform().SetCoordinateType(
+            _model->GetResource()->GetAnimations().at(index).coordinateType
+        );
 
     // 現在の姿勢をキャッシュする
     for (size_t i = 0; i < _model->GetPoseNodes().size(); ++i)

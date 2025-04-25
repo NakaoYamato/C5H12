@@ -1,43 +1,8 @@
 #pragma once
+
+#include "CoordinateTypeDef.h"
 #include "Vector.h"
 #include "Quaternion.h"
-
-// À•WŒn
-enum COORDINATE_TYPE
-{
-	RHS_Y_UP = 0,
-	LHS_Y_UP = 1,
-	RHS_Z_UP = 2,
-	LHS_Z_UP = 3,
-};
-
-static const DirectX::XMFLOAT4X4 COORDINATE_SYSTEM_TRANSFORMS[]
-{
-	{
-		-1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		0,0,0,1
-	},
-	{
-		1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		0,0,0,1
-	},
-	{
-		-1,0,0,0,
-		0,0,-1,0,
-		0,1,0,0,
-		0,0,0,1
-	},
-	{
-		-1,0,0,0,
-		0,0,1,0,
-		0,1,0,0,
-		0,0,0,1
-	},
-};
 
 class Transform
 {
@@ -90,7 +55,7 @@ public:
 	void AddRotation(const Vector3& v) { this->_angle += v; }
 
 private:
-	int _coordinateType = COORDINATE_TYPE::LHS_Y_UP;
+	int _coordinateType = CoordinateType::LHS_Y_UP;
 
 	// ’·‚³‚Ì’PˆÊ(m)
 	float _lengthScale = 1.0f;

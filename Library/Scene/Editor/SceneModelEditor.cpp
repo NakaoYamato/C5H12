@@ -20,6 +20,7 @@ void SceneModelEditor::Initialize()
     // 編集用オブジェクト作成
     ActorManager& actorManager = GetActorManager();
 	_modelActor = RegisterActor<Actor>(u8"Model", ActorTag::Stage);
+    _modelActor.lock()->GetTransform().SetLengthScale(0.01f);
     _modelRenderer = _modelActor.lock()->AddComponent<ModelRenderer>("Data/Model/Shape/Box.fbx");
     _animator = _modelActor.lock()->AddComponent<Animator>(_modelRenderer.lock()->GetModel());
 
@@ -39,17 +40,51 @@ void SceneModelEditor::Update(float elapsedTime)
         0,0,1,0,
         0,0,0,1
         ));
+
+    // ボーン表示
+    auto model = _modelRenderer.lock()->GetModel();
+    if (model)
+    {
+        DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        // 親から子どもにボーンをのばす
+        for (auto& node : model->GetPoseNodes())
+        {
+            if (node.parent != nullptr)
+            {
+                Vector3 childWP = Vector3(node.worldTransform._41, node.worldTransform._42, node.worldTransform._43);
+                Vector3 parentWP = Vector3(node.parent->worldTransform._41, node.parent->worldTransform._42, node.parent->worldTransform._43);
+                float length = Vec3Length(parentWP - childWP);
+                if (length == 0.0f)
+                    continue;
+                DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(DirectX::XMLoadFloat3(&parentWP), DirectX::XMLoadFloat3(&childWP), Up);
+                DirectX::XMFLOAT4X4 world;
+                DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixInverse(nullptr, View));
+                Debug::Renderer::DrawBone(
+                    world,
+                    length,
+                    _boneColor
+                );
+            }
+        }
+    }
 }
 
 void SceneModelEditor::DrawGui()
 {
     if (ImGui::Begin(u8"モデル"))
     {
-        ImGui::Text(u8"%s", _filepath.c_str());
-        ImGui::Text(u8"%s", _currentDirectory.c_str());
-        ImGui::Text(u8"%s", _relativePath.c_str());
-
         _modelActor.lock()->DrawGui();
+    }
+    ImGui::End();
+
+    if (ImGui::Begin(u8"編集"))
+    {
+        ImGui::Text(u8"絶対パス：%s", _filepath.c_str());
+        ImGui::Text(u8"カレントディレクトリ：%s", _currentDirectory.c_str());
+        ImGui::Text(u8"相対パス：%s", _relativePath.c_str());
+        ImGui::Separator();
+
+        ImGui::ColorEdit4(u8"ボーンの色", &_boneColor.x);
     }
     ImGui::End();
 

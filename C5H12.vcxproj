@@ -285,6 +285,7 @@
     <ClInclude Include="Library\Input\ManagedTarget\KeybordInput.h" />
     <ClInclude Include="Library\Input\ManagedTarget\MouseInput.h" />
     <ClInclude Include="Library\JobSystem\JobSystem.h" />
+    <ClInclude Include="Library\Math\CoordinateTypeDef.h" />
     <ClInclude Include="Library\Math\Easing.h" />
     <ClInclude Include="Library\Math\HighPrecisionTimer.h" />
     <ClInclude Include="Library\Math\Quaternion.h" />

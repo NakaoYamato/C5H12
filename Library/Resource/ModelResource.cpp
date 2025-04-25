@@ -949,6 +949,7 @@ void ModelResource::Animation::serialize(T& archive)
 {
     archive(
         CEREAL_NVP(name),
+        CEREAL_NVP(coordinateType),
         CEREAL_NVP(secondsLength),
         CEREAL_NVP(nodeAnims)
     );

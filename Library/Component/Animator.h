@@ -22,14 +22,6 @@ public:
 	void DrawGui() override;
 
 public:
-	void SetModel(Model* model)
-	{
-		_model = model;
-
-		// ノードキャッシュの生成
-		_nodeCaches.resize(model->GetPoseNodes().size());
-	}
-
 #pragma region アニメーション制御
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime);
@@ -77,6 +69,19 @@ public:
 	int GetAnimationIndex(const std::string& key) const;
 
 #pragma endregion
+
+#pragma region アクセサ
+	void SetModel(Model* model)
+	{
+		_model = model;
+
+		// ノードキャッシュの生成
+		_nodeCaches.resize(model->GetPoseNodes().size());
+	}
+
+	bool UseAnimCoordinate()const { return _useAnimCoordinate; }
+	void SetUseAnimCoordinate(bool b) { this->_useAnimCoordinate = b; }
+#pragma endregion
 public:
 	// アニメーションパラメーター
 	int _currentAnimIndex = -1;
@@ -90,6 +95,9 @@ public:
 	float _currentAnimBlendSeconds = 0.0f;
 	float _animBlendSecondsLength = -1.0f;
 	bool _animBlending = false;
+
+	// アニメーションの座標系を使用するかどうか
+	bool _useAnimCoordinate = false;
 
 	Model* _model{};
 };

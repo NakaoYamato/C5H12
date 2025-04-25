@@ -39,6 +39,9 @@ private:
 	std::weak_ptr<Actor> _modelActor;
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
+
+	// デバッグ用
+	Vector4 _boneColor = _VECTOR4_RED;
 };
 
 // メニューバーに登録

@@ -14,6 +14,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "../Math/CoordinateTypeDef.h"
+
 /// <summary>
 /// 3Dモデルのリソース生成クラス
 /// </summary>
@@ -152,6 +154,7 @@ public:
 	struct Animation
 	{
 		std::string name{};
+		CoordinateType coordinateType = CoordinateType::RHS_Y_UP;
 		float secondsLength{};
 		std::vector<NodeAnim> nodeAnims;
 

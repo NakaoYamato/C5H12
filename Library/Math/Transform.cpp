@@ -35,7 +35,7 @@ void Transform::DrawGui()
     };
     int type = static_cast<int>(_coordinateType);
     if (ImGui::Combo(u8"ç¿ïWån", &type, coordinates, 4))
-        _coordinateType = static_cast<COORDINATE_TYPE>(type);
+        _coordinateType = static_cast<CoordinateType>(type);
     ImGui::DragFloat(u8"í∑Ç≥ÇÃíPà (m)", &_lengthScale, 0.01f, 0.01f, 10.0f);
 
     ImGui::DragFloat3("position", &_position.x, 0.1f);

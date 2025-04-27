@@ -27,26 +27,12 @@ void Animator::DrawGui()
             ImGui::Text(u8"再生中のアニメーション:");
             ImGui::SameLine();
             ImGui::Text(animations[_currentAnimIndex].name.c_str());
-            static const char* coordinates[4] =
-            {
-                u8"右手Y軸UP",
-                u8"左手Y軸UP",
-                u8"右手Z軸UP",
-                u8"左手Z軸UP"
-            };
-            int type = static_cast<int>(currentAnimation.coordinateType);
-            if (ImGui::Combo(u8"座標系", &type, coordinates, 4))
-            {
-                currentAnimation.coordinateType = static_cast<CoordinateType>(type);
-                this->PlayAnimation(_currentAnimIndex, _animLoop, _animBlendSeconds);
-            }
             ImGui::SliderFloat(u8"経過時間", &_currentAnimSeconds, 0.0f, currentAnimation.secondsLength);
 
             ImGui::Separator();
         }
         ImGui::DragFloat(u8"ブレンド時間", &_animBlendSeconds, 0.01f);
         ImGui::Checkbox(u8"ループ", &_animLoop);
-        ImGui::Checkbox(u8"アニメーションの座標系使か", &_useAnimCoordinate);
 
         int index = 0;
         for (const ModelResource::Animation& animation : animations)
@@ -147,12 +133,6 @@ void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
     _animBlending = blendSeconds > 0.0f;
     _currentAnimBlendSeconds = 0.0f;
     _animBlendSecondsLength = blendSeconds;
-
-    // アニメーションの座標系を使用
-    if (_useAnimCoordinate)
-        GetActor()->GetTransform().SetCoordinateType(
-            _model->GetResource()->GetAnimations().at(index).coordinateType
-        );
 
     // 現在の姿勢をキャッシュする
     for (size_t i = 0; i < _model->GetPoseNodes().size(); ++i)

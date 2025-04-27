@@ -14,7 +14,7 @@ void DragonActor::OnCreate()
 {
 	Actor::OnCreate();
 
-	GetTransform().SetCoordinateType(CoordinateType::RHS_Z_UP);
+	GetTransform().SetCoordinateType(CoordinateType::LHS_Y_UP);
 	GetTransform().SetLengthScale(0.01f);
 
 	// コンポーネント追加
@@ -380,6 +380,9 @@ void DragonActor::SetModelAnimation()
 #pragma endregion
 	};
 
+	DirectX::XMMATRIX ToZUP = DirectX::XMMatrixRotationX(+90.0f / DirectX::XM_PI);
+	DirectX::XMMATRIX InvToZUP = DirectX::XMMatrixInverse(nullptr, ToZUP);
+	DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[RHS_Z_UP]);
 	// アニメーション追加
 	_modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations().clear();
 	for (auto& [filename, animationName] : animParams)
@@ -387,6 +390,32 @@ void DragonActor::SetModelAnimation()
 		_modelRenderer.lock()->GetModel()->GetResource()->AppendAnimations(
 			filename,
 			animationName);
+
+		// アニメーションを右手Z-UPに変換
+		Quaternion q = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(Vector3(-90.0f, 0.0f, 0.0f)));
+		size_t index = _modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations().size() - 1;
+		auto& animation = _modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations()[index];
+		for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)
+		{
+			rotation.value = q;
+		}
+		for (auto& nodeAnim : animation.nodeAnims)
+		{
+			//// 位置
+			//for (auto& position : nodeAnim.positionKeyframes)
+			//{
+			//	position.value = Vec3TransformCoord(position.value, 
+			//		DirectX::XMMatrixInverse(nullptr, M));
+			//	//position.value = Vector3(position.value.x, -position.value.z, position.value.y);
+			//}
+			//// 回転
+			//for (auto& rotation : nodeAnim.rotationKeyframes)
+			//{
+			//	DirectX::XMMATRIX rot = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&rotation.value));
+			//	DirectX::XMMATRIX R = rot * M;
+			//	DirectX::XMStoreFloat4(&rotation.value, DirectX::XMQuaternionRotationMatrix(R));
+			//}
+		}
 	}
 }
 

@@ -154,7 +154,6 @@ public:
 	struct Animation
 	{
 		std::string name{};
-		CoordinateType coordinateType = CoordinateType::RHS_Y_UP;
 		float secondsLength{};
 		std::vector<NodeAnim> nodeAnims;
 

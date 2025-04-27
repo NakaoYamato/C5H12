@@ -76,9 +76,6 @@ public:
 
 	int GetCurrentAnimIndex()const { return _currentAnimIndex; }
 	float GetCurrentAnimSeconds() const { return _currentAnimSeconds; }
-	bool UseAnimCoordinate()const { return _useAnimCoordinate; }
-
-	void SetUseAnimCoordinate(bool b) { this->_useAnimCoordinate = b; }
 
 	/// <summary>
 	/// アニメーション名から番号取得
@@ -111,9 +108,6 @@ public:
 	float _currentAnimBlendSeconds = 0.0f;
 	float _animBlendSecondsLength = -1.0f;
 	bool _animBlending = false;
-
-	// アニメーションの座標系を使用するかどうか
-	bool _useAnimCoordinate = false;
 
 	Model* _model{};
 };

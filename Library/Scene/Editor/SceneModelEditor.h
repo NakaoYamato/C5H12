@@ -38,7 +38,8 @@ private:
 	void DrawMenuBarGui();
 	// 編集GUI描画
 	void DrawEditGui();
-
+	// アニメーション編集GUI描画
+	void DrawEditAnimationGui();
 private:
 	std::string _filepath;
 	std::string _currentDirectory;

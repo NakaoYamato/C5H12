@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <imgui.h>
 
+#include "../../Library/Math/Quaternion.h"
 #include "../../Library/Graphics/Graphics.h"
 
 #include "../../DebugSupporter/DebugSupporter.h"
@@ -85,17 +86,17 @@ void SceneModelEditor::Update(float elapsedTime)
 
 void SceneModelEditor::DrawGui()
 {
-    if (ImGui::Begin(u8"モデル"))
-    {
-        _modelActor.lock()->DrawGui();
-    }
-    ImGui::End();
-
     // 編集GUI描画
     DrawEditGui();
 
     // メニューバーのGUI描画
     DrawMenuBarGui();
+
+    if (ImGui::Begin(u8"モデル"))
+    {
+        _modelActor.lock()->DrawGui();
+    }
+    ImGui::End();
 }
 
 // メニューバーのGUI描画
@@ -118,9 +119,20 @@ void SceneModelEditor::DrawMenuBarGui()
                     // 絶対パス、カレントディレクトリ取得
                     _filepath = filepath;
                     _currentDirectory = currentDirectory;
+                    try
+                    {
+                        // 相対パス取得
+                        std::filesystem::path path =
+                            std::filesystem::relative(filepath, currentDirectory);
+                        _relativePath = path.u8string();
+                    }
+                    catch (...)
+                    {
+                        _relativePath = "";
+                    }
 
                     // モデルの読み込み
-                    _modelRenderer.lock()->LoadModel(_filepath.c_str());
+                    _modelRenderer.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
                     _animator.lock()->SetModel(_modelRenderer.lock()->GetModel());
 
                     _nodeNames.clear();
@@ -159,30 +171,135 @@ void SceneModelEditor::DrawEditGui()
         ImGui::Text(u8"カレントディレクトリ：%s", _currentDirectory.c_str());
         ImGui::Text(u8"相対パス：%s", _relativePath.c_str());
         ImGui::Separator();
-        ImGui::Text(u8"アニメーション判定");
-        if (_animator.lock()->GetCurrentAnimIndex() != -1)
+        if (ImGui::Button(u8"モデル表示"))
         {
-            if (ImGui::TreeNode(u8"現在のアニメーション判定"))
+            _modelActor.lock()->SetShowFlag(!_modelActor.lock()->IsShowing());
+        }
+        ImGui::Separator();
+        if (ImGui::TreeNode(u8"判定"))
+        {
+            ImGui::Text(u8"アニメーション判定");
+            if (_animator.lock()->GetCurrentAnimIndex() != -1)
             {
-                _animCollisionData.DrawGui(_animator.lock()->GetCurrentAnimationName(), _nodeNames);
+                if (ImGui::TreeNode(u8"現在のアニメーション判定"))
+                {
+                    _animCollisionData.DrawGui(_animator.lock()->GetCurrentAnimationName(), _nodeNames);
+
+                    ImGui::TreePop();
+                }
+            }
+            if (ImGui::TreeNode(u8"すべてのアニメーション判定"))
+            {
+                _animCollisionData.DrawGuiAll(_nodeNames);
 
                 ImGui::TreePop();
             }
-        }
-        if (ImGui::TreeNode(u8"すべてのアニメーション判定"))
-        {
-            _animCollisionData.DrawGuiAll(_nodeNames);
+            if (ImGui::Button(u8"判定の書き出し"))
+            {
+                _animCollisionData.Serialize(_filepath.c_str());
+            }
 
             ImGui::TreePop();
         }
-        if (ImGui::Button(u8"判定の書き出し"))
+        ImGui::Separator();
+        if (ImGui::TreeNode(u8"アニメーション編集"))
         {
-            _animCollisionData.Serialize(_filepath.c_str());
-        }
+            DrawEditAnimationGui();
 
+            ImGui::TreePop();
+        }
         ImGui::Separator();
 
         ImGui::ColorEdit4(u8"ノードの色", &_nodeColor.x);
     }
     ImGui::End();
+}
+
+void SceneModelEditor::DrawEditAnimationGui()
+{
+    // アニメーション再生中か確認
+    int currentAnimIndex = _animator.lock()->GetCurrentAnimIndex();
+    if (currentAnimIndex == -1)
+        return;
+    auto model = _modelRenderer.lock()->GetModel();
+
+    ModelResource::Animation& animation = model->GetResource()->GetAddressAnimations()[currentAnimIndex];
+    int index = 0;
+    for (auto& node : animation.nodeAnims)
+    {
+        if (ImGui::TreeNode(model->GetPoseNodes()[index].name.c_str()))
+        {
+            if (ImGui::TreeNode(u8"Position"))
+            {
+                int keyIndex = 0;
+                for (auto& frame : node.positionKeyframes)
+                {
+                    if (ImGui::TreeNode(std::to_string(keyIndex).c_str()))
+                    {
+                        ImGui::DragFloat3(u8"position", &frame.value.x, 0.1f);
+                        ImGui::TreePop();
+                    }
+                    keyIndex++;
+                }
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode(u8"Rotation"))
+            {
+                int keyIndex = 0;
+                for (auto& frame : node.rotationKeyframes)
+                {
+                    if (ImGui::TreeNode(std::to_string(keyIndex).c_str()))
+                    {
+                        {
+                            DirectX::XMFLOAT4X4 transform = Quaternion(frame.value).ToMatrix();
+                            if (Debug::Guizmo(GetMainCamera()->GetView(), GetMainCamera()->GetProjection(),
+                                &transform))
+                            {
+                                // 回転を取得
+                                DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
+                                DirectX::XMVECTOR S, R, T;
+                                DirectX::XMMatrixDecompose(&S, &R, &T, M);
+                                DirectX::XMStoreFloat4(&frame.value, R);
+                            }
+                        }
+                        ImGui::DragFloat4(u8"oriental", &frame.value.x, 0.1f);
+                        Vector3 degrees = Vec3ConvertToDegrees(QuaternionToRollPitchYaw(frame.value));
+                        if (ImGui::DragFloat3(u8"angle", &degrees.x, 0.1f))
+                        {
+                            frame.value = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(degrees));
+                        }
+                        if (ImGui::Button("EDIT"))
+                        {
+                            frame.value.x = 0.0f;
+                            frame.value.y = -0.707f;
+                            frame.value.z = 0.707f;
+                            frame.value.w = 0.0f;
+                        }
+                        ImGui::TreePop();
+                    }
+                    keyIndex++;
+                }
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode(u8"Scale"))
+            {
+                int keyIndex = 0;
+                for (auto& frame : node.scaleKeyframes)
+                {
+                    if (ImGui::TreeNode(std::to_string(keyIndex).c_str()))
+                    {
+                        ImGui::DragFloat3(u8"scale", &frame.value.x, 0.1f);
+                        ImGui::TreePop();
+                    }
+                    keyIndex++;
+                }
+                ImGui::TreePop();
+            }
+
+            ImGui::TreePop();
+        }
+        index++;
+    }
 }

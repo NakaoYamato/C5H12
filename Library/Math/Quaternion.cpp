@@ -220,3 +220,11 @@ Quaternion::Quaternion(const DirectX::XMMATRIX& r)
 	this->z = Q.z;
 	this->w = Q.w;
 }
+
+DirectX::XMFLOAT4X4 Quaternion::ToMatrix() const
+{
+	DirectX::XMMATRIX M = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(this));
+	DirectX::XMFLOAT4X4 m;
+	DirectX::XMStoreFloat4x4(&m, M);
+	return m;
+}

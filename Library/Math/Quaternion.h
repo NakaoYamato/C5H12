@@ -66,4 +66,7 @@ public:
 
 	Quaternion(const DirectX::XMFLOAT4& v) { x = v.x; y = v.y; z = v.z; w = v.w; }
 	~Quaternion() {}
+
+	// ‰ñ“]s—ñ‚É•ÏŠ·
+	DirectX::XMFLOAT4X4 ToMatrix()const;
 };

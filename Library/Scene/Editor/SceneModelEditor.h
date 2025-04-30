@@ -54,6 +54,10 @@ private:
 	// デバッグ用
 	Vector4 _nodeColor = _VECTOR4_RED;
 	std::vector<const char*> _nodeNames;
+
+	int _selectingMeshIndex = -1;
+	float _vertexPointRadius = 0.05f;
+	Vector4 _vertexPointColor = _VECTOR4_GRAY;
 };
 
 // メニューバーに登録

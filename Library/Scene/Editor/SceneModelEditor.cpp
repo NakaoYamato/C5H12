@@ -47,6 +47,37 @@ void SceneModelEditor::Update(float elapsedTime)
     {
         // ノード表示
         model->DebugDrawNode(_nodeColor);
+
+        // 頂点表示
+        if (_selectingMeshIndex != -1)
+        {
+            auto& meshes = model->GetResource()->GetAddressMeshes();
+            auto& mesh = meshes[_selectingMeshIndex];
+
+            for (auto& vertex : mesh.vertices)
+            {
+                Vector3 position = _VECTOR3_ZERO;
+                size_t indices[4] = { vertex.boneIndex.x, vertex.boneIndex.y, vertex.boneIndex.z, vertex.boneIndex.w };
+                float weight[4] = { vertex.boneWeight.x, vertex.boneWeight.y, vertex.boneWeight.z, vertex.boneWeight.w };
+                if (mesh.bones.size() != 0)
+                {
+                    for (size_t i = 0; i < 4; ++i)
+                    {
+                        const ModelResource::Bone& bone = mesh.bones.at(indices[i]);
+                        DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&model->GetPoseNodes()[bone.nodeIndex].worldTransform);
+                        DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+                        DirectX::XMMATRIX Bone = Offset * World;
+                        position += Vec3TransformCoord(vertex.position, Bone) * weight[i];
+                    }
+                }
+                else
+                {
+                    position = Vec3TransformCoord(vertex.position, _modelActor.lock()->GetTransform().GetMatrix());
+                }
+
+                Debug::Renderer::DrawSphere(position, _vertexPointRadius, _vertexPointColor);
+            }
+        }
         
         // アニメーションを再生中は当たり判定を表示
         if (_animator.lock()->GetCurrentAnimIndex() != -1)
@@ -209,6 +240,10 @@ void SceneModelEditor::DrawEditGui()
             ImGui::TreePop();
         }
         ImGui::Separator();
+
+        ImGui::SliderInt(u8"選択中のメッシュ", &_selectingMeshIndex, -1, (int)_modelRenderer.lock()->GetModel()->GetResource()->GetAddressMeshes().size() - 1);
+        ImGui::DragFloat(u8"頂点の点の大きさ", &_vertexPointRadius, 0.01f);
+        ImGui::ColorEdit4(u8"頂点の色", &_vertexPointColor.x);
 
         ImGui::ColorEdit4(u8"ノードの色", &_nodeColor.x);
     }

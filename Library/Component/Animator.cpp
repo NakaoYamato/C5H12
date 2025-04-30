@@ -34,26 +34,60 @@ void Animator::DrawGui()
         ImGui::DragFloat(u8"ブレンド時間", &_animBlendSeconds, 0.01f);
         ImGui::Checkbox(u8"ループ", &_animLoop);
 
-        int index = 0;
-        for (const ModelResource::Animation& animation : animations)
+        ImGui::Separator();
+        // フィルター
+        if (ImGui::InputText(u8"検索", &filterStr))
         {
-            ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf;
+            Filtering(filterStr);
+        }
+        ImGui::Separator();
 
-            if (ImGui::TreeNodeEx(&animation, nodeFlags, animation.name.c_str()))
+        //　何もフィルターしていなければすべて表示
+        if (filterStr == "")
+        {
+            int index = 0;
+            for (const ModelResource::Animation& animation : animations)
             {
-                // ダブルクリックで再生
-                if (ImGui::IsItemClicked())
+                ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf;
+
+                if (ImGui::TreeNodeEx(&animation, nodeFlags, animation.name.c_str()))
                 {
-                    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                    // ダブルクリックで再生
+                    if (ImGui::IsItemClicked())
                     {
-                        this->PlayAnimation(index, _animLoop, _animBlendSeconds);
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                        {
+                            this->PlayAnimation(index, _animLoop, _animBlendSeconds);
+                        }
                     }
+
+                    ImGui::TreePop();
                 }
 
-                ImGui::TreePop();
+                index++;
             }
+        }
+        else
+        {
+            // フィルターしたアニメーションのみ表示
+            for (int index : _displayAnimationIndices)
+            {
+                ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf;
 
-            index++;
+                if (ImGui::TreeNodeEx(&animations[index], nodeFlags, animations[index].name.c_str()))
+                {
+                    // ダブルクリックで再生
+                    if (ImGui::IsItemClicked())
+                    {
+                        if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                        {
+                            this->PlayAnimation(index, _animLoop, _animBlendSeconds);
+                        }
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
         }
 
         ImGui::TreePop();
@@ -363,4 +397,24 @@ std::string Animator::GetAnimationName(int index) const
 std::string Animator::GetCurrentAnimationName() const
 {
     return GetAnimationName(_currentAnimIndex);
+}
+
+/// アニメーションのデバッグ表示をフィルタ
+void Animator::Filtering(std::string filterStr)
+{
+    // 表示用コンテナをクリア
+    _displayAnimationIndices.clear();
+
+    // モデルのアニメーション名がfilterStrを含むか確認
+    int index = 0;
+    for (const ModelResource::Animation& animation : _model->GetResource()->GetAddressAnimations())
+    {
+        // filterStrを含んでいたら表示用コンテナに追加
+        if (animation.name.find(filterStr) != std::string::npos)
+        {
+            _displayAnimationIndices.push_back(index);
+        }
+
+        index++;
+    }
 }

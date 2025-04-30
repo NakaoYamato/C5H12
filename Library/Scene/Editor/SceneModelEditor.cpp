@@ -182,7 +182,7 @@ void SceneModelEditor::DrawEditGui()
 
         ImGui::Separator();
 
-        ImGui::ColorEdit4(u8"ボーンの色", &_nodeColor.x);
+        ImGui::ColorEdit4(u8"ノードの色", &_nodeColor.x);
     }
     ImGui::End();
 }

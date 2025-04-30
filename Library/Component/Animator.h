@@ -110,4 +110,15 @@ public:
 	bool _animBlending = false;
 
 	Model* _model{};
+
+private:
+	/// <summary>
+	/// アニメーションのデバッグ表示をフィルタ
+	/// </summary>
+	/// <param name="filterStr">これを含むアニメーションを表示</param>
+	void Filtering(std::string filterStr);
+
+	// デバッグ表示用
+	std::vector<int> _displayAnimationIndices;
+	std::string filterStr = "";
 };

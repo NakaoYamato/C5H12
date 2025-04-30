@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include "../Math/Vector.h"
 #include "../Resource/ModelResource.h"
 
 /// <summary>
@@ -23,6 +24,9 @@ public:
 
 	// トランスフォーム更新処理
 	void UpdateTransform(const DirectX::XMFLOAT4X4& world);
+
+	// ノードのデバッグ表示
+	void DebugDrawNode(Vector4 nodeColor = _VECTOR4_RED);
 
 	// GUiの表示
 	void DrawGui();

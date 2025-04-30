@@ -87,6 +87,33 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& world)
     }
 }
 
+// ノードのデバッグ表示
+void Model::DebugDrawNode(Vector4 nodeColor)
+{
+    // ボーン表示
+    DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    // 親から子どもにボーンをのばす
+    for (auto& node : GetPoseNodes())
+    {
+        if (node.parent != nullptr)
+        {
+            Vector3 childWP = Vector3(node.worldTransform._41, node.worldTransform._42, node.worldTransform._43);
+            Vector3 parentWP = Vector3(node.parent->worldTransform._41, node.parent->worldTransform._42, node.parent->worldTransform._43);
+            float length = Vec3Length(parentWP - childWP);
+            if (length == 0.0f)
+                continue;
+            DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(DirectX::XMLoadFloat3(&parentWP), DirectX::XMLoadFloat3(&childWP), Up);
+            DirectX::XMFLOAT4X4 world;
+            DirectX::XMStoreFloat4x4(&world, DirectX::XMMatrixInverse(nullptr, View));
+            Debug::Renderer::DrawBone(
+                world,
+                length,
+                nodeColor
+            );
+        }
+    }
+}
+
 void Model::DrawGui()
 {
     if (ImGui::TreeNode(u8"モデル"))

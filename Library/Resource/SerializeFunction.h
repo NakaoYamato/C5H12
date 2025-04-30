@@ -9,6 +9,14 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/string.hpp>
 
+#pragma region 定義
+// モデルのシリアライズファイル拡張子
+static const char* MODEL_EXTENSION = ".model";
+// アニメーションの当たり判定のファイル拡張子
+static const char* ANIMATION_COLLISION_EXTENSION = ".animCol";
+#pragma endregion
+
+
 // DirectXMath構造体用のserializeテンプレート関数を定義
 namespace DirectX
 {

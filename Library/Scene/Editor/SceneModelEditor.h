@@ -34,6 +34,12 @@ public:
 	}
 
 private:
+	// メニューバーのGUI描画
+	void DrawMenuBarGui();
+	// 編集GUI描画
+	void DrawEditGui();
+
+private:
 	std::string _filepath;
 	std::string _currentDirectory;
 	std::string _relativePath;
@@ -45,7 +51,7 @@ private:
 	AnimationCollisionData _animCollisionData;
 
 	// デバッグ用
-	Vector4 _boneColor = _VECTOR4_RED;
+	Vector4 _nodeColor = _VECTOR4_RED;
 	std::vector<const char*> _nodeNames;
 };
 

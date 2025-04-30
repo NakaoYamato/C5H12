@@ -18,7 +18,7 @@ void DragonActor::OnCreate()
 	GetTransform().SetLengthScale(0.01f);
 
 	// コンポーネント追加
-	_modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
+	_modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Dragons/Kuzar the Magnificent.model");
 	auto animator = AddComponent<Animator>(_modelRenderer.lock()->GetModel());
 
 	// モデルがシリアライズされていなければアニメーションを設定
@@ -392,7 +392,7 @@ void DragonActor::SetModelAnimation()
 			animationName);
 
 		// アニメーションを右手Z-UPに変換
-		Quaternion q = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(Vector3(-90.0f, 0.0f, 0.0f)));
+		Quaternion q = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(Vector3(90.0f, 0.0f, 0.0f)));
 		size_t index = _modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations().size() - 1;
 		auto& animation = _modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations()[index];
 		for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)

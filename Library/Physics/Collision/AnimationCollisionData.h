@@ -9,8 +9,6 @@
 class AnimationCollisionData
 {
 public:
-	static const char* SerializeExtension;
-
 	/// <summary>
 	/// 判定の種類
 	/// </summary>
@@ -80,11 +78,19 @@ public:
 		_data.clear();
 	}
 
-	// 書き出し
-	void Serialize(const char* filename);
+	/// <summary>
+	/// データ書き出し
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns>失敗したらfalse</returns>
+	bool Serialize(const char* filename);
 
-	// 読み込み
-	void Deserialize(const char* filename);
+	/// <summary>
+	/// データ読み込み
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns>失敗したらfalse</returns>
+	bool Deserialize(const char* filename);
 #pragma region アクセサ
 	Keyframes& GetKeyframes(const std::string& animName) {
 		return _data[animName];

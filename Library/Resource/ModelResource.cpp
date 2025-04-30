@@ -85,8 +85,12 @@ void ModelResource::Load(std::string filename)
 
     std::filesystem::path serializePath(filename);
 
+    // 拡張子取得
+    std::string extension = _filepath.extension().string();
+    std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
+
     // シリアライズの確認
-    serializePath.replace_extension(".cereal");
+    serializePath.replace_extension(MODEL_EXTENSION);
     _serializePath = serializePath.generic_string();
     if (std::filesystem::exists(serializePath))
     {
@@ -110,13 +114,14 @@ void ModelResource::Load(std::string filename)
 
         return;
     }
+    else
+    {
+        // もしもfilenameの拡張子がMODEL_EXTENSIONで、ファイルが見つからなかった場合エラーを出す
+        _ASSERT_EXPR_A(extension != MODEL_EXTENSION, "Serialize File not found!");
+    }
 
     // シリアライズされていない
     _isSerialized = false;
-
-    // 拡張子取得
-    std::string extension = _filepath.extension().string();
-    std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
 
     // FBXファイルの場合は特殊なインポートオプションを設定
     if (extension == ".fbx")
@@ -127,6 +132,7 @@ void ModelResource::Load(std::string filename)
 
     // インポート時のフラグ
     uint32_t flag =
+        aiProcess_MakeLeftHanded |          // 左手座標系化
         aiProcess_Triangulate |             // 三角形化
         aiProcess_JoinIdenticalVertices |   // 重複頂点のマージ
         aiProcess_PopulateArmatureData;     // ボーンの参照データを取得
@@ -263,6 +269,7 @@ int ModelResource::FindNodeByName(std::string name)
     return -1;
 }
 
+#pragma region 読み込み
 // ノードの読み込み
 void ModelResource::LoadNodes(std::vector<Node>& nodes)
 {
@@ -751,7 +758,9 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
         TraverseMesh(meshes, nodes, aNode->mChildren[aNodeIndex]);
     }
 }
+#pragma endregion
 
+#pragma region 構築
 // ノードの構築
 void ModelResource::BuildNode(std::vector<Node>& nodes)
 {
@@ -781,6 +790,7 @@ void ModelResource::BuildBone(std::vector<Mesh>& meshes, std::vector<Node>& node
         }
     }
 }
+#pragma endregion
 
 // ノードインデックス取得
 int ModelResource::GetNodeIndex(const std::vector<Node>& nodes, const char* name)

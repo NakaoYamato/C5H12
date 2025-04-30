@@ -6,8 +6,6 @@
 
 #include "../../Library/Resource/SerializeFunction.h"
 
-const char* AnimationCollisionData::SerializeExtension = ".animCol";
-
 void AnimationCollisionData::Keyframe::DrawGui(const std::vector<const char*>& nodeNames)
 {
     // CollisionTypeÇÃëIë
@@ -110,9 +108,12 @@ void AnimationCollisionData::DrawGui(const std::string& animName, const std::vec
 }
 
 // èëÇ´èoÇµ
-void AnimationCollisionData::Serialize(const char* filename)
+bool AnimationCollisionData::Serialize(const char* filename)
 {
-    std::ofstream ostream(filename, std::ios::binary);
+    std::filesystem::path serializePath(filename);
+    serializePath.replace_extension(ANIMATION_COLLISION_EXTENSION);
+
+    std::ofstream ostream(serializePath.string().c_str(), std::ios::binary);
     if (ostream.is_open())
     {
         cereal::BinaryOutputArchive archive(ostream);
@@ -122,17 +123,21 @@ void AnimationCollisionData::Serialize(const char* filename)
             archive(
                 CEREAL_NVP(_data)
             );
+            return true;
         }
         catch (...)
         {
-            assert(!"Serialize failed");
         }
     }
+    return false;
 }
 
-void AnimationCollisionData::Deserialize(const char* filename)
+bool AnimationCollisionData::Deserialize(const char* filename)
 {
-    std::ifstream istream(filename, std::ios::binary);
+    std::filesystem::path serializePath(filename);
+    serializePath.replace_extension(ANIMATION_COLLISION_EXTENSION);
+
+    std::ifstream istream(serializePath.string().c_str(), std::ios::binary);
     if (istream.is_open())
     {
         cereal::BinaryInputArchive archive(istream);
@@ -142,14 +147,11 @@ void AnimationCollisionData::Deserialize(const char* filename)
             archive(
                 CEREAL_NVP(_data)
             );
+            return true;
         }
         catch (...)
         {
-            assert(!"Deserialize failed");
         }
     }
-    else
-    {
-        assert(!"Deserialize failed");
-    }
+    return false;
 }

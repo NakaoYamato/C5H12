@@ -172,31 +172,13 @@ public:
 	// モデルの読み込み
 	void Load(std::string filename);
 
+
 	// アニメーションの追加
-	// rootStartAngle = オイラー角
 	void AppendAnimations(std::string filename,
 		std::string animationName);
 	// アニメーションの追加
-	// rootStartAngle = オイラー角
 	void AppendAnimations(ModelResource* animationResource,
 		std::string animationName);
-
-#pragma region アクセサ
-	const std::vector<Node>& GetNodes() const { return _nodes; }
-	const std::vector<Mesh>& GetMeshes() const { return _meshes; }
-	const std::vector<Material>& GetMaterials() const { return _materials; }
-	const std::vector<Animation>& GetAnimations() const { return _animations; }
-	const std::string& GetSerializePath() const { return _serializePath; }
-
-	std::vector<Node>& GetAddressNodes() { return _nodes; }
-	std::vector<Mesh>& GetAddressMeshes() { return _meshes; }
-	std::vector<Material>& GetAddressMaterials() { return _materials; }
-	std::vector<Animation>& GetAddressAnimations() { return _animations; }
-
-	// 名前からノード番号を取得
-	int FindNodeByName(std::string name);
-
-#pragma endregion
 
 	// 指定のマテリアルのSRVを変更
 	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)
@@ -217,15 +199,31 @@ public:
 		assert(!"Material Not Find!!");
 	}
 
+#pragma region アクセサ
+	const std::vector<Node>& GetNodes() const { return _nodes; }
+	const std::vector<Mesh>& GetMeshes() const { return _meshes; }
+	const std::vector<Material>& GetMaterials() const { return _materials; }
+	const std::vector<Animation>& GetAnimations() const { return _animations; }
+	const std::string& GetSerializePath() const { return _serializePath; }
+
+	std::vector<Node>& GetAddressNodes() { return _nodes; }
+	std::vector<Mesh>& GetAddressMeshes() { return _meshes; }
+	std::vector<Material>& GetAddressMaterials() { return _materials; }
+	std::vector<Animation>& GetAddressAnimations() { return _animations; }
+
+	// 名前からノード番号を取得
+	int FindNodeByName(std::string name);
+
+	// 読み込んだデータがシリアライズされていたかどうか
+	bool IsSerialized()const { return _isSerialized; }
+#pragma endregion
 	// シリアライズ
 	void Serialize(const char* filename);
 
 	// デシリアライズ
 	void Deserialize(const char* filename);
-
-	// 読み込んだデータがシリアライズされていたかどうか
-	bool IsSerialized()const { return _isSerialized; }
 private:
+#pragma region 読み込み
 	// ノードの読み込み
 	void LoadNodes(std::vector<Node>& nodes);
 
@@ -239,18 +237,20 @@ private:
 	static void LoadAnimations(const aiScene* _aScene, std::vector<Animation>& animations, const std::vector<Node>& nodes);
 	void LoadAnimations(std::vector<Animation>& animations, const std::vector<Node>& nodes);
 
-private:
 	// ノードの再帰読み込み
 	void TraverseNode(std::vector<Node>& nodes, const aiNode* aNode, int parentIndex);
 
 	// メッシュの再帰読み込み
 	void TraverseMesh(std::vector<Mesh>& meshes, std::vector<Node>& nodes, const aiNode* aNode);
+#pragma endregion
 
+#pragma region 構築
 	// ノードの構築
 	void BuildNode(std::vector<Node>& nodes);
 
 	// ボーンの構築
 	void BuildBone(std::vector<Mesh>& meshes, std::vector<Node>& nodes);
+#pragma endregion
 
 private:
 	// ノードインデックス取得

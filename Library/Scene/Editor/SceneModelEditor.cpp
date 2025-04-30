@@ -252,13 +252,31 @@ void SceneModelEditor::DrawEditGui()
 
 void SceneModelEditor::DrawEditAnimationGui()
 {
+    auto model = _modelRenderer.lock()->GetModel();
+
+    if (ImGui::Button(u8"すべてのアニメーションを90度回転"))
+    {
+        DirectX::XMVECTOR RotationY90 = DirectX::XMQuaternionRotationAxis(
+            DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),
+            DirectX::XMConvertToRadians(90.0f));
+        for (auto& animation : model->GetResource()->GetAddressAnimations())
+        {
+            auto& rootAnimNode = animation.nodeAnims[0];
+            for (auto& frame : rootAnimNode.rotationKeyframes)
+            {
+                DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&frame.value);
+
+                DirectX::XMStoreFloat4(&frame.value, DirectX::XMQuaternionMultiply(RotationY90, Q));
+            }
+        }
+    }
+
     // アニメーション再生中か確認
     int currentAnimIndex = _animator.lock()->GetCurrentAnimIndex();
     if (currentAnimIndex == -1)
         return;
-    auto model = _modelRenderer.lock()->GetModel();
-
     ModelResource::Animation& animation = model->GetResource()->GetAddressAnimations()[currentAnimIndex];
+
     int index = 0;
     for (auto& node : animation.nodeAnims)
     {

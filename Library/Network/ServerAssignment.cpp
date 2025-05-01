@@ -1,6 +1,6 @@
 #include "ServerAssignment.h"
 
-
+#include <imgui.h>
 
 void ServerAssignment::Execute()
 {
@@ -13,25 +13,23 @@ void ServerAssignment::Execute()
 	// ENLライブラリの初期化
 	if (!ENLInitialize())
 	{
-		//std::cout << "Server Initialize NG" << std::endl;
+		_logs.push_back(u8"\tサーバー初期化失敗");
 		return;
 	}
-	else
-	{
-		//std::cout << "Server Initialize OK" << std::endl;
-	}
+	_logs.push_back(u8"サーバー初期化成功");
 
 	// サーバオブジェクト作成(accept実行)
 	mrsServer = ENLServerCreate(ENLConnectionType::CONNECTION_TYPE_TCP, address, port, backlog);
 	if (mrsServer <= 0)
 	{
-		//std::cout << "Server Create NG" << std::endl;
+		_logs.push_back(u8"\tサーバーオブジェクト生成失敗");
 		return;
 	}
+	_logs.push_back(u8"サーバーオブジェクト生成成功");
 	// static関数からメンバ変数にアクセスできるようにthisポインタを紐づける
 	SetServerData(mrsServer, this);
 	// 接続されたときのコールバック関数設定
-	//SetAcceptCallback(mrsServer, Accept);
+	SetAcceptCallback(mrsServer, Accept);
 
 	// サーバ側からコマンド入力で終了されるまでループする。
 	// キーボードでexitを入力するとループを抜けるための別スレッドを用意
@@ -54,9 +52,11 @@ void ServerAssignment::Execute()
 	clients.clear();
 
 	ENLClose(mrsServer);
+	_logs.push_back(u8"サーバー封鎖");
 
-	// mrs終了処理
+	// ENL終了処理
 	ENLFinalize();
+	_logs.push_back(u8"サーバー終了");
 }
 
 void ServerAssignment::Exit()
@@ -182,6 +182,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connection_dat
 	//}
 }
 
+// ユーザが切断したときに呼ばれるコールバック関数
 void ServerAssignment::Disconnect(ENLConnection connection, void* connection_data)
 {
 	ServerAssignment* self = reinterpret_cast<ServerAssignment*>(connection_data);
@@ -206,8 +207,11 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connection_dat
 
 	// プレイヤー情報削除
 	self->EraseClient(connection);
+
+	self->_logs.push_back(u8"切断\t" + connection);
 }
 
+// 接続されたときのコールバック関数
 void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection connection)
 {
 	// レコードが読み込み可能になった際に呼ばれるCallBack関数の設定
@@ -235,7 +239,7 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 
 	self->AddID();
 	self->clients.emplace_back(client);
-	std::cout << "New Connected" << std::endl;
+	self->_logs.push_back(u8"新規接続\t" + client.enlConnection);
 
 	// ID送信
 	PlayerLogin playerLogin{};
@@ -268,6 +272,35 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 	//		sizeof(player)
 	//	);
 	//}
+}
+
+void ServerAssignment::DrawGui()
+{
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu(u8"デバッグ"))
+		{
+			ImGui::Checkbox(u8"サーバー", &_drawGui);
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
+	if (_drawGui)
+	{
+		if (ImGui::Begin(u8"サーバー"))
+		{
+			ImGui::Text(u8"ログ");
+			ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(250, 470), ImGuiWindowFlags_NoTitleBar);
+			for (std::string message : _logs) {
+				ImGui::Text(u8"%s", message.c_str());
+			}
+			ImGui::EndChild();
+			ImGui::Spacing();
+		}
+		ImGui::End();
+	}
 }
 
 void ServerAssignment::EraseClient(ENLConnection connection)

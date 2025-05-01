@@ -16,9 +16,17 @@ public:
 	void Execute();
 	void Exit();
 
+#pragma region コールバック関数
+	// レコードが読み込み可能になった際に呼ばれるコールバック関数
 	static void ReadRecord(ENLConnection connection, void* connection_data, uint16_t payload_type, const void* payload, uint32_t payload_len);
+	// ユーザが切断したときに呼ばれるコールバック関数
 	static void Disconnect(ENLConnection connection, void* connection_data);
+	// 接続されたときのコールバック関数
 	static void Accept(ENLServer server, void* server_data, ENLConnection connection);
+#pragma endregion
+
+	// GUI表示
+	void DrawGui();
 
 	enum class NetworkTag : uint16_t
 	{
@@ -69,5 +77,9 @@ private:
 	ENLServer mrsServer = -1;
 	std::vector<Client> clients;
 	bool loop = true;
+
+	// デバッグ用
+	bool _drawGui = false;
+	std::vector<std::string> _logs;
 };
 #endif

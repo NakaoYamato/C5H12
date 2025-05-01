@@ -45,6 +45,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
 
     bool _isTextureCube = false;
-    int _lutIndex = 0;
+    int _lutIndex = 1;
     bool _drawGui = false;
 };

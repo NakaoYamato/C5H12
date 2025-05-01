@@ -187,9 +187,6 @@ bool Framework::Initialize() const
         [](bool pause) {imguiProfilerIsPause = pause; },
         static_cast<int>(JobSystem::Instance().GetNumThreads()) + 1);
 
-    // サーバー起動
-    //server
-
     return true;
 }
 
@@ -310,8 +307,8 @@ void Framework::CalcFrameStatus()
         SetWindowTextA(_hwnd, outs.str().c_str());
 #else
         //SetWindowTextW(hwnd_, L"タイトル");
-        outs << fps_ << "/" << "FrameTime:" << 1000.0f / fps_ << "(ms)";
-        SetWindowTextA(hwnd_, outs.str().c_str());
+        outs << _fps << "/" << "FrameTime:" << 1000.0f / _fps << "(ms)";
+        SetWindowTextA(_hwnd, outs.str().c_str());
 #endif
 
         // 1秒が過ぎたフラグをオン

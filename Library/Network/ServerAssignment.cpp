@@ -1,35 +1,37 @@
 #include "ServerAssignment.h"
-#if 0
+
+
+
 void ServerAssignment::Execute()
 {
-	// Server課題 サーバ情報設定
+	// サーバ情報設定
 	// IPアドレス、ポート番号、バックログ数を指定
 	char address[40] = { "0.0.0.0" };
 	uint16_t port = 7000;
 	uint32_t backlog = 10;
 
-	// mrsライブラリの初期化
+	// ENLライブラリの初期化
 	if (!ENLInitialize())
 	{
-		std::cout << "Server Initialize NG" << std::endl;
+		//std::cout << "Server Initialize NG" << std::endl;
 		return;
 	}
 	else
 	{
-		std::cout << "Server Initialize OK" << std::endl;
+		//std::cout << "Server Initialize OK" << std::endl;
 	}
 
 	// サーバオブジェクト作成(accept実行)
 	mrsServer = ENLServerCreate(ENLConnectionType::CONNECTION_TYPE_TCP, address, port, backlog);
 	if (mrsServer <= 0)
 	{
-		std::cout << "Server Create NG" << std::endl;
+		//std::cout << "Server Create NG" << std::endl;
 		return;
 	}
 	// static関数からメンバ変数にアクセスできるようにthisポインタを紐づける
 	SetServerData(mrsServer, this);
 	// 接続されたときのコールバック関数設定
-	SetAcceptCallback(mrsServer, Accept);
+	//SetAcceptCallback(mrsServer, Accept);
 
 	// サーバ側からコマンド入力で終了されるまでループする。
 	// キーボードでexitを入力するとループを抜けるための別スレッドを用意
@@ -284,4 +286,3 @@ void ServerAssignment::EraseClient(ENLConnection connection)
 	}
 	clients.erase(clients.begin() + i);
 }
-#endif

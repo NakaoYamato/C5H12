@@ -11,7 +11,7 @@
 #include "../Math/HighPrecisionTimer.h"
 
 // ネットワーク
-//#include "../Network/ServerAssignment.h"
+#include "../Network/ServerAssignment.h"
 
 CONST LONG SCREEN_WIDTH{ 1280 };
 CONST LONG SCREEN_HEIGHT{ 720 };
@@ -69,5 +69,5 @@ private:
 	CONST HWND _hwnd = {};
 
 	// 受信サーバー
-	//ServerAssignment server;
+	ServerAssignment* server = nullptr;
 };

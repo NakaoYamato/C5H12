@@ -7,7 +7,7 @@
 #include <vector>
 #include <DirectXMath.h>
 
-#if 0
+#if 1
 class ServerAssignment
 {
 public:

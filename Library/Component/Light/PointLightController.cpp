@@ -15,7 +15,10 @@ void PointLightController::Update(float elapsedTime)
     pos.y = GetActor()->GetTransform().GetWorldPosition().y;
     pos.z = GetActor()->GetTransform().GetWorldPosition().z;
 	_light.position = pos;
+    _light.color = _color * _colorVolume;
     {
+        // ポイントライトの登録
+        // スレッドセーフ
 		std::lock_guard<std::mutex> lock(_renderContextMutex);
         GetActor()->GetScene()->GetRenderContext().pointLights.push_back(&_light);
     }
@@ -33,6 +36,7 @@ void PointLightController::DrawGui()
     bool useFlag = _light.isAlive == 1;
     ImGui::Checkbox(u8"使用フラグ", &useFlag);
     _light.isAlive = useFlag == true ? 1 : 0;
-    ImGui::ColorEdit4("color", &_light.color.x);
-    ImGui::DragFloat("range", &_light.range, 0.1f);
+    ImGui::ColorEdit4(u8"color", &_color.x);
+    ImGui::DragFloat(u8"範囲", &_light.range, 0.1f);
+    ImGui::DragFloat(u8"強さ", &_colorVolume, 0.1f);
 }

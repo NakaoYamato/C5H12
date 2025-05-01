@@ -322,6 +322,11 @@ bool Vector3::operator != (const Vector3& v) const
     return (x != v.x) || (y != v.y) || (z != v.z);
 }
 
+Vector4 Vector4::operator*(float f) const
+{
+    return Vector4(x * f, y * f, z * f, w);
+}
+
 Vector4 Vector4::operator*(const Vector4& v) const
 {
     return Vector4(x * v.x, y * v.y, z * v.z, w * v.w);

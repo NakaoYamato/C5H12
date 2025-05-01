@@ -167,6 +167,7 @@ public:
     Vector4(const DirectX::XMFLOAT4& v) { x = v.x; y = v.y; z = v.z; w = v.w; }
     ~Vector4() {};
 
+    Vector4 operator*(float) const;
     Vector4 operator*(const Vector4&) const;
 
     const Vector3 Vec3()const { return Vector3(x, y, z); }

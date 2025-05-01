@@ -10,6 +10,9 @@
 
 #include "../Math/HighPrecisionTimer.h"
 
+// ネットワーク
+//#include "../Network/ServerAssignment.h"
+
 CONST LONG SCREEN_WIDTH{ 1280 };
 CONST LONG SCREEN_HEIGHT{ 720 };
 CONST BOOL FULLSCREEN{ FALSE };
@@ -64,4 +67,7 @@ private:
 private:
 	// メインウィンドウのハンドル
 	CONST HWND _hwnd = {};
+
+	// 受信サーバー
+	//ServerAssignment server;
 };

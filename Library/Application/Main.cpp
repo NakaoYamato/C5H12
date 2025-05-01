@@ -1,3 +1,5 @@
+#include "../Network/ServerAssignment.h"
+
 #include <windows.h>
 #include <iostream>
 #include <time.h>

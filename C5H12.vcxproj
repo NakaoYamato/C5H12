@@ -105,14 +105,15 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -129,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -138,7 +139,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -194,6 +195,8 @@
     <ClCompile Include="Library\Math\Quaternion.cpp" />
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
+    <ClCompile Include="Library\Network\ClientAssignment.cpp" />
+    <ClCompile Include="Library\Network\ServerAssignment.cpp" />
     <ClCompile Include="Library\Physics\Collision\AnimationCollisionData.cpp" />
     <ClCompile Include="Library\Physics\PhysicsManager.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
@@ -293,6 +296,8 @@
     <ClInclude Include="Library\Math\Random.h" />
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
+    <ClInclude Include="Library\Network\ClientAssignment.h" />
+    <ClInclude Include="Library\Network\ServerAssignment.h" />
     <ClInclude Include="Library\Physics\Collision\AnimationCollisionData.h" />
     <ClInclude Include="Library\Physics\PhysicsManager.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />

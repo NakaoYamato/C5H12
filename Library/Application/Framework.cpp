@@ -187,6 +187,9 @@ bool Framework::Initialize() const
         [](bool pause) {imguiProfilerIsPause = pause; },
         static_cast<int>(JobSystem::Instance().GetNumThreads()) + 1);
 
+    // サーバー起動
+    //server
+
     return true;
 }
 

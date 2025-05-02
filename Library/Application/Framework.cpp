@@ -44,9 +44,6 @@ int Framework::Run()
             _tictoc.Tick();
             CalcFrameStatus();
 
-            // 更新処理
-            Update(_tictoc.TimeInterval());
-
             // 固定間隔更新処理
             fixedUpdateTimer += _tictoc.TimeInterval();
             if (fixedUpdateTimer - _FIXED_UPDATE_RATE >= 0.0f)
@@ -54,6 +51,10 @@ int Framework::Run()
                 FixedUpdate();
                 fixedUpdateTimer = fixedUpdateTimer - _FIXED_UPDATE_RATE;
             }
+
+            // 更新処理
+            Update(_tictoc.TimeInterval());
+
             Render();
         }
     }

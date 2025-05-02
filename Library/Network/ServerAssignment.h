@@ -3,6 +3,7 @@
 #include <ENLBuffer.h>
 #include <iostream>
 #include <thread>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <DirectXMath.h>
@@ -13,15 +14,46 @@ class ServerAssignment
 public:
 	ServerAssignment() {}
 	~ServerAssignment() {}
+
+	/// <summary>
+	/// 開始処理
+	/// </summary>
 	void Execute();
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	void Update();
+
+	/// <summary>
+	/// 終了処理
+	/// </summary>
 	void Exit();
 
 #pragma region コールバック関数
-	// レコードが読み込み可能になった際に呼ばれるコールバック関数
-	static void ReadRecord(ENLConnection connection, void* connection_data, uint16_t payload_type, const void* payload, uint32_t payload_len);
-	// ユーザが切断したときに呼ばれるコールバック関数
+	/// <summary>
+	/// レコードが読み込み可能になった際に呼ばれるコールバック関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connection_data">ServerAssignmentのポインタ</param>
+	/// <param name="payload_type"></param>
+	/// <param name="payload"></param>
+	/// <param name="payload_len"></param>
+	static void ReadRecord(ENLConnection connection, void* connectionData, uint16_t payloadType, const void* payload, uint32_t payloadLen);
+
+	/// <summary>
+	/// ユーザが切断したときに呼ばれるコールバック関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connection_data">ServerAssignmentのポインタ</param>
 	static void Disconnect(ENLConnection connection, void* connection_data);
-	// 接続されたときのコールバック関数
+
+	/// <summary>
+	/// 接続されたときのコールバック関数
+	/// </summary>
+	/// <param name="server"></param>
+	/// <param name="server_data">ServerAssignmentのポインタ</param>
+	/// <param name="connection"></param>
 	static void Accept(ENLServer server, void* server_data, ENLConnection connection);
 #pragma endregion
 
@@ -77,6 +109,10 @@ private:
 	ENLServer mrsServer = -1;
 	std::vector<Client> clients;
 	bool loop = true;
+
+	// 更新処理用スレッド
+	std::shared_ptr<std::thread> _updateThread = nullptr;
+	std::mutex updateThreadMutex;
 
 	// デバッグ用
 	bool _drawGui = false;

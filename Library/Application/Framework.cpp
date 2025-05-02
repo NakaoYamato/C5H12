@@ -177,7 +177,8 @@ bool Framework::Initialize() const
     Debug::Initialize();
 
 	// ジョブシステム初期化
-    JobSystem::Instance().Initialize();
+    // サーバーのスレッドで最大２個必要なのでその分減らしている
+    JobSystem::Instance().Initialize(std::max<size_t>(std::thread::hardware_concurrency() - 2, 1));
 
     // ImGui初期化
     ImGuiManager::Initialize(_hwnd,

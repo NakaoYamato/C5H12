@@ -16,7 +16,7 @@ void SceneNetworkDebug::Initialize()
     // サーバー作成
     _server = std::make_shared<ServerAssignment>();
     // サーバー起動
-    //_server->Execute();
+    _server->Execute();
 
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
@@ -25,8 +25,16 @@ void SceneNetworkDebug::Initialize()
 // 終了化
 void SceneNetworkDebug::Finalize()
 {
-    Scene::Finalize();
-
     // サーバー終了
     _server->Exit();
+
+    Scene::Finalize();
+}
+
+// Gui描画処理
+void SceneNetworkDebug::DrawGui()
+{
+    Scene::DrawGui();
+
+    _server->DrawGui();
 }

@@ -21,6 +21,9 @@ public:
 	// 終了化
 	void Finalize() override;
 
+	// Gui描画処理
+	void DrawGui() override;
+
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
 	{

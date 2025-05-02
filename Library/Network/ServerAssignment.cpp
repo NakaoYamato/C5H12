@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+/// 開始処理
 void ServerAssignment::Execute()
 {
 	// サーバ情報設定
@@ -31,16 +32,31 @@ void ServerAssignment::Execute()
 	// 接続されたときのコールバック関数設定
 	SetAcceptCallback(mrsServer, Accept);
 
-	// サーバ側からコマンド入力で終了されるまでループする。
-	// キーボードでexitを入力するとループを抜けるための別スレッドを用意
-	std::thread th(&ServerAssignment::Exit, this);
+	// 更新処理用スレッド起動
+	// メインスレッドで起動すると止まってしまう
+	_updateThread = std::make_shared<std::thread>(&ServerAssignment::Update, this);
+}
 
-	do {
+/// 更新処理
+void ServerAssignment::Update()
+{
+	while (true)
+	{
 		// スタックされているデータの送信、受信を行う。
 		ENLUpdate();
-	} while (loop);
-	th.join();
 
+		{
+			// ループフラグ確認
+			std::lock_guard<std::mutex> lock(updateThreadMutex);
+			if (loop == false)
+				break;
+		}
+	}
+}
+
+/// 終了処理
+void ServerAssignment::Exit()
+{
 	// クライアント全削除
 	for (Client client : clients)
 	{
@@ -51,24 +67,20 @@ void ServerAssignment::Execute()
 	}
 	clients.clear();
 
+	// 更新処理の停止
+	{
+		std::lock_guard<std::mutex> lock(updateThreadMutex);
+		loop = false;
+	}
+	_updateThread->join();
+
+	// サーバーを閉じる
 	ENLClose(mrsServer);
 	_logs.push_back(u8"サーバー封鎖");
 
 	// ENL終了処理
 	ENLFinalize();
 	_logs.push_back(u8"サーバー終了");
-}
-
-void ServerAssignment::Exit()
-{
-	while (loop) {
-		std::string input;
-		std::cin >> input;
-		if (input == "exit")
-		{
-			loop = false;
-		}
-	}
 }
 
 void ServerAssignment::ReadRecord(ENLConnection connection, void* connection_data, uint16_t payload_type, const void* payload, uint32_t payload_len)

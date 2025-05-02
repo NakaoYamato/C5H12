@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;.\Server\Define;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;.\Server\Define;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -198,7 +198,6 @@
     <ClCompile Include="Library\Mediator\Mediator.cpp" />
     <ClCompile Include="Library\Mediator\NetworkMediator.cpp" />
     <ClCompile Include="Library\Network\ClientAssignment.cpp" />
-    <ClCompile Include="Library\Network\ServerAssignment.cpp" />
     <ClCompile Include="Library\Physics\Collision\AnimationCollisionData.cpp" />
     <ClCompile Include="Library\Physics\PhysicsManager.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
@@ -302,7 +301,6 @@
     <ClInclude Include="Library\Mediator\Mediator.h" />
     <ClInclude Include="Library\Mediator\NetworkMediator.h" />
     <ClInclude Include="Library\Network\ClientAssignment.h" />
-    <ClInclude Include="Library\Network\ServerAssignment.h" />
     <ClInclude Include="Library\Physics\Collision\AnimationCollisionData.h" />
     <ClInclude Include="Library\Physics\PhysicsManager.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />

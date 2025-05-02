@@ -1,6 +1,7 @@
 #include "ServerAssignment.h"
 
-#include <imgui.h>
+
+using namespace Network;
 
 /// 開始処理
 void ServerAssignment::Execute()
@@ -14,49 +15,34 @@ void ServerAssignment::Execute()
 	// ENLライブラリの初期化
 	if (!ENLInitialize())
 	{
-		_logs.push_back(u8"\tサーバー初期化失敗");
+		std::cout << "\tサーバー初期化失敗" << std::endl;
 		return;
 	}
-	_logs.push_back(u8"サーバー初期化成功");
+	std::cout << "サーバー初期化成功" << std::endl;
 
 	// サーバオブジェクト作成(accept実行)
 	mrsServer = ENLServerCreate(ENLConnectionType::CONNECTION_TYPE_TCP, address, port, backlog);
 	if (mrsServer <= 0)
 	{
-		_logs.push_back(u8"\tサーバーオブジェクト生成失敗");
+		std::cout << "\tサーバーオブジェクト生成失敗" << std::endl;
 		return;
 	}
-	_logs.push_back(u8"サーバーオブジェクト生成成功");
+	std::cout << "サーバーオブジェクト生成成功" << std::endl;
 	// static関数からメンバ変数にアクセスできるようにthisポインタを紐づける
 	SetServerData(mrsServer, this);
 	// 接続されたときのコールバック関数設定
 	SetAcceptCallback(mrsServer, Accept);
 
-	// 更新処理用スレッド起動
-	// メインスレッドで起動すると止まってしまう
-	_updateThread = std::make_shared<std::thread>(&ServerAssignment::Update, this);
-}
+	// サーバ側からコマンド入力で終了されるまでループする。
+	// キーボードでexitを入力するとループを抜けるための別スレッドを用意
+	std::thread th(&ServerAssignment::Exit, this);
 
-/// 更新処理
-void ServerAssignment::Update()
-{
-	while (true)
-	{
+	do {
 		// スタックされているデータの送信、受信を行う。
 		ENLUpdate();
+	} while (loop);
+	th.join();
 
-		{
-			// ループフラグ確認
-			std::lock_guard<std::mutex> lock(updateThreadMutex);
-			if (loop == false)
-				break;
-		}
-	}
-}
-
-/// 終了処理
-void ServerAssignment::Exit()
-{
 	// クライアント全削除
 	for (Client client : clients)
 	{
@@ -67,22 +53,29 @@ void ServerAssignment::Exit()
 	}
 	clients.clear();
 
-	// 更新処理の停止
-	{
-		std::lock_guard<std::mutex> lock(updateThreadMutex);
-		loop = false;
-	}
-	_updateThread->join();
-
-	// サーバーを閉じる
 	ENLClose(mrsServer);
-	_logs.push_back(u8"サーバー封鎖");
+	std::cout << "サーバー封鎖" << std::endl;
 
-	// ENL終了処理
+	// mrs終了処理
 	ENLFinalize();
-	_logs.push_back(u8"サーバー終了");
+	std::cout << "サーバー終了" << std::endl;
 }
 
+/// 終了処理
+void ServerAssignment::Exit()
+{
+	while (loop) {
+		std::string input;
+		std::cin >> input;
+		if (input == "exit")
+		{
+			loop = false;
+		}
+	}
+}
+
+#pragma region コールバック関数
+/// レコードが読み込み可能になった際に呼ばれるコールバック関数
 void ServerAssignment::ReadRecord(ENLConnection connection, void* connection_data, uint16_t payload_type, const void* payload, uint32_t payload_len)
 {
 	//ServerAssignment* self = reinterpret_cast<ServerAssignment*>(connection_data);
@@ -211,7 +204,7 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connection_dat
 		if (client.enlConnection == connection)continue;// 送信者には送らない
 		ENLWriteRecord(
 			client.enlConnection,
-			static_cast<uint16_t>(NetworkTag::Logout),
+			static_cast<uint16_t>(DataTag::Logout),
 			&logout,
 			sizeof(logout)
 		);
@@ -220,7 +213,7 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connection_dat
 	// プレイヤー情報削除
 	self->EraseClient(connection);
 
-	self->_logs.push_back(u8"切断\t" + connection);
+	std::cout << "切断\t" << connection << std::endl;
 }
 
 // 接続されたときのコールバック関数
@@ -251,7 +244,7 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 
 	self->AddID();
 	self->clients.emplace_back(client);
-	self->_logs.push_back(u8"新規接続\t" + client.enlConnection);
+	std::cout << "新規接続\t" << client.enlConnection << std::endl;
 
 	// ID送信
 	PlayerLogin playerLogin{};
@@ -262,7 +255,7 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 	{
 		ENLWriteRecord(
 			client.enlConnection,
-			static_cast<uint16_t>(NetworkTag::Login),
+			static_cast<uint16_t>(DataTag::Login),
 			&playerLogin,
 			sizeof(playerLogin)
 		);
@@ -285,35 +278,7 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 	//	);
 	//}
 }
-
-void ServerAssignment::DrawGui()
-{
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu(u8"デバッグ"))
-		{
-			ImGui::Checkbox(u8"サーバー", &_drawGui);
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMainMenuBar();
-	}
-
-	if (_drawGui)
-	{
-		if (ImGui::Begin(u8"サーバー"))
-		{
-			ImGui::Text(u8"ログ");
-			ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(250, 470), ImGuiWindowFlags_NoTitleBar);
-			for (std::string message : _logs) {
-				ImGui::Text(u8"%s", message.c_str());
-			}
-			ImGui::EndChild();
-			ImGui::Spacing();
-		}
-		ImGui::End();
-	}
-}
+#pragma endregion
 
 void ServerAssignment::EraseClient(ENLConnection connection)
 {

@@ -13,28 +13,6 @@ void SceneNetworkDebug::Initialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/diffuse_iem.dds",
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
-    // サーバー作成
-    _server = std::make_shared<ServerAssignment>();
-    // サーバー起動
-    _server->Execute();
-
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
-}
-
-// 終了化
-void SceneNetworkDebug::Finalize()
-{
-    // サーバー終了
-    _server->Exit();
-
-    Scene::Finalize();
-}
-
-// Gui描画処理
-void SceneNetworkDebug::DrawGui()
-{
-    Scene::DrawGui();
-
-    _server->DrawGui();
 }

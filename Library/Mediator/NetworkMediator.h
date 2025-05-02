@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "../Actor/Actor.h"
-#include "../Network/ServerAssignment.h"
 #include "../Network/ClientAssignment.h"
 
 /// <summary>
@@ -17,5 +16,4 @@ public:
 	~NetworkMediator() = default;
 
 private:
-	std::shared_ptr<ServerAssignment> _server;
 };

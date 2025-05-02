@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "../Scene/Scene.h"
+
 // 開始処理
 void Rigidbody::Start()
 {
@@ -12,6 +14,13 @@ void Rigidbody::Start()
 // 更新処理
 void Rigidbody::Update(float elapsedTime)
 {
+}
+
+// 固定間隔更新処理
+void Rigidbody::FixedUpdate()
+{
+	float deltaTime = _FIXED_UPDATE_RATE;
+
 	// 不動オブジェクトなら処理しない
 	if (IsMovable() == false)
 	{
@@ -36,8 +45,8 @@ void Rigidbody::Update(float elapsedTime)
 	_oldLinearVelocity = _linearVelocity;
 	DirectX::XMVECTOR linearAcceleration = {};
 	linearAcceleration = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_accumulatedForce), 1 / _inertialMass);
-	DirectX::XMStoreFloat3(&_linearVelocity, 
-		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_linearVelocity), DirectX::XMVectorScale(linearAcceleration, elapsedTime)));
+	DirectX::XMStoreFloat3(&_linearVelocity,
+		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_linearVelocity), DirectX::XMVectorScale(linearAcceleration, deltaTime)));
 	// 速度が最低速度量より低ければ停止
 	//if (DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&_linearVelocity))) < _standStillVelocity)
 	//{
@@ -56,20 +65,20 @@ void Rigidbody::Update(float elapsedTime)
 	Vector3 positon = _oldPosition;
 	DirectX::XMStoreFloat3(&positon,
 		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&positon),
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_linearVelocity), elapsedTime)));
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_linearVelocity), deltaTime)));
 	this->GetActor()->GetTransform().SetPosition(positon);
 
 	//トルク(accumulated_torque)から角加速度(angular_acceleration)を算出し角速度(angular_velocity)を更新する
 	_oldAngularVelocity = _angularVelocity;
 	DirectX::XMVECTOR angularAcceleration;
 	angularAcceleration = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&_accumulatedTorque), InverseInertiaTensor(true));
-	DirectX::XMStoreFloat3(&_angularVelocity, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_angularVelocity), DirectX::XMVectorScale(angularAcceleration, elapsedTime)));
+	DirectX::XMStoreFloat3(&_angularVelocity, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_angularVelocity), DirectX::XMVectorScale(angularAcceleration, deltaTime)));
 
 	//角速度による姿勢の更新
 	// 非回転オブジェクトなら処理しない
 	if (IsRotatable())
 	{
-		DirectX::XMVECTOR wt = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_angularVelocity), elapsedTime);
+		DirectX::XMVECTOR wt = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_angularVelocity), deltaTime);
 		float angle = DirectX::XMVectorGetX(DirectX::XMVector3Length(wt));
 		wt = DirectX::XMVector3Normalize(wt);
 		DirectX::XMVECTOR q = DirectX::XMVectorScale(wt, sinf(angle * 0.5f));

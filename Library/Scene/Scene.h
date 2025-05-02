@@ -24,6 +24,8 @@
 
 #define _SCENE_CB_SLOT_INDEX 0
 #define _LIGHT_CB_SLOT_INDEX 3
+
+static constexpr float _FIXED_UPDATE_RATE = 1.0f / 60.0f;
 #pragma endregion
 
 // シーンをメニューバーに登録する際の階層
@@ -57,8 +59,8 @@ public:
 	// 更新処理
 	virtual void Update(float elapsedTime);
 
-	// 1秒ごとの更新処理
-	virtual void FixedUpdate() {};
+	/// 一定間隔の更新処理
+	virtual void FixedUpdate();
 
 	// 描画処理
 	virtual void Render();

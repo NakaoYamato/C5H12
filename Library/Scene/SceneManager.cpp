@@ -76,7 +76,7 @@ void SceneManager::Update(float elapsedTime)
 	}
 }
 
-// 1秒ごとの更新処理
+/// 一定間隔の更新処理
 void SceneManager::FixedUpdate()
 {
 	if (_currentScene != nullptr)

@@ -20,7 +20,7 @@ public:
 	// 更新処理
 	virtual void Update(float elapsedTime) {}
 
-	// 1秒ごとの更新処理
+	/// 一定間隔の更新処理
 	virtual void FixedUpdate() {}
 
 	// 描画処理

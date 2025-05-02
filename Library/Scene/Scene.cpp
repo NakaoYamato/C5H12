@@ -54,6 +54,13 @@ void Scene::Update(float elapsedTime)
     _actorManager.Judge();
 }
 
+/// 一定間隔の更新処理
+void Scene::FixedUpdate()
+{
+    // ゲームオブジェクトの更新
+    _actorManager.FixedUpdate();
+}
+
 //描画処理
 void Scene::Render()
 {

@@ -106,7 +106,7 @@ void ActorManager::Update(float elapsedTime)
 	_removeActors.clear();
 }
 
-// 1秒ごとの更新処理
+/// 一定間隔の更新処理
 void ActorManager::FixedUpdate()
 {
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)

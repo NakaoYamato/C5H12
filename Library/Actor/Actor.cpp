@@ -48,13 +48,13 @@ void Actor::Update(float elapsedTime)
 	UpdateTransform();
 }
 
-// 1秒ごとの更新処理
+/// 一定間隔の更新処理
 void Actor::FixedUpdate()
 {
 	// 起動チェック
 	if (!_isActive)return;
 
-	// 各コンポーネントの1秒ごとの更新処理
+	// 各コンポーネントの一定間隔の更新処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->FixedUpdate();

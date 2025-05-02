@@ -35,19 +35,49 @@ public:
 	Framework& operator=(Framework&&) noexcept = delete;
 
 public:
-	// ゲームループの実行
+	/// <summary>
+	/// ゲームループの実行
+	/// </summary>
+	/// <returns></returns>
 	int Run();
 
-	// ウィンドウのメッセージを受け取るためのコールバック関数
+	/// <summary>
+	/// ウィンドウのメッセージを受け取るためのコールバック関数
+	/// </summary>
+	/// <param name="hwnd"></param>
+	/// <param name="msg"></param>
+	/// <param name="wparam"></param>
+	/// <param name="lparam"></param>
+	/// <returns></returns>
 	LRESULT CALLBACK HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 private:
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <returns></returns>
 	bool Initialize() const;
-	// 毎フレームの更新処理
+
+	/// <summary>
+	/// 毎フレームの更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
 	void Update(float elapsedTime/*Elapsed seconds from last frame*/);
-	// 1秒ごとの更新処理
+
+	/// <summary>
+	/// 一定間隔の更新処理
+	/// </summary>
 	void FixedUpdate();
-	void Render(float elapsedTime/*Elapsed seconds from last frame*/);
+
+	/// <summary>
+	/// 描画処理
+	/// </summary>
+	void Render();
+
+	/// <summary>
+	/// 終了化
+	/// </summary>
+	/// <returns></returns>
 	bool Uninitialize();
 
 private:
@@ -57,10 +87,13 @@ private:
 	float _elapsedTime{};
 	float _fps{};
 
+	/// <summary>
+	/// フレームレートの計算
+	/// </summary>
 	void CalcFrameStatus();
 
-	// 1秒が経過したフラグ
-	bool _elapsed1Second = false;
+	// 固定間隔更新処理のためのタイマー
+	float fixedUpdateTimer = 0.0f;
 private:
 	// メインウィンドウのハンドル
 	CONST HWND _hwnd = {};

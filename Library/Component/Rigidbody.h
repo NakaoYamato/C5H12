@@ -16,6 +16,9 @@ public:
 	// 更新処理
 	void Update(float elapsedTime) override;
 
+	// 固定間隔更新処理
+	void FixedUpdate() override;
+
 	// GUI描画
 	void DrawGui() override;
 

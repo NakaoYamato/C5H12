@@ -17,17 +17,20 @@
 int Framework::syncInterval = 0;
 // ドロップされたファイルパス
 std::wstring Framework::filePath;
-
+// プロファイラーの描画フラグ
 static bool imguiProfilerIsPause = false;
 
+/// ゲームループの実行
 int Framework::Run()
 {
     // ウィンドウからのメッセージを受け取る変数
     MSG msg{};
 
+    // 初期化処理　失敗したら終了
     if (!Initialize())
         return 0;
 
+    // ゲームループ
     while (WM_QUIT != msg.message)
     {
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -37,15 +40,21 @@ int Framework::Run()
         }
         else
         {
+            // 前フレームからの経過時間計算
             _tictoc.Tick();
             CalcFrameStatus();
+
+            // 更新処理
             Update(_tictoc.TimeInterval());
-            if (_elapsed1Second)
+
+            // 固定間隔更新処理
+            fixedUpdateTimer += _tictoc.TimeInterval();
+            if (fixedUpdateTimer - _FIXED_UPDATE_RATE >= 0.0f)
             {
                 FixedUpdate();
-                _elapsed1Second = false;
+                fixedUpdateTimer = fixedUpdateTimer - _FIXED_UPDATE_RATE;
             }
-            Render(_tictoc.TimeInterval());
+            Render();
         }
     }
 
@@ -218,13 +227,15 @@ void Framework::Update(float elapsedTime)
     //EffectManager::Instance().Update(elapsedTime);
 }
 
+/// 一定間隔の更新処理
 void Framework::FixedUpdate()
 {
     // シーンの更新
     SceneManager::Instance().FixedUpdate();
 }
 
-void Framework::Render(float elapsedTime)
+/// 描画処理
+void Framework::Render()
 {
     // 別スレッド中にデバイスコンテキストが使われていた場合に
     // 同時アクセスしないように排他制御する
@@ -295,6 +306,7 @@ bool Framework::Uninitialize()
     return true;
 }
 
+/// フレームレートの計算
 void Framework::CalcFrameStatus()
 {
     ++_elapsedFrame;
@@ -304,6 +316,7 @@ void Framework::CalcFrameStatus()
         std::ostringstream outs;
         outs.precision(6);
 #if _DEBUG
+        // タイトルバーにFPS表示
         outs << _fps << "/" << "FrameTime:" << 1000.0f / _fps << "(ms)";
         SetWindowTextA(_hwnd, outs.str().c_str());
 #else
@@ -311,9 +324,6 @@ void Framework::CalcFrameStatus()
         outs << _fps << "/" << "FrameTime:" << 1000.0f / _fps << "(ms)";
         SetWindowTextA(_hwnd, outs.str().c_str());
 #endif
-
-        // 1秒が過ぎたフラグをオン
-        _elapsed1Second = true;
 
         _elapsedFrame = 0;
         _elapsedTime += 1.0f;

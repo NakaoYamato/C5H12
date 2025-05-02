@@ -33,7 +33,7 @@ public:
 	// 更新処理
 	void Update(float elapsedTime);
 
-	// 1秒ごとの更新処理
+	/// 一定間隔の更新処理
 	void FixedUpdate();
 
 	// 当たり判定処理

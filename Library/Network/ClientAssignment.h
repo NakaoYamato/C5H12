@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+/// <summary>
+/// クライアント
+/// </summary>
 class ClientAssignment
 {
 public:
@@ -14,7 +17,7 @@ public:
 	/// <summary>
 	/// 開始処理
 	/// </summary>
-	void Execute();
+	void Execute(const char* ipAddress = "127.0.0.1");
 
 	/// <summary>
 	/// 更新処理
@@ -28,29 +31,28 @@ public:
 
 #pragma region コールバック関数
 	/// <summary>
-	/// レコードが読み込み可能になった際に呼ばれるコールバック関数
+	/// サーバーと接続時に呼ばれる関数
 	/// </summary>
 	/// <param name="connection"></param>
-	/// <param name="connection_data">ServerAssignmentのポインタ</param>
-	/// <param name="payload_type"></param>
-	/// <param name="payload"></param>
-	/// <param name="payload_len"></param>
+	/// <param name="connectionData">自身(ClientAssignment)のポインタ</param>
+	static void Connect(ENLConnection connection, void* connectionData);
+
+	/// <summary>
+	/// サーバーと切断されたときに呼ばれる関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connectionData">自身(ClientAssignment)のポインタ</param>
+	static void Disconnect(ENLConnection connection, void* connectionData);
+
+	/// <summary>
+	/// サーバーからデータが送られたときに呼ばれる関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connectionData">自身(ClientAssignment)のポインタ</param>
+	/// <param name="payloadType">送られたデータタイプ</param>
+	/// <param name="payload">データのポインタ</param>
+	/// <param name="payloadLen">データの長さ</param>
 	static void ReadRecord(ENLConnection connection, void* connectionData, uint16_t payloadType, const void* payload, uint32_t payloadLen);
-
-	/// <summary>
-	/// ユーザが切断したときに呼ばれるコールバック関数
-	/// </summary>
-	/// <param name="connection"></param>
-	/// <param name="connection_data">ServerAssignmentのポインタ</param>
-	static void Disconnect(ENLConnection connection, void* connection_data);
-
-	/// <summary>
-	/// 接続されたときのコールバック関数
-	/// </summary>
-	/// <param name="server"></param>
-	/// <param name="server_data">ServerAssignmentのポインタ</param>
-	/// <param name="connection"></param>
-	static void Accept(ENLServer server, void* server_data, ENLConnection connection);
 #pragma endregion
 
 	// GUI表示

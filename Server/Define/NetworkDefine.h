@@ -4,6 +4,9 @@
 #include <ENLBuffer.h>
 #include <DirectXMath.h>
 
+#define ENL_CONNECTION_TYPE ENLConnectionType::CONNECTION_TYPE_TCP
+#define ENL_PORT_ADDRESS 7000
+
 namespace Network
 {
 	/// <summary>
@@ -19,12 +22,32 @@ namespace Network
 		Sync
 	};
 
-	struct Client {
-		ENLConnection enlConnection = -1;
-		//Player* player = nullptr;
+	struct Player
+	{
+		int id;
+		DirectX::XMFLOAT3 position = {};
+		DirectX::XMFLOAT3 angle = {};
+		DirectX::XMFLOAT3 scale = {};
 	};
 
-	// 送信データ用構造体
+	/// <summary>
+	/// クライアント構造体
+	/// </summary>
+	struct Client 
+	{
+		ENLConnection enlConnection = -1;
+		Player player = {};
+	};
+
+#pragma region 送信データ
+	struct PlayerTransform
+	{
+		int id;
+		DirectX::XMFLOAT3 position = {};
+		DirectX::XMFLOAT3 angle = {};
+		DirectX::XMFLOAT3 scale = {};
+	};
+
 	struct PlayerInput
 	{
 		int id;
@@ -45,7 +68,8 @@ namespace Network
 	{
 		int id;
 		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT3 targetPosition;
-		//Player::State state;
+		DirectX::XMFLOAT3 angle = {};
+		DirectX::XMFLOAT3 scale = {};
 	};
+#pragma endregion
 }

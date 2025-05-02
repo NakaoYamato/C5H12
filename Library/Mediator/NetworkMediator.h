@@ -16,4 +16,5 @@ public:
 	~NetworkMediator() = default;
 
 private:
+	std::weak_ptr<ClientAssignment> user;
 };

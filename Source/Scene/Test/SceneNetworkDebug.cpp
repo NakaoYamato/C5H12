@@ -15,4 +15,26 @@ void SceneNetworkDebug::Initialize()
 
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
+
+    _client = std::make_shared<ClientAssignment>();
+    _client->Execute();
+}
+
+void SceneNetworkDebug::Update(float elapsedTime)
+{
+    Scene::Update(elapsedTime);
+
+    _client->Update();
+}
+
+void SceneNetworkDebug::Finalize()
+{
+    _client->Exit();
+    Scene::Finalize();
+}
+
+void SceneNetworkDebug::DrawGui()
+{
+    Scene::DrawGui();
+    _client->DrawGui();
 }

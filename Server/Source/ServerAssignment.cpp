@@ -9,7 +9,6 @@ void ServerAssignment::Execute()
 	// サーバ情報設定
 	// IPアドレス、ポート番号、バックログ数を指定
 	char address[40] = { "0.0.0.0" };
-	uint16_t port = 7000;
 	uint32_t backlog = 10;
 
 	// ENLライブラリの初期化
@@ -21,7 +20,7 @@ void ServerAssignment::Execute()
 	std::cout << "サーバー初期化成功" << std::endl;
 
 	// サーバオブジェクト作成(accept実行)
-	mrsServer = ENLServerCreate(ENLConnectionType::CONNECTION_TYPE_TCP, address, port, backlog);
+	mrsServer = ENLServerCreate(ENL_CONNECTION_TYPE, address, ENL_PORT_ADDRESS, backlog);
 	if (mrsServer <= 0)
 	{
 		std::cout << "\tサーバーオブジェクト生成失敗" << std::endl;
@@ -48,8 +47,6 @@ void ServerAssignment::Execute()
 	{
 		ENLClose(client.enlConnection);
 		client.enlConnection = 0;
-		//delete client.player;
-		//client.player = nullptr;
 	}
 	clients.clear();
 
@@ -70,6 +67,22 @@ void ServerAssignment::Exit()
 		if (input == "exit")
 		{
 			loop = false;
+		}
+		else if (input == "get")
+		{
+			std::cout << "============================================" << std::endl;
+			// プレイヤー情報を表示
+			int index = 0;
+			for (const Client& client : clients)
+			{
+				std::cout << "id : " << index << std::endl;
+				std::cout << "position : " << client.player.position.x << client.player.position.y << client.player.position.z << std::endl;
+				std::cout << "angle : " << client.player.angle.x << client.player.angle.y << client.player.angle.z << std::endl;
+				std::cout << "scale : " << client.player.scale.x << client.player.scale.y << client.player.scale.z << std::endl;
+				std::cout << "============================================" << std::endl;
+
+				index++;
+			}
 		}
 	}
 }
@@ -196,8 +209,8 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connection_dat
 	// 切断されたクライアントのIDを検索
 	for (const Client& client : self->clients)
 	{
-		//if (client.enlConnection != connection)continue;// 切断されたクライアントとコネクションが違う場合continue
-		//logout.id = client.player->id;
+		if (client.enlConnection != connection)continue;// 切断されたクライアントとコネクションが違う場合continue
+		logout.id = client.player.id;
 	}
 	for (const Client& client : self->clients)
 	{
@@ -231,27 +244,25 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 	SetClientData(connection, self);
 
 	// サーバにプレイヤー追加
-	//Player* player = new Player();
-	//player->id = self->id;
-	//player->position = DirectX::XMFLOAT3(0, 0, 0);
-	//player->angle = DirectX::XMFLOAT3(0, 0, 0);
-	//player->targetPosition = DirectX::XMFLOAT3(0, 0, 0);
-	//player->state = Player::State::Idle;
+	Player player = Player();
+	player.id = self->id;
+	player.position = DirectX::XMFLOAT3(0, 0, 0);
+	player.angle = DirectX::XMFLOAT3(0, 0, 0);
 
-	Client client;
-	client.enlConnection = connection;
-	//client.player = player;
+	Client newClient;
+	newClient.enlConnection = connection;
+	newClient.player = player;
 
 	self->AddID();
-	self->clients.emplace_back(client);
-	std::cout << "新規接続\t" << client.enlConnection << std::endl;
+	self->clients.emplace_back(newClient);
+	std::cout << "新規接続\t" << newClient.enlConnection << std::endl;
 
 	// ID送信
 	PlayerLogin playerLogin{};
-	//playerLogin.id = player->id;
+	playerLogin.id = player.id;
 
 	// クライアントに接続者送信(接続者含む)
-	for (Client client : self->clients)
+	for (const Client& client : self->clients)
 	{
 		ENLWriteRecord(
 			client.enlConnection,
@@ -261,35 +272,33 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 		);
 	}
 	// 接続者に既存ログインユーザ送信
-	//for (Client client : self->clients)
-	//{
-	//	if (client.player->id == playerLogin.id)continue;
-	//	PlayerSync player{};
-	//	player.id = client.player->id;
-	//	player.position = client.player->position;
-	//	player.targetPosition = client.player->targetPosition;
-	//	player.state = client.player->state;
+	for (Client client : self->clients)
+	{
+		if (client.player.id == playerLogin.id)continue;
+		PlayerSync player{};
+		player.id = client.player.id;
+		player.position = client.player.position;
+		player.angle = client.player.angle;
+		player.scale = client.player.scale;
 
-	//	ENLWriteRecord(
-	//		connection,
-	//		static_cast<uint16_t>(NetworkTag::Sync),
-	//		&player,
-	//		sizeof(player)
-	//	);
-	//}
+		ENLWriteRecord(
+			connection,
+			static_cast<uint16_t>(DataTag::Sync),
+			&player,
+			sizeof(player)
+		);
+	}
 }
 #pragma endregion
 
 void ServerAssignment::EraseClient(ENLConnection connection)
 {
 	int i = 0;
-	for (Client client : clients)
+	for (Client& client : clients)
 	{
 		if (client.enlConnection == connection)
 		{
 			ENLClose(client.enlConnection);
-			//delete client.player;
-			//client.player = nullptr;
 			break;
 		}
 		++i;

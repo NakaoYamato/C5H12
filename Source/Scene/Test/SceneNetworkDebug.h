@@ -2,6 +2,8 @@
 
 #include "../../Library/Scene/SceneManager.h"
 
+#include "../../Library/Network/ClientAssignment.h"
+
 class SceneNetworkDebug : public Scene
 {
 public:
@@ -16,6 +18,12 @@ public:
 	//初期化
 	void Initialize()override;
 
+	void Update(float elapsedTime) override;
+
+	void Finalize() override;
+
+	void DrawGui() override;
+
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
 	{
@@ -23,6 +31,7 @@ public:
 	}
 
 private:
+	std::shared_ptr<ClientAssignment> _client;
 };
 
 // メニューバーに登録

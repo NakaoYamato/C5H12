@@ -14,8 +14,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "../Math/CoordinateTypeDef.h"
-
 /// <summary>
 /// 3Dモデルのリソース生成クラス
 /// </summary>

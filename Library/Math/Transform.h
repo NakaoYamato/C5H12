@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CoordinateTypeDef.h"
 #include "Vector.h"
 #include "Quaternion.h"
 
@@ -30,7 +29,6 @@ public:
 	const Vector3& GetScale()const { return _scale; }
 	const Vector3& GetRotation()const { return _angle; }
 	const DirectX::XMFLOAT4X4& GetMatrix()const { return _transform; }
-	int GetCoordinateType()const { return _coordinateType; }
 	float GetLengthScale()const { return _lengthScale; }
 
 	void SetPosition(const Vector3& v) { this->_position = v; }
@@ -46,7 +44,6 @@ public:
 	void SetAngleY(float f) { this->_angle.y = f; }
 	void SetAngleZ(float f) { this->_angle.z = f; }
 
-	void SetCoordinateType(int type) { this->_coordinateType = type; }
 	void SetLengthScale(float lengthScale) { this->_lengthScale = lengthScale; }
 	void SetMatrix(const DirectX::XMFLOAT4X4& m) { this->_transform = m; }
 
@@ -55,8 +52,6 @@ public:
 	void AddRotation(const Vector3& v) { this->_angle += v; }
 
 private:
-	int _coordinateType = CoordinateType::LHS_Y_UP;
-
 	// ’·‚³‚Ì’PˆÊ(m)
 	float _lengthScale = 1.0f;
 

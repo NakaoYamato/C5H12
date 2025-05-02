@@ -14,7 +14,6 @@ void DragonActor::OnCreate()
 {
 	Actor::OnCreate();
 
-	GetTransform().SetCoordinateType(CoordinateType::LHS_Y_UP);
 	GetTransform().SetLengthScale(0.01f);
 
 	// コンポーネント追加
@@ -382,7 +381,7 @@ void DragonActor::SetModelAnimation()
 
 	DirectX::XMMATRIX ToZUP = DirectX::XMMatrixRotationX(+90.0f / DirectX::XM_PI);
 	DirectX::XMMATRIX InvToZUP = DirectX::XMMatrixInverse(nullptr, ToZUP);
-	DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[RHS_Z_UP]);
+	DirectX::XMMATRIX M = DirectX::XMMatrixIdentity();
 	// アニメーション追加
 	_modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations().clear();
 	for (auto& [filename, animationName] : animParams)

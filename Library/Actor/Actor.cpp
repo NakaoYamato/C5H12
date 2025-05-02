@@ -260,8 +260,7 @@ void Actor::DrawGuizmo()
 	{
 		// 単位を考慮した行列から位置、回転、スケールを取得
 		DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
-		DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[_transform.GetCoordinateType()]) *
-			DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };
+		DirectX::XMMATRIX C{ DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };
 		M = DirectX::XMMatrixInverse(nullptr, C) * M;
 		DirectX::XMVECTOR S, R, T;
 		DirectX::XMMatrixDecompose(&S, &R, &T, M);

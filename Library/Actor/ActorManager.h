@@ -39,9 +39,6 @@ public:
 	// “–‚½‚è”»’èˆ—
 	void Judge();
 
-	// •`‰æ‚Ì‘Oˆ—
-	void RenderPreprocess(RenderContext& rc);
-
 	// •`‰æˆ—
 	void Render(const RenderContext& rc);
 

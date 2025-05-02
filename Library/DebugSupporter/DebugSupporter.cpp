@@ -20,6 +20,7 @@ namespace Debug
     std::unique_ptr<DebugRenderer> _debugRenderer;
 	std::mutex                 _debugMutex;
 
+    bool _showDemoGui = false;
     bool _showCameraGui = false;
     bool _useGuizmo = false;
 
@@ -315,29 +316,34 @@ namespace Debug
             {
                 ImGui::Checkbox(u8"デバッグカメラ", &_showCameraGui);
 
-                static const char* operationNames[] =
-                {
-                    "TRANSLATE",
-                    "ROTATE",
-                    "SCALE",
-                    "BOUNDS"
-                };
-                int gO = static_cast<int>(_guizmoOperation);
-                if (ImGui::Combo(u8"ギズモ操作", &gO, operationNames, _countof(operationNames)))
-                {
-                    _guizmoOperation = static_cast<ImGuizmo::OPERATION>(gO);
-                }
-                static const char* modeNames[] =
-                {
-                    "LOCAL",
-                    "WORLD"
-                };
-                int gM = static_cast<int>(_guizmoMode);
-                if (ImGui::Combo(u8"ギズモ座標系", &gM, modeNames, _countof(modeNames)))
-                {
-                    _guizmoMode = static_cast<ImGuizmo::MODE>(gM);
-                }
+                ImGui::Checkbox(u8"IMGUIデモ", &_showDemoGui);
 
+                if (ImGui::BeginMenu(u8"ギズモ"))
+                {
+                    static const char* operationNames[] =
+                    {
+                        u8"位置",
+                        u8"回転",
+                        u8"スケール",
+                        "BOUNDS"
+                    };
+                    int gO = static_cast<int>(_guizmoOperation);
+                    if (ImGui::Combo(u8"編集モード", &gO, operationNames, _countof(operationNames)))
+                    {
+                        _guizmoOperation = static_cast<ImGuizmo::OPERATION>(gO);
+                    }
+                    static const char* modeNames[] =
+                    {
+                        u8"ローカル",
+                        u8"ワールド"
+                    };
+                    int gM = static_cast<int>(_guizmoMode);
+                    if (ImGui::Combo(u8"座標系", &gM, modeNames, _countof(modeNames)))
+                    {
+                        _guizmoMode = static_cast<ImGuizmo::MODE>(gM);
+                    }
+                    ImGui::EndMenu();
+                }
 
                 ImGui::EndMenu();
             }
@@ -378,6 +384,11 @@ namespace Debug
                 _debugCamera.DrawGui();
             }
             ImGui::End();
+        }
+
+        if (_showDemoGui)
+        {
+            ImGui::ShowDemoWindow();
         }
     }
     DebugInput* GetDebugInput()

@@ -195,6 +195,8 @@
     <ClCompile Include="Library\Math\Quaternion.cpp" />
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
+    <ClCompile Include="Library\Mediator\Mediator.cpp" />
+    <ClCompile Include="Library\Mediator\NetworkMediator.cpp" />
     <ClCompile Include="Library\Network\ClientAssignment.cpp" />
     <ClCompile Include="Library\Network\ServerAssignment.cpp" />
     <ClCompile Include="Library\Physics\Collision\AnimationCollisionData.cpp" />
@@ -297,6 +299,8 @@
     <ClInclude Include="Library\Math\Random.h" />
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
+    <ClInclude Include="Library\Mediator\Mediator.h" />
+    <ClInclude Include="Library\Mediator\NetworkMediator.h" />
     <ClInclude Include="Library\Network\ClientAssignment.h" />
     <ClInclude Include="Library\Network\ServerAssignment.h" />
     <ClInclude Include="Library\Physics\Collision\AnimationCollisionData.h" />

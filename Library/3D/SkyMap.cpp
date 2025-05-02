@@ -74,22 +74,22 @@ void SkyMap::DrawGui()
 #if USE_IMGUI
 	if (ImGui::BeginMainMenuBar())
 	{
-		if (ImGui::BeginMenu(u8"描画管理"))
+		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			ImGui::Checkbox(u8"スカイマップ", &_drawGui);
+			if (ImGui::BeginMenu(u8"描画管理"))
+			{
+				if (ImGui::BeginMenu(u8"スカイマップ"))
+				{
+					ImGui::SliderInt(u8"ルックアップテーブル番号", &_lutIndex, 0, LUT_INDEX_MAX - 1);
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenu();
 		}
 
 		ImGui::EndMainMenuBar();
-	}
-
-	if (_drawGui)
-	{
-		if (ImGui::Begin(u8"スカイマップ"))
-		{
-			ImGui::SliderInt(u8"ルックアップテーブル番号", &_lutIndex, 0, LUT_INDEX_MAX - 1);
-		}
-		ImGui::End();
 	}
 #endif
 }

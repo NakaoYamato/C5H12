@@ -46,5 +46,4 @@ private:
 
     bool _isTextureCube = false;
     int _lutIndex = 1;
-    bool _drawGui = false;
 };

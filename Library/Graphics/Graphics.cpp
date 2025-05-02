@@ -292,12 +292,17 @@ void Graphics::DrawGui()
 #if USE_IMGUI
 	if (ImGui::BeginMainMenuBar())
 	{
-		if (ImGui::BeginMenu(u8"描画管理"))
+		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			ImGui::Checkbox(u8"フレームバッファ", &_drawFrameBuffer);
-			ImGui::Checkbox(u8"デファードレンダリング", &_renderingDeferred);
-			ImGui::Checkbox(u8"シャドウマップ", &_drawCSMGui);
-			ImGui::Checkbox(u8"GBuffer", &_drawGBGui);
+			if (ImGui::BeginMenu(u8"描画管理"))
+			{
+				ImGui::Checkbox(u8"フレームバッファ", &_drawFrameBuffer);
+				ImGui::Checkbox(u8"デファードレンダリング", &_renderingDeferred);
+				ImGui::Checkbox(u8"シャドウマップ", &_drawCSMGui);
+				ImGui::Checkbox(u8"GBuffer", &_drawGBGui);
+
+				ImGui::EndMenu();
+			}
 
 			ImGui::EndMenu();
 		}

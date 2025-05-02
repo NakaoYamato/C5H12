@@ -150,13 +150,19 @@ void PostProcessManager::DrawGui()
 	// メニューバー
 	if (ImGui::BeginMainMenuBar())
 	{
-		if (ImGui::BeginMenu(u8"ポストエフェクトGUI"))
+		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			for (size_t i = 0; i < static_cast<int>(PostProcessType::MAX_PostProcessType); ++i)
+			if (ImGui::BeginMenu(u8"ポストプロセス"))
 			{
-				GuiFlag& guiFlag = _postProcesses[i].second;
-				ImGui::Checkbox(guiFlag.first.c_str(), &guiFlag.second);
+				for (size_t i = 0; i < static_cast<int>(PostProcessType::MAX_PostProcessType); ++i)
+				{
+					GuiFlag& guiFlag = _postProcesses[i].second;
+					ImGui::Checkbox(guiFlag.first.c_str(), &guiFlag.second);
+				}
+
+				ImGui::EndMenu();
 			}
+
 			ImGui::EndMenu();
 		}
 

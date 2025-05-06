@@ -33,6 +33,14 @@ public:
 	// GUI表示
 	void DrawGui();
 
+	/// <summary>
+    /// データをサーバーに送信する
+	/// </summary>
+	/// <param name="tag">Network::DataTag</param>
+	/// <param name="data">例:&hoge</param>
+	/// <param name="length">例:sizeof(hoge)</param>
+	void WriteRecord(Network::DataTag tag, const void* data, uint32_t length);
+
 #pragma region サーバーからの各種データ受け取りを行ったときのコールバック関数設定
     /// <summary>
     /// MessageDataを受け取った時のコールバック関数を設定する

@@ -27,7 +27,7 @@ namespace Network
 
 	struct Player
 	{
-		int id;
+		int id = -1;
 		DirectX::XMFLOAT3 position = {};
 		DirectX::XMFLOAT3 angle = {};
 		DirectX::XMFLOAT3 scale = {};
@@ -45,18 +45,18 @@ namespace Network
 #pragma region 送信データ
     struct MessageData
     {
-		int id;
-        std::string message;
+		int id = 1;
+		std::string message = {};
     };
 
 	struct PlayerLogin
 	{
-		int id;
+		int id = -1;
 	};
 
 	struct PlayerLogout
 	{
-		int id;
+		int id = -1;
 	};
 
 	struct PlayerSync
@@ -68,9 +68,8 @@ namespace Network
 
 	struct PlayerMove
 	{
-		int id;
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT3 clickPosition;
+		int id = -1;
+		DirectX::XMFLOAT3 velocity = {};
 	};
 
 #pragma endregion

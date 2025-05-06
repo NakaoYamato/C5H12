@@ -2,7 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
-#include "../../Source/Actor/GameSystem/GameSystemActor.h"
+#include "../../Source/Actor/Mediator/NetworkMediator.h"
 
 //初期化
 void SceneNetworkDebug::Initialize()
@@ -17,6 +17,6 @@ void SceneNetworkDebug::Initialize()
 
     // オブジェクト作成
     {
-        auto gameSystem = RegisterActor<GameSystemActor>("GameSystem", ActorTag::DrawContextParameter);
+        auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
     }
 }

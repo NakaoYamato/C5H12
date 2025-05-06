@@ -150,29 +150,24 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 // GUI表示
 void ClientAssignment::DrawGui()
 {
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu(u8"デバッグ"))
-		{
-			ImGui::Checkbox(u8"サーバー", &_drawGui);
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMainMenuBar();
+	ImGui::Text(u8"ログ");
+	ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(250, 470), ImGuiWindowFlags_NoTitleBar);
+	for (std::string message : _logs) {
+		ImGui::Text(u8"%s", message.c_str());
 	}
+	ImGui::EndChild();
+	ImGui::Spacing();
+}
 
-	if (_drawGui)
-	{
-		if (ImGui::Begin(u8"サーバー"))
-		{
-			ImGui::Text(u8"ログ");
-			ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(250, 470), ImGuiWindowFlags_NoTitleBar);
-			for (std::string message : _logs) {
-				ImGui::Text(u8"%s", message.c_str());
-			}
-			ImGui::EndChild();
-			ImGui::Spacing();
-		}
-		ImGui::End();
-	}
+/// データをサーバーに送信する
+void ClientAssignment::WriteRecord(Network::DataTag tag, const void* data, uint32_t length)
+{
+	ENLBuffer send;
+	send.Write(data, length);
+	ENLWriteRecord(
+		connection,								// 送信先指定
+		static_cast<uint16_t>(tag),					// データコマンド
+		send.GetData(),								// 送信データ
+		send.GetDataLen()							// 送信サイズ
+	);
 }

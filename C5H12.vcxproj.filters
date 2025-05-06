@@ -285,16 +285,7 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mediator\PlayerMediator.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Library\Component\Network\ClientConnection.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Actor\GameSystem\GameSystemActor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Mediator\NetworkMediator.cpp">
+    <ClCompile Include="Source\Actor\Mediator\NetworkMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -602,16 +593,7 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mediator\PlayerMediator.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\Component\Network\ClientConnection.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Actor\GameSystem\GameSystemActor.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mediator\NetworkMediator.h">
+    <ClInclude Include="Source\Actor\Mediator\NetworkMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

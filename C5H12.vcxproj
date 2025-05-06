@@ -163,7 +163,6 @@
     <ClCompile Include="Library\Component\Light\LightController.cpp" />
     <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
     <ClCompile Include="Library\Component\ModelRenderer.cpp" />
-    <ClCompile Include="Library\Component\Network\ClientConnection.cpp" />
     <ClCompile Include="Library\Component\Rigidbody.cpp" />
     <ClCompile Include="Library\Component\ShapeController.cpp" />
     <ClCompile Include="Library\Converter\ToString.cpp" />
@@ -228,7 +227,6 @@
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
     <ClCompile Include="Source\Actor\Dragon\DragonActor.cpp" />
-    <ClCompile Include="Source\Actor\GameSystem\GameSystemActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
@@ -236,8 +234,7 @@
     <ClCompile Include="Source\Component\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Component\Stage\GrassController.cpp" />
-    <ClCompile Include="Source\Mediator\NetworkMediator.cpp" />
-    <ClCompile Include="Source\Mediator\PlayerMediator.cpp" />
+    <ClCompile Include="Source\Actor\Mediator\NetworkMediator.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneCollisionDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneDragonDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
@@ -260,7 +257,6 @@
     <ClInclude Include="Library\Component\Light\LightController.h" />
     <ClInclude Include="Library\Component\Light\PointLightController.h" />
     <ClInclude Include="Library\Component\ModelRenderer.h" />
-    <ClInclude Include="Library\Component\Network\ClientConnection.h" />
     <ClInclude Include="Library\Component\Rigidbody.h" />
     <ClInclude Include="Library\Component\ShapeController.h" />
     <ClInclude Include="Library\Converter\ToString.h" />
@@ -335,7 +331,6 @@
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Source\Actor\Dragon\DragonActor.h" />
-    <ClInclude Include="Source\Actor\GameSystem\GameSystemActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h" />
@@ -343,8 +338,7 @@
     <ClInclude Include="Source\Component\Player\PlayerController.h" />
     <ClInclude Include="Source\Component\Player\PlayerInput.h" />
     <ClInclude Include="Source\Component\Stage\GrassController.h" />
-    <ClInclude Include="Source\Mediator\NetworkMediator.h" />
-    <ClInclude Include="Source\Mediator\PlayerMediator.h" />
+    <ClInclude Include="Source\Actor\Mediator\NetworkMediator.h" />
     <ClInclude Include="Source\Scene\Test\SceneCollisionDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />

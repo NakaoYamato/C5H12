@@ -26,6 +26,35 @@ public:
 	/// </summary>
 	void Exit();
 
+	void AddID() { id++; }
+
+	std::vector<Network::Client> GetClients() { return clients; }
+
+	/// <summary>
+    /// idからクライアントを取得
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns>失敗でnullptr</returns>
+	Network::Client* GetClient(int id)
+	{
+		for (Network::Client& client : clients)
+		{
+			if (client.player.id == id)
+			{
+				return &client;
+			}
+		}
+		return nullptr;
+	}
+
+	/// <summary>
+	/// クライアント削除
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <returns>削除したクライアントのID</returns>
+	int EraseClient(ENLConnection connection);
+
+private:
 #pragma region コールバック関数
 	/// <summary>
 	/// レコードが読み込み可能になった際に呼ばれるコールバック関数
@@ -52,10 +81,6 @@ public:
 	/// <param name="connection"></param>
 	static void Accept(ENLServer server, void* server_data, ENLConnection connection);
 #pragma endregion
-
-	void AddID() { id++; }
-	std::vector<Network::Client> GetClients() { return clients; }
-	void EraseClient(ENLConnection connection);
 
 private:
 	int id = 0;

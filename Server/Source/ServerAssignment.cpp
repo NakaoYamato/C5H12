@@ -91,113 +91,119 @@ void ServerAssignment::Exit()
 /// レコードが読み込み可能になった際に呼ばれるコールバック関数
 void ServerAssignment::ReadRecord(ENLConnection connection, void* connection_data, uint16_t payload_type, const void* payload, uint32_t payload_len)
 {
-	//ServerAssignment* self = reinterpret_cast<ServerAssignment*>(connection_data);
-	//ENLBuffer buffer;
-	//// 受信データをバッファに書き込み
-	//buffer.Write(payload, payload_len);
-	//switch (static_cast<NetworkTag>(payload_type))
-	//{
-	//case NetworkTag::Message:
-	//{
-	//	char payloadStr[256];
-	//	// バッファデータからpayLoadStrにデータに読み込み
-	//	if (!buffer.Read(payloadStr, payload_len)) {
-	//		std::cout << "Read Error" << std::endl;
-	//	}
-	//	std::cout << "recv data message" << std::endl;
-	//	std::cout << payloadStr << std::endl;
-	//	for (const Client& client : self->clients)
-	//	{
-	//		// 受信データをクライアントに送信
-	//		ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
-	//	}
+	ServerAssignment* self = reinterpret_cast<ServerAssignment*>(connection_data);
+	ENLBuffer buffer;
+	// 受信データをバッファに書き込み
+	buffer.Write(payload, payload_len);
 
-	//	break;
-	//}
-	//case NetworkTag::Move:
-	//{
-	//	PlayerInput payloadData;
-	//	// バッファデータからpayLoadStrにデータに読み込み
-	//	if (!buffer.Read(&payloadData, payload_len)) {
-	//		std::cout << "Read Error" << std::endl;
-	//	}
+	switch (static_cast<Network::DataTag>(payload_type))
+	{
+	case DataTag::Message:
+	{
+        MessageData massageData;
+		// バッファデータからpayLoadStrにデータに読み込み
+		if (!buffer.Read(&massageData, payload_len)) {
+			std::cout << "Read Error" << std::endl;
+		}
+		// メッセージ表示
+		std::cout << "RECV Message" << std::endl;
+		std::cout << massageData.id << ":" << massageData.message << std::endl;
+	}
+	break;
+	case DataTag::Login:
+	{
+		// Loginはクライアントが受け取るだけなので処理することはない
+		return;
+	}
+	break;
+	case DataTag::Logout:
+	{
+		// サーバからクライアント情報を削除
+		int eraseId = self->EraseClient(connection);
 
-	//	std::cout << "recv data move id:" << std::to_string(payloadData.id) << std::endl;
-	//	std::cout << "position x:" << payloadData.position.x;
-	//	std::cout << "y:" << payloadData.position.y;
-	//	std::cout << "z:" << payloadData.position.z << std::endl;
-	//	std::cout << "click_position x:" << payloadData.clickPosition.x;
-	//	std::cout << "y:" << payloadData.clickPosition.y;
-	//	std::cout << "z:" << payloadData.clickPosition.z << std::endl;
+		std::cout << "RECV Logout" << std::endl;
+		std::cout << eraseId << ":" << "Logout" << std::endl;
+	}
+	break;
+	case DataTag::Sync:
+	{
+		std::cout << "RECV Sync" << std::endl;
+        // クライアントからSyncを受信したときは受信元以外のクライアントに送信する
+		for (const Client& client : self->clients)
+		{
+            // 受信者には送らない
+			if (client.enlConnection == connection)
+			{
+				std::cout << client.player.id << ":" << "Sync" << std::endl;
+                continue;
+			}
 
-	//	for (const Client& client : self->clients)
-	//	{
-	//		// 同じIDの場合
-	//		if (client.player->id == payloadData.id)
-	//		{
-	//			client.player->position = payloadData.position;
-	//			client.player->targetPosition = payloadData.clickPosition;
-	//			client.player->state = Player::State::Move;
-	//		}
-	//		// 受信データをクライアントに送信
-	//		ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
-	//	}
-	//	break;
-	//}
-	//case NetworkTag::Attack:
-	//{
-	//	PlayerInput payloadData;
-	//	// バッファデータからpayLoadStrにデータに読み込み
-	//	if (!buffer.Read(&payloadData, payload_len)) {
-	//		std::cout << "Read Error" << std::endl;
-	//	}
+			ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
+		}
+		return;
+	}
+	break;
+	case DataTag::Move:
+	{
+		PlayerMove playerMove;
+		// バッファデータからpayLoadStrにデータに読み込み
+		if (!buffer.Read(&playerMove, payload_len)) {
+			std::cout << "Read Error" << std::endl;
+		}
 
-	//	std::cout << "recv data attack id:" << std::to_string(payloadData.id) << std::endl;
-	//	std::cout << "position x:" << payloadData.position.x;
-	//	std::cout << "y:" << payloadData.position.y;
-	//	std::cout << "z:" << payloadData.position.z << std::endl;
-	//	std::cout << "click_position x:" << payloadData.clickPosition.x;
-	//	std::cout << "y:" << payloadData.clickPosition.y;
-	//	std::cout << "z:" << payloadData.clickPosition.z << std::endl;
+		std::cout << "RECV Logout" << std::endl;
+		std::cout << playerMove.id << std::endl;
+		std::cout << "velocity x:" << playerMove.velocity.x;
+		std::cout << "y:" << playerMove.velocity.y;
+		std::cout << "z:" << playerMove.velocity.z << std::endl;
 
-	//	for (const Client& client : self->clients)
-	//	{
-	//		// 同じIDの場合
-	//		if (client.player->id == payloadData.id)
-	//		{
-	//			client.player->position = payloadData.position;
-	//			client.player->targetPosition = payloadData.clickPosition;
-	//			client.player->state = Player::State::Move;
-	//		}
-	//		// 受信データをクライアントに送信
-	//		ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
-	//	}
-	//	break;
-	//}
-	//case NetworkTag::Logout:
-	//{
-	//	int id = -1;
-	//	// クライアントに削除送信
-	//	for (const Client& client : self->clients)
-	//	{
-	//		if (client.enlConnection == connection)
-	//		{
-	//			// ログアウトした人のIDを保存
-	//			id = client.player->id;
-	//			// 送信者には送らない
-	//			continue;
-	//		}
-	//		// 受信データをクライアントに送信
-	//		ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
-	//	}
+		// 送信元のプレイヤー情報を保存
+        auto client = self->GetClient(playerMove.id);
+		if (client != nullptr)
+		{
+			//client->player.position = payloadData.position;
+			//client->player.targetPosition = payloadData.clickPosition;
+			//client->player.state = Player::State::Move;
+		}
+	}
+	break;
+	case DataTag::Attack:
+	{
+		//PlayerInput payloadData;
+		//// バッファデータからpayLoadStrにデータに読み込み
+		//if (!buffer.Read(&payloadData, payload_len)) {
+		//	std::cout << "Read Error" << std::endl;
+		//}
 
-	//	// サーバからもクライアント情報を削除
-	//	self->EraseClient(connection);
+		//std::cout << "recv data attack id:" << std::to_string(payloadData.id) << std::endl;
+		//std::cout << "position x:" << payloadData.position.x;
+		//std::cout << "y:" << payloadData.position.y;
+		//std::cout << "z:" << payloadData.position.z << std::endl;
+		//std::cout << "click_position x:" << payloadData.clickPosition.x;
+		//std::cout << "y:" << payloadData.clickPosition.y;
+		//std::cout << "z:" << payloadData.clickPosition.z << std::endl;
 
-	//	std::cout << "logouted clients id:" << std::to_string(id) << std::endl;
-	//	break;
-	//}
-	//}
+		//for (const Client& client : self->clients)
+		//{
+		//	// 同じIDの場合
+		//	if (client.player->id == payloadData.id)
+		//	{
+		//		client.player->position = payloadData.position;
+		//		client.player->targetPosition = payloadData.clickPosition;
+		//		client.player->state = Player::State::Move;
+		//	}
+		//	// 受信データをクライアントに送信
+		//	ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
+		//}
+		break;
+	}
+	}
+
+	// 受信データを全クライアントに送信
+	for (const Client& client : self->clients)
+	{
+		ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
+	}
 }
 
 // ユーザが切断したときに呼ばれるコールバック関数
@@ -274,7 +280,9 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 	// 接続者に既存ログインユーザ送信
 	for (const Client& client : self->clients)
 	{
+        // 送信者には送らない
 		if (client.player.id == playerLogin.id)continue;
+
 		PlayerSync player{};
 		player.id = client.player.id;
 		player.position = client.player.position;
@@ -290,7 +298,7 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 }
 #pragma endregion
 
-void ServerAssignment::EraseClient(ENLConnection connection)
+int ServerAssignment::EraseClient(ENLConnection connection)
 {
 	int i = 0;
 	for (Client& client : clients)
@@ -303,4 +311,5 @@ void ServerAssignment::EraseClient(ENLConnection connection)
 		++i;
 	}
 	clients.erase(clients.begin() + i);
+    return i;
 }

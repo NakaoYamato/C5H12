@@ -22,12 +22,12 @@ void PlayerActor::OnCreate()
 	auto playerController = AddComponent<PlayerController>();
 
 	// Œ•¶¬
-	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(u8"PlayerSword", ActorTag::Player);
+	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);
 	const ModelResource::Node* rightHandNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("RightHand")));
 	sword->Initialize(this, rightHandNode);
 
 	// ‚¶¬
-	auto shield = this->_scene->RegisterActor<PlayerShieldActor>(u8"PlayerShield", ActorTag::Player);
+	auto shield = this->_scene->RegisterActor<PlayerShieldActor>(GetName() + std::string(u8"Shield"), ActorTag::Player);
 	const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("LeftForeArm")));
 	shield->Initialize(this, leftForeArmNode);
 }

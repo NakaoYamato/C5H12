@@ -75,6 +75,75 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 	// connectionに紐づいているポインタからメンバ変数を参照する
 	ClientAssignment* self = static_cast<ClientAssignment*>(connectionData);
 	self->_logs.push_back(u8"サーバーからデータ受信");
+
+	// 受信データ取得
+    ENLBuffer buffer;
+    buffer.Write(payload, payloadLen);
+
+	// コネクションに紐づいているメンバ変数からデータ更新
+	switch (static_cast<Network::DataTag>(payloadType))
+	{
+    case Network::DataTag::Message:
+    {
+		Network::MessageData message;
+		if (!buffer.Read(&message, payloadLen))
+		{
+			self->_logs.push_back(u8"\t読み取り失敗:Message");
+			return;
+		}
+		if (self->_playerMessageDataCallback)
+			self->_playerMessageDataCallback(message);
+    }
+    break;
+    case Network::DataTag::Login:
+	{
+        Network::PlayerLogin playerLogin;
+		if (!buffer.Read(&playerLogin, payloadLen))
+		{
+			self->_logs.push_back(u8"\t読み取り失敗:Login");
+			return;
+		}
+		if (self->_playerLoginCallback)
+			self->_playerLoginCallback(playerLogin);
+	}
+	break;
+	case Network::DataTag::Logout:
+	{
+		Network::PlayerLogout playerLogout;
+		if (!buffer.Read(&playerLogout, payloadLen))
+		{
+			self->_logs.push_back(u8"\t読み取り失敗:Logout");
+			return;
+		}
+		if (self->_playerLogoutCallback)
+			self->_playerLogoutCallback(playerLogout);
+	}
+	break;
+	case Network::DataTag::Sync:
+	{
+		Network::PlayerSync playerSync;
+		if (!buffer.Read(&playerSync, payloadLen))
+		{
+			self->_logs.push_back(u8"\t読み取り失敗:Sync");
+			return;
+		}
+		if (self->_playerSyncCallback)
+			self->_playerSyncCallback(playerSync);
+	}
+    break;
+	case Network::DataTag::Move:
+	{
+		Network::PlayerMove playerMove;
+		if (!buffer.Read(&playerMove, payloadLen))
+		{
+			self->_logs.push_back(u8"\t読み取り失敗:Move");
+			return;
+		}
+		if (self->_playerMoveCallback)
+			self->_playerMoveCallback(playerMove);
+	}
+	break;
+	}
 }
 #pragma endregion
 

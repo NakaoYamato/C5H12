@@ -11,8 +11,6 @@
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Camera/Camera.h"
 
-#include "../../Library/Mediator/NetworkMediator.h"
-
 #pragma region 定義
 #define _RENDER_FRAME_INDEX         0
 #define _APPLY_SHADOW_FRAME_INDEX   1
@@ -115,9 +113,6 @@ public:
 	virtual Camera* GetMainCamera() {
 		return &_camera;
 	}
-
-	// ネットワークメディエーター取得
-	NetworkMediator& GetNetworkMediator() { return _networkMediator; }
 #pragma endregion
 private:
 	std::unique_ptr<Sprite>			_fullscreenQuad;
@@ -126,8 +121,6 @@ private:
 #pragma region シーン必須オブジェクト
 	std::weak_ptr<LightController>	_directionalLight;
 	Camera							_camera = {};
-
-	NetworkMediator					_networkMediator = {};
 #pragma endregion
 
 	RenderContext					_renderContext;

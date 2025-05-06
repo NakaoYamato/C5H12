@@ -2,6 +2,8 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
+#include "../../Source/Actor/GameSystem/GameSystemActor.h"
+
 //初期化
 void SceneNetworkDebug::Initialize()
 {
@@ -14,27 +16,7 @@ void SceneNetworkDebug::Initialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
     // オブジェクト作成
-    ActorManager& actorManager = GetActorManager();
-
-    _client = std::make_shared<ClientAssignment>();
-    _client->Execute();
-}
-
-void SceneNetworkDebug::Update(float elapsedTime)
-{
-    Scene::Update(elapsedTime);
-
-    _client->Update();
-}
-
-void SceneNetworkDebug::Finalize()
-{
-    _client->Exit();
-    Scene::Finalize();
-}
-
-void SceneNetworkDebug::DrawGui()
-{
-    Scene::DrawGui();
-    _client->DrawGui();
+    {
+        auto gameSystem = RegisterActor<GameSystemActor>("GameSystem", ActorTag::DrawContextParameter);
+    }
 }

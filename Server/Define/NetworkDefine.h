@@ -3,6 +3,7 @@
 #include <ENL.h>
 #include <ENLBuffer.h>
 #include <DirectXMath.h>
+#include <string>
 
 #define ENL_CONNECTION_TYPE ENLConnectionType::CONNECTION_TYPE_TCP
 #define ENL_PORT_ADDRESS 7000
@@ -15,11 +16,13 @@ namespace Network
 	enum class DataTag : uint16_t
 	{
 		Message = 1,
-		Move,
-		Attack,
+
 		Login,
 		Logout,
-		Sync
+		Sync,
+
+		Move,
+		Attack,
 	};
 
 	struct Player
@@ -40,20 +43,11 @@ namespace Network
 	};
 
 #pragma region 送信データ
-	struct PlayerTransform
-	{
+    struct MessageData
+    {
 		int id;
-		DirectX::XMFLOAT3 position = {};
-		DirectX::XMFLOAT3 angle = {};
-		DirectX::XMFLOAT3 scale = {};
-	};
-
-	struct PlayerInput
-	{
-		int id;
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT3 clickPosition;
-	};
+        std::string message;
+    };
 
 	struct PlayerLogin
 	{
@@ -64,12 +58,20 @@ namespace Network
 	{
 		int id;
 	};
+
 	struct PlayerSync
+	{
+		int id = -1;
+		DirectX::XMFLOAT3 position = {};
+		DirectX::XMFLOAT3 angle = {};
+	};
+
+	struct PlayerMove
 	{
 		int id;
 		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT3 angle = {};
-		DirectX::XMFLOAT3 scale = {};
+		DirectX::XMFLOAT3 clickPosition;
 	};
+
 #pragma endregion
 }

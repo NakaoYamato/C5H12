@@ -272,14 +272,13 @@ void ServerAssignment::Accept(ENLServer server, void* server_data, ENLConnection
 		);
 	}
 	// 接続者に既存ログインユーザ送信
-	for (Client client : self->clients)
+	for (const Client& client : self->clients)
 	{
 		if (client.player.id == playerLogin.id)continue;
 		PlayerSync player{};
 		player.id = client.player.id;
 		player.position = client.player.position;
 		player.angle = client.player.angle;
-		player.scale = client.player.scale;
 
 		ENLWriteRecord(
 			connection,

@@ -45,6 +45,22 @@ void Input::Update()
 {
 	_lastInput = _currentInput;
 
+
+	// ウィンドウがアクティブかどうかを確認
+	if (GetForegroundWindow() != _hwnd)
+    {      
+		// ウィンドウがアクティブでない場合、入力を無効にする
+        for (auto& mapInfo : _inputActionMap)
+        {
+            _currentInput[mapInfo.first] = FALSE;
+        }
+        for (auto& mapInfo : _moveActionMap)
+        {
+            _currentMovedParameter[mapInfo.first] = 0.0f;
+        }
+        return;
+	}
+
 	// 入力監視クラスを更新
 	_keybordInputObserver.Update();
 	_gamePadInputObserver.Update();

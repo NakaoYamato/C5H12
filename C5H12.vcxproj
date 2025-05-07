@@ -232,6 +232,7 @@
     <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
     <ClCompile Include="Source\Actor\WeaponActor.cpp" />
+    <ClCompile Include="Source\Component\Camera\PlayerCameraController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Component\Stage\GrassController.cpp" />
@@ -337,6 +338,7 @@
     <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h" />
     <ClInclude Include="Source\Actor\WeaponActor.h" />
+    <ClInclude Include="Source\Component\Camera\PlayerCameraController.h" />
     <ClInclude Include="Source\Component\Player\PlayerController.h" />
     <ClInclude Include="Source\Component\Player\PlayerInput.h" />
     <ClInclude Include="Source\Component\Stage\GrassController.h" />

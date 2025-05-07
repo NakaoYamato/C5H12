@@ -6,6 +6,9 @@ void PlayerController::Start()
 {
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_playerInput = GetActor()->GetComponent<PlayerInput>();
+
+	_charactorController.lock()->SetMaxSpeedXZ(5.0f);
+
 }
 
 void PlayerController::Update(float elapsedTime)
@@ -20,6 +23,10 @@ void PlayerController::Update(float elapsedTime)
 			{
 				_charactorController.lock()->AddForce(movement * _moveSpeed);
 			}
+			else
+			{
+				_charactorController.lock()->AddForce(Vec3Normalize(_charactorController.lock()->GetVelocity()) * -_friction);
+			}
 		}
 	}
 }
@@ -27,5 +34,6 @@ void PlayerController::Update(float elapsedTime)
 // GUI•`‰æ
 void PlayerController::DrawGui()
 {
-	ImGui::DragFloat("MoveSpeed", &_moveSpeed, 0.01f, 0.0f, 100.0f);
+	ImGui::DragFloat(u8"ˆÚ“®‘¬“x", &_moveSpeed, 0.01f, 0.0f, 100.0f);
+	ImGui::DragFloat(u8"–€ŽC", &_friction, 0.01f, 0.0f, 100.0f);
 }

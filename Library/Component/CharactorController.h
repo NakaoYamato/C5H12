@@ -23,6 +23,36 @@ public:
         _acceleration += force;
     }
 
+    // 速度を0にする
+    void ClearVelocity()
+    {
+        _velocity = {};
+        _acceleration = {};
+    }
+
+#pragma region アクセサ
+    float GetRadius() const { return _radius; }
+    float GetSkinWidth() const { return _skinWidth; }
+    float GetStepOffset() const { return _stepOffset; }
+
+    Vector3 GetVelocity() const { return _velocity; }
+    Vector3 GetAcceleration() const { return _acceleration; }
+    float GetMaxSpeedXZ() const { return _maxSpeedXZ; }
+    float GetCurrentSpeedXZ() const { return _currentSpeedXZ; }
+    Vector3 GetGravity() const { return _gravity; }
+    bool IsUseGravity() const { return _useGravity; }
+
+    void SetRadius(float radius) { _radius = radius; }
+    void SetSkinWidth(float skinWidth) { _skinWidth = skinWidth; }
+    void SetStepOffset(float stepOffset) { _stepOffset = stepOffset; }
+
+    void SetVelocity(const Vector3& velocity) { _velocity = velocity; }
+    void SetAcceleration(const Vector3& acceleration) { _acceleration = acceleration; }
+    void SetMaxSpeedXZ(float maxSpeedXZ) { _maxSpeedXZ = maxSpeedXZ; }
+    void SetCurrentSpeedXZ(float currentSpeedXZ) { _currentSpeedXZ = currentSpeedXZ; }
+    void SetGravity(const Vector3& gravity) { _gravity = gravity; }
+    void SetUseGravity(bool useGravity) { _useGravity = useGravity; }
+#pragma endregion
 private:
     /// <summary>
     /// 速度更新
@@ -62,7 +92,6 @@ private:
     float _currentSpeedXZ = 0.0f;
 
     Vector3 _gravity = { 0.0f, -9.8f, 0.0f };
-    float _friction = 0.3f;
 
     bool _useGravity = false;
 #pragma endregion

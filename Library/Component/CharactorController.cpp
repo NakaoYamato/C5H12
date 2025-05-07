@@ -10,11 +10,6 @@ void CharactorController::Update(float elapsedTime)
     if (_useGravity)
         AddForce(_gravity);
 
-	// 慣性処理
-	{
-        AddForce(Vec3Normalize(_velocity) * -_friction);
-	}
-
     /// 速度更新
     UpdateVelocity(elapsedTime);
 }
@@ -37,7 +32,6 @@ void CharactorController::DrawGui()
     ImGui::DragFloat(u8"最大速度", &_maxSpeedXZ, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"現在の速度", &_currentSpeedXZ, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat3(u8"重力", &_gravity.x, 0.01f);
-    ImGui::DragFloat(u8"摩擦", &_friction, 0.01f, 0.0f, 100.0f);
     ImGui::Checkbox(u8"重力使用", &_useGravity);
     ImGui::Separator();
 }

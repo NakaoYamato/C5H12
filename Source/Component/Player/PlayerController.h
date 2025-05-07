@@ -29,5 +29,8 @@ private:
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<PlayerInput> _playerInput;
 
-	float _moveSpeed = 10.0f;
+	// ˆÚ“®‘¬“x
+	float _moveSpeed = 20.0f;
+	// –€ŽC—Í
+	float _friction = 25.0f;
 };

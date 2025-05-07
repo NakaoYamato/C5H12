@@ -120,9 +120,9 @@ private:
 
 #pragma region シーン必須オブジェクト
 	std::weak_ptr<LightController>	_directionalLight;
-	Camera							_camera = {};
 #pragma endregion
 
+	Camera							_camera = {};
 	RenderContext					_renderContext;
 	ActorManager					_actorManager;
 	bool							_ready = false;

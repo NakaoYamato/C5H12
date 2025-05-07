@@ -7,6 +7,8 @@
 #include "../../Source/Component/Player/PlayerInput.h"
 #include "../../Source/Component/Player/PlayerController.h"
 
+#include "../../Source/Component/Camera/PlayerCameraController.h"
+
 #include "PlayerSwordActor.h"
 #include "PlayerShieldActor.h"
 
@@ -32,6 +34,13 @@ void PlayerActor::OnCreate()
 	const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("LeftForeArm")));
 	shield->Initialize(this, leftForeArmNode);
     _shieldActor = shield;
+
+	if (_isUserControlled)
+	{
+		// ƒJƒƒ‰ì¬
+		auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::DrawContextParameter);
+        camera->AddComponent<PlayerCameraController>(this);
+	}
 }
 
 // íœˆ—

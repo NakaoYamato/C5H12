@@ -86,6 +86,31 @@ public:
 
 private:
 #pragma region サーバー通信のコールバック関数
+#ifdef USE_MRS
+	/// <summary>
+	/// サーバーと接続時に呼ばれる関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connectionData">自身(ClientAssignment)のポインタ</param>
+	static void Connect(MrsConnection connection, void* connectionData);
+
+	/// <summary>
+	/// サーバーと切断されたときに呼ばれる関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connectionData">自身(ClientAssignment)のポインタ</param>
+	static void Disconnect(MrsConnection connection, void* connectionData);
+
+	/// <summary>
+	/// サーバーからデータが送られたときに呼ばれる関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connectionData">自身(ClientAssignment)のポインタ</param>
+	/// <param name="payloadType">送られたデータタイプ</param>
+	/// <param name="payload">データのポインタ</param>
+	/// <param name="payloadLen">データの長さ</param>
+	static void ReadRecord(MrsConnection connection, void* connectionData, uint32 seqnum, uint16 options, uint16 payloadType, const void* payload, uint32 payloadLen);
+#else
 	/// <summary>
 	/// サーバーと接続時に呼ばれる関数
 	/// </summary>
@@ -109,10 +134,15 @@ private:
 	/// <param name="payload">データのポインタ</param>
 	/// <param name="payloadLen">データの長さ</param>
 	static void ReadRecord(ENLConnection connection, void* connectionData, uint16_t payloadType, const void* payload, uint32_t payloadLen);
+#endif // USE_MRS
 #pragma endregion
 
 private:
+#ifdef USE_MRS
+	MrsConnection connection;
+#else
 	ENLConnection connection = 0;
+#endif // USE_MRS
 
 #pragma region サーバーからの各種データ受け取りを行ったときのコールバック関数
 	std::function<void(const Network::MessageData&)> _playerMessageDataCallback;

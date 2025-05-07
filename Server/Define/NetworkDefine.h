@@ -1,12 +1,24 @@
 #pragma once
 
+#define USE_MRS
+
+#ifdef USE_MRS
+#include <mrs.hpp>
+
+#define NETWORK_CONNECTION_TYPE MRS_CONNECTION_TYPE_UDP
+#define NETWORK_RECORD_OPTION MrsRecordOption::MRS_RECORD_OPTION_NONE
+
+#else
 #include <ENL.h>
 #include <ENLBuffer.h>
+
+#define NETWORK_CONNECTION_TYPE ENLConnectionType::CONNECTION_TYPE_TCP
+#endif // USE_MRS
+
 #include <DirectXMath.h>
 #include <string>
 
-#define ENL_CONNECTION_TYPE ENLConnectionType::CONNECTION_TYPE_TCP
-#define ENL_PORT_ADDRESS 7000
+#define NETWORK_PORT_ADDRESS 7000
 
 namespace Network
 {
@@ -38,7 +50,11 @@ namespace Network
 	/// </summary>
 	struct Client 
 	{
-		ENLConnection enlConnection = -1;
+#ifdef USE_MRS
+		MrsConnection connection = nullptr;
+#else
+		ENLConnection connection = -1;
+#endif // USE_MRS
 		Player player = {};
 	};
 

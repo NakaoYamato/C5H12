@@ -137,7 +137,7 @@ void NetworkMediator::ProcessNetworkData()
             _players[sync.id] = player;
         }
         player->GetTransform().SetPosition(sync.position);
-        player->GetTransform().SetAngle(sync.angle);
+        player->GetTransform().SetRotation(sync.angle);
     }
     _playerSyncs.clear();
 }

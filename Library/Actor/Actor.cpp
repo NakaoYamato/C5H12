@@ -270,6 +270,6 @@ void Actor::DrawGuizmo()
 		r = QuaternionToRollPitchYaw(R);
 		_transform.SetPosition(t);
 		_transform.SetScale(s);
-		_transform.SetAngle(r);
+		_transform.SetRotation(r);
 	}
 }

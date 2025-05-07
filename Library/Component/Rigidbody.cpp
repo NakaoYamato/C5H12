@@ -86,7 +86,7 @@ void Rigidbody::FixedUpdate()
 
 		_orientation = QuaternionFromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
 		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
-		this->GetActor()->GetTransform().SetAngle(QuaternionToRollPitchYaw(_orientation));
+		this->GetActor()->GetTransform().SetRotation(QuaternionToRollPitchYaw(_orientation));
 	}
 
 	//力のアキュムレータをゼロリセットする

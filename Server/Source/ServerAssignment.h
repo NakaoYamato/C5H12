@@ -47,15 +47,50 @@ public:
 		return nullptr;
 	}
 
+#ifdef USE_MRS
+	/// <summary>
+	/// クライアント削除
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <returns>削除したクライアントのID</returns>
+	int EraseClient(MrsConnection connection);
+#else
 	/// <summary>
 	/// クライアント削除
 	/// </summary>
 	/// <param name="connection"></param>
 	/// <returns>削除したクライアントのID</returns>
 	int EraseClient(ENLConnection connection);
+#endif // USE_MRS
 
 private:
 #pragma region コールバック関数
+#ifdef USE_MRS
+	/// <summary>
+	/// レコードが読み込み可能になった際に呼ばれるコールバック関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connection_data">ServerAssignmentのポインタ</param>
+	/// <param name="payload_type"></param>
+	/// <param name="payload"></param>
+	/// <param name="payload_len"></param>
+	static void ReadRecord(MrsConnection connection, void* connectionData, uint32 seqnum, uint16 options, uint16 payloadType, const void* payload, uint32 payloadLen);
+
+	/// <summary>
+	/// ユーザが切断したときに呼ばれるコールバック関数
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="connection_data">ServerAssignmentのポインタ</param>
+	static void Disconnect(MrsConnection connection, void* connectionData);
+
+	/// <summary>
+	/// 接続されたときのコールバック関数
+	/// </summary>
+	/// <param name="server"></param>
+	/// <param name="server_data">ServerAssignmentのポインタ</param>
+	/// <param name="connection"></param>
+	static void Accept(MrsServer server, void* serverData, MrsConnection connection);
+#else
 	/// <summary>
 	/// レコードが読み込み可能になった際に呼ばれるコールバック関数
 	/// </summary>
@@ -71,7 +106,7 @@ private:
 	/// </summary>
 	/// <param name="connection"></param>
 	/// <param name="connection_data">ServerAssignmentのポインタ</param>
-	static void Disconnect(ENLConnection connection, void* connection_data);
+	static void Disconnect(ENLConnection connection, void* connectionData);
 
 	/// <summary>
 	/// 接続されたときのコールバック関数
@@ -79,12 +114,19 @@ private:
 	/// <param name="server"></param>
 	/// <param name="server_data">ServerAssignmentのポインタ</param>
 	/// <param name="connection"></param>
-	static void Accept(ENLServer server, void* server_data, ENLConnection connection);
+	static void Accept(ENLServer server, void* serverData, ENLConnection connection);
+#endif // USE_MRS
 #pragma endregion
 
 private:
 	int id = 0;
+
+#ifdef USE_MRS
+	MrsServer mrsServer = nullptr;
+#else
 	ENLServer mrsServer = -1;
+#endif // USE_MRS
+
 	std::vector<Network::Client> clients;
 	bool loop = true;
 };

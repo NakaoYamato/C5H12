@@ -1,10 +1,11 @@
 #pragma once
 
+#include "../../Library/Network/ClientAssignment.h"
+
 #include <unordered_map>
 #include <mutex>
 
 #include "../../Library/Actor/Actor.h"
-#include "../../Library/Network/ClientAssignment.h"
 #include "../Player/PlayerActor.h"
 #include "../../Library/Scene/Scene.h"
 

@@ -1,8 +1,10 @@
+// Winsock2とWinsockの多重定義を避けるために、先にインクルード
+#include "../../Source/Actor/Mediator/NetworkMediator.h"
+
 #include "SceneNetworkDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
 
-#include "../../Source/Actor/Mediator/NetworkMediator.h"
 
 //初期化
 void SceneNetworkDebug::Initialize()

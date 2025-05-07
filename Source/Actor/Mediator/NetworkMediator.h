@@ -33,16 +33,6 @@ public:
 
 #pragma endregion
 
-    //void AddPlayer(std::weak_ptr<PlayerActor> player)
-    //{
-    //    _players.push_back({ -1, player });
-    //}
-    //void RemovePlayer(std::weak_ptr<PlayerActor> player)
-    //{
-    //    _players.erase(std::remove_if(_players.begin(), _players.end(),
-    //        [&player](const PlayerInfo& p) { return p.player.lock() == player.lock(); }), _players.end());
-    //}
-
     const std::vector<std::string>& GetLogs()
     {
         // スレッドセーフ
@@ -50,6 +40,13 @@ public:
         return _logs;
     }
 private:
+    /// <summary>
+    /// プレイヤー作成
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="isControlled"></param>
+    std::weak_ptr<PlayerActor> CreatePlayer(int id, bool isControlled);
+
     /// <summary>
     /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
     /// </summary>

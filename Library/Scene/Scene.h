@@ -85,10 +85,10 @@ public:
 	/// <param name="name">オブジェクトの名前（重複不可）</param>
 	/// <param name="tag">タグ</param>
 	/// <returns></returns>
-	template<class T>
-	std::shared_ptr<T> RegisterActor(const std::string& name, ActorTag tag)
+	template<class T, class... Args>
+	std::shared_ptr<T> RegisterActor(const std::string& name, ActorTag tag, Args... args)
 	{
-		std::shared_ptr<T> actor = std::make_shared<T>();
+		std::shared_ptr<T> actor = std::make_shared<T>(args...);
 		actor->SetName(name.c_str());
 		actor->SetScene(this);
 		_actorManager.Register(actor, tag);

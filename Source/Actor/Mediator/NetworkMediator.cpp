@@ -71,6 +71,25 @@ void NetworkMediator::DrawGui()
     DrawLogGui();
 }
 
+/// プレイヤー作成
+std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControlled)
+{
+    // 要素チェック
+    if (_players[id].lock()) return std::weak_ptr<PlayerActor>();
+
+    // ユーザーが操作するプレイヤーか
+    if (isControlled)
+    {
+        myPlayerId = id;
+    }
+
+    auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
+
+    // コンテナに登録
+    _players[id] = player;
+    return player;
+}
+
 /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
 void NetworkMediator::SetClientCollback()
 {
@@ -134,21 +153,8 @@ void NetworkMediator::ProcessNetworkData()
     // ログインデータの処理
     for (auto& login : _playerLogins)
     {
-        // 登録されているか確認
-        if (!_players[login.id].lock())
-        {
-            // プレイヤー生成
-            auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(login.id), ActorTag::Player);
-
-            // コンテナに登録
-            _players[login.id] = player;
-        }
-
-        // 操作するプレイヤーがいなければ登録
-        if (myPlayerId == -1)
-        {
-            myPlayerId = login.id;
-        }
+        // プレイヤー作成
+        CreatePlayer(login.id, myPlayerId == -1);
     }
     _playerLogins.clear();
     //===============================================================================
@@ -162,8 +168,7 @@ void NetworkMediator::ProcessNetworkData()
         if (!player)
         {
             // プレイヤーが存在しないなら作成
-            player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(sync.id), ActorTag::Player);
-            _players[sync.id] = player;
+            player = CreatePlayer(sync.id, false).lock();
         }
         player->GetTransform().SetPosition(sync.position);
         player->GetTransform().SetRotation(sync.angle);
@@ -184,8 +189,7 @@ void NetworkMediator::ProcessNetworkData()
             if (!player)
             {
                 // プレイヤーが存在しないなら作成
-                player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(sync.players[i].id), ActorTag::Player);
-                _players[sync.players[i].id] = player;
+                player = CreatePlayer(sync.players[i].id, false).lock();
             }
             player->GetTransform().SetPosition(sync.players[i].position);
             player->GetTransform().SetRotation(sync.players[i].angle);

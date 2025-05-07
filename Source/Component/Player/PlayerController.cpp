@@ -10,13 +10,16 @@ void PlayerController::Start()
 
 void PlayerController::Update(float elapsedTime)
 {
-	auto playerInput = _playerInput.lock();
-	if (playerInput)
+	if (_isUserControlled)
 	{
-		Vector3 movement = playerInput->GetMovement();
-		if (movement.x != 0.0f || movement.z != 0.0f)
+		auto playerInput = _playerInput.lock();
+		if (playerInput)
 		{
-			_charactorController.lock()->AddForce(movement * _moveSpeed);
+			Vector3 movement = playerInput->GetMovement();
+			if (movement.x != 0.0f || movement.z != 0.0f)
+			{
+				_charactorController.lock()->AddForce(movement * _moveSpeed);
+			}
 		}
 	}
 }

@@ -19,7 +19,7 @@ void PlayerActor::OnCreate()
 	auto animator = AddComponent<Animator>(modelRenderer->GetModel());
 	auto charactorController = AddComponent<CharactorController>();
 	auto playerInput = AddComponent<PlayerInput>();
-	auto playerController = AddComponent<PlayerController>();
+	auto playerController = AddComponent<PlayerController>(_isUserControlled);
 
 	// Œ•¶¬
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);

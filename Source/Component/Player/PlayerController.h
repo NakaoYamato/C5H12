@@ -7,7 +7,7 @@
 class PlayerController : public Component
 {
 public:
-	PlayerController() {}
+	PlayerController(bool isUserControlled) : _isUserControlled(isUserControlled) {}
 	~PlayerController() override {}
 
 	// 名前取得
@@ -23,6 +23,9 @@ public:
 	void DrawGui() override;
 
 private:
+	// ユーザーが操作するプレイヤーか
+	const bool _isUserControlled = true;
+
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<PlayerInput> _playerInput;
 

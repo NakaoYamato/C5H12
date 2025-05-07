@@ -42,15 +42,22 @@ void NetworkMediator::Update(float elapsedTime)
     {
         auto myPlayer = _players[myPlayerId].lock();
         // プレイヤーの同期
-        Network::PlayerSync sync{};
-        sync.id = myPlayerId;
-        sync.position = myPlayer->GetTransform().GetPosition();
-        sync.angle = myPlayer->GetTransform().GetRotation();
+        Network::AllPlayerSync sync{};
+        // players[0]にデータを入れる
+        sync.players[0].id          = myPlayerId;
+        sync.players[0].position    = myPlayer->GetTransform().GetPosition();
+        sync.players[0].angle       = myPlayer->GetTransform().GetRotation();
         // サーバーに送信
-        _client->WriteRecord(Network::DataTag::Sync, &sync, sizeof(sync));
+        _client->WriteRecord(Network::DataTag::AllSync, &sync, sizeof(sync));
 
         _syncTimer = 0.0f;
     }
+}
+
+// 固定間隔更新処理
+void NetworkMediator::FixedUpdate()
+{
+    Actor::FixedUpdate();
 }
 
 void NetworkMediator::DrawGui()
@@ -85,6 +92,16 @@ void NetworkMediator::SetClientCollback()
 
             _playerSyncs.push_back(playerSync);
         });
+    _client->SetAllPlayerSyncCallback(
+        [this](const Network::AllPlayerSync& allPlayerSync)
+        {
+            // スレッドセーフ
+            std::lock_guard<std::mutex> lock(_mutex);
+
+            _logs.push_back("AllPlayerSync");
+
+            _allPlayerSync.push_back(allPlayerSync);
+        });
     _client->SetPlayerLoginCallback(
         [this](const Network::PlayerLogin& playerLogin)
         {
@@ -94,7 +111,16 @@ void NetworkMediator::SetClientCollback()
             _logs.push_back("PlayerLogin" + std::to_string(playerLogin.id));
 
             _playerLogins.push_back(playerLogin);
+        });
+    _client->SetPlayerLogoutCallback(
+        [this](const Network::PlayerLogout& playerLogout)
+        {
+            // スレッドセーフ
+            std::lock_guard<std::mutex> lock(_mutex);
 
+            _logs.push_back("PlayerLogout" + std::to_string(playerLogout.id));
+
+            _playerLogouts.push_back(playerLogout);
         });
 }
 
@@ -104,6 +130,7 @@ void NetworkMediator::ProcessNetworkData()
     // スレッドセーフ
     std::lock_guard<std::mutex> lock(_mutex);
 
+    //===============================================================================
     // ログインデータの処理
     for (auto& login : _playerLogins)
     {
@@ -124,7 +151,9 @@ void NetworkMediator::ProcessNetworkData()
         }
     }
     _playerLogins.clear();
+    //===============================================================================
 
+    //===============================================================================
     // 同期データの処理
     for (auto& sync : _playerSyncs)
     {
@@ -140,6 +169,46 @@ void NetworkMediator::ProcessNetworkData()
         player->GetTransform().SetRotation(sync.angle);
     }
     _playerSyncs.clear();
+    //===============================================================================
+
+    //===============================================================================
+    // 全体同期データの処理
+    for (auto& sync : _allPlayerSync)
+    {
+        // プレイヤー情報を更新
+        for (int i = 0; i < NETWORK_MAX_CONNECTION; i++)
+        {
+            if (sync.players[i].id == -1)continue;
+
+            auto player = _players[sync.players[i].id].lock();
+            if (!player)
+            {
+                // プレイヤーが存在しないなら作成
+                player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(sync.players[i].id), ActorTag::Player);
+                _players[sync.players[i].id] = player;
+            }
+            player->GetTransform().SetPosition(sync.players[i].position);
+            player->GetTransform().SetRotation(sync.players[i].angle);
+        }
+    }
+    _allPlayerSync.clear();
+    //===============================================================================
+
+    //===============================================================================
+    // ログアウトデータの処理
+    for (auto& logout : _playerLogouts)
+    {
+        // プレイヤー情報を削除
+        auto player = _players[logout.id].lock();
+        if (player)
+        {
+            // プレイヤー削除
+            player->Destroy();
+            _players.erase(logout.id);
+        }
+    }
+    _playerLogouts.clear();
+    //===============================================================================
 }
 
 /// ネットワークGUIの表示

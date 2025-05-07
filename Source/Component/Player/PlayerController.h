@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
-#include "../../Library/Component/Rigidbody.h"
+#include "../../Library/Component/CharactorController.h"
 #include "PlayerInput.h"
 
 class PlayerController : public Component
@@ -23,7 +23,7 @@ public:
 	void DrawGui() override;
 
 private:
-	std::weak_ptr<Rigidbody> _rigidbody;
+	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<PlayerInput> _playerInput;
 
 	float _moveSpeed = 10.0f;

@@ -95,6 +95,19 @@ public:
 	}
 #pragma endregion
 private:
+    /// <summary>
+    /// 速度更新
+    /// </summary>
+    /// <param name="deltaTime"></param>
+    void UpdateVelocity(float deltaTime);
+
+    /// <summary>
+    /// 位置更新
+    /// </summary>
+    /// <param name="deltaTime"></param>
+    void UpdatePosition(float deltaTime);
+
+private:
 	Quaternion			_orientation = {};			//姿勢(クォータニオン)
 	Vector3				_linearVelocity = {};		//並進速度
 	Vector3				_angularVelocity = {};		//角速度

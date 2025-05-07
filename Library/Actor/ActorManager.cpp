@@ -381,8 +381,6 @@ std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string&
 // 要素の全削除
 void ActorManager::Clear()
 {
-	// スレッドセーフ
-	std::lock_guard<std::mutex> lock(_mutex);
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		_startActors[i].clear();
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)

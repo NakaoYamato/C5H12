@@ -133,7 +133,6 @@ void ServerAssignment::Exit()
 				std::cout << "id : " << index << std::endl;
 				std::cout << "position : " << client.player.position.x << client.player.position.y << client.player.position.z << std::endl;
 				std::cout << "angle : " << client.player.angle.x << client.player.angle.y << client.player.angle.z << std::endl;
-				std::cout << "scale : " << client.player.scale.x << client.player.scale.y << client.player.scale.z << std::endl;
 				std::cout << "============================================" << std::endl;
 
 				index++;
@@ -167,6 +166,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		// バッファデータからpayLoadStrにデータに読み込み
 		if (!buffer.Read(&massageData, payloadLen)) {
 			std::cout << "Read Error" << std::endl;
+			return;
 		}
 		// メッセージ表示
 		std::cout << "RECV Message" << std::endl;
@@ -190,27 +190,65 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 	break;
 	case DataTag::Sync:
 	{
-		std::cout << "RECV Sync" << std::endl;
-        // クライアントからSyncを受信したときは受信元以外のクライアントに送信する
+		// Syncはクライアントが受け取るだけなので処理することはない
+		return;
+	}
+	break;
+	case DataTag::AllSync:
+	{
+		std::cout << "RECV AllSync" << std::endl;
+
+		AllPlayerSync allPlayerSync;
+		// バッファデータからpayLoadStrにデータに読み込み
+		if (!buffer.Read(&allPlayerSync, payloadLen)) {
+			std::cout << "Read Error" << std::endl;
+			return;
+		}
+
+		// 送信元のデータを保存
+		Player& recvPlayer = allPlayerSync.players[0];
+		auto client = self->GetClientFromConnection(connection);
+		client->isSync = true;
+        client->player.position = recvPlayer.position;
+        client->player.angle = recvPlayer.angle;
+
+		// 各クライアントがSyncを送信するまで返さない
 		for (const Client& client : self->clients)
 		{
-            // 受信者には送らない
-			if (client.connection == connection)
-			{
-				std::cout << client.player.id << ":" << "Sync" << std::endl;
-                continue;
-			}
+			if (client.isSync == false)
+				return;
+		}
+
+		// 送信データ作成
+        AllPlayerSync allPlayerSyncData;
+        for (int i = 0; i < NETWORK_MAX_CONNECTION; i++)
+        {
+			if (i < self->clients.size())
+				allPlayerSyncData.players[i] = self->clients[i].player;
+			else
+				allPlayerSyncData.players[i].id = -1;
+        }
+#ifdef USE_MRS
+		mrs::Buffer send;
+		send.Write(&allPlayerSyncData, sizeof(allPlayerSyncData));
+#endif // USE_MRS
+
+        // すべてのクライアントにすべてのクライアントのデータを送信
+		for (Client& client : self->clients)
+		{
+			// Syncフラグをfalseに戻す
+			client.isSync = false;
 
 #ifdef USE_MRS
 			mrs_write_record(
 				client.connection,						// 送信先コネクション
-				NETWORK_RECORD_OPTION,	// 通信オプション
-				payloadType,								// データコマンド
-				payload,								// 送信データ
-				payloadLen							// 送信サイズ
+				NETWORK_RECORD_OPTION,					// 通信オプション
+				payloadType,							// データコマンド
+				send.GetData(),								// 送信データ
+				send.GetDataLen()								// 送信サイズ
 			);
 #else
-			ENLWriteRecord(client.connection, payloadType, payload, payloadLen);
+			ENLWriteRecord(client.connection, payloadType, &allPlayerSyncData, sizeof(allPlayerSyncData));
 #endif // USE_MRS
 		}
 		return;
@@ -231,7 +269,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		std::cout << "z:" << playerMove.velocity.z << std::endl;
 
 		// 送信元のプレイヤー情報を保存
-        auto client = self->GetClient(playerMove.id);
+        auto client = self->GetClientFromID(playerMove.id);
 		if (client != nullptr)
 		{
 			//client->player.position = payloadData.position;
@@ -413,12 +451,14 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 		player.angle = client.player.angle;
 
 #ifdef USE_MRS
+		mrs::Buffer send;
+		send.Write(&player, sizeof(player));
 		mrs_write_record(
-			client.connection,						// 送信先コネクション
+			connection,						// 送信先コネクション
 			NETWORK_RECORD_OPTION,	// 通信オプション
 			static_cast<uint16>(Network::DataTag::Sync),	// データコマンド
-			&player,								// 送信データ
-			sizeof(player)							// 送信サイズ
+			send.GetData(),								// 送信データ
+			send.GetDataLen()							// 送信サイズ
 		);
 #else
 		ENLWriteRecord(

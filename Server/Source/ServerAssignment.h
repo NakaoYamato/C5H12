@@ -35,7 +35,7 @@ public:
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns>失敗でnullptr</returns>
-	Network::Client* GetClient(int id)
+	Network::Client* GetClientFromID(int id)
 	{
 		for (Network::Client& client : clients)
 		{
@@ -46,6 +46,42 @@ public:
 		}
 		return nullptr;
 	}
+
+#ifdef USE_MRS
+	/// <summary>
+	/// connectionからクライアントを取得
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <returns>失敗でnullptr</returns>
+	Network::Client* GetClientFromConnection(MrsConnection connection)
+	{
+		for (Network::Client& client : clients)
+		{
+			if (client.connection == connection)
+			{
+				return &client;
+			}
+		}
+		return nullptr;
+	}
+#else
+	/// <summary>
+	/// connectionからクライアントを取得
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <returns>失敗でnullptr</returns>
+	Network::Client* GetClientFromConnection(ENLConnection connection)
+	{
+		for (Network::Client& client : clients)
+		{
+			if (client.connection == connection)
+			{
+				return &client;
+			}
+		}
+		return nullptr;
+	}
+#endif // USE_MRS
 
 #ifdef USE_MRS
 	/// <summary>

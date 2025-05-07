@@ -192,6 +192,18 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerSyncCallback(playerSync);
 	}
     break;
+	case Network::DataTag::AllSync:
+	{
+		Network::AllPlayerSync allPlayerSync;
+		if (!buffer.Read(&allPlayerSync, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:AllSync");
+			return;
+		}
+		if (self->_allPlayerSyncCallback)
+			self->_allPlayerSyncCallback(allPlayerSync);
+	}
+    break;
 	case Network::DataTag::Move:
 	{
 		Network::PlayerMove playerMove;

@@ -4,7 +4,7 @@
 
 void PlayerController::Start()
 {
-	_rigidbody = GetActor()->GetComponent<Rigidbody>();
+	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_playerInput = GetActor()->GetComponent<PlayerInput>();
 }
 
@@ -16,7 +16,7 @@ void PlayerController::Update(float elapsedTime)
 		Vector3 movement = playerInput->GetMovement();
 		if (movement.x != 0.0f || movement.z != 0.0f)
 		{
-			_rigidbody.lock()->AddForce(movement * _moveSpeed * elapsedTime);
+			_charactorController.lock()->AddForce(movement * _moveSpeed);
 		}
 	}
 }

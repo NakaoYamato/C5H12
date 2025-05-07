@@ -9,4 +9,10 @@ public:
 
 	// ¶¬ˆ—
 	void OnCreate() override;
+
+	// íœˆ—
+	void Destroy() override;
+private:
+    std::weak_ptr<Actor> _swordActor;
+    std::weak_ptr<Actor> _shieldActor;
 };

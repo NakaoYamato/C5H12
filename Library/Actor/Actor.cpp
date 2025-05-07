@@ -245,6 +245,12 @@ void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3&
 	}
 }
 
+// 削除処理
+void Actor::Destroy()
+{
+    _scene->GetActorManager().Remove(shared_from_this());
+}
+
 // トランスフォーム更新
 void Actor::UpdateTransform()
 {

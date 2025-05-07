@@ -23,6 +23,9 @@ public:
     // 更新処理
     void Update(float elapsedTime) override;
 
+    // 固定間隔更新処理
+    void FixedUpdate() override;
+
     // GUI描画
     void DrawGui() override;
 
@@ -85,7 +88,9 @@ private:
 
 #pragma region サーバーからの受信データ
     std::vector<Network::PlayerLogin> _playerLogins;
+    std::vector<Network::PlayerLogout> _playerLogouts;
     std::vector<Network::PlayerSync> _playerSyncs;
+    std::vector<Network::AllPlayerSync> _allPlayerSync;
 #pragma endregion
 
     // データ同期間隔(秒)

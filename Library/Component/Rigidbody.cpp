@@ -14,6 +14,8 @@ void Rigidbody::Start()
 // 更新処理
 void Rigidbody::Update(float elapsedTime)
 {
+	/// 速度更新
+    UpdateVelocity(elapsedTime);
 }
 
 // 固定間隔更新処理
@@ -21,79 +23,8 @@ void Rigidbody::FixedUpdate()
 {
 	float deltaTime = _FIXED_UPDATE_RATE;
 
-	// 不動オブジェクトなら処理しない
-	if (IsMovable() == false)
-	{
-		//ForcedStop();
-		return;
-	}
-
-	if (_inertialMass <= 0.0f)
-	{
-		return;
-	}
-
-	// 空気抗力計算
-	{
-		float currentVelocityLenSq = Vec3LengthSq(_linearVelocity);
-		float dragFactor = 0.5f * _dragCoefficient * currentVelocityLenSq;
-		Vector3  dragForce = Vec3Normalize(_linearVelocity) * -dragFactor;
-		AddForce(dragForce);
-	}
-
-	//力(accumulated_force)から加速度(linear_acceleration)を算出し速度(linear_velocity)を更新する
-	_oldLinearVelocity = _linearVelocity;
-	DirectX::XMVECTOR linearAcceleration = {};
-	linearAcceleration = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_accumulatedForce), 1 / _inertialMass);
-	DirectX::XMStoreFloat3(&_linearVelocity,
-		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_linearVelocity), DirectX::XMVectorScale(linearAcceleration, deltaTime)));
-	// 速度が最低速度量より低ければ停止
-	//if (DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&_linearVelocity))) < _standStillVelocity)
-	//{
-	//	_linearVelocity = {};
-	//	// 停止フラグをオン
-	//	_isStandstill = true;
-	//}
-	//else
-	//{
-	//	// 停止フラグをオフ
-	//	_isStandstill = false;
-	//}
-
-	//並進速度による位置の更新
-	_oldPosition = this->GetActor()->GetTransform().GetPosition();
-	Vector3 positon = _oldPosition;
-	DirectX::XMStoreFloat3(&positon,
-		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&positon),
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_linearVelocity), deltaTime)));
-	this->GetActor()->GetTransform().SetPosition(positon);
-
-	//トルク(accumulated_torque)から角加速度(angular_acceleration)を算出し角速度(angular_velocity)を更新する
-	_oldAngularVelocity = _angularVelocity;
-	DirectX::XMVECTOR angularAcceleration;
-	angularAcceleration = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&_accumulatedTorque), InverseInertiaTensor(true));
-	DirectX::XMStoreFloat3(&_angularVelocity, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_angularVelocity), DirectX::XMVectorScale(angularAcceleration, deltaTime)));
-
-	//角速度による姿勢の更新
-	// 非回転オブジェクトなら処理しない
-	if (IsRotatable())
-	{
-		DirectX::XMVECTOR wt = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_angularVelocity), deltaTime);
-		float angle = DirectX::XMVectorGetX(DirectX::XMVector3Length(wt));
-		wt = DirectX::XMVector3Normalize(wt);
-		DirectX::XMVECTOR q = DirectX::XMVectorScale(wt, sinf(angle * 0.5f));
-		q.m128_f32[3] = cosf(angle * 0.5f);
-
-		_orientation = QuaternionFromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
-		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
-		this->GetActor()->GetTransform().SetRotation(QuaternionToRollPitchYaw(_orientation));
-	}
-
-	//力のアキュムレータをゼロリセットする
-	_accumulatedForce = {};
-
-	//トルクのアキュムレータをゼロリセットする
-	_accumulatedTorque = {};
+	/// 位置更新
+    UpdatePosition(deltaTime);
 }
 
 // GUI描画
@@ -149,4 +80,87 @@ DirectX::XMVECTOR Rigidbody::AddForceAtPoint(const DirectX::XMVECTOR& force, con
 	DirectX::XMStoreFloat3(&_accumulatedTorque, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_accumulatedTorque), torque));
 
 	return torque;
+}
+
+/// 速度更新
+void Rigidbody::UpdateVelocity(float deltaTime)
+{
+	//力(_accumulatedForce)から加速度(linearAcceleration)を算出し速度(linearAcceleration)を更新する
+	_oldLinearVelocity = _linearVelocity;
+	DirectX::XMVECTOR linearAcceleration = {};
+	linearAcceleration = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_accumulatedForce), 1 / _inertialMass);
+	DirectX::XMStoreFloat3(&_linearVelocity,
+		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_linearVelocity), DirectX::XMVectorScale(linearAcceleration, deltaTime)));
+
+	// 速度が最低速度量より低ければ停止
+	//if (DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMLoadFloat3(&_linearVelocity))) < _standStillVelocity)
+	//{
+	//	_linearVelocity = {};
+	//	// 停止フラグをオン
+	//	_isStandstill = true;
+	//}
+	//else
+	//{
+	//	// 停止フラグをオフ
+	//	_isStandstill = false;
+	//}
+
+	//トルク(_accumulatedTorque)から角加速度(angularAcceleration)を算出し角速度(_angularVelocity)を更新する
+	_oldAngularVelocity = _angularVelocity;
+	DirectX::XMVECTOR angularAcceleration;
+	angularAcceleration = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&_accumulatedTorque), InverseInertiaTensor(true));
+	DirectX::XMStoreFloat3(&_angularVelocity, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&_angularVelocity), DirectX::XMVectorScale(angularAcceleration, deltaTime)));
+
+	//力のアキュムレータをゼロリセットする
+	_accumulatedForce = {};
+
+	//トルクのアキュムレータをゼロリセットする
+	_accumulatedTorque = {};
+}
+
+/// 位置更新
+void Rigidbody::UpdatePosition(float deltaTime)
+{
+	// 不動オブジェクトなら処理しない
+	if (IsMovable() == false)
+	{
+		//ForcedStop();
+		return;
+	}
+
+	if (_inertialMass <= 0.0f)
+	{
+		return;
+	}
+
+	// 空気抗力計算
+	{
+		float currentVelocityLenSq = Vec3LengthSq(_linearVelocity);
+		float dragFactor = 0.5f * _dragCoefficient * currentVelocityLenSq;
+		Vector3  dragForce = Vec3Normalize(_linearVelocity) * -dragFactor;
+		AddForce(dragForce);
+	}
+
+	//並進速度による位置の更新
+	_oldPosition = this->GetActor()->GetTransform().GetPosition();
+	Vector3 positon = _oldPosition;
+	DirectX::XMStoreFloat3(&positon,
+		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&positon),
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_linearVelocity), deltaTime)));
+	this->GetActor()->GetTransform().SetPosition(positon);
+
+	//角速度による姿勢の更新
+	// 非回転オブジェクトなら処理しない
+	if (IsRotatable())
+	{
+		DirectX::XMVECTOR wt = DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_angularVelocity), deltaTime);
+		float angle = DirectX::XMVectorGetX(DirectX::XMVector3Length(wt));
+		wt = DirectX::XMVector3Normalize(wt);
+		DirectX::XMVECTOR q = DirectX::XMVectorScale(wt, sinf(angle * 0.5f));
+		q.m128_f32[3] = cosf(angle * 0.5f);
+
+		_orientation = QuaternionFromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
+		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
+		this->GetActor()->GetTransform().SetRotation(QuaternionToRollPitchYaw(_orientation));
+	}
 }

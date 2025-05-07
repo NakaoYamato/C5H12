@@ -59,6 +59,8 @@ public:
 		const Vector3& hitNormal, 
 		const float& penetration);
 
+	// 削除処理
+	virtual void Destroy();
 #pragma region コンポーネント関係
 	// コンポーネント追加
 	template<class T, class... Args>

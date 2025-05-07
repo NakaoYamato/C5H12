@@ -19,6 +19,7 @@
 #include <string>
 
 #define NETWORK_PORT_ADDRESS 7000
+#define NETWORK_MAX_CONNECTION 4
 
 namespace Network
 {
@@ -32,6 +33,7 @@ namespace Network
 		Login,
 		Logout,
 		Sync,
+        AllSync,
 
 		Move,
 		Attack,
@@ -42,7 +44,6 @@ namespace Network
 		int id = -1;
 		DirectX::XMFLOAT3 position = {};
 		DirectX::XMFLOAT3 angle = {};
-		DirectX::XMFLOAT3 scale = {};
 	};
 
 	/// <summary>
@@ -56,6 +57,7 @@ namespace Network
 		ENLConnection connection = -1;
 #endif // USE_MRS
 		Player player = {};
+        bool isSync = false;
 	};
 
 #pragma region 送信データ
@@ -80,6 +82,19 @@ namespace Network
 		int id = -1;
 		DirectX::XMFLOAT3 position = {};
 		DirectX::XMFLOAT3 angle = {};
+	};
+
+	/// <summary>
+	/// Server: 受け取るときはplayers[0]にデータが入っている
+	///			送信するときはidは各プレイヤーのID
+	///			存在しないところはID == -1
+    /// Client:	受け取るときはidは各プレイヤーのID
+	///			存在しないところはID == -1
+    ///			送信するときはplayers[0]にデータを入れる
+	/// </summary>
+	struct AllPlayerSync
+	{
+		Player players[NETWORK_MAX_CONNECTION] = {};
 	};
 
 	struct PlayerMove

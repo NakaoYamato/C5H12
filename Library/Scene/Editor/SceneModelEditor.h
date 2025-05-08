@@ -58,6 +58,9 @@ private:
 	int _selectingMeshIndex = -1;
 	float _vertexPointRadius = 0.05f;
 	Vector4 _vertexPointColor = _VECTOR4_GRAY;
+
+	// 取り除くアニメーション名
+	std::string _filterAnimationName;
 };
 
 // メニューバーに登録

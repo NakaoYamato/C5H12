@@ -270,6 +270,19 @@ void SceneModelEditor::DrawEditAnimationGui()
             }
         }
     }
+    ImGui::InputText(u8"取り除く対象", &_filterAnimationName);
+	if (ImGui::Button(u8"アニメーション名を取り除く"))
+	{
+		auto& animations = model->GetResource()->GetAddressAnimations();
+		for (size_t i = 0; i < animations.size(); ++i)
+		{
+			//if (animations[i].name == _filterAnimationName)
+			//{
+			//	animations.erase(animations.begin() + i);
+			//	break;
+			//}
+		}
+	}
 
     // アニメーション再生中か確認
     int currentAnimIndex = _animator.lock()->GetCurrentAnimIndex();

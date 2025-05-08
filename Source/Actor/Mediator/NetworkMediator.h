@@ -67,6 +67,11 @@ private:
     /// ログの表示
     /// </summary>
     void DrawLogGui();
+
+    /// <summary>
+	/// メッセージの表示
+    /// </summary>
+    void DrawMessageGui();
 #pragma endregion
 
 
@@ -84,6 +89,8 @@ private:
     std::mutex _mutex;
 
 #pragma region サーバーからの受信データ
+	// プレイヤーメッセージデータ
+    std::vector<Network::MessageData> _messageDatas;
     std::vector<Network::PlayerLogin> _playerLogins;
     std::vector<Network::PlayerLogout> _playerLogouts;
     std::vector<Network::PlayerSync> _playerSyncs;
@@ -94,5 +101,6 @@ private:
     float _syncTime = 1.0f;
     float _syncTimer = 0.0f;
 
+    std::string _message;
     std::vector<std::string> _logs;
 };

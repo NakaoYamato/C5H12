@@ -69,6 +69,9 @@ void NetworkMediator::DrawGui()
 
     /// ログの表示
     DrawLogGui();
+
+    /// メッセージの表示
+    DrawMessageGui();
 }
 
 /// プレイヤー作成
@@ -99,7 +102,7 @@ void NetworkMediator::SetClientCollback()
             // スレッドセーフ
             std::lock_guard<std::mutex> lock(_mutex);
 
-            _logs.push_back(messageData.message);
+			_messageDatas.push_back(messageData);
         });
     _client->SetPlayerSyncCallback(
         [this](const Network::PlayerSync& playerSync)
@@ -183,7 +186,11 @@ void NetworkMediator::ProcessNetworkData()
         // プレイヤー情報を更新
         for (int i = 0; i < NETWORK_MAX_CONNECTION; i++)
         {
+			// プレイヤーが存在しないならスキップ
             if (sync.players[i].id == -1)continue;
+
+			// 自身のデータはスキップ
+			if (sync.players[i].id == myPlayerId)continue;
 
             auto player = _players[sync.players[i].id].lock();
             if (!player)
@@ -253,6 +260,42 @@ void NetworkMediator::DrawLogGui()
             ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(0, 0), ImGuiWindowFlags_NoTitleBar);
             for (std::string message : logs) {
                 ImGui::Text(u8"%s", message.c_str());
+            }
+            ImGui::EndChild();
+            ImGui::Spacing();
+
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
+    }
+}
+
+void NetworkMediator::DrawMessageGui()
+{
+    static ImGuiTabBarFlags tab_bar_flags =
+        ImGuiTabBarFlags_AutoSelectNewTabs |
+        ImGuiTabBarFlags_Reorderable |
+        ImGuiTabBarFlags_FittingPolicyResizeDown;
+    if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+    {
+        if (ImGui::BeginTabItem(u8"チャット"))
+        {
+            ImGui::InputText(u8"メッセージ", &_message);
+            if (ImGui::Button(u8"送信"))
+            {
+				Network::MessageData messageData{};
+				messageData.id = myPlayerId;
+				_message.copy(messageData.message, sizeof(messageData.message) - 1);
+				// メッセージデータを送信
+				_client->WriteRecord(Network::DataTag::Message, &messageData, sizeof(messageData));
+				// メッセージをクリア
+				_message.clear();
+            }
+            auto& messages = _messageDatas;
+            ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(0, 0), ImGuiWindowFlags_NoTitleBar);
+            for (auto& message : messages) {
+                ImGui::Text(u8"%d : %s", message.id, message.message);
             }
             ImGui::EndChild();
             ImGui::Spacing();

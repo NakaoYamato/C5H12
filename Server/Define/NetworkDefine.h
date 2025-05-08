@@ -20,6 +20,7 @@
 
 #define NETWORK_PORT_ADDRESS 7000
 #define NETWORK_MAX_CONNECTION 4
+#define NETWORK_MAX_MESSAGE_SIZE 512
 
 namespace Network
 {
@@ -64,7 +65,7 @@ namespace Network
     struct MessageData
     {
 		int id = 1;
-		std::string message = {};
+		char message[NETWORK_MAX_MESSAGE_SIZE] = { "\0" };
     };
 
 	struct PlayerLogin

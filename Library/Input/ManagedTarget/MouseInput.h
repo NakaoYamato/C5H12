@@ -45,13 +45,6 @@ public:
 	// 入力量がある情報
 	std::unordered_map<int, float> mouseParameters;
 
-	int				screenWidth = 0;
-	int				screenHeight = 0;
-	HWND			hWnd = nullptr;
-
-	// マウス移動量を正規化するためのパラメータ
-	float normalizeFactor = 10.0f;
-
 public:
 	/// <summary>
 	/// ホイール移動値をセット
@@ -64,7 +57,23 @@ public:
 	void FixCursorInCenter() const;
 
 	/// <summary>
+	/// マウスを画面内に修正
+	/// </summary>
+	void ClipCursorInWindow() const;
+
+	/// <summary>
 	/// マウスのキー番号から文字列に変換
 	/// </summary>
 	static const char* ToString(int vKey);
+private:
+	int				_screenWidth = 0;
+	int				_screenHeight = 0;
+	HWND			_hWnd = nullptr;
+
+	// マウス移動量を正規化するためのパラメータ
+	float _normalizeFactor = 10.0f;
+
+	// 現在のカーソル位置
+	POINT _currentScreenCursorPos = { 0, 0 };
+	POINT _currentClientCursorPos = { 0, 0 };
 };

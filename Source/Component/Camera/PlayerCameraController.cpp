@@ -55,6 +55,10 @@ void PlayerCameraController::Update(float elapsedTime)
     Vector3 eye = target - front * _cameraDistance;
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, target, up);
+
+	// マウスの位置を画面内に修正
+    _Mouse->ClipCursorInWindow();
+    _Mouse->UpdatePosition();
 }
 
 void PlayerCameraController::DrawGui()

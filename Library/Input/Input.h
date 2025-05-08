@@ -19,6 +19,7 @@ class Input;
 #define _INPUT_IS_TRIGGERD(action) Input::Instance().IsTriggerd(action)
 #define _INPUT_IS_RELEASED(action) Input::Instance().IsReleased(action)
 #define _INPUT_IS_AXIS(action) Input::Instance().IsAxis(action)
+#define _Mouse Input::Instance().GetMouseInput()
 
 /// <summary>
 /// “ü—Íî•ñŠÄ‹ƒNƒ‰ƒX

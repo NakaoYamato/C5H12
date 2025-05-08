@@ -6,9 +6,11 @@ void PlayerController::Start()
 {
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_playerInput = GetActor()->GetComponent<PlayerInput>();
+	_animator = GetActor()->GetComponent<Animator>();
 
 	_charactorController.lock()->SetMaxSpeedXZ(5.0f);
 
+	//_animator.lock()->PlayAnimation(u8"Idle", false);
 }
 
 void PlayerController::Update(float elapsedTime)
@@ -22,10 +24,12 @@ void PlayerController::Update(float elapsedTime)
 			if (movement.x != 0.0f || movement.z != 0.0f)
 			{
 				_charactorController.lock()->AddForce(movement * _moveSpeed);
+				_charactorController.lock()->SetRotateToDirection(true);
 			}
 			else
 			{
 				_charactorController.lock()->AddForce(Vec3Normalize(_charactorController.lock()->GetVelocity()) * -_friction);
+				_charactorController.lock()->SetRotateToDirection(false);
 			}
 		}
 	}

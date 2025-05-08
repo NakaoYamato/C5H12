@@ -12,12 +12,20 @@ void CharactorController::Update(float elapsedTime)
 
     /// 速度更新
     UpdateVelocity(elapsedTime);
+	/// 位置更新
+	UpdatePosition(elapsedTime);
+	/// 回転更新
+	if (_rotateToDirection)
+		UpdateRotation(elapsedTime, { _velocity.x, _velocity.z });
 }
 
 void CharactorController::FixedUpdate()
 {
     /// 位置更新
-    UpdatePosition(_FIXED_UPDATE_RATE);
+    //UpdatePosition(_FIXED_UPDATE_RATE);
+	/// 回転更新
+	//if (_rotateToDirection)
+	//	UpdateRotation(_FIXED_UPDATE_RATE, { _velocity.x, _velocity.z });
 }
 
 void CharactorController::DrawGui()
@@ -48,6 +56,13 @@ void CharactorController::UpdateVelocity(float deltaTime)
         _velocity.x = _velocity.x / _currentSpeedXZ * _maxSpeedXZ;
         _velocity.z = _velocity.z / _currentSpeedXZ * _maxSpeedXZ;
     }
+	// 最小速度チェック
+	if (_currentSpeedXZ < _minSpeedXZ)
+	{
+		_velocity.x = 0.0f;
+		_velocity.z = 0.0f;
+	}
+
     // 加速力を0
     _acceleration = {};
 }
@@ -180,5 +195,44 @@ void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 			transform.SetPositionX(transform.GetPosition().x + move.x);
 			transform.SetPositionZ(transform.GetPosition().z + move.z);
 		}
+	}
+}
+
+void CharactorController::UpdateRotation(float deltaTime, const Vector2& vec)
+{
+	// 進行ベクトルが0ベクトルの時は処理しない
+	if (vec.x == 0.0f && vec.y == 0.0f)
+		return;
+
+	Vector3 angle = this->GetActor()->GetTransform().GetRotation();
+	float speed = _rotationSpeed * deltaTime;
+
+	// 進行ベクトルを単位ベクトル化
+	Vector2 moveVec = Vec2Normalize({ vec.x , vec.y });
+
+	// 自身の回転値から前方向を求める
+	float frontX = sinf(angle.y);
+	float frontZ = cosf(angle.y);
+
+	// 回転角を求めるため、２つの単位ベクトルの内積を計算する
+	float dot = ((moveVec.x * frontX) + (moveVec.y * frontZ));
+
+	// 内積値は-1.0~1.0で表現されており、２つの単位ベクトルの角度が
+	// 小さいほど1.0に近づくという性質を利用して回転速度を調整する
+	float rot = 1.0f - dot;
+	speed *= rot;
+
+	// 左右判定を行うために２つの単位ベクトルの外積を計算する
+	float cross = ((moveVec.x * frontZ) - (moveVec.y * frontX));
+
+	// ２Dの外積値が正の場合か負の場合によって左右判定が行える
+	// 左右判定を行うことによって左右回転を選択する
+	if (cross < 0.0f)
+	{
+		this->GetActor()->GetTransform().SetAngleY(angle.y - speed);
+	}
+	else
+	{
+		this->GetActor()->GetTransform().SetAngleY(angle.y + speed);
 	}
 }

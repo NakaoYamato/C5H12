@@ -17,7 +17,8 @@ void PlayerActor::OnCreate()
 {
 	GetTransform().SetLengthScale(0.01f);
 	// コンポーネント追加
-	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
+	//auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
+	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/ARPGWarrior/Animations/Generic/ARPG_Warrior.fbx");
 	auto animator = AddComponent<Animator>(modelRenderer->GetModel());
 	auto charactorController = AddComponent<CharactorController>();
 	auto playerInput = AddComponent<PlayerInput>();
@@ -25,13 +26,15 @@ void PlayerActor::OnCreate()
 
 	// 剣生成
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);
-	const ModelResource::Node* rightHandNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("RightHand")));
+	//const ModelResource::Node* rightHandNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("RightHand")));
+	const ModelResource::Node* rightHandNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("ORG-hand.R")));
 	sword->Initialize(this, rightHandNode);
     _swordActor = sword;
 
 	// 盾生成
 	auto shield = this->_scene->RegisterActor<PlayerShieldActor>(GetName() + std::string(u8"Shield"), ActorTag::Player);
-	const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("LeftForeArm")));
+	//const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("LeftForeArm")));
+	const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("ORG-hand.L")));
 	shield->Initialize(this, leftForeArmNode);
     _shieldActor = shield;
 

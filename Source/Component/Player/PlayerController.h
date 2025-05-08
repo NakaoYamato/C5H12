@@ -2,6 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
+#include "../../Library/Component/Animator.h"
 #include "PlayerInput.h"
 
 class PlayerController : public Component
@@ -28,6 +29,7 @@ private:
 
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<PlayerInput> _playerInput;
+	std::weak_ptr<Animator> _animator;
 
 	// ˆÚ“®‘¬“x
 	float _moveSpeed = 20.0f;

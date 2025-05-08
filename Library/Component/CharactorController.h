@@ -41,6 +41,7 @@ public:
     float GetCurrentSpeedXZ() const { return _currentSpeedXZ; }
     Vector3 GetGravity() const { return _gravity; }
     bool IsUseGravity() const { return _useGravity; }
+	bool IsRotateToDirection() const { return _rotateToDirection; }
 
     void SetRadius(float radius) { _radius = radius; }
     void SetSkinWidth(float skinWidth) { _skinWidth = skinWidth; }
@@ -52,6 +53,7 @@ public:
     void SetCurrentSpeedXZ(float currentSpeedXZ) { _currentSpeedXZ = currentSpeedXZ; }
     void SetGravity(const Vector3& gravity) { _gravity = gravity; }
     void SetUseGravity(bool useGravity) { _useGravity = useGravity; }
+	void SetRotateToDirection(bool rotateToDirection) { _rotateToDirection = rotateToDirection; }
 #pragma endregion
 private:
     /// <summary>
@@ -73,6 +75,12 @@ private:
     /// <param name="move"></param>
     /// <param name="vertical">trueで垂直処理</param>
     void MoveAndSlide(const Vector3& move, bool vertical);
+
+	/// <summary>
+	/// 回転処理
+	/// </summary>
+	/// <param name="deltaTime"></param>
+	void UpdateRotation(float deltaTime, const Vector2& vec);
 private:
 #pragma region パラメータ
     // 半径
@@ -87,12 +95,21 @@ private:
 #pragma region 移動関係
     Vector3 _velocity = {};
     Vector3 _acceleration = {};
-
-    float _maxSpeedXZ = 10.0f;
-    float _currentSpeedXZ = 0.0f;
-
+    // 重力
     Vector3 _gravity = { 0.0f, -9.8f, 0.0f };
 
+    // XZ方向の最小速度
+    float _minSpeedXZ = 0.01f;
+	// XZ方向の最大速度
+    float _maxSpeedXZ = 10.0f;
+	// XZ方向の現在の速度
+    float _currentSpeedXZ = 0.0f;
+    // 移動方向への回転速度
+	float _rotationSpeed = DirectX::XMConvertToRadians(720.0f);
+
+	// 重力使用
     bool _useGravity = false;
+    // 移動方向に向くか
+    bool _rotateToDirection = true;
 #pragma endregion
 };

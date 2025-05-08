@@ -8,6 +8,19 @@
 
 void PlayerCameraController::Start()
 {
+    Vector3 angle = GetActor()->GetTransform().GetRotation();
+    // カメラ回転値を回転行列に変換
+    DirectX::XMMATRIX Transform =
+        DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+
+    // 回転行列から前方向ベクトルを取り出す
+    DirectX::XMVECTOR Front = Transform.r[2];
+    Vector3 front{};
+    DirectX::XMStoreFloat3(&front, Front);
+    // 初期設定
+    _currentFocus = _playerActor->GetTransform().GetPosition();
+    _currentFocus.y += _cameraOffsetY;
+    GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
 }
 
 void PlayerCameraController::Update(float elapsedTime)
@@ -48,23 +61,37 @@ void PlayerCameraController::Update(float elapsedTime)
         angle.x = -DirectX::XMConvertToRadians(89.9f);
     GetActor()->GetTransform().SetRotation(angle);
 
-    Vector3 target = _playerActor->GetTransform().GetPosition();
-    target.y += _cameraOffsetY;
+    Vector3 newFocus = _playerActor->GetTransform().GetPosition();
+    newFocus.y += _cameraOffsetY;
 
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
-    Vector3 eye = target - front * _cameraDistance;
+    Vector3 newEye = newFocus - front * _cameraDistance;
 
-    GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, target, up);
+    // 補完処理
+    Vector3 focus = Vec3Lerp(_currentFocus, newFocus, _focusLerpSpeed * _FIXED_UPDATE_RATE);
+    Vector3 eye = Vec3Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * _FIXED_UPDATE_RATE);
+    eye = newEye;
 
+    GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, _VECTOR3_UP);
+
+    _currentFocus = focus;
+    GetActor()->GetTransform().SetPosition(eye);
 	// マウスの位置を画面内に修正
     _Mouse->ClipCursorInWindow();
     _Mouse->UpdatePosition();
 }
 
+// 固定間隔更新処理
+void PlayerCameraController::FixedUpdate()
+{
+}
+
 void PlayerCameraController::DrawGui()
 {
-    ImGui::DragFloat("CameraDistance", &_cameraDistance, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat("CameraOffsetY", &_cameraOffsetY, 0.1f, -10.0f, 10.0f);
-    ImGui::DragFloat("HorizontalMovePower", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat("VerticalMovePower", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"オフセット", &_cameraOffsetY, 0.1f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"注視点補完速度", &_focusLerpSpeed, 0.1f, 0.01f, 10.0f);
+    ImGui::DragFloat(u8"視点補完速度", &_eyeLerpSpeed, 0.1f, 0.01f, 10.0f);
+    ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"垂直入力補正値", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
 }

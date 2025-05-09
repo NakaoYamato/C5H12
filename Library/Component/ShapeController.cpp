@@ -2,6 +2,12 @@
 
 #include <imgui.h>
 
+ShapeController::ShapeController(ShapeType type) :
+	_type(type)
+{
+	GetActor()->LoadModel(GetShapeModelFilename(type));
+}
+
 void ShapeController::DrawGui()
 {
 	static const char* shapTypeName[] =
@@ -15,7 +21,7 @@ void ShapeController::DrawGui()
 	{
 		_type = static_cast<ShapeType>(type);
 		// •ÏX‚³‚ê‚Ä‚¢‚½‚çƒ‚ƒfƒ‹•ÏX
-		LoadModel(GetShapeModelFilename(_type));
+		GetActor()->LoadModel(GetShapeModelFilename(_type));
 	}
 	ImGui::DragFloat("radius", &_radius, 0.01f);
 	ImGui::DragFloat("height", &_height, 0.01f);

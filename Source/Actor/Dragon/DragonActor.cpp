@@ -14,14 +14,17 @@ void DragonActor::OnCreate()
 {
 	Actor::OnCreate();
 
+	// モデル読み込み
+	auto model = LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
+
 	GetTransform().SetLengthScale(0.01f);
 
 	// コンポーネント追加
-	_modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
-	auto animator = AddComponent<Animator>(_modelRenderer.lock()->GetModel());
+	_modelRenderer = AddComponent<ModelRenderer>();
+	auto animator = AddComponent<Animator>();
 
 	// モデルがシリアライズされていなければアニメーションを設定
-	if (!_modelRenderer.lock()->GetModel()->GetResource()->IsSerialized())
+	if (!model.lock()->GetResource()->IsSerialized())
 	{
 		// テクスチャ設定
 		SetModelTexture();
@@ -30,7 +33,7 @@ void DragonActor::OnCreate()
 		SetModelAnimation();
 
 		// 再シリアライズ
-		_modelRenderer.lock()->GetModel()->ReSerialize();
+		model.lock()->ReSerialize();
 	}
 }
 
@@ -76,7 +79,7 @@ void DragonActor::DrawGui()
 				_modelType = static_cast<ModelType>(mt);
 				SetModelTexture();
 				// 再シリアライズ
-				_modelRenderer.lock()->GetModel()->ReSerialize();
+				GetModel().lock()->ReSerialize();
 			}
 			static const char* drawHornTypeName[] =
 			{
@@ -104,7 +107,7 @@ void DragonActor::DrawGui()
 // モデルのテクスチャを設定
 void DragonActor::SetModelTexture()
 {
-	auto resource = _modelRenderer.lock()->GetModel()->GetResource();
+	auto resource = GetModel().lock()->GetResource();
 	auto SetModelSRV = [&](const wchar_t* filename, std::string materialName, std::string textureKey)
 		{
 			static std::wstring RelativePath = L"./Data/Model/Dragons/";
@@ -383,17 +386,17 @@ void DragonActor::SetModelAnimation()
 	DirectX::XMMATRIX InvToZUP = DirectX::XMMatrixInverse(nullptr, ToZUP);
 	DirectX::XMMATRIX M = DirectX::XMMatrixIdentity();
 	// アニメーション追加
-	_modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations().clear();
+	GetModel().lock()->GetResource()->GetAddressAnimations().clear();
 	for (auto& [filename, animationName] : animParams)
 	{
-		_modelRenderer.lock()->GetModel()->GetResource()->AppendAnimations(
+		GetModel().lock()->GetResource()->AppendAnimations(
 			filename,
 			animationName);
 
 		// アニメーションを右手Z-UPに変換
 		Quaternion q = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(Vector3(90.0f, 0.0f, 0.0f)));
-		size_t index = _modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations().size() - 1;
-		auto& animation = _modelRenderer.lock()->GetModel()->GetResource()->GetAddressAnimations()[index];
+		size_t index = GetModel().lock()->GetResource()->GetAddressAnimations().size() - 1;
+		auto& animation = GetModel().lock()->GetResource()->GetAddressAnimations()[index];
 		//for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)
 		//{
 		//	rotation.value = q;
@@ -421,7 +424,7 @@ void DragonActor::SetModelAnimation()
 // 使用する角を設定
 void DragonActor::SetUseHorn()
 {
-	auto& nodes = _modelRenderer.lock()->GetModel()->GetAddressPoseNodes();
+	auto& nodes = GetModel().lock()->GetAddressPoseNodes();
 	// posenodeから"Kuzar3_Horn"を含むnodeを全取得
 	ModelResource::Node* horns[6] = {};
 	std::vector<int> hornIncludeIndices;

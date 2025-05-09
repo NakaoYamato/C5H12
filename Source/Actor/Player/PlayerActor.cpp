@@ -14,26 +14,32 @@
 // 生成時処理
 void PlayerActor::OnCreate()
 {
+	Actor::OnCreate();
+
+	// モデル読み込み
+	//auto model = LoadModel("./Data/Model/Player/2025_03_25.fbx");
+	auto model = LoadModel("./Data/Model/Player/ARPGWarrior/Animations/Generic/ARPG_Warrior.fbx");
 	GetTransform().SetLengthScale(0.01f);
+
 	// コンポーネント追加
 	//auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
-	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/ARPGWarrior/Animations/Generic/ARPG_Warrior.fbx");
-	auto animator = AddComponent<Animator>(modelRenderer->GetModel());
+	auto modelRenderer = AddComponent<ModelRenderer>();
+	auto animator = AddComponent<Animator>();
 	_charactorController = AddComponent<CharactorController>();
 	auto playerInput = AddComponent<PlayerInput>();
 	_playerController = AddComponent<PlayerController>(_isUserControlled);
 
 	// 剣生成
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);
-	//const ModelResource::Node* rightHandNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("RightHand")));
-	const ModelResource::Node* rightHandNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("ORG-hand.R")));
+	//const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("RightHand")));
+	const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("ORG-hand.R")));
 	sword->Initialize(this, rightHandNode);
     _swordActor = sword;
 
 	// 盾生成
 	auto shield = this->_scene->RegisterActor<PlayerShieldActor>(GetName() + std::string(u8"Shield"), ActorTag::Player);
-	//const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("LeftForeArm")));
-	const ModelResource::Node* leftForeArmNode = &(modelRenderer->GetModel()->GetPoseNodes().at(modelRenderer->GetModel()->GetNodeIndex("ORG-hand.L")));
+	//const ModelResource::Node* leftForeArmNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("LeftForeArm")));
+	const ModelResource::Node* leftForeArmNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("ORG-hand.L")));
 	shield->Initialize(this, leftForeArmNode);
     _shieldActor = shield;
 

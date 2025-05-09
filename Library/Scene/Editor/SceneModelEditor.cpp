@@ -21,9 +21,10 @@ void SceneModelEditor::Initialize()
     // 編集用オブジェクト作成
     ActorManager& actorManager = GetActorManager();
 	_modelActor = RegisterActor<Actor>(u8"Model", ActorTag::Stage);
+    _modelActor.lock()->LoadModel("Data/Model/Shape/Box.fbx");
     _modelActor.lock()->GetTransform().SetLengthScale(0.01f);
-    _modelRenderer = _modelActor.lock()->AddComponent<ModelRenderer>("Data/Model/Shape/Box.fbx");
-    _animator = _modelActor.lock()->AddComponent<Animator>(_modelRenderer.lock()->GetModel());
+    _modelRenderer = _modelActor.lock()->AddComponent<ModelRenderer>();
+    _animator = _modelActor.lock()->AddComponent<Animator>();
 
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
@@ -42,7 +43,7 @@ void SceneModelEditor::Update(float elapsedTime)
         0,0,0,1
         ));
 
-    auto model = _modelRenderer.lock()->GetModel();
+    auto model = _modelActor.lock()->GetModel().lock();
     if (model)
     {
         // ノード表示
@@ -163,12 +164,12 @@ void SceneModelEditor::DrawMenuBarGui()
                     }
 
                     // モデルの読み込み
-                    _modelRenderer.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
-                    _animator.lock()->SetModel(_modelRenderer.lock()->GetModel());
+                    auto model = _modelActor.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
+                    _animator.lock()->ResetModel(model.lock());
 
                     _nodeNames.clear();
                     // ノードの名前を全取得
-                    for (auto& node : _modelRenderer.lock()->GetModel()->GetPoseNodes())
+                    for (auto& node : model.lock()->GetPoseNodes())
                     {
                         _nodeNames.push_back(node.name.c_str());
                     }
@@ -179,7 +180,7 @@ void SceneModelEditor::DrawMenuBarGui()
                         // なかったら新規作成
                         _animCollisionData.Clear();
                         // アニメーション名を登録
-                        for (auto& animation : _modelRenderer.lock()->GetModel()->GetResource()->GetAnimations())
+                        for (auto& animation : model.lock()->GetResource()->GetAnimations())
                         {
                             _animCollisionData.AddKeyFrames(animation.name);
                         }
@@ -241,7 +242,7 @@ void SceneModelEditor::DrawEditGui()
         }
         ImGui::Separator();
 
-        ImGui::SliderInt(u8"選択中のメッシュ", &_selectingMeshIndex, -1, (int)_modelRenderer.lock()->GetModel()->GetResource()->GetAddressMeshes().size() - 1);
+        ImGui::SliderInt(u8"選択中のメッシュ", &_selectingMeshIndex, -1, (int)_modelActor.lock()->GetModel().lock()->GetResource()->GetAddressMeshes().size() - 1);
         ImGui::DragFloat(u8"頂点の点の大きさ", &_vertexPointRadius, 0.01f);
         ImGui::ColorEdit4(u8"頂点の色", &_vertexPointColor.x);
 
@@ -252,7 +253,7 @@ void SceneModelEditor::DrawEditGui()
 
 void SceneModelEditor::DrawEditAnimationGui()
 {
-    auto model = _modelRenderer.lock()->GetModel();
+    auto model = _modelActor.lock()->GetModel().lock();
 
     if (ImGui::Button(u8"すべてのアニメーションを90度回転"))
     {

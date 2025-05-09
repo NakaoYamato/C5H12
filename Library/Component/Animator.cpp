@@ -4,9 +4,10 @@
 
 #include <imgui.h>
 
-Animator::Animator(Model* model)
+// 開始処理
+void Animator::Start()
 {
-    SetModel(model);
+    ResetModel(GetActor()->GetModel().lock());
 }
 
 // 更新処理
@@ -20,7 +21,7 @@ void Animator::DrawGui()
 {
     if (ImGui::TreeNode(u8"アニメーション"))
     {
-        auto& animations = _model->GetResource()->GetAddressAnimations();
+        auto& animations = _model.lock()->GetResource()->GetAddressAnimations();
         if (_currentAnimIndex >= 0)
         {
             auto& currentAnimation = animations[_currentAnimIndex];
@@ -100,11 +101,11 @@ void Animator::UpdateAnimation(float elapsedTime)
     // アニメーションが設定されていなければ処理しない
     if (_currentAnimIndex == -1)
         return;
-    std::vector<ModelResource::Node>& poseNode = _model->GetPoseNodes();
+    std::vector<ModelResource::Node>& poseNode = _model.lock()->GetPoseNodes();
     // アニメーション計算処理
     ComputeAnimation(_currentAnimIndex, _currentAnimSeconds, poseNode);
     // ノード設定
-    //_model->SetPoseNodes(poseNode);
+    //_model.lock()->SetPoseNodes(poseNode);
     // アニメーション経過時間更新
     UpdateAnimSeconds(elapsedTime);
 
@@ -114,9 +115,9 @@ void Animator::UpdateAnimation(float elapsedTime)
         // ブレンド率計算
         float rate = _currentAnimBlendSeconds / _animBlendSecondsLength;
 
-        poseNode = ComputeBlending(_nodeCaches, _model->GetPoseNodes(), rate);
+        poseNode = ComputeBlending(_nodeCaches, _model.lock()->GetPoseNodes(), rate);
         // ノード設定
-        _model->SetPoseNodes(poseNode);
+        _model.lock()->SetPoseNodes(poseNode);
 
         // 時間経過
         _currentAnimBlendSeconds += elapsedTime;
@@ -137,7 +138,7 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
     // 経過時間
     _currentAnimSeconds += elapsedTime;
     // 再生時間が終端時間を超えた時
-    const ModelResource::Animation& animation = _model->GetResource()->GetAnimations().at(_currentAnimIndex);
+    const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(_currentAnimIndex);
     if (_currentAnimSeconds > animation.secondsLength)
     {
         if (_animLoop)
@@ -169,9 +170,9 @@ void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
     _animBlendSecondsLength = blendSeconds;
 
     // 現在の姿勢をキャッシュする
-    for (size_t i = 0; i < _model->GetPoseNodes().size(); ++i)
+    for (size_t i = 0; i < _model.lock()->GetPoseNodes().size(); ++i)
     {
-        const ModelResource::Node& src = _model->GetPoseNodes().at(i);
+        const ModelResource::Node& src = _model.lock()->GetPoseNodes().at(i);
         ModelResource::Node& dst = _nodeCaches.at(i);
 
         dst.position = src.position;
@@ -194,7 +195,7 @@ bool Animator::IsPlayAnimation(int index) const
         if (_currentAnimIndex != index)return false;
     }
     if (_currentAnimIndex < 0)return false;
-    if (_currentAnimIndex >= _model->GetResource()->GetAnimations().size()) return false;
+    if (_currentAnimIndex >= _model.lock()->GetResource()->GetAnimations().size()) return false;
     return _animPlaying;
 }
 
@@ -202,7 +203,7 @@ bool Animator::IsPlayAnimation(int index) const
 void Animator::ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const
 {
     // 指定のアニメーションデータを収集
-    const ModelResource::Animation& animation = _model->GetResource()->GetAnimations().at(animationIndex);
+    const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(animationIndex);
     const ModelResource::NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
     // 位置
     for (size_t index = 0; index < nodeAnim.positionKeyframes.size() - 1; ++index)
@@ -266,9 +267,9 @@ void Animator::ComputeAnimation(int animationIndex, int nodeIndex, float time, M
 // アニメーション計算処理
 void Animator::ComputeAnimation(int animationIndex, float time, std::vector<ModelResource::Node>& nodePoses) const
 {
-    if (nodePoses.size() != _model->GetPoseNodes().size())
+    if (nodePoses.size() != _model.lock()->GetPoseNodes().size())
     {
-        nodePoses.resize(_model->GetPoseNodes().size());
+        nodePoses.resize(_model.lock()->GetPoseNodes().size());
     }
     for (size_t nodeIndex = 0; nodeIndex < nodePoses.size(); ++nodeIndex)
     {
@@ -287,7 +288,7 @@ std::vector<ModelResource::Node> Animator::ComputeBlending(
 
     std::vector<ModelResource::Node> result = pose1;
 
-    size_t count = _model->GetPoseNodes().size();
+    size_t count = _model.lock()->GetPoseNodes().size();
     for (size_t i = 0; i < count; ++i)
     {
         const ModelResource::Node& node0 = pose0.at(i);
@@ -320,13 +321,13 @@ void Animator::ComputeRootMotion(int animationIndex,
     std::vector<ModelResource::Node>& resultNodePose,
     Vector3& movement) const
 {
-    resultNodePose = _model->GetPoseNodes();
+    resultNodePose = _model.lock()->GetPoseNodes();
     movement = _VECTOR3_ZERO;
 
     std::vector<ModelResource::Node> oldNodes;
     std::vector<ModelResource::Node> currentNodes;
     // 指定のアニメーション姿勢を取得
-    const ModelResource::Animation& animation = _model->GetResource()->GetAnimations().at(animationIndex);
+    const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(animationIndex);
     ComputeAnimation(animationIndex, oldAnimSeconds, oldNodes);
     ComputeAnimation(animationIndex, currentAnimSeconds, currentNodes);
     ComputeAnimation(animationIndex, currentAnimSeconds, resultNodePose);
@@ -372,13 +373,22 @@ void Animator::ComputeRootMotion(int animationIndex,
     }
 }
 
+void Animator::ResetModel(std::shared_ptr<Model> model)
+{
+    // モデルが設定されていなければ処理しない
+    assert(model != nullptr);
+	_model = model;
+    // ノードキャッシュの生成
+    _nodeCaches.resize(model->GetPoseNodes().size());
+}
+
 /// アニメーション名から番号取得
 int Animator::GetAnimationIndex(const std::string& key) const
 {
-    const size_t animationSize = _model->GetResource()->GetAnimations().size();
+    const size_t animationSize = _model.lock()->GetResource()->GetAnimations().size();
     for (size_t i = 0; i < animationSize; ++i)
     {
-        if (_model->GetResource()->GetAnimations().at(i).name == key)
+        if (_model.lock()->GetResource()->GetAnimations().at(i).name == key)
             return static_cast<int>(i);
     }
     assert(!"アニメーションがありません");
@@ -388,10 +398,10 @@ int Animator::GetAnimationIndex(const std::string& key) const
 /// アニメーション番号から名前取得
 std::string Animator::GetAnimationName(int index) const
 {
-    assert(index < _model->GetResource()->GetAnimations().size());
+    assert(index < _model.lock()->GetResource()->GetAnimations().size());
     assert(index >= 0);
 
-    return _model->GetResource()->GetAnimations()[index].name;
+    return _model.lock()->GetResource()->GetAnimations()[index].name;
 }
 
 std::string Animator::GetCurrentAnimationName() const
@@ -407,7 +417,7 @@ void Animator::Filtering(std::string filterStr)
 
     // モデルのアニメーション名がfilterStrを含むか確認
     int index = 0;
-    for (const ModelResource::Animation& animation : _model->GetResource()->GetAddressAnimations())
+    for (const ModelResource::Animation& animation : _model.lock()->GetResource()->GetAddressAnimations())
     {
         // filterStrを含んでいたら表示用コンテナに追加
         if (animation.name.find(filterStr) != std::string::npos)

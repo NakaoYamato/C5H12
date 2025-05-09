@@ -6,14 +6,14 @@
 class Animator : public Component
 {
 public:
-	Animator(Model* model);
+	Animator() {}
 	~Animator()override {}
 
 	// 名前取得
 	const char* GetName()const { return "Animator"; }
 
 	// 開始処理
-	void Start()override {}
+	void Start()override;
 
 	// 更新処理
 	void Update(float elapsedTime) override;
@@ -66,13 +66,7 @@ public:
 #pragma endregion
 
 #pragma region アクセサ
-	void SetModel(Model* model)
-	{
-		_model = model;
-
-		// ノードキャッシュの生成
-		_nodeCaches.resize(model->GetPoseNodes().size());
-	}
+	void ResetModel(std::shared_ptr<Model> model);
 
 	int GetCurrentAnimIndex()const { return _currentAnimIndex; }
 	float GetCurrentAnimSeconds() const { return _currentAnimSeconds; }
@@ -95,6 +89,13 @@ public:
 	/// <returns></returns>
 	std::string GetCurrentAnimationName() const;
 #pragma endregion
+private:
+	/// <summary>
+	/// アニメーションのデバッグ表示をフィルタ
+	/// </summary>
+	/// <param name="filterStr">これを含むアニメーションを表示</param>
+	void Filtering(std::string filterStr);
+
 public:
 	// アニメーションパラメーター
 	int _currentAnimIndex = -1;
@@ -109,14 +110,8 @@ public:
 	float _animBlendSecondsLength = -1.0f;
 	bool _animBlending = false;
 
-	Model* _model{};
-
 private:
-	/// <summary>
-	/// アニメーションのデバッグ表示をフィルタ
-	/// </summary>
-	/// <param name="filterStr">これを含むアニメーションを表示</param>
-	void Filtering(std::string filterStr);
+	std::weak_ptr<Model> _model;
 
 	// デバッグ表示用
 	std::vector<int> _displayAnimationIndices;

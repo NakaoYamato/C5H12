@@ -24,12 +24,10 @@ void SceneCollisionDebug::Initialize()
     {
         auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
 
-        //stage->GetTransform().SetPositionY(-2.7f);
-        //stage->GetTransform().SetLengthScale(0.1f);
-        //auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
-
-        stage->GetTransform().SetLengthScale(0.01f);
-        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Test/test.fbx");
+        stage->LoadModel("./Data/Model/Stage/Land/Land.fbx");
+        stage->GetTransform().SetPositionY(-2.7f);
+        stage->GetTransform().SetLengthScale(0.1f);
+        auto modelCont = stage->AddComponent<ModelRenderer>();
 
         modelCont->SetRenderType(ModelRenderType::Static);
     }

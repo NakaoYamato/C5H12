@@ -3,15 +3,16 @@
 #include <imgui.h>
 
 #include "ActorManager.h"
-
-#include "../../External/nameof/include/nameof.hpp"
-#include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
+#include "../Graphics/Graphics.h"
 
 #include "../Component/Component.h"
 #include "../Component/Collider/ColliderBaseComponent.h"
 
 #include "../Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
+#include "../../External/nameof/include/nameof.hpp"
+#include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
+
 #include <ImGuizmo.h>
 
 // 開始処理
@@ -249,6 +250,13 @@ void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3&
 void Actor::Destroy()
 {
     _scene->GetActorManager().Remove(shared_from_this());
+}
+
+/// モデルの読み込み
+std::weak_ptr<Model> Actor::LoadModel(const char* filename)
+{
+	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
+	return _model;
 }
 
 // トランスフォーム更新

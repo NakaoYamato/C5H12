@@ -4,36 +4,37 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
-ModelRenderer::ModelRenderer(const char* filename)
-{
-	LoadModel(filename);
-}
-
 // çXêVèàóù
 void ModelRenderer::Update(float elapsedTime)
 {
-	_model->UpdateTransform(GetActor()->GetTransform().GetMatrix());
+	auto model = GetActor()->GetModel().lock();
+	if (model == nullptr) return;
+	model->UpdateTransform(GetActor()->GetTransform().GetMatrix());
 }
 
 // ï`âÊèàóù
 void ModelRenderer::Render(const RenderContext& rc)
 {
-	const ModelResource* resource = _model->GetResource();
-	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
+	auto model = GetActor()->GetModel().lock();
+	if (model == nullptr) return;
+	const ModelResource* resource = model->GetResource();
+	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, _model.get(), _color, _shaderName, _renderType, _blendType, &_shaderParameter);
+		MeshRenderer::Draw(&mesh, model.get(), _color, _shaderName, _renderType, _blendType, &_shaderParameter);
 	}
 }
 
 // âeï`âÊ
 void ModelRenderer::CastShadow(const RenderContext& rc)
 {
-	const ModelResource* resource = _model->GetResource();
-	const std::vector<ModelResource::Node>& nodes = _model->GetPoseNodes();
+	auto model = GetActor()->GetModel().lock();
+	if (model == nullptr) return;
+	const ModelResource* resource = model->GetResource();
+	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, _model.get(), _VECTOR4_WHITE, "CascadedShadowMap", _renderType, BlendType::Opaque, &_shadowParameter);
+		MeshRenderer::Draw(&mesh, model.get(), _VECTOR4_WHITE, "CascadedShadowMap", _renderType, BlendType::Opaque, &_shadowParameter);
 	}
 }
 
@@ -86,7 +87,9 @@ void ModelRenderer::DrawGui()
 	{
 		_blendType = static_cast<BlendType>(bId);
 	}
-	_model->DrawGui();
+	auto model = GetActor()->GetModel().lock();
+	if (model == nullptr) return;
+	model->DrawGui();
 }
 
 void ModelRenderer::SetShader(std::string name)
@@ -96,8 +99,3 @@ void ModelRenderer::SetShader(std::string name)
 	_shaderParameter = MeshRenderer::GetShaderParameterKey(_renderType, _shaderName, Graphics::Instance().RenderingDeferred());
 }
 
-// ÉÇÉfÉãÇÃì«Ç›çûÇ›
-void ModelRenderer::LoadModel(const char* filename)
-{
-	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
-}

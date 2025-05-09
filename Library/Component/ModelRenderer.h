@@ -9,7 +9,7 @@
 class ModelRenderer : public Component
 {
 public:
-	ModelRenderer(const char* filename);
+	ModelRenderer() {}
 	~ModelRenderer()override {}
 
 	// 名前取得
@@ -34,7 +34,6 @@ public:
 	void DrawGui() override;
 
 #pragma region アクセサ
-	Model* GetModel() { return _model.get(); }
 	const ShaderBase::Parameter& GetShaderParameter()const { return _shaderParameter; }
 	const ShaderBase::Parameter& GetShadowParameter()const { return _shadowParameter; }
 	std::string GetShaderName()const { return _shaderName; }
@@ -49,12 +48,7 @@ public:
 	void SetBlendType(BlendType type) { this->_blendType = type; }
 	void SetColor(const Vector4& c) { this->_color = c; }
 #pragma endregion
-public:
-	// モデルの読み込み
-	void LoadModel(const char* filename);
-
 private:
-	std::unique_ptr<Model> _model;
 	ShaderBase::Parameter _shaderParameter;
 	ShaderBase::Parameter _shadowParameter;
 	std::string _shaderName = "PBR";

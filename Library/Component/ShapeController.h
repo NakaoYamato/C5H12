@@ -14,9 +14,7 @@ enum class ShapeType
 class ShapeController : public ModelRenderer
 {
 public:
-	ShapeController(ShapeType type = ShapeType::Box) : 
-		ModelRenderer(GetShapeModelFilename(type)),
-		_type(type){}
+	ShapeController(ShapeType type = ShapeType::Box);
 	~ShapeController()override {}
 
 	// –¼‘OŽæ“¾

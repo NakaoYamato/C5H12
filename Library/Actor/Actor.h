@@ -24,46 +24,91 @@ public:
 	Actor() {}
 	virtual ~Actor() {};
 
-	// 生成時処理
+	/// <summary>
+	/// 生成時処理
+	/// </summary>
 	virtual void OnCreate() {};
 
+	/// <summary>
 	// 開始処理
+	/// </summary>
 	virtual void Start();
 
-	// 更新処理
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	/// <param name="elapsedTime">前フレームからの更新時間</param>
 	virtual void Update(float elapsedTime);
 
+	/// <summary>
 	/// 一定間隔の更新処理
+	/// #include "../../Library/Scene/Scene.h"をインクルードして
+	/// _FIXED_UPDATE_INTERVAL　が一定間隔(秒)
+	/// </summary>
 	virtual void FixedUpdate();
 
-	// 描画処理
+	/// <summary>
+	/// 描画処理
+	/// </summary>
+	/// <param name="rc"></param>
 	virtual void Render(const RenderContext& rc);
 
+	/// <summary>
 	// デバッグ表示
+	/// </summary>
+	/// <param name="rc"></param>
 	virtual void DebugRender(const RenderContext& rc);
 
+	/// <summary>
 	// 影描画
+	/// </summary>
+	/// <param name="rc"></param>
 	virtual void CastShadow(const RenderContext& rc);
 
+	/// <summary>
 	// 3D描画後の描画処理
+	/// </summary>
+	/// <param name="rc"></param>
 	virtual void DelayedRender(const RenderContext& rc);
 
+	/// <summary>
 	// Gui描画
+	/// </summary>
 	virtual void DrawGui();
 
-	// 当たり判定処理
+	/// <summary>
+	/// 当たり判定処理
+	/// </summary>
+	/// <param name="other">判定対象</param>
 	virtual void Judge(Actor* other);
 
-	// 接触時の処理
+	/// <summary>
+	/// 接触時の処理
+	/// </summary>
+	/// <param name="other">接触対象</param>
+	/// <param name="hitPosition">接触位置</param>
+	/// <param name="hitNormal">接触対象から自身に向けての法線</param>
+	/// <param name="penetration">めり込み量</param>
 	virtual void OnCollision(Actor* other, 
 		const Vector3& hitPosition, 
 		const Vector3& hitNormal, 
 		const float& penetration);
 
+	/// <summary>
 	// 削除処理
+	/// </summary>
 	virtual void Destroy();
+
+	/// <summary>
+	/// モデルの読み込み
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns></returns>
+	virtual std::weak_ptr<Model> LoadModel(const char* filename);
 #pragma region コンポーネント関係
+	/// <summary>
 	// コンポーネント追加
+	/// </summary>
 	template<class T, class... Args>
 	std::shared_ptr<T> AddComponent(Args... args)
 	{
@@ -73,7 +118,11 @@ public:
 		return component;
 	}
 
-	// コンポーネント取得
+	/// <summary>
+	/// コンポーネント取得
+	/// </summary>
+	/// <typeparam name="T">Componentを継承したもの</typeparam>
+	/// <returns>失敗でnullptr</returns>
 	template<class T>
 	std::shared_ptr<T> GetComponent()
 	{
@@ -86,7 +135,13 @@ public:
 		return nullptr;
 	}
 
-	// 当たり判定コンポーネント
+	/// <summary>
+	/// 当たり判定コンポーネント追加
+	/// </summary>
+	/// <typeparam name="T">Colliderを継承したコンポーネント</typeparam>
+	/// <typeparam name="...Args"></typeparam>
+	/// <param name="...args">引数</param>
+	/// <returns></returns>
 	template<class T, class... Args>
 	std::shared_ptr<T> AddCollider(Args... args)
 	{
@@ -95,6 +150,12 @@ public:
 		_colliders.emplace_back(component);
 		return component;
 	}
+
+	/// <summary>
+	/// 当たり判定コンポーネント取得
+	/// </summary>
+	/// <typeparam name="T">Colliderを継承したコンポーネント</typeparam>
+	/// <returns>失敗でnullptr</returns>
 	template<class T>
 	std::shared_ptr<T> GetCollider()
 	{
@@ -118,11 +179,17 @@ public:
 	Scene* GetScene() { return _scene; }
 	const char* GetName() const { return _name.c_str(); }
 	Transform& GetTransform() { return _transform; }
+	std::weak_ptr<Model> GetModel() { return _model; }
 	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return _judgeTags; }
 
 	void SetScene(Scene* scene) { this->_scene = scene; }
 	void SetName(const char* name) { this->_name = name; }
 	void SetTransform(const Transform& t) { this->_transform = t; }
+	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
+	// そのタグに対して当たり判定を行うかのフラグをセット
+	void SetJudgeTagFlag(ActorTag tag, bool f) { _judgeTags[tag] = f; }
+
+#pragma region フラグ関係
 	void SetActiveFlag(bool b) { this->_isActive = b; }
 	void SetShowFlag(bool b) { this->_isShowing = b; }
 	void SetDrawDebugFlag(bool b) { this->_drawDebug = b; }
@@ -132,9 +199,7 @@ public:
 	bool IsShowing()const { return _isShowing; }
 	bool DrawDebug()const { return _drawDebug; }
 	bool DrawHierarchy()const { return _drawHierarchy; }
-
-	// そのタグに対して当たり判定を行うかのフラグをセット
-	void SetJudgeTagFlag(ActorTag tag, bool f) { _judgeTags[tag] = f; }
+#pragma endregion
 #pragma endregion
 protected:
 	// トランスフォーム更新

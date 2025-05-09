@@ -2,64 +2,11 @@
 
 #include <imgui.h>
 
+#include "CollisionMath.h"
 #include "../DebugSupporter/DebugSupporter.h"
 
 void CollisionManager::Update()
 {
-}
-
-void CollisionManager::DebugRender(const RenderContext& rc)
-{
-	// デバッグ描画フラグがオフなら何もしない
-	if (!_isDebugDraw)return;
-
-	// 球コライダーのデバッグ描画
-	for (auto& sphereCollider : _sphereColliders)
-	{
-		Debug::Renderer::DrawSphere(
-			sphereCollider->GetPosition().TransformCoord(sphereCollider->GetActor()->GetTransform().GetMatrix()),
-			sphereCollider->GetRadius(),
-			_VECTOR4_RED);
-	}
-	// ボックスコライダーのデバッグ描画
-	for (auto& boxCollider : _boxColliders)
-	{
-		Debug::Renderer::DrawBox(
-			boxCollider->GetPosition().TransformCoord(boxCollider->GetActor()->GetTransform().GetMatrix()),
-			boxCollider->GetActor()->GetTransform().GetRotation(),
-			boxCollider->GetHalfSize(), 
-			_VECTOR4_GREEN);
-	}
-	// カプセルコライダーのデバッグ描画
-	for (auto& capsuleCollider : _capsuleColliders)
-	{
-		Debug::Renderer::DrawCapsule(
-			capsuleCollider->GetStart().TransformCoord(capsuleCollider->GetActor()->GetTransform().GetMatrix()),
-			capsuleCollider->GetEnd().TransformCoord(capsuleCollider->GetActor()->GetTransform().GetMatrix()),
-			capsuleCollider->GetRadius(),
-			_VECTOR4_BLUE);
-	}
-	// メッシュコライダーのデバッグ描画
-	for (auto& meshCollider : _meshColliders)
-	{
-		const auto& collisionMesh = meshCollider->GetCollisionMesh();
-		for (const auto& area : collisionMesh.areas)
-		{
-			Debug::Renderer::DrawBox(area.boundingBox.Center, _VECTOR3_ZERO, area.boundingBox.Extents, _VECTOR4_YELLOW);
-		}
-		if (_isDebugDrawVertex)
-		{
-			for (const auto& triangle : collisionMesh.triangles)
-			{
-				Debug::Renderer::AddVertex(triangle.positions[0]);
-				Debug::Renderer::AddVertex(triangle.positions[1]);
-				Debug::Renderer::AddVertex(triangle.positions[1]);
-				Debug::Renderer::AddVertex(triangle.positions[2]);
-				Debug::Renderer::AddVertex(triangle.positions[2]);
-				Debug::Renderer::AddVertex(triangle.positions[0]);
-			}
-		}
-	}
 }
 
 void CollisionManager::DrawGui()
@@ -70,8 +17,6 @@ void CollisionManager::DrawGui()
 		{
 			if (ImGui::BeginMenu(u8"当たり判定"))
 			{
-				ImGui::Checkbox(u8"デバッグ描画", &_isDebugDraw);
-
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenu();
@@ -80,6 +25,152 @@ void CollisionManager::DrawGui()
 		ImGui::EndMainMenuBar();
 	}
 }
+
+#pragma region キャスト
+/// レイキャスト
+bool CollisionManager::RayCast(const Vector3& start, const Vector3& direction, const float distance, RayCastResult& result)
+{
+	bool hit = false;
+	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
+	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
+
+	result.distance = distance;
+	// 各メッシュコライダーに対してレイキャストを行う
+	for (auto& meshCollider : _meshColliders)
+	{
+		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		{
+			DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
+			DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
+			// レイVsAABB
+			if (Collision3D::IntersectRayVsAABB(Start, DirectionNorm, result.distance, aabbCenter, aabbRadii, nullptr, nullptr))
+			{
+				HitResult tmpResult;
+				// エリアに含まれている三角形と判定
+				for (const int& index : area.triangleIndices)
+				{
+					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
+					DirectX::XMVECTOR TrianglePos[3] = {
+						DirectX::XMLoadFloat3(&triangle.positions[0]),
+						DirectX::XMLoadFloat3(&triangle.positions[1]),
+						DirectX::XMLoadFloat3(&triangle.positions[2])
+					};
+
+					// レイVs三角形
+					if (Collision3D::IntersectRayVsTriangle(Start, DirectionNorm, result.distance, TrianglePos, tmpResult))
+					{
+						// 最近距離を更新
+						if (result.distance > tmpResult.distance)
+						{
+							result.position		= tmpResult.position;
+							result.normal		= tmpResult.normal;
+							result.distance		= tmpResult.distance;
+						}
+						hit = true;
+					}
+				}
+			}
+		}
+	}
+
+	return hit;
+}
+
+/// スフィアキャスト
+bool CollisionManager::SphereCast(const Vector3& start, const Vector3& direction, float radius, const float distance, RayCastResult& result)
+{
+	bool hit = false;
+	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
+	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
+
+	result.distance = distance;
+	// 各メッシュコライダーに対してスフィアキャスト行う
+	for (auto& meshCollider : _meshColliders)
+	{
+		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		{
+			DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
+			DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
+			// スフィアキャストVSAABB
+			if (Collision3D::IntersectCapsuleVsAABB(Start, DirectionNorm, result.distance, radius, slubCenter, slubRadii))
+			{
+				HitResult tmpResult;
+				// エリアに含まれている三角形と判定
+				for (const int& index : area.triangleIndices)
+				{
+					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
+					DirectX::XMVECTOR TrianglePos[3] = {
+						DirectX::XMLoadFloat3(&triangle.positions[0]),
+						DirectX::XMLoadFloat3(&triangle.positions[1]),
+						DirectX::XMLoadFloat3(&triangle.positions[2])
+					};
+
+					// スフィアキャストVs三角形
+					if (Collision3D::IntersectSphereCastVsTriangle(Start, DirectionNorm, result.distance, radius, TrianglePos, &tmpResult, false))
+					{
+						// 最近距離を更新
+						if (result.distance > tmpResult.distance)
+						{
+							result.position = tmpResult.position;
+							result.normal = tmpResult.normal;
+							result.distance = tmpResult.distance;
+						}
+						hit = true;
+					}
+				}
+			}
+		}
+	}
+
+	return hit;
+}
+bool CollisionManager::SphereCast(const Vector3& origin, const Vector3& direction, float radius, float& distance, Vector3& hitPosition, Vector3& hitNormal, bool drawHitMesh)
+{
+	bool hit = false;
+	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&origin);
+	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
+
+	// 各メッシュコライダーに対してスフィアキャスト行う
+	for (auto& meshCollider : _meshColliders)
+	{
+		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		{
+			DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
+			DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
+			// スフィアキャストVSAABB
+			if (Collision3D::IntersectCapsuleVsAABB(Start, DirectionNorm, distance, radius, slubCenter, slubRadii))
+			{
+				HitResult tmpResult;
+				// エリアに含まれている三角形と判定
+				for (const int& index : area.triangleIndices)
+				{
+					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
+					DirectX::XMVECTOR TrianglePos[3] = {
+						DirectX::XMLoadFloat3(&triangle.positions[0]),
+						DirectX::XMLoadFloat3(&triangle.positions[1]),
+						DirectX::XMLoadFloat3(&triangle.positions[2])
+					};
+
+					// スフィアキャストVs三角形
+					if (Collision3D::IntersectSphereCastVsTriangle(Start, DirectionNorm, distance, radius, TrianglePos, &tmpResult, false))
+					{
+						// 最近距離を更新
+						if (distance > tmpResult.distance)
+						{
+							hitPosition = tmpResult.position;
+							hitNormal = tmpResult.normal;
+							distance = tmpResult.distance;
+						}
+						hit = true;
+					}
+				}
+			}
+		}
+	}
+
+	return hit;
+}
+#pragma endregion
 
 #pragma region 登録
 // 球コライダー登録

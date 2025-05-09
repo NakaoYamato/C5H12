@@ -196,8 +196,8 @@ public:
 
 	bool IsActive()const { return _isActive; }
 	bool IsShowing()const { return _isShowing; }
-	bool DrawDebug()const { return _drawDebug; }
-	bool DrawHierarchy()const { return _drawHierarchy; }
+	bool IsDrawingDebug()const { return _drawDebug; }
+	bool IsDrawingHierarchy()const { return _drawHierarchy; }
 #pragma endregion
 #pragma endregion
 protected:

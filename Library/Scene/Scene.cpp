@@ -129,9 +129,6 @@ void Scene::Render()
     // ゲームオブジェクトの描画
     _actorManager.Render(rc);
 
-    // 当たり判定の描画
-	_collisionManager.DebugRender(rc);
-
     //--------------------------------------------------------------------------------------
     // GBuffer生成
     GBuffer* gBuffer = graphics.GetGBuffer();

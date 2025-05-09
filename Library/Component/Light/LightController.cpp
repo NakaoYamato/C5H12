@@ -11,7 +11,7 @@ void LightController::DebugRender(const RenderContext& rc)
 {
     DirectX::XMFLOAT4X4 transform = GetActor()->GetTransform().GetMatrix();
     // ƒqƒGƒ‰ƒ‹ƒL[‚É•\Ž¦’†‚Ì‚Ý•`‰æ
-    if (GetActor()->DrawHierarchy())
+    if (GetActor()->IsDrawingHierarchy())
     {
         const DirectX::XMFLOAT4X4& view = GetActor()->GetScene()->GetMainCamera()->GetView();
         const DirectX::XMFLOAT4X4& projection = GetActor()->GetScene()->GetMainCamera()->GetProjection();

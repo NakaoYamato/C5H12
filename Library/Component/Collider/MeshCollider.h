@@ -34,6 +34,8 @@ public:
 	void OnDestroy() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
+	// デバッグ描画処理
+	void DebugRender(const RenderContext& rc) override;
 	// GUI描画
 	void DrawGui() override;
 	// コリジョンメッシュの再計算
@@ -51,4 +53,6 @@ private:
 private:
 	CollisionMesh	_collisionMesh;	// コリジョンメッシュ
 	bool _recalculate = true;	// 再計算フラグ
+	bool _isDebugDrawVertex = false; // 頂点描画フラグ
+	int _cellSize = 16; // 分割エリアのサイズ
 };

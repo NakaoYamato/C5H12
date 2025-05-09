@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "../../Scene/Scene.h"
+#include "../../DebugSupporter/DebugSupporter.h"
 
 // 開始処理
 void MeshCollider::Start()
@@ -30,9 +31,40 @@ void MeshCollider::Update(float elapsedTime)
 	}
 }
 
+// デバッグ描画処理
+void MeshCollider::DebugRender(const RenderContext& rc)
+{
+	// デバッグ描画フラグがオフなら何もしない
+	if (!GetActor()->IsDrawingDebug())return;
+
+	// 有効でなければ描画しない
+	if (!IsActive())
+		return;
+
+	for (const auto& area : _collisionMesh.areas)
+	{
+		Debug::Renderer::DrawBox(area.boundingBox.Center, _VECTOR3_ZERO, area.boundingBox.Extents, _VECTOR4_YELLOW);
+	}
+	if (_isDebugDrawVertex)
+	{
+		for (const auto& triangle : _collisionMesh.triangles)
+		{
+			Debug::Renderer::AddVertex(triangle.positions[0]);
+			Debug::Renderer::AddVertex(triangle.positions[1]);
+			Debug::Renderer::AddVertex(triangle.positions[1]);
+			Debug::Renderer::AddVertex(triangle.positions[2]);
+			Debug::Renderer::AddVertex(triangle.positions[2]);
+			Debug::Renderer::AddVertex(triangle.positions[0]);
+		}
+	}
+}
+
 // GUI描画
 void MeshCollider::DrawGui()
 {
+	ColliderBase::DrawGui();
+	ImGui::DragInt(u8"分割エリアサイズ", &_cellSize, 1.0f, 1, 32);
+	ImGui::Checkbox(u8"コリジョンメッシュ頂点表示", &_isDebugDrawVertex);
 	if (ImGui::Button(u8"コリジョンメッシュ再計算"))
 	{
 		_recalculate = true;
@@ -62,9 +94,12 @@ void MeshCollider::RecalculateCollisionMesh()
 		for (size_t i = 0; i < mesh.indices.size(); i += 3)
 		{
 			// 頂点データをワールド空間変換
-			uint32_t a = mesh.indices.at(i + 0);
+			//uint32_t a = mesh.indices.at(i + 0);
+			//uint32_t b = mesh.indices.at(i + 1);
+			//uint32_t c = mesh.indices.at(i + 2);
+			uint32_t a = mesh.indices.at(i + 2);
 			uint32_t b = mesh.indices.at(i + 1);
-			uint32_t c = mesh.indices.at(i + 2);
+			uint32_t c = mesh.indices.at(i + 0);
 			DirectX::XMVECTOR A = DirectX::XMLoadFloat3(&mesh.vertices.at(a).position);
 			DirectX::XMVECTOR B = DirectX::XMLoadFloat3(&mesh.vertices.at(b).position);
 			DirectX::XMVECTOR C = DirectX::XMLoadFloat3(&mesh.vertices.at(c).position);
@@ -85,7 +120,7 @@ void MeshCollider::RecalculateCollisionMesh()
 			CollisionMesh::Triangle& triangle = _collisionMesh.triangles.emplace_back();
 			DirectX::XMStoreFloat3(&triangle.positions[0], A);
 			DirectX::XMStoreFloat3(&triangle.positions[1], B);
-			DirectX::XMStoreFloat3(&triangle.positions[2], C);
+			DirectX::XMStoreFloat3(&triangle.positions[2], C);	
 			DirectX::XMStoreFloat3(&triangle.normal, N);
 
 			// モデル全体のAABBを計測
@@ -103,15 +138,14 @@ void MeshCollider::RecalculateCollisionMesh()
 	DirectX::XMStoreFloat3(&volumeMin, VolumeMin);
 	DirectX::XMStoreFloat3(&volumeMax, VolumeMax);
 
-	const int cellSize = 16;
-	_collisionMesh.areas.resize((size_t)(cellSize * cellSize));
-	float sizeX = (volumeMax.x - volumeMin.x) / cellSize;
-	float sizeZ = (volumeMax.z - volumeMin.z) / cellSize;
-	for (int i = 0; i < cellSize * cellSize; ++i)
+	_collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
+	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
+	float sizeZ = (volumeMax.z - volumeMin.z) / _cellSize;
+	for (int i = 0; i < _cellSize * _cellSize; ++i)
 	{
-		_collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % cellSize) + 0.5f * sizeX;
+		_collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % _cellSize) + 0.5f * sizeX;
 		_collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
-		_collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / cellSize) + 0.5f * sizeZ;
+		_collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
 		_collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
 		_collisionMesh.areas[i].boundingBox.Extents.y = 10.0f; // 無限
 		_collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
@@ -119,13 +153,14 @@ void MeshCollider::RecalculateCollisionMesh()
 	for (int i = 0; i < _collisionMesh.triangles.size(); ++i)
 	{
 		const CollisionMesh::Triangle& triangle = _collisionMesh.triangles[i];
-		std::unordered_map<size_t, int> indexMap;
-		indexMap.insert(std::make_pair(CalcKey(triangle.positions[0], sizeX, sizeZ, volumeMin.x, volumeMin.z, cellSize), 0));
-		indexMap.insert(std::make_pair(CalcKey(triangle.positions[1], sizeX, sizeZ, volumeMin.x, volumeMin.z, cellSize), 0));
-		indexMap.insert(std::make_pair(CalcKey(triangle.positions[2], sizeX, sizeZ, volumeMin.x, volumeMin.z, cellSize), 0));
+		std::vector<size_t> indexMap;
+		// 各頂点がどのエリアに属するかを調べる
+		indexMap.push_back(CalcKey(triangle.positions[0], sizeX, sizeZ, volumeMin.x, volumeMin.z, _cellSize));
+		indexMap.push_back(CalcKey(triangle.positions[1], sizeX, sizeZ, volumeMin.x, volumeMin.z, _cellSize));
+		indexMap.push_back(CalcKey(triangle.positions[2], sizeX, sizeZ, volumeMin.x, volumeMin.z, _cellSize));
 		for (auto& index : indexMap)
 		{
-			_collisionMesh.areas[index.first].triangleIndices.push_back(i);
+			_collisionMesh.areas[index].triangleIndices.push_back(i);
 		}
 	}
 }

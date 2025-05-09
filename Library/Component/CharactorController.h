@@ -14,6 +14,8 @@ public:
     void Update(float elapsedTime) override;
     // 固定間隔更新処理
     void FixedUpdate() override;
+    // デバッグ描画処理
+    void DebugRender(const RenderContext& rc) override;
     // GUI描画
     void DrawGui() override;
 
@@ -35,11 +37,12 @@ public:
     float GetSkinWidth() const { return _skinWidth; }
     float GetStepOffset() const { return _stepOffset; }
 
-    Vector3 GetVelocity() const { return _velocity; }
-    Vector3 GetAcceleration() const { return _acceleration; }
+    const Vector3& GetVelocity() const { return _velocity; }
+	Vector3 GetVelocityXZ() const { return { _velocity.x, 0.0f, _velocity.z }; }
+    const Vector3& GetAcceleration() const { return _acceleration; }
     float GetMaxSpeedXZ() const { return _maxSpeedXZ; }
     float GetCurrentSpeedXZ() const { return _currentSpeedXZ; }
-    Vector3 GetGravity() const { return _gravity; }
+    const Vector3& GetGravity() const { return _gravity; }
     bool IsUseGravity() const { return _useGravity; }
 	bool IsRotateToDirection() const { return _rotateToDirection; }
 
@@ -81,15 +84,17 @@ private:
 	/// </summary>
 	/// <param name="deltaTime"></param>
 	void UpdateRotation(float deltaTime, const Vector2& vec);
+
 private:
 #pragma region パラメータ
     // 半径
     float _radius = 0.5f;
     // スキン幅
-    float _skinWidth = 0.1f;
+    float _skinWidth = 0.01f;
     // ステップオフセット
     float _stepOffset = 0.1f;
-
+    // スロープ
+	float _slopeLimit = DirectX::XMConvertToRadians(45.0f);
 #pragma endregion
 
 #pragma region 移動関係
@@ -108,7 +113,7 @@ private:
 	float _rotationSpeed = DirectX::XMConvertToRadians(720.0f);
 
 	// 重力使用
-    bool _useGravity = false;
+    bool _useGravity = true;
     // 移動方向に向くか
     bool _rotateToDirection = true;
 #pragma endregion

@@ -800,9 +800,9 @@ void DebugRenderer::Render(
 					count = totalVertexCount - start;
 				}
 			}
-			_gridVertices.clear();
 		}
 	}
 #endif
+	_gridVertices.clear();
 	_instances.clear();
 }

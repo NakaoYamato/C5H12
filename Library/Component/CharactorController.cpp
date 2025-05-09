@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "../Scene/Scene.h"
+#include "../../DebugSupporter/DebugSupporter.h"
 
 void CharactorController::Update(float elapsedTime)
 {
@@ -26,6 +27,15 @@ void CharactorController::FixedUpdate()
 	/// 回転更新
 	//if (_rotateToDirection)
 	//	UpdateRotation(_FIXED_UPDATE_RATE, { _velocity.x, _velocity.z });
+}
+
+// デバッグ描画処理
+void CharactorController::DebugRender(const RenderContext& rc)
+{
+	Debug::Renderer::DrawSphere(
+		GetActor()->GetTransform().GetPosition() + Vector3(0.0f, _radius + _stepOffset, 0.0f),
+		_radius,
+		_VECTOR4_YELLOW);
 }
 
 void CharactorController::DrawGui()
@@ -80,7 +90,88 @@ void CharactorController::UpdatePosition(float deltaTime)
 /// 移動＆滑り
 void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 {
+	CollisionManager& collisionManager = this->GetActor()->GetScene()->GetCollisionManager();
+	RayCastResult result;
 	Transform& transform = this->GetActor()->GetTransform();
+
+	DirectX::XMVECTOR Position = DirectX::XMLoadFloat3(&transform.GetPosition());
+	DirectX::XMVECTOR Move = DirectX::XMLoadFloat3(&move);
+	DirectX::XMVECTOR CenterOffset = DirectX::XMVectorSet(0, _radius + _stepOffset, 0, 0);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		// キャスト量算出
+		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(Move));
+		if (distance <= FLT_EPSILON)
+			break;
+
+		distance += _skinWidth;
+
+		// 縦移動時はステップオフセット分もキャスト量を増やす
+		if (vertical)
+			distance += _stepOffset;
+
+		DirectX::XMVECTOR Origine = DirectX::XMVectorAdd(Position, CenterOffset);
+		DirectX::XMVECTOR Direction = DirectX::XMVector3Normalize(Move);
+		Vector3 origine{}, direction{};
+		DirectX::XMStoreFloat3(&origine, Origine);
+		DirectX::XMStoreFloat3(&direction, Direction);
+		Vector3 hitPosition{}, hitNormal{};
+		// スフィアキャスト
+		if (collisionManager.SphereCast(origine, direction, _radius, distance, hitPosition, hitNormal))
+		{
+			// 増やしたキャスト量を引く
+			distance -= _skinWidth;
+			if (vertical)
+				distance -= _stepOffset;
+
+			// 移動量を計算
+			DirectX::XMVECTOR Vec = DirectX::XMVectorScale(Direction, distance);
+
+			// 移動量を適応
+			Position = DirectX::XMVectorAdd(Position, Vec);
+
+			// 法線ベクトル
+			DirectX::XMVECTOR Normal = DirectX::XMLoadFloat3(&hitNormal);
+
+			// スロープ
+			if (vertical)
+			{
+				// 速度を0にする
+				_velocity.y = 0.0f;
+				// スロープの角度を計算
+				DirectX::XMVECTOR Up = DirectX::XMVectorSet(0, 1, 0, 0);
+				float angle = acosf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(Normal, Up)));
+				// 制限角度以内なら滑る処理をskip
+				if (angle < _slopeLimit)
+				{
+					break;
+				}
+			}
+
+			// 移動した量を減らす
+			Move = DirectX::XMVectorSubtract(Move, Vec);
+
+			// 移動ベクトルを壁に沿わせる
+			DirectX::XMVECTOR Projection = DirectX::XMVectorScale(
+				Normal,
+				DirectX::XMVectorGetX(DirectX::XMVector3Dot(Move, Normal))
+			);
+
+			// 壁に沿ったベクトルを計算 (Move から法線方向の成分を引く)
+			Move = DirectX::XMVectorSubtract(Move, Projection);
+		}
+		else
+		{
+			Position = DirectX::XMVectorAdd(Position, Move);
+			break;
+		}
+	}
+
+	Vector3 position{};
+	DirectX::XMStoreFloat3(&position, Position);
+	transform.SetPosition(position);
+#if 0
 	Vector3 calcPosition = transform.GetPosition();
 	float calcRadi{};
 	Vector3 direction{};
@@ -104,22 +195,40 @@ void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 		// 足元が球の最小点になるように設定
 		distance = _stepOffset + moveLength + (_radius - calcRadi);
 
-		//if (SphereCast(calcPosition, direction, calcRadi, distance, hitPosition, hitNormal))
-		//{
-		//	// TODO : がくがくする
-		//	//Debug::AddVertex(testVertex[0]);
-		//	//Debug::AddVertex(testVertex[1]);
-		//	//Debug::AddVertex(testVertex[1]);
-		//	//Debug::AddVertex(testVertex[2]);
-		//	//Debug::AddVertex(testVertex[2]);
-		//	//Debug::AddVertex(testVertex[0]);
-		//	transform.SetPositionY(calcPosition.y + direction.y * distance - calcRadi);
-		//	_velocity.y = 0.0f;
-		//}
-		//else
+		Debug::Renderer::DrawCapsule(
+			calcPosition + direction * distance,
+			calcPosition,  
+			calcRadi,
+			_VECTOR4_YELLOW);
+#if 0
+		if (collisionManager.SphereCast(calcPosition, direction, calcRadi, distance, result))
+		{
+			// TODO : がくがくする
+			//Debug::AddVertex(testVertex[0]);
+			//Debug::AddVertex(testVertex[1]);
+			//Debug::AddVertex(testVertex[1]);
+			//Debug::AddVertex(testVertex[2]);
+			//Debug::AddVertex(testVertex[2]);
+			//Debug::AddVertex(testVertex[0]);
+			transform.SetPositionY(calcPosition.y + direction.y * result.distance - calcRadi);
+			_velocity.y = 0.0f;
+		}
+		else
 		{
 			transform.SetPositionY(transform.GetPosition().y + move.y);
 		}
+#else
+		if (collisionManager.SphereCast(calcPosition, direction, calcRadi, distance, hitPosition, hitNormal))
+		{
+			// TODO : がくがくする
+			transform.SetPositionY(calcPosition.y + direction.y * distance - calcRadi);
+			_velocity.y = 0.0f;
+		}
+		else
+		{
+			transform.SetPositionY(transform.GetPosition().y + move.y);
+		}
+#endif
 	}
 	// XZ処理
 	else
@@ -134,68 +243,131 @@ void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 		// TODO 01/07エラー
 		assert(sqrtf(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z) - 1.0f < 1e-5);
 		distance = moveLength;
-		calcRadi += _stepOffset;
+		//calcRadi += _stepOffset;
 
-		//if (SphereCast(calcPosition, direction, calcRadi, distance, hitPosition, hitNormal))
-		//{
-		//	//Debug::AddVertex(testVertex[0]);
-		//	//Debug::AddVertex(testVertex[1]);
-		//	//Debug::AddVertex(testVertex[1]);
-		//	//Debug::AddVertex(testVertex[2]);
-		//	//Debug::AddVertex(testVertex[2]);
-		//	//Debug::AddVertex(testVertex[0]);
+		Debug::Renderer::DrawCapsule(
+			calcPosition,
+			calcPosition + direction * distance,
+			calcRadi,
+			_VECTOR4_GRAY);
+#if 0
+		if (collisionManager.SphereCast(calcPosition, direction, calcRadi, distance, result))
+		{
+			distance = result.distance;
+			//Debug::AddVertex(testVertex[0]);
+			//Debug::AddVertex(testVertex[1]);
+			//Debug::AddVertex(testVertex[1]);
+			//Debug::AddVertex(testVertex[2]);
+			//Debug::AddVertex(testVertex[2]);
+			//Debug::AddVertex(testVertex[0]);
 
-		//	// 壁まで移動
-		//	transform.SetPositionX(calcPosition.x + direction.x * (distance - _stepOffset));
-		//	transform.SetPositionZ(calcPosition.z + direction.z * (distance - _stepOffset));
+			// 壁まで移動
+			transform.SetPositionX(calcPosition.x + direction.x * (distance - _stepOffset));
+			transform.SetPositionZ(calcPosition.z + direction.z * (distance - _stepOffset));
 
-		//	// 残りの移動量を算出
-		//	float remainingMovement = moveLength - distance;
+			// 残りの移動量を算出
+			float remainingMovement = moveLength - distance;
 
-		//	// 残りの移動量があれば壁ずり
-		//	if (remainingMovement > 0.0f && distance > 0.0f)
-		//	{
-		//		// 壁ずり
-		//		// レイの向きを残りの移動量倍したベクトルを法線に射影
-		//		DirectX::XMVECTOR hitNormalVec = DirectX::XMLoadFloat3(&hitNormal);
-		//		DirectX::XMVECTOR remainingDirectionVec = DirectX::XMVector3Normalize(
-		//			DirectX::XMLoadFloat3(&direction));
-		//		DirectX::XMVectorScale(remainingDirectionVec, remainingMovement);
-		//		DirectX::XMFLOAT3 nextDirection{};
-		//		{
-		//			DirectX::XMVECTOR projection = DirectX::XMVectorScale(
-		//				hitNormalVec,
-		//				DirectX::XMVectorGetX(
-		//					DirectX::XMVector3Dot(remainingDirectionVec,
-		//						hitNormalVec)));
-		//			DirectX::XMVECTOR nextDirectionVec = DirectX::XMVectorSubtract(remainingDirectionVec, projection);
-		//			//DirectX::XMStoreFloat3(&nextMove, nextDirectionVec);
-		//			DirectX::XMStoreFloat3(&nextDirection, DirectX::XMVector3Normalize(nextDirectionVec));
-		//		}
+			// 残りの移動量があれば壁ずり
+			if (remainingMovement > 0.0f && distance > 0.0f)
+			{
+				// 壁ずり
+				// レイの向きを残りの移動量倍したベクトルを法線に射影
+				DirectX::XMVECTOR hitNormalVec = DirectX::XMLoadFloat3(&hitNormal);
+				DirectX::XMVECTOR remainingDirectionVec = DirectX::XMVector3Normalize(
+					DirectX::XMLoadFloat3(&direction));
+				DirectX::XMVectorScale(remainingDirectionVec, remainingMovement);
+				DirectX::XMFLOAT3 nextDirection{};
+				{
+					DirectX::XMVECTOR projection = DirectX::XMVectorScale(
+						hitNormalVec,
+						DirectX::XMVectorGetX(
+							DirectX::XMVector3Dot(remainingDirectionVec,
+								hitNormalVec)));
+					DirectX::XMVECTOR nextDirectionVec = DirectX::XMVectorSubtract(remainingDirectionVec, projection);
+					//DirectX::XMStoreFloat3(&nextMove, nextDirectionVec);
+					DirectX::XMStoreFloat3(&nextDirection, DirectX::XMVector3Normalize(nextDirectionVec));
+				}
 
-		//		calcPosition = transform.GetPosition();
-		//		calcPosition.y += _radius + _skinWidth + _stepOffset * 0.5f;
-		//		distance = remainingMovement;
+				calcPosition = transform.GetPosition();
+				calcPosition.y += _radius + _skinWidth + _stepOffset * 0.5f;
+				distance = remainingMovement;
 
-		//		if (SphereCast(calcPosition, nextDirection, calcRadi, distance, hitPosition, hitNormal))
-		//		{
-		//			// 壁まで移動
-		//			transform.SetPositionX(calcPosition.x + nextDirection.x * (distance - _skinWidth));
-		//			transform.SetPositionZ(calcPosition.z + nextDirection.z * (distance - _skinWidth));
-		//		}
-		//		else
-		//		{
-		//			transform.SetPositionX(transform.GetPosition().x + nextDirection.x * remainingMovement);
-		//			transform.SetPositionZ(transform.GetPosition().z + nextDirection.z * remainingMovement);
-		//		}
-		//	}
-		//}
-		//else
+				if (collisionManager.SphereCast(calcPosition, nextDirection, calcRadi, distance, result))
+				{
+					distance = result.distance;
+					// 壁まで移動
+					transform.SetPositionX(calcPosition.x + nextDirection.x * (distance - _skinWidth));
+					transform.SetPositionZ(calcPosition.z + nextDirection.z * (distance - _skinWidth));
+				}
+				else
+				{
+					transform.SetPositionX(transform.GetPosition().x + nextDirection.x * remainingMovement);
+					transform.SetPositionZ(transform.GetPosition().z + nextDirection.z * remainingMovement);
+				}
+			}
+		}
+		else
 		{
 			transform.SetPositionX(transform.GetPosition().x + move.x);
 			transform.SetPositionZ(transform.GetPosition().z + move.z);
 		}
+#else
+		if (collisionManager.SphereCast(calcPosition, direction, calcRadi, distance, hitPosition, hitNormal))
+		{
+			// 壁まで移動
+			transform.SetPositionX(calcPosition.x + direction.x * (distance - _skinWidth));
+			transform.SetPositionZ(calcPosition.z + direction.z * (distance - _skinWidth));
+
+			// 残りの移動量を算出
+			float remainingMovement = moveLength - distance;
+
+			// 残りの移動量があれば壁ずり
+			if (remainingMovement > 0.0f && distance > 0.0f)
+			{
+				// 壁ずり
+				// レイの向きを残りの移動量倍したベクトルを法線に射影
+				DirectX::XMVECTOR hitNormalVec = DirectX::XMLoadFloat3(&hitNormal);
+				DirectX::XMVECTOR remainingDirectionVec = DirectX::XMVector3Normalize(
+					DirectX::XMLoadFloat3(&direction));
+				DirectX::XMVectorScale(remainingDirectionVec, remainingMovement);
+				DirectX::XMFLOAT3 nextDirection{};
+				{
+					DirectX::XMVECTOR projection = DirectX::XMVectorScale(
+						hitNormalVec,
+						DirectX::XMVectorGetX(
+							DirectX::XMVector3Dot(remainingDirectionVec,
+								hitNormalVec)));
+					DirectX::XMVECTOR nextDirectionVec = DirectX::XMVectorSubtract(remainingDirectionVec, projection);
+					//DirectX::XMStoreFloat3(&nextMove, nextDirectionVec);
+					DirectX::XMStoreFloat3(&nextDirection, DirectX::XMVector3Normalize(nextDirectionVec));
+				}
+
+				calcPosition = transform.GetPosition();
+				calcPosition.y += _radius + _skinWidth + _stepOffset * 0.5f;
+				distance = remainingMovement;
+
+				if (collisionManager.SphereCast(calcPosition, nextDirection, calcRadi, distance, hitPosition, hitNormal))
+				{
+					// 壁まで移動
+					transform.SetPositionX(calcPosition.x + nextDirection.x * (distance - _skinWidth));
+					transform.SetPositionZ(calcPosition.z + nextDirection.z * (distance - _skinWidth));
+				}
+				else
+				{
+					transform.SetPositionX(transform.GetPosition().x + nextDirection.x * remainingMovement);
+					transform.SetPositionZ(transform.GetPosition().z + nextDirection.z * remainingMovement);
+				}
+			}
+		}
+		else
+		{
+			transform.SetPositionX(transform.GetPosition().x + move.x);
+			transform.SetPositionZ(transform.GetPosition().z + move.z);
+		}
+#endif
 	}
+#endif
 }
 
 void CharactorController::UpdateRotation(float deltaTime, const Vector2& vec)

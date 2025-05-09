@@ -122,6 +122,94 @@ namespace CollisionHelper
 
 		return DirectX::XMLoadFloat3(&p);
 	}
+	// スフィアキャストorカプセルVsAABB用の頂点算出関数
+	inline DirectX::XMFLOAT3 GetAABBCorner(
+		const DirectX::XMFLOAT3& aabbPos,
+		const DirectX::XMFLOAT3& aabbRadii,
+		const int v)
+	{
+		DirectX::XMFLOAT3 p = {};
+		DirectX::XMStoreFloat3(&p, GetAABBCorner(DirectX::XMLoadFloat3(&aabbPos), DirectX::XMLoadFloat3(&aabbRadii), v));
+		return p;
+	}
+
+	// 線分と線分の最短点を求める関数を作成せよ
+	// 引数p0とp1で線分A、p2とp3で線分Bとし、この２線分のそれぞれの最短点をret[2]で返す
+	void GetNearPointsSegmentSegment(DirectX::XMFLOAT3 p0, DirectX::XMFLOAT3 p1, DirectX::XMFLOAT3 p2, DirectX::XMFLOAT3 p3, DirectX::XMFLOAT3 ret[2])
+	{
+		using namespace DirectX;
+		// 線分A
+		XMVECTOR start_A = DirectX::XMLoadFloat3(&p0);
+		XMVECTOR end_A = DirectX::XMLoadFloat3(&p1);
+		XMVECTOR direction_A = end_A - start_A;
+		float directionLength_A = DirectX::XMVectorGetX(DirectX::XMVector3Length(direction_A));
+
+		// 線分B
+		XMVECTOR start_B = DirectX::XMLoadFloat3(&p2);
+		XMVECTOR end_B = DirectX::XMLoadFloat3(&p3);
+		XMVECTOR direction_B = end_B - start_B;
+		float directionLength_B = DirectX::XMVectorGetX(DirectX::XMVector3Length(direction_B));
+
+		// 線分Bから線分A
+		DirectX::XMVECTOR r = start_A - start_B;
+
+		// 線分A上の最近点から線分Aの始点の長さ算出
+		float dADotDB = XMVectorGetX(XMVector3Dot(direction_A, direction_B));
+		float dADotR = XMVectorGetX(XMVector3Dot(direction_A, r));
+		float dBDotR = XMVectorGetX(XMVector3Dot(direction_B, r));
+		float dADotDA = directionLength_A * directionLength_A;
+		float dBDotDB = directionLength_B * directionLength_B;
+		float t_A = dADotDA * dBDotDB - dADotDB * dADotDB;// 分母計算
+		// 線分Aと線分Bが平行かどうか
+		if (t_A == 0.0f)
+		{
+			t_A = 0.0f;
+		}
+		else
+		{
+			t_A = (dADotDB * dBDotR - dADotR * dBDotDB) / t_A;
+		}
+		// 線分Aの長さが0の時
+		if (dADotDA < FLT_EPSILON)
+		{
+			t_A = 0.0f;
+		}
+
+		// 線分Aの範囲チェック
+		t_A = std::clamp<float>(t_A, 0.0f, directionLength_A);
+
+		// 線分Aの最近点
+		DirectX::XMVECTOR k_A = start_A +
+			DirectX::XMVectorScale(direction_A, t_A);
+
+		// 線分Bの最近点
+		DirectX::XMVECTOR k_B{};
+		// 線分Bが長さを持たないとき
+		if (dBDotDB < FLT_EPSILON)
+		{
+			k_B = start_B;
+		}
+		else
+		{
+			DirectX::XMVECTOR startBToKA = k_A - start_B;
+			DirectX::XMVECTOR normDirection_B = DirectX::XMVectorScale(direction_B, 1.0f / directionLength_B);
+			float t_B = XMVectorGetX(
+				XMVector3Dot(
+					startBToKA,
+					normDirection_B
+				)
+			);
+
+			// t_Bの範囲チェック
+			t_B = std::clamp<float>(t_B, 0.0f, directionLength_B);
+
+			k_B = start_B +
+				DirectX::XMVectorScale(normDirection_B, t_B);
+		}
+
+		DirectX::XMStoreFloat3(&ret[0], k_A);
+		DirectX::XMStoreFloat3(&ret[1], k_B);
+	}
 
 	// 線分と線分の最短距離の二乗を取得する
 	float GetMinDistSq_SegmentSegment(const DirectX::XMVECTOR& point1A,
@@ -795,6 +883,7 @@ namespace CollisionHelper
 		{
 			type = OBB_SAT_Type::NoHit;
 			hitAxis[0] = hitAxis[1] = -1;
+            penetration = 0.0f;
 		}
 		~CollisionResultOBB() {}
 
@@ -1197,6 +1286,300 @@ bool Collision3D::IntersectBoxVsBox(
     penetration = data.penetration;
 
 	return true;
+}
+
+/// AABBVsカプセル
+bool Collision3D::IntersectAABBVsCapsule(
+	const Vector3& aabbPosition, const Vector3& aabbRadii, 
+	const Vector3& cStart, const Vector3& cEnd, float cRadius, 
+	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+{
+	//②カプセルの中心線の始端、AABBの中心、AABBとカプセル半径のボロノイ領域の半径を
+	//  ループ処理するため、xyz成分を配列に代入する
+	float capsulePos[3] = { };
+	float aabbPos[3] = { };
+	float aabbVoronoiRad[3] = { };
+
+	{
+		capsulePos[0] = cStart.x;
+		capsulePos[1] = cStart.y;
+		capsulePos[2] = cStart.z;
+		aabbPos[0] = aabbPosition.x;
+		aabbPos[1] = aabbPosition.y;
+		aabbPos[2] = aabbPosition.z;
+		aabbVoronoiRad[0] = aabbRadii.x + cRadius;
+		aabbVoronoiRad[1] = aabbRadii.y + cRadius;
+		aabbVoronoiRad[2] = aabbRadii.z + cRadius;
+	}
+
+	//③カプセルの中心の線分のベクトルを作り、距離を変数にバックアップしたうえで正規化し、
+	// こちらもループ処理するため、xyz成分を配列に代入
+	DirectX::XMFLOAT3 dVec = { };
+	float cylinderLength = 0.0f;
+	float d[3] = { };
+	{
+		dVec.x = cEnd.x - cStart.x;
+		dVec.y = cEnd.y - cStart.y;
+		dVec.z = cEnd.z - cStart.z;
+
+		cylinderLength = sqrtf(
+			dVec.x * dVec.x +
+			dVec.y * dVec.y +
+			dVec.z * dVec.z
+		);
+
+		if (cylinderLength != 0.0f)
+		{
+			dVec.x /= cylinderLength;
+			dVec.y /= cylinderLength;
+			dVec.z /= cylinderLength;
+		}
+
+		d[0] = dVec.x;
+		d[1] = dVec.y;
+		d[2] = dVec.z;
+	}
+
+	// 直線とスラブの２交点までの距離をtminとtmaxと定義
+	float tmin = 0.0f;
+	float tmax = FLT_MAX;
+
+	// スラブとの距離を算出し交差しているかの確認と最近点の算出を行う
+	for (int i = 0; i < 3; i++)
+	{
+		//xyz軸との平行確認
+		if (fabsf(d[i]) < FLT_EPSILON)
+		{
+			//④平行の場合、位置関係の比較を行い、範囲内になければ交差なしでreturn false
+			if (aabbPos[i] - aabbVoronoiRad[i] > capsulePos[i])
+				return false;
+			else if (aabbPos[i] + aabbVoronoiRad[i] < capsulePos[i])
+				return false;
+		}
+		else
+		{
+			// t1が近スラブ、t2が遠スラブとの距離
+			float ood = 1.0f / d[i];
+			float t1 = (aabbPos[i] - aabbVoronoiRad[i] - capsulePos[i]) * ood;
+			float t2 = (aabbPos[i] + aabbVoronoiRad[i] - capsulePos[i]) * ood;
+
+			//⑤遠近が逆転している場合があるので、その場合入れ替えておく
+			if (t1 > t2)
+			{
+				float data = t1;
+				t1 = t2;
+				t2 = data;
+			}
+
+			//⑥t1がtminよりも大きい場合、tminをt1で更新する
+			if (t1 > tmin)
+				tmin = t1;
+
+			//⑦t2がtmaxよりも小さい場合、tmaxをt2で更新する
+			if (t2 < tmax)
+				tmax = t2;
+
+			// tminとtmaxの大小関係が逆転するのは、交差していない場合のみなので、その場合はreturn false
+			if (tmin > tmax) return false;
+		}
+	}
+
+	// ここまで来たらカプセルの中心の線分と拡大したAABB（ボロノイ領域）との交差が確定。
+	//⑧交点を割り出す。
+	DirectX::XMFLOAT3 p = {
+		cStart.x + dVec.x * tmin,
+		cStart.y + dVec.y * tmin,
+		cStart.z + dVec.z * tmin,
+	};
+
+	// 求めた交点から、頂点・面・辺のボロノイ領域のチェックを行う。
+	int u = 0, v = 0;
+	if (p.x <= aabbPosition.x - aabbRadii.x) u |= 1;
+	else if (p.x >= aabbPosition.x + aabbRadii.x) v |= 1;
+	if (p.y <= aabbPosition.y - aabbRadii.y) u |= 2;
+	else if (p.y >= aabbPosition.y + aabbRadii.y) v |= 2;
+	if (p.z <= aabbPosition.z - aabbRadii.z) u |= 4;
+	else if (p.z >= aabbPosition.z + aabbRadii.z) v |= 4;
+
+	int mask = u | v;
+	if (mask == 7)
+	{
+		//⑨ボロノイ頂点領域での交差なので角に球体を作って、線分vs球に置き換えて詳細チェックを行う
+		// ※交差判定だけなら点と線分の距離がカプセルの半径以下かどうかで判断は可能だが、押し戻し処理に衝突点がいるため、線分vs球で行う
+		// ※ゲーム数学Ⅱの課題19の「光線と球の交差」を参考
+
+		DirectX::XMFLOAT3 corner = CollisionHelper::GetAABBCorner(aabbPosition, aabbRadii, v);
+		DirectX::XMVECTOR e = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&corner), DirectX::XMLoadFloat3(&cStart));
+
+		DirectX::XMVECTOR direction = DirectX::XMVector3Normalize(
+			DirectX::XMVectorSubtract(
+				DirectX::XMLoadFloat3(&cEnd),
+				DirectX::XMLoadFloat3(&cStart)
+			)
+		);
+		float a = {};
+		{
+			a = DirectX::XMVectorGetX(DirectX::XMVector3Dot(direction, e));
+		}
+		float D = 0.0f;
+		{
+			float r = cRadius;
+			float eLengthSq = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(e));
+
+			D = r * r - eLengthSq + a * a;
+		}
+		if (D > 0.0f)
+		{
+			float t0 = a - sqrtf(D);
+			if (t0 >= 0.0f && t0 <= cylinderLength)
+			{
+				// ⑩「光線と球の交差」で衝突点を求めなおす
+				DirectX::XMVECTOR intersection = DirectX::XMVectorAdd(
+					DirectX::XMLoadFloat3(&cStart),
+					DirectX::XMVectorScale(direction, t0)
+				);
+
+				// ⑪衝突点と角の座標から衝突時の法線方向を求める
+				DirectX::XMVECTOR normal = DirectX::XMVectorSubtract(
+					intersection,
+					DirectX::XMLoadFloat3(&corner)
+				);
+
+				// ⑫衝突点と角の座標とカプセルの半径からめり込み量を算出し、CollideCapsule関数を呼び出す
+				float normalLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(normal));
+				normal = DirectX::XMVector3Normalize(normal);
+				float penetration = cRadius - normalLength;
+				if (penetration > 0.0f)
+				{
+					DirectX::XMStoreFloat3(&hitPosition, intersection);
+                    DirectX::XMStoreFloat3(&hitNormal, normal);
+                    penetration = penetration;
+					return true;
+				}
+			}
+		}
+	}
+
+	else if ((mask & (mask - 1)) == 0)
+	{
+		// ボロノイ面領域での交差なのでボロノイ領域と実際の交差判定が等しいため、詳細チェックはしない
+		//⑬衝突に使う法線は、面法線に等しくなるため、u,vの値から法線を求める。
+		DirectX::XMVECTOR normal{};
+		switch (u)
+		{
+		case 0b0001:
+			normal = DirectX::XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
+			break;
+		case 0b0010:
+			normal = DirectX::XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
+			break;
+		case 0b0100:
+			normal = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
+			break;
+		default:
+			switch (v)
+			{
+			case 0b0001:
+				normal = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+				break;
+			case 0b0010:
+				normal = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+				break;
+			case 0b0100:
+				normal = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+				break;
+			}
+		}
+
+		//⑭AABBの中心と最近点の間のベクトルから法線に対する射影ベクトルを作り、AABBとカプセルの距離を算出する
+		DirectX::XMVECTOR direction = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&p), DirectX::XMLoadFloat3(&aabbPosition));
+		DirectX::XMVECTOR projection = DirectX::XMVectorScale(normal, DirectX::XMVectorGetX(DirectX::XMVector3Dot(normal, direction)));
+		float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(projection));
+
+		//⑮法線とAABBの半辺長から、法線方向のAABBの中心から表面までの距離を算出する
+		DirectX::XMVECTOR radiiVec = DirectX::XMLoadFloat3(&aabbRadii);
+		float aabbLength = DirectX::XMVectorGetX(
+			DirectX::XMVector3Length(DirectX::XMVectorMultiply(normal, radiiVec))
+		);
+
+		//⑯AABBとカプセルの距離、法線方向のAABBの中心から表面までの距離、カプセルの半径を使ってめり込み量を算出し、CollideCapsule関数を呼び出す
+		float penetration = cRadius + aabbLength - length;
+		if (penetration > 0.0f)
+		{
+            hitPosition = p;
+			DirectX::XMStoreFloat3(&hitNormal, normal);
+			penetration = penetration;
+			return true;
+		}
+	}
+	else
+	{
+		// ボロノイ辺領域での交差なので線分vsカプセルで詳細チェックを行う
+		DirectX::XMFLOAT3 NearP[2] = {};	// 2線分上のそれぞれの最短点
+
+		//⑰線分と線分の最短点を求めるGetNearPointsSegmentSegment関数を適切な線分を与えて呼び出せ
+		DirectX::XMFLOAT3 aabbLine[2] = {};
+		aabbLine[0] = CollisionHelper::GetAABBCorner(aabbPosition, aabbRadii, v);
+		aabbLine[1] = CollisionHelper::GetAABBCorner(aabbPosition, aabbRadii, 7 - u);
+
+		CollisionHelper::GetNearPointsSegmentSegment(cStart, cEnd, aabbLine[0], aabbLine[1], NearP);
+
+		//⑱2線分上のそれぞれの最短点から衝突時の法線方向を求める
+		DirectX::XMFLOAT3 normal =
+		{
+			NearP[0].x - NearP[1].x,
+			NearP[0].y - NearP[1].y,
+			NearP[0].z - NearP[1].z
+		};
+		float normalLength = sqrtf(
+			normal.x * normal.x +
+			normal.y * normal.y +
+			normal.z * normal.z
+		);
+
+		if (normalLength != 0.0f)
+		{
+			normal.x /= normalLength;
+			normal.y /= normalLength;
+			normal.z /= normalLength;
+		}
+
+		//⑲最短点間の距離とカプセルの半径からめり込み量を算出し、CollideCapsule関数を呼び出す
+		penetration = cRadius - normalLength;
+		if (penetration > 0.0f)
+		{
+			hitPosition = p;
+            hitNormal = normal;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/// ボックスVsカプセル
+bool Collision3D::IntersectBoxVsCapsule(
+	const Vector3& boxPos, const Vector3& boxRadii, const Vector3& boxAngle,
+	const Vector3& cStart, const Vector3& cEnd, float cRadius,
+	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+{
+    // カプセルの始点、終点をローカル座標に変換
+	DirectX::XMMATRIX BoxM = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&boxAngle));
+	DirectX::XMMATRIX InvBoxM = DirectX::XMMatrixInverse(nullptr, BoxM);
+    bool result = IntersectAABBVsCapsule(
+		boxPos, boxRadii, 
+		cStart.TransformCoord(InvBoxM), cEnd.TransformCoord(InvBoxM),
+		cRadius,
+		hitPosition, hitNormal, penetration);
+	if (result)
+	{
+        // 衝突点をワールド座標に変換
+        hitPosition = hitPosition.TransformCoord(BoxM);
+        hitNormal = hitNormal.TransformNormal(BoxM);
+		return true;
+    }
+
+	return false;
 }
 
 /// カプセルVsカプセル

@@ -170,6 +170,52 @@ namespace Collision3D
         float& penetration);
 
     /// <summary>
+    /// AABBVsカプセル
+    /// </summary>
+    /// <param name="aabbPos">AABBの中心座標</param>
+    /// <param name="aabbRadii">AABBの半辺長</param>
+    /// <param name="cStart">カプセルの始点</param>
+    /// <param name="cEnd">カプセルの終点</param>
+    /// <param name="cRadius">カプセルの半径</param>
+    /// <param name="hitPosition">衝突位置</param>
+    /// <param name="hitNormal">衝突位置の法線</param>
+    /// <param name="penetration">めり込み量</param>
+    /// <returns></returns>
+    bool IntersectAABBVsCapsule(
+        const Vector3& aabbPos,
+        const Vector3& aabbRadii,
+        const Vector3& cStart,
+        const Vector3& cEnd,
+        float cRadius,
+        Vector3& hitPosition,
+        Vector3& hitNormal,
+        float& penetration);
+
+    /// <summary>
+    /// ボックスVsカプセル
+    /// </summary>
+    /// <param name="boxPos">ボックスの位置</param>
+    /// <param name="boxRadii">ボックスの半辺長</param>
+    /// <param name="boxAngle">ボックスの回転量</param>
+    /// <param name="cStart">カプセルの始点</param>
+    /// <param name="cEnd">カプセルの終点</param>
+    /// <param name="cRadius">カプセルの半径</param>
+    /// <param name="hitPosition">衝突位置</param>
+    /// <param name="hitNormal">衝突位置の法線</param>
+    /// <param name="penetration">めり込み量</param>
+    /// <returns></returns>
+    bool IntersectBoxVsCapsule(
+        const Vector3& boxPos,
+        const Vector3& boxRadii,
+        const Vector3& boxAngle,
+        const Vector3& cStart,
+        const Vector3& cEnd,
+        float cRadius,
+        Vector3& hitPosition,
+        Vector3& hitNormal,
+        float& penetration);
+
+    /// <summary>
     /// カプセルVsカプセル
     /// </summary>
     /// <param name="c0Start"></param>

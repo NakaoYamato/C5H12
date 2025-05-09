@@ -133,6 +133,69 @@ void CollisionManager::Update()
                     penetration);
             }
 		}
+
+  //      // ボックスVsカプセル
+		//for (auto& capsule : _capsuleColliders)
+		//{
+		//	Transform& transformB = capsule->GetActor()->GetTransform();
+		//	if (Collision3D::IntersectBoxVsCapsule(
+  //              boxA->GetPosition().TransformCoord(transformA.GetMatrix()),
+  //              boxA->GetHalfSize(),
+  //              transformA.GetRotation(),
+  //              capsule->GetStart().TransformCoord(transformB.GetMatrix()),
+  //              capsule->GetEnd().TransformCoord(transformB.GetMatrix()),
+  //              capsule->GetRadius(),
+  //              hitPosition,
+  //              hitNormal,
+  //              penetration))
+  //          {
+  //              // 接触解消
+  //              boxA->Resolve(capsule->GetActor().get(),
+  //                  hitPosition,
+  //                  hitNormal,
+  //                  penetration);
+  //              capsule->Resolve(boxA->GetActor().get(),
+  //                  hitPosition,
+  //                  -hitNormal,
+  //                  penetration);
+  //          }
+		//}
+	}
+
+	// カプセルの当たり判定
+	for (auto& capsuleA : _capsuleColliders)
+	{
+		Transform& transformA = capsuleA->GetActor()->GetTransform();
+
+		for (auto& capsuleB : _capsuleColliders)
+		{
+			// 同じ場合は処理しない
+			if (capsuleA == capsuleB)
+				continue;
+
+			Transform& transformB = capsuleB->GetActor()->GetTransform();
+			if (Collision3D::IntersectCapsuleVsCapsule(
+                capsuleA->GetStart().TransformCoord(transformA.GetMatrix()),
+                capsuleA->GetEnd().TransformCoord(transformA.GetMatrix()),
+                capsuleA->GetRadius(),
+                capsuleB->GetStart().TransformCoord(transformB.GetMatrix()),
+                capsuleB->GetEnd().TransformCoord(transformB.GetMatrix()),
+                capsuleB->GetRadius(),
+                hitPosition,
+                hitNormal,
+                penetration))
+            {
+                // 接触解消
+                capsuleA->Resolve(capsuleB->GetActor().get(),
+                    hitPosition,
+                    hitNormal,
+                    penetration);
+                capsuleB->Resolve(capsuleA->GetActor().get(),
+                    hitPosition,
+                    -hitNormal,
+                    penetration);
+            }
+		}
 	}
 }
 

@@ -2,10 +2,9 @@
 
 #include <imgui.h>
 
-ShapeController::ShapeController(ShapeType type) :
-	_type(type)
+void ShapeController::Start()
 {
-	GetActor()->LoadModel(GetShapeModelFilename(type));
+	GetActor()->LoadModel(GetShapeModelFilename(_type));
 }
 
 void ShapeController::DrawGui()

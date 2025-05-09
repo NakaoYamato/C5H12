@@ -14,11 +14,15 @@ enum class ShapeType
 class ShapeController : public ModelRenderer
 {
 public:
-	ShapeController(ShapeType type = ShapeType::Box);
+	ShapeController(ShapeType type = ShapeType::Box) :
+		_type(type) {}
 	~ShapeController()override {}
 
 	// –¼‘Oæ“¾
 	const char* GetName()const { return "ShapeController"; }
+
+	// ‰Šú‰»
+	void Start()override;
 
 	// GUI•`‰æ
 	void DrawGui() override;

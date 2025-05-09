@@ -11,6 +11,9 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
+	// 押し出し処理
+	void ApplyExtrusion() {}
+
 	// コライダーの有効状態取得
 	bool IsActive() const { return _isActive; }
 	// コライダーの有効状態設定

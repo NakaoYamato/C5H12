@@ -29,10 +29,6 @@ public:
     // GUI描画
     void DrawGui() override;
 
-#pragma region アクセサ
-
-#pragma endregion
-
     const std::vector<std::string>& GetLogs()
     {
         // スレッドセーフ

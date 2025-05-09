@@ -7,6 +7,68 @@
 
 void CollisionManager::Update()
 {
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+
+	// 
+
+	// 球の当たり判定
+	for (auto& sphereA : _sphereColliders)
+	{
+		Transform& transformA = sphereA->GetActor()->GetTransform();
+
+		// 球Vs球
+		for (auto& sphereB : _sphereColliders)
+		{
+			// 同じ場合は処理しない
+			if (sphereA == sphereB)
+				continue;
+
+			Transform& transformB = sphereB->GetActor()->GetTransform();
+			if (Collision3D::IntersectSphereVsSphere(
+				sphereA->GetPosition().TransformCoord(transformA.GetMatrix()),
+				sphereA->GetRadius(),
+				sphereB->GetPosition().TransformCoord(transformB.GetMatrix()),
+				sphereB->GetRadius(),
+				hitPosition,
+				hitNormal,
+				penetration))
+			{
+				// トリガーでなければ押し出し処理
+				if (!sphereA->IsTrigger())
+				{
+					sphereA->GetActor()->GetTransform().SetPosition(
+						sphereA->GetActor()->GetTransform().GetPosition() + hitNormal * penetration);
+				}
+				sphereA->GetActor()->OnCollision(
+					sphereB->GetActor().get(),
+					hitPosition,
+					hitNormal,
+					penetration);
+
+				if (!sphereB->IsTrigger())
+				{
+					sphereB->GetActor()->GetTransform().SetPosition(
+						sphereB->GetActor()->GetTransform().GetPosition() - hitNormal * penetration);
+				}
+				sphereB->GetActor()->OnCollision(
+					sphereA->GetActor().get(),
+					hitPosition,
+					-hitNormal,
+					penetration);
+			}
+		}
+
+		//for (auto& boxCollider : _boxColliders)
+		//{
+		//	Collision3D::IntersectSphereVsAABB(
+		//		sphereCollider->GetPosition(),
+		//		sphereCollider->GetRadius(),
+		//		boxCollider->GetPosition(),
+		//		boxCollider->GetSize());
+		//}
+	}
 }
 
 void CollisionManager::DrawGui()
@@ -28,13 +90,17 @@ void CollisionManager::DrawGui()
 
 #pragma region キャスト
 /// レイキャスト
-bool CollisionManager::RayCast(const Vector3& start, const Vector3& direction, const float distance, RayCastResult& result)
+bool CollisionManager::RayCast(
+	const Vector3& start,
+	const Vector3& direction,
+	float& distance,
+	Vector3& hitPosition,
+	Vector3& hitNormal)
 {
 	bool hit = false;
 	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
 	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
 
-	result.distance = distance;
 	// 各メッシュコライダーに対してレイキャストを行う
 	for (auto& meshCollider : _meshColliders)
 	{
@@ -43,7 +109,7 @@ bool CollisionManager::RayCast(const Vector3& start, const Vector3& direction, c
 			DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
 			DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
 			// レイVsAABB
-			if (Collision3D::IntersectRayVsAABB(Start, DirectionNorm, result.distance, aabbCenter, aabbRadii, nullptr, nullptr))
+			if (Collision3D::IntersectRayVsAABB(Start, DirectionNorm, distance, aabbCenter, aabbRadii, nullptr, nullptr))
 			{
 				HitResult tmpResult;
 				// エリアに含まれている三角形と判定
@@ -57,14 +123,14 @@ bool CollisionManager::RayCast(const Vector3& start, const Vector3& direction, c
 					};
 
 					// レイVs三角形
-					if (Collision3D::IntersectRayVsTriangle(Start, DirectionNorm, result.distance, TrianglePos, tmpResult))
+					if (Collision3D::IntersectRayVsTriangle(Start, DirectionNorm, distance, TrianglePos, tmpResult))
 					{
 						// 最近距離を更新
-						if (result.distance > tmpResult.distance)
+						if (distance > tmpResult.distance)
 						{
-							result.position		= tmpResult.position;
-							result.normal		= tmpResult.normal;
-							result.distance		= tmpResult.distance;
+							hitPosition		= tmpResult.position;
+							hitNormal		= tmpResult.normal;
+							distance		= tmpResult.distance;
 						}
 						hit = true;
 					}
@@ -77,54 +143,7 @@ bool CollisionManager::RayCast(const Vector3& start, const Vector3& direction, c
 }
 
 /// スフィアキャスト
-bool CollisionManager::SphereCast(const Vector3& start, const Vector3& direction, float radius, const float distance, RayCastResult& result)
-{
-	bool hit = false;
-	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
-	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
-
-	result.distance = distance;
-	// 各メッシュコライダーに対してスフィアキャスト行う
-	for (auto& meshCollider : _meshColliders)
-	{
-		for (auto& area : meshCollider->GetCollisionMesh().areas)
-		{
-			DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
-			DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
-			// スフィアキャストVSAABB
-			if (Collision3D::IntersectCapsuleVsAABB(Start, DirectionNorm, result.distance, radius, slubCenter, slubRadii))
-			{
-				HitResult tmpResult;
-				// エリアに含まれている三角形と判定
-				for (const int& index : area.triangleIndices)
-				{
-					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
-					DirectX::XMVECTOR TrianglePos[3] = {
-						DirectX::XMLoadFloat3(&triangle.positions[0]),
-						DirectX::XMLoadFloat3(&triangle.positions[1]),
-						DirectX::XMLoadFloat3(&triangle.positions[2])
-					};
-
-					// スフィアキャストVs三角形
-					if (Collision3D::IntersectSphereCastVsTriangle(Start, DirectionNorm, result.distance, radius, TrianglePos, &tmpResult, false))
-					{
-						// 最近距離を更新
-						if (result.distance > tmpResult.distance)
-						{
-							result.position = tmpResult.position;
-							result.normal = tmpResult.normal;
-							result.distance = tmpResult.distance;
-						}
-						hit = true;
-					}
-				}
-			}
-		}
-	}
-
-	return hit;
-}
-bool CollisionManager::SphereCast(const Vector3& origin, const Vector3& direction, float radius, float& distance, Vector3& hitPosition, Vector3& hitNormal, bool drawHitMesh)
+bool CollisionManager::SphereCast(const Vector3& origin, const Vector3& direction, float radius, float& distance, Vector3& hitPosition, Vector3& hitNormal)
 {
 	bool hit = false;
 	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&origin);

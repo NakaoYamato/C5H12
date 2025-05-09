@@ -10,14 +10,6 @@
 #include "../Component/Collider/CapsuleCollider.h"
 #include "../Component/Collider/MeshCollider.h"
 
-struct RayCastResult
-{
-	Vector3 position	= _VECTOR3_ZERO;// 衝突位置
-	Vector3 normal		= _VECTOR3_UP;  // 衝突法線
-	float distance		= FLT_MAX;		// 衝突距離
-	int materialIndex	= -1;			// マテリアルインデックス
-};
-
 class CollisionManager
 {
 public:
@@ -30,46 +22,40 @@ public:
 	// GUI描画処理
 	void DrawGui();
 
-#pragma region キャスト
+#pragma region キャスト	
 	/// <summary>
 	/// レイキャスト
 	/// </summary>
 	/// <param name="start">レイ開始位置（ワールド）</param>
 	/// <param name="direction">レイ方向（要正規化）</param>
-	/// <param name="distance">距離</param>
-	/// <param name="result">結果</param>
+	/// <param name="distance">IN OUT 距離</param>
+	/// <param name="hitPosition">OUT 衝突点</param>
+	/// <param name="hitNormal">OUT 衝突点の法線</param>
 	/// <returns></returns>
 	bool RayCast(
 		const Vector3& start,
 		const Vector3& direction,
-		const float distance,
-		RayCastResult& result);
+		float& distance,
+		Vector3& hitPosition,
+		Vector3& hitNormal);
 
 	/// <summary>
 	/// スフィアキャスト
 	/// </summary>
-	/// <param name="start">開始位置（ワールド）</param>
+	/// <param name="origin">開始位置（ワールド）</param>
 	/// <param name="direction">方向（要正規化）</param>
 	/// <param name="radius">半径</param>
-	/// <param name="distance">距離</param>
-	/// <param name="result">結果</param>
+	/// <param name="distance">IN OUT 距離</param>
+	/// <param name="hitPosition">OUT 衝突点</param>
+	/// <param name="hitNormal">OUT 衝突点の法線</param>
 	/// <returns></returns>
-	bool SphereCast(
-		const Vector3& start,
-		const Vector3& direction,
-		float radius,
-		const float distance,
-		RayCastResult& result);
-
-	// スフィアキャスト
 	bool SphereCast(
 		const Vector3& origin,
 		const Vector3& direction/*must normal*/,
 		float radius,
 		float& distance/*in out*/,
 		Vector3& hitPosition/*out*/,
-		Vector3& hitNormal/*out*/,
-		bool drawHitMesh = false);
+		Vector3& hitNormal/*out*/);
 #pragma endregion
 
 public:

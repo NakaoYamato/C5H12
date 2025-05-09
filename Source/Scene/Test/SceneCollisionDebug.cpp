@@ -33,19 +33,31 @@ void SceneCollisionDebug::Initialize()
 
 		stage->AddCollider<MeshCollider>();
     }
+    for (float f = 0.0f; f <= 10.0f; ++f)
     {
-        auto box = RegisterActor<Actor>("box", ActorTag::Player);
+        auto box = RegisterActor<Actor>("box" + std::to_string(f), ActorTag::Player);
         auto boxC = box->AddComponent<ShapeController>();
 		box->AddCollider<BoxCollider>();
-    }
+		box->GetTransform().SetPositionX(f);
+		box->GetTransform().SetPositionY(0.5f);
+		boxC->SetType(ShapeType::Box);
+	}
+    for (float f = 0.0f; f <= 10.0f; ++f)
     {
-        auto sphere = RegisterActor<Actor>("sphere", ActorTag::Player);
+        auto sphere = RegisterActor<Actor>("sphere" + std::to_string(f), ActorTag::Player);
         auto sphereC = sphere->AddComponent<ShapeController>(ShapeType::Sphere);
+        sphere->GetTransform().SetPositionX(f);
+        sphere->GetTransform().SetPositionZ(2.0f);
+        sphere->GetTransform().SetPositionY(0.5f);
         sphere->AddCollider<SphereCollider>();
     }
+    for (float f = 0.0f; f <= 10.0f; ++f)
     {
-        auto capsule = RegisterActor<Actor>("capsule", ActorTag::Player);
+        auto capsule = RegisterActor<Actor>("capsule" + std::to_string(f), ActorTag::Player);
         auto capsuleC = capsule->AddComponent<ShapeController>(ShapeType::Capsule);
+        capsule->GetTransform().SetPositionX(f);
+        capsule->GetTransform().SetPositionZ(-2.0f);
+        capsule->GetTransform().SetPositionY(0.5f);
         capsule->AddCollider<CapsuleCollider>();
     }
     {

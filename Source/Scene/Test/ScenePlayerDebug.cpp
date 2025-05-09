@@ -27,4 +27,9 @@ void ScenePlayerDebug::Initialize()
     {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
     }
+    // •‰‰×ƒeƒXƒg
+    //for (int i = 0; i < 10; ++i)
+    //{
+    //    auto player = RegisterActor<PlayerActor>("Player" + std::to_string(i), ActorTag::Player, false);
+    //}
 }

@@ -17,6 +17,11 @@ public:
 	// 開始処理
 	virtual void Start() {}
 
+	/// <summary>
+	/// 削除時処理
+	/// </summary>
+	virtual void OnDestroy() {}
+
 	// 更新処理
 	virtual void Update(float elapsedTime) {}
 

@@ -36,9 +36,6 @@ public:
 	/// ˆê’èŠÔŠu‚ÌXVˆ—
 	void FixedUpdate();
 
-	// “–‚½‚è”»’èˆ—
-	void Judge();
-
 	// •`‰æˆ—
 	void Render(const RenderContext& rc);
 

@@ -30,6 +30,7 @@ class Vector4;
 #define _VECTOR4_RED    Vector4(1.0f, 0.0f, 0.0f, 1.0f)
 #define _VECTOR4_GREEN  Vector4(0.0f, 1.0f, 0.0f, 1.0f)
 #define _VECTOR4_BLUE   Vector4(0.0f, 0.0f, 1.0f, 1.0f)
+#define _VECTOR4_YELLOW Vector4(1.0f, 1.0f, 0.0f, 1.0f)
 #pragma endregion
 
 #pragma region 関数
@@ -125,6 +126,24 @@ public:
 
     bool operator == (const Vector2&) const;
     bool operator != (const Vector2&) const;
+
+#pragma region 関数
+    //  VECTOR2の長さの二乗を取得
+	float Length() const { return Vec2Length(*this); }
+    //  VECTOR2の長さを取得
+	float LengthSq() const { return Vec2LengthSq(*this); }
+    //  VECTOR2対VECTOR2の内積
+	float Dot(const Vector2& v) const { return Vec2Dot(*this, v); }
+    //  VECTOR2対VECTOR2の外積
+    Vector2 Cross(const Vector2& rhs) const { return Vec2Cross(*this, rhs); }
+    //  VECTOR2を単位化
+	Vector2 Normalize() const { return Vec2Normalize(*this); }
+    //  thisとdstで保管処理
+	Vector2 Lerp(const Vector2& dst, float t, float (*Easing)(float) = nullptr) const
+	{
+		return Vec2Lerp(*this, dst, t, Easing);
+	}
+#pragma endregion
 };
 //--------------------------------------------------
 // VECTOR3
@@ -154,6 +173,64 @@ public:
 
     bool operator == (const Vector3&) const;
     bool operator != (const Vector3&) const;
+#pragma region 関数
+    //  VECTOR3の長さの二乗を取得
+	float Length() const { return Vec3Length(*this); }
+    //  VECTOR3の長さを取得
+	float LengthSq() const { return Vec3LengthSq(*this); }
+    //  VECTOR3対VECTOR3の内積
+	float Dot(const Vector3& v) const { return Vec3Dot(*this, v); }
+    //  VECTOR3対VECTOR3の外積
+	Vector3 Cross(const Vector3& rhs) const { return Vec3Cross(*this, rhs); }
+    //  VECTOR3を単位化
+	Vector3 Normalize() const { return Vec3Normalize(*this); }
+    //  thisとdstで保管処理
+	Vector3 Lerp(const Vector3& dst, float t, float (*Easing)(float) = nullptr) const
+	{
+		return Vec3Lerp(*this, dst, t, Easing);
+	}
+    //  VECTOR3を度数法に変換
+	Vector3 ConvertToDegrees() const { return Vec3ConvertToDegrees(*this); }
+    //  VECTOR3を弧度法に変換
+	Vector3 ConvertToRadians() const { return Vec3ConvertToRadians(*this); }
+    //  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
+	Vector3 FromRotationMatrix(const DirectX::XMFLOAT4X4& r) const
+	{
+		return Vec3FromRotationMatrix(r);
+	}
+    //  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
+	Vector3 FromRotationMatrix(const DirectX::XMMATRIX& r) const
+	{
+		return Vec3FromRotationMatrix(r);
+	}
+    // 行列との掛け算
+	Vector3 TransformCoord(const DirectX::XMFLOAT4X4& m) const
+	{
+		return Vec3TransformCoord(*this, m);
+	}
+    // 行列との掛け算
+	Vector3 TransformCoord(const DirectX::XMMATRIX& m) const
+	{
+		return Vec3TransformCoord(*this, m);
+	}
+    // 行列との掛け算
+	Vector3 TransformNormal(const DirectX::XMFLOAT4X4& m) const
+	{
+		return Vec3TransformNormal(*this, m);
+	}
+    // 行列との掛け算
+	Vector3 TransformNormal(const DirectX::XMMATRIX& m) const
+	{
+		return Vec3TransformNormal(*this, m);
+	}
+    // 各軸の角度取得
+    /// <param name="normalVec">正規化されたベクトル</param>
+    /// <returns>ラジアン</returns>
+	Vector3 CalcAngle() const
+	{
+		return Vec3CalcAngle(*this);
+	}
+#pragma endregion
 };
 //--------------------------------------------------
 // VECTOR4

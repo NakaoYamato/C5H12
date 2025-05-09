@@ -82,6 +82,8 @@ void ActorManager::Update(float elapsedTime)
 	// 削除処理
 	for (const std::shared_ptr<Actor>& actor : _removeActors)
 	{
+		actor->OnDestroy();
+
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
 			std::vector<std::shared_ptr<Actor>>::iterator itStart = std::find(_startActors[i].begin(), _startActors[i].end(), actor);
@@ -114,59 +116,6 @@ void ActorManager::FixedUpdate()
 		for (auto& actor : _updateActors[i])
 		{
 			actor->FixedUpdate();
-		}
-	}
-}
-
-// 当たり判定処理
-void ActorManager::Judge()
-{
-	size_t actorSize{};
-	{
-		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		{
-			actorSize += _updateActors[i].size();
-		}
-	}
-	// 総当たりで処理
-	for (size_t srcTag = 0; srcTag < static_cast<size_t>(ActorTag::ActorTagMax); ++srcTag)
-	{
-		for (auto& srcActor : _updateActors[srcTag])
-		{
-			// 起動チェック
-			if (!srcActor->IsActive())
-				continue;
-
-			// 当たり判定を行う対象を取得
-			for (auto& [dstTag, judgeFlag] : srcActor->GetJudgeTags())
-			{
-				// src側の当たり判定可能フラグをチェック
-				if (!judgeFlag)
-					continue;
-
-				const size_t dstTagIndex = static_cast<size_t>(dstTag);
-				// 上下関係確認
-				if (srcTag > dstTagIndex)
-					continue;
-
-				for (auto& dstActor : _updateActors[dstTagIndex])
-				{
-					// 起動チェック
-					if (!dstActor->IsActive())
-						continue;
-
-					// 同じアクターか確認
-					if (srcActor.get() == dstActor.get())
-						continue;
-
-					// dstがsrcと当たり判定を行うか確認
-					if (dstActor->GetJudgeTags().at(static_cast<ActorTag>(srcTag)) == false)
-						continue;
-
-					srcActor->Judge(dstActor.get());
-				}
-
-			}
 		}
 	}
 }

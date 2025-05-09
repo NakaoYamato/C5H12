@@ -6,6 +6,7 @@
 #include "../../Library/Graphics/Graphics.h"
 
 #include "../../Library/Component/ModelRenderer.h"
+#include "../../Source/Actor/Stage/StageActor.h"
 
 //èâä˙âª
 void SceneNetworkDebug::Initialize()
@@ -23,13 +24,6 @@ void SceneNetworkDebug::Initialize()
         auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
     }
     {
-        auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
-
-        stage->LoadModel("./Data/Model/Stage/Land/Land.fbx");
-        stage->GetTransform().SetPositionY(-2.7f);
-        stage->GetTransform().SetLengthScale(0.1f);
-        auto modelCont = stage->AddComponent<ModelRenderer>();
-
-        modelCont->SetRenderType(ModelRenderType::Static);
+        auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
     }
 }

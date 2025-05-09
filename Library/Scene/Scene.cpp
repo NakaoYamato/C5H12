@@ -51,7 +51,7 @@ void Scene::Update(float elapsedTime)
 	//JobSystem::Instance().WaitCalculationJob();
 
     // 当たり判定処理
-    _actorManager.Judge();
+	_collisionManager.Update();
 }
 
 /// 一定間隔の更新処理
@@ -128,6 +128,9 @@ void Scene::Render()
 
     // ゲームオブジェクトの描画
     _actorManager.Render(rc);
+
+    // 当たり判定の描画
+	_collisionManager.DebugRender(rc);
 
     //--------------------------------------------------------------------------------------
     // GBuffer生成
@@ -276,6 +279,9 @@ void Scene::DrawGui()
 {
     //　ゲームオブジェクトのGui表示
     _actorManager.DrawGui();
+
+	//　当たり判定のGui表示
+	_collisionManager.DrawGui();
 
     if(_skyMap)
         _skyMap->DrawGui();

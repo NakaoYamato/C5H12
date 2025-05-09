@@ -6,6 +6,7 @@
 #include "../../Library/2D/Sprite.h"
 #include "../../Library/3D/SkyMap.h"
 #include "../../Library/Actor/ActorManager.h"
+#include "../../Library/Collision/CollisionManager.h"
 
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/Component/Light/LightController.h"
@@ -99,6 +100,8 @@ public:
 #pragma region アクセサ
 	// アクター管理者取得
 	ActorManager& GetActorManager() { return _actorManager; }
+	// 当たり判定管理者取得
+	CollisionManager& GetCollisionManager() { return _collisionManager; }
 
 	// RenderContext取得
 	RenderContext& GetRenderContext() {
@@ -125,5 +128,6 @@ private:
 	Camera							_camera = {};
 	RenderContext					_renderContext;
 	ActorManager					_actorManager;
+	CollisionManager				_collisionManager;
 	bool							_ready = false;
 };

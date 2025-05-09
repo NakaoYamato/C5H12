@@ -6,7 +6,7 @@
 #include "../Graphics/Graphics.h"
 
 #include "../Component/Component.h"
-#include "../Component/Collider/ColliderBaseComponent.h"
+#include "../Component/Collider/ColliderBase.h"
 
 #include "../Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
@@ -18,14 +18,36 @@
 // 開始処理
 void Actor::Start()
 {
+	// 行列を更新
+	UpdateTransform();
+	if (_model != nullptr)
+	{
+		// モデルの行列を更新
+		_model->UpdateTransform(_transform.GetMatrix());
+	}
+
 	// 各コンポーネントのスタート処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Start();
 	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->Start();
+	}
+}
+
+/// 削除時処理
+void Actor::OnDestroy()
+{
+	// 各コンポーネントの削除処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->OnDestroy();
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->OnDestroy();
 	}
 }
 
@@ -40,13 +62,15 @@ void Actor::Update(float elapsedTime)
 	{
 		component->Update(elapsedTime);
 	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
-	{
-		collider->Update(elapsedTime);
-	}
 
 	// トランスフォーム更新
 	UpdateTransform();
+
+	// 当たり判定は行列に影響されるので、トランスフォーム更新後に行う
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->Update(elapsedTime);
+	}
 }
 
 /// 一定間隔の更新処理
@@ -60,7 +84,7 @@ void Actor::FixedUpdate()
 	{
 		component->FixedUpdate();
 	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->FixedUpdate();
 	}
@@ -78,7 +102,7 @@ void Actor::Render(const RenderContext& rc)
 	{
 		component->Render(rc);
 	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->Render(rc);
 	}
@@ -96,7 +120,7 @@ void Actor::DebugRender(const RenderContext& rc)
 	{
 		component->DebugRender(rc);
 	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->DebugRender(rc);
 	}
@@ -175,7 +199,7 @@ void Actor::DrawGui()
 			ImGui::Separator();
 
 			int index = 0;
-			for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
+			for (std::shared_ptr<ColliderBase>& collider : _colliders)
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -201,37 +225,6 @@ void Actor::DrawGui()
 	}
 }
 
-// 当たり判定処理
-void Actor::Judge(Actor* other)
-{
-	// 起動チェック
-	if (!_isActive)return;
-
-	Vector3 hitPosition{};
-	Vector3 hitNormal{};
-	float penetration{};
-	// 当たり判定コンポーネントの検索
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
-	{
-		// 接触対象の当たり判定コンポーネントの検索
-		const size_t otherComponentSize = other->GetColliderComponentSize();
-		for (size_t i = 0; i < otherComponentSize; ++i)
-		{
-			std::shared_ptr<ColliderBaseComponent> otherComponent = other->GetCollider(i);
-
-			// 当たり判定処理
-			const bool result = collider->Judge(other, otherComponent.get(),
-				hitPosition, hitNormal, penetration);
-			if (result)
-			{
-				// 各コンポーネントの接触処理
-				this->OnCollision(other, hitPosition, hitNormal, penetration);
-				other->OnCollision(this, hitPosition, -hitNormal, penetration);
-			}
-		}
-	}
-}
-
 // 接触時の処理
 void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3& hitNormal, const float& penetration)
 {
@@ -240,7 +233,7 @@ void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3&
 	{
 		component->OnCollision(other, hitPosition, hitNormal, penetration);
 	}
-	for (std::shared_ptr<ColliderBaseComponent>& collider : _colliders)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->OnCollision(other, hitPosition, hitNormal, penetration);
 	}

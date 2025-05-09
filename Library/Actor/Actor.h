@@ -11,7 +11,7 @@
 
 // 前方宣言
 class Component;
-class ColliderBaseComponent;
+class ColliderBase;
 enum class ActorTag;
 class Scene;
 
@@ -28,6 +28,11 @@ public:
 	/// 生成時処理
 	/// </summary>
 	virtual void OnCreate() {};
+
+	/// <summary>
+	/// 削除時処理
+	/// </summary>
+	virtual void OnDestroy();
 
 	/// <summary>
 	// 開始処理
@@ -75,12 +80,6 @@ public:
 	// Gui描画
 	/// </summary>
 	virtual void DrawGui();
-
-	/// <summary>
-	/// 当たり判定処理
-	/// </summary>
-	/// <param name="other">判定対象</param>
-	virtual void Judge(Actor* other);
 
 	/// <summary>
 	/// 接触時の処理
@@ -159,7 +158,7 @@ public:
 	template<class T>
 	std::shared_ptr<T> GetCollider()
 	{
-		for (std::shared_ptr<ColliderBaseComponent>& component : _colliders)
+		for (std::shared_ptr<ColliderBase>& component : _colliders)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
@@ -167,7 +166,7 @@ public:
 		}
 		return nullptr;
 	}
-	std::shared_ptr<ColliderBaseComponent> GetCollider(size_t index)
+	std::shared_ptr<ColliderBase> GetCollider(size_t index)
 	{
 		return _colliders[index];
 	}
@@ -226,7 +225,7 @@ protected:
 
 	std::vector<std::shared_ptr<Component>>	_components;
 	// 当たり判定コンポーネント
-	std::vector<std::shared_ptr<ColliderBaseComponent>>	_colliders;
+	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
 
 	// 各タグに対して当たり判定を行うかのフラグ
 	std::unordered_map<ActorTag, bool> _judgeTags;

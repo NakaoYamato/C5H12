@@ -770,7 +770,7 @@ void DebugRenderer::Render(
 			// 定数バッファ更新
 			CbMesh cbMesh;
 			DirectX::XMStoreFloat4x4(&cbMesh.worldViewProjection, WVP);
-			cbMesh.color = { 1,1,1,1 };
+			cbMesh.color = _VECTOR4_WHITE;
 			dc->UpdateSubresource(_constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 			// 頂点バッファ設定
 			stride = sizeof(Vector3);

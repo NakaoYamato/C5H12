@@ -30,10 +30,23 @@ void SceneCollisionDebug::Initialize()
         auto modelCont = stage->AddComponent<ModelRenderer>();
 
         modelCont->SetRenderType(ModelRenderType::Static);
+
+		stage->AddCollider<MeshCollider>();
     }
     {
         auto box = RegisterActor<Actor>("box", ActorTag::Player);
         auto boxC = box->AddComponent<ShapeController>();
+		box->AddCollider<BoxCollider>();
+    }
+    {
+        auto sphere = RegisterActor<Actor>("sphere", ActorTag::Player);
+        auto sphereC = sphere->AddComponent<ShapeController>(ShapeType::Sphere);
+        sphere->AddCollider<SphereCollider>();
+    }
+    {
+        auto capsule = RegisterActor<Actor>("capsule", ActorTag::Player);
+        auto capsuleC = capsule->AddComponent<ShapeController>(ShapeType::Capsule);
+        capsule->AddCollider<CapsuleCollider>();
     }
     {
         auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);

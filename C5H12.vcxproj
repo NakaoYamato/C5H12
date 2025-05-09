@@ -159,8 +159,13 @@
     <ClCompile Include="Library\Application\Main.cpp" />
     <ClCompile Include="Library\Camera\Camera.cpp" />
     <ClCompile Include="Library\Camera\CameraController.cpp" />
+    <ClCompile Include="Library\Collision\CollisionManager.cpp" />
     <ClCompile Include="Library\Component\Animator.cpp" />
     <ClCompile Include="Library\Component\CharactorController.cpp" />
+    <ClCompile Include="Library\Component\Collider\BoxCollider.cpp" />
+    <ClCompile Include="Library\Component\Collider\CapsuleCollider.cpp" />
+    <ClCompile Include="Library\Component\Collider\MeshCollider.cpp" />
+    <ClCompile Include="Library\Component\Collider\SphereCollider.cpp" />
     <ClCompile Include="Library\Component\Light\LightController.cpp" />
     <ClCompile Include="Library\Component\Light\PointLightController.cpp" />
     <ClCompile Include="Library\Component\ModelRenderer.cpp" />
@@ -231,6 +236,7 @@
     <ClCompile Include="Source\Actor\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Actor\Stage\StageActor.cpp" />
     <ClCompile Include="Source\Actor\WeaponActor.cpp" />
     <ClCompile Include="Source\Component\Camera\PlayerCameraController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerController.cpp" />
@@ -253,9 +259,14 @@
     <ClInclude Include="Library\Application\Framework.h" />
     <ClInclude Include="Library\Camera\Camera.h" />
     <ClInclude Include="Library\Camera\CameraController.h" />
+    <ClInclude Include="Library\Collision\CollisionManager.h" />
     <ClInclude Include="Library\Component\Animator.h" />
     <ClInclude Include="Library\Component\CharactorController.h" />
-    <ClInclude Include="Library\Component\Collider\ColliderBaseComponent.h" />
+    <ClInclude Include="Library\Component\Collider\BoxCollider.h" />
+    <ClInclude Include="Library\Component\Collider\CapsuleCollider.h" />
+    <ClInclude Include="Library\Component\Collider\ColliderBase.h" />
+    <ClInclude Include="Library\Component\Collider\MeshCollider.h" />
+    <ClInclude Include="Library\Component\Collider\SphereCollider.h" />
     <ClInclude Include="Library\Component\Component.h" />
     <ClInclude Include="Library\Component\Light\LightController.h" />
     <ClInclude Include="Library\Component\Light\PointLightController.h" />
@@ -337,6 +348,7 @@
     <ClInclude Include="Source\Actor\Player\PlayerActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h" />
+    <ClInclude Include="Source\Actor\Stage\StageActor.h" />
     <ClInclude Include="Source\Actor\WeaponActor.h" />
     <ClInclude Include="Source\Component\Camera\PlayerCameraController.h" />
     <ClInclude Include="Source\Component\Player\PlayerController.h" />

@@ -7,6 +7,7 @@
 
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/Actor/Player/PlayerActor.h"
+#include "../../Source/Actor/Stage/StageActor.h"
 
 void ScenePlayerDebug::Initialize()
 {
@@ -21,14 +22,7 @@ void ScenePlayerDebug::Initialize()
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
     {
-        auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
-
-        stage->LoadModel("./Data/Model/Stage/Land/Land.fbx");
-        stage->GetTransform().SetPositionY(-2.7f);
-        stage->GetTransform().SetLengthScale(0.1f);
-        auto modelCont = stage->AddComponent<ModelRenderer>();
-
-        modelCont->SetRenderType(ModelRenderType::Static);
+        auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
     }
     {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);

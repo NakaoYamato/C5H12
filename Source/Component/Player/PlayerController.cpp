@@ -10,7 +10,7 @@ void PlayerController::Start()
 
 	_charactorController.lock()->SetMaxSpeedXZ(5.0f);
 
-	//_animator.lock()->PlayAnimation(u8"Idle", false);
+	_animator.lock()->PlayAnimation(u8"Idle1", true);
 }
 
 void PlayerController::Update(float elapsedTime)

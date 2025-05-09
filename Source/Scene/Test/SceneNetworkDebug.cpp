@@ -5,6 +5,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
+#include "../../Library/Component/ModelRenderer.h"
 
 //初期化
 void SceneNetworkDebug::Initialize()
@@ -20,5 +21,14 @@ void SceneNetworkDebug::Initialize()
     // オブジェクト作成
     {
         auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
+    }
+    {
+        auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
+
+        stage->GetTransform().SetPositionY(-2.7f);
+        stage->GetTransform().SetLengthScale(0.1f);
+        auto modelCont = stage->AddComponent<ModelRenderer>("./Data/Model/Stage/Land/Land.fbx");
+
+        modelCont->SetRenderType(ModelRenderType::Static);
     }
 }

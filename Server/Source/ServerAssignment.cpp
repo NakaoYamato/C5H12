@@ -260,21 +260,25 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		// バッファデータからpayLoadStrにデータに読み込み
 		if (!buffer.Read(&playerMove, payloadLen)) {
 			std::cout << "Read Error" << std::endl;
+			return;
 		}
 
-		std::cout << "RECV Logout" << std::endl;
-		std::cout << playerMove.id << std::endl;
-		std::cout << "velocity x:" << playerMove.velocity.x;
-		std::cout << "y:" << playerMove.velocity.y;
-		std::cout << "z:" << playerMove.velocity.z << std::endl;
+		std::cout << "RECV Move" << std::endl;
+		//std::cout << playerMove.id << std::endl;
+		//std::cout << "position x:" << playerMove.position.x;
+		//std::cout << "y:" << playerMove.position.y;
+		//std::cout << "z:" << playerMove.position.z << std::endl;
+		//std::cout << "velocity x:" << playerMove.velocity.x;
+		//std::cout << "y:" << playerMove.velocity.y;
+		//std::cout << "z:" << playerMove.velocity.z << std::endl;
+		//std::cout << "state :" << playerMove.state;
 
 		// 送信元のプレイヤー情報を保存
         auto client = self->GetClientFromID(playerMove.id);
 		if (client != nullptr)
 		{
-			//client->player.position = payloadData.position;
-			//client->player.targetPosition = payloadData.clickPosition;
-			//client->player.state = Player::State::Move;
+			client->player.position = playerMove.position;
+			client->player.state = PlayerState::Move;
 		}
 	}
 	break;

@@ -40,11 +40,20 @@ namespace Network
 		Attack,
 	};
 
+	enum class PlayerState : int
+	{
+		None = 0,
+		Stop,
+		Move,
+		Attack,
+	};
+
 	struct Player
 	{
 		int id = -1;
 		DirectX::XMFLOAT3 position = {};
 		DirectX::XMFLOAT3 angle = {};
+		PlayerState state = PlayerState::None;
 	};
 
 	/// <summary>
@@ -101,7 +110,9 @@ namespace Network
 	struct PlayerMove
 	{
 		int id = -1;
+		DirectX::XMFLOAT3 position = {};
 		DirectX::XMFLOAT3 velocity = {};
+		int state = -1;
 	};
 
 #pragma endregion

@@ -58,6 +58,19 @@ void NetworkMediator::Update(float elapsedTime)
 void NetworkMediator::FixedUpdate()
 {
     Actor::FixedUpdate();
+
+	// プレイヤーの移動情報送信
+    auto myPlayer = _players[myPlayerId].lock();
+	if (myPlayer)
+    {
+		Network::PlayerMove playerMove{};
+		playerMove.id = myPlayerId;
+		playerMove.position = myPlayer->GetTransform().GetPosition();
+		playerMove.velocity = myPlayer->GetCharactorController()->GetVelocity();
+        playerMove.state = 0;
+        // サーバーに送信
+        _client->WriteRecord(Network::DataTag::Move, &playerMove, sizeof(playerMove));
+    }
 }
 
 void NetworkMediator::DrawGui()
@@ -122,7 +135,7 @@ void NetworkMediator::SetClientCollback()
 
             _logs.push_back("AllPlayerSync");
 
-            _allPlayerSync.push_back(allPlayerSync);
+            _allPlayerSyncs.push_back(allPlayerSync);
         });
     _client->SetPlayerLoginCallback(
         [this](const Network::PlayerLogin& playerLogin)
@@ -143,6 +156,16 @@ void NetworkMediator::SetClientCollback()
             _logs.push_back("PlayerLogout" + std::to_string(playerLogout.id));
 
             _playerLogouts.push_back(playerLogout);
+        });
+    _client->SetPlayerMoveCallback(
+        [this](const Network::PlayerMove& playerMove)
+        {
+            // スレッドセーフ
+            std::lock_guard<std::mutex> lock(_mutex);
+
+            _logs.push_back("PlayerMove" + std::to_string(playerMove.id));
+
+            _playerMoves.push_back(playerMove);
         });
 }
 
@@ -181,7 +204,7 @@ void NetworkMediator::ProcessNetworkData()
 
     //===============================================================================
     // 全体同期データの処理
-    for (auto& sync : _allPlayerSync)
+    for (auto& sync : _allPlayerSyncs)
     {
         // プレイヤー情報を更新
         for (int i = 0; i < NETWORK_MAX_CONNECTION; i++)
@@ -202,7 +225,7 @@ void NetworkMediator::ProcessNetworkData()
             player->GetTransform().SetRotation(sync.players[i].angle);
         }
     }
-    _allPlayerSync.clear();
+    _allPlayerSyncs.clear();
     //===============================================================================
 
     //===============================================================================
@@ -220,6 +243,27 @@ void NetworkMediator::ProcessNetworkData()
     }
     _playerLogouts.clear();
     //===============================================================================
+
+	//===============================================================================
+	// 移動データの処理
+	for (auto& move : _playerMoves)
+	{
+		// プレイヤー情報を更新
+		auto player = _players[move.id].lock();
+        if (!player)
+            continue;
+		// 自身の場合はスキップ
+		if (move.id == myPlayerId)
+			continue;
+		player->GetTransform().SetPosition(move.position);
+        auto charactor = player->GetCharactorController();
+		if (charactor)
+		{
+			charactor->SetVelocity(move.velocity);
+		}
+	}
+    _playerMoves.clear();
+	//===============================================================================
 }
 
 /// ネットワークGUIの表示

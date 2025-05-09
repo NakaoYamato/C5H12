@@ -7,6 +7,7 @@
 
 #include "../../Library/Math/Transform.h"
 #include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/3D/Model.h"
 
 // 前方宣言
 class Component;
@@ -143,10 +144,14 @@ protected:
 	virtual void DrawGuizmo();
 
 protected:
+	// 所属するシーン
 	Scene* _scene = nullptr;
-
+	// 名前
 	std::string			_name;
+	// トランスフォーム
 	Transform			_transform;
+	// モデル
+	std::shared_ptr<Model>	_model;
 
 	bool				_isActive = true;
 	bool				_isShowing = true;

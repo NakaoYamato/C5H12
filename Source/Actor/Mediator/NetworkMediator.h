@@ -94,7 +94,8 @@ private:
     std::vector<Network::PlayerLogin> _playerLogins;
     std::vector<Network::PlayerLogout> _playerLogouts;
     std::vector<Network::PlayerSync> _playerSyncs;
-    std::vector<Network::AllPlayerSync> _allPlayerSync;
+    std::vector<Network::AllPlayerSync> _allPlayerSyncs;
+    std::vector<Network::PlayerMove> _playerMoves;
 #pragma endregion
 
     // ƒf[ƒ^“¯ŠúŠÔŠu(•b)

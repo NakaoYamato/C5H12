@@ -5,7 +5,6 @@
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Source/Component/Player/PlayerInput.h"
-#include "../../Source/Component/Player/PlayerController.h"
 
 #include "../../Source/Component/Camera/PlayerCameraController.h"
 
@@ -20,9 +19,9 @@ void PlayerActor::OnCreate()
 	//auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
 	auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/ARPGWarrior/Animations/Generic/ARPG_Warrior.fbx");
 	auto animator = AddComponent<Animator>(modelRenderer->GetModel());
-	auto charactorController = AddComponent<CharactorController>();
+	_charactorController = AddComponent<CharactorController>();
 	auto playerInput = AddComponent<PlayerInput>();
-	auto playerController = AddComponent<PlayerController>(_isUserControlled);
+	_playerController = AddComponent<PlayerController>(_isUserControlled);
 
 	// Œ•¶¬
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);

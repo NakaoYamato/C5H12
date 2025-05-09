@@ -276,11 +276,11 @@ void SceneModelEditor::DrawEditAnimationGui()
 		auto& animations = model->GetResource()->GetAddressAnimations();
 		for (size_t i = 0; i < animations.size(); ++i)
 		{
-			//if (animations[i].name == _filterAnimationName)
-			//{
-			//	animations.erase(animations.begin() + i);
-			//	break;
-			//}
+			size_t pos = animations[i].name.find(_filterAnimationName);
+			if (pos != std::string::npos)
+			{
+				animations[i].name.erase(pos, _filterAnimationName.length());
+			}
 		}
 	}
 

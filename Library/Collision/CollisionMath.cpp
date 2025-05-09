@@ -787,6 +787,65 @@ namespace CollisionHelper
 		}
 	}
 
+	// OBBとOBBの衝突処理用の補助
+	class CollisionResultOBB
+	{
+	public:
+		CollisionResultOBB()
+		{
+			type = OBB_SAT_Type::NoHit;
+			hitAxis[0] = hitAxis[1] = -1;
+		}
+		~CollisionResultOBB() {}
+
+		enum class OBB_SAT_Type
+		{
+			NoHit,			// 衝突していない
+			Point2_Face1,	// 頂点と面で衝突
+			Point1_Face2,	// 頂点と面で衝突
+			Edge_Edge		// 辺と辺で衝突
+		};
+
+		OBB_SAT_Type type;	// 交差タイプ
+		int hitAxis[2];		// 交差軸
+        float penetration;	// めり込み量
+	};
+
+	// 分離軸への射影長の算出
+	inline float SumProjectedRadii(
+		const DirectX::XMFLOAT3& obbSize,
+		const DirectX::XMVECTOR localAxis[3],
+		const DirectX::XMVECTOR& separateAxis
+	)
+	{
+		return
+			fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(separateAxis, DirectX::XMVectorScale(localAxis[0], obbSize.x)))) +
+			fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(separateAxis, DirectX::XMVectorScale(localAxis[1], obbSize.y)))) +
+			fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(separateAxis, DirectX::XMVectorScale(localAxis[2], obbSize.z))));
+	}
+
+	// 外積分離軸判定用関数
+	inline bool SumProjectedRadiiCrossSAT(
+		const DirectX::XMFLOAT3& obb1Size, const DirectX::XMFLOAT3& obb2Size,
+		const DirectX::XMVECTOR obb1LocalAxis[3], const DirectX::XMVECTOR obb2LocalAxis[3],
+		DirectX::XMVECTOR L, const DirectX::XMVECTOR T, float& penetration)
+	{
+		float r1, r2;
+
+		if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(L)) > FLT_EPSILON)
+		{
+			L = DirectX::XMVector3Normalize(L);
+			float LT_Dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(L, T));
+
+			r1 = SumProjectedRadii(obb1Size, obb1LocalAxis, L);
+			r2 = SumProjectedRadii(obb2Size, obb2LocalAxis, L);
+			penetration = r1 + r2 - fabsf(LT_Dot);
+
+			if (penetration <= 0.0f) return false;
+		}
+
+		return true;
+	}
 }
 
 // 球Vs球
@@ -819,6 +878,57 @@ bool Collision3D::IntersectSphereVsSphere(
 	DirectX::XMStoreFloat3(&hitNormal, DirectX::XMVector3Normalize(Direction));
 	penetration = sumRadi - length;
 	return true;
+}
+
+/// 球Vsボックス
+bool Collision3D::IntersectSphereVsBox(
+	const Vector3& spherePos, float sphereRadius,
+	const Vector3& boxPos, const Vector3& boxRadii, const Vector3& boxAngle,
+	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+{
+	DirectX::XMMATRIX BoxM = {}, InvBoxM = {};
+	{
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&boxAngle));
+		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&boxPos));
+		BoxM = R * T;
+	}
+	InvBoxM = DirectX::XMMatrixInverse(nullptr, BoxM);
+
+	Vector3 localSpherePos = Vec3TransformCoord(spherePos, InvBoxM);
+
+	Vector3 nearPos = localSpherePos;
+	{
+		if (-boxRadii.x > nearPos.x)
+			nearPos.x = -boxRadii.x;
+		else if (boxRadii.x < nearPos.x)
+			nearPos.x = boxRadii.x;
+
+		if (-boxRadii.y > nearPos.y)
+			nearPos.y = -boxRadii.y;
+		else if (boxRadii.y < nearPos.y)
+			nearPos.y = boxRadii.y;
+
+		if (-boxRadii.z > nearPos.z)
+			nearPos.z = -boxRadii.z;
+		else if (boxRadii.z < nearPos.z)
+			nearPos.z = boxRadii.z;
+	}
+	// グローバル空間に変換
+	DirectX::XMStoreFloat3(&nearPos,
+		DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&nearPos), BoxM));
+
+    Vector3 vec = spherePos - nearPos;
+	float length = vec.Length();
+
+    // 衝突判定
+	if (length < sphereRadius)
+	{
+        hitPosition = nearPos;
+        hitNormal = vec.Normalize();
+		penetration = sphereRadius - length;
+        return true;
+	}
+	return false;
 }
 
 // 球Vs三角形
@@ -887,6 +997,206 @@ bool Collision3D::IntersectSphereVsCapsule(
 			cStart, cRadius,
 			hitPosition, hitNormal, penetration);
 	}
+}
+
+/// ボックスVsボックス
+bool Collision3D::IntersectBoxVsBox(
+	const Vector3& box0Pos, const Vector3& box0Radii, const Vector3& box0Angle,
+	const Vector3& box1Pos, const Vector3& box1Radii, const Vector3& box1Angle,
+	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+{
+	using namespace CollisionHelper;
+
+	CollisionResultOBB data{};
+
+	data.type = CollisionResultOBB::OBB_SAT_Type::NoHit;
+	data.penetration = FLT_MAX;	// めり込み量の初期値を最大にして比較を行い、小さい方で上書きすることで、最小のめり込み量の軸を求める
+
+	float r0, r1;			// 分離軸への射影長
+	float obb1RadXYZ[3] = { box0Radii.x, box0Radii.y, box0Radii.z };	// 半辺長をxyz個別にループ処理で扱うため配列に入れておく
+	float obb2RadXYZ[3] = { box1Radii.x, box1Radii.y, box1Radii.z };	// 半辺長をxyz個別にループ処理で扱うため配列に入れておく
+	DirectX::XMVECTOR L;	// 分離軸
+	DirectX::XMVECTOR Position0 = DirectX::XMLoadFloat3(&box0Pos);
+	DirectX::XMVECTOR Position1 = DirectX::XMLoadFloat3(&box1Pos);
+	DirectX::XMVECTOR T = DirectX::XMVectorSubtract(Position1, Position0);	// ２体間のベクトル
+
+	// 姿勢行列を算出し、ローカル座標軸を抽出し、ループ処理で扱うため配列に入れておく
+	DirectX::XMMATRIX Box0M = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&box0Angle));
+	DirectX::XMVECTOR obb0LocalAxis[3] = { Box0M.r[0], Box0M.r[1], Box0M.r[2] };
+	DirectX::XMMATRIX Box1M = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&box1Angle));
+	DirectX::XMVECTOR obb1LocalAxis[3] = { Box1M.r[0], Box1M.r[1], Box1M.r[2] };
+
+	// 分離軸：box0側の各ローカル軸での交差判定
+	for (int i = 0; i < 3; i++)
+	{
+		L = obb0LocalAxis[i];
+		float LT_Dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(L, T));
+
+		r0 = obb1RadXYZ[i];
+		r1 = SumProjectedRadii(box1Radii, obb1LocalAxis, L);
+		penetration = r0 + r1 - fabsf(LT_Dot);
+
+		// １回でも交差していない軸が見つかれば、２物体間が交差していないことが確定する
+		if (penetration <= 0.0f) return false;
+
+		//①衝突処理用パラメータを設定する
+		if (data.penetration > penetration)
+		{
+			data.penetration = penetration;
+			data.type = CollisionResultOBB::OBB_SAT_Type::Point2_Face1;
+			data.hitAxis[0] = i;
+		}
+	}
+
+	// 分離軸：box1側の各ローカル軸での交差判定
+	for (int i = 0; i < 3; i++)
+	{
+		L = obb1LocalAxis[i];
+		float LT_Dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(L, T));
+
+		r0 = SumProjectedRadii(box0Radii, obb0LocalAxis, L);
+		r1 = obb2RadXYZ[i];
+		penetration = r0 + r1 - fabsf(LT_Dot);
+
+		// １回でも交差していない軸が見つかれば、２物体間が交差していないことが確定する
+		if (penetration <= 0.0f) return false;
+
+		//①衝突処理用パラメータを設定する
+		if (data.penetration > penetration)
+		{
+			data.penetration = penetration;
+			data.type = CollisionResultOBB::OBB_SAT_Type::Point1_Face2;
+			data.hitAxis[1] = i;
+		}
+	}
+
+	// 分離軸：外積分離軸での交差判定
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			L = DirectX::XMVector3Cross(obb0LocalAxis[i], obb1LocalAxis[j]);
+			if (SumProjectedRadiiCrossSAT(box0Radii, box1Radii, obb0LocalAxis, obb1LocalAxis, L, T, penetration))
+			{
+				//①衝突処理用パラメータを設定する
+				if (data.penetration > penetration)
+				{
+					data.penetration = penetration;
+					data.type = CollisionResultOBB::OBB_SAT_Type::Edge_Edge;
+					data.hitAxis[0] = i;
+					data.hitAxis[1] = j;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	if (data.type == CollisionResultOBB::OBB_SAT_Type::NoHit) return false;	// 念のためチェック
+
+	// ここまで来たら交差確定。衝突処理に必要な残りのパラメータを算出する
+	DirectX::XMVECTOR norm = {};
+	DirectX::XMVECTOR point = {};
+	DirectX::XMVECTOR vec = {};
+
+	// 分離軸：box0側のいずれかのローカル軸が最小めり込み量だった場合、box1の頂点とbox0の面が衝突している
+	if (data.type == CollisionResultOBB::OBB_SAT_Type::Point2_Face1)
+	{
+		vec = T;
+
+		// この衝突の場合、法線は交差軸となる。位置関係と分離軸の向きから面法線の向きを補正する
+		if (data.hitAxis[0] < 0) return false;
+		norm = obb0LocalAxis[data.hitAxis[0]];
+		norm = DirectX::XMVector3Normalize(norm);
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(norm, vec)) > 0.0f)
+		{
+			norm = DirectX::XMVectorScale(norm, -1);
+		}
+
+		// 衝突点の算出。この衝突の場合、頂点が衝突点となる
+		// 半辺長を代入しておき、その各軸が位置関係からプラスマイナスのどちら側になるかを判定し補正する
+		point = DirectX::XMLoadFloat3(&box1Radii);
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb1LocalAxis[0], vec)) > 0.0f) point.m128_f32[0] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb1LocalAxis[1], vec)) > 0.0f) point.m128_f32[1] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb1LocalAxis[2], vec)) > 0.0f) point.m128_f32[2] *= -1.0f;
+
+		// 姿勢クォータニオンを使って、現在の姿勢をpointに反映し、positionに加算して、衝突点を求める
+		point = DirectX::XMVectorAdd(DirectX::XMVector3Rotate(point, DirectX::XMQuaternionRotationMatrix(Box1M)), Position1);
+	}
+	// 分離軸：box1側のいずれかのローカル軸が最小めり込み量だった場合、box0の頂点とbox1の面が衝突している
+	else if (data.type == CollisionResultOBB::OBB_SAT_Type::Point1_Face2)
+	{
+		vec = DirectX::XMVectorScale(T, -1);
+
+		// この衝突の場合、法線は交差軸となる。位置関係と分離軸の向きから面法線の向きを補正する
+		if (data.hitAxis[1] < 0) return false;
+		norm = obb1LocalAxis[data.hitAxis[1]];
+		norm = DirectX::XMVector3Normalize(norm);
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(norm, vec)) < 0.0f)
+		{
+			norm = DirectX::XMVectorScale(norm, -1);
+		}
+
+		// 衝突点の算出。この衝突の場合、頂点が衝突点となる
+		// 半辺長を代入しておき、その各軸が位置関係からプラスマイナスのどちら側になるかを判定し補正する
+		point = DirectX::XMLoadFloat3(&box0Radii);
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb0LocalAxis[0], vec)) > 0.0f) point.m128_f32[0] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb0LocalAxis[1], vec)) > 0.0f) point.m128_f32[1] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb0LocalAxis[2], vec)) > 0.0f) point.m128_f32[2] *= -1.0f;
+
+		// 姿勢クォータニオンを使って、現在の姿勢をpointに反映し、positionに加算して、衝突点を求める
+		point = DirectX::XMVectorAdd(DirectX::XMVector3Rotate(point, DirectX::XMQuaternionRotationMatrix(Box0M)), Position0);
+	}
+	// 分離軸：いずれかの外積分離軸が最小めり込み量だった場合、辺と辺同士の衝突となる。
+	else if (data.type == CollisionResultOBB::OBB_SAT_Type::Edge_Edge)
+	{
+		// この衝突の場合、法線は交差軸同士の外積となる。その後、位置関係と法線の向きから法線の向きを補正する
+		if (data.hitAxis[0] < 0 || data.hitAxis[1] < 0) return false;
+
+		vec = T;
+
+		norm = DirectX::XMVector3Cross(obb0LocalAxis[data.hitAxis[0]], obb1LocalAxis[data.hitAxis[1]]);
+		norm = DirectX::XMVector3Normalize(norm);
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(norm, vec)) > 0.0f)
+		{
+			norm = DirectX::XMVectorScale(norm, -1);
+		}
+
+		// 衝突点の算出。この衝突の場合、各軸上のポイントを算出し、２点間の中間点を近似衝突点とする。
+		// 半辺長を代入しておき、その各軸が位置関係からプラスマイナスのどちら側になるかを判定し補正する
+		DirectX::XMVECTOR p[2] = { DirectX::XMLoadFloat3(&box0Radii), DirectX::XMLoadFloat3(&box1Radii) };
+
+		// ヒットした軸上にあるはずなので、data.hitAxis[0]軸の補正値は０にする
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb1LocalAxis[0], vec)) > 0.0f) p[0].m128_f32[0] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb1LocalAxis[1], vec)) > 0.0f) p[0].m128_f32[1] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb1LocalAxis[2], vec)) > 0.0f) p[0].m128_f32[2] *= -1.0f;
+		p[0].m128_f32[data.hitAxis[0]] = 0.0f;
+
+		// 姿勢クォータニオンを使って、現在の姿勢をpointに反映し、positionに加算して、疑似衝突点を求める
+		p[0] = DirectX::XMVectorAdd(DirectX::XMVector3Rotate(p[0], DirectX::XMQuaternionRotationMatrix(Box1M)), Position1);
+
+		// ヒットした軸上にあるはずなので、data.hitAxis[1]軸の補正値は０にする
+		vec = DirectX::XMVectorScale(vec, 1.0f);
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb0LocalAxis[0], vec)) > 0.0f) p[1].m128_f32[0] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb0LocalAxis[1], vec)) > 0.0f) p[1].m128_f32[1] *= -1.0f;
+		if (DirectX::XMVectorGetX(DirectX::XMVector3Dot(obb0LocalAxis[2], vec)) > 0.0f) p[1].m128_f32[2] *= -1.0f;
+		p[1].m128_f32[data.hitAxis[1]] = 0.0f;
+
+		// 姿勢クォータニオンを使って、現在の姿勢をpointに反映し、positionに加算して、疑似衝突点を求める
+		p[1] = DirectX::XMVectorAdd(DirectX::XMVector3Rotate(p[1], DirectX::XMQuaternionRotationMatrix(Box0M)), Position0);
+
+		// ２点の疑似衝突点から平均を取り衝突点を求める
+		point = DirectX::XMVectorScale(DirectX::XMVectorAdd(p[0], p[1]), 0.5f);
+	}
+
+	// 計算した法線と衝突点を反映する
+	DirectX::XMStoreFloat3(&hitPosition, point);
+	DirectX::XMStoreFloat3(&hitNormal, norm);
+    penetration = data.penetration;
+
+	return true;
 }
 
 /// カプセルVsカプセル

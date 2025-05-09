@@ -11,8 +11,6 @@ void CollisionManager::Update()
 	Vector3 hitNormal{};
 	float penetration = 0.0f;
 
-	// 
-
 	// 球の当たり判定
 	for (auto& sphereA : _sphereColliders)
 	{
@@ -35,39 +33,106 @@ void CollisionManager::Update()
 				hitNormal,
 				penetration))
 			{
-				// トリガーでなければ押し出し処理
-				if (!sphereA->IsTrigger())
-				{
-					sphereA->GetActor()->GetTransform().SetPosition(
-						sphereA->GetActor()->GetTransform().GetPosition() + hitNormal * penetration);
-				}
-				sphereA->GetActor()->OnCollision(
-					sphereB->GetActor().get(),
+                // 接触解消
+				sphereA->Resolve(sphereB->GetActor().get(),
 					hitPosition,
 					hitNormal,
 					penetration);
-
-				if (!sphereB->IsTrigger())
-				{
-					sphereB->GetActor()->GetTransform().SetPosition(
-						sphereB->GetActor()->GetTransform().GetPosition() - hitNormal * penetration);
-				}
-				sphereB->GetActor()->OnCollision(
-					sphereA->GetActor().get(),
-					hitPosition,
-					-hitNormal,
-					penetration);
+                sphereB->Resolve(sphereA->GetActor().get(),
+                    hitPosition,
+                    -hitNormal,
+                    penetration);
 			}
 		}
 
-		//for (auto& boxCollider : _boxColliders)
-		//{
-		//	Collision3D::IntersectSphereVsAABB(
-		//		sphereCollider->GetPosition(),
-		//		sphereCollider->GetRadius(),
-		//		boxCollider->GetPosition(),
-		//		boxCollider->GetSize());
-		//}
+		// 球Vsボックス
+        for (auto& box : _boxColliders)
+        {
+            Transform& transformB = box->GetActor()->GetTransform();
+            if (Collision3D::IntersectSphereVsBox(
+                sphereA->GetPosition().TransformCoord(transformA.GetMatrix()),
+                sphereA->GetRadius(),
+                box->GetPosition().TransformCoord(transformB.GetMatrix()),
+                box->GetHalfSize(),
+                transformB.GetRotation(),
+                hitPosition,
+                hitNormal,
+                penetration))
+            {
+                // 接触解消
+                sphereA->Resolve(box->GetActor().get(),
+                    hitPosition,
+                    hitNormal,
+                    penetration);
+                box->Resolve(sphereA->GetActor().get(),
+                    hitPosition,
+                    -hitNormal,
+                    penetration);
+            }
+        }
+
+        // 球Vsカプセル
+        for (auto& capsule : _capsuleColliders)
+        {
+            Transform& transformB = capsule->GetActor()->GetTransform();
+            if (Collision3D::IntersectSphereVsCapsule(
+                sphereA->GetPosition().TransformCoord(transformA.GetMatrix()),
+                sphereA->GetRadius(),
+                capsule->GetStart().TransformCoord(transformB.GetMatrix()),
+                capsule->GetEnd().TransformCoord(transformB.GetMatrix()),
+                capsule->GetRadius(),
+                hitPosition,
+                hitNormal,
+                penetration))
+            {
+                // 接触解消
+                sphereA->Resolve(capsule->GetActor().get(),
+                    hitPosition,
+                    hitNormal,
+                    penetration);
+                capsule->Resolve(sphereA->GetActor().get(),
+                    hitPosition,
+                    -hitNormal,
+                    penetration);
+            }
+        }
+	}
+
+    // ボックスの当たり判定
+	for (auto& boxA : _boxColliders)
+	{
+		Transform& transformA = boxA->GetActor()->GetTransform();
+
+        // ボックスVsボックス
+		for (auto& boxB : _boxColliders)
+		{
+			// 同じ場合は処理しない
+			if (boxA == boxB)
+				continue;
+
+			Transform& transformB = boxB->GetActor()->GetTransform();
+			if (Collision3D::IntersectBoxVsBox(
+                boxA->GetPosition().TransformCoord(transformA.GetMatrix()),
+                boxA->GetHalfSize(),
+                transformA.GetRotation(),
+                boxB->GetPosition().TransformCoord(transformB.GetMatrix()),
+                boxB->GetHalfSize(),
+                transformB.GetRotation(),
+                hitPosition,
+                hitNormal,
+                penetration))
+            {
+                // 接触解消
+                boxA->Resolve(boxB->GetActor().get(),
+                    hitPosition,
+                    hitNormal,
+                    penetration);
+                boxB->Resolve(boxA->GetActor().get(),
+                    hitPosition,
+                    -hitNormal,
+                    penetration);
+            }
+		}
 	}
 }
 

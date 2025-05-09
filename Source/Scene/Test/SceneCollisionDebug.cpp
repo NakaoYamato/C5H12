@@ -38,7 +38,7 @@ void SceneCollisionDebug::Initialize()
         auto box = RegisterActor<Actor>("box" + std::to_string(f), ActorTag::Player);
         auto boxC = box->AddComponent<ShapeController>();
 		box->AddCollider<BoxCollider>();
-		box->GetTransform().SetPositionX(f);
+		box->GetTransform().SetPositionX(2.0f * f);
 		box->GetTransform().SetPositionY(0.5f);
 		boxC->SetType(ShapeType::Box);
 	}
@@ -46,7 +46,7 @@ void SceneCollisionDebug::Initialize()
     {
         auto sphere = RegisterActor<Actor>("sphere" + std::to_string(f), ActorTag::Player);
         auto sphereC = sphere->AddComponent<ShapeController>(ShapeType::Sphere);
-        sphere->GetTransform().SetPositionX(f);
+        sphere->GetTransform().SetPositionX(2.0f * f);
         sphere->GetTransform().SetPositionZ(2.0f);
         sphere->GetTransform().SetPositionY(0.5f);
         sphere->AddCollider<SphereCollider>();
@@ -55,12 +55,12 @@ void SceneCollisionDebug::Initialize()
     {
         auto capsule = RegisterActor<Actor>("capsule" + std::to_string(f), ActorTag::Player);
         auto capsuleC = capsule->AddComponent<ShapeController>(ShapeType::Capsule);
-        capsule->GetTransform().SetPositionX(f);
+        capsule->GetTransform().SetPositionX(2.0f * f);
         capsule->GetTransform().SetPositionZ(-2.0f);
         capsule->GetTransform().SetPositionY(0.5f);
         capsule->AddCollider<CapsuleCollider>();
     }
     {
-        auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
+        //auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
     }
 }

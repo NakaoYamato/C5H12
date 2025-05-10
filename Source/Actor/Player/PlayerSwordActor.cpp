@@ -11,7 +11,7 @@ void PlayerSwordActor::OnCreate()
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetScale(0.2f);
 	GetTransform().SetPosition(Vector3(0.4f, 0.05f, 0.03f));
-	GetTransform().SetRotation(Vector3::ConvertToRadians(Vector3(0.0f, 0.0f, 90.0f)));
+	GetTransform().SetRotation(Vector3::ToRadians(Vector3(0.0f, 0.0f, 90.0f)));
 	// コンポーネント追加
 	auto modelRenderer = AddComponent<ModelRenderer>();
 }

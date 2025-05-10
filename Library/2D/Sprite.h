@@ -48,12 +48,12 @@ public:
 	/// <param name="color">ï`âÊêF</param>
 	void Render(ID3D11DeviceContext* immediateContext,
 		const Vector2& position,
-		const Vector2& scale = Vector2(1.0f, 1.0f),
-		const Vector2& texPos = Vector2(0.0f, 0.0f),
-		const Vector2& texSize = Vector2(0.0f, 0.0f),
-		const Vector2& center = Vector2(0.0f, 0.0f), 
+		const Vector2& scale = Vector2::One,
+		const Vector2& texPos = Vector2::Zero,
+		const Vector2& texSize = Vector2::Zero,
+		const Vector2& center = Vector2::Zero,
 		float angle = 0.0f,
-		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f)) const;
+		const Vector4& color = Vector4::White) const;
 
 	/// <summary>
 	/// FullscreenQuadÇÃë„ÇÌÇË

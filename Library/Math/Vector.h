@@ -138,9 +138,9 @@ public:
     //  t   : 経過時間(0.0f ~ 1.0f)
     static Vector3 Lerp(const Vector3& src, const Vector3& dst, float t, float (*Easing)(float) = nullptr);
     //  VECTOR3を度数法に変換
-    static Vector3 ConvertToDegrees(const Vector3& v);
+    static Vector3 ToDegrees(const Vector3& v);
     //  VECTOR3を弧度法に変換
-    static Vector3 ConvertToRadians(const Vector3& v);
+    static Vector3 ToRadians(const Vector3& v);
     //  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
     static Vector3 FromRotationMatrix(const DirectX::XMFLOAT4X4& r);
     //  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
@@ -176,9 +176,9 @@ public:
 		return Vector3::Lerp(*this, dst, t, Easing);
 	}
     //  VECTOR3を度数法に変換
-	Vector3 ConvertToDegrees() const { return Vector3::ConvertToDegrees(*this); }
+	Vector3 ToDegrees() const { return Vector3::ToDegrees(*this); }
     //  VECTOR3を弧度法に変換
-	Vector3 ConvertToRadians() const { return Vector3::ConvertToRadians(*this); }
+	Vector3 ToRadians() const { return Vector3::ToRadians(*this); }
     // 行列との掛け算
 	Vector3 TransformCoord(const DirectX::XMFLOAT4X4& m) const
 	{

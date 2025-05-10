@@ -394,7 +394,7 @@ void DragonActor::SetModelAnimation()
 			animationName);
 
 		// アニメーションを右手Z-UPに変換
-		Quaternion q = Quaternion::FromRollPitchYaw(Vector3::ConvertToRadians(Vector3(90.0f, 0.0f, 0.0f)));
+		Quaternion q = Quaternion::FromRollPitchYaw(Vector3::ToRadians(Vector3(90.0f, 0.0f, 0.0f)));
 		size_t index = GetModel().lock()->GetResource()->GetAddressAnimations().size() - 1;
 		auto& animation = GetModel().lock()->GetResource()->GetAddressAnimations()[index];
 		//for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)

@@ -12,7 +12,7 @@
 class SkyMap
 {
 public:
-    static constexpr size_t LUT_INDEX_MAX = 3;
+    static constexpr size_t LutMaxIndex = 3;
 
 public:
     SkyMap(ID3D11Device* device, const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM);
@@ -36,7 +36,7 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _diffuseIEMSRV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _specularIEMSRV;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _lutSRVs[LUT_INDEX_MAX];
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _lutSRVs[LutMaxIndex];
 
     struct Constants
     {

@@ -75,9 +75,9 @@ private:
 	// ’·‚³‚Ì’PˆÊ(m)
 	float _lengthScale = 1.0f;
 
-	Vector3 _position{};
-	Vector3 _scale{ 1.0f, 1.0f, 1.0f};
-	Vector3 _angle{};
+	Vector3 _position	= Vector3::Zero;
+	Vector3 _scale		= Vector3::One;
+	Vector3 _angle		= Vector3::Zero;
 
 	DirectX::XMFLOAT4X4 _transform =
 	{

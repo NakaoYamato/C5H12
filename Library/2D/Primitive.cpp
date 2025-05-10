@@ -4,7 +4,7 @@
 Primitive::Primitive(ID3D11Device* device)
 {
     //VertexBufferの作成
-    Vertex vertices[VERTEX_NUM] = { Vector3(0, 0, 0), Vector4(0, 0, 0, 0) };
+    Vertex vertices[VertexNum] = { Vector3::Zero, Vector4::Zero };
     D3D11_BUFFER_DESC bd = {};
     bd.Usage = D3D11_USAGE_DYNAMIC;
     bd.ByteWidth = sizeof(vertices);			// 頂点バッファのサイズ
@@ -111,13 +111,13 @@ void Primitive::Circle(ID3D11DeviceContext* context,
     const Vector4& color, int n) const
 {
     if (n < 3 || radius <= 0.0f) return;
-    if (n > 64) n = 64;//最大64角形
+    if (n > CircleMaxPolygonal) n = CircleMaxPolygonal;//最大チェック
 
     D3D11_VIEWPORT viewport;
     UINT numViewports = 1;
     context->RSGetViewports(&numViewports, &viewport);
 
-    Vertex vertices[130] = { Vector3(0,0,0) };
+    Vertex vertices[130] = { Vector3::Zero };
     float arc = DirectX::XM_PI * 2 / n;
     Vertex* p = &vertices[0];
 

@@ -27,10 +27,10 @@ Sprite::Sprite(ID3D11Device* device,
 	// 頂点情報のセット
 	Vertex vertices[]
 	{
-		{{-1.0f,+1.0f,0},{1,1,1,1},{0,0}},
-		{{+1.0f,+1.0f,0},{1,1,1,1},{1,0}},
-		{{-1.0f,-1.0f,0},{1,1,1,1},{0,1}},
-		{{+1.0f,-1.0f,0},{1,1,1,1},{0,1}},
+		{{-1.0f,+1.0f,0}, Vector4::White ,Vector2::Zero		},
+		{{+1.0f,+1.0f,0}, Vector4::White ,Vector2::XOneYZero},
+		{{-1.0f,-1.0f,0}, Vector4::White ,Vector2::XZeroYOne},
+		{{+1.0f,-1.0f,0}, Vector4::White ,Vector2::One		},
 	};
 
 	// 頂点バッファオブジェクトの生成
@@ -75,10 +75,10 @@ Sprite::Sprite(ID3D11Device* device,
 	// 頂点情報のセット
 	Vertex vertices[]
 	{
-		{{-1.0f,+1.0f,0},{1,1,1,1},{0,0}},
-		{{+1.0f,+1.0f,0},{1,1,1,1},{1,0}},
-		{{-1.0f,-1.0f,0},{1,1,1,1},{0,1}},
-		{{+1.0f,-1.0f,0},{1,1,1,1},{0,1}},
+		{{-1.0f,+1.0f,0}, Vector4::White ,Vector2::Zero		},
+		{{+1.0f,+1.0f,0}, Vector4::White ,Vector2::XOneYZero},
+		{{-1.0f,-1.0f,0}, Vector4::White ,Vector2::XZeroYOne},
+		{{+1.0f,-1.0f,0}, Vector4::White ,Vector2::One		},
 	};
 
 	// 頂点バッファオブジェクトの生成
@@ -172,10 +172,10 @@ void Sprite::Render(ID3D11DeviceContext* dc,
 	}
 
 	Vertex vertices[4] = {};
-	vertices[0] = { Vector3(0.0f, 0.0f, 0), color, Vector2(0, 0) };
-	vertices[1] = { Vector3(1.0f, 0.0f, 0), color, Vector2(1, 0) };
-	vertices[2] = { Vector3(0.0f, 1.0f, 0), color, Vector2(0, 1) };
-	vertices[3] = { Vector3(1.0f, 1.0f, 0), color, Vector2(1, 1) };
+	vertices[0] = { Vector3(0.0f, 0.0f, 0), color, Vector2::Zero		};
+	vertices[1] = { Vector3(1.0f, 0.0f, 0), color, Vector2::XOneYZero	};
+	vertices[2] = { Vector3(0.0f, 1.0f, 0), color, Vector2::XZeroYOne	};
+	vertices[3] = { Vector3(1.0f, 1.0f, 0), color, Vector2::One			};
 
 	const float sinValue = sinf(angle);
 	const float cosValue = cosf(angle);

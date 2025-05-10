@@ -80,7 +80,7 @@ void SkyMap::DrawGui()
 			{
 				if (ImGui::BeginMenu(u8"スカイマップ"))
 				{
-					ImGui::SliderInt(u8"ルックアップテーブル番号", &_lutIndex, 0, LUT_INDEX_MAX - 1);
+					ImGui::SliderInt(u8"ルックアップテーブル番号", &_lutIndex, 0, LutMaxIndex - 1);
 					ImGui::EndMenu();
 				}
 

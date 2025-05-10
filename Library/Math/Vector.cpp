@@ -229,7 +229,7 @@ Vector3 Vector3::Lerp(const Vector3& src, const Vector3& dst, float t, float(*Ea
     );
 }
 //  VECTOR3を度数法に変換
-Vector3 Vector3::ConvertToDegrees(const Vector3& v)
+Vector3 Vector3::ToDegrees(const Vector3& v)
 {
     Vector3 d{};
     d.x = DirectX::XMConvertToDegrees(v.x);
@@ -238,7 +238,7 @@ Vector3 Vector3::ConvertToDegrees(const Vector3& v)
     return d;
 }
 //  VECTOR3を弧度法に変換
-Vector3 Vector3::ConvertToRadians(const Vector3& v)
+Vector3 Vector3::ToRadians(const Vector3& v)
 {
     Vector3 d{};
     d.x = DirectX::XMConvertToRadians(v.x);

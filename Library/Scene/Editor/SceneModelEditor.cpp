@@ -331,10 +331,10 @@ void SceneModelEditor::DrawEditAnimationGui()
                             }
                         }
                         ImGui::DragFloat4(u8"oriental", &frame.value.x, 0.1f);
-                        Vector3 degrees = Vector3::ConvertToDegrees(Quaternion::ToRollPitchYaw(frame.value));
+                        Vector3 degrees = Vector3::ToDegrees(Quaternion::ToRollPitchYaw(frame.value));
                         if (ImGui::DragFloat3(u8"angle", &degrees.x, 0.1f))
                         {
-                            frame.value = Quaternion::FromRollPitchYaw(Vector3::ConvertToRadians(degrees));
+                            frame.value = Quaternion::FromRollPitchYaw(Vector3::ToRadians(degrees));
                         }
                         if (ImGui::Button("EDIT"))
                         {

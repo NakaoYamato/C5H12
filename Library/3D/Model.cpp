@@ -156,10 +156,10 @@ void Model::DrawGui()
                         }
                         ImGui::Separator();
                         ImGui::DragFloat3(u8"position", &node.position.x, 0.1f);
-                        Vector3 degrees = Vector3::ConvertToDegrees(Quaternion::ToRollPitchYaw(node.rotation));
+                        Vector3 degrees = Vector3::ToDegrees(Quaternion::ToRollPitchYaw(node.rotation));
                         if (ImGui::DragFloat3(u8"degrees", &degrees.x, 0.1f))
                         {
-                            node.rotation = Quaternion::FromRollPitchYaw(Vector3::ConvertToRadians(degrees));
+                            node.rotation = Quaternion::FromRollPitchYaw(Vector3::ToRadians(degrees));
                         }
                         ImGui::DragFloat3(u8"scale", &node.scale.x, 0.1f);
                         ImGui::Separator();
@@ -252,73 +252,5 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
                     textureData.dummyTextureDimension);
             }
         }
-
-        //if (material.textureDatas.at("Diffuse").filename.size() > 0)
-        //{
-        //    std::filesystem::path path(fbx_filename);
-        //    path.replace_filename(material.textureDatas.at("Diffuse").filename);
-        //    D3D11_TEXTURE2D_DESC texture2d_desc;
-        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-        //        material.textureDatas.at("Diffuse").textureSRV.ReleaseAndGetAddressOf(),
-        //        &texture2d_desc);
-        //}
-        //else
-        //{
-        //    GpuResourceManager::MakeDummyTexture(device,
-        //        material.textureDatas.at("Diffuse").textureSRV.ReleaseAndGetAddressOf(),
-        //        0xFFFFFFFF,
-        //        16);
-        //}
-
-        //if (material.textureDatas.at("Normal").filename.size() > 0)
-        //{
-        //    std::filesystem::path path(fbx_filename);
-        //    path.replace_filename(material.textureDatas.at("Normal").filename);
-        //    D3D11_TEXTURE2D_DESC texture2d_desc;
-        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-        //        material.textureDatas.at("Normal").textureSRV.ReleaseAndGetAddressOf(),
-        //        &texture2d_desc);
-        //}
-        //else
-        //{
-        //    GpuResourceManager::MakeDummyTexture(device,
-        //        material.textureDatas.at("Normal").textureSRV.ReleaseAndGetAddressOf(),
-        //        0xFFFF7F7F, // Normal == 0xFFFF7F7F
-        //        16);
-        //}
-
-        //if (material.textureDatas.at("Specular").filename.size() > 0)
-        //{
-        //    std::filesystem::path path(fbx_filename);
-        //    path.replace_filename(material.textureDatas.at("Specular").filename);
-        //    D3D11_TEXTURE2D_DESC texture2d_desc;
-        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-        //        material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
-        //        &texture2d_desc);
-        //}
-        //else
-        //{
-        //    GpuResourceManager::MakeDummyTexture(device,
-        //        material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
-        //        0xFFFFFFFF,// ダミーならアルファが0 
-        //        16);
-        //}
-
-        //if (material.textureDatas.at("Roughness").filename.size() > 0)
-        //{
-        //    std::filesystem::path path(fbx_filename);
-        //    path.replace_filename(material.textureDatas.at("Roughness").filename);
-        //    D3D11_TEXTURE2D_DESC texture2d_desc;
-        //    GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-        //        material.textureDatas.at("Roughness").textureSRV.ReleaseAndGetAddressOf(),
-        //        &texture2d_desc);
-        //}
-        //else
-        //{
-        //    GpuResourceManager::MakeDummyTexture(device,
-        //        material.textureDatas.at("Specular").textureSRV.ReleaseAndGetAddressOf(),
-        //        0xFFFFFFFF,// ダミーならアルファが0 
-        //        16);
-        //}
     }
 }

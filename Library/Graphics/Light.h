@@ -11,7 +11,7 @@ public:
     // 位置
     Vector4 position{};
     // 色
-    Vector4 color = _VECTOR4_WHITE;
+    Vector4 color = Vector4::White;
     // 範囲
     float range{};
     // 使用フラグ 1 使用

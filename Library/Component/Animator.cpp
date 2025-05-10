@@ -322,7 +322,7 @@ void Animator::ComputeRootMotion(int animationIndex,
     Vector3& movement) const
 {
     resultNodePose = _model.lock()->GetPoseNodes();
-    movement = _VECTOR3_ZERO;
+    movement = Vector3::Zero;
 
     std::vector<ModelResource::Node> oldNodes;
     std::vector<ModelResource::Node> currentNodes;
@@ -362,7 +362,7 @@ void Animator::ComputeRootMotion(int animationIndex,
     {
         const ModelResource::Node* rootNood = &resultNodePose[controlNodeIndex];
         DirectX::XMMATRIX ParentWorldT = DirectX::XMLoadFloat4x4(&rootNood->parent->worldTransform);
-        movement = Vec3TransformNormal(movement, ParentWorldT);
+        movement = Vector3::TransformNormal(movement, ParentWorldT);
     }
 
     // ˜œ‚ÌˆÊ’u‚ğ‰‰ñ‚ÌˆÊ’u‚É’u‚­

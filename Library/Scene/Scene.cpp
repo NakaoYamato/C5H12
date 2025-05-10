@@ -94,9 +94,9 @@ void Scene::Render()
     rc.deviceContext = dc;
     rc.renderState = graphics.GetRenderState();
     rc.camera = GetMainCamera();
-    rc.lightDirection = _VECTOR4_RIGHT;
-    rc.lightColor = _VECTOR4_WHITE;
-    rc.lightAmbientColor = _VECTOR4_BLACK;
+    rc.lightDirection = Vector4::Right;
+    rc.lightColor = Vector4::White;
+    rc.lightAmbientColor = Vector4::Black;
     if (_skyMap)
     {
         rc.environmentMap = _skyMap->GetSRV().GetAddressOf();
@@ -147,7 +147,7 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // フレームバッファ0番に空、GBuffer、その他レンダラーを描画
     FrameBuffer* renderFrame = graphics.GetFrameBuffer(_RENDER_FRAME_INDEX);
-    renderFrame->ClearAndActivate(dc, _VECTOR4_ZERO, 1.0f);
+    renderFrame->ClearAndActivate(dc, Vector4::Zero, 1.0f);
     {
         // 空の描画
         if (_skyMap)
@@ -209,7 +209,7 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
     FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(_APPLY_SHADOW_FRAME_INDEX);
-    modelAndShadowRenderFrame->ClearAndActivate(dc, _VECTOR4_ZERO, 0.0f);
+    modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
         // 影の描画
         // cascadedShadowMapにある深度情報から

@@ -46,9 +46,9 @@ public:
 		float startSeconds			= 0.0f;
 		float endSeconds			= 0.0f;
 
-		Vector3 position			= _VECTOR3_ZERO;
-		Vector3 angle				= _VECTOR3_ZERO;
-		Vector3 scale				= _VECTOR3_ONE;
+		Vector3 position			= Vector3::Zero;
+		Vector3 angle				= Vector3::Zero;
+		Vector3 scale				= Vector3::One;
 
 		void DrawGui(const std::vector<const char*>& nodeNames);
 

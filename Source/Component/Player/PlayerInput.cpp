@@ -23,14 +23,14 @@ void PlayerInput::Update(float elapsedTime)
 	// Y軸の成分を0にして正規化
 	frontVec.y = 0.0f;
 	rightVec.y = 0.0f;
-	frontVec = Vec3Normalize(frontVec);
-	rightVec = Vec3Normalize(rightVec);
+	frontVec = Vector3::Normalize(frontVec);
+	rightVec = Vector3::Normalize(rightVec);
 
 	// 移動ベクトルを計算
 	_movement = {};
 	_movement.x = frontVec.x * lAxisValue.y + rightVec.x * lAxisValue.x;
 	_movement.z = frontVec.z * lAxisValue.y + rightVec.z * lAxisValue.x;
-	_movement = Vec3Normalize(_movement);
+	_movement = Vector3::Normalize(_movement);
 
 	if (_INPUT_IS_PRESSED("Dash"))
 		_inputFlag |= Inputs::Dash;

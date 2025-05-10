@@ -5,10 +5,11 @@
 
 #include "../Math/Vector.h"
 
-const int PRIMITIVE_VERTEX_NUM = 130;
-
 class Primitive
 {
+public:
+    static constexpr int VERTEX_NUM = 130;
+
 public:
     Primitive(ID3D11Device* device);
     Primitive() = delete;

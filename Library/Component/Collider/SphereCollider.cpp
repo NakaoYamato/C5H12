@@ -24,7 +24,7 @@ void SphereCollider::DebugRender(const RenderContext& rc)
 	Debug::Renderer::DrawSphere(
 		GetPosition().TransformCoord(GetActor()->GetTransform().GetMatrix()),
 		GetRadius(),
-		IsTrigger() ? _VECTOR4_BLUE : _VECTOR4_GREEN);
+		IsTrigger() ? Vector4::Blue : Vector4::Green);
 }
 
 // íœˆ—

@@ -274,7 +274,7 @@ void Actor::DrawGuizmo()
 		Vector3 s, r, t;
 		DirectX::XMStoreFloat3(&s, S);
 		DirectX::XMStoreFloat3(&t, T);
-		r = QuaternionToRollPitchYaw(R);
+		r = Quaternion::ToRollPitchYaw(R);
 		_transform.SetPosition(t);
 		_transform.SetScale(s);
 		_transform.SetRotation(r);

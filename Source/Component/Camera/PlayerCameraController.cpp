@@ -68,11 +68,11 @@ void PlayerCameraController::Update(float elapsedTime)
     Vector3 newEye = newFocus - front * _cameraDistance;
 
     // •âŠ®ˆ—
-    Vector3 focus = Vec3Lerp(_currentFocus, newFocus, _focusLerpSpeed * _FIXED_UPDATE_RATE);
-    Vector3 eye = Vec3Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * _FIXED_UPDATE_RATE);
+    Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * _FIXED_UPDATE_RATE);
+    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * _FIXED_UPDATE_RATE);
     eye = newEye;
 
-    GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, _VECTOR3_UP);
+    GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 
     _currentFocus = focus;
     GetActor()->GetTransform().SetPosition(eye);

@@ -2,8 +2,6 @@
 #include <math.h>
 #include <cmath>
 
-#define _M_PI        3.14159265358979323846264338327950288f
-
 // •âŠ®ˆ—
 inline float EasingLerp(float src, float dst, float t, float(*Easing)(float))
 {
@@ -17,48 +15,51 @@ inline float EasingLerp(float src, float dst, float t, float(*Easing)(float))
 class Easings
 {
 public:
-    static float EaseInSine(float x)
+    static constexpr float PI = 3.14159265358979323846f;
+
+public:
+    static float InSine(float x)
     {
-        return (1 - cosf((x * _M_PI) / 2.0f));
+        return (1 - cosf((x * PI) / 2.0f));
     }
-    static float EaseOutSine(float x)
+    static float OutSine(float x)
     {
-        return (sinf((x * _M_PI) / 2.0f));
+        return (sinf((x * PI) / 2.0f));
     }
-    static float EaseInOutSine(float x)
+    static float InOutSine(float x)
     {
-        return -(cosf(_M_PI * x) - 1.0f) / 2.0f;
+        return -(cosf(PI * x) - 1.0f) / 2.0f;
     }
-    static float EaseInCubic(float x)
+    static float InCubic(float x)
     {
         return x * x * x;
     }
-    static float EaseOutCubic(float x)
+    static float OutCubic(float x)
     {
         return 1.0f - pow(1.0f - x, 3.0f);
     }
-    static float EaseInOutCubic(float x)//5
+    static float InOutCubic(float x)//5
     {
         return x < 0.5 ? 4.0f * x * x * x :
             1.0f - pow(-2.0f * x + 2.0f, 3.0f) / 2.0f;
     }
-    static float EaseInCirc(float x)
+    static float InCirc(float x)
     {
         return 1.0f - sqrtf(1.0f - pow(x, 2.0f));
     }
-    static float EaseOutCirc(float x)
+    static float OutCirc(float x)
     {
         return sqrtf(1.0f - pow(x - 1.0f, 2.0f));
     }
-    static float EaseInOutCirc(float x)
+    static float InOutCirc(float x)
     {
         return x < 0.5f
             ? (1.0f - sqrtf(1 - pow(2.0f * x, 2.0f))) / 2.0f
             : (sqrtf(1 - pow(-2.0f * x + 2.0f, 2.0f)) + 1.0f) / 2.0f;
     }
-    static float EaseInElastic(float x)
+    static float InElastic(float x)
     {
-        const float c4 = (2.0f * _M_PI) / 3.0f;
+        const float c4 = (2.0f * PI) / 3.0f;
 
         return x == 0.0f
             ? 0.0f
@@ -67,9 +68,9 @@ public:
             : -pow(2.0f, 10.0f * x - 10.0f) *
             sinf((x * 10.0f - 10.750f) * c4);
     }
-    static float EaseOutElastic(float x)
+    static float OutElastic(float x)
     {
-        const float c4 = (2.0f * _M_PI) / 3.0f;
+        const float c4 = (2.0f * PI) / 3.0f;
 
         return x == 0.0f
             ? 0.0f
@@ -77,9 +78,9 @@ public:
             ? 1.0f
             : pow(2.0f, -10.0f * x) * sinf((x * 10.0f - 0.75f) * c4) + 1.0f;
     }
-    static float EaseInOutElastic(float x)
+    static float InOutElastic(float x)
     {
-        const float c5 = (2.0f * _M_PI) / 4.5f;
+        const float c5 = (2.0f * PI) / 4.5f;
 
         return x == 0.0f
             ? 0.0f
@@ -89,40 +90,40 @@ public:
             ? -(pow(2.0f, 20.0f * x - 10.0f) * sinf((20.0f * x - 11.125f) * c5)) / 2.0f
             : (pow(2.0f, -20.0f * x + 10.0f) * sinf((20.0f * x - 11.125f) * c5)) / 2.0f + 1.0f;
     }
-    static float EaseInQuad(float x)
+    static float InQuad(float x)
     {
         return x * x;
     }
-    static float EaseOutQuad(float x)
+    static float OutQuad(float x)
     {
         return 1.0f - (1.0f - x) * (1.0f - x);
     }
-    static float EaseInOutQuad(float x)
+    static float InOutQuad(float x)
     {
         return x < 0.5f ? 2.0f * x * x : 1.0f - pow(-2.0f * x + 2.0f, 2.0f) / 2.0f;
     }
-    static float EaseInQuart(float x)
+    static float InQuart(float x)
     {
         return x * x * x * x;
     }
-    static float EaseOutQuart(float x)
+    static float OutQuart(float x)
     {
         return 1.0f - pow(1.0f - x, 4.0f);
     }
-    static float EaseInOutQuart(float x)
+    static float InOutQuart(float x)
     {
         return x < 0.5f ? 8.0f * x * x * x * x :
             1.0f - pow(-2.0f * x + 2.0f, 4.0f) / 2.0f;
     }
-    static float EaseInExpo(float x)
+    static float InExpo(float x)
     {
         return x == 0.0f ? 0.0f : pow(2.0f, 10.0f * x - 10.0f);
     }
-    static float EaseOutExpo(float x)
+    static float OutExpo(float x)
     {
         return x == 1.0f ? 1.0f : 1.0f - pow(2.0f, -10.0f * x);
     }
-    static float EaseInOutExpo(float x)
+    static float InOutExpo(float x)
     {
         return x == 0.0f
             ? 0.0f
@@ -131,21 +132,21 @@ public:
             : x < 0.5f ? pow(2.0f, 20.0f * x - 10.0f) / 2.0f
             : (2.0f - pow(2.0f, -20.0f * x + 10.0f)) / 2.0f;
     }
-    static float EaseInBack(float x)
+    static float InBack(float x)
     {
         const float c1 = 1.70158f;
         const float c3 = c1 + 1.0f;
 
         return c3 * x * x * x - c1 * x * x;
     }
-    static float EaseOutBack(float x)
+    static float OutBack(float x)
     {
         const float c1 = 1.70158f;
         const float c3 = c1 + 1.0f;
 
         return 1 + c3 * pow(x - 1.0f, 3.0f) + c1 * pow(x - 1.0f, 2.0f);
     }
-    static float EaseInOutBack(float x)
+    static float InOutBack(float x)
     {
         const float c1 = 1.70158f;
         const float c2 = c1 * 1.525f;
@@ -155,14 +156,14 @@ public:
             : (pow(2.0f * x - 2.0f, 2.0f) * ((c2 + 1.0f) * (x * 2.0f - 2.0f)
                 + c2) + 2.0f) / 2.0f;
     }
-    static float EaseInBounce(float x)
+    static float InBounce(float x)
     {
         float X = 1.0f - x;
-        float ret = 1.0f - EaseOutBounce(X);
+        float ret = 1.0f - OutBounce(X);
         x = 1.0f - X;
         return ret;
     }
-    static float EaseOutBounce(float& x)
+    static float OutBounce(float& x)
     {
         const float n1 = 7.5625f;
         const float d1 = 2.75f;
@@ -180,19 +181,19 @@ public:
             return n1 * (x -= 2.625f / d1) * x + 0.984375f;
         }
     }
-    static float EaseInOutBounce(float& x)
+    static float InOutBounce(float& x)
     {
         if (x < 0.5f)
         {
             float X = 1.0f - 2.0f * x;
-            float ret = (1.0f - EaseOutBounce(X)) / 2.0f;
+            float ret = (1.0f - OutBounce(X)) / 2.0f;
             x = (1.0f - X) / 2.0f;
             return ret;
         }
         else
         {
             float X = 2.0f * x - 1.0f;
-            float ret = (1.0f + EaseOutBounce(X)) / 2.0f;
+            float ret = (1.0f + OutBounce(X)) / 2.0f;
             x = (X + 1.0f) / 2.0f;
             return ret;
         }

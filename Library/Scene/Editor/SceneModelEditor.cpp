@@ -57,7 +57,7 @@ void SceneModelEditor::Update(float elapsedTime)
 
             for (auto& vertex : mesh.vertices)
             {
-                Vector3 position = _VECTOR3_ZERO;
+                Vector3 position = Vector3::Zero;
                 size_t indices[4] = { vertex.boneIndex.x, vertex.boneIndex.y, vertex.boneIndex.z, vertex.boneIndex.w };
                 float weight[4] = { vertex.boneWeight.x, vertex.boneWeight.y, vertex.boneWeight.z, vertex.boneWeight.w };
                 if (mesh.bones.size() != 0)
@@ -68,12 +68,12 @@ void SceneModelEditor::Update(float elapsedTime)
                         DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&model->GetPoseNodes()[bone.nodeIndex].worldTransform);
                         DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
                         DirectX::XMMATRIX Bone = Offset * World;
-                        position += Vec3TransformCoord(vertex.position, Bone) * weight[i];
+                        position += Vector3::TransformCoord(vertex.position, Bone) * weight[i];
                     }
                 }
                 else
                 {
-                    position = Vec3TransformCoord(vertex.position, _modelActor.lock()->GetTransform().GetMatrix());
+                    position = Vector3::TransformCoord(vertex.position, _modelActor.lock()->GetTransform().GetMatrix());
                 }
 
                 Debug::Renderer::DrawSphere(position, _vertexPointRadius, _vertexPointColor);
@@ -101,13 +101,13 @@ void SceneModelEditor::Update(float elapsedTime)
                     switch (keyframe.shapeType)
                     {
                     case AnimationCollisionData::ShapeType::Box:
-                        Debug::Renderer::DrawBox(transform, _VECTOR4_WHITE);
+                        Debug::Renderer::DrawBox(transform, Vector4::White);
                         break;
                     case AnimationCollisionData::ShapeType::Sphere:
-                        Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), keyframe.scale.x, _VECTOR4_WHITE);
+                        Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), keyframe.scale.x, Vector4::White);
                         break;
                     case AnimationCollisionData::ShapeType::Capsule:
-                        Debug::Renderer::DrawCapsule(transform, 1.0f, 1.0f, _VECTOR4_WHITE);
+                        Debug::Renderer::DrawCapsule(transform, 1.0f, 1.0f, Vector4::White);
                         break;
                     }
                 }
@@ -331,10 +331,10 @@ void SceneModelEditor::DrawEditAnimationGui()
                             }
                         }
                         ImGui::DragFloat4(u8"oriental", &frame.value.x, 0.1f);
-                        Vector3 degrees = Vec3ConvertToDegrees(QuaternionToRollPitchYaw(frame.value));
+                        Vector3 degrees = Vector3::ConvertToDegrees(Quaternion::ToRollPitchYaw(frame.value));
                         if (ImGui::DragFloat3(u8"angle", &degrees.x, 0.1f))
                         {
-                            frame.value = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(degrees));
+                            frame.value = Quaternion::FromRollPitchYaw(Vector3::ConvertToRadians(degrees));
                         }
                         if (ImGui::Button("EDIT"))
                         {

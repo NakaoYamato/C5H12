@@ -7,7 +7,7 @@
 // ŠJŽnˆ—
 void Rigidbody::Start()
 {
-	_orientation = QuaternionFromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
+	_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
 	DirectX::XMStoreFloat4x4(&_inertiaTensor, DirectX::XMMatrixIdentity());
 }
 
@@ -135,9 +135,9 @@ void Rigidbody::UpdatePosition(float deltaTime)
 
 	// ‹ó‹CR—ÍŒvŽZ
 	{
-		float currentVelocityLenSq = Vec3LengthSq(_linearVelocity);
+		float currentVelocityLenSq = Vector3::LengthSq(_linearVelocity);
 		float dragFactor = 0.5f * _dragCoefficient * currentVelocityLenSq;
-		Vector3  dragForce = Vec3Normalize(_linearVelocity) * -dragFactor;
+		Vector3  dragForce = Vector3::Normalize(_linearVelocity) * -dragFactor;
 		AddForce(dragForce);
 	}
 
@@ -159,8 +159,8 @@ void Rigidbody::UpdatePosition(float deltaTime)
 		DirectX::XMVECTOR q = DirectX::XMVectorScale(wt, sinf(angle * 0.5f));
 		q.m128_f32[3] = cosf(angle * 0.5f);
 
-		_orientation = QuaternionFromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
+		_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
 		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
-		this->GetActor()->GetTransform().SetRotation(QuaternionToRollPitchYaw(_orientation));
+		this->GetActor()->GetTransform().SetRotation(Quaternion::ToRollPitchYaw(_orientation));
 	}
 }

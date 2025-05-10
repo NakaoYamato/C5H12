@@ -99,7 +99,7 @@ void Model::DebugDrawNode(Vector4 nodeColor)
         {
             Vector3 childWP = Vector3(node.worldTransform._41, node.worldTransform._42, node.worldTransform._43);
             Vector3 parentWP = Vector3(node.parent->worldTransform._41, node.parent->worldTransform._42, node.parent->worldTransform._43);
-            float length = Vec3Length(parentWP - childWP);
+            float length = Vector3::Length(parentWP - childWP);
             if (length == 0.0f)
                 continue;
             DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(DirectX::XMLoadFloat3(&parentWP), DirectX::XMLoadFloat3(&childWP), Up);
@@ -156,10 +156,10 @@ void Model::DrawGui()
                         }
                         ImGui::Separator();
                         ImGui::DragFloat3(u8"position", &node.position.x, 0.1f);
-                        Vector3 degrees = Vec3ConvertToDegrees(QuaternionToRollPitchYaw(node.rotation));
+                        Vector3 degrees = Vector3::ConvertToDegrees(Quaternion::ToRollPitchYaw(node.rotation));
                         if (ImGui::DragFloat3(u8"degrees", &degrees.x, 0.1f))
                         {
-                            node.rotation = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(degrees));
+                            node.rotation = Quaternion::FromRollPitchYaw(Vector3::ConvertToRadians(degrees));
                         }
                         ImGui::DragFloat3(u8"scale", &node.scale.x, 0.1f);
                         ImGui::Separator();

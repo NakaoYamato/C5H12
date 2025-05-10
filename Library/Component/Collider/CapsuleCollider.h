@@ -27,7 +27,7 @@ public:
 	void SetRadius(float radius) { _radius = radius; }
 #pragma endregion
 private:
-	Vector3 _start = _VECTOR3_ZERO; // 開始座標
-	Vector3 _end = _VECTOR3_UP; // 終了座標
+	Vector3 _start = Vector3::Zero; // 開始座標
+	Vector3 _end = Vector3::Up; // 終了座標
 	float _radius = 1.0f; // 半径
 };

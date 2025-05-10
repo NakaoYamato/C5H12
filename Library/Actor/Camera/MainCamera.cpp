@@ -50,7 +50,7 @@ void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vecto
     DirectX::XMVECTOR S, R, T;
     DirectX::XMMatrixDecompose(&S, &R, &T, World);
     Vector3 s, r, t;
-    r = QuaternionToRollPitchYaw(R);
+    r = Quaternion::ToRollPitchYaw(R);
     _transform.SetRotation(r);
 }
 

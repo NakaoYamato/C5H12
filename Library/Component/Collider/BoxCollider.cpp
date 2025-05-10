@@ -26,7 +26,7 @@ void BoxCollider::DebugRender(const RenderContext& rc)
 		GetPosition().TransformCoord(GetActor()->GetTransform().GetMatrix()),
 		GetActor()->GetTransform().GetRotation(),
 		GetHalfSize(),
-		IsTrigger() ? _VECTOR4_BLUE : _VECTOR4_GREEN);
+		IsTrigger() ? Vector4::Blue : Vector4::Green);
 }
 
 // íœˆ—

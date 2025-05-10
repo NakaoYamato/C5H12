@@ -4,7 +4,7 @@
 Primitive::Primitive(ID3D11Device* device)
 {
     //VertexBufferの作成
-    Vertex vertices[PRIMITIVE_VERTEX_NUM] = { Vector3(0, 0, 0), Vector4(0, 0, 0, 0) };
+    Vertex vertices[VERTEX_NUM] = { Vector3(0, 0, 0), Vector4(0, 0, 0, 0) };
     D3D11_BUFFER_DESC bd = {};
     bd.Usage = D3D11_USAGE_DYNAMIC;
     bd.ByteWidth = sizeof(vertices);			// 頂点バッファのサイズ
@@ -94,7 +94,7 @@ void Primitive::Line(ID3D11DeviceContext* context,
 
     Vector2 v1(from.x, from.y);
     Vector2 v2(to.x, to.y);
-    float w = Vec2Length(v2 - v1);
+    float w = Vector2::Length(v2 - v1);
     float h = width;
     float cx = w * 0.5f;
     float cy = h * 0.5f;

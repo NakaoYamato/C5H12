@@ -28,7 +28,7 @@ public:
 private:
 	PointLight _light;
 
-	Vector4 _color = _VECTOR4_WHITE;
+	Vector4 _color = Vector4::White;
 	float _colorVolume = 1.0f;
 	static std::mutex _renderContextMutex;
 };

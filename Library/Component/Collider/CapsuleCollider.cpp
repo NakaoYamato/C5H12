@@ -26,7 +26,7 @@ void CapsuleCollider::DebugRender(const RenderContext& rc)
 		GetStart().TransformCoord(GetActor()->GetTransform().GetMatrix()),
 		GetEnd().TransformCoord(GetActor()->GetTransform().GetMatrix()),
 		GetRadius(),
-		IsTrigger() ? _VECTOR4_BLUE : _VECTOR4_GREEN);
+		IsTrigger() ? Vector4::Blue : Vector4::Green);
 }
 
 // íœˆ—

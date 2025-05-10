@@ -24,6 +24,6 @@ public:
 	void SetRadius(Vector3 halfSize) { _halfSize = halfSize; }
 #pragma endregion
 private:
-	Vector3 _center = _VECTOR3_ZERO; // 中心座標
-	Vector3 _halfSize = _VECTOR3_ONE; // 半辺長
+	Vector3 _center = Vector3::Zero; // 中心座標
+	Vector3 _halfSize = Vector3::One; // 半辺長
 };

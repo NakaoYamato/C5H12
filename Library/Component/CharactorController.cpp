@@ -35,7 +35,7 @@ void CharactorController::DebugRender(const RenderContext& rc)
 	Debug::Renderer::DrawSphere(
 		GetActor()->GetTransform().GetPosition() + Vector3(0.0f, _radius + _stepOffset, 0.0f),
 		_radius,
-		_VECTOR4_YELLOW);
+		Vector4::Yellow);
 }
 
 void CharactorController::DrawGui()
@@ -60,7 +60,7 @@ void CharactorController::UpdateVelocity(float deltaTime)
     // 加速度処理
     _velocity += _acceleration * deltaTime;
     // 最大速度チェック
-    _currentSpeedXZ = Vec2Length({ _velocity.x, _velocity.z });
+    _currentSpeedXZ = Vector2::Length({ _velocity.x, _velocity.z });
     if (_currentSpeedXZ > _maxSpeedXZ)
     {
         _velocity.x = _velocity.x / _currentSpeedXZ * _maxSpeedXZ;
@@ -182,7 +182,7 @@ void CharactorController::UpdateRotation(float deltaTime, const Vector2& vec)
 	float speed = _rotationSpeed * deltaTime;
 
 	// 進行ベクトルを単位ベクトル化
-	Vector2 moveVec = Vec2Normalize({ vec.x , vec.y });
+	Vector2 moveVec = Vector2::Normalize({ vec.x , vec.y });
 
 	// 自身の回転値から前方向を求める
 	float frontX = sinf(angle.y);

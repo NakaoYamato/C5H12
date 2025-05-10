@@ -177,10 +177,10 @@ void DebugRenderer::DrawCapsule(const Vector3& start, const Vector3& end, float 
 		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&start));
 		// 回転行列作成
 		Vector3 target = end - start;
-		Quaternion q = QuaternionLookAt(start, Quaternion::AxisY, end);
+		Quaternion q = Quaternion::LookAt(start, Quaternion::AxisY, end);
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q));
 		// 高さ
-		float length = Vec3Length(target);
+		float length = Vector3::Length(target);
 
 		Instance& instance = _instances.emplace_back();
 		instance.mesh = &_cylinderMesh;
@@ -217,7 +217,7 @@ void DebugRenderer::DrawArrow(
 	const Vector4& color)
 {
 	// startからtargetまでの姿勢
-	Quaternion q = QuaternionLookAt(start, Quaternion::AxisX, target);
+	Quaternion q = Quaternion::LookAt(start, Quaternion::AxisX, target);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q));
 
 	{
@@ -770,7 +770,7 @@ void DebugRenderer::Render(
 			// 定数バッファ更新
 			CbMesh cbMesh;
 			DirectX::XMStoreFloat4x4(&cbMesh.worldViewProjection, WVP);
-			cbMesh.color = _VECTOR4_WHITE;
+			cbMesh.color = Vector4::White;
 			dc->UpdateSubresource(_constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 			// 頂点バッファ設定
 			stride = sizeof(Vector3);

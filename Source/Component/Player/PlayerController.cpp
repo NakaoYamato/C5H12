@@ -28,7 +28,7 @@ void PlayerController::Update(float elapsedTime)
 			}
 			else
 			{
-				_charactorController.lock()->AddForce(Vec3Normalize(_charactorController.lock()->GetVelocityXZ()) * -_friction);
+				_charactorController.lock()->AddForce(Vector3::Normalize(_charactorController.lock()->GetVelocityXZ()) * -_friction);
 				_charactorController.lock()->SetRotateToDirection(false);
 			}
 		}

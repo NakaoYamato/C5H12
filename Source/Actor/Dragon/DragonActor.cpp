@@ -394,7 +394,7 @@ void DragonActor::SetModelAnimation()
 			animationName);
 
 		// アニメーションを右手Z-UPに変換
-		Quaternion q = QuaternionFromRollPitchYaw(Vec3ConvertToRadians(Vector3(90.0f, 0.0f, 0.0f)));
+		Quaternion q = Quaternion::FromRollPitchYaw(Vector3::ConvertToRadians(Vector3(90.0f, 0.0f, 0.0f)));
 		size_t index = GetModel().lock()->GetResource()->GetAddressAnimations().size() - 1;
 		auto& animation = GetModel().lock()->GetResource()->GetAddressAnimations()[index];
 		//for (auto& rotation : animation.nodeAnims[0].rotationKeyframes)
@@ -406,7 +406,7 @@ void DragonActor::SetModelAnimation()
 			//// 位置
 			//for (auto& position : nodeAnim.positionKeyframes)
 			//{
-			//	position.value = Vec3TransformCoord(position.value, 
+			//	position.value = Vector3::TransformCoord(position.value, 
 			//		DirectX::XMMatrixInverse(nullptr, M));
 			//	//position.value = Vector3(position.value.x, -position.value.z, position.value.y);
 			//}
@@ -448,8 +448,8 @@ void DragonActor::SetUseHorn()
 	for (int i : hornIncludeIndices)
 	{
 		if (nodes[i].name == HornNames[static_cast<int>(_drawHornType)])
-			nodes[i].scale = _VECTOR3_ONE;
+			nodes[i].scale = Vector3::One;
 		else
-			nodes[i].scale = _VECTOR3_ZERO;
+			nodes[i].scale = Vector3::Zero;
 	}
 }

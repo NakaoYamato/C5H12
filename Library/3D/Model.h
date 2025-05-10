@@ -26,7 +26,7 @@ public:
 	void UpdateTransform(const DirectX::XMFLOAT4X4& world);
 
 	// ノードのデバッグ表示
-	void DebugDrawNode(Vector4 nodeColor = _VECTOR4_RED);
+	void DebugDrawNode(Vector4 nodeColor = Vector4::Red);
 
 	// GUiの表示
 	void DrawGui();

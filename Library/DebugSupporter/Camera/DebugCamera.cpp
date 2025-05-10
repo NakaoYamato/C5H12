@@ -26,7 +26,7 @@ void DebugCamera::Update(float elapsedTime)
             _eye = mainCamera->GetEye();
             DirectX::XMVECTOR S, R, T;
             DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&mainCamera->GetView())));
-            _angle = QuaternionToRollPitchYaw(R);
+            _angle = Quaternion::ToRollPitchYaw(R);
         }
 
         // 使用フラグをオン

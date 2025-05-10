@@ -43,7 +43,7 @@ void MeshCollider::DebugRender(const RenderContext& rc)
 
 	for (const auto& area : _collisionMesh.areas)
 	{
-		Debug::Renderer::DrawBox(area.boundingBox.Center, _VECTOR3_ZERO, area.boundingBox.Extents, _VECTOR4_YELLOW);
+		Debug::Renderer::DrawBox(area.boundingBox.Center, Vector3::Zero, area.boundingBox.Extents, Vector4::Yellow);
 	}
 	if (_isDebugDrawVertex)
 	{

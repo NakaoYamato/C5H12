@@ -8,9 +8,9 @@ void CameraControllerBase::DrawGui()
 {
     ImGui::DragFloat3("target", &_target.x);
     ImGui::DragFloat3("eye", &_eye.x);
-    Vector3 deg = Vec3ConvertToDegrees(_angle);
+    Vector3 deg = Vector3::ConvertToDegrees(_angle);
     if (ImGui::DragFloat3("angle", &deg.x))
     {
-        _angle = Vec3ConvertToRadians(deg);
+        _angle = Vector3::ConvertToRadians(deg);
     }
 }

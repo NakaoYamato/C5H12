@@ -52,12 +52,12 @@ private:
 	AnimationCollisionData _animCollisionData;
 
 	// デバッグ用
-	Vector4 _nodeColor = _VECTOR4_RED;
+	Vector4 _nodeColor = Vector4::Red;
 	std::vector<const char*> _nodeNames;
 
 	int _selectingMeshIndex = -1;
 	float _vertexPointRadius = 0.05f;
-	Vector4 _vertexPointColor = _VECTOR4_GRAY;
+	Vector4 _vertexPointColor = Vector4::Gray;
 
 	// 取り除くアニメーション名
 	std::string _filterAnimationName;

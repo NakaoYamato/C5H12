@@ -21,7 +21,7 @@ void LightController::DebugRender(const RenderContext& rc)
             DirectX::XMVECTOR S, R, T;
             DirectX::XMMatrixDecompose(&S, &R, &T, M);
             Vector3 s, r, t;
-            r = QuaternionToRollPitchYaw(R);
+            r = Quaternion::ToRollPitchYaw(R);
             GetActor()->GetTransform().SetRotation(r);
         }
 

@@ -983,7 +983,7 @@ bool Collision3D::IntersectSphereVsBox(
 	}
 	InvBoxM = DirectX::XMMatrixInverse(nullptr, BoxM);
 
-	Vector3 localSpherePos = Vec3TransformCoord(spherePos, InvBoxM);
+	Vector3 localSpherePos = Vector3::TransformCoord(spherePos, InvBoxM);
 
 	Vector3 nearPos = localSpherePos;
 	{
@@ -1069,7 +1069,7 @@ bool Collision3D::IntersectSphereVsCapsule(
 	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
 {
 	Vector3 direction = cEnd - cStart;
-	float length = Vec3Length(direction);
+	float length = Vector3::Length(direction);
 
 	if (length != 0.0f)
 	{

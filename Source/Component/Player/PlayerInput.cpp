@@ -36,6 +36,10 @@ void PlayerInput::Update(float elapsedTime)
 		_inputFlag |= Inputs::Dash;
 	else
 		_inputFlag &= ~Inputs::Dash;
+	if (_INPUT_IS_PRESSED("Attack1"))
+		_inputFlag |= Inputs::Attack;
+	else
+		_inputFlag &= ~Inputs::Attack;
 }
 
 // GUI•`‰æ

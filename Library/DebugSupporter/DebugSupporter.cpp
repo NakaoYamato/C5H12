@@ -8,7 +8,7 @@
 #include <mutex>
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/Converter/ToString.h"
+#include "../../Library/Algorithm/Converter.h"
 
 static char s_path_buffer[MAX_PATH];
 

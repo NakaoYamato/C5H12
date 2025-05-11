@@ -18,6 +18,8 @@
 #include <DirectXMath.h>
 #include <string>
 
+#include "PlayerDefine.h"
+
 #define NETWORK_PORT_ADDRESS 7000
 #define NETWORK_MAX_CONNECTION 4
 #define NETWORK_MAX_MESSAGE_SIZE 512
@@ -36,14 +38,6 @@ namespace Network
 		Sync,
         AllSync,
 
-		Move,
-		Attack,
-	};
-
-	enum class PlayerState : int
-	{
-		None = 0,
-		Stop,
 		Move,
 		Attack,
 	};

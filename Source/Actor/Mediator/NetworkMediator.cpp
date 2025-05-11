@@ -223,6 +223,7 @@ void NetworkMediator::ProcessNetworkData()
             }
             player->GetTransform().SetPosition(sync.players[i].position);
             player->GetTransform().SetRotation(sync.players[i].angle);
+            player->GetPlayerController()->SetState(static_cast<PlayerState>(sync.players[i].state));
         }
     }
     _allPlayerSyncs.clear();

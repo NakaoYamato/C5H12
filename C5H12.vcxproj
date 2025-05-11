@@ -155,6 +155,7 @@
     <ClCompile Include="Library\Actor\Actor.cpp" />
     <ClCompile Include="Library\Actor\ActorManager.cpp" />
     <ClCompile Include="Library\Actor\Camera\MainCamera.cpp" />
+    <ClCompile Include="Library\Algorithm\Converter.cpp" />
     <ClCompile Include="Library\Application\Framework.cpp" />
     <ClCompile Include="Library\Application\Main.cpp" />
     <ClCompile Include="Library\Camera\Camera.cpp" />
@@ -173,7 +174,6 @@
     <ClCompile Include="Library\Component\ModelRenderer.cpp" />
     <ClCompile Include="Library\Component\Rigidbody.cpp" />
     <ClCompile Include="Library\Component\ShapeController.cpp" />
-    <ClCompile Include="Library\Converter\ToString.cpp" />
     <ClCompile Include="Library\DebugSupporter\Camera\DebugCamera.cpp" />
     <ClCompile Include="Library\DebugSupporter\DebugSupporter.cpp" />
     <ClCompile Include="Library\DebugSupporter\Renderer\DebugRenderer.cpp" />
@@ -248,6 +248,7 @@
     <ClCompile Include="Source\Scene\Test\SceneDragonDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
+    <ClCompile Include="Source\StateMachine\Player\PlayerStateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
@@ -257,6 +258,9 @@
     <ClInclude Include="Library\Actor\Actor.h" />
     <ClInclude Include="Library\Actor\ActorManager.h" />
     <ClInclude Include="Library\Actor\Camera\MainCamera.h" />
+    <ClInclude Include="Library\Algorithm\Converter.h" />
+    <ClInclude Include="Library\Algorithm\StateMachine\StateBase.h" />
+    <ClInclude Include="Library\Algorithm\StateMachine\StateMachine.h" />
     <ClInclude Include="Library\Application\Framework.h" />
     <ClInclude Include="Library\Camera\Camera.h" />
     <ClInclude Include="Library\Camera\CameraController.h" />
@@ -275,7 +279,6 @@
     <ClInclude Include="Library\Component\ModelRenderer.h" />
     <ClInclude Include="Library\Component\Rigidbody.h" />
     <ClInclude Include="Library\Component\ShapeController.h" />
-    <ClInclude Include="Library\Converter\ToString.h" />
     <ClInclude Include="Library\DebugSupporter\Camera\DebugCamera.h" />
     <ClInclude Include="Library\DebugSupporter\DebugSupporter.h" />
     <ClInclude Include="Library\DebugSupporter\Input\DebugInput.h" />
@@ -360,6 +363,7 @@
     <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
+    <ClInclude Include="Source\StateMachine\Player\PlayerStateMachine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

@@ -5,7 +5,7 @@
 
 #include "../HRTrace.h"
 #include "../../ResourceManager/GpuResourceManager.h"
-#include "../../Converter/ToString.h"
+#include "../../Algorithm/Converter.h"
 
 GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 {

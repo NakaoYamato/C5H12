@@ -138,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Define\NetworkDefine.h" />
+    <ClInclude Include="Define\PlayerDefine.h" />
     <ClInclude Include="Source\ServerAssignment.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

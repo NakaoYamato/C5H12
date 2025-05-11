@@ -5,7 +5,7 @@
 #include "../../External/nameof/include/nameof.hpp"
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 
-// •Ï”‚Ì•¶š—ñ‰»
+// •Ï”–¼‚Ì•¶š—ñ‰»
 #define _TO_STRING_U8(str) std::string(#str)
 
 /// <summary>

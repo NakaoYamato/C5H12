@@ -2,7 +2,7 @@
 
 #include<imgui.h>
 
-#include "../Converter/ToString.h"
+#include "../Algorithm/Converter.h"
 #include "../ResourceManager/GpuResourceManager.h"
 
 #include "../PostProcess/GlowExtraction/GlowExtraction.h"

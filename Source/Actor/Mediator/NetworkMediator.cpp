@@ -47,6 +47,7 @@ void NetworkMediator::Update(float elapsedTime)
         sync.players[0].id          = myPlayerId;
         sync.players[0].position    = myPlayer->GetTransform().GetPosition();
         sync.players[0].angle       = myPlayer->GetTransform().GetRotation();
+        sync.players[0].state       = myPlayer->GetPlayerController()->GetState();
         // サーバーに送信
         _client->WriteRecord(Network::DataTag::AllSync, &sync, sizeof(sync));
 
@@ -67,7 +68,7 @@ void NetworkMediator::FixedUpdate()
 		playerMove.id = myPlayerId;
 		playerMove.position = myPlayer->GetTransform().GetPosition();
 		playerMove.velocity = myPlayer->GetCharactorController()->GetVelocity();
-        playerMove.state = 0;
+        playerMove.state = myPlayer->GetPlayerController()->GetState();
         // サーバーに送信
         _client->WriteRecord(Network::DataTag::Move, &playerMove, sizeof(playerMove));
     }
@@ -223,7 +224,7 @@ void NetworkMediator::ProcessNetworkData()
             }
             player->GetTransform().SetPosition(sync.players[i].position);
             player->GetTransform().SetRotation(sync.players[i].angle);
-            player->GetPlayerController()->SetState(static_cast<PlayerState>(sync.players[i].state));
+            player->GetPlayerController()->SetState(sync.players[i].state);
         }
     }
     _allPlayerSyncs.clear();
@@ -262,6 +263,7 @@ void NetworkMediator::ProcessNetworkData()
 		{
 			charactor->SetVelocity(move.velocity);
 		}
+        player->GetPlayerController()->SetState(move.state);
 	}
     _playerMoves.clear();
 	//===============================================================================

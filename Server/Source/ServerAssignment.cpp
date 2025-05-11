@@ -278,7 +278,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		if (client != nullptr)
 		{
 			client->player.position = playerMove.position;
-			client->player.state = static_cast<PlayerState>(playerMove.state);
+			client->player.state = playerMove.state;
 		}
 	}
 	break;

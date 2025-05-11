@@ -57,6 +57,19 @@ void MeshCollider::DebugRender(const RenderContext& rc)
 			Debug::Renderer::AddVertex(triangle.positions[0]);
 		}
 	}
+	if (_drawCellIndex != -1)
+	{
+		const auto& area = _collisionMesh.areas[_drawCellIndex];
+        for (const auto& triangle : area.triangleIndices)
+        {
+            Debug::Renderer::AddVertex(_collisionMesh.triangles[triangle].positions[0]);
+            Debug::Renderer::AddVertex(_collisionMesh.triangles[triangle].positions[1]);
+            Debug::Renderer::AddVertex(_collisionMesh.triangles[triangle].positions[1]);
+            Debug::Renderer::AddVertex(_collisionMesh.triangles[triangle].positions[2]);
+            Debug::Renderer::AddVertex(_collisionMesh.triangles[triangle].positions[2]);
+            Debug::Renderer::AddVertex(_collisionMesh.triangles[triangle].positions[0]);
+        }
+	}
 }
 
 // GUI描画
@@ -65,6 +78,7 @@ void MeshCollider::DrawGui()
 	ColliderBase::DrawGui();
 	ImGui::DragInt(u8"分割エリアサイズ", &_cellSize, 1.0f, 1, 32);
 	ImGui::Checkbox(u8"コリジョンメッシュ頂点表示", &_isDebugDrawVertex);
+    ImGui::SliderInt(u8"描画エリアインデックス", &_drawCellIndex, -1, _cellSize * _cellSize - 1);
 	if (ImGui::Button(u8"コリジョンメッシュ再計算"))
 	{
 		_recalculate = true;
@@ -155,9 +169,11 @@ void MeshCollider::RecalculateCollisionMesh()
 		const CollisionMesh::Triangle& triangle = _collisionMesh.triangles[i];
 		std::vector<size_t> indexMap;
 		// 各頂点がどのエリアに属するかを調べる
-		indexMap.push_back(CalcKey(triangle.positions[0], sizeX, sizeZ, volumeMin.x, volumeMin.z, _cellSize));
-		indexMap.push_back(CalcKey(triangle.positions[1], sizeX, sizeZ, volumeMin.x, volumeMin.z, _cellSize));
-		indexMap.push_back(CalcKey(triangle.positions[2], sizeX, sizeZ, volumeMin.x, volumeMin.z, _cellSize));
+        // 三角形からAABBを算出し、各エリアのAABBと衝突しているか調べる
+        const Vector3 points[3] = { triangle.positions[0], triangle.positions[1], triangle.positions[2] };
+        DirectX::BoundingBox triangleBox;
+        DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, points, sizeof(Vector3));
+        indexMap = GetCollisionMeshIndex(triangleBox);
 		for (auto& index : indexMap)
 		{
 			_collisionMesh.areas[index].triangleIndices.push_back(i);
@@ -165,12 +181,19 @@ void MeshCollider::RecalculateCollisionMesh()
 	}
 }
 
-// 座標を分割エリアのkeyに変換
-size_t MeshCollider::CalcKey(const Vector3& position, const float& sizeX, const float& sizeZ, const float& minX, const float& minZ, const size_t& sellsize)
+/// 指定のAABBとコリジョンメッシュのAABBの交差判定
+std::vector<size_t> MeshCollider::GetCollisionMeshIndex(const DirectX::BoundingBox& aabb)
 {
-	size_t chipX = static_cast<size_t>((position.x - minX) / sizeX);
-	size_t chipZ = static_cast<size_t>((position.z - minZ) / sizeZ);
-	chipX = std::clamp<size_t>(chipX, 0, sellsize - 1);
-	chipZ = std::clamp<size_t>(chipZ, 0, sellsize - 1);
-	return chipX + chipZ * sellsize;
+    std::vector<size_t> indices;
+	size_t index = 0;
+    // コリジョンメッシュのAABBと交差しているエリアを取得
+    for (const auto& area : _collisionMesh.areas)
+    {
+        if (area.boundingBox.Intersects(aabb))
+        {
+            indices.push_back(index);
+        }
+		index++;
+    }
+	return indices;
 }

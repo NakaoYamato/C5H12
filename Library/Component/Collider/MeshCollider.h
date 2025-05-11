@@ -45,14 +45,17 @@ public:
 	const CollisionMesh& GetCollisionMesh() const { return _collisionMesh; }
 #pragma endregion
 private:
-	// 座標を分割エリアのkeyに変換
-	size_t CalcKey(const Vector3& position,
-		const float& sizeX, const float& sizeZ,
-		const float& minX, const float& minZ,
-		const size_t& sellsize);
+    /// <summary>
+    /// 指定のAABBとコリジョンメッシュのAABBの交差判定
+    /// </summary>
+    /// <param name="aabb"></param>
+    /// <returns>交差したAABBの番号</returns>
+    std::vector<size_t> GetCollisionMeshIndex(
+        const DirectX::BoundingBox& aabb);
 private:
 	CollisionMesh	_collisionMesh;	// コリジョンメッシュ
 	bool _recalculate = true;	// 再計算フラグ
 	bool _isDebugDrawVertex = false; // 頂点描画フラグ
 	int _cellSize = 16; // 分割エリアのサイズ
+    int _drawCellIndex = -1; // 描画エリアのインデックス
 };

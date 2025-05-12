@@ -173,10 +173,14 @@ public:
 
 	// アニメーションの追加
 	void AppendAnimations(std::string filename,
-		std::string animationName);
+		std::string animationName = "");
+	// アニメーションの追加
+	void AppendAnimations(const Animation& animation,
+		const std::vector<Node>& nodes,
+		std::string animationName = "");
 	// アニメーションの追加
 	void AppendAnimations(ModelResource* animationResource,
-		std::string animationName);
+		std::string animationName = "");
 
 	// 指定のマテリアルのSRVを変更
 	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)

@@ -169,7 +169,92 @@ void ModelResource::AppendAnimations(std::string filename,
 {
     ModelResource modelResource;
     modelResource.Load(filename);
-    AppendAnimations(&modelResource, animationName);
+	AppendAnimations(modelResource.GetAnimations().at(0), modelResource.GetNodes(), animationName);
+}
+
+void ModelResource::AppendAnimations(const Animation& newAnimation,
+    const std::vector<Node>& nodes,
+    std::string animationName)
+{
+    // thisとanimationResourceのノードを一致させるマップ作成
+    std::unordered_map<std::string, size_t> nodeMap;
+    {
+        size_t index = 0;
+        for (auto& node : this->GetNodes())
+        {
+            nodeMap[node.name] = index;
+            index++;
+        }
+    }
+
+	// animationNameが空の場合は、newAnimationの名前を使用
+    if (animationName.size() == 0)
+    {
+        animationName = newAnimation.name;
+    }
+
+    ModelResource::Animation animation{};
+    animation.name = animationName;
+    animation.secondsLength = newAnimation.secondsLength;
+    animation.nodeAnims.resize(this->GetNodes().size());
+    // thisと新規のモデルのノード割り当て処理
+    for (auto& node : this->GetNodes())
+    {
+        size_t srcIndex = GetNodeIndex(this->GetNodes(), node.name.c_str());
+        size_t dstIndex = GetNodeIndex(nodes, node.name.c_str());
+        if (dstIndex != -1)
+        {
+            animation.nodeAnims[srcIndex] = newAnimation.nodeAnims[dstIndex];
+        }
+    }
+    // アニメーションがなかったノードに対して初期姿勢を追加
+    for (size_t nodeIndex = 0; nodeIndex < animation.nodeAnims.size(); ++nodeIndex)
+    {
+        const Node& node = this->GetNodes().at(nodeIndex);
+        NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
+
+        // 移動
+        if (nodeAnim.positionKeyframes.size() == 0)
+        {
+            VectorKeyframe& keyframe = nodeAnim.positionKeyframes.emplace_back();
+            keyframe.seconds = 0.0f;
+            keyframe.value = node.position;
+        }
+        if (nodeAnim.positionKeyframes.size() == 1)
+        {
+            VectorKeyframe& keyframe = nodeAnim.positionKeyframes.emplace_back();
+            keyframe.seconds = animation.secondsLength;
+            keyframe.value = nodeAnim.positionKeyframes.at(0).value;
+        }
+        // 回転
+        if (nodeAnim.rotationKeyframes.size() == 0)
+        {
+            QuaternionKeyframe& keyframe = nodeAnim.rotationKeyframes.emplace_back();
+            keyframe.seconds = 0.0f;
+            keyframe.value = node.rotation;
+        }
+        if (nodeAnim.rotationKeyframes.size() == 1)
+        {
+            QuaternionKeyframe& keyframe = nodeAnim.rotationKeyframes.emplace_back();
+            keyframe.seconds = animation.secondsLength;
+            keyframe.value = nodeAnim.rotationKeyframes.at(0).value;
+        }
+        // スケール
+        if (nodeAnim.scaleKeyframes.size() == 0)
+        {
+            VectorKeyframe& keyframe = nodeAnim.scaleKeyframes.emplace_back();
+            keyframe.seconds = 0.0f;
+            keyframe.value = node.scale;
+        }
+        if (nodeAnim.scaleKeyframes.size() == 1)
+        {
+            VectorKeyframe& keyframe = nodeAnim.scaleKeyframes.emplace_back();
+            keyframe.seconds = animation.secondsLength;
+            keyframe.value = nodeAnim.scaleKeyframes.at(0).value;
+        }
+    }
+
+    this->_animations.push_back(animation);
 }
 
 // アニメーションの追加

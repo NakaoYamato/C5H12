@@ -38,8 +38,12 @@ private:
 	void DrawMenuBarGui();
 	// 編集GUI描画
 	void DrawEditGui();
+	// 表示GUI描画
+	void DrawShowGui();
 	// アニメーション編集GUI描画
 	void DrawEditAnimationGui();
+	// アニメーション追加GUI描画
+	void DrawAddAnimationGui();
 private:
 	std::string _filepath;
 	std::string _currentDirectory;
@@ -49,9 +53,15 @@ private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
 
+	// アニメーションデータ
 	AnimationCollisionData _animCollisionData;
 
+	// 追加アニメーションモデル
+	std::shared_ptr<Model> _animationModel;
+	std::vector<bool> _addAnimationMap;
+
 	// デバッグ用
+	bool _showNode = true;
 	Vector4 _nodeColor = Vector4::Red;
 	std::vector<const char*> _nodeNames;
 

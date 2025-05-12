@@ -1,5 +1,6 @@
 #include "SceneModelEditor.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <imgui.h>
 
@@ -47,7 +48,8 @@ void SceneModelEditor::Update(float elapsedTime)
     if (model)
     {
         // ノード表示
-        model->DebugDrawNode(_nodeColor);
+        if (_showNode)
+            model->DebugDrawNode(_nodeColor);
 
         // 頂点表示
         if (_selectingMeshIndex != -1)
@@ -55,6 +57,8 @@ void SceneModelEditor::Update(float elapsedTime)
             auto& meshes = model->GetResource()->GetAddressMeshes();
             auto& mesh = meshes[_selectingMeshIndex];
 
+
+            Debug::Renderer::AddVertex(Vector3::Zero);
             for (auto& vertex : mesh.vertices)
             {
                 Vector3 position = Vector3::Zero;
@@ -75,9 +79,11 @@ void SceneModelEditor::Update(float elapsedTime)
                 {
                     position = Vector3::TransformCoord(vertex.position, _modelActor.lock()->GetTransform().GetMatrix());
                 }
-
-                Debug::Renderer::DrawSphere(position, _vertexPointRadius, _vertexPointColor);
+				Debug::Renderer::AddVertex(position);
+				Debug::Renderer::AddVertex(position);
+                //Debug::Renderer::DrawSphere(position, _vertexPointRadius, _vertexPointColor);
             }
+            Debug::Renderer::AddVertex(Vector3::Zero);
         }
         
         // アニメーションを再生中は当たり判定を表示
@@ -120,10 +126,12 @@ void SceneModelEditor::DrawGui()
 {
     // 編集GUI描画
     DrawEditGui();
-
+    // 表示GUI描画
+    DrawShowGui();
     // メニューバーのGUI描画
     DrawMenuBarGui();
-
+	// アニメーション追加GUI描画
+    DrawAddAnimationGui();
     if (ImGui::Begin(u8"モデル"))
     {
         _modelActor.lock()->DrawGui();
@@ -188,6 +196,20 @@ void SceneModelEditor::DrawMenuBarGui()
                 }
             }
 
+            if (ImGui::Button(u8"アニメーション読み込み"))
+            {
+                // ダイアログを開く
+                std::string filepath;
+                std::string currentDirectory;
+                Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
+                // ファイルを選択したら
+                if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                {
+					_animationModel = std::make_shared<Model>(Graphics::Instance().GetDevice(), filepath.c_str());
+                    _addAnimationMap.resize(_animationModel->GetResource()->GetAddressAnimations().size());
+                }
+            }
+
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -199,14 +221,6 @@ void SceneModelEditor::DrawEditGui()
 {
     if (ImGui::Begin(u8"編集"))
     {
-        ImGui::Text(u8"絶対パス：%s", _filepath.c_str());
-        ImGui::Text(u8"カレントディレクトリ：%s", _currentDirectory.c_str());
-        ImGui::Text(u8"相対パス：%s", _relativePath.c_str());
-        ImGui::Separator();
-        if (ImGui::Button(u8"モデル表示"))
-        {
-            _modelActor.lock()->SetShowFlag(!_modelActor.lock()->IsShowing());
-        }
         ImGui::Separator();
         if (ImGui::TreeNode(u8"判定"))
         {
@@ -241,7 +255,24 @@ void SceneModelEditor::DrawEditGui()
             ImGui::TreePop();
         }
         ImGui::Separator();
+    }
+    ImGui::End();
+}
 
+// 表示GUI描画
+void SceneModelEditor::DrawShowGui()
+{
+    if (ImGui::Begin(u8"表示"))
+    {
+        ImGui::Text(u8"絶対パス：%s", _filepath.c_str());
+        ImGui::Text(u8"カレントディレクトリ：%s", _currentDirectory.c_str());
+        ImGui::Text(u8"相対パス：%s", _relativePath.c_str());
+        ImGui::Separator();
+		ImGui::Checkbox(u8"ノード表示", &_showNode);
+        if (ImGui::Button(u8"モデル表示"))
+        {
+            _modelActor.lock()->SetShowFlag(!_modelActor.lock()->IsShowing());
+        }
         ImGui::SliderInt(u8"選択中のメッシュ", &_selectingMeshIndex, -1, (int)_modelActor.lock()->GetModel().lock()->GetResource()->GetAddressMeshes().size() - 1);
         ImGui::DragFloat(u8"頂点の点の大きさ", &_vertexPointRadius, 0.01f);
         ImGui::ColorEdit4(u8"頂点の色", &_vertexPointColor.x);
@@ -271,6 +302,7 @@ void SceneModelEditor::DrawEditAnimationGui()
             }
         }
     }
+    ImGui::Separator();
     ImGui::InputText(u8"取り除く対象", &_filterAnimationName);
 	if (ImGui::Button(u8"アニメーション名を取り除く"))
 	{
@@ -284,6 +316,17 @@ void SceneModelEditor::DrawEditAnimationGui()
 			}
 		}
 	}
+    ImGui::Separator();
+    if (ImGui::Button(u8"アニメーションのソート"))
+    {
+		std::sort(model->GetResource()->GetAddressAnimations().begin(),
+			model->GetResource()->GetAddressAnimations().end(),
+			[](const ModelResource::Animation& a, const ModelResource::Animation& b)
+			{
+				return a.name < b.name;
+			});
+    }
+    ImGui::Separator();
 
     // アニメーション再生中か確認
     int currentAnimIndex = _animator.lock()->GetCurrentAnimIndex();
@@ -369,4 +412,43 @@ void SceneModelEditor::DrawEditAnimationGui()
         }
         index++;
     }
+}
+
+// アニメーション追加GUI描画
+void SceneModelEditor::DrawAddAnimationGui()
+{
+	if (_animationModel.get() == nullptr)
+		return;
+
+	if (ImGui::Begin(u8"アニメーション追加"))
+	{
+        auto& animations = _animationModel->GetResource()->GetAddressAnimations();
+        int index = 0;
+        for (const ModelResource::Animation& animation : animations)
+        {
+            ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf;
+
+            bool flag = _addAnimationMap[index];
+			ImGui::Checkbox(animation.name.c_str(), &flag);
+			_addAnimationMap[index] = flag;
+
+            index++;
+        }
+        ImGui::Separator();
+		if (ImGui::Button(u8"アニメーション追加"))
+		{
+			auto model = _modelActor.lock()->GetModel().lock();
+			auto& animations = _animationModel->GetResource()->GetAddressAnimations();
+			for (size_t i = 0; i < animations.size(); ++i)
+			{
+				if (_addAnimationMap[i])
+				{
+					model->GetResource()->AppendAnimations(
+                        animations[i],
+                        _animationModel->GetResource()->GetNodes());
+				}
+			}
+		}
+	}
+	ImGui::End();
 }

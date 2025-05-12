@@ -249,9 +249,6 @@
     <ClCompile Include="Source\Component\Player\PlayerController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Physics\PhysicsManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -268,9 +265,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Scene\Editor\SceneModelEditor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Library\Physics\Collision\AnimationCollisionData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Network\ClientAssignment.cpp">
@@ -590,9 +584,6 @@
     <ClInclude Include="Source\Component\Player\PlayerController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Physics\PhysicsManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -609,9 +600,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Scene\Editor\SceneModelEditor.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\Physics\Collision\AnimationCollisionData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Network\ClientAssignment.h">

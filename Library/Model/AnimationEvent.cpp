@@ -1,24 +1,25 @@
-#include "AnimationCollisionData.h"
+#include "AnimationEvent.h"
 
 #include <filesystem>
 #include <fstream>
 #include <imgui.h>
 
-#include "../../Library/Model/SerializeFunction.h"
+#include "../DebugSupporter/DebugSupporter.h"
+#include "SerializeFunction.h"
 
-void AnimationCollisionData::Keyframe::DrawGui(const std::vector<const char*>& nodeNames)
+void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeNames)
 {
-    // CollisionTypeの選択
+    // EventTypeの選択
     {
-        static const char* CollisionTypeNames[] =
+        static const char* EventTypeNames[] =
         {
+            u8"Flag",
             u8"Hit",
             u8"Attack",
-            u8"Other",
         };
-        int type = static_cast<int>(collisionType);
-        if (ImGui::Combo(u8"判定の種類", &type, CollisionTypeNames, _countof(CollisionTypeNames)))
-            collisionType = static_cast<CollisionType>(type);
+        int type = static_cast<int>(eventType);
+        if (ImGui::Combo(u8"判定の種類", &type, EventTypeNames, _countof(EventTypeNames)))
+            eventType = static_cast<EventType>(type);
     }
     // ShapeTypeの選択
     {
@@ -44,10 +45,10 @@ void AnimationCollisionData::Keyframe::DrawGui(const std::vector<const char*>& n
 }
 
 template<class T>
-void AnimationCollisionData::Keyframe::serialize(T& archive)
+inline void AnimationEvent::EventData::serialize(T& archive)
 {
     archive(
-        CEREAL_NVP(collisionType),
+        CEREAL_NVP(eventType),
         CEREAL_NVP(shapeType),
         CEREAL_NVP(nodeIndex),
         CEREAL_NVP(triggerMessage),
@@ -59,16 +60,66 @@ void AnimationCollisionData::Keyframe::serialize(T& archive)
     );
 }
 
-
-// すべてのGUI描画
-void AnimationCollisionData::DrawGuiAll(const std::vector<const char*>& nodeNames)
+/// モデル情報読み込み
+void AnimationEvent::Load(std::weak_ptr<Model> model)
 {
-    for (auto& [animName, keyframes] : _data)
+    _model = model;
+
+    _nodeNames.clear();
+    // ノードの名前を全取得
+    for (auto& node : model.lock()->GetPoseNodes())
+    {
+        _nodeNames.push_back(node.name.c_str());
+    }
+}
+
+/// デバッグ表示
+void AnimationEvent::DebugRender(const std::string& animName, float animElapsedTime)
+{
+    if (_model.expired())
+        return;
+
+    for (auto& event : _data[animName.c_str()])
+    {
+        if (animElapsedTime > event.startSeconds &&
+            animElapsedTime < event.endSeconds)
+        {
+            auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
+            DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
+            DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
+            DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
+            DirectX::XMFLOAT4X4 transform = {};
+
+            DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
+
+            switch (event.shapeType)
+            {
+            case AnimationEvent::ShapeType::Box:
+                Debug::Renderer::DrawBox(transform, Vector4::White);
+                break;
+            case AnimationEvent::ShapeType::Sphere:
+                Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), event.scale.x, Vector4::White);
+                break;
+            case AnimationEvent::ShapeType::Capsule:
+                Debug::Renderer::DrawCapsule(transform, 1.0f, 1.0f, Vector4::White);
+                break;
+            }
+        }
+    }
+}
+
+// GUI描画
+void AnimationEvent::DrawGui()
+{
+    if (_model.expired())
+        return;
+
+    for (auto& [animName, datas] : _data)
     {
         // アニメーション毎のキーフレームGUI
         if (ImGui::TreeNode(animName.c_str()))
         {
-            DrawGui(animName, nodeNames);
+            DrawGui(animName);
             ImGui::Separator();
 
             ImGui::TreePop();
@@ -76,13 +127,16 @@ void AnimationCollisionData::DrawGuiAll(const std::vector<const char*>& nodeName
     }
 }
 
-// 指定したKeyframesのGUI描画
-void AnimationCollisionData::DrawGui(const std::string& animName, const std::vector<const char*>& nodeNames)
+// 指定したEventDataのGUI描画
+void AnimationEvent::DrawGui(const std::string& animName)
 {
+    if (_model.expired())
+        return;
+
     auto& keyframes = _data[animName];
     if (ImGui::Button(u8"キーフレーム追加"))
     {
-        keyframes.push_back(AnimationCollisionData::Keyframe());
+        keyframes.push_back(AnimationEvent::EventData());
     }
 
     int index = 0;
@@ -91,7 +145,7 @@ void AnimationCollisionData::DrawGui(const std::string& animName, const std::vec
         if (ImGui::TreeNode(std::to_string(index).c_str()))
         {
             // 各キーフレームGUI
-            keyframe.DrawGui(nodeNames);
+            keyframe.DrawGui(_nodeNames);
 
             if (ImGui::Button(u8"削除"))
             {
@@ -107,8 +161,9 @@ void AnimationCollisionData::DrawGui(const std::string& animName, const std::vec
     }
 }
 
-// 書き出し
-bool AnimationCollisionData::Serialize(const char* filename)
+#pragma region ファイル操作
+/// データ書き出し
+bool AnimationEvent::Serialize(const char* filename)
 {
     std::filesystem::path serializePath(filename);
     serializePath.replace_extension(ANIMATION_EVENT_EXTENSION);
@@ -132,7 +187,8 @@ bool AnimationCollisionData::Serialize(const char* filename)
     return false;
 }
 
-bool AnimationCollisionData::Deserialize(const char* filename)
+/// データ読み込み
+bool AnimationEvent::Deserialize(const char* filename)
 {
     std::filesystem::path serializePath(filename);
     serializePath.replace_extension(ANIMATION_EVENT_EXTENSION);
@@ -155,3 +211,4 @@ bool AnimationCollisionData::Deserialize(const char* filename)
     }
     return false;
 }
+#pragma endregion

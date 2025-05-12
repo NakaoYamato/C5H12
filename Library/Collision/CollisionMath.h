@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Math/Vector.h"
-#include "../3D/Model.h"
+#include "../Model/Model.h"
 
 // ƒqƒbƒgŒ‹‰Ê
 struct HitResult

@@ -29,7 +29,7 @@ void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceConte
 	ImGui::StyleColorsClassic();
 
 	ImGuiStyle& style = ImGui::GetStyle();
-	style.Colors[ImGuiCol_::ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.2f);
+	style.Colors[ImGuiCol_::ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.5f);
 
 
 	ProfileInitialize(isPaused, setPause, maxThreads);

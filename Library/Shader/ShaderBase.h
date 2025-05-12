@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include "../Graphics/RenderContext.h"
-#include "../Resource/ModelResource.h"
+#include "../Model/ModelResource.h"
 
 /// <summary>
 /// モデルの描画に使用するシェーダを指定するための基底クラス

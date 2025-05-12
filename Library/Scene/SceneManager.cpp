@@ -2,7 +2,7 @@
 
 #include "SceneLoading.h"
 
-#include "../Resource/SerializeFunction.h"
+#include "../Model/SerializeFunction.h"
 
 #include<imgui.h>
 #include <filesystem>

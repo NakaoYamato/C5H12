@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "../3D/Model.h"
+#include "../Model/Model.h"
 #include "../Shader/ShaderBase.h"
 
 /// <summary>

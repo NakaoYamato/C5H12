@@ -89,35 +89,8 @@ void SceneModelEditor::Update(float elapsedTime)
         // アニメーションを再生中は当たり判定を表示
         if (_animator.lock()->GetCurrentAnimIndex() != -1)
         {
-            float animCurrentTime = _animator.lock()->GetCurrentAnimSeconds();
             // 当たり判定表示
-            for (auto& keyframe : _animCollisionData.GetKeyframes(_animator.lock()->GetCurrentAnimationName()))
-            {
-                if (animCurrentTime > keyframe.startSeconds &&
-                    animCurrentTime < keyframe.endSeconds)
-                {
-                    auto& node = model->GetPoseNodes()[keyframe.nodeIndex];
-                    DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&keyframe.position));
-                    DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(keyframe.angle.x, keyframe.angle.y, keyframe.angle.z);
-                    DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&keyframe.scale));
-                    DirectX::XMFLOAT4X4 transform = {};
-
-                    DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
-
-                    switch (keyframe.shapeType)
-                    {
-                    case AnimationCollisionData::ShapeType::Box:
-                        Debug::Renderer::DrawBox(transform, Vector4::White);
-                        break;
-                    case AnimationCollisionData::ShapeType::Sphere:
-                        Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), keyframe.scale.x, Vector4::White);
-                        break;
-                    case AnimationCollisionData::ShapeType::Capsule:
-                        Debug::Renderer::DrawCapsule(transform, 1.0f, 1.0f, Vector4::White);
-                        break;
-                    }
-                }
-            }
+			_animationEvent.DebugRender(_animator.lock()->GetCurrentAnimationName(), _animator.lock()->GetCurrentAnimSeconds());
         }
     }
 }
@@ -175,24 +148,19 @@ void SceneModelEditor::DrawMenuBarGui()
                     auto model = _modelActor.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
                     _animator.lock()->ResetModel(model.lock());
 
-                    _nodeNames.clear();
-                    // ノードの名前を全取得
-                    for (auto& node : model.lock()->GetPoseNodes())
-                    {
-                        _nodeNames.push_back(node.name.c_str());
-                    }
-
                     // 判定のシリアライズの確認
-                    if (!_animCollisionData.Deserialize(_filepath.c_str()))
+                    if (!_animationEvent.Deserialize(_filepath.c_str()))
                     {
                         // なかったら新規作成
-                        _animCollisionData.Clear();
+                        _animationEvent.Clear();
+
                         // アニメーション名を登録
                         for (auto& animation : model.lock()->GetResource()->GetAnimations())
                         {
-                            _animCollisionData.AddKeyFrames(animation.name);
+                            _animationEvent.AddEventData(animation.name);
                         }
                     }
+                    _animationEvent.Load(model.lock());
                 }
             }
 
@@ -229,20 +197,20 @@ void SceneModelEditor::DrawEditGui()
             {
                 if (ImGui::TreeNode(u8"現在のアニメーション判定"))
                 {
-                    _animCollisionData.DrawGui(_animator.lock()->GetCurrentAnimationName(), _nodeNames);
+                    _animationEvent.DrawGui(_animator.lock()->GetCurrentAnimationName());
 
                     ImGui::TreePop();
                 }
             }
             if (ImGui::TreeNode(u8"すべてのアニメーション判定"))
             {
-                _animCollisionData.DrawGuiAll(_nodeNames);
+                _animationEvent.DrawGui();
 
                 ImGui::TreePop();
             }
             if (ImGui::Button(u8"判定の書き出し"))
             {
-                _animCollisionData.Serialize(_filepath.c_str());
+                _animationEvent.Serialize(_filepath.c_str());
             }
 
             ImGui::TreePop();

@@ -5,7 +5,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
-#include "../../Library/Physics/Collision/AnimationCollisionData.h"
+#include "../../Library/Model/AnimationEvent.h"
 
 class SceneModelEditor : public Scene
 {
@@ -54,7 +54,7 @@ private:
 	std::weak_ptr<Animator> _animator;
 
 	// アニメーションデータ
-	AnimationCollisionData _animCollisionData;
+	AnimationEvent _animationEvent;
 
 	// 追加アニメーションモデル
 	std::shared_ptr<Model> _animationModel;
@@ -63,7 +63,6 @@ private:
 	// デバッグ用
 	bool _showNode = true;
 	Vector4 _nodeColor = Vector4::Red;
-	std::vector<const char*> _nodeNames;
 
 	int _selectingMeshIndex = -1;
 	float _vertexPointRadius = 0.05f;

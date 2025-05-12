@@ -114,7 +114,7 @@
     <ClCompile Include="Library\Scene\SceneManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Resource\ModelResource.cpp">
+    <ClCompile Include="Library\Model\ModelResource.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp">
@@ -123,10 +123,10 @@
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\3D\Model.cpp">
+    <ClCompile Include="Library\Model\Model.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\3D\SkyMap.cpp">
+    <ClCompile Include="Library\2D\SkyMap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp">
@@ -318,6 +318,9 @@
     <ClCompile Include="Source\StateMachine\Player\PlayerStateMachine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Model\AnimationEvent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -440,10 +443,10 @@
     <ClInclude Include="Library\Scene\SceneManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Resource\ModelResource.h">
+    <ClInclude Include="Library\Model\ModelResource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Resource\SerializeFunction.h">
+    <ClInclude Include="Library\Model\SerializeFunction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\ResourceManager\ModelResourceManager.h">
@@ -452,10 +455,10 @@
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\3D\Model.h">
+    <ClInclude Include="Library\Model\Model.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\3D\SkyMap.h">
+    <ClInclude Include="Library\2D\SkyMap.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h">
@@ -657,6 +660,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\StateMachine\Player\PlayerStateMachine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Model\AnimationEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

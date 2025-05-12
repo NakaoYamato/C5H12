@@ -5,7 +5,7 @@
 #include <string>
 
 #include "../Math/Vector.h"
-#include "../Resource/ModelResource.h"
+#include "../Model/ModelResource.h"
 
 /// <summary>
 /// ƒ‚ƒfƒ‹ƒNƒ‰ƒX

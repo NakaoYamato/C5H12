@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "../../Library/2D/Sprite.h"
-#include "../../Library/3D/SkyMap.h"
+#include "../../Library/2D/SkyMap.h"
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
 

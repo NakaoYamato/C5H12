@@ -2,7 +2,7 @@
 
 #include "../../Library/Actor/Actor.h"
 
-#include "../../Library/Resource/ModelResource.h"
+#include "../../Library/Model/ModelResource.h"
 
 class WeaponActor : public Actor
 {

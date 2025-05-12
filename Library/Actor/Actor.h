@@ -7,7 +7,7 @@
 
 #include "../../Library/Math/Transform.h"
 #include "../../Library/Graphics/RenderContext.h"
-#include "../../Library/3D/Model.h"
+#include "../../Library/Model/Model.h"
 
 // ‘O•ûéŒ¾
 class Component;

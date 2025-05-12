@@ -150,8 +150,9 @@
   <ItemGroup>
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
-    <ClCompile Include="Library\3D\Model.cpp" />
-    <ClCompile Include="Library\3D\SkyMap.cpp" />
+    <ClCompile Include="Library\Model\AnimationEvent.cpp" />
+    <ClCompile Include="Library\Model\Model.cpp" />
+    <ClCompile Include="Library\2D\SkyMap.cpp" />
     <ClCompile Include="Library\Actor\Actor.cpp" />
     <ClCompile Include="Library\Actor\ActorManager.cpp" />
     <ClCompile Include="Library\Actor\Camera\MainCamera.cpp" />
@@ -222,7 +223,7 @@
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp" />
-    <ClCompile Include="Library\Resource\ModelResource.cpp" />
+    <ClCompile Include="Library\Model\ModelResource.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneModelEditor.cpp" />
     <ClCompile Include="Library\Scene\Scene.cpp" />
     <ClCompile Include="Library\Scene\SceneLoading.cpp" />
@@ -253,8 +254,9 @@
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
-    <ClInclude Include="Library\3D\Model.h" />
-    <ClInclude Include="Library\3D\SkyMap.h" />
+    <ClInclude Include="Library\Model\AnimationEvent.h" />
+    <ClInclude Include="Library\Model\Model.h" />
+    <ClInclude Include="Library\2D\SkyMap.h" />
     <ClInclude Include="Library\Actor\Actor.h" />
     <ClInclude Include="Library\Actor\ActorManager.h" />
     <ClInclude Include="Library\Actor\Camera\MainCamera.h" />
@@ -335,8 +337,8 @@
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
     <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />
     <ClInclude Include="Library\ResourceManager\ModelResourceManager.h" />
-    <ClInclude Include="Library\Resource\ModelResource.h" />
-    <ClInclude Include="Library\Resource\SerializeFunction.h" />
+    <ClInclude Include="Library\Model\ModelResource.h" />
+    <ClInclude Include="Library\Model\SerializeFunction.h" />
     <ClInclude Include="Library\Scene\Editor\SceneModelEditor.h" />
     <ClInclude Include="Library\Scene\Scene.h" />
     <ClInclude Include="Library\Scene\SceneLoading.h" />

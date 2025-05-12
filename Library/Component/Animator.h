@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-#include "../../Library/3D/Model.h"
+#include "../../Library/Model/Model.h"
 
 class Animator : public Component
 {

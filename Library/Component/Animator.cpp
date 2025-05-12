@@ -30,10 +30,14 @@ void Animator::DrawGui()
             ImGui::Text(animations[_currentAnimIndex].name.c_str());
             ImGui::SliderFloat(u8"経過時間", &_currentAnimSeconds, 0.0f, currentAnimation.secondsLength);
 
+            if (ImGui::Button(u8"再生"))
+            {
+                this->PlayAnimation(_currentAnimIndex, _animLoop, _animBlendSeconds);
+            }
             ImGui::Separator();
         }
-        ImGui::DragFloat(u8"ブレンド時間", &_animBlendSeconds, 0.01f);
         ImGui::Checkbox(u8"ループ", &_animLoop);
+        ImGui::DragFloat(u8"ブレンド時間", &_animBlendSeconds, 0.01f);
 
         ImGui::Separator();
         // フィルター

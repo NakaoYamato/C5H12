@@ -18,7 +18,7 @@ void PlayerActor::OnCreate()
 
 	// モデル読み込み
 	//auto model = LoadModel("./Data/Model/Player/2025_03_25.fbx");
-	auto model = LoadModel("./Data/Model/Player/ARPGWarrior/Animations/Generic/ARPG_Warrior.fbx");
+	auto model = LoadModel("./Data/Model/Player/ARPG_Warrior.fbx");
 	GetTransform().SetLengthScale(0.01f);
 
 	// コンポーネント追加

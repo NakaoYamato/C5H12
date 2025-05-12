@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <mutex>
-#include "../Resource/ModelResource.h"
+#include "../Model/ModelResource.h"
 
 // モデルのリソースマネージャー
 class ModelResourceManager

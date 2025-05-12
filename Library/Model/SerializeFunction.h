@@ -12,8 +12,8 @@
 #pragma region 定義
 // モデルのシリアライズファイル拡張子
 static const char* MODEL_EXTENSION = ".model";
-// アニメーションの当たり判定のファイル拡張子
-static const char* ANIMATION_COLLISION_EXTENSION = ".animCol";
+// アニメーションイベントのファイル拡張子
+static const char* ANIMATION_EVENT_EXTENSION = ".animEvent";
 #pragma endregion
 
 

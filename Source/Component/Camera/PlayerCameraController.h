@@ -38,4 +38,5 @@ private:
     float _cameraDistance = 5.0f;
     float _horizontalMovePower = 6.0f;
     float _verticalMovePower = 3.0f;
+    float _cameraRadius = 0.1f;
 };

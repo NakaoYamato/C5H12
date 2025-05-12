@@ -67,6 +67,21 @@ void PlayerCameraController::Update(float elapsedTime)
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
     Vector3 newEye = newFocus - front * _cameraDistance;
 
+    // 新しい視点とステージの当たり判定
+    float distance = _cameraDistance;
+    Vector3 hitPosition{}, hitNormal{};
+	if (GetActor()->GetScene()->GetCollisionManager().SphereCast(
+        newFocus, -front.Normalize(),
+        _cameraRadius, 
+        distance,
+        hitPosition,
+        hitNormal))
+	{
+        // 密接していなければdistanceを使う
+        if (distance > 0.0f)
+            newEye = newFocus - front * distance;
+	}
+
     // 補完処理
     Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * _FIXED_UPDATE_RATE);
     Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * _FIXED_UPDATE_RATE);
@@ -94,4 +109,5 @@ void PlayerCameraController::DrawGui()
     ImGui::DragFloat(u8"視点補完速度", &_eyeLerpSpeed, 0.1f, 0.01f, 10.0f);
     ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"垂直入力補正値", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"カメラの半径", &_cameraRadius, 0.01f, 0.01f, 1.0f);
 }

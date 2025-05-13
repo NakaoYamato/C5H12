@@ -17,6 +17,7 @@ public:
 	~Quaternion() {}
 
 #pragma region Ã“Iƒƒ“ƒo•Ï”
+	static constexpr DirectX::XMFLOAT4 Identity = { 0.0f,0.0f,0.0f,1.0f };
 	static constexpr DirectX::XMFLOAT3 AxisX = { 1.0f,0.0f,0.0f };
 	static constexpr DirectX::XMFLOAT3 AxisY = { 0.0f,1.0f,0.0f };
 	static constexpr DirectX::XMFLOAT3 AxisZ = { 0.0f,0.0f,1.0f };

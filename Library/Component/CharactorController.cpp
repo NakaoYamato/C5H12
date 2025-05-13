@@ -12,7 +12,8 @@ void CharactorController::Start()
 	_animator = GetActor()->GetComponent<Animator>();
 }
 
-void CharactorController::Update(float elapsedTime)
+// 遅延更新処理
+void CharactorController::LateUpdate(float elapsedTime)
 {
     // 重力適応
     if (_useGravity)
@@ -88,6 +89,10 @@ void CharactorController::UpdateVelocity(float deltaTime)
 void CharactorController::UpdatePosition(float deltaTime)
 {
 	Vector3 movement = _velocity * deltaTime;
+	// ルートモーションの移動量取得
+	if (_animator.lock())
+		movement += _animator.lock()->GetRootMovement();
+
     // 水平処理
     MoveAndSlide({ movement.x, 0.0f, movement.z }, false);
     // 垂直処理

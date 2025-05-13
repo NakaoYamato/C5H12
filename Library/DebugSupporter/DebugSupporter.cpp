@@ -59,6 +59,14 @@ namespace Debug
         {
             Output::String(std::to_string(value));
         }
+        void String(const Vector3& value)
+        {
+            Debug::Output::String(value.x);
+            Debug::Output::String("\t");
+            Debug::Output::String(value.y);
+            Debug::Output::String("\t");
+            Debug::Output::String(value.z);
+        }
     }
 
     namespace Renderer

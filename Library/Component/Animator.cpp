@@ -1,6 +1,7 @@
 #include "Animator.h"
 
 #include "../../Library/JobSystem/JobSystem.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 
@@ -13,31 +14,98 @@ void Animator::Start()
 // 更新処理
 void Animator::Update(float elapsedTime)
 {
-    UpdateAnimation(elapsedTime);
+    // アニメーションが設定されていなければ処理しない
+    if (_animationIndex == -1)
+        return;
+
+    std::vector<ModelResource::Node>& poseNodes = _model.lock()->GetPoseNodes();
+
+    // アニメーション経過時間更新
+    UpdateAnimSeconds(elapsedTime);
+
+    // アニメーション計算処理
+    ComputeAnimation(_animationIndex, _animationTimer, poseNodes);
+
+  //  if (_removeMovement && _removeMovementNodeIndex != -1)
+  //  {
+		//auto& node = poseNode[_removeMovementNodeIndex];
+		//node.position = Vector3::Zero;
+  //  }
+
+    // ブレンディング計算処理
+    if (_isBlending)
+    {
+        // ブレンド率計算
+        float rate = _blendTimer / _blendEndTime;
+
+        poseNodes = ComputeBlending(_cacheNodes, _model.lock()->GetPoseNodes(), rate);
+        // ノード設定
+        _model.lock()->SetPoseNodes(poseNodes);
+
+        // 時間経過
+        _blendTimer += elapsedTime;
+        if (_blendTimer >= _blendEndTime)
+        {
+            _blendTimer = _blendEndTime;
+            _isBlending = false;
+        }
+    }
+
+	// ルートモーション計算
+	_rootMovement = Vector3::Zero;
+	if (_useRootMotion && _rootNodeIndex != -1 && _isPlaying)
+	{
+		float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
+        
+        ModelResource::Node oldRootNode{};
+        ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
+		ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
+
+        Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
+        Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
+
+        // 移動量取得
+        _rootMovement = currentPosition - oldPosition;
+        Debug::Renderer::DrawSphere(currentPosition, 0.1f, Vector4::Green);
+        // ポーズノードの移動量を取り除く
+        poseNodes[_rootNodeIndex].position = _rootOffset;
+
+        // モデルの姿勢を更新
+        _model.lock()->SetPoseNodes(poseNodes);
+	}
 }
 
 // GUI描画
 void Animator::DrawGui()
 {
+    ImGui::Checkbox(u8"ルートモーションするか", &_useRootMotion);
+    ImGui::Combo(u8"ルートモーションノード", &_rootNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
+    ImGui::Checkbox(u8"移動量を取り除くか", &_removeMovement);
+    ImGui::Combo(u8"移動量を取り除くノード", &_removeMovementNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
+    ImGui::DragFloat3(u8"移動量オフセット", &_rootOffset.x, 0.01f, -100.0f, 100.0f);
     if (ImGui::TreeNode(u8"アニメーション"))
     {
         auto& animations = _model.lock()->GetResource()->GetAddressAnimations();
-        if (_currentAnimIndex >= 0)
+        if (_animationIndex >= 0)
         {
-            auto& currentAnimation = animations[_currentAnimIndex];
+            auto& currentAnimation = animations[_animationIndex];
             ImGui::Text(u8"再生中のアニメーション:");
             ImGui::SameLine();
-            ImGui::Text(animations[_currentAnimIndex].name.c_str());
-            ImGui::SliderFloat(u8"経過時間", &_currentAnimSeconds, 0.0f, currentAnimation.secondsLength);
+            ImGui::Text(animations[_animationIndex].name.c_str());
+            ImGui::SliderFloat(u8"経過時間", &_animationTimer, 0.0f, currentAnimation.secondsLength);
 
             if (ImGui::Button(u8"再生"))
             {
-                this->PlayAnimation(_currentAnimIndex, _animLoop, _animBlendSeconds);
+                this->PlayAnimation(_animationIndex, _isLoop, _blendSeconds);
             }
             ImGui::Separator();
         }
-        ImGui::Checkbox(u8"ループ", &_animLoop);
-        ImGui::DragFloat(u8"ブレンド時間", &_animBlendSeconds, 0.01f);
+        ImGui::DragFloat(u8"ブレンド時間", &_blendSeconds, 0.01f);
+        ImGui::Checkbox(u8"再生", &_isPlaying);
+        ImGui::SameLine();
+        ImGui::Checkbox(u8"ループ", &_isLoop);
+        ImGui::SameLine();
+        ImGui::Checkbox(u8"ブレンドするか", &_isBlending);
 
         ImGui::Separator();
         // フィルター
@@ -62,7 +130,7 @@ void Animator::DrawGui()
                     {
                         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                         {
-                            this->PlayAnimation(index, _animLoop, _animBlendSeconds);
+                            this->PlayAnimation(index, _isLoop, _blendSeconds);
                         }
                     }
 
@@ -86,7 +154,7 @@ void Animator::DrawGui()
                     {
                         if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                         {
-                            this->PlayAnimation(index, _animLoop, _animBlendSeconds);
+                            this->PlayAnimation(index, _isLoop, _blendSeconds);
                         }
                     }
 
@@ -99,62 +167,29 @@ void Animator::DrawGui()
     }
 }
 
-// アニメーション更新処理
-void Animator::UpdateAnimation(float elapsedTime)
-{
-    // アニメーションが設定されていなければ処理しない
-    if (_currentAnimIndex == -1)
-        return;
-    std::vector<ModelResource::Node>& poseNode = _model.lock()->GetPoseNodes();
-    // アニメーション計算処理
-    ComputeAnimation(_currentAnimIndex, _currentAnimSeconds, poseNode);
-    // ノード設定
-    //_model.lock()->SetPoseNodes(poseNode);
-    // アニメーション経過時間更新
-    UpdateAnimSeconds(elapsedTime);
-
-    // ブレンディング計算処理
-    if (_animBlending)
-    {
-        // ブレンド率計算
-        float rate = _currentAnimBlendSeconds / _animBlendSecondsLength;
-
-        poseNode = ComputeBlending(_nodeCaches, _model.lock()->GetPoseNodes(), rate);
-        // ノード設定
-        _model.lock()->SetPoseNodes(poseNode);
-
-        // 時間経過
-        _currentAnimBlendSeconds += elapsedTime;
-        if (_currentAnimBlendSeconds >= _animBlendSecondsLength)
-        {
-            _currentAnimBlendSeconds = _animBlendSecondsLength;
-            _animBlending = false;
-        }
-    }
-}
-
 // アニメーション経過時間更新
 void Animator::UpdateAnimSeconds(float elapsedTime)
 {
     // 再生中でなければ処理しない
-    if (!_animPlaying)
+    if (!_isPlaying)
         return;
+
     // 経過時間
-    _currentAnimSeconds += elapsedTime;
+    _animationTimer += elapsedTime;
     // 再生時間が終端時間を超えた時
-    const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(_currentAnimIndex);
-    if (_currentAnimSeconds > animation.secondsLength)
+    const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(_animationIndex);
+    if (_animationTimer > animation.secondsLength)
     {
-        if (_animLoop)
+        if (_isLoop)
         {
             // 再生時間を戻す
-            _currentAnimSeconds -= animation.secondsLength;
+            _animationTimer -= animation.secondsLength;
         }
         else
         {
             // 再生時間を終了時間にする
-            _currentAnimSeconds = animation.secondsLength;
-            _animPlaying = false;
+            _animationTimer = animation.secondsLength;
+            _isPlaying = false;
         }
     }
 }
@@ -163,21 +198,21 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
 void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
 {
     // フラグを再設定
-    _currentAnimIndex = index;
-    _currentAnimSeconds = 0;
-    _animLoop = loop;
-    _animPlaying = true;
+    _animationIndex = index;
+    _animationTimer = 0;
+    _isLoop = loop;
+    _isPlaying = true;
 
     // ブレンドアニメーションパラメーター
-    _animBlending = blendSeconds > 0.0f;
-    _currentAnimBlendSeconds = 0.0f;
-    _animBlendSecondsLength = blendSeconds;
+    _isBlending = blendSeconds > 0.0f;
+    _blendTimer = 0.0f;
+    _blendEndTime = blendSeconds;
 
     // 現在の姿勢をキャッシュする
     for (size_t i = 0; i < _model.lock()->GetPoseNodes().size(); ++i)
     {
         const ModelResource::Node& src = _model.lock()->GetPoseNodes().at(i);
-        ModelResource::Node& dst = _nodeCaches.at(i);
+        ModelResource::Node& dst = _cacheNodes.at(i);
 
         dst.position = src.position;
         dst.rotation = src.rotation;
@@ -196,11 +231,11 @@ bool Animator::IsPlayAnimation(int index) const
 {
     if (index != -1)
     {
-        if (_currentAnimIndex != index)return false;
+        if (_animationIndex != index)return false;
     }
-    if (_currentAnimIndex < 0)return false;
-    if (_currentAnimIndex >= _model.lock()->GetResource()->GetAnimations().size()) return false;
-    return _animPlaying;
+    if (_animationIndex < 0)return false;
+    if (_animationIndex >= _model.lock()->GetResource()->GetAnimations().size()) return false;
+    return _isPlaying;
 }
 
 // アニメーション計算処理
@@ -383,7 +418,14 @@ void Animator::ResetModel(std::shared_ptr<Model> model)
     assert(model != nullptr);
 	_model = model;
     // ノードキャッシュの生成
-    _nodeCaches.resize(model->GetPoseNodes().size());
+    _cacheNodes.resize(model->GetPoseNodes().size());
+
+    _nodeNames.clear();
+    // ノードの名前を全取得
+    for (auto& node : model->GetPoseNodes())
+    {
+        _nodeNames.push_back(node.name.c_str());
+    }
 }
 
 /// アニメーション名から番号取得
@@ -408,9 +450,9 @@ std::string Animator::GetAnimationName(int index) const
     return _model.lock()->GetResource()->GetAnimations()[index].name;
 }
 
-std::string Animator::GetCurrentAnimationName() const
+std::string Animator::GetAnimationName() const
 {
-    return GetAnimationName(_currentAnimIndex);
+    return GetAnimationName(_animationIndex);
 }
 
 /// アニメーションのデバッグ表示をフィルタ

@@ -87,10 +87,10 @@ void SceneModelEditor::Update(float elapsedTime)
         }
         
         // アニメーションを再生中は当たり判定を表示
-        if (_animator.lock()->GetCurrentAnimIndex() != -1)
+        if (_animator.lock()->GetAnimationIndex() != -1)
         {
             // 当たり判定表示
-			_animationEvent.DebugRender(_animator.lock()->GetCurrentAnimationName(), _animator.lock()->GetCurrentAnimSeconds());
+			_animationEvent.DebugRender(_animator.lock()->GetAnimationName(), _animator.lock()->GetAnimationTimer());
         }
     }
 }
@@ -193,11 +193,11 @@ void SceneModelEditor::DrawEditGui()
         if (ImGui::TreeNode(u8"判定"))
         {
             ImGui::Text(u8"アニメーション判定");
-            if (_animator.lock()->GetCurrentAnimIndex() != -1)
+            if (_animator.lock()->GetAnimationIndex() != -1)
             {
                 if (ImGui::TreeNode(u8"現在のアニメーション判定"))
                 {
-                    _animationEvent.DrawGui(_animator.lock()->GetCurrentAnimationName());
+                    _animationEvent.DrawGui(_animator.lock()->GetAnimationName());
 
                     ImGui::TreePop();
                 }
@@ -297,7 +297,7 @@ void SceneModelEditor::DrawEditAnimationGui()
     ImGui::Separator();
 
     // アニメーション再生中か確認
-    int currentAnimIndex = _animator.lock()->GetCurrentAnimIndex();
+    int currentAnimIndex = _animator.lock()->GetAnimationIndex();
     if (currentAnimIndex == -1)
         return;
     ModelResource::Animation& animation = model->GetResource()->GetAddressAnimations()[currentAnimIndex];

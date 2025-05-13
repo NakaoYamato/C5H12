@@ -43,6 +43,11 @@ namespace Debug
 		/// </summary>
 		/// <param name="value"></param>
 		void String(float value);
+		/// <summary>
+		/// デバッグ文字出力
+		/// </summary>
+		/// <param name="value"></param>
+		void String(const Vector3& value);
 	}
 
 	namespace Renderer

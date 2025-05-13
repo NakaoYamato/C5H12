@@ -11,6 +11,7 @@
 // 更新処理
 void ActorManager::Update(float elapsedTime)
 {
+	//----------------------------------------------------------------
 	// 開始関数の呼び出し
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
@@ -21,14 +22,16 @@ void ActorManager::Update(float elapsedTime)
 		}
 		_startActors[i].clear();
 	}
+	//----------------------------------------------------------------
 
+	//----------------------------------------------------------------
+	// 更新処理
 	if (JobSystem::Instance().UseMultiThread())
 	{
 		// 全体の計算時間
 		ProfileScopedSection_2(0, ActorManager, ImGuiControl::Profiler::Dark);
 
 		std::vector<std::future<void>> jobResults;
-		// 更新処理
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
 			float deltaTime = elapsedTime;
@@ -58,7 +61,6 @@ void ActorManager::Update(float elapsedTime)
 	}
 	else
 	{
-		// 更新処理
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
 			float deltaTime = elapsedTime;
@@ -78,11 +80,35 @@ void ActorManager::Update(float elapsedTime)
 			}
 		}
 	}
+	//----------------------------------------------------------------
 
+	//----------------------------------------------------------------
+	// LateUpdate処理
+	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+	{
+		float deltaTime = elapsedTime;
+		auto& [timeScale, duration] = _gameSpeeds[i];
+		if (duration > 0.0f)
+		{
+			duration -= elapsedTime;
+			deltaTime *= timeScale;
+		}
+
+		for (auto& actor : _updateActors[i])
+		{
+			// 各アクターの計算時間
+			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Green);
+
+			actor->LateUpdate(deltaTime);
+		}
+	}
+	//----------------------------------------------------------------
+
+	//----------------------------------------------------------------
 	// 削除処理
 	for (const std::shared_ptr<Actor>& actor : _removeActors)
 	{
-		actor->OnDestroy();
+		actor->Deleted();
 
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
@@ -106,6 +132,7 @@ void ActorManager::Update(float elapsedTime)
 		}
 	}
 	_removeActors.clear();
+	//----------------------------------------------------------------
 }
 
 /// 一定間隔の更新処理

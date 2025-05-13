@@ -30,15 +30,12 @@ public:
 
 	// 生成時処理
 	void OnCreate() override;
-
 	// 開始関数
-	void Start() override;
-
+	void OnStart() override;
 	// 更新処理
-	void Update(float elapsedTime) override;
-
+	void OnUpdate(float elapsedTime) override;
 	// GUI描画
-	void DrawGui() override;
+	void OnDrawGui() override;
 
 	void SetModelType(ModelType type) { this->_modelType = type; }
 private:

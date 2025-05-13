@@ -5,6 +5,13 @@
 #include "../Scene/Scene.h"
 #include "../../DebugSupporter/DebugSupporter.h"
 
+// 初期化処理
+void CharactorController::Start()
+{
+	// コンポーネント取得
+	_animator = GetActor()->GetComponent<Animator>();
+}
+
 void CharactorController::Update(float elapsedTime)
 {
     // 重力適応
@@ -80,7 +87,7 @@ void CharactorController::UpdateVelocity(float deltaTime)
 /// 位置更新
 void CharactorController::UpdatePosition(float deltaTime)
 {
-    Vector3 movement = _velocity * deltaTime;
+	Vector3 movement = _velocity * deltaTime;
     // 水平処理
     MoveAndSlide({ movement.x, 0.0f, movement.z }, false);
     // 垂直処理

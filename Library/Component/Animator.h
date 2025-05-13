@@ -11,13 +11,10 @@ public:
 
 	// 名前取得
 	const char* GetName()const { return "Animator"; }
-
 	// 開始処理
 	void Start()override;
-
 	// 更新処理
 	void Update(float elapsedTime) override;
-
 	// GUI描画
 	void DrawGui() override;
 
@@ -25,13 +22,11 @@ public:
 #pragma region アニメーション制御
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime);
-
 	// アニメーション経過時間更新
 	void UpdateAnimSeconds(float elapsedTime);
 
 	// アニメーション再生
 	void PlayAnimation(int index, bool loop, float blendSeconds = 0.0f);
-
 	// アニメーション再生(名前から検索)
 	void PlayAnimation(std::string name, bool loop, float blendSeconds = 0.0f);
 
@@ -66,6 +61,10 @@ public:
 #pragma endregion
 
 #pragma region アクセサ
+	/// <summary>
+	/// モデルをリセット
+	/// </summary>
+	/// <param name="model"></param>
 	void ResetModel(std::shared_ptr<Model> model);
 
 	int GetCurrentAnimIndex()const { return _currentAnimIndex; }
@@ -115,5 +114,5 @@ private:
 
 	// デバッグ表示用
 	std::vector<int> _displayAnimationIndices;
-	std::string filterStr = "";
+	std::string _filterStr = "";
 };

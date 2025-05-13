@@ -93,7 +93,7 @@ public:
 		actor->SetName(name.c_str());
 		actor->SetScene(this);
 		_actorManager.Register(actor, tag);
-		actor->OnCreate();
+		actor->Create();
 		return actor;
 	}
 

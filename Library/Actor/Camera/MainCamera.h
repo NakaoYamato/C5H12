@@ -12,13 +12,13 @@ public:
 	void OnCreate() override;
 
 	// 開始関数
-	void Start() override;
+	void OnStart() override;
 
 	// 更新処理
-	void Update(float elapsedTime) override;
+	void OnUpdate(float elapsedTime) override;
 
 	// GUI描画
-	void DrawGui() override;
+	void OnDrawGui() override;
 
 	// 指定方向を向く
 	void SetLookAt(const Vector3& eye, const Vector3& focus, const Vector3& up);

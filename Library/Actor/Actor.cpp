@@ -15,6 +15,29 @@
 
 #include <ImGuizmo.h>
 
+#pragma region ActorManagerで呼ぶ関数
+/// 生成処理
+void Actor::Create()
+{
+	OnCreate();
+}
+
+/// 削除時処理
+void Actor::Deleted()
+{
+	// 各コンポーネントの削除処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->Deleted();
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->Deleted();
+	}
+
+	OnDeleted();
+}
+
 // 開始処理
 void Actor::Start()
 {
@@ -35,45 +58,49 @@ void Actor::Start()
 	{
 		collider->Start();
 	}
+
+	OnStart();
 }
 
-/// 削除時処理
-void Actor::OnDestroy()
-{
-	// 各コンポーネントの削除処理
-	for (std::shared_ptr<Component>& component : _components)
-	{
-		component->OnDestroy();
-	}
-	for (std::shared_ptr<ColliderBase>& collider : _colliders)
-	{
-		collider->OnDestroy();
-	}
-}
-
-// 更新処理
+///	更新処理
 void Actor::Update(float elapsedTime)
 {
 	// 起動チェック
 	if (!_isActive)return;
+
+	OnPreUpdate(elapsedTime);
 
 	// 各コンポーネントの更新処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Update(elapsedTime);
 	}
-
-	// トランスフォーム更新
-	UpdateTransform();
-
-	// 当たり判定は行列に影響されるので、トランスフォーム更新後に行う
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->Update(elapsedTime);
 	}
+
+	OnUpdate(elapsedTime);
+
+	// トランスフォーム更新
+	UpdateTransform();
 }
 
-/// 一定間隔の更新処理
+/// Update後更新処理
+void Actor::LateUpdate(float elapsedTime)
+{
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->LateUpdate(elapsedTime);
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->LateUpdate(elapsedTime);
+	}
+	OnLateUpdate(elapsedTime);
+}
+
+/// 固定間隔更新処理
 void Actor::FixedUpdate()
 {
 	// 起動チェック
@@ -88,6 +115,8 @@ void Actor::FixedUpdate()
 	{
 		collider->FixedUpdate();
 	}
+
+	OnFixedUpdate();
 }
 
 // 描画処理
@@ -223,25 +252,31 @@ void Actor::DrawGui()
 	{
 		DrawGuizmo();
 	}
+
+	OnDrawGui();
 }
+#pragma endregion
 
 // 接触時の処理
-void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3& hitNormal, const float& penetration)
+void Actor::Contact(Actor* other, const Vector3& hitPosition, const Vector3& hitNormal, const float& penetration)
 {
 	// 各コンポーネントの接触処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
-		component->OnCollision(other, hitPosition, hitNormal, penetration);
+		component->OnContact(other, hitPosition, hitNormal, penetration);
 	}
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
-		collider->OnCollision(other, hitPosition, hitNormal, penetration);
+		collider->OnContact(other, hitPosition, hitNormal, penetration);
 	}
+
+	OnContact(other, hitPosition, hitNormal, penetration);
 }
 
 // 削除処理
-void Actor::Destroy()
+void Actor::Remove()
 {
+	OnRemove();
     _scene->GetActorManager().Remove(shared_from_this());
 }
 
@@ -252,6 +287,7 @@ std::weak_ptr<Model> Actor::LoadModel(const char* filename)
 	return _model;
 }
 
+#pragma region 仮想関数
 // トランスフォーム更新
 void Actor::UpdateTransform()
 {
@@ -280,3 +316,4 @@ void Actor::DrawGuizmo()
 		_transform.SetRotation(r);
 	}
 }
+#pragma endregion

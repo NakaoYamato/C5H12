@@ -14,8 +14,6 @@
 // ¶¬Žžˆ—
 void PlayerActor::OnCreate()
 {
-	Actor::OnCreate();
-
 	// ƒ‚ƒfƒ‹“Ç‚Ýž‚Ý
 	//auto model = LoadModel("./Data/Model/Player/2025_03_25.fbx");
 	auto model = LoadModel("./Data/Model/Player/ARPG_Warrior.fbx");
@@ -52,19 +50,17 @@ void PlayerActor::OnCreate()
 }
 
 // íœˆ—
-void PlayerActor::Destroy()
+void PlayerActor::OnRemove()
 {
-	Actor::Destroy();
-
 	if (_swordActor.lock())
 	{
 		// Œ•íœ
-        _swordActor.lock()->Destroy();
+        _swordActor.lock()->Remove();
 	}
 	if (_shieldActor.lock())
 	{
 		// ‚íœ
-		_shieldActor.lock()->Destroy();
+		_shieldActor.lock()->Remove();
 	}
 }
 

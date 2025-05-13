@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Component.h"
+#include "Animator.h"
 
 class CharactorController : public Component
 {
@@ -10,6 +11,8 @@ public:
     // 名前取得
     const char* GetName() const override { return "CharactorController"; }
 
+	// 初期化処理
+    void Start() override;
     // 更新処理
     void Update(float elapsedTime) override;
     // 固定間隔更新処理
@@ -116,5 +119,10 @@ private:
     bool _useGravity = true;
     // 移動方向に向くか
     bool _rotateToDirection = true;
+#pragma endregion
+
+#pragma region アニメーション
+	// アニメーター
+    std::weak_ptr<Animator> _animator;
 #pragma endregion
 };

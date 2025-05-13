@@ -5,8 +5,6 @@
 // 生成時処理
 void MainCamera::OnCreate()
 {
-	Actor::OnCreate();
-
 	// カメラの初期化
 	SetLookAt(
 		Vector3(0.0f, 10.0f, -10.0f),
@@ -24,21 +22,21 @@ void MainCamera::OnCreate()
 }
 
 // 開始関数
-void MainCamera::Start()
+void MainCamera::OnStart()
 {
-	Actor::Start();
+
 }
 
 // 更新処理
-void MainCamera::Update(float elapsedTime)
+void MainCamera::OnUpdate(float elapsedTime)
 {
-	Actor::Update(elapsedTime);
+
 }
 
 // GUI描画
-void MainCamera::DrawGui()
+void MainCamera::OnDrawGui()
 {
-	Actor::DrawGui();
+
 }
 
 void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vector3& up)

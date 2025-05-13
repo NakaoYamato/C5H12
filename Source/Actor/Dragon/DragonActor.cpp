@@ -12,8 +12,6 @@
 // 生成時処理
 void DragonActor::OnCreate()
 {
-	Actor::OnCreate();
-
 	// モデル読み込み
 	auto model = LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
 
@@ -38,25 +36,21 @@ void DragonActor::OnCreate()
 }
 
 // 開始関数
-void DragonActor::Start()
+void DragonActor::OnStart()
 {
-	Actor::Start();
+
 }
 
 // 更新処理
-void DragonActor::Update(float elapsedTime)
+void DragonActor::OnUpdate(float elapsedTime)
 {
-	Actor::Update(elapsedTime);
-
 	// 使用する角を設定
 	SetUseHorn();
 }
 
 // GUI描画
-void DragonActor::DrawGui()
+void DragonActor::OnDrawGui()
 {
-	Actor::DrawGui();
-
 	static ImGuiTabBarFlags tab_bar_flags =
 		ImGuiTabBarFlags_AutoSelectNewTabs |
 		ImGuiTabBarFlags_Reorderable |

@@ -41,14 +41,14 @@ void Animator::DrawGui()
 
         ImGui::Separator();
         // フィルター
-        if (ImGui::InputText(u8"検索", &filterStr))
+        if (ImGui::InputText(u8"検索", &_filterStr))
         {
-            Filtering(filterStr);
+            Filtering(_filterStr);
         }
         ImGui::Separator();
 
         //　何もフィルターしていなければすべて表示
-        if (filterStr == "")
+        if (_filterStr == "")
         {
             int index = 0;
             for (const ModelResource::Animation& animation : animations)

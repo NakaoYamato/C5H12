@@ -24,79 +24,75 @@ public:
 	Actor() {}
 	virtual ~Actor() {};
 
+#pragma region ActorManagerで呼ぶ関数
 	/// <summary>
-	/// 生成時処理
+	/// 生成処理
 	/// </summary>
-	virtual void OnCreate() {};
-
+	void Create();
 	/// <summary>
 	/// 削除時処理
 	/// </summary>
-	virtual void OnDestroy();
-
+	void Deleted();
 	/// <summary>
 	// 開始処理
 	/// </summary>
-	virtual void Start();
-
+	void Start();
 	/// <summary>
-	/// 更新処理
+	///	更新処理
 	/// </summary>
-	/// <param name="elapsedTime">前フレームからの更新時間</param>
-	virtual void Update(float elapsedTime);
-
+	/// <param name="elapsedTime"></param>
+	void Update(float elapsedTime);
 	/// <summary>
-	/// 一定間隔の更新処理
-	/// #include "../../Library/Scene/Scene.h"をインクルードして
-	/// _FIXED_UPDATE_INTERVAL　が一定間隔(秒)
+	/// Update後更新処理
 	/// </summary>
-	virtual void FixedUpdate();
-
+	/// <param name="elapsedTime"></param>
+	void LateUpdate(float elapsedTime);
+	/// <summary>
+	/// 固定間隔更新処理
+	/// </summary>
+	void FixedUpdate();
 	/// <summary>
 	/// 描画処理
 	/// </summary>
 	/// <param name="rc"></param>
-	virtual void Render(const RenderContext& rc);
-
+	void Render(const RenderContext& rc);
 	/// <summary>
 	// デバッグ表示
 	/// </summary>
 	/// <param name="rc"></param>
-	virtual void DebugRender(const RenderContext& rc);
-
+	void DebugRender(const RenderContext& rc);
 	/// <summary>
 	// 影描画
 	/// </summary>
 	/// <param name="rc"></param>
-	virtual void CastShadow(const RenderContext& rc);
-
+	void CastShadow(const RenderContext& rc);
 	/// <summary>
 	// 3D描画後の描画処理
 	/// </summary>
 	/// <param name="rc"></param>
-	virtual void DelayedRender(const RenderContext& rc);
-
+	void DelayedRender(const RenderContext& rc);
 	/// <summary>
 	// Gui描画
 	/// </summary>
-	virtual void DrawGui();
+	void DrawGui();
+#pragma endregion
 
 	/// <summary>
-	/// 接触時の処理
+	/// 接触処理
 	/// </summary>
 	/// <param name="other">接触対象</param>
 	/// <param name="hitPosition">接触位置</param>
 	/// <param name="hitNormal">接触対象から自身に向けての法線</param>
 	/// <param name="penetration">めり込み量</param>
-	virtual void OnCollision(Actor* other, 
-		const Vector3& hitPosition, 
-		const Vector3& hitNormal, 
+	void Contact(Actor* other,
+		const Vector3& hitPosition,
+		const Vector3& hitNormal,
 		const float& penetration);
 
 	/// <summary>
-	// 削除処理
+	// 自身を削除処理
 	/// </summary>
-	virtual void Destroy();
+	void Remove();
 
 	/// <summary>
 	/// モデルの読み込み
@@ -173,7 +169,6 @@ public:
 	size_t GetColliderComponentSize()const { return _colliders.size(); }
 #pragma endregion
 
-
 #pragma region アクセサ
 	Scene* GetScene() { return _scene; }
 	const char* GetName() const { return _name.c_str(); }
@@ -201,11 +196,65 @@ public:
 #pragma endregion
 #pragma endregion
 protected:
+#pragma region 仮想関数
+	/// <summary>
+	/// 生成時処理
+	/// </summary>
+	virtual void OnCreate() {};
+	/// <summary>
+	/// 削除時処理
+	/// </summary>
+	virtual void OnDeleted() {};
+	/// <summary>
+	// 開始時処理
+	/// </summary>
+	virtual void OnStart() {};
+	/// <summary>
+	/// 更新前処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void OnPreUpdate(float elapsedTime) {};
+	/// <summary>
+	/// 更新時処理
+	/// </summary>
+	/// <param name="elapsedTime">前フレームからの更新時間</param>
+	virtual void OnUpdate(float elapsedTime) {};
+	/// <summary> 
+	/// Updateのあとによばれる更新時処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void OnLateUpdate(float elapsedTime) {};
+	/// <summary>
+	/// 一定間隔の更新時処理
+	/// #include "../../Library/Scene/Scene.h"をインクルードして
+	/// _FIXED_UPDATE_INTERVAL　が一定間隔(秒)
+	/// </summary>
+	virtual void OnFixedUpdate() {};
 	// トランスフォーム更新
 	virtual void UpdateTransform();
-
 	// ギズモ描画
 	virtual void DrawGuizmo();
+	// GUI描画
+	virtual void OnDrawGui() {};
+
+	/// <summary>
+	/// 接触時処理
+	/// </summary>
+	/// <param name="other">接触対象</param>
+	/// <param name="hitPosition">接触位置</param>
+	/// <param name="hitNormal">接触対象から自身に向けての法線</param>
+	/// <param name="penetration">めり込み量</param>
+	virtual void OnContact(Actor* other,
+		const Vector3& hitPosition,
+		const Vector3& hitNormal,
+		const float& penetration) {
+	}
+
+	/// <summary>
+	/// 自身削除時処理
+	/// </summary>
+	virtual void OnRemove() {};
+#pragma endregion
 
 protected:
 	// 所属するシーン

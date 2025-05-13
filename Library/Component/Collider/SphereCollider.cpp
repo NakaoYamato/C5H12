@@ -28,7 +28,7 @@ void SphereCollider::DebugRender(const RenderContext& rc)
 }
 
 // 削除時処理
-void SphereCollider::OnDestroy()
+void SphereCollider::Deleted()
 {
 	// コライダーの削除
 	GetActor()->GetScene()->GetCollisionManager().UnregisterSphereCollider(this);

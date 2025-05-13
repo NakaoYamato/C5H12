@@ -22,7 +22,7 @@ void ColliderBase::Resolve(Actor* other,
         transform.SetPosition(transform.GetPosition() + hitNormal * penetration);
     }
     // アクターに接触処理を通知
-    GetActor()->OnCollision(
+    GetActor()->Contact(
         other,
         hitPosition,
         hitNormal,

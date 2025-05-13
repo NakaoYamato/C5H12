@@ -16,18 +16,16 @@ public:
 
     // 開始時処理
     void OnCreate() override;
-
     // 開始時処理
-    void Start() override;
-
-    // 更新処理
-    void Update(float elapsedTime) override;
-
+    void OnStart() override;
+    /// 更新前処理
+    void OnPreUpdate(float elapsedTime) override;
+    // 遅延更新処理
+	void OnLateUpdate(float elapsedTime) override;
     // 固定間隔更新処理
-    void FixedUpdate() override;
-
+    void OnFixedUpdate() override;
     // GUI描画
-    void DrawGui() override;
+    void OnDrawGui() override;
 
     const std::vector<std::string>& GetLogs()
     {

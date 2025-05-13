@@ -14,40 +14,56 @@ public:
 	// 名前取得
 	virtual const char* GetName() const = 0;
 
-	// 開始処理
+	/// <summary>
+	/// 開始時処理
+	/// </summary>
 	virtual void Start() {}
-
 	/// <summary>
 	/// 削除時処理
 	/// </summary>
-	virtual void OnDestroy() {}
-
-	// 更新処理
-	virtual void Update(float elapsedTime) {}
-
-	/// 一定間隔の更新処理
-	virtual void FixedUpdate() {}
-
-	// 描画処理
-	virtual void Render(const RenderContext& rc) {}
-
-	// デバッグ表示
-	virtual void DebugRender(const RenderContext& rc) {}
-
-	// 影描画
-	virtual void CastShadow(const RenderContext& rc) {}
-
-	// 3D描画後の描画処理
-	virtual void DelayedRender(const RenderContext& rc) {}
-
+	virtual void Deleted() {}
 	/// <summary>
+	/// 更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void Update(float elapsedTime) {}
+	/// <summary>
+	/// Update後更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void LateUpdate(float elapsedTime) {}
+	/// <summary>
+	/// 一定間隔更新処理
+	/// </summary>
+	virtual void FixedUpdate() {}
+	/// <summary>
+	/// 描画処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void Render(const RenderContext& rc) {}
+	/// <summary>
+	/// デバッグ表示
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void DebugRender(const RenderContext& rc) {}
+	/// <summary>
+	/// 影描画
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void CastShadow(const RenderContext& rc) {}
+	/// <summary>
+	/// 3D描画後の描画処理
+	/// </summary>
+	/// <param name="rc"></param>
+	/// <summary>
+	virtual void DelayedRender(const RenderContext& rc) {}
 	/// オブジェクトとの接触時の処理
 	/// </summary>
 	/// <param name="other"></param>
 	/// <param name="hitPosition">当たったワールド座標</param>
 	/// <param name="hitNormal">接触面のotherからthisに向かう法線</param>
 	/// <param name="penetration">めり込み量</param>
-	virtual void OnCollision(Actor* other,
+	virtual void OnContact(Actor* other,
 		const Vector3& hitPosition,
 		const Vector3& hitNormal,
 		const float& penetration) {}

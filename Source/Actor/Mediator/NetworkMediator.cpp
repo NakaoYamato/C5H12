@@ -13,29 +13,29 @@ NetworkMediator::~NetworkMediator()
 
 void NetworkMediator::OnCreate()
 {
-    Actor::OnCreate();
-
     // サーバー作成
     _client = std::make_shared<ClientAssignment>();
     SetClientCollback();
     _client->Execute();
 }
 
-void NetworkMediator::Start()
+void NetworkMediator::OnStart()
 {
-    Actor::Start();
 }
 
-void NetworkMediator::Update(float elapsedTime)
+/// 更新前処理
+void NetworkMediator::OnPreUpdate(float elapsedTime)
 {
     // サーバー更新
     _client->Update();
 
     /// 受け取ったデータを処理
     ProcessNetworkData();
+}
 
-    Actor::Update(elapsedTime);
-
+// 遅延更新処理
+void NetworkMediator::OnLateUpdate(float elapsedTime)
+{
     // プレイヤーの同期処理
     _syncTimer += elapsedTime;
     if (_syncTimer >= _syncTime && _players[myPlayerId].lock())
@@ -44,10 +44,10 @@ void NetworkMediator::Update(float elapsedTime)
         // プレイヤーの同期
         Network::AllPlayerSync sync{};
         // players[0]にデータを入れる
-        sync.players[0].id          = myPlayerId;
-        sync.players[0].position    = myPlayer->GetTransform().GetPosition();
-        sync.players[0].angle       = myPlayer->GetTransform().GetRotation();
-        sync.players[0].state       = myPlayer->GetPlayerController()->GetState();
+        sync.players[0].id = myPlayerId;
+        sync.players[0].position = myPlayer->GetTransform().GetPosition();
+        sync.players[0].angle = myPlayer->GetTransform().GetRotation();
+        sync.players[0].state = myPlayer->GetPlayerController()->GetState();
         // サーバーに送信
         _client->WriteRecord(Network::DataTag::AllSync, &sync, sizeof(sync));
 
@@ -56,10 +56,8 @@ void NetworkMediator::Update(float elapsedTime)
 }
 
 // 固定間隔更新処理
-void NetworkMediator::FixedUpdate()
+void NetworkMediator::OnFixedUpdate()
 {
-    Actor::FixedUpdate();
-
 	// プレイヤーの移動情報送信
     auto myPlayer = _players[myPlayerId].lock();
 	if (myPlayer)
@@ -74,10 +72,8 @@ void NetworkMediator::FixedUpdate()
     }
 }
 
-void NetworkMediator::DrawGui()
+void NetworkMediator::OnDrawGui()
 {
-    Actor::DrawGui();
-
     /// ネットワークGUIの表示
     DrawNetworkGui();
 
@@ -239,7 +235,7 @@ void NetworkMediator::ProcessNetworkData()
         if (player)
         {
             // プレイヤー削除
-            player->Destroy();
+            player->Remove();
             _players.erase(logout.id);
         }
     }

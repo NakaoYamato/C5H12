@@ -6,8 +6,6 @@
 // ¶¬ˆ—
 void StageActor::OnCreate()
 {
-	Actor::OnCreate();
-
     LoadModel("./Data/Model/Stage/ExampleStage/ExampleStage.fbx");
 
     //LoadModel("./Data/Model/Stage/BasicTrainingStage/BasicTrainingStage.fbx");

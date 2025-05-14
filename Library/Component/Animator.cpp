@@ -18,7 +18,8 @@ void Animator::Update(float elapsedTime)
     if (_animationIndex == -1)
         return;
 
-    std::vector<ModelResource::Node>& poseNodes = _model.lock()->GetPoseNodes();
+    std::vector<ModelResource::Node>&   poseNodes = _model.lock()->GetPoseNodes();
+	std::vector<ModelResource::Node>    oldPoseNodes = poseNodes;
 
     // アニメーション経過時間更新
     UpdateAnimSeconds(elapsedTime);
@@ -26,19 +27,15 @@ void Animator::Update(float elapsedTime)
     // アニメーション計算処理
     ComputeAnimation(_animationIndex, _animationTimer, poseNodes);
 
-  //  if (_removeMovement && _removeMovementNodeIndex != -1)
-  //  {
-		//auto& node = poseNode[_removeMovementNodeIndex];
-		//node.position = Vector3::Zero;
-  //  }
-
     // ブレンディング計算処理
-    if (_isBlending)
+    if (_blendTimer < _blendEndTime)
     {
         // ブレンド率計算
         float rate = _blendTimer / _blendEndTime;
 
-        poseNodes = ComputeBlending(_cacheNodes, _model.lock()->GetPoseNodes(), rate);
+        // ブレンド計算
+		BlendPoseNode(oldPoseNodes, poseNodes, rate, poseNodes);
+
         // ノード設定
         _model.lock()->SetPoseNodes(poseNodes);
 
@@ -66,9 +63,41 @@ void Animator::Update(float elapsedTime)
 
         // 移動量取得
         _rootMovement = currentPosition - oldPosition;
-        Debug::Renderer::DrawSphere(currentPosition, 0.1f, Vector4::Green);
         // ポーズノードの移動量を取り除く
-        poseNodes[_rootNodeIndex].position = _rootOffset;
+        poseNodes[_rootNodeIndex].position = {};
+		// オブジェクトに応じてノードの位置を調整
+        switch (_rootMotionOption)
+        {
+        case Animator::RootMotionOption::None:
+            break;
+        case Animator::RootMotionOption::RemovePositionX:
+            poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
+            poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
+            break;
+        case Animator::RootMotionOption::RemovePositionY:
+            poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
+            break;
+        case Animator::RootMotionOption::RemovePositionZ:
+            poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
+            break;
+        case Animator::RootMotionOption::RemovePositionXY:
+            poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
+            break;
+        case Animator::RootMotionOption::RemovePositionXZ:
+            poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
+            break;
+        case Animator::RootMotionOption::RemovePositionYZ:
+            poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
+            break;
+        case Animator::RootMotionOption::RemovePositionXYZ:
+            break;
+        case Animator::RootMotionOption::UseOffset:
+        default:
+            poseNodes[_rootNodeIndex].position = _rootOffset;
+            break;
+        }
 
         // モデルの姿勢を更新
         _model.lock()->SetPoseNodes(poseNodes);
@@ -80,8 +109,23 @@ void Animator::DrawGui()
 {
     ImGui::Checkbox(u8"ルートモーションするか", &_useRootMotion);
     ImGui::Combo(u8"ルートモーションノード", &_rootNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
-    ImGui::Checkbox(u8"移動量を取り除くか", &_removeMovement);
-    ImGui::Combo(u8"移動量を取り除くノード", &_removeMovementNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
+    static const char* optionNames[] =
+    {
+        u8"なし",
+        u8"X位置除去",
+        u8"Y位置除去",
+        u8"Z位置除去",
+        u8"XY位置除去",
+        u8"XZ位置除去",
+        u8"YZ位置除去",
+        u8"XYZ位置除去",
+        u8"オフセット使用",
+    };
+    int option = static_cast<int>(_rootMotionOption);
+    if (ImGui::Combo(u8"ルートモーションオプション", &option, optionNames, _countof(optionNames)))
+    {
+        _rootMotionOption = static_cast<RootMotionOption>(option);
+    }
     ImGui::DragFloat3(u8"移動量オフセット", &_rootOffset.x, 0.01f, -100.0f, 100.0f);
     if (ImGui::TreeNode(u8"アニメーション"))
     {
@@ -316,18 +360,17 @@ void Animator::ComputeAnimation(int animationIndex, float time, std::vector<Mode
     }
 }
 
-// ブレンディング計算処理
-std::vector<ModelResource::Node> Animator::ComputeBlending(
-    const std::vector<ModelResource::Node>& pose0,
+/// ブレンディング計算処理
+void Animator::BlendPoseNode(
+    const std::vector<ModelResource::Node>& pose0, 
     const std::vector<ModelResource::Node>& pose1,
-    float rate) const
+    float rate, 
+    std::vector<ModelResource::Node>& result)const
 {
     // サイズ確認
     assert(pose0.size() == pose1.size());
 
-    std::vector<ModelResource::Node> result = pose1;
-
-    size_t count = _model.lock()->GetPoseNodes().size();
+    size_t count = pose1.size();
     for (size_t i = 0; i < count; ++i)
     {
         const ModelResource::Node& node0 = pose0.at(i);
@@ -349,67 +392,15 @@ std::vector<ModelResource::Node> Animator::ComputeBlending(
         DirectX::XMStoreFloat4(&res.rotation, R);
         DirectX::XMStoreFloat3(&res.position, T);
     }
-
-    return result;
 }
 
-/// ルートモーション処理
-void Animator::ComputeRootMotion(int animationIndex,
-    float oldAnimSeconds, float currentAnimSeconds,
-    int controlNodeIndex,
-    std::vector<ModelResource::Node>& resultNodePose,
-    Vector3& movement) const
+/// ルートモーションで使うノード番号設定
+void Animator::SetRootNodeIndex(const std::string& key)
 {
-    resultNodePose = _model.lock()->GetPoseNodes();
-    movement = Vector3::Zero;
-
-    std::vector<ModelResource::Node> oldNodes;
-    std::vector<ModelResource::Node> currentNodes;
-    // 指定のアニメーション姿勢を取得
-    const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(animationIndex);
-    ComputeAnimation(animationIndex, oldAnimSeconds, oldNodes);
-    ComputeAnimation(animationIndex, currentAnimSeconds, currentNodes);
-    ComputeAnimation(animationIndex, currentAnimSeconds, resultNodePose);
-
-    // 前フレームと今フレームのノードのローカル座標を取得
-    const Vector3& oldRootNoodPos = oldNodes[controlNodeIndex].position;
-    const Vector3& currentRootNoodPos = currentNodes[controlNodeIndex].position;
-
-    // 移動量計算
-    if (oldAnimSeconds > currentAnimSeconds)
-    {
-        // ループアニメーションで前回のアニメーション経過時間よりも今回のアニメーション経過時間の方が
-        // 小さい時の処理
-
-        // 前フレームからアニメーション終了までの移動量を算出
-        //std::vector<ModelResource::Node> endNodePoses;
-        //ComputeAnimation(animationIndex, animation.secondsLength, endNodePoses);
-        //const Vector3& endRootNoodPos = endNodePoses[controlNodeIndex].position;
-        //movement += endRootNoodPos - oldRootNoodPos;
-        //// アニメーション開始から今フレームまでの移動量を算出
-        //std::vector<ModelResource::Node> startNodePoses;
-        //ComputeAnimation(animationIndex, 0.0f, startNodePoses);
-        //const Vector3& startRootNoodPos = startNodePoses[controlNodeIndex].position;
-        //movement += currentRootNoodPos - startRootNoodPos;
-    }
-    else
-    {
-        movement += currentRootNoodPos - oldRootNoodPos;
-    }
-
-    // 移動量を変換
-    {
-        const ModelResource::Node* rootNood = &resultNodePose[controlNodeIndex];
-        DirectX::XMMATRIX ParentWorldT = DirectX::XMLoadFloat4x4(&rootNood->parent->worldTransform);
-        movement = Vector3::TransformNormal(movement, ParentWorldT);
-    }
-
-    // 腰骨の位置を初回の位置に置く
-    {
-        std::vector<ModelResource::Node> startNodePoses;
-        ComputeAnimation(animationIndex, 0.0f, startNodePoses);
-        resultNodePose[controlNodeIndex].position = startNodePoses[controlNodeIndex].position;
-    }
+    if (!_model.lock())
+        return;
+    // モデルからノード番号取得
+    SetRootNodeIndex(_model.lock()->GetNodeIndex(key));
 }
 
 void Animator::ResetModel(std::shared_ptr<Model> model)

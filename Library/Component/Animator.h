@@ -6,6 +6,23 @@
 class Animator : public Component
 {
 public:
+	/// <summary>
+	/// ルートモーションのオプション
+	/// </summary>
+	enum class RootMotionOption
+	{
+		None,
+		RemovePositionX,
+		RemovePositionY,
+		RemovePositionZ,
+		RemovePositionXY,
+		RemovePositionXZ,
+		RemovePositionYZ,
+		RemovePositionXYZ,
+		UseOffset,
+	};
+
+public:
 	Animator() {}
 	~Animator()override {}
 
@@ -36,26 +53,18 @@ public:
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const;
 	void ComputeAnimation(int animationIndex, float time, std::vector<ModelResource::Node>& nodePoses) const;
 
-	// ブレンディング計算処理
-	std::vector<ModelResource::Node> ComputeBlending(
-		const std::vector<ModelResource::Node>& pose0,
-		const std::vector<ModelResource::Node>& pose1, float rate) const;
-
 	/// <summary>
-	/// ルートモーション処理
+	/// ブレンディング計算処理
 	/// </summary>
-	/// <param name="animationIndex">アニメーション番号</param>
-	/// <param name="oldAnimSeconds">前フレームのアニメーション経過時間</param>
-	/// <param name="currentAnimSeconds">今フレームのアニメーション経過時間</param>
-	/// <param name="controlNodeIndex">ルートモーションを適応させるノード</param>
-	/// <param name="resultNodePose">処理を行った後のノード</param>
-	/// <param name="movement">モデル空間内での移動量</param>
-	void ComputeRootMotion(int animationIndex,
-		float oldAnimSeconds, float currentAnimSeconds,
-		int controlNodeIndex,
-		std::vector<ModelResource::Node>& resultNodePose,
-		Vector3& movement) const;
-
+	/// <param name="pose0">前のポーズ</param>
+	/// <param name="pose1">次のポーズ</param>
+	/// <param name="rate">ブレンド率</param>
+	/// <param name="result">結果</param>
+	void BlendPoseNode(
+		const std::vector<ModelResource::Node>& pose0,
+		const std::vector<ModelResource::Node>& pose1,
+		float rate,
+		std::vector<ModelResource::Node>& result)const;
 #pragma endregion
 
 #pragma region アクセサ
@@ -78,7 +87,7 @@ public:
 	bool IsLoop() const { return _isLoop; }
 	bool IsBlending() const { return _isBlending; }
 	bool IsUseRootMotion() const { return _useRootMotion; }
-	bool IsRemoveMovement() const { return _removeMovement; }
+	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
 
 	/// <summary>
 	///	ルートモーションで使うノード番号設定
@@ -89,22 +98,12 @@ public:
 	/// ルートモーションで使うノード番号設定
 	/// </summary>
 	/// <param name="key"></param>
-	void SetRootNodeIndex(const std::string& key) { _rootNodeIndex = GetAnimationIndex(key); }
-	/// <summary>
-	/// 移動量を取り除くノード番号設定
-	/// </summary>
-	/// <param name="index"></param>
-	void SetRemoveMovementNodeIndex(int index) { _removeMovementNodeIndex = index; }
-	/// <summary>
-	/// 移動量を取り除くノード番号設定
-	/// </summary>
-	/// <param name="key"></param>
-	void SetRemoveMovementNodeIndex(const std::string& key) { _removeMovementNodeIndex = GetAnimationIndex(key); }
+	void SetRootNodeIndex(const std::string& key);
+	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
 	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
 	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
 	void SetIsBlending(bool isBlending) { _isBlending = isBlending; }
 	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
-	void SetIsRemoveMovement(bool isRemoveMovement) { _removeMovement = isRemoveMovement; }
 
 	/// <summary>
 	/// モデルをリセット
@@ -140,7 +139,7 @@ private:
 #pragma region パラメータ
 	int		_animationIndex = -1;
 	int		_rootNodeIndex = -1;
-	int 	_removeMovementNodeIndex = -1;
+	RootMotionOption _rootMotionOption = RootMotionOption::None;
 
 	float	_animationTimer = 0.0f;
 	float	_blendTimer = 0.0f;
@@ -150,7 +149,6 @@ private:
 	bool	_isLoop			= false;
 	bool	_isBlending		= false;
 	bool	_useRootMotion	= false;
-	bool	_removeMovement = false;
 
 	std::vector<ModelResource::Node> _cacheNodes;
 	Vector3 _rootOffset = Vector3::Zero;

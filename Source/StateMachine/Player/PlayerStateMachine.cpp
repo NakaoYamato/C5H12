@@ -50,7 +50,8 @@ void PlayerStateMachine::DrawGui()
 #pragma region ‘Ò‹@
 void PlayerIdleState::Enter()
 {
-    owner->GetAnimator()->PlayAnimation(u8"Idle1", true);
+    owner->GetAnimator()->PlayAnimation(u8"Idle1", true, 0.2f);
+    owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 
 void PlayerIdleState::Execute(float elapsedTime)
@@ -63,7 +64,9 @@ void PlayerIdleState::Execute(float elapsedTime)
 #pragma region UŒ‚1
 void PlayerAttack1State::Enter()
 {
-    owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false);
+    owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
+    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    owner->GetAnimator()->SetIsUseRootMotion(true);
 }
 
 void PlayerAttack1State::Execute(float elapsedTime)

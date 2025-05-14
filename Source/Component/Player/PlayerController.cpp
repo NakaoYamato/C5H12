@@ -34,10 +34,10 @@ void PlayerController::Update(float elapsedTime)
 				_charactorController.lock()->SetRotateToDirection(false);
 			}
 
-			//if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)
-			//{
-   //             _state = PlayerState::Attack1;
-			//}
+			if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)
+			{
+                //_state = PlayerState::Attack1;
+			}
 		}
 	}
 

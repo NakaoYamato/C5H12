@@ -54,6 +54,7 @@ public:
 
 	// アニメーション計算処理
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const;
+	// アニメーション計算処理
 	void ComputeAnimation(int animationIndex, float time, std::vector<ModelResource::Node>& nodePoses) const;
 
 	/// <summary>
@@ -88,7 +89,6 @@ public:
 
 	bool IsPlaying() const { return _isPlaying; }
 	bool IsLoop() const { return _isLoop; }
-	bool IsBlending() const { return _isBlending; }
 	bool IsUseRootMotion() const { return _useRootMotion; }
 	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
 
@@ -105,7 +105,6 @@ public:
 	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
 	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
 	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
-	void SetIsBlending(bool isBlending) { _isBlending = isBlending; }
 	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
 
 	/// <summary>
@@ -150,16 +149,14 @@ private:
 
 	bool	_isPlaying		= false;
 	bool	_isLoop			= false;
-	bool	_isBlending		= false;
 	bool	_useRootMotion	= false;
 
-	std::vector<ModelResource::Node> _cacheNodes;
-	Vector3							_rootOffset = Vector3::Zero;
-	Vector3							_rootMovement = Vector3::Zero;
+	Vector3	_rootOffset		= Vector3::Zero;
+	Vector3	_rootMovement	= Vector3::Zero;
 #pragma endregion
 
 #pragma region イベント
-	AnimationEvent _animationEvent;
+	AnimationEvent _animationEvent{};
 #pragma endregion
 
 

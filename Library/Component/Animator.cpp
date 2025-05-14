@@ -44,7 +44,6 @@ void Animator::Update(float elapsedTime)
         if (_blendTimer >= _blendEndTime)
         {
             _blendTimer = _blendEndTime;
-            _isBlending = false;
         }
     }
 
@@ -118,8 +117,7 @@ void Animator::DebugRender(const RenderContext& rc)
 // GUI描画
 void Animator::DrawGui()
 {
-    ImGui::Checkbox(u8"ルートモーションするか", &_useRootMotion);
-    ImGui::Combo(u8"ルートモーションノード", &_rootNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
+    auto& animations = _model.lock()->GetResource()->GetAddressAnimations();
     static const char* optionNames[] =
     {
         u8"なし",
@@ -132,34 +130,32 @@ void Animator::DrawGui()
         u8"XYZ位置除去",
         u8"オフセット使用",
     };
+
+    ImGui::Checkbox(u8"ルートモーションするか", &_useRootMotion);
+    ImGui::Combo(u8"ルートモーションノード", &_rootNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
     int option = static_cast<int>(_rootMotionOption);
     if (ImGui::Combo(u8"ルートモーションオプション", &option, optionNames, _countof(optionNames)))
-    {
         _rootMotionOption = static_cast<RootMotionOption>(option);
-    }
     ImGui::DragFloat3(u8"移動量オフセット", &_rootOffset.x, 0.01f, -100.0f, 100.0f);
+    if (_animationIndex >= 0)
+    {
+        auto& currentAnimation = animations[_animationIndex];
+        ImGui::Text(u8"再生中のアニメーション:");
+        ImGui::SameLine();
+        ImGui::Text(animations[_animationIndex].name.c_str());
+        ImGui::SliderFloat(u8"経過時間", &_animationTimer, 0.0f, currentAnimation.secondsLength);
+        ImGui::Separator();
+    }
+    ImGui::DragFloat(u8"ブレンド時間", &_blendSeconds, 0.01f);
+    if (ImGui::Button(u8"再生"))
+    {
+        if (_animationIndex != -1)
+            this->PlayAnimation(_animationIndex, _isLoop, _blendSeconds);
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox(u8"ループ", &_isLoop);
     if (ImGui::TreeNode(u8"アニメーション"))
     {
-        auto& animations = _model.lock()->GetResource()->GetAddressAnimations();
-        if (_animationIndex >= 0)
-        {
-            auto& currentAnimation = animations[_animationIndex];
-            ImGui::Text(u8"再生中のアニメーション:");
-            ImGui::SameLine();
-            ImGui::Text(animations[_animationIndex].name.c_str());
-            ImGui::SliderFloat(u8"経過時間", &_animationTimer, 0.0f, currentAnimation.secondsLength);
-            ImGui::Separator();
-        }
-        ImGui::DragFloat(u8"ブレンド時間", &_blendSeconds, 0.01f);
-        if (ImGui::Button(u8"再生"))
-        {
-            if (_animationIndex != -1)
-                this->PlayAnimation(_animationIndex, _isLoop, _blendSeconds);
-        }
-        ImGui::SameLine();
-        ImGui::Checkbox(u8"ループ", &_isLoop);
-        ImGui::SameLine();
-        ImGui::Checkbox(u8"ブレンドするか", &_isBlending);
 
         ImGui::Separator();
         // フィルター
@@ -220,12 +216,21 @@ void Animator::DrawGui()
         ImGui::TreePop();
     }
 
-	if (GetAnimationIndex() != -1)
-        _animationEvent.DrawGui(GetAnimationName(), false);
-    else
-        _animationEvent.DrawGui(false);
+    if (ImGui::TreeNode(u8"イベント"))
+    {
+        // メッセージリストの編集
+        _animationEvent.DrawMassageListGui(false);
+        ImGui::Separator();
+        if (GetAnimationIndex() != -1)
+            _animationEvent.DrawGui(GetAnimationName(), false);
+        else
+            _animationEvent.DrawGui(false);
+
+        ImGui::TreePop();
+    }
 }
 
+#pragma region アニメーション制御
 // アニメーション経過時間更新
 void Animator::UpdateAnimSeconds(float elapsedTime)
 {
@@ -263,20 +268,8 @@ void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
     _isPlaying = true;
 
     // ブレンドアニメーションパラメーター
-    _isBlending = blendSeconds > 0.0f;
     _blendTimer = 0.0f;
     _blendEndTime = blendSeconds;
-
-    // 現在の姿勢をキャッシュする
-    for (size_t i = 0; i < _model.lock()->GetPoseNodes().size(); ++i)
-    {
-        const ModelResource::Node& src = _model.lock()->GetPoseNodes().at(i);
-        ModelResource::Node& dst = _cacheNodes.at(i);
-
-        dst.position = src.position;
-        dst.rotation = src.rotation;
-        dst.scale = src.scale;
-    }
 }
 
 // アニメーション再生(名前から検索)
@@ -408,7 +401,9 @@ void Animator::BlendPoseNode(
         DirectX::XMStoreFloat3(&res.position, T);
     }
 }
+#pragma endregion
 
+#pragma region アクセサ
 /// ルートモーションで使うノード番号設定
 void Animator::SetRootNodeIndex(const std::string& key)
 {
@@ -424,8 +419,6 @@ void Animator::ResetModel(std::shared_ptr<Model> model)
     // モデルが設定されていなければ処理しない
     assert(model != nullptr);
 	_model = model;
-    // ノードキャッシュの生成
-    _cacheNodes.resize(model->GetPoseNodes().size());
 
     _nodeNames.clear();
     // ノードの名前を全取得
@@ -464,6 +457,7 @@ std::string Animator::GetAnimationName() const
 {
     return GetAnimationName(_animationIndex);
 }
+#pragma endregion
 
 /// アニメーションのデバッグ表示をフィルタ
 void Animator::Filtering(std::string filterStr)

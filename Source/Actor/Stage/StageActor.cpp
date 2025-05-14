@@ -18,6 +18,7 @@ void StageActor::OnCreate()
     auto modelCont = AddComponent<ModelRenderer>();
 
     modelCont->SetRenderType(ModelRenderType::Static);
+	modelCont->SetColor(Vector4::Gray);
 
     AddCollider<MeshCollider>();
 }

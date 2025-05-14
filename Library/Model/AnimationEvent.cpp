@@ -7,16 +7,26 @@
 #include "../DebugSupporter/DebugSupporter.h"
 #include "SerializeFunction.h"
 
-void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeNames, bool canEdit)
+// データのバージョン管理
+CEREAL_CLASS_VERSION(AnimationEvent, 0)
+
+void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageList, const std::vector<const char*>& nodeNames, bool canEdit)
 {
+    static const char* EventTypeNames[] =
+    {
+        u8"Flag",
+        u8"Hit",
+        u8"Attack",
+    };
+    static const char* ShapeTypeNames[] =
+    {
+        u8"Box",
+        u8"Sphere",
+        u8"Capsule",
+    };
+
     // EventTypeの選択
     {
-        static const char* EventTypeNames[] =
-        {
-            u8"Flag",
-            u8"Hit",
-            u8"Attack",
-        };
         int type = static_cast<int>(eventType);
         if (ImGui::Combo(u8"判定の種類", &type, EventTypeNames, _countof(EventTypeNames)))
             eventType = static_cast<EventType>(type);
@@ -24,7 +34,8 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeName
     switch (eventType)
     {
     case AnimationEvent::EventType::Flag:
-        ImGui::InputText(u8"メッセージ", &triggerMessage);
+        if (messageList.size() != 0)
+			ImGui::Combo(u8"メッセージ", &messageIndex, messageList.data(), (int)messageList.size());
         ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
         ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
         break;
@@ -33,19 +44,14 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeName
     {
         // ShapeTypeの選択
         {
-            static const char* ShapeTypeNames[] =
-            {
-                u8"Box",
-                u8"Sphere",
-                u8"Capsule",
-            };
             int type = static_cast<int>(shapeType);
             if (ImGui::Combo(u8"判定の形状", &type, ShapeTypeNames, _countof(ShapeTypeNames)))
                 shapeType = static_cast<ShapeType>(type);
         }
         // nodeの選択
         ImGui::Combo(u8"ノード", &nodeIndex, nodeNames.data(), (int)nodeNames.size());
-        ImGui::InputText(u8"ヒット時のメッセージ", &triggerMessage);
+        if (messageList.size() != 0)
+            ImGui::Combo(u8"ヒット時のメッセージ", &messageIndex, messageList.data(), (int)messageList.size());
         ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
         ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
 
@@ -58,12 +64,12 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeName
             break;
         case AnimationEvent::ShapeType::Sphere:
             ImGui::DragFloat3(u8"position", &position.x, 0.1f);
-            ImGui::DragFloat3(u8"radius", &scale.x, 0.1f);
+            ImGui::DragFloat(u8"radius", &scale.x, 0.1f);
             break;
         case AnimationEvent::ShapeType::Capsule:
             ImGui::DragFloat3(u8"start", &position.x, 0.1f);
             ImGui::DragFloat3(u8"end", &angle.x, 0.1f);
-            ImGui::DragFloat3(u8"radius", &scale.x, 0.1f);
+            ImGui::DragFloat(u8"radius", &scale.x, 0.1f);
             break;
         }
     }
@@ -72,19 +78,22 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeName
 }
 
 template<class T>
-inline void AnimationEvent::EventData::serialize(T& archive)
+inline void AnimationEvent::EventData::serialize(T& archive, const std::uint32_t version)
 {
-    archive(
-        CEREAL_NVP(eventType),
-        CEREAL_NVP(shapeType),
-        CEREAL_NVP(nodeIndex),
-        CEREAL_NVP(triggerMessage),
-        CEREAL_NVP(startSeconds),
-        CEREAL_NVP(endSeconds),
-        CEREAL_NVP(position),
-        CEREAL_NVP(angle),
-        CEREAL_NVP(scale)
-    );
+    if (version == 0)
+    {
+        archive(
+            CEREAL_NVP(eventType),
+            CEREAL_NVP(shapeType),
+            CEREAL_NVP(nodeIndex),
+            CEREAL_NVP(messageIndex),
+            CEREAL_NVP(startSeconds),
+            CEREAL_NVP(endSeconds),
+            CEREAL_NVP(position),
+            CEREAL_NVP(angle),
+            CEREAL_NVP(scale)
+        );
+    }
 }
 
 /// モデル情報読み込み
@@ -192,26 +201,70 @@ void AnimationEvent::DrawGui(const std::string& animName, bool canEdit)
         }
     }
 
+    std::vector<const char*> messageList;
+	messageList.reserve(_messageList.size());
+	for (auto& message : _messageList)
+	{
+		messageList.push_back(message.c_str());
+	}
+
     int index = 0;
     for (auto& keyframe : keyframes)
     {
         if (ImGui::TreeNode(std::to_string(index).c_str()))
         {
             // 各キーフレームGUI
-            keyframe.DrawGui(_nodeNames, canEdit);
+            keyframe.DrawGui(messageList, _nodeNames, canEdit);
 
-            if (ImGui::Button(u8"削除"))
+            if (canEdit)
             {
-                // 削除で配列が変更されているのでbreakで処理を強制終了させている
-                keyframes.erase(keyframes.begin() + index);
-                ImGui::TreePop();
-                break;
+                if (ImGui::Button(u8"削除"))
+                {
+                    // 削除で配列が変更されているのでbreakで処理を強制終了させている
+                    keyframes.erase(keyframes.begin() + index);
+                    ImGui::TreePop();
+                    break;
+                }
             }
 
             ImGui::TreePop();
         }
         index++;
     }
+}
+
+/// メッセージリストの編集GUI描画
+void AnimationEvent::DrawMassageListGui(bool canEdit)
+{
+    int index = 0;
+    for (auto& message : _messageList)
+    {
+        if (canEdit)
+        {
+            ImGui::InputText(std::to_string(index).c_str(), &message);
+            ImGui::SameLine();
+            if (ImGui::Button((std::to_string(index) + u8"削除").c_str()))
+            {
+                _messageList.erase(_messageList.begin() + index);
+                break;
+            }
+        }
+        else
+        {
+            ImGui::Text((std::to_string(index) + ":").c_str());
+			ImGui::SameLine();
+			ImGui::Text(message.c_str());
+        }
+        index++;
+    }
+
+	if (canEdit)
+	{
+        if (ImGui::Button(u8"メッセージ追加"))
+        {
+            _messageList.push_back("");
+        }
+	}
 }
 
 #pragma region ファイル操作
@@ -229,6 +282,7 @@ bool AnimationEvent::Serialize(const char* filename)
         try
         {
             archive(
+                CEREAL_NVP(_messageList),
                 CEREAL_NVP(_data)
             );
             return true;
@@ -253,7 +307,10 @@ bool AnimationEvent::Deserialize(const char* filename)
 
         try
         {
+
+
             archive(
+                CEREAL_NVP(_messageList),
                 CEREAL_NVP(_data)
             );
             return true;

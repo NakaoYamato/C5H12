@@ -43,7 +43,7 @@ public:
 		ShapeType shapeType = ShapeType::Box;
 
 		int nodeIndex = 0;
-		std::string	triggerMessage = "";
+		int messageIndex = -1;
 		float startSeconds = 0.0f;
 		float endSeconds = 0.0f;
 
@@ -53,11 +53,11 @@ public:
 		Vector3 angle = Vector3::Zero;
 		Vector3 scale = Vector3::One;
 
-		void DrawGui(const std::vector<const char*>& nodeNames, bool canEdit);
+		void DrawGui(const std::vector<const char*>& messageList, const std::vector<const char*>& nodeNames, bool canEdit);
 
 		// シリアライズ
 		template<class T>
-		void serialize(T& archive);
+		void serialize(T& archive, const std::uint32_t version);
 	};
 	using EventDataMap = std::vector<EventData>;
 public:
@@ -84,6 +84,11 @@ public:
 	void DrawGui(bool canEdit = true);
 	// 指定したEventDataのGUI描画
 	void DrawGui(const std::string& animName, bool canEdit = true);
+	/// <summary>
+	/// メッセージリストの編集GUI描画
+	/// </summary>
+	/// <param name="canEdit">編集可能か</param>
+	void DrawMassageListGui(bool canEdit = true);
 
 #pragma region ファイル操作
 	/// <summary>
@@ -120,10 +125,14 @@ public:
 #pragma endregion
 private:
 	std::weak_ptr<Model> _model;
+
+	// メッセージリスト
+	std::vector<std::string> _messageList;
 	// key		: アニメーション名
 	// Value	: イベントデータ 
 	std::unordered_map<std::string, EventDataMap> _data;
 
+	// モデルのノード名
 	std::vector<const char*> _nodeNames;
 };
 

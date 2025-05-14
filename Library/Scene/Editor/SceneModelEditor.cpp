@@ -181,6 +181,9 @@ void SceneModelEditor::DrawEditGui()
         ImGui::Separator();
         if (ImGui::TreeNode(u8"判定"))
         {
+            // メッセージリストの編集
+            _animationEvent.DrawMassageListGui();
+            ImGui::Separator();
             ImGui::Text(u8"アニメーション判定");
             if (_animator.lock()->GetAnimationIndex() != -1)
             {

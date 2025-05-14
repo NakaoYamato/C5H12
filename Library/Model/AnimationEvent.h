@@ -47,11 +47,13 @@ public:
 		float startSeconds = 0.0f;
 		float endSeconds = 0.0f;
 
+		// 判定の位置 ShapeType::Capsule時はstart
 		Vector3 position = Vector3::Zero;
+		// 判定の回転 ShapeType::Capsule時はend
 		Vector3 angle = Vector3::Zero;
 		Vector3 scale = Vector3::One;
 
-		void DrawGui(const std::vector<const char*>& nodeNames);
+		void DrawGui(const std::vector<const char*>& nodeNames, bool canEdit);
 
 		// シリアライズ
 		template<class T>
@@ -75,10 +77,13 @@ public:
 	/// <param name="animElapsedTime"></param>
 	void DebugRender(const std::string& animName, float animElapsedTime);
 
-	// GUI描画
-	void DrawGui();
+	/// <summary>
+	/// GUI描画
+	/// </summary>
+	/// <param name="canEdit">編集可能か</param>
+	void DrawGui(bool canEdit = true);
 	// 指定したEventDataのGUI描画
-	void DrawGui(const std::string& animName);
+	void DrawGui(const std::string& animName, bool canEdit = true);
 
 #pragma region ファイル操作
 	/// <summary>

@@ -148,18 +148,7 @@ void SceneModelEditor::DrawMenuBarGui()
                     auto model = _modelActor.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
                     _animator.lock()->ResetModel(model.lock());
 
-                    // 判定のシリアライズの確認
-                    if (!_animationEvent.Deserialize(_filepath.c_str()))
-                    {
-                        // なかったら新規作成
-                        _animationEvent.Clear();
-
-                        // アニメーション名を登録
-                        for (auto& animation : model.lock()->GetResource()->GetAnimations())
-                        {
-                            _animationEvent.AddEventData(animation.name);
-                        }
-                    }
+					// アニメーションイベントの読み込み
                     _animationEvent.Load(model.lock());
                 }
             }

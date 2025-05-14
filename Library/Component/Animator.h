@@ -2,6 +2,7 @@
 
 #include "Component.h"
 #include "../../Library/Model/Model.h"
+#include "../../Library/Model/AnimationEvent.h"
 
 class Animator : public Component
 {
@@ -32,6 +33,8 @@ public:
 	void Start()override;
 	// 更新処理
 	void Update(float elapsedTime) override;
+	// デバッグ表示
+	void DebugRender(const RenderContext& rc)override;
 	// GUI描画
 	void DrawGui() override;
 
@@ -151,10 +154,14 @@ private:
 	bool	_useRootMotion	= false;
 
 	std::vector<ModelResource::Node> _cacheNodes;
-	Vector3 _rootOffset = Vector3::Zero;
-	Vector3 _rootMovement = Vector3::Zero;
-	Quaternion _rootRotation = Quaternion::Identity;
+	Vector3							_rootOffset = Vector3::Zero;
+	Vector3							_rootMovement = Vector3::Zero;
 #pragma endregion
+
+#pragma region イベント
+	AnimationEvent _animationEvent;
+#pragma endregion
+
 
 #pragma region デバッグ用
 	std::vector<int> _displayAnimationIndices;

@@ -7,7 +7,7 @@
 #include "../DebugSupporter/DebugSupporter.h"
 #include "SerializeFunction.h"
 
-void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeNames)
+void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeNames, bool canEdit)
 {
     // EventTypeの選択
     {
@@ -21,27 +21,54 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& nodeName
         if (ImGui::Combo(u8"判定の種類", &type, EventTypeNames, _countof(EventTypeNames)))
             eventType = static_cast<EventType>(type);
     }
-    // ShapeTypeの選択
+    switch (eventType)
     {
-        static const char* ShapeTypeNames[] =
+    case AnimationEvent::EventType::Flag:
+        ImGui::InputText(u8"メッセージ", &triggerMessage);
+        ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
+        ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
+        break;
+    case AnimationEvent::EventType::Hit:
+    case AnimationEvent::EventType::Attack:
+    {
+        // ShapeTypeの選択
         {
-            u8"Box",
-            u8"Sphere",
-            u8"Capsule",
-        };
-        int type = static_cast<int>(shapeType);
-        if (ImGui::Combo(u8"判定の形状", &type, ShapeTypeNames, _countof(ShapeTypeNames)))
-            shapeType = static_cast<ShapeType>(type);
-    }
-    // nodeの選択
-    ImGui::Combo(u8"ノード", &nodeIndex, nodeNames.data(), (int)nodeNames.size());
-    ImGui::InputText(u8"ヒット時のメッセージ", &triggerMessage);
-    ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
-    ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
+            static const char* ShapeTypeNames[] =
+            {
+                u8"Box",
+                u8"Sphere",
+                u8"Capsule",
+            };
+            int type = static_cast<int>(shapeType);
+            if (ImGui::Combo(u8"判定の形状", &type, ShapeTypeNames, _countof(ShapeTypeNames)))
+                shapeType = static_cast<ShapeType>(type);
+        }
+        // nodeの選択
+        ImGui::Combo(u8"ノード", &nodeIndex, nodeNames.data(), (int)nodeNames.size());
+        ImGui::InputText(u8"ヒット時のメッセージ", &triggerMessage);
+        ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
+        ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
 
-    ImGui::DragFloat3(u8"position", &position.x, 0.1f);
-    ImGui::DragFloat3(u8"angle", &angle.x, 0.1f);
-    ImGui::DragFloat3(u8"scale", &scale.x, 0.1f);
+        switch (shapeType)
+        {
+        case AnimationEvent::ShapeType::Box:
+            ImGui::DragFloat3(u8"position", &position.x, 0.1f);
+            ImGui::DragFloat3(u8"angle", &angle.x, 0.1f);
+            ImGui::DragFloat3(u8"scale", &scale.x, 0.1f);
+            break;
+        case AnimationEvent::ShapeType::Sphere:
+            ImGui::DragFloat3(u8"position", &position.x, 0.1f);
+            ImGui::DragFloat3(u8"radius", &scale.x, 0.1f);
+            break;
+        case AnimationEvent::ShapeType::Capsule:
+            ImGui::DragFloat3(u8"start", &position.x, 0.1f);
+            ImGui::DragFloat3(u8"end", &angle.x, 0.1f);
+            ImGui::DragFloat3(u8"radius", &scale.x, 0.1f);
+            break;
+        }
+    }
+        break;
+    }
 }
 
 template<class T>
@@ -63,11 +90,26 @@ inline void AnimationEvent::EventData::serialize(T& archive)
 /// モデル情報読み込み
 void AnimationEvent::Load(std::weak_ptr<Model> model)
 {
+	assert(model.lock() != nullptr);
+
     _model = model;
+
+	// モデルのシリアライズパスからイベント情報のパスを取得
+    if (!Deserialize(_model.lock()->GetFilepath()))
+    {
+        // なかったら新規作成
+        Clear();
+
+        // アニメーション名を登録
+        for (auto& animation : _model.lock()->GetResource()->GetAnimations())
+        {
+            AddEventData(animation.name);
+        }
+    }
 
     _nodeNames.clear();
     // ノードの名前を全取得
-    for (auto& node : model.lock()->GetPoseNodes())
+    for (auto& node : _model.lock()->GetPoseNodes())
     {
         _nodeNames.push_back(node.name.c_str());
     }
@@ -101,7 +143,14 @@ void AnimationEvent::DebugRender(const std::string& animName, float animElapsedT
                 Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), event.scale.x, Vector4::White);
                 break;
             case AnimationEvent::ShapeType::Capsule:
-                Debug::Renderer::DrawCapsule(transform, 1.0f, 1.0f, Vector4::White);
+            {
+
+                Debug::Renderer::DrawCapsule(
+                    event.position.TransformCoord(node.worldTransform), 
+                    event.angle.TransformCoord(node.worldTransform), 
+                    event.scale.x,
+                    Vector4::White);
+            }
                 break;
             }
         }
@@ -109,7 +158,7 @@ void AnimationEvent::DebugRender(const std::string& animName, float animElapsedT
 }
 
 // GUI描画
-void AnimationEvent::DrawGui()
+void AnimationEvent::DrawGui(bool canEdit)
 {
     if (_model.expired())
         return;
@@ -119,7 +168,7 @@ void AnimationEvent::DrawGui()
         // アニメーション毎のキーフレームGUI
         if (ImGui::TreeNode(animName.c_str()))
         {
-            DrawGui(animName);
+            DrawGui(animName, canEdit);
             ImGui::Separator();
 
             ImGui::TreePop();
@@ -128,15 +177,19 @@ void AnimationEvent::DrawGui()
 }
 
 // 指定したEventDataのGUI描画
-void AnimationEvent::DrawGui(const std::string& animName)
+void AnimationEvent::DrawGui(const std::string& animName, bool canEdit)
 {
     if (_model.expired())
         return;
 
     auto& keyframes = _data[animName];
-    if (ImGui::Button(u8"キーフレーム追加"))
+
+    if (canEdit)
     {
-        keyframes.push_back(AnimationEvent::EventData());
+        if (ImGui::Button(u8"キーフレーム追加"))
+        {
+            keyframes.push_back(AnimationEvent::EventData());
+        }
     }
 
     int index = 0;
@@ -145,7 +198,7 @@ void AnimationEvent::DrawGui(const std::string& animName)
         if (ImGui::TreeNode(std::to_string(index).c_str()))
         {
             // 各キーフレームGUI
-            keyframe.DrawGui(_nodeNames);
+            keyframe.DrawGui(_nodeNames, canEdit);
 
             if (ImGui::Button(u8"削除"))
             {

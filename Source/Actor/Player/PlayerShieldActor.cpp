@@ -8,8 +8,8 @@ void PlayerShieldActor::OnCreate()
 	LoadModel("./Data/Model/Player/Shield/Shield.fbx");
 
 	GetTransform().SetLengthScale(0.05f);
-	GetTransform().SetPosition(Vector3(0.0f, 0.1f, -0.1f));
-	GetTransform().SetRotation(Vector3::ToRadians(Vector3(0.0f, -90.0f, 80.0f)));
+	GetTransform().SetPosition(Vector3(-0.042f, 0.129f, 0.053f));
+	GetTransform().SetRotation(Vector3::ToRadians(Vector3(0.0f, 90.0f, 80.0f)));
 	// コンポーネント追加
 	auto modelRenderer = AddComponent<ModelRenderer>();
 }

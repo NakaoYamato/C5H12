@@ -104,6 +104,17 @@ void Animator::Update(float elapsedTime)
 	}
 }
 
+// デバッグ表示
+void Animator::DebugRender(const RenderContext& rc)
+{
+    // アニメーションを再生中は当たり判定を表示
+    if (GetAnimationIndex() != -1)
+    {
+        // 当たり判定表示
+        _animationEvent.DebugRender(GetAnimationName(), GetAnimationTimer());
+    }
+}
+
 // GUI描画
 void Animator::DrawGui()
 {
@@ -137,15 +148,14 @@ void Animator::DrawGui()
             ImGui::SameLine();
             ImGui::Text(animations[_animationIndex].name.c_str());
             ImGui::SliderFloat(u8"経過時間", &_animationTimer, 0.0f, currentAnimation.secondsLength);
-
-            if (ImGui::Button(u8"再生"))
-            {
-                this->PlayAnimation(_animationIndex, _isLoop, _blendSeconds);
-            }
             ImGui::Separator();
         }
         ImGui::DragFloat(u8"ブレンド時間", &_blendSeconds, 0.01f);
-        ImGui::Checkbox(u8"再生", &_isPlaying);
+        if (ImGui::Button(u8"再生"))
+        {
+            if (_animationIndex != -1)
+                this->PlayAnimation(_animationIndex, _isLoop, _blendSeconds);
+        }
         ImGui::SameLine();
         ImGui::Checkbox(u8"ループ", &_isLoop);
         ImGui::SameLine();
@@ -209,6 +219,11 @@ void Animator::DrawGui()
 
         ImGui::TreePop();
     }
+
+	if (GetAnimationIndex() != -1)
+        _animationEvent.DrawGui(GetAnimationName(), false);
+    else
+        _animationEvent.DrawGui(false);
 }
 
 // アニメーション経過時間更新
@@ -403,6 +418,7 @@ void Animator::SetRootNodeIndex(const std::string& key)
     SetRootNodeIndex(_model.lock()->GetNodeIndex(key));
 }
 
+/// モデルをリセット
 void Animator::ResetModel(std::shared_ptr<Model> model)
 {
     // モデルが設定されていなければ処理しない
@@ -417,6 +433,9 @@ void Animator::ResetModel(std::shared_ptr<Model> model)
     {
         _nodeNames.push_back(node.name.c_str());
     }
+
+    // アニメーションイベント読み込み
+	_animationEvent.Load(model);
 }
 
 /// アニメーション名から番号取得

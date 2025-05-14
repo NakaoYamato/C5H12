@@ -14,7 +14,7 @@ PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* anima
     _stateMachine.RegisterState(std::make_shared<PlayerAttack1State>(this));
 
     // 初期ステート設定
-    _stateMachine.SetState("Idle");
+    _stateMachine.ChangeState("Idle");
 }
 
 // 実行処理
@@ -48,35 +48,122 @@ void PlayerStateMachine::DrawGui()
 
 #pragma region 各ステート
 #pragma region 待機
-void PlayerIdleState::Enter()
+void PlayerIdleState::OnEnter()
 {
     owner->GetAnimator()->PlayAnimation(u8"Idle1", true, 0.2f);
     owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 
-void PlayerIdleState::Execute(float elapsedTime)
+void PlayerIdleState::OnExecute(float elapsedTime)
 {
     if (owner->GetPlayer()->GetState() == PlayerState::Attack1)
-        owner->GetStateMachine().SetState("Attack1");
+        owner->GetStateMachine().ChangeState("Attack1");
 }
 #pragma endregion
 
 #pragma region 攻撃1
-void PlayerAttack1State::Enter()
+// 攻撃1サブステート
+namespace Attack1SubState
 {
-    owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
+    class Combo1SubState : public StateBase<PlayerStateMachine>
+    {
+    public:
+        Combo1SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        {
+        }
+        const char* GetName() const override { return "Combo1"; }
+
+        void OnEnter() override
+        {
+            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションイベントから攻撃キャンセル取得
+			auto& animationEvent = owner->GetAnimator()->GetAnimationEvent();
+			int massageListSize = (int)animationEvent.GetMessageList().size();
+			auto events = owner->GetAnimator()->GetCurrentEvents();
+            for (auto& event : events)
+            {
+                // メッセージインデックスが範囲外ならcontinue
+                if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
+                    continue;
+
+                // 攻撃キャンセル判定
+				if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
+				{
+					// 攻撃キャンセルがあったらCombo2に遷移
+					owner->GetStateMachine().ChangeSubState("Combo2");
+				}
+            }
+        }
+        void OnExit() override 
+        {
+        }
+    };
+    class Combo2SubState : public StateBase<PlayerStateMachine>
+    {
+    public:
+        Combo2SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        {
+        }
+        const char* GetName() const override { return "Combo2"; }
+
+        void OnEnter() override
+        {
+            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo2", false, 0.3f);
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションイベントから攻撃キャンセル取得
+			auto& animationEvent = owner->GetAnimator()->GetAnimationEvent();
+            int massageListSize = (int)animationEvent.GetMessageList().size();
+			auto events = owner->GetAnimator()->GetCurrentEvents();
+            for (auto& event : events)
+            {
+                // メッセージインデックスが範囲外ならcontinue
+                if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
+                    continue;
+
+                // 攻撃キャンセル判定
+                if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
+                {
+                    // 攻撃キャンセルがあったらCombo2に遷移
+                    //owner->GetStateMachine().ChangeSubState("Combo2");
+                }
+            }
+        }
+        void OnExit() override 
+        {
+        }
+    };
 }
 
-void PlayerAttack1State::Execute(float elapsedTime)
+PlayerAttack1State::PlayerAttack1State(PlayerStateMachine* stateMachine) : 
+    HierarchicalStateBase(stateMachine)
+{
+	// サブステート登録
+    RegisterSubState(std::make_shared<Attack1SubState::Combo1SubState>(stateMachine));
+    RegisterSubState(std::make_shared<Attack1SubState::Combo2SubState>(stateMachine));
+}
+
+void PlayerAttack1State::OnEnter()
+{
+    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    owner->GetAnimator()->SetIsUseRootMotion(true);
+    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    // 初期サブステート設定
+	ChangeSubState("Combo1");
+}
+
+void PlayerAttack1State::OnExecute(float elapsedTime)
 {
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
     {
         owner->GetPlayer()->SetState(PlayerState::Idle);
-        // 攻撃1からIdleに遷移
-        owner->GetStateMachine().SetState("Idle");
+        // 攻撃からIdleに遷移
+        owner->GetStateMachine().ChangeState("Idle");
     }
 }
 #pragma endregion

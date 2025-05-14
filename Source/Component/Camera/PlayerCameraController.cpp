@@ -21,6 +21,8 @@ void PlayerCameraController::Start()
     _currentFocus = _playerActor->GetTransform().GetPosition();
     _currentFocus.y += _cameraOffsetY;
     GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
+
+	_focusNodeIndex = _playerActor->GetModel().lock()->GetNodeIndex("ORG-hips");
 }
 
 void PlayerCameraController::Update(float elapsedTime)
@@ -61,7 +63,9 @@ void PlayerCameraController::Update(float elapsedTime)
         angle.x = -DirectX::XMConvertToRadians(89.9f);
     GetActor()->GetTransform().SetRotation(angle);
 
-    Vector3 newFocus = _playerActor->GetTransform().GetPosition();
+    //Vector3 newFocus = _playerActor->GetTransform().GetPosition();
+    auto& focusNode = _playerActor->GetModel().lock()->GetPoseNodes().at(_focusNodeIndex);
+    Vector3 newFocus = Vector3::TransformCoord(focusNode.position, focusNode.parent->worldTransform);
     newFocus.y += _cameraOffsetY;
 
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
@@ -83,9 +87,9 @@ void PlayerCameraController::Update(float elapsedTime)
 	}
 
     // 補完処理
-    Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * _FIXED_UPDATE_RATE);
-    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * _FIXED_UPDATE_RATE);
-    eye = newEye;
+    Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * elapsedTime);
+    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * elapsedTime);
+    //eye = newEye;
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 

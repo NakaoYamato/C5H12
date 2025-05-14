@@ -71,6 +71,15 @@ public:
 		std::vector<ModelResource::Node>& result)const;
 #pragma endregion
 
+#pragma region アニメーションイベント
+	/// <summary>
+	/// 再生中のアニメーションのイベントを取得
+	/// </summary>
+	/// <returns></returns>
+	std::vector<AnimationEvent::EventData> GetCurrentEvents();
+#pragma endregion
+
+
 #pragma region アクセサ
 	/// <summary>
 	/// 現在のアニメーション番号取得
@@ -125,7 +134,17 @@ public:
 	/// <returns></returns>
 	std::string GetAnimationName() const;
 
+	/// <summary>
+	/// ルートモーションによる移動量取得
+	/// </summary>
+	/// <returns></returns>
 	const Vector3& GetRootMovement() const { return _rootMovement; }
+
+	/// <summary>
+	///	アニメーションイベント取得
+	/// </summary>
+	/// <returns></returns>
+	AnimationEvent& GetAnimationEvent() { return _animationEvent; }
 #pragma endregion
 private:
 	/// <summary>

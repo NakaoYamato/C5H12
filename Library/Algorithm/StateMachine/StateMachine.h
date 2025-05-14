@@ -20,16 +20,6 @@ public:
 	{
 		currentState->Execute(elapsedTime);
 	}
-	// ステートセット
-	virtual void SetState(std::string key)
-	{
-#ifdef _DEBUG
-		if (stateMap.find(key) == stateMap.end())
-			return;
-#endif // _DEBUG
-		currentState = stateMap.at(key).get();
-		currentState->Enter();
-	}
 	// ステート変更
 	virtual void ChangeState(std::string key)
 	{

@@ -107,20 +107,47 @@ public:
 #pragma endregion
 
 #pragma region アクセサ
+	/// <summary>
+	/// アニメーションに含まれるデータマップを取得
+	/// </summary>
+	/// <param name="animName">アニメーション名</param>
+	/// <returns></returns>
 	EventDataMap& GetEventData(const std::string& animName) {
 		return _data[animName];
 	}
 
-	// 要素を追加
+	/// <summary>
+	/// 要素を追加
+	/// </summary>
+	/// <param name="animName"></param>
 	void AddEventData(const std::string& animName)
 	{
 		_data[animName];
 	}
 
-	// 要素全削除
+	/// <summary>
+	/// 要素全削除
+	/// </summary>
 	void Clear()
 	{
 		_data.clear();
+	}
+
+	/// <summary>
+	/// アニメーション名と経過時間からイベントデータを取得
+	/// </summary>
+	/// <param name="animName">アニメーション名</param>
+	/// <param name="animElapsedTime">アニメーション経過時間</param>
+	/// <returns></returns>
+	EventDataMap GetCurrentEventData(const std::string& animName, float animElapsedTime);
+
+	/// <summary>
+	/// メッセージリストを取得
+	/// </summary>
+	/// <returns></returns>
+	const std::vector<std::string>& GetMessageList() const
+	{
+		return _messageList;
 	}
 #pragma endregion
 private:

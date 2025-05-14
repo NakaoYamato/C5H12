@@ -18,6 +18,7 @@ void Animator::Update(float elapsedTime)
     if (_animationIndex == -1)
         return;
 
+    _rootMovement = Vector3::Zero;
     std::vector<ModelResource::Node>&   poseNodes = _model.lock()->GetPoseNodes();
 	std::vector<ModelResource::Node>    oldPoseNodes = poseNodes;
 
@@ -46,10 +47,9 @@ void Animator::Update(float elapsedTime)
             _blendTimer = _blendEndTime;
         }
     }
-
 	// ルートモーション計算
-	_rootMovement = Vector3::Zero;
-	if (_useRootMotion && _rootNodeIndex != -1 && _isPlaying)
+	// ブレンド中はルートモーションを計算しない
+    else if(_useRootMotion && _rootNodeIndex != -1 && _isPlaying)
 	{
 		float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
         
@@ -400,6 +400,20 @@ void Animator::BlendPoseNode(
         DirectX::XMStoreFloat4(&res.rotation, R);
         DirectX::XMStoreFloat3(&res.position, T);
     }
+}
+#pragma endregion
+
+#pragma region アニメーションイベント
+/// 再生中のアニメーションのイベントを取得
+std::vector<AnimationEvent::EventData> Animator::GetCurrentEvents()
+{
+	if (_animationIndex == -1)
+        return std::vector<AnimationEvent::EventData>();
+
+    return _animationEvent.GetCurrentEventData(
+		GetAnimationName(), _animationTimer);
+
+    return std::vector<AnimationEvent::EventData>();
 }
 #pragma endregion
 

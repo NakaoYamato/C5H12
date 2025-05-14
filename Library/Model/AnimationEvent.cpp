@@ -322,3 +322,19 @@ bool AnimationEvent::Deserialize(const char* filename)
     return false;
 }
 #pragma endregion
+
+#pragma region アクセサ
+/// アニメーション名と経過時間からイベントデータを取得
+AnimationEvent::EventDataMap AnimationEvent::GetCurrentEventData(const std::string& animName, float animElapsedTime)
+{
+    EventDataMap result;
+    for (auto& event : _data[animName])
+    {
+        if (event.startSeconds <= animElapsedTime && animElapsedTime <= event.endSeconds)
+        {
+            result.push_back(event);
+        }
+    }
+    return result;
+}
+#pragma endregion

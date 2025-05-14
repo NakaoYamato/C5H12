@@ -45,9 +45,9 @@ public:
 
 	// ステート名取得
 	const char* GetName() const override { return "Idle"; }
-	void Enter() override;
-	void Execute(float elapsedTime) override;
-	void Exit() override {}
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
 };
 #pragma endregion
 
@@ -55,14 +55,14 @@ public:
 class PlayerAttack1State final : public HierarchicalStateBase<PlayerStateMachine>
 {
 public:
-	PlayerAttack1State(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	PlayerAttack1State(PlayerStateMachine* stateMachine);
 	~PlayerAttack1State() override {}
 
 	// ステート名取得
 	const char* GetName() const override { return "Attack1"; }
-	void Enter() override;
-	void Execute(float elapsedTime) override;
-	void Exit() override {}
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
 };
 #pragma endregion
 

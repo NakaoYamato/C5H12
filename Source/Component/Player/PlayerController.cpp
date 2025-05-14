@@ -36,7 +36,7 @@ void PlayerController::Update(float elapsedTime)
 
 			if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)
 			{
-                //_state = PlayerState::Attack1;
+                _state = PlayerState::Attack1;
 			}
 		}
 	}

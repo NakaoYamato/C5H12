@@ -29,6 +29,8 @@ public:
 private:
     PlayerActor* _playerActor;
 
+    // カメラの注視点のなるノード番号
+	int _focusNodeIndex = -1;
     Vector3 _currentFocus{};
 
     float _cameraOffsetY = 1.0f;

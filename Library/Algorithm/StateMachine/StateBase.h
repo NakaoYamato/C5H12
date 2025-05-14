@@ -15,11 +15,11 @@ public:
 
 	// 全て継承先で実装させる必要があるため純粋仮想関数で実装
 	// ステートに入った時のメソッド
-	virtual void Enter() = 0;
+	virtual void OnEnter() = 0;
 	// ステートで実行するメソッド
-	virtual void Execute(float elapsedTime) = 0;
+	virtual void OnExecute(float elapsedTime) = 0;
 	// ステートから出ていくときのメソッド
-	virtual void Exit() = 0;
+	virtual void OnExit() = 0;
 	// GUi描画
 	virtual void DrawGui() {};
 protected:
@@ -33,23 +33,36 @@ public:
 	HierarchicalStateBase(T* owner) : StateBase<T>(owner) {}
 	virtual ~HierarchicalStateBase() {}
 
+	/// <summary>
+	/// 開始処理
+	/// </summary>
+	void Enter()
+	{
+		OnEnter();
+	}
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	void Execute(float elapsedTime)
+	{
+		if (subState)
+			subState->OnExecute(elapsedTime);
+		OnExecute(elapsedTime);
+	}
+	/// <summary>
+	/// 終了処理
+	/// </summary>
+	void Exit()
+	{
+		if (subState)
+			subState->OnExit();
+		OnExit();
+	}
+
+#pragma region 仮想関数
 	// 名前の取得
 	virtual const char* GetName() const = 0;
-	// 全て継承先で実装させる必要があるため純粋仮想関数で実装
-	// ステートに入った時のメソッド
-	virtual void Enter() = 0;
-	// ステートで実行するメソッド
-	virtual void Execute(float elapsedTime)
-	{
-		if (subState)
-			subState->Execute(elapsedTime);
-	}
-	// ステートから出ていくときのメソッド
-	virtual void Exit()
-	{
-		if (subState)
-			subState->Exit();
-	}
 	// GUi描画
 	virtual void DrawGui() {};
 	// サブステート設定
@@ -57,14 +70,14 @@ public:
 	{
 		// 2層目ステートセット
 		subState = stateMap.at(key).get();
-		subState->Enter();
+		subState->OnEnter();
 	}
 	// サブステート変更
 	virtual void ChangeSubState(std::string key)
 	{
 		// 2層目のステート切り替え
 		if (subState != nullptr)
-			subState->Exit();
+			subState->OnExit();
 		SetSubState(key);
 	}
 	// サブステート登録
@@ -79,7 +92,16 @@ public:
 			return "";
 		return subState->GetName();
 	}
-
+#pragma endregion
+protected:
+#pragma region 仮想関数
+	// ステートに入った時のメソッド
+	virtual void OnEnter() = 0;
+	// ステートで実行するメソッド
+	virtual void OnExecute(float elapsedTime) {};
+	// ステートから出ていくときのメソッド
+	virtual void OnExit() {};
+#pragma endregion
 protected:
 	using StateMap = std::unordered_map<std::string, std::shared_ptr<StateBase<T>>>;
 	StateMap stateMap;

@@ -7,8 +7,9 @@ class PlayerInput : public Component
 public:
 	enum Inputs : int
 	{
-		Attack = 0b00000001,
-		Dash = 0b00000010,
+		Attack		= 0b00000001,
+		Dash		= 0b00000010,
+		Evade		= 0b00000100,
 	};
 
 public:
@@ -28,10 +29,15 @@ public:
 	void DrawGui() override;
 
 #pragma region アクセサ
+	// 入力方向を取得
+	const Vector2& GetLAxisValue() const { return _lAxisValue; }
+	// 移動方向を取得
 	const Vector3& GetMovement() const { return _movement; }
 	int GetInputFlag() const { return _inputFlag; }
 #pragma endregion
 private:
+	// 入力方向
+	Vector2 _lAxisValue = { 0.0f, 0.0f };
 	// 移動方向(ワールド座標)
 	Vector3 _movement;
 

@@ -26,6 +26,9 @@ void CharactorController::LateUpdate(float elapsedTime)
 	/// 回転更新
 	if (_rotateToDirection)
 		UpdateRotation(elapsedTime, { _velocity.x, _velocity.z });
+	/// ルートモーションによる回転更新
+	if (_rotateToDirectionByRootMotion)
+		UpdateRotation(elapsedTime, { _animator.lock()->GetRootMovement().x, _animator.lock()->GetRootMovement().z });
 }
 
 void CharactorController::FixedUpdate()
@@ -90,7 +93,7 @@ void CharactorController::UpdatePosition(float deltaTime)
 {
 	Vector3 movement = _velocity * deltaTime;
 	// ルートモーションの移動量取得
-	if (_animator.lock() && !Debug::Input::IsActive(DebugInput::BTN_F5))
+	if (_animator.lock())
 		movement += _animator.lock()->GetRootMovement();
 
     // 水平処理

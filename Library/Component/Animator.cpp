@@ -72,7 +72,9 @@ void Animator::Update(float elapsedTime)
         Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
 
         // 移動量取得
-        _rootMovement = currentPosition - oldPosition;
+		// デバッグでF5を押しているときは移動量を取得しない
+        if (!Debug::Input::IsActive(DebugInput::BTN_F5))
+            _rootMovement = currentPosition - oldPosition;
         // ポーズノードの移動量を取り除く
         poseNodes[_rootNodeIndex].position = {};
 		// オブジェクトに応じてノードの位置を調整

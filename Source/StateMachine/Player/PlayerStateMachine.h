@@ -23,6 +23,9 @@ public:
 	StateMachine<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
 	PlayerController* GetPlayer() { return _player; }
 	Animator* GetAnimator() { return _animator; }
+
+	// キャンセルイベントを取得
+	bool CallCancelEvent() const { return _callCancelEvent; }
 #pragma endregion
 
 	// 移動速度
@@ -33,6 +36,8 @@ private:
 	StateMachine<PlayerStateMachine> _stateMachine;
 	PlayerController* _player = nullptr;
 	Animator* _animator = nullptr;
+
+	bool _callCancelEvent = false;
 };
 
 #pragma region 各ステート
@@ -50,6 +55,52 @@ public:
 	void OnExit() override {}
 };
 #pragma endregion
+
+#pragma region 走り
+class PlayerRunState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerRunState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerRunState() override {}
+
+	// ステート名取得
+	const char* GetName() const override { return "Run"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
+#pragma region ダッシュ
+class PlayerSprintState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerSprintState(PlayerStateMachine* stateMachine);
+	~PlayerSprintState() override {}
+
+	// ステート名取得
+	const char* GetName() const override { return "Sprint"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
+#pragma region 回避
+class PlayerEvadeState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerEvadeState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerEvadeState() override {}
+
+	// ステート名取得
+	const char* GetName() const override { return "Evade"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
 
 #pragma region 攻撃1
 class PlayerAttack1State final : public HierarchicalStateBase<PlayerStateMachine>

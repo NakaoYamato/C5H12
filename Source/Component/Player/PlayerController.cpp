@@ -25,14 +25,17 @@ void PlayerController::Update(float elapsedTime)
 			Vector3 movement = playerInput->GetMovement();
 			if (movement.x != 0.0f || movement.z != 0.0f)
 			{
-				_charactorController.lock()->AddForce(movement * _moveSpeed);
-				_charactorController.lock()->SetRotateToDirection(true);
+				_isMoving = true;
+				// “ü—Í•ûŒü‚ÉŒü‚­
+				_charactorController.lock()->UpdateRotation(elapsedTime, { movement.x, movement.z });
 			}
 			else
 			{
-				_charactorController.lock()->AddForce(Vector3::Normalize(_charactorController.lock()->GetVelocityXZ()) * -_friction);
-				_charactorController.lock()->SetRotateToDirection(false);
+				_isMoving = false;
 			}
+
+			_isDush = playerInput->GetInputFlag() & PlayerInput::Inputs::Dash;
+			_isEvade = playerInput->GetInputFlag() & PlayerInput::Inputs::Evade;
 
 			_isAttack = false;
 			if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)

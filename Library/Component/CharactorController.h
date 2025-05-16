@@ -48,6 +48,7 @@ public:
     const Vector3& GetGravity() const { return _gravity; }
     bool IsUseGravity() const { return _useGravity; }
 	bool IsRotateToDirection() const { return _rotateToDirection; }
+	bool IsRotateToDirectionByRootMotion() const { return _rotateToDirectionByRootMotion; }
 
     void SetRadius(float radius) { _radius = radius; }
     void SetSkinWidth(float skinWidth) { _skinWidth = skinWidth; }
@@ -60,8 +61,9 @@ public:
     void SetGravity(const Vector3& gravity) { _gravity = gravity; }
     void SetUseGravity(bool useGravity) { _useGravity = useGravity; }
 	void SetRotateToDirection(bool rotateToDirection) { _rotateToDirection = rotateToDirection; }
+	void SetRotateToDirectionByRootMotion(bool rotateToDirection) { _rotateToDirectionByRootMotion = rotateToDirection; }
 #pragma endregion
-private:
+public:
     /// <summary>
     /// 速度更新
     /// </summary>
@@ -119,6 +121,8 @@ private:
     bool _useGravity = true;
     // 移動方向に向くか
     bool _rotateToDirection = true;
+    // ルートモーションによる移動方向に向くか
+    bool _rotateToDirectionByRootMotion = false;
 #pragma endregion
 
 #pragma region アニメーション

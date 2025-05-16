@@ -31,7 +31,11 @@ public:
     PlayerState GetState() const { return _state; }
     // ƒvƒŒƒCƒ„[‚Ìó‘Ô‚ğİ’è
     void SetState(PlayerState state) { _state = state; }
+	std::shared_ptr<PlayerInput> GetPlayerInput() const { return _playerInput.lock(); }
 
+	bool IsMoving() const { return _isMoving; }
+	bool IsDush() const { return _isDush; }
+	bool IsEvade() const { return _isEvade; }
 	bool IsAttack() const { return _isAttack; }
 #pragma endregion
 
@@ -52,5 +56,8 @@ private:
 	// –€C—Í
 	float _friction = 25.0f;
 
+	bool _isMoving = false;
+	bool _isDush = false;
+	bool _isEvade = false;
 	bool _isAttack = false;
 };

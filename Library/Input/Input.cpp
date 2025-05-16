@@ -10,7 +10,7 @@ Input::Input()
 	// ƒAƒNƒVƒ‡ƒ“‚Ì“o˜^
 	_inputActionMap["OK"] = { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
 	_inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_THUMB}};
-	_inputActionMap["Avoidance"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
+	_inputActionMap["Evade"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
 	_inputActionMap["Attack1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_A}, {InputType::InputMouse,VK_LBUTTON} };
 	_inputActionMap["Attack2"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_X}, {InputType::InputMouse,VK_RBUTTON} };
 	_inputActionMap["LookOn"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };

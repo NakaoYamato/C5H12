@@ -44,7 +44,7 @@ public:
 	~PlayerIdleState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "Idle"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -59,7 +59,7 @@ public:
 	~PlayerRunState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "Run"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -74,7 +74,7 @@ public:
 	~PlayerSprintState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "Sprint"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -89,7 +89,7 @@ public:
 	~PlayerEvadeState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "Evade"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -104,7 +104,7 @@ public:
 	~PlayerAttack1State() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "Attack1"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -119,7 +119,7 @@ public:
 	~PlayerGuardState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "Guard"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -133,7 +133,7 @@ public:
 	PlayerHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerHitState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "Hit"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -144,7 +144,7 @@ public:
 	PlayerHitKnockDownState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerHitKnockDownState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "HitKnockDown"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -155,7 +155,7 @@ public:
 	PlayerGuardHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerGuardHitState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "GuardHit"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -166,7 +166,7 @@ public:
 	PlayerGuardBreakState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerGuardBreakState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "GuardBreak"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -180,7 +180,7 @@ public:
 	PlayerDeathState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerDeathState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "Death"; }
+	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}

@@ -28,9 +28,9 @@ public:
 
 #pragma region アクセサ
     // プレイヤーの状態を取得
-    PlayerState GetState() const { return _state; }
+    PlayerMainStates GetState() const { return _state; }
     // プレイヤーの状態を設定
-    void SetState(PlayerState state) { _state = state; }
+    void SetState(PlayerMainStates state) { _state = state; }
 	std::shared_ptr<PlayerInput> GetPlayerInput() const { return _playerInput.lock(); }
 
 	bool IsMoving() const { return _isMoving; }
@@ -49,7 +49,7 @@ private:
 	// ユーザーが操作するプレイヤーか
 	const bool _isUserControlled = true;
     // プレイヤーの状態
-    PlayerState _state = PlayerState::None;
+    PlayerMainStates _state = PlayerMainStates::None;
 	// ステートマシン
     std::unique_ptr<PlayerStateMachine> _stateMachine;
 

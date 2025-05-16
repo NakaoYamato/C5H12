@@ -90,7 +90,7 @@ void CharactorController::UpdatePosition(float deltaTime)
 {
 	Vector3 movement = _velocity * deltaTime;
 	// ルートモーションの移動量取得
-	if (_animator.lock())
+	if (_animator.lock() && !Debug::Input::IsActive(DebugInput::BTN_F5))
 		movement += _animator.lock()->GetRootMovement();
 
     // 水平処理

@@ -128,8 +128,80 @@ namespace Attack1SubState
                 // 攻撃キャンセル判定
                 if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
                 {
-                    // 攻撃キャンセルがあったらCombo2に遷移
-                    //owner->GetStateMachine().ChangeSubState("Combo2");
+                    // 攻撃キャンセルがあったらCombo3に遷移
+                    owner->GetStateMachine().ChangeSubState("Combo3");
+                }
+            }
+        }
+        void OnExit() override 
+        {
+        }
+    };
+    class Combo3SubState : public StateBase<PlayerStateMachine>
+    {
+    public:
+        Combo3SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        {
+        }
+        const char* GetName() const override { return "Combo3"; }
+
+        void OnEnter() override
+        {
+            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo3", false, 0.3f);
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションイベントから攻撃キャンセル取得
+			auto& animationEvent = owner->GetAnimator()->GetAnimationEvent();
+            int massageListSize = (int)animationEvent.GetMessageList().size();
+			auto events = owner->GetAnimator()->GetCurrentEvents();
+            for (auto& event : events)
+            {
+                // メッセージインデックスが範囲外ならcontinue
+                if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
+                    continue;
+
+                // 攻撃キャンセル判定
+                if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
+                {
+                    // 攻撃キャンセルがあったらCombo4に遷移
+                    owner->GetStateMachine().ChangeSubState("Combo4");
+                }
+            }
+        }
+        void OnExit() override 
+        {
+        }
+    };
+    class Combo4SubState : public StateBase<PlayerStateMachine>
+    {
+    public:
+        Combo4SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        {
+        }
+        const char* GetName() const override { return "Combo4"; }
+
+        void OnEnter() override
+        {
+            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo4", false, 0.3f);
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションイベントから攻撃キャンセル取得
+			auto& animationEvent = owner->GetAnimator()->GetAnimationEvent();
+            int massageListSize = (int)animationEvent.GetMessageList().size();
+			auto events = owner->GetAnimator()->GetCurrentEvents();
+            for (auto& event : events)
+            {
+                // メッセージインデックスが範囲外ならcontinue
+                if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
+                    continue;
+
+                // 攻撃キャンセル判定
+                if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
+                {
+                    // 攻撃キャンセルがあったらCombo5に遷移
+                    //owner->GetStateMachine().ChangeSubState("Combo5");
                 }
             }
         }
@@ -145,6 +217,8 @@ PlayerAttack1State::PlayerAttack1State(PlayerStateMachine* stateMachine) :
 	// サブステート登録
     RegisterSubState(std::make_shared<Attack1SubState::Combo1SubState>(stateMachine));
     RegisterSubState(std::make_shared<Attack1SubState::Combo2SubState>(stateMachine));
+    RegisterSubState(std::make_shared<Attack1SubState::Combo3SubState>(stateMachine));
+    RegisterSubState(std::make_shared<Attack1SubState::Combo4SubState>(stateMachine));
 }
 
 void PlayerAttack1State::OnEnter()

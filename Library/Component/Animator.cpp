@@ -47,16 +47,27 @@ void Animator::Update(float elapsedTime)
             _blendTimer = _blendEndTime;
         }
     }
-	// ルートモーション計算
-	// ブレンド中はルートモーションを計算しない
-    else if(_useRootMotion && _rootNodeIndex != -1 && _isPlaying)
-	{
-		float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
-        
-        ModelResource::Node oldRootNode{};
-        ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
-		ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
 
+	// ルートモーション計算
+    if(_useRootMotion && _rootNodeIndex != -1 && _isPlaying)
+	{
+		// 現在のルートノード取得
+        ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
+		// ブレンド中はブレンドしていないルートノードを取得
+        if (_blendTimer < _blendEndTime)
+        {
+            ModelResource::Node node{};
+            ComputeAnimation(_animationIndex, _rootNodeIndex, _animationTimer, node);
+			// poseNodesの行列を使いたいためpositionのみ取得
+            currentRootNode.position = node.position;
+        }
+
+        // 前フレームのルートノード取得
+		float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
+        ModelResource::Node oldRootNode{};
+		ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
+        
+		// ノードのワールド座標を取得
         Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
         Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
 

@@ -12,7 +12,7 @@
 #include <ENL.h>
 #include <ENLBuffer.h>
 
-#define NETWORK_CONNECTION_TYPE ENLConnectionType::CONNECTION_TYPE_TCP
+#define NETWORK_CONNECTION_TYPE ENLConnectionType::CONNECTION_TYPE_UDP
 #endif // USE_MRS
 
 #include <DirectXMath.h>

@@ -37,6 +37,12 @@ public:
 	bool IsDush() const { return _isDush; }
 	bool IsEvade() const { return _isEvade; }
 	bool IsAttack() const { return _isAttack; }
+	bool IsGuard() const { return _isGuard; }
+	// 受けたダメージを取得
+	int GetSustainedDamage() const { return _sustainedDamage; }
+	// ノックバックダメージを取得
+	int GetKnockbackDamage() const { return _knockbackDamage; }
+	bool IsDead() const { return _isDead; }
 #pragma endregion
 
 private:
@@ -60,4 +66,9 @@ private:
 	bool _isDush = false;
 	bool _isEvade = false;
 	bool _isAttack = false;
+	bool _isGuard = false;
+	// 受けたダメージダメージ
+	int _sustainedDamage = 0;
+	int _knockbackDamage = 5;
+	bool _isDead = false;
 };

@@ -50,8 +50,9 @@ void PlayerInput::Update(float elapsedTime)
 		};
 
 	InputPressed("Dash", Inputs::Dash);
+	InputPressed("Action2", Inputs::Guard);
 
-	InputTriggerd("Attack1", Inputs::Attack);
+	InputTriggerd("Action1", Inputs::Attack);
 	InputTriggerd("Evade", Inputs::Evade);
 }
 

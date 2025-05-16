@@ -22,32 +22,38 @@ void PlayerController::Update(float elapsedTime)
 		auto playerInput = _playerInput.lock();
 		if (playerInput)
 		{
+			_isDush = playerInput->GetInputFlag() & PlayerInput::Inputs::Dash;
+			_isEvade = playerInput->GetInputFlag() & PlayerInput::Inputs::Evade;
+			_isGuard = playerInput->GetInputFlag() & PlayerInput::Inputs::Guard;
+
+			_isAttack = false;
+			if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)
+			{
+				_state = PlayerState::Attack1;
+				_isAttack = true;
+			}
+
 			Vector3 movement = playerInput->GetMovement();
 			if (movement.x != 0.0f || movement.z != 0.0f)
 			{
 				_isMoving = true;
 				// 入力方向に向く
-				_charactorController.lock()->UpdateRotation(elapsedTime, { movement.x, movement.z });
+				if (_stateMachine->GetStateMachine().GetStateName() != "Evade")
+					_charactorController.lock()->UpdateRotation(elapsedTime, { movement.x, movement.z });
 			}
 			else
 			{
 				_isMoving = false;
 			}
 
-			_isDush = playerInput->GetInputFlag() & PlayerInput::Inputs::Dash;
-			_isEvade = playerInput->GetInputFlag() & PlayerInput::Inputs::Evade;
-
-			_isAttack = false;
-			if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)
-			{
-                _state = PlayerState::Attack1;
-				_isAttack = true;
-			}
 		}
 	}
 
 	// 行動処理
     _stateMachine->Execute(elapsedTime);
+
+	// 受けたダメージを初期化
+	_sustainedDamage = 0;
 }
 
 // GUI描画
@@ -58,6 +64,19 @@ void PlayerController::DrawGui()
     ImGui::Separator();
 	ImGui::DragFloat(u8"移動速度", &_moveSpeed, 0.01f, 0.0f, 100.0f);
 	ImGui::DragFloat(u8"摩擦", &_friction, 0.01f, 0.0f, 100.0f);
+
+	if (ImGui::Button(u8"ダメージを受ける"))
+	{
+		_sustainedDamage = 1;
+	}
+	if (ImGui::Button(u8"大ダメージを受ける"))
+	{
+		_sustainedDamage = _knockbackDamage;
+	}
+	if (ImGui::Button(u8"死亡"))
+	{
+		_isDead = true;
+	}
 
 	ImGui::Separator();
 	_stateMachine->DrawGui();

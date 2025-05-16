@@ -10,6 +10,7 @@ public:
 		Attack		= 0b00000001,
 		Dash		= 0b00000010,
 		Evade		= 0b00000100,
+		Guard		= 0b00001000,
 	};
 
 public:

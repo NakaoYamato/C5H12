@@ -27,11 +27,6 @@ public:
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 #pragma endregion
-
-	// 移動速度
-	float _moveSpeed = 10.0f;
-	// 攻撃距離
-	float _attackRenge = 3.0f;
 private:
 	StateMachine<PlayerStateMachine> _stateMachine;
 	PlayerController* _player = nullptr;
@@ -101,7 +96,6 @@ public:
 };
 #pragma endregion
 
-
 #pragma region 攻撃1
 class PlayerAttack1State final : public HierarchicalStateBase<PlayerStateMachine>
 {
@@ -111,6 +105,82 @@ public:
 
 	// ステート名取得
 	const char* GetName() const override { return "Attack1"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
+#pragma region ガード
+class PlayerGuardState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerGuardState(PlayerStateMachine* stateMachine);
+	~PlayerGuardState() override {}
+
+	// ステート名取得
+	const char* GetName() const override { return "Guard"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
+#pragma region 被弾
+class PlayerHitState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerHitState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Hit"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+class PlayerHitKnockDownState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerHitKnockDownState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerHitKnockDownState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "HitKnockDown"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+class PlayerGuardHitState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerGuardHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerGuardHitState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "GuardHit"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+class PlayerGuardBreakState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerGuardBreakState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerGuardBreakState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "GuardBreak"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
+#pragma region 死亡
+class PlayerDeathState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerDeathState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~PlayerDeathState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Death"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}

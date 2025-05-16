@@ -96,10 +96,17 @@ void MouseInputObserver::FixCursorInCenter() const
 /// マウスを画面内に修正
 void MouseInputObserver::ClipCursorInWindow() const
 {
+	// ウィンドウがアクティブかどうかを確認
+	if (GetForegroundWindow() != _hWnd)
+		return;
+
 	RECT rect;
-	if (GetClientRect(_hWnd, &rect)) {
-		POINT tl = { rect.left, rect.top };
-		POINT br = { rect.right, rect.bottom };
+	if (GetClientRect(_hWnd, &rect)) 
+	{
+		static constexpr float ClipCursorOffset = 30.0f;
+
+		POINT tl = { rect.left	+ ClipCursorOffset, rect.top	+ ClipCursorOffset };
+		POINT br = { rect.right - ClipCursorOffset, rect.bottom - ClipCursorOffset };
 
 		// クライアント座標をスクリーン座標に変換
 		ClientToScreen(_hWnd, &tl);

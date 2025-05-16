@@ -93,7 +93,8 @@ namespace Attack1SubState
 				if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
 				{
 					// 攻撃キャンセルがあったらCombo2に遷移
-					owner->GetStateMachine().ChangeSubState("Combo2");
+                    if (owner->GetPlayer()->IsAttack())
+                        owner->GetStateMachine().ChangeSubState("Combo2");
 				}
             }
         }
@@ -129,7 +130,8 @@ namespace Attack1SubState
                 if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
                 {
                     // 攻撃キャンセルがあったらCombo3に遷移
-                    owner->GetStateMachine().ChangeSubState("Combo3");
+                    if (owner->GetPlayer()->IsAttack())
+                        owner->GetStateMachine().ChangeSubState("Combo3");
                 }
             }
         }
@@ -165,7 +167,8 @@ namespace Attack1SubState
                 if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
                 {
                     // 攻撃キャンセルがあったらCombo4に遷移
-                    owner->GetStateMachine().ChangeSubState("Combo4");
+                    if (owner->GetPlayer()->IsAttack())
+                        owner->GetStateMachine().ChangeSubState("Combo4");
                 }
             }
         }
@@ -187,23 +190,6 @@ namespace Attack1SubState
         }
         void OnExecute(float elapsedTime) override
         {
-            // アニメーションイベントから攻撃キャンセル取得
-			auto& animationEvent = owner->GetAnimator()->GetAnimationEvent();
-            int massageListSize = (int)animationEvent.GetMessageList().size();
-			auto events = owner->GetAnimator()->GetCurrentEvents();
-            for (auto& event : events)
-            {
-                // メッセージインデックスが範囲外ならcontinue
-                if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
-                    continue;
-
-                // 攻撃キャンセル判定
-                if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
-                {
-                    // 攻撃キャンセルがあったらCombo5に遷移
-                    //owner->GetStateMachine().ChangeSubState("Combo5");
-                }
-            }
         }
         void OnExit() override 
         {

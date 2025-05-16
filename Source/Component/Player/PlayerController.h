@@ -31,6 +31,8 @@ public:
     PlayerState GetState() const { return _state; }
     // ƒvƒŒƒCƒ„[‚Ìó‘Ô‚ğİ’è
     void SetState(PlayerState state) { _state = state; }
+
+	bool IsAttack() const { return _isAttack; }
 #pragma endregion
 
 private:
@@ -49,4 +51,6 @@ private:
 	float _moveSpeed = 20.0f;
 	// –€C—Í
 	float _friction = 25.0f;
+
+	bool _isAttack = false;
 };

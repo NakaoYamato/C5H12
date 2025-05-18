@@ -74,7 +74,7 @@ inline const char* GetPlayerMainStateName(PlayerMainStates state)
 	case PlayerMainStates::Death:
 		return "Death";
 	case PlayerMainStates::None:
-		return "None";
+		return "";
 	case PlayerMainStates::MaxState:
 	default:
 		return "error";
@@ -124,7 +124,7 @@ inline const char* GetPlayerSubStateName(PlayerSubStates state)
 	case PlayerSubStates::Guarding:
 		return "Guarding";
 	case PlayerSubStates::None:
-		return "None";
+		return "";
 	case PlayerSubStates::MaxSubState:
 	default:
 		return "error";

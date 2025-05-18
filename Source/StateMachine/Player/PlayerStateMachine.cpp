@@ -88,6 +88,9 @@ void PlayerStateMachine::DrawGui()
         std::string str = u8"現在のステート:";
         str += _stateMachine.GetState()->GetName();
         ImGui::Text("%s", str.c_str());
+        str = u8"現在のサブステート:";
+        str += _stateMachine.GetState()->GetSubStateName();
+        ImGui::Text("%s", str.c_str());
 
         ImGui::Separator();
         for (auto& [name, state] : _stateMachine.GetStateMap())
@@ -100,6 +103,25 @@ void PlayerStateMachine::DrawGui()
         }
 
         ImGui::TreePop();
+    }
+}
+
+// ステート変更
+void PlayerStateMachine::ChangeState(PlayerMainStates mainStateName, PlayerSubStates subStateName)
+{
+    PlayerMainStates currentMainState = GetPlayerMainStateFromName(GetStateName());
+    PlayerSubStates currentSubState = GetPlayerSubStateFromName(GetSubStateName());
+
+    // 現在のステートと変更先が違うなら変更
+    if (currentMainState != mainStateName)
+        _stateMachine.ChangeState(GetPlayerMainStateName(mainStateName));
+
+    // サブステートがあるなら変更
+    if (subStateName != PlayerSubStates::None)
+    {
+        // 現在のサブステートと変更先が違うなら変更
+        if (currentSubState != subStateName)
+            _stateMachine.ChangeSubState(GetPlayerSubStateName(subStateName));
     }
 }
 
@@ -137,6 +159,9 @@ const char* PlayerRunState::GetName() const
 }
 void PlayerRunState::OnEnter()
 {
+    // フラグを立てる
+    owner->GetPlayer()->SetIsMoving(true);
+
     owner->GetAnimator()->SetRootNodeIndex("root");
     owner->GetAnimator()->SetIsUseRootMotion(true);
     owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
@@ -159,6 +184,11 @@ void PlayerRunState::OnExecute(float elapsedTime)
     // ガード移行
     else if (owner->GetPlayer()->IsGuard())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
+}
+void PlayerRunState::OnExit()
+{
+    // フラグを下ろす
+    owner->GetPlayer()->SetIsMoving(false);
 }
 #pragma endregion
 
@@ -288,17 +318,24 @@ const char* PlayerSprintState::GetName() const
 
 void PlayerSprintState::OnEnter()
 {
+    // フラグを立てる
+    owner->GetPlayer()->SetIsDash(true);
+
     owner->GetAnimator()->SetRootNodeIndex("root");
     owner->GetAnimator()->SetIsUseRootMotion(true);
     owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     // 初期サブステート設定
     ChangeSubState(GetPlayerSubStateName(PlayerSubStates::SprintStart));
 }
-
 void PlayerSprintState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
     owner->GetPlayer()->RotationMovement(elapsedTime);
+}
+void PlayerSprintState::OnExit()
+{
+    // フラグを下ろす
+    owner->GetPlayer()->SetIsDash(false);
 }
 #pragma endregion
 
@@ -513,7 +550,6 @@ void PlayerAttack1State::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
     {
-        owner->GetPlayer()->SetState(PlayerMainStates::Idle);
         // 攻撃からIdleに遷移
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Idle));
     }
@@ -581,6 +617,9 @@ const char* PlayerGuardState::GetName() const
 
 void PlayerGuardState::OnEnter()
 {
+    // フラグを立てる
+    owner->GetPlayer()->SetIsGuard(true);
+
 	owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
@@ -602,6 +641,12 @@ void PlayerGuardState::OnExecute(float elapsedTime)
     // ガード解除
     else if (!owner->GetPlayer()->IsGuard())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Idle));
+}
+
+void PlayerGuardState::OnExit()
+{
+    // フラグを下ろす
+    owner->GetPlayer()->SetIsGuard(false);
 }
 
 #pragma endregion

@@ -24,7 +24,6 @@ void PlayerActor::OnCreate()
 	auto modelRenderer	= this->AddComponent<ModelRenderer>();
 	auto animator		= this->AddComponent<Animator>();
 	_charactorController = this->AddComponent<CharactorController>();
-	auto playerInput	= this->AddComponent<PlayerInput>();
 	_playerController	= this->AddComponent<PlayerController>();
     // プレイヤーが操作する場合は、プレイヤーコントローラーを追加
     if (_isUserControlled)

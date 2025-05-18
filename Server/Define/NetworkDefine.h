@@ -46,8 +46,10 @@ namespace Network
 	{
 		int id = -1;
 		DirectX::XMFLOAT3 position = {};
-		DirectX::XMFLOAT3 angle = {};
+        DirectX::XMFLOAT2 movement = {};
+        float angleY = 0.0f;
 		PlayerMainStates state = PlayerMainStates::None;
+        PlayerSubStates subState = PlayerSubStates::None;
 	};
 
 	/// <summary>
@@ -85,7 +87,7 @@ namespace Network
 	{
 		int id = -1;
 		DirectX::XMFLOAT3 position = {};
-		DirectX::XMFLOAT3 angle = {};
+		float angleY = 0.0f;
 	};
 
 	/// <summary>
@@ -105,8 +107,10 @@ namespace Network
 	{
 		int id = -1;
 		DirectX::XMFLOAT3 position = {};
-		DirectX::XMFLOAT3 velocity = {};
+		DirectX::XMFLOAT2 movement = {};
+		float angleY = 0.0f;
 		PlayerMainStates state = PlayerMainStates::None;
+        PlayerSubStates subState = PlayerSubStates::None;
 	};
 
 #pragma endregion

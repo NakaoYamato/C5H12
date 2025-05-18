@@ -132,7 +132,7 @@ void ServerAssignment::Exit()
 			{
 				std::cout << "id : " << index << std::endl;
 				std::cout << "position : " << client.player.position.x << client.player.position.y << client.player.position.z << std::endl;
-				std::cout << "angle : " << client.player.angle.x << client.player.angle.y << client.player.angle.z << std::endl;
+				std::cout << "angle Y: " << client.player.angleY << std::endl;
 				std::cout << "============================================" << std::endl;
 
 				index++;
@@ -210,7 +210,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		auto client = self->GetClientFromConnection(connection);
 		client->isSync = true;
         client->player.position = recvPlayer.position;
-        client->player.angle = recvPlayer.angle;
+        client->player.angleY = recvPlayer.angleY;
 
 		// 各クライアントがSyncを送信するまで返さない
 		for (const Client& client : self->clients)
@@ -409,7 +409,7 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 	Player player = Player();
 	player.id = self->id;
 	player.position = DirectX::XMFLOAT3(0, 0, 0);
-	player.angle = DirectX::XMFLOAT3(0, 0, 0);
+	player.angleY = 0.0f;
 
 	Client newClient;
 	newClient.connection = connection;
@@ -452,7 +452,7 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 		PlayerSync player{};
 		player.id = client.player.id;
 		player.position = client.player.position;
-		player.angle = client.player.angle;
+		player.angleY = client.player.angleY;
 
 #ifdef USE_MRS
 		mrs::Buffer send;

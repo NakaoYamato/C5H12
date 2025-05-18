@@ -40,16 +40,25 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
     _syncTimer += elapsedTime;
     if (_syncTimer >= _syncTime && _players[myPlayerId].lock())
     {
-        auto myPlayer = _players[myPlayerId].lock();
-        // プレイヤーの同期
-        Network::AllPlayerSync sync{};
-        // players[0]にデータを入れる
-        sync.players[0].id = myPlayerId;
-        sync.players[0].position = myPlayer->GetTransform().GetPosition();
-        sync.players[0].angle = myPlayer->GetTransform().GetRotation();
-        sync.players[0].state = myPlayer->GetPlayerController()->GetState();
-        // サーバーに送信
-        _client->WriteRecord(Network::DataTag::AllSync, &sync, sizeof(sync));
+        //auto myPlayer = _players[myPlayerId].lock();
+        //// プレイヤーの同期
+        //Network::AllPlayerSync sync{};
+        //// players[0]にデータを入れる
+        //sync.players[0].id = myPlayerId;
+        //sync.players[0].position = myPlayer->GetTransform().GetPosition();
+        //sync.players[0].angleY = myPlayer->GetTransform().GetRotation().y;
+        //auto playerController = myPlayer->GetPlayerController();
+        //if (playerController != nullptr)
+        //{
+        //    auto stateMachine = playerController->GetPlayerStateMachine();
+        //    if (stateMachine != nullptr)
+        //    {
+        //        sync.players[0].state = GetPlayerMainStateFromName(stateMachine->GetStateName());
+        //        sync.players[0].subState = GetPlayerSubStateFromName(stateMachine->GetSubStateName());
+        //    }
+        //}
+        //// サーバーに送信
+        //_client->WriteRecord(Network::DataTag::AllSync, &sync, sizeof(sync));
 
         _syncTimer = 0.0f;
     }
@@ -65,8 +74,17 @@ void NetworkMediator::OnFixedUpdate()
 		Network::PlayerMove playerMove{};
 		playerMove.id = myPlayerId;
 		playerMove.position = myPlayer->GetTransform().GetPosition();
-		playerMove.velocity = myPlayer->GetCharactorController()->GetVelocity();
-        playerMove.state = myPlayer->GetPlayerController()->GetState();
+        auto playerController = myPlayer->GetPlayerController();
+        if (playerController != nullptr)
+        {
+            playerMove.movement = playerController->GetMovement();
+            auto stateMachine = playerController->GetPlayerStateMachine();
+            if (stateMachine != nullptr)
+            {
+                playerMove.state = GetPlayerMainStateFromName(stateMachine->GetStateName());
+                playerMove.subState = GetPlayerSubStateFromName(stateMachine->GetSubStateName());
+            }
+        }
         // サーバーに送信
         _client->WriteRecord(Network::DataTag::Move, &playerMove, sizeof(playerMove));
     }
@@ -194,7 +212,7 @@ void NetworkMediator::ProcessNetworkData()
             player = CreatePlayer(sync.id, false).lock();
         }
         player->GetTransform().SetPosition(sync.position);
-        player->GetTransform().SetRotation(sync.angle);
+        player->GetTransform().SetAngleY(sync.angleY);
     }
     _playerSyncs.clear();
     //===============================================================================
@@ -219,8 +237,17 @@ void NetworkMediator::ProcessNetworkData()
                 player = CreatePlayer(sync.players[i].id, false).lock();
             }
             player->GetTransform().SetPosition(sync.players[i].position);
-            player->GetTransform().SetRotation(sync.players[i].angle);
-            player->GetPlayerController()->SetState(sync.players[i].state);
+            player->GetTransform().SetAngleY(sync.players[i].angleY);
+            // プレイヤーの状態を更新
+            auto playerController = player->GetPlayerController();
+            if (playerController != nullptr)
+            {
+                auto stateMachine = playerController->GetPlayerStateMachine();
+                if (stateMachine != nullptr)
+                {
+                    stateMachine->ChangeState(sync.players[i].state, sync.players[i].subState);
+                }
+            }
         }
     }
     _allPlayerSyncs.clear();
@@ -254,12 +281,18 @@ void NetworkMediator::ProcessNetworkData()
 		if (move.id == myPlayerId)
 			continue;
 		player->GetTransform().SetPosition(move.position);
-        auto charactor = player->GetCharactorController();
-		if (charactor)
-		{
-			charactor->SetVelocity(move.velocity);
-		}
-        player->GetPlayerController()->SetState(move.state);
+        // プレイヤーの状態を更新
+        auto playerController = player->GetPlayerController();
+        if (playerController != nullptr)
+        {
+            playerController->SetMovement(move.movement);
+
+            auto stateMachine = playerController->GetPlayerStateMachine();
+            if (stateMachine != nullptr)
+            {
+                stateMachine->ChangeState(move.state, move.subState);
+            }
+        }
 	}
     _playerMoves.clear();
 	//===============================================================================

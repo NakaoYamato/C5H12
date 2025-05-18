@@ -24,6 +24,13 @@ public:
 	PlayerController* GetPlayer() { return _player; }
 	Animator* GetAnimator() { return _animator; }
 
+	// ステート変更
+	void ChangeState(enum class PlayerMainStates mainStateName, enum class PlayerSubStates subStateName);
+    // ステート名取得
+    const char* GetStateName() { return _stateMachine.GetState()->GetName(); }
+    // サブステート名取得
+    const char* GetSubStateName() { return _stateMachine.GetState()->GetSubStateName(); }
+
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 #pragma endregion
@@ -62,7 +69,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 #pragma endregion
 
@@ -77,7 +84,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 #pragma endregion
 
@@ -122,7 +129,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 #pragma endregion
 

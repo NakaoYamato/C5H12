@@ -40,10 +40,8 @@ public:
     }
 
 #pragma region アクセサ
-    // プレイヤーの状態を取得
-    PlayerMainStates GetState() const { return _state; }
-    // プレイヤーの状態を設定
-    void SetState(PlayerMainStates state) { _state = state; }
+	// ステートマシン取得
+    PlayerStateMachine* GetPlayerStateMachine() { return _stateMachine.get(); }
 
     const Vector2& GetMovement() const { return _movement; }
 	bool IsMoving() const { return _isMoving; }
@@ -59,7 +57,7 @@ public:
 
     void SetMovement(const Vector2& movement) { _movement = movement; }
     void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
-    void SetIsDush(bool isDush) { _isDash = isDush; }
+    void SetIsDash(bool isDush) { _isDash = isDush; }
     void SetIsEvade(bool isEvade) { _isEvade = isEvade; }
     void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
     void SetIsGuard(bool isGuard) { _isGuard = isGuard; }

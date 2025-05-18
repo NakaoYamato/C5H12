@@ -42,7 +42,7 @@ void PlayerInput::Update(float elapsedTime)
 		player->SetIsMoving(movement.LengthSq() > 0.0f);
 	}
 
-	player->SetIsDush(_INPUT_IS_PRESSED("Dash"));
+	player->SetIsDash(_INPUT_IS_PRESSED("Dash"));
     player->SetIsGuard(_INPUT_IS_PRESSED("Guard") || _INPUT_IS_AXIS("Guard") > 0.0f);
 
     player->SetIsAttack(_INPUT_IS_TRIGGERD("Action1"));

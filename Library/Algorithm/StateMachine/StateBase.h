@@ -86,7 +86,7 @@ public:
 		stateMap.insert(std::make_pair(state->GetName(), state));
 	}
 	// サブステートの名前番号取得
-	virtual std::string GetSubStateName()
+	virtual const char* GetSubStateName()
 	{
 		if (subState == nullptr)
 			return "";

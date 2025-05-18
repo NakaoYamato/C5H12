@@ -7,7 +7,6 @@
 void PlayerController::Start()
 {
 	_charactorController = GetActor()->GetComponent<CharactorController>();
-	_playerInput = GetActor()->GetComponent<PlayerInput>();
 	_animator = GetActor()->GetComponent<Animator>();
 
 	_charactorController.lock()->SetMaxSpeedXZ(5.0f);
@@ -17,38 +16,6 @@ void PlayerController::Start()
 
 void PlayerController::Update(float elapsedTime)
 {
-	if (_isUserControlled)
-	{
-		auto playerInput = _playerInput.lock();
-		if (playerInput)
-		{
-			_isDush = playerInput->GetInputFlag() & PlayerInput::Inputs::Dash;
-			_isEvade = playerInput->GetInputFlag() & PlayerInput::Inputs::Evade;
-			_isGuard = playerInput->GetInputFlag() & PlayerInput::Inputs::Guard;
-
-			_isAttack = false;
-			if (playerInput->GetInputFlag() & PlayerInput::Inputs::Attack)
-			{
-				_state = PlayerMainStates::Attack1;
-				_isAttack = true;
-			}
-
-			Vector3 movement = playerInput->GetMovement();
-			if (movement.x != 0.0f || movement.z != 0.0f)
-			{
-				_isMoving = true;
-				// “ü—Í•ûŒü‚ÉŒü‚­
-				if (_stateMachine->GetStateMachine().GetStateName() != "Evade")
-					_charactorController.lock()->UpdateRotation(elapsedTime, { movement.x, movement.z });
-			}
-			else
-			{
-				_isMoving = false;
-			}
-
-		}
-	}
-
 	// s“®ˆ—
     _stateMachine->Execute(elapsedTime);
 

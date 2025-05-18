@@ -21,11 +21,16 @@ void PlayerActor::OnCreate()
 
 	// コンポーネント追加
 	//auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
-	auto modelRenderer = AddComponent<ModelRenderer>();
-	auto animator = AddComponent<Animator>();
-	_charactorController = AddComponent<CharactorController>();
-	auto playerInput = AddComponent<PlayerInput>();
-	_playerController = AddComponent<PlayerController>(_isUserControlled);
+	auto modelRenderer	= this->AddComponent<ModelRenderer>();
+	auto animator		= this->AddComponent<Animator>();
+	_charactorController = this->AddComponent<CharactorController>();
+	auto playerInput	= this->AddComponent<PlayerInput>();
+	_playerController	= this->AddComponent<PlayerController>();
+    // プレイヤーが操作する場合は、プレイヤーコントローラーを追加
+    if (_isUserControlled)
+    {
+		this->AddComponent<PlayerInput>();
+    }
 
 	// 剣生成
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);

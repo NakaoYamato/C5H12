@@ -18,10 +18,10 @@ GamePadInputObserver::GamePadInputObserver()
 	gamepadstates[XINPUT_GAMEPAD_START] = FALSE;
 	gamepadstates[XINPUT_GAMEPAD_BACK] = FALSE;
 
-	gamepadstates[XINPUT_GAMEPAD_LEFT_THUMB] = FALSE;		// L3
-	gamepadstates[XINPUT_GAMEPAD_RIGHT_THUMB] = FALSE;		//R3
 	gamepadstates[XINPUT_GAMEPAD_LEFT_SHOULDER] = FALSE;	// L1
+	gamepadstates[XINPUT_GAMEPAD_LEFT_THUMB] = FALSE;		// L3
 	gamepadstates[XINPUT_GAMEPAD_RIGHT_SHOULDER] = FALSE;	// R1
+	gamepadstates[XINPUT_GAMEPAD_RIGHT_THUMB] = FALSE;		//R3
 
 	gamepadParameters[GAMEPAD_AXIS_LX] = 0.0f;
 	gamepadParameters[GAMEPAD_AXIS_LY] = 0.0f;

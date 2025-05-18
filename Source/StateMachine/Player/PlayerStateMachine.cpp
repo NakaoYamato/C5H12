@@ -144,9 +144,12 @@ void PlayerRunState::OnEnter()
 }
 void PlayerRunState::OnExecute(float elapsedTime)
 {
+    // 移動方向に向く
+    owner->GetPlayer()->RotationMovement(elapsedTime);
+
     if (owner->GetPlayer()->IsAttack())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));
-    else if (owner->GetPlayer()->IsDush())
+    else if (owner->GetPlayer()->IsDash())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Sprint));
     else if (!owner->GetPlayer()->IsMoving())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Idle));
@@ -223,7 +226,7 @@ namespace SprintSubState
             else if (owner->GetPlayer()->IsGuard())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
             // ダッシュ解除で移動に遷移
-            else if (!owner->GetPlayer()->IsDush())
+            else if (!owner->GetPlayer()->IsDash())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Run));
         }
         void OnExit() override
@@ -294,6 +297,8 @@ void PlayerSprintState::OnEnter()
 
 void PlayerSprintState::OnExecute(float elapsedTime)
 {
+    // 移動方向に向く
+    owner->GetPlayer()->RotationMovement(elapsedTime);
 }
 #pragma endregion
 
@@ -321,31 +326,28 @@ void PlayerEvadeState::OnEnter()
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
 	// 入力方向から回避方向を決定
 	std::string evadeAnimationName = evadeAnimationNames[0];
-	auto playerInput = owner->GetPlayer()->GetPlayerInput();
-    if (playerInput)
+    Vector2 movement = owner->GetPlayer()->GetMovement();
+
+    // 入力方向が0なら前転
+    if (movement.LengthSq() == 0.0f)
+        evadeAnimationName = evadeAnimationNames[0];
+    else
     {
-        Vector3 movement = playerInput->GetMovement();
-		// 入力方向が0なら前転
-        if (movement.LengthSq() == 0.0f)
-            evadeAnimationName = evadeAnimationNames[0];
-        else
-        {
-            // 入力方向とプレイヤーのY軸回転量から回避方向を決定
-            float angle = 
-                DirectX::XMConvertToDegrees(
-                    atan2f(movement.x, movement.z)
-                    - owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
-                );
-			// 角度を0~360度に正規化
-			angle = fmodf(angle, 360.0f);
-			if (angle < 0.0f)
-				angle += 360.0f;
-			// 360度を8方向に分割
-			int index = (int)(angle / 45.0f + 0.5f);
-			if (index >= 8)
-				index = 0;
-			evadeAnimationName = evadeAnimationNames[index];
-        }
+        // 入力方向とプレイヤーのY軸回転量から回避方向を決定
+        float angle =
+            DirectX::XMConvertToDegrees(
+                atan2f(movement.x, movement.y)
+                - owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+            );
+        // 角度を0~360度に正規化
+        angle = fmodf(angle, 360.0f);
+        if (angle < 0.0f)
+            angle += 360.0f;
+        // 360度を8方向に分割
+        int index = (int)(angle / 45.0f + 0.5f);
+        if (index >= 8)
+            index = 0;
+        evadeAnimationName = evadeAnimationNames[index];
     }
 
 	owner->GetAnimator()->PlayAnimation(evadeAnimationName, false, 0.2f);
@@ -502,6 +504,11 @@ void PlayerAttack1State::OnExecute(float elapsedTime)
         else if (owner->GetPlayer()->IsGuard())
             owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
     }
+    else
+    {
+        // キャンセルがかかるまでの間は移動方向に向く
+        owner->GetPlayer()->RotationMovement(elapsedTime);
+    }
 
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
@@ -583,6 +590,9 @@ void PlayerGuardState::OnEnter()
 
 void PlayerGuardState::OnExecute(float elapsedTime)
 {
+    // 移動方向に向く
+    owner->GetPlayer()->RotationMovement(elapsedTime);
+
     // 攻撃移行
     if (owner->GetPlayer()->IsAttack())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));

@@ -3,7 +3,6 @@
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
-#include "PlayerInput.h"
 #include "../../Source/StateMachine/Player/PlayerStateMachine.h"
 
 #include <PlayerDefine.h>
@@ -11,7 +10,7 @@
 class PlayerController : public Component
 {
 public:
-	PlayerController(bool isUserControlled) : _isUserControlled(isUserControlled) {}
+	PlayerController() {}
 	~PlayerController() override {}
 
 	// 名前取得
@@ -26,15 +25,29 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
+    /// <summary>
+    /// 移動方向に向く
+    /// </summary>
+    /// <param name="rotationSpeed">回転速度</param>
+    /// <param name="elapsedTime">経過時間</param>
+    void RotationMovement(float elapsedTime, float rotationSpeed = 1.0f)
+    {
+        auto charactorController = _charactorController.lock();
+        if (charactorController == nullptr)
+            return;
+		charactorController->UpdateRotation(elapsedTime,
+			_movement * rotationSpeed);
+    }
+
 #pragma region アクセサ
     // プレイヤーの状態を取得
     PlayerMainStates GetState() const { return _state; }
     // プレイヤーの状態を設定
     void SetState(PlayerMainStates state) { _state = state; }
-	std::shared_ptr<PlayerInput> GetPlayerInput() const { return _playerInput.lock(); }
 
+    const Vector2& GetMovement() const { return _movement; }
 	bool IsMoving() const { return _isMoving; }
-	bool IsDush() const { return _isDush; }
+	bool IsDash() const { return _isDash; }
 	bool IsEvade() const { return _isEvade; }
 	bool IsAttack() const { return _isAttack; }
 	bool IsGuard() const { return _isGuard; }
@@ -43,27 +56,27 @@ public:
 	// ノックバックダメージを取得
 	int GetKnockbackDamage() const { return _knockbackDamage; }
 	bool IsDead() const { return _isDead; }
+
+    void SetMovement(const Vector2& movement) { _movement = movement; }
+    void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
+    void SetIsDush(bool isDush) { _isDash = isDush; }
+    void SetIsEvade(bool isEvade) { _isEvade = isEvade; }
+    void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
+    void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
+    void SetSustainedDamage(int damage) { _sustainedDamage = damage; }
+    void SetKnockbackDamage(int damage) { _knockbackDamage = damage; }
+    void SetIsDead(bool isDead) { _isDead = isDead; }
 #pragma endregion
 
 private:
-	// ユーザーが操作するプレイヤーか
-	const bool _isUserControlled = true;
-    // プレイヤーの状態
-    PlayerMainStates _state = PlayerMainStates::None;
+#pragma region ステート制御
 	// ステートマシン
-    std::unique_ptr<PlayerStateMachine> _stateMachine;
+	std::unique_ptr<PlayerStateMachine> _stateMachine;
 
-	std::weak_ptr<CharactorController> _charactorController;
-	std::weak_ptr<PlayerInput> _playerInput;
-	std::weak_ptr<Animator> _animator;
-
-	// 移動速度
-	float _moveSpeed = 20.0f;
-	// 摩擦力
-	float _friction = 25.0f;
-
+    // 入力方向をワールド空間に変換したもの
+    Vector2 _movement = { 0.0f, 0.0f };
 	bool _isMoving = false;
-	bool _isDush = false;
+	bool _isDash = false;
 	bool _isEvade = false;
 	bool _isAttack = false;
 	bool _isGuard = false;
@@ -71,4 +84,15 @@ private:
 	int _sustainedDamage = 0;
 	int _knockbackDamage = 5;
 	bool _isDead = false;
+#pragma endregion
+    // プレイヤーの状態
+    PlayerMainStates _state = PlayerMainStates::None;
+
+	std::weak_ptr<CharactorController> _charactorController;
+	std::weak_ptr<Animator> _animator;
+
+	// 移動速度
+	float _moveSpeed = 20.0f;
+	// 摩擦力
+	float _friction = 25.0f;
 };

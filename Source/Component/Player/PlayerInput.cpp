@@ -8,14 +8,19 @@
 // 開始処理
 void PlayerInput::Start()
 {
+    _playerController = GetActor()->GetComponent<PlayerController>();
 }
 
 // 更新処理
 void PlayerInput::Update(float elapsedTime)
 {
+    auto player = _playerController.lock();
+	if (player == nullptr)
+		return;
+
 	// 入力処理
 	{
-		_lAxisValue = Vector2(_INPUT_IS_AXIS("AxisLX"), _INPUT_IS_AXIS("AxisLY"));
+		Vector2 lAxisValue = Vector2(_INPUT_IS_AXIS("AxisLX"), _INPUT_IS_AXIS("AxisLY"));
 
 		// カメラの正面方向と右方向を取得
 		Vector3 frontVec = GetActor()->GetScene()->GetMainCamera()->GetFront();
@@ -28,37 +33,23 @@ void PlayerInput::Update(float elapsedTime)
 		rightVec = Vector3::Normalize(rightVec);
 
 		// 移動ベクトルを計算
-		_movement = {};
-		_movement.x = frontVec.x * _lAxisValue.y + rightVec.x * _lAxisValue.x;
-		_movement.z = frontVec.z * _lAxisValue.y + rightVec.z * _lAxisValue.x;
-		_movement = Vector3::Normalize(_movement);
+		Vector2 movement = {};
+		movement.x = frontVec.x * lAxisValue.y + rightVec.x * lAxisValue.x;
+		movement.y = frontVec.z * lAxisValue.y + rightVec.z * lAxisValue.x;
+        player->SetMovement(Vector2::Normalize(movement));
+
+        // 移動量があれば移動中とする
+		player->SetIsMoving(movement.LengthSq() > 0.0f);
 	}
 
-	auto InputPressed = [&](std::string action, Inputs data)
-		{
-			if (_INPUT_IS_PRESSED(action))
-				_inputFlag |= data;
-			else
-				_inputFlag &= ~data;
-		};
-	auto InputTriggerd = [&](std::string action, Inputs data)
-		{
-			if (_INPUT_IS_TRIGGERD(action))
-				_inputFlag |= data;
-			else
-				_inputFlag &= ~data;
-		};
+	player->SetIsDush(_INPUT_IS_PRESSED("Dash"));
+    player->SetIsGuard(_INPUT_IS_PRESSED("Guard") || _INPUT_IS_AXIS("Guard") > 0.0f);
 
-	InputPressed("Dash", Inputs::Dash);
-	InputPressed("Action2", Inputs::Guard);
-
-	InputTriggerd("Action1", Inputs::Attack);
-	InputTriggerd("Evade", Inputs::Evade);
+    player->SetIsAttack(_INPUT_IS_TRIGGERD("Action1"));
+    player->SetIsEvade(_INPUT_IS_TRIGGERD("Evade"));
 }
 
 // GUI描画
 void PlayerInput::DrawGui()
 {
-	ImGui::DragFloat3("Movement", &_movement.x, 0.01f, -1.0f, 1.0f);
-	ImGui::Text("InputFlag: %d", _inputFlag);
 }

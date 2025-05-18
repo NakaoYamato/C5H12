@@ -9,10 +9,10 @@ Input::Input()
 {
 	// ÉAÉNÉVÉáÉìÇÃìoò^
 	_inputActionMap["OK"] = { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
-	_inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_THUMB}};
-	_inputActionMap["Evade"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
-	_inputActionMap["Action1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_A}, {InputType::InputMouse,VK_LBUTTON} };
-	_inputActionMap["Action2"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_X}, {InputType::InputMouse,VK_RBUTTON} };
+	_inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_SHOULDER}};
+	_inputActionMap["Evade"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_A}};
+	_inputActionMap["Action1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_Y}, {InputType::InputMouse,VK_LBUTTON} };
+	_inputActionMap["Guard"] = { {InputType::InputMouse,VK_XBUTTON2} };
 	_inputActionMap["LookOn"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
 
 	_moveActionMap["AxisLX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
@@ -23,6 +23,7 @@ Input::Input()
 	_moveActionMap["MouseMoveY"] = { {InputType::InputMouse,MOUSE_MOVE_Y} };
 	_moveActionMap["MouseWheel"] = { {InputType::InputMouse,MOUSE_WHEEL} };
 	_moveActionMap["MouseOldWheel"] = { {InputType::InputMouse,MOUSE_OLD_WHEEL} };
+	_moveActionMap["Guard"] = { {InputType::InputGamepad,GAMEPAD_TRIGGER_R} };
 
 	// ìoò^ÇµÇΩÉAÉNÉVÉáÉìÇÃì¸óÕäƒéãèÓïÒÇäiî[
 	for (const auto& mapInfo : _inputActionMap)

@@ -1,5 +1,6 @@
 #include "Animator.h"
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
@@ -49,71 +50,10 @@ void Animator::Update(float elapsedTime)
     }
 
 	// ルートモーション計算
-    if(_useRootMotion && _rootNodeIndex != -1 && _isPlaying)
-	{
-		// 現在のルートノード取得
-        ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
-		// ブレンド中はブレンドしていないルートノードを取得
-        if (_blendTimer < _blendEndTime)
-        {
-            ModelResource::Node node{};
-            ComputeAnimation(_animationIndex, _rootNodeIndex, _animationTimer, node);
-			// poseNodesの行列を使いたいためpositionのみ取得
-            currentRootNode.position = node.position;
-        }
+    CalcRootMotion(elapsedTime, poseNodes);
 
-        // 前フレームのルートノード取得
-		float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
-        ModelResource::Node oldRootNode{};
-		ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
-        
-		// ノードのワールド座標を取得
-        Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
-        Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
-
-        // 移動量取得
-		// デバッグでF5を押しているときは移動量を取得しない
-        if (!Debug::Input::IsActive(DebugInput::BTN_F5))
-            _rootMovement = currentPosition - oldPosition;
-        // ポーズノードの移動量を取り除く
-        poseNodes[_rootNodeIndex].position = {};
-		// オブジェクトに応じてノードの位置を調整
-        switch (_rootMotionOption)
-        {
-        case Animator::RootMotionOption::None:
-            break;
-        case Animator::RootMotionOption::RemovePositionX:
-            poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
-            poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
-            break;
-        case Animator::RootMotionOption::RemovePositionY:
-            poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
-            poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
-            break;
-        case Animator::RootMotionOption::RemovePositionZ:
-            poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
-            poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
-            break;
-        case Animator::RootMotionOption::RemovePositionXY:
-            poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
-            break;
-        case Animator::RootMotionOption::RemovePositionXZ:
-            poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
-            break;
-        case Animator::RootMotionOption::RemovePositionYZ:
-            poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
-            break;
-        case Animator::RootMotionOption::RemovePositionXYZ:
-            break;
-        case Animator::RootMotionOption::UseOffset:
-        default:
-            poseNodes[_rootNodeIndex].position = _rootOffset;
-            break;
-        }
-
-        // モデルの姿勢を更新
-        _model.lock()->SetPoseNodes(poseNodes);
-	}
+    // アニメーションイベントの更新
+    UpdateAnimationEvent();
 }
 
 // デバッグ表示
@@ -485,6 +425,113 @@ std::string Animator::GetAnimationName() const
     return GetAnimationName(_animationIndex);
 }
 #pragma endregion
+
+/// ルートモーション計算
+void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node>& poseNodes)
+{
+    if (!_useRootMotion) return;
+    if (_rootNodeIndex == -1) return;
+    if (!_isPlaying) return;
+
+    // 現在のルートノード取得
+    ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
+    // ブレンド中はブレンドしていないルートノードを取得
+    if (_blendTimer < _blendEndTime)
+    {
+        ModelResource::Node node{};
+        ComputeAnimation(_animationIndex, _rootNodeIndex, _animationTimer, node);
+        // poseNodesの行列を使いたいためpositionのみ取得
+        currentRootNode.position = node.position;
+    }
+
+    // 前フレームのルートノード取得
+    float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
+    ModelResource::Node oldRootNode{};
+    ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
+
+    // ノードのワールド座標を取得
+    Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
+    Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
+
+    // 移動量取得
+    // デバッグでF5を押しているときは移動量を取得しない
+    if (!Debug::Input::IsActive(DebugInput::BTN_F5))
+        _rootMovement = currentPosition - oldPosition;
+    // ポーズノードの移動量を取り除く
+    poseNodes[_rootNodeIndex].position = {};
+    // オブジェクトに応じてノードの位置を調整
+    switch (_rootMotionOption)
+    {
+    case Animator::RootMotionOption::None:
+        break;
+    case Animator::RootMotionOption::RemovePositionX:
+        poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
+        poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
+        break;
+    case Animator::RootMotionOption::RemovePositionY:
+        poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
+        poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
+        break;
+    case Animator::RootMotionOption::RemovePositionZ:
+        poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
+        poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
+        break;
+    case Animator::RootMotionOption::RemovePositionXY:
+        poseNodes[_rootNodeIndex].position.z = oldRootNode.position.z;
+        break;
+    case Animator::RootMotionOption::RemovePositionXZ:
+        poseNodes[_rootNodeIndex].position.y = oldRootNode.position.y;
+        break;
+    case Animator::RootMotionOption::RemovePositionYZ:
+        poseNodes[_rootNodeIndex].position.x = oldRootNode.position.x;
+        break;
+    case Animator::RootMotionOption::RemovePositionXYZ:
+        break;
+    case Animator::RootMotionOption::UseOffset:
+    default:
+        poseNodes[_rootNodeIndex].position = _rootOffset;
+        break;
+    }
+
+    // モデルの姿勢を更新
+    _model.lock()->SetPoseNodes(poseNodes);
+}
+
+/// アニメーションイベントの更新
+void Animator::UpdateAnimationEvent()
+{
+    // 再生中でなければ処理しない
+    if (!_isPlaying)
+        return;
+
+    for (auto& event : GetCurrentEvents())
+    {
+        // 攻撃判定が発生したら
+        if (event.eventType == AnimationEvent::EventType::Attack)
+        {
+            // Capsuleの攻撃判定生成
+            if (event.shapeType == AnimationEvent::ShapeType::Capsule)
+            {
+                auto& collisionManager = GetActor()->GetScene()->GetCollisionManager();
+
+                auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
+                DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
+                DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
+                DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
+                DirectX::XMFLOAT4X4 transform = {};
+
+                DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
+
+                collisionManager.RegisterCapsuleData(
+                    GetActor().get(),
+                    "Attack",
+                    event.position.TransformCoord(node.worldTransform),
+                    event.angle.TransformCoord(node.worldTransform),
+                    event.scale.x);
+            }
+        }
+    }
+}
 
 /// アニメーションのデバッグ表示をフィルタ
 void Animator::Filtering(std::string filterStr)

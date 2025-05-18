@@ -8,6 +8,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/Actor/Player/PlayerActor.h"
 #include "../../Source/Actor/Stage/StageActor.h"
+#include "../../Source/Actor/Enemy/Dummy/DummyActor.h"
 
 void ScenePlayerDebug::Initialize()
 {
@@ -26,6 +27,9 @@ void ScenePlayerDebug::Initialize()
     }
     {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
+    }
+    {
+        auto enemy = RegisterActor<DummyActor>("Enemy", ActorTag::Enemy);
     }
     // •‰‰×ƒeƒXƒg
     //for (int i = 0; i < 10; ++i)

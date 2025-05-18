@@ -147,6 +147,18 @@ public:
 	AnimationEvent& GetAnimationEvent() { return _animationEvent; }
 #pragma endregion
 private:
+    /// <summary>
+    /// ルートモーション計算
+    /// </summary>
+    /// <param name="elapsedTime"></param>
+    /// <param name="poseNodes"></param>
+    void CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node>& poseNodes);
+
+    /// <summary>
+    /// アニメーションイベントの更新
+    /// </summary>
+    void UpdateAnimationEvent();
+
 	/// <summary>
 	/// アニメーションのデバッグ表示をフィルタ
 	/// </summary>

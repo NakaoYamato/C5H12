@@ -17,7 +17,6 @@ public:
 	/// <param name="collisionData">ÚGî•ñ</param>
 	virtual void OnContact(CollisionData& collisionData) override;
 
-
 	const char* GetLayer() const { return _layer.c_str(); }
 
 	void SetLayer(const char* layer) { this->_layer = layer; }

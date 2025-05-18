@@ -21,10 +21,14 @@ class Scene;
 /// </summary>
 struct CollisionData
 {
-	// 衝突相手
-	Actor* other = nullptr;
 	// 自分のレイヤー
 	std::string myLayer = "";
+	// 自分がトリガーかどうか
+	bool isTrigger = false;
+	// 衝突相手
+	Actor* other = nullptr;
+	// 衝突相手がトリガーかどうか
+    bool otherIsTrigger = false;
 	// 相手のレイヤー
 	std::string otherLayer = "";
 	// 衝突点

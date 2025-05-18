@@ -19,28 +19,31 @@ class CollisionManager
 public:
     struct SphereData
     {
-		SphereData(Actor* actor, std::string layer, const Vector3& position, float radius)
+		SphereData(Actor* actor, std::string layer, const Vector3& position, float radius, bool isTrigger)
 		{
             this->actor = actor;
             this->layer = layer;
             this->position = position;
             this->radius = radius;
+            this->isTrigger = isTrigger;
 		}
 
         Actor* actor = nullptr;
 		std::string layer = "";
 		Vector3 position = {};
         float radius = 0.0f;
+        bool isTrigger = false;
     };
     struct BoxData
     {
-        BoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation)
+        BoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
         {
             this->actor = actor;
             this->layer = layer;
             this->position = position;
             this->halfSize = halfSize;
             this->rotation = rotation;
+			this->isTrigger = isTrigger;
         }
 
         Actor* actor;
@@ -48,16 +51,18 @@ public:
 		Vector3 position;
 		Vector3 halfSize;
         Vector3 rotation;
+		bool isTrigger = false;
     };
     struct CapsuleData
     {
-        CapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius)
+        CapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
         {
             this->actor = actor;
             this->layer = layer;
             this->start = start;
             this->end = end;
             this->radius = radius;
+			this->isTrigger = isTrigger;
         }
 
         Actor* actor;
@@ -65,6 +70,7 @@ public:
         Vector3 start;
         Vector3 end;
         float radius;
+		bool isTrigger = false;
     };
 public:
 	CollisionManager() {}
@@ -124,11 +130,11 @@ public:
 	void RegisterMeshCollider(MeshCollider* meshCollider);
 
     // 球データ登録
-    void RegisterSphereData(Actor* actor, std::string layer, const Vector3& position, float radius);
+    void RegisterSphereData(Actor* actor, std::string layer, const Vector3& position, float radius, bool isTrigger = true);
     // ボックスデータ登録
-    void RegisterBoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation);
+    void RegisterBoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger = true);
     // カプセルデータ登録
-    void RegisterCapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius);
+    void RegisterCapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger = true);
 #pragma endregion
 
 #pragma region 削除

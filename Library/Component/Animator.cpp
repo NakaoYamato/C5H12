@@ -509,25 +509,42 @@ void Animator::UpdateAnimationEvent()
         // UŒ‚”»’è‚ª”­¶‚µ‚½‚ç
         if (event.eventType == AnimationEvent::EventType::Attack)
         {
-            // Capsule‚ÌUŒ‚”»’è¶¬
-            if (event.shapeType == AnimationEvent::ShapeType::Capsule)
+            auto& collisionManager = GetActor()->GetScene()->GetCollisionManager();
+
+            auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
+            DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
+            DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
+            DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
+            DirectX::XMFLOAT4X4 transform = {};
+
+            DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
+
+            // UŒ‚”»’è¶¬
+            switch (event.shapeType)
             {
-                auto& collisionManager = GetActor()->GetScene()->GetCollisionManager();
-
-                auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
-                DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
-                DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
-                DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
-                DirectX::XMFLOAT4X4 transform = {};
-
-                DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
-
+            case AnimationEvent::ShapeType::Sphere:
+                collisionManager.RegisterSphereData(
+                    GetActor().get(),
+                    "Attack",
+                    Vector3(transform._41, transform._42, transform._43),
+                    event.scale.x);
+                break;
+            case AnimationEvent::ShapeType::Box:
+                collisionManager.RegisterBoxData(
+                    GetActor().get(),
+                    "Attack",
+                    event.position.TransformCoord(node.worldTransform),
+                    event.scale,
+                    event.angle);
+                break;
+            case AnimationEvent::ShapeType::Capsule:
                 collisionManager.RegisterCapsuleData(
                     GetActor().get(),
                     "Attack",
                     event.position.TransformCoord(node.worldTransform),
                     event.angle.TransformCoord(node.worldTransform),
                     event.scale.x);
+                break;
             }
         }
     }

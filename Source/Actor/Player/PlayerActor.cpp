@@ -25,7 +25,11 @@ void PlayerActor::OnCreate()
 	auto animator		= this->AddComponent<Animator>();
 	_charactorController = this->AddComponent<CharactorController>();
 	_playerController	= this->AddComponent<PlayerController>();
-    // プレイヤーが操作する場合は、プレイヤーコントローラーを追加
+    auto collider		= this->AddCollider<CapsuleCollider>();
+	collider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
+	collider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));
+	collider->SetRadius(0.5f);
+	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
     if (_isUserControlled)
     {
 		this->AddComponent<PlayerInput>();

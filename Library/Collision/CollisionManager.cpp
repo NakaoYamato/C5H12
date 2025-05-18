@@ -14,8 +14,10 @@ void CollisionManager::Update()
 	auto PushCollisionData = [&](
 		Actor* actorA, 
 		const std::string& layerA,
+        bool isTriggerA,
 		Actor* actorB,
 		const std::string& layerB,
+		bool isTriggerB,
 		const Vector3& hitPosition,
 		const Vector3& hitNormal,
 		float penetration)
@@ -26,14 +28,20 @@ void CollisionManager::Update()
 			// 接触情報を保存
 			CollisionData dataA;
             dataA.myLayer = layerA;
+            dataA.isTrigger = isTriggerA;
 			dataA.other = actorB;
+            dataA.otherIsTrigger = isTriggerB;
             dataA.otherLayer = layerB;
 			dataA.hitPosition = hitPosition;
 			dataA.hitNormal = hitNormal;
 			dataA.penetration = penetration;
 			collisionDataMap[actorA].push_back(dataA);
 			CollisionData dataB;
+            dataB.myLayer = layerB;
+            dataB.isTrigger = isTriggerB;
 			dataB.other = actorA;
+			dataB.otherIsTrigger = isTriggerA;
+			dataB.otherLayer = layerA;
 			dataB.hitPosition = hitPosition;
 			dataB.hitNormal = -hitNormal;
 			dataB.penetration = penetration;
@@ -81,8 +89,10 @@ void CollisionManager::Update()
 							PushCollisionData(
 								sphereA.actor,
 								sphereA.layer,
+                                sphereA.isTrigger,
 								sphereB.actor,
 								sphereB.layer,
+                                sphereB.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
@@ -115,9 +125,11 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								sphereA.actor,
-								sphereA.layer,
+                                sphereA.layer,
+                                sphereA.isTrigger,
 								box.actor,
-								box.layer,
+                                box.layer,
+                                box.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
@@ -150,9 +162,11 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								sphereA.actor,
-								sphereA.layer,
+                                sphereA.layer,
+                                sphereA.isTrigger,
 								capsule.actor,
-								capsule.layer,
+                                capsule.layer,
+                                capsule.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
@@ -194,9 +208,11 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								boxA.actor,
-								boxA.layer,
+                                boxA.layer,
+                                boxA.isTrigger,
 								boxB.actor,
-								boxB.layer,
+                                boxB.layer,
+                                boxB.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
@@ -264,9 +280,11 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								capsuleA.actor,
-								capsuleA.layer,
+                                capsuleA.layer,
+                                capsuleA.isTrigger,
 								capsuleB.actor,
 								capsuleB.layer,
+                                capsuleB.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
@@ -310,8 +328,10 @@ void CollisionManager::Update()
 					PushCollisionData(
 						sphereA.actor,
                         sphereA.layer,
+                        sphereA.isTrigger,
 						sphereB.actor,
                         sphereB.layer,
+                        sphereB.isTrigger,
 						hitPosition,
 						hitNormal,
 						penetration);
@@ -334,8 +354,10 @@ void CollisionManager::Update()
 					PushCollisionData(
 						sphereA.actor,
                         sphereA.layer,
+                        sphereA.isTrigger,
                         box.actor,
                         box.layer,
+                        box.isTrigger,
 						hitPosition,
 						hitNormal,
 						penetration);
@@ -358,8 +380,10 @@ void CollisionManager::Update()
 					PushCollisionData(
                         sphereA.actor,
                         sphereA.layer,
+                        sphereA.isTrigger,
                         capsule.actor,
                         capsule.layer,
+                        capsule.isTrigger,
 						hitPosition,
 						hitNormal,
 						penetration);
@@ -391,8 +415,10 @@ void CollisionManager::Update()
 					PushCollisionData(
                         boxA.actor,
                         boxA.layer,
+                        boxA.isTrigger,
                         boxB.actor,
                         boxB.layer,
+                        boxB.isTrigger,
 						hitPosition,
 						hitNormal,
 						penetration);
@@ -450,8 +476,10 @@ void CollisionManager::Update()
 					PushCollisionData(
                         capsuleA.actor,
                         capsuleA.layer,
+                        capsuleA.isTrigger,
                         capsuleB.actor,
                         capsuleB.layer,
+                        capsuleB.isTrigger,
 						hitPosition,
 						hitNormal,
 						penetration);
@@ -617,19 +645,19 @@ void CollisionManager::RegisterMeshCollider(MeshCollider* meshCollider)
 	_meshColliders.push_back(meshCollider);
 }
 // 球データ登録
-void CollisionManager::RegisterSphereData(Actor* actor, std::string layer, const Vector3& position, float radius)
+void CollisionManager::RegisterSphereData(Actor* actor, std::string layer, const Vector3& position, float radius, bool isTrigger)
 {
-    _sphereDatas.push_back(SphereData(actor, layer, position, radius));
+    _sphereDatas.push_back(SphereData(actor, layer, position, radius, isTrigger));
 }
 // ボックスデータ登録
-void CollisionManager::RegisterBoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation)
+void CollisionManager::RegisterBoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
 {
-    _boxDatas.push_back(BoxData(actor, layer, position, halfSize, rotation));
+    _boxDatas.push_back(BoxData(actor, layer, position, halfSize, rotation, isTrigger));
 }
 // カプセルデータ登録
-void CollisionManager::RegisterCapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius)
+void CollisionManager::RegisterCapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
 {
-    _capsuleDatas.push_back(CapsuleData(actor, layer, start, end, radius));
+    _capsuleDatas.push_back(CapsuleData(actor, layer, start, end, radius, isTrigger));
 }
 
 #pragma endregion
@@ -699,7 +727,8 @@ void CollisionManager::SetDataByCollider()
 				sphere->GetActor().get(),
                 sphere->GetLayer(),
 				sphere->GetPosition().TransformCoord(transform.GetMatrix()),
-				sphere->GetRadius()));
+				sphere->GetRadius(),
+				sphere->IsTrigger()));
 	}
 	for (auto& box : _boxColliders)
 	{
@@ -710,7 +739,8 @@ void CollisionManager::SetDataByCollider()
                 box->GetLayer(),
 				box->GetPosition().TransformCoord(transform.GetMatrix()),
 				box->GetHalfSize(),
-				transform.GetRotation()));
+				transform.GetRotation(),
+				box->IsTrigger()));
 	}
 	for (auto& capsule : _capsuleColliders)
 	{
@@ -721,6 +751,7 @@ void CollisionManager::SetDataByCollider()
                 capsule->GetLayer(),
 				capsule->GetStart().TransformCoord(transform.GetMatrix()),
 				capsule->GetEnd().TransformCoord(transform.GetMatrix()),
-				capsule->GetRadius()));
+				capsule->GetRadius(),
+				capsule->IsTrigger()));
 	}
 }

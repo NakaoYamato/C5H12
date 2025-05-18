@@ -21,6 +21,8 @@ public:
     void DebugRender(const RenderContext& rc) override;
     // GUI描画
     void DrawGui() override;
+    // 接触の解消処理
+    virtual void OnContact(CollisionData& collisionData) override;
 
     // 力を加える
     void AddForce(const Vector3& force)
@@ -39,6 +41,8 @@ public:
     float GetRadius() const { return _radius; }
     float GetSkinWidth() const { return _skinWidth; }
     float GetStepOffset() const { return _stepOffset; }
+    float GetSlopeLimit() const { return _slopeLimit; }
+    float GetMass() const { return _mass; }
 
     const Vector3& GetVelocity() const { return _velocity; }
 	Vector3 GetVelocityXZ() const { return { _velocity.x, 0.0f, _velocity.z }; }
@@ -53,6 +57,8 @@ public:
     void SetRadius(float radius) { _radius = radius; }
     void SetSkinWidth(float skinWidth) { _skinWidth = skinWidth; }
     void SetStepOffset(float stepOffset) { _stepOffset = stepOffset; }
+    void SetSlopeLimit(float slopeLimit) { _slopeLimit = slopeLimit; }
+    void SetMass(float mass) { _mass = mass; }
 
     void SetVelocity(const Vector3& velocity) { _velocity = velocity; }
     void SetAcceleration(const Vector3& acceleration) { _acceleration = acceleration; }
@@ -100,6 +106,8 @@ private:
     float _stepOffset = 0.1f;
     // スロープ
 	float _slopeLimit = DirectX::XMConvertToRadians(45.0f);
+    // 質量
+    float _mass = 1.0f;
 #pragma endregion
 
 #pragma region 移動関係
@@ -128,5 +136,10 @@ private:
 #pragma region アニメーション
 	// アニメーター
     std::weak_ptr<Animator> _animator;
+#pragma endregion
+
+#pragma region 衝突関係
+    // 押し出し量
+    Vector3 _pushOut = {};
 #pragma endregion
 };

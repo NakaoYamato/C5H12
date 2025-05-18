@@ -54,6 +54,8 @@ void CharactorController::DrawGui()
     ImGui::DragFloat(u8"半径", &_radius, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"スキン幅", &_skinWidth, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"ステップオフセット", &_stepOffset, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"スロープ", &_slopeLimit, 0.01f, 0.0f, DirectX::XM_PI);
+    ImGui::DragFloat(u8"質量", &_mass, 0.01f, 0.0f, 100.0f);
 
 	ImGui::Separator();
     ImGui::DragFloat3(u8"加速度", &_acceleration.x, 0.01f);
@@ -63,6 +65,25 @@ void CharactorController::DrawGui()
     ImGui::DragFloat3(u8"重力", &_gravity.x, 0.01f);
     ImGui::Checkbox(u8"重力使用", &_useGravity);
     ImGui::Separator();
+}
+
+// 接触の解消処理
+void CharactorController::OnContact(CollisionData& collisionData)
+{   
+	// トリガーでなければ押し出し処理
+    if (!collisionData.isTrigger && !collisionData.otherIsTrigger)
+    {
+		auto otherCharactor = collisionData.other->GetComponent<CharactorController>();
+		if (otherCharactor)
+		{
+            float sum = _mass + otherCharactor->GetMass();
+			// 押し出し量を取得　重みを考慮
+			if (sum != 0.0f)
+				_pushOut += (otherCharactor->GetMass() / sum) * collisionData.penetration * collisionData.hitNormal;
+			else	
+				_pushOut += collisionData.penetration * collisionData.hitNormal;
+		}
+    }
 }
 
 /// 速度更新
@@ -91,7 +112,7 @@ void CharactorController::UpdateVelocity(float deltaTime)
 /// 位置更新
 void CharactorController::UpdatePosition(float deltaTime)
 {
-	Vector3 movement = _velocity * deltaTime;
+	Vector3 movement = _velocity * deltaTime + _pushOut;
 	// ルートモーションの移動量取得
 	if (_animator.lock())
 		movement += _animator.lock()->GetRootMovement();
@@ -100,6 +121,9 @@ void CharactorController::UpdatePosition(float deltaTime)
     MoveAndSlide({ movement.x, 0.0f, movement.z }, false);
     // 垂直処理
     MoveAndSlide({ 0.0f, movement.y, 0.0f }, true);
+
+	// 押し出し量をクリア
+	_pushOut = {};
 }
 
 /// 移動＆滑り

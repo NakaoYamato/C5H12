@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <mutex>
 
 #include "../Graphics/RenderContext.h"
 
@@ -10,8 +11,61 @@
 #include "../Component/Collider/CapsuleCollider.h"
 #include "../Component/Collider/MeshCollider.h"
 
+/// <summary>
+/// Colliderの管理者
+/// </summary>
 class CollisionManager
 {
+public:
+    struct SphereData
+    {
+		SphereData(Actor* actor, std::string layer, const Vector3& position, float radius)
+		{
+            this->actor = actor;
+            this->layer = layer;
+            this->position = position;
+            this->radius = radius;
+		}
+
+        Actor* actor = nullptr;
+		std::string layer = "";
+		Vector3 position = {};
+        float radius = 0.0f;
+    };
+    struct BoxData
+    {
+        BoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation)
+        {
+            this->actor = actor;
+            this->layer = layer;
+            this->position = position;
+            this->halfSize = halfSize;
+            this->rotation = rotation;
+        }
+
+        Actor* actor;
+		std::string layer = "";
+		Vector3 position;
+		Vector3 halfSize;
+        Vector3 rotation;
+    };
+    struct CapsuleData
+    {
+        CapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius)
+        {
+            this->actor = actor;
+            this->layer = layer;
+            this->start = start;
+            this->end = end;
+            this->radius = radius;
+        }
+
+        Actor* actor;
+		std::string layer = "";
+        Vector3 start;
+        Vector3 end;
+        float radius;
+    };
 public:
 	CollisionManager() {}
 	~CollisionManager() {}
@@ -68,6 +122,13 @@ public:
 	void RegisterCapsuleCollider(CapsuleCollider* capsuleCollider);
 	// メッシュコライダー登録
 	void RegisterMeshCollider(MeshCollider* meshCollider);
+
+    // 球データ登録
+    void RegisterSphereData(Actor* actor, std::string layer, const Vector3& position, float radius);
+    // ボックスデータ登録
+    void RegisterBoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation);
+    // カプセルデータ登録
+    void RegisterCapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius);
 #pragma endregion
 
 #pragma region 削除
@@ -82,8 +143,21 @@ public:
 #pragma endregion
 
 private:
+	/// <summary>
+	/// 各コンポーネントの情報を設定
+	/// </summary>
+	void SetDataByCollider();
+
+private:
 	std::vector<SphereCollider*>	_sphereColliders; // 球コライダー
 	std::vector<BoxCollider*>		_boxColliders; // ボックスコライダー
 	std::vector<CapsuleCollider*>	_capsuleColliders; // カプセルコライダー
 	std::vector<MeshCollider*>		_meshColliders; // メッシュコライダー
+
+	// 衝突データ
+    std::vector<SphereData> _sphereDatas;
+    std::vector<BoxData> _boxDatas;
+    std::vector<CapsuleData> _capsuleDatas;
+
+    std::mutex _mutex; // スレッドセーフ用
 };

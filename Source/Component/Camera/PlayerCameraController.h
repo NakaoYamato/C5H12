@@ -35,9 +35,9 @@ private:
 
     float _cameraOffsetY = 1.0f;
 	float _focusLerpSpeed = 5.0f;
-	float _eyeLerpSpeed = 1.0f;
+	float _eyeLerpSpeed = 10.0f;
 
-    float _cameraDistance = 5.0f;
+    float _cameraDistance = 6.0f;
     float _horizontalMovePower = 6.0f;
     float _verticalMovePower = 3.0f;
     float _cameraRadius = 0.1f;

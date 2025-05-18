@@ -13,7 +13,7 @@
 #include "../../Source/Actor/Player/PlayerActor.h"
 #include "../../Source/Component/Stage/GrassController.h"
 
-#include "../../Source/Actor/Dragon/DragonActor.h"
+#include "../../Source/Actor/Enemy/Dragon/DragonActor.h"
 
 //èâä˙âª
 void SceneDebug::Initialize()

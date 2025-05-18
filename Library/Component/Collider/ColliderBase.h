@@ -14,15 +14,13 @@ public:
 	/// <summary>
 	/// 接触の解消処理
 	/// </summary>
-	/// <param name="other">接触対象</param>
-	/// <param name="hitPosition">接触位置</param>
-	/// <param name="hitNormal">接触対象から自身に向けての法線</param>
-	/// <param name="penetration">めり込み量</param>
-	virtual void Resolve(Actor* other,
-		const Vector3& hitPosition,
-		const Vector3& hitNormal,
-		const float& penetration);
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContact(CollisionData& collisionData) override;
 
+
+	const char* GetLayer() const { return _layer.c_str(); }
+
+	void SetLayer(const char* layer) { this->_layer = layer; }
 	// コライダーの有効状態取得
 	bool IsActive() const { return _isActive; }
 	// コライダーの有効状態設定
@@ -32,6 +30,8 @@ public:
 	// コライダーのトリガー状態設定
 	void SetTrigger(bool isTrigger) { _isTrigger = isTrigger; }
 private:
+	// レイヤー
+	std::string			_layer = "";
 	bool _isActive = true; // 有効か
 	bool _isTrigger = false; // トリガーか
 };

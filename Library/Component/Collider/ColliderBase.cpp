@@ -4,27 +4,19 @@
 // GUI描画
 void ColliderBase::DrawGui()
 {
+    ImGui::InputText(u8"レイヤー", &_layer);
 	ImGui::Checkbox(u8"有効", &_isActive);
 	ImGui::Checkbox(u8"トリガー", &_isTrigger);
 }
 
 /// 接触の解消処理
-void ColliderBase::Resolve(Actor* other, 
-	const Vector3& hitPosition, 
-	const Vector3& hitNormal,
-	const float& penetration)
+void ColliderBase::OnContact(CollisionData& collisionData)
 {   
     // トリガーでなければ押し出し処理
     if (!_isTrigger)
     {
         // 自身のトランスフォームを取得
         Transform& transform = GetActor()->GetTransform();
-        transform.SetPosition(transform.GetPosition() + hitNormal * penetration);
+        transform.SetPosition(transform.GetPosition() + collisionData.hitNormal * collisionData.penetration);
     }
-    // アクターに接触処理を通知
-    GetActor()->Contact(
-        other,
-        hitPosition,
-        hitNormal,
-        penetration);
 }

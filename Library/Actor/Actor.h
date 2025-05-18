@@ -10,10 +10,30 @@
 #include "../../Library/Model/Model.h"
 
 // 前方宣言
+class Actor;
 class Component;
 class ColliderBase;
 enum class ActorTag;
 class Scene;
+
+/// <summary>
+/// 接触情報
+/// </summary>
+struct CollisionData
+{
+	// 衝突相手
+	Actor* other = nullptr;
+	// 自分のレイヤー
+	std::string myLayer = "";
+	// 相手のレイヤー
+	std::string otherLayer = "";
+	// 衝突点
+	Vector3 hitPosition = Vector3::Zero;
+	// 衝突点の法線
+	Vector3 hitNormal = Vector3::Zero;
+	// めり込み量
+	float penetration = 0.0f;
+};
 
 /// <summary>
 /// ゲームオブジェクトの基底クラス
@@ -80,14 +100,8 @@ public:
 	/// <summary>
 	/// 接触処理
 	/// </summary>
-	/// <param name="other">接触対象</param>
-	/// <param name="hitPosition">接触位置</param>
-	/// <param name="hitNormal">接触対象から自身に向けての法線</param>
-	/// <param name="penetration">めり込み量</param>
-	void Contact(Actor* other,
-		const Vector3& hitPosition,
-		const Vector3& hitNormal,
-		const float& penetration);
+	/// <param name="collisionData">接触情報</param>
+	void Contact(CollisionData& collisionData);
 
 	/// <summary>
 	// 自身を削除処理
@@ -240,15 +254,8 @@ protected:
 	/// <summary>
 	/// 接触時処理
 	/// </summary>
-	/// <param name="other">接触対象</param>
-	/// <param name="hitPosition">接触位置</param>
-	/// <param name="hitNormal">接触対象から自身に向けての法線</param>
-	/// <param name="penetration">めり込み量</param>
-	virtual void OnContact(Actor* other,
-		const Vector3& hitPosition,
-		const Vector3& hitNormal,
-		const float& penetration) {
-	}
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContact(CollisionData& collisionData) {}
 
 	/// <summary>
 	/// 自身削除時処理

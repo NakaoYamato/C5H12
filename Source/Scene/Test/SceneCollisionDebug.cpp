@@ -7,7 +7,7 @@
 #include "../../Library/Component/ShapeController.h"
 
 #include "../../Library/Component/ModelRenderer.h"
-#include "../../Source/Actor/Dragon/DragonActor.h"
+#include "../../Source/Actor/Enemy/Dragon/DragonActor.h"
 
 void SceneCollisionDebug::Initialize()
 {

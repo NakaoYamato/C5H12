@@ -231,7 +231,7 @@
     <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Dragon\DragonActor.cpp">
+    <ClCompile Include="Source\Actor\Enemy\Dragon\DragonActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Component\Player\PlayerInput.cpp">
@@ -313,6 +313,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Model\AnimationEvent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Actor\Enemy\Dummy\DummyActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -566,7 +569,7 @@
     <ClInclude Include="Source\Actor\WeaponActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Dragon\DragonActor.h">
+    <ClInclude Include="Source\Actor\Enemy\Dragon\DragonActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Component\Player\PlayerInput.h">
@@ -651,6 +654,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Model\AnimationEvent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Actor\Enemy\Dummy\DummyActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

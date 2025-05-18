@@ -258,19 +258,19 @@ void Actor::DrawGui()
 #pragma endregion
 
 // 接触時の処理
-void Actor::Contact(Actor* other, const Vector3& hitPosition, const Vector3& hitNormal, const float& penetration)
+void Actor::Contact(CollisionData& collisionData)
 {
 	// 各コンポーネントの接触処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
-		component->OnContact(other, hitPosition, hitNormal, penetration);
+		component->OnContact(collisionData);
 	}
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
-		collider->OnContact(other, hitPosition, hitNormal, penetration);
+		collider->OnContact(collisionData);
 	}
 
-	OnContact(other, hitPosition, hitNormal, penetration);
+	OnContact(collisionData);
 }
 
 // 削除処理

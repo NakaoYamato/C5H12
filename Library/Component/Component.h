@@ -59,14 +59,8 @@ public:
 	virtual void DelayedRender(const RenderContext& rc) {}
 	/// オブジェクトとの接触時の処理
 	/// </summary>
-	/// <param name="other"></param>
-	/// <param name="hitPosition">当たったワールド座標</param>
-	/// <param name="hitNormal">接触面のotherからthisに向かう法線</param>
-	/// <param name="penetration">めり込み量</param>
-	virtual void OnContact(Actor* other,
-		const Vector3& hitPosition,
-		const Vector3& hitNormal,
-		const float& penetration) {}
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContact(CollisionData& collisionData) {}
 
 	// GUI描画
 	virtual void DrawGui() {}

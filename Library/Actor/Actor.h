@@ -8,36 +8,13 @@
 #include "../../Library/Math/Transform.h"
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/Model/Model.h"
+#include "../../Collision/CollisionDefine.h"
 
 // 前方宣言
-class Actor;
 class Component;
 class ColliderBase;
 enum class ActorTag;
 class Scene;
-
-/// <summary>
-/// 接触情報
-/// </summary>
-struct CollisionData
-{
-	// 自分のレイヤー
-	std::string myLayer = "";
-	// 自分がトリガーかどうか
-	bool isTrigger = false;
-	// 衝突相手
-	Actor* other = nullptr;
-	// 衝突相手がトリガーかどうか
-    bool otherIsTrigger = false;
-	// 相手のレイヤー
-	std::string otherLayer = "";
-	// 衝突点
-	Vector3 hitPosition = Vector3::Zero;
-	// 衝突点の法線
-	Vector3 hitNormal = Vector3::Zero;
-	// めり込み量
-	float penetration = 0.0f;
-};
 
 /// <summary>
 /// ゲームオブジェクトの基底クラス

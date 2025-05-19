@@ -28,7 +28,7 @@ void ModelCollider::Update(float elapsedTime)
 		auto& node = poseNodes[sphere.nodeIndex];
 		collisionManager.RegisterSphereData(
 			GetActor().get(),
-			"Collider",
+			GetLayer(),
 			sphere.position.TransformCoord(node.worldTransform),
 			sphere.radius,
 			false);
@@ -43,7 +43,7 @@ void ModelCollider::Update(float elapsedTime)
 		auto& endNode = poseNodes[capsule.endNodeIndex];
 		collisionManager.RegisterCapsuleData(
 			GetActor().get(),
-			"Collider",
+			GetLayer(),
 			capsule.start.TransformCoord(startNode.worldTransform),
 			capsule.end.TransformCoord(endNode.worldTransform),
 			capsule.radius,

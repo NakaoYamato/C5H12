@@ -257,6 +257,7 @@
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
+    <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Model\AnimationEvent.h" />
     <ClInclude Include="Library\Model\Model.h" />

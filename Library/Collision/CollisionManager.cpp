@@ -13,10 +13,10 @@ void CollisionManager::Update()
 	// コンテナに情報を追加
 	auto PushCollisionData = [&](
 		Actor* actorA, 
-		const std::string& layerA,
+		CollisionLayer layerA,
         bool isTriggerA,
 		Actor* actorB,
-		const std::string& layerB,
+		CollisionLayer layerB,
 		bool isTriggerB,
 		const Vector3& hitPosition,
 		const Vector3& hitNormal,
@@ -656,17 +656,17 @@ void CollisionManager::RegisterMeshCollider(MeshCollider* meshCollider)
 	_meshColliders.push_back(meshCollider);
 }
 // 球データ登録
-void CollisionManager::RegisterSphereData(Actor* actor, std::string layer, const Vector3& position, float radius, bool isTrigger)
+void CollisionManager::RegisterSphereData(Actor* actor, CollisionLayer layer, const Vector3& position, float radius, bool isTrigger)
 {
     _sphereDatas.push_back(SphereData(actor, layer, position, radius, isTrigger));
 }
 // ボックスデータ登録
-void CollisionManager::RegisterBoxData(Actor* actor, std::string layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
+void CollisionManager::RegisterBoxData(Actor* actor, CollisionLayer layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
 {
     _boxDatas.push_back(BoxData(actor, layer, position, halfSize, rotation, isTrigger));
 }
 // カプセルデータ登録
-void CollisionManager::RegisterCapsuleData(Actor* actor, std::string layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
+void CollisionManager::RegisterCapsuleData(Actor* actor, CollisionLayer layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
 {
     _capsuleDatas.push_back(CapsuleData(actor, layer, start, end, radius, isTrigger));
 }

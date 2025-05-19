@@ -683,6 +683,9 @@
     <ClInclude Include="Source\StateMachine\Enemy\Dragon\DragonStateMachine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Collision\CollisionDefine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

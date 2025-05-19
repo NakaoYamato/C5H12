@@ -525,14 +525,14 @@ void Animator::UpdateAnimationEvent()
             case AnimationEvent::ShapeType::Sphere:
                 collisionManager.RegisterSphereData(
                     GetActor().get(),
-                    "Attack",
+                    CollisionLayer::Attack,
                     Vector3(transform._41, transform._42, transform._43),
                     event.scale.x);
                 break;
             case AnimationEvent::ShapeType::Box:
                 collisionManager.RegisterBoxData(
                     GetActor().get(),
-                    "Attack",
+                    CollisionLayer::Attack,
                     event.position.TransformCoord(node.worldTransform),
                     event.scale,
                     event.angle);
@@ -540,7 +540,7 @@ void Animator::UpdateAnimationEvent()
             case AnimationEvent::ShapeType::Capsule:
                 collisionManager.RegisterCapsuleData(
                     GetActor().get(),
-                    "Attack",
+                    CollisionLayer::Attack,
                     event.position.TransformCoord(node.worldTransform),
                     event.angle.TransformCoord(node.worldTransform),
                     event.scale.x);

@@ -31,7 +31,7 @@ void DummyActor::OnUpdate(float elapsedTime)
 /// ÚGŽžˆ—
 void DummyActor::OnContact(CollisionData& collisionData)
 {
-    if (collisionData.otherLayer == "Attack")
+    if (collisionData.otherLayer == CollisionLayer::Attack)
     {
         _shapeController.lock()->SetColor(Vector4::Red);
     }

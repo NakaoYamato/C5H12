@@ -96,21 +96,20 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 
 	_textureSize.x = static_cast<float>(width);
 	_textureSize.y = static_cast<float>(height);
-	_gbufferFullscreenQuads[RenderingType::Phong] = std::make_unique<Sprite>(device,
-		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/DeferredRenderingPS.cso");
-	_gbufferFullscreenQuads[RenderingType::PBR] = std::make_unique<Sprite>(device,
-		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/PBRDeferredRenderingPS.cso");
+
+	// ピクセルシェーダーオブジェクトの生成
+	GpuResourceManager::CreatePsFromCso(device,
+		"./Data/Shader/DeferredRenderingPS.cso",
+		_gbufferPS[RenderingType::Phong].ReleaseAndGetAddressOf());
+	GpuResourceManager::CreatePsFromCso(device,
+		"./Data/Shader/PBRDeferredRenderingPS.cso",
+		_gbufferPS[RenderingType::PBR].ReleaseAndGetAddressOf());
+	GpuResourceManager::CreatePsFromCso(device,
+		"./Data/Shader/SpriteWithDepthPS.cso",
+		_depthWritePS.ReleaseAndGetAddressOf());
 
 	_frameBuffer = std::make_unique<FrameBuffer>(device,
 		width, height);
-	_fullscreenQuad = std::make_unique<Sprite>(device,
-		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/SpriteWithDepthPS.cso");
 
 	// SSR用変数初期化
 	_ssrFullscreenQuad = std::make_unique<Sprite>(device,
@@ -218,7 +217,7 @@ void GBuffer::DrawGui()
 }
 
 // GBufferのデータを書き出し
-void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
+void GBuffer::Blit(TextureRenderer& textureRenderer, ID3D11DeviceContext* immediateContext)
 {
 	_frameBuffer->ClearAndActivate(immediateContext);
 	{
@@ -229,9 +228,11 @@ void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 		}
 		tempSRVs.push_back(_depthStencilSRV.Get());
 		// 描画タイプに合わせたライティング処理
-		_gbufferFullscreenQuads[_renderingType]->Blit(immediateContext,
+		textureRenderer.Blit(
+			immediateContext,
 			tempSRVs.data(),
-			0, GBUFFER_RTV_COUNT + 1);
+			0, GBUFFER_RTV_COUNT + 1,
+			_gbufferPS[_renderingType].Get());
 	}
 	_frameBuffer->Deactivate(immediateContext);
 
@@ -258,7 +259,10 @@ void GBuffer::Blit(ID3D11DeviceContext* immediateContext)
 			_frameBuffer->GetColorSRV().Get(),
 			GetDepthSRV().Get()
 		};
-		_fullscreenQuad->Blit(immediateContext,
-			srv, 0, _countof(srv));
+		textureRenderer.Blit(
+			immediateContext,
+			srv,
+			0, _countof(srv),
+			_depthWritePS.Get());
 	}
 }

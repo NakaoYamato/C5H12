@@ -6,7 +6,7 @@
 #include <memory>
 #include "../Math/Vector.h"
 #include "../PostProcess/FrameBuffer.h"
-#include "../2D/Sprite.h"
+#include "../../Library/Renderer/TextureRenderer.h"
 
 // GBufferで使用するレンダーターゲットの枚数
 static constexpr UINT GBUFFER_RTV_COUNT = 4;
@@ -62,7 +62,7 @@ public:
 	void DrawGui();
 
 	// GBufferのデータを書き出し
-	void Blit(ID3D11DeviceContext* immediateContext);
+	void Blit(TextureRenderer& textureRenderer, ID3D11DeviceContext* immediateContext);
 
 #pragma region アクセサ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetRenderTargetSRV(UINT index) {
@@ -85,9 +85,9 @@ private:
 	ID3D11DepthStencilView* _cachedDSV{};
 
 	Vector2 _textureSize{};
-	std::unique_ptr<Sprite> _gbufferFullscreenQuads[RenderingType::RenderingTypeMax];
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> _gbufferPS[RenderingType::RenderingTypeMax];
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> _depthWritePS;
 	std::unique_ptr<FrameBuffer> _frameBuffer;
-	std::unique_ptr<Sprite> _fullscreenQuad;
 
 	int _renderingType = RenderingType::PBR;
 	bool _useSSR = false;

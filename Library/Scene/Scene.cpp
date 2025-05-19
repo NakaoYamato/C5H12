@@ -13,13 +13,9 @@
 // 初期化
 void Scene::Initialize()
 {
-    _fullscreenQuad = std::make_unique<Sprite>(Graphics::Instance().GetDevice(),
-        L"",
-        "./Data/Shader/FullscreenQuadVS.cso",
-        "./Data/Shader/SpritePS.cso");
-
     // レンダラー作成
 	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
+	_textureRenderer.Initialize(Graphics::Instance().GetDevice());
 
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
@@ -172,7 +168,7 @@ void Scene::Render()
             dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
             dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
-            gBuffer->Blit(dc);
+            gBuffer->Blit(_textureRenderer, dc);
         }
         else
         {
@@ -258,7 +254,7 @@ void Scene::Render()
     }
     dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
     // バックバッファに描画
-    _fullscreenQuad->Blit(
+    _textureRenderer.Blit(
         dc,
         PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
         0, 1

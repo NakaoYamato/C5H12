@@ -3,9 +3,9 @@
 #include <d3d11.h>
 #include <memory>
 
-#include "../../Library/2D/Sprite.h"
 #include "../../Library/2D/SkyMap.h"
 #include "../../Library/Renderer/MeshRenderer.h"
+#include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
 
@@ -107,6 +107,8 @@ public:
 	RenderContext& GetRenderContext() {	return _renderContext; }
 	// メッシュレンダラー取得
 	MeshRenderer& GetMeshRenderer() { return _meshRenderer; }
+	// テクスチャレンダラー取得
+	TextureRenderer& GetTextureRenderer() { return _textureRenderer; }
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
@@ -118,7 +120,6 @@ public:
 	}
 #pragma endregion
 private:
-	std::unique_ptr<Sprite>			_fullscreenQuad;
 	std::unique_ptr<SkyMap>			_skyMap;
 
 #pragma region シーン必須オブジェクト
@@ -128,7 +129,9 @@ private:
 	Camera							_camera = {};
 	RenderContext					_renderContext;
 	MeshRenderer					_meshRenderer;
+	TextureRenderer					_textureRenderer;
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
+
 	bool							_ready = false;
 };

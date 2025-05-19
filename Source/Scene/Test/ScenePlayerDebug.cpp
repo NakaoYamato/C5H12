@@ -9,6 +9,7 @@
 #include "../../Source/Actor/Player/PlayerActor.h"
 #include "../../Source/Actor/Stage/StageActor.h"
 #include "../../Source/Actor/Enemy/Dummy/DummyActor.h"
+#include "../../Source/Actor/Enemy/Dragon/DragonActor.h"
 
 void ScenePlayerDebug::Initialize()
 {
@@ -30,6 +31,10 @@ void ScenePlayerDebug::Initialize()
     }
     {
         auto enemy = RegisterActor<DummyActor>("Enemy", ActorTag::Enemy);
+    }
+    {
+        auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
+        dragon->GetTransform().SetPosition(Vector3(0.0f, 10.0f, -10.0f));
     }
     // •‰‰×ƒeƒXƒg
     //for (int i = 0; i < 10; ++i)

@@ -8,6 +8,7 @@
 
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/Actor/Enemy/Dragon/DragonActor.h"
+#include "../../Library/Component/CharactorController.h"
 
 void SceneCollisionDebug::Initialize()
 {
@@ -38,6 +39,7 @@ void SceneCollisionDebug::Initialize()
         auto box = RegisterActor<Actor>("box" + std::to_string(f), ActorTag::Player);
         auto boxC = box->AddComponent<ShapeController>();
 		box->AddCollider<BoxCollider>();
+		box->AddComponent<CharactorController>();
 		box->GetTransform().SetPositionX(2.0f * f);
 		box->GetTransform().SetPositionY(0.5f);
 		boxC->SetType(ShapeType::Box);
@@ -50,6 +52,7 @@ void SceneCollisionDebug::Initialize()
         sphere->GetTransform().SetPositionZ(2.0f);
         sphere->GetTransform().SetPositionY(0.5f);
         sphere->AddCollider<SphereCollider>();
+        sphere->AddComponent<CharactorController>();
     }
     for (float f = 0.0f; f <= 10.0f; ++f)
     {
@@ -59,6 +62,7 @@ void SceneCollisionDebug::Initialize()
         capsule->GetTransform().SetPositionZ(-2.0f);
         capsule->GetTransform().SetPositionY(0.5f);
         capsule->AddCollider<CapsuleCollider>();
+        capsule->AddComponent<CharactorController>();
     }
     {
         //auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);

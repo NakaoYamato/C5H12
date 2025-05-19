@@ -61,21 +61,21 @@ void CollisionManager::Update()
 		// 球の当たり判定
 		for (auto& sphereA : _sphereDatas)
 		{
-			// 球Vs球
-			for (auto& sphereB : _sphereDatas)
-			{
-				// 同じ場合は処理しない
-				if (sphereA.actor == sphereB.actor)
-					continue;
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					Vector3 hitPosition{};
+					Vector3 hitNormal{};
+					float penetration = 0.0f;
 
-				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-					std::to_string(jobResults.size()).c_str(),
-					ImGuiControl::Profiler::Color::Blue,
-					[&]()
+					// 球Vs球
+					for (auto& sphereB : _sphereDatas)
 					{
-						Vector3 hitPosition{};
-						Vector3 hitNormal{};
-						float penetration = 0.0f;
+						// 同じ場合は処理しない
+						if (sphereA.actor == sphereB.actor)
+							continue;
 
 						if (Collision3D::IntersectSphereVsSphere(
 							sphereA.position,
@@ -89,29 +89,32 @@ void CollisionManager::Update()
 							PushCollisionData(
 								sphereA.actor,
 								sphereA.layer,
-                                sphereA.isTrigger,
+								sphereA.isTrigger,
 								sphereB.actor,
 								sphereB.layer,
-                                sphereB.isTrigger,
+								sphereB.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
 						}
 					}
-				));
-			}
+				}));
 
-			// 球Vsボックス
-			for (auto& box : _boxDatas)
-			{
-				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-					std::to_string(jobResults.size()).c_str(),
-					ImGuiControl::Profiler::Color::Blue,
-					[&]()
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					Vector3 hitPosition{};
+					Vector3 hitNormal{};
+					float penetration = 0.0f;
+
+					// 球Vsボックス
+					for (auto& box : _boxDatas)
 					{
-						Vector3 hitPosition{};
-						Vector3 hitNormal{};
-						float penetration = 0.0f;
+						// 同じ場合は処理しない
+						if (sphereA.actor == box.actor)
+							continue;
 
 						if (Collision3D::IntersectSphereVsBox(
 							sphereA.position,
@@ -125,30 +128,33 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								sphereA.actor,
-                                sphereA.layer,
-                                sphereA.isTrigger,
+								sphereA.layer,
+								sphereA.isTrigger,
 								box.actor,
-                                box.layer,
-                                box.isTrigger,
+								box.layer,
+								box.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
 						}
 					}
-				));
-			}
+				}));
 
-			// 球Vsカプセル
-			for (auto& capsule : _capsuleDatas)
-			{
-				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-					std::to_string(jobResults.size()).c_str(),
-					ImGuiControl::Profiler::Color::Blue,
-					[&]()
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					Vector3 hitPosition{};
+					Vector3 hitNormal{};
+					float penetration = 0.0f;
+
+					// 球Vsカプセル
+					for (auto& capsule : _capsuleDatas)
 					{
-						Vector3 hitPosition{};
-						Vector3 hitNormal{};
-						float penetration = 0.0f;
+						// 同じ場合は処理しない
+						if (sphereA.actor == capsule.actor)
+							continue;
 
 						if (Collision3D::IntersectSphereVsCapsule(
 							sphereA.position,
@@ -162,38 +168,37 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								sphereA.actor,
-                                sphereA.layer,
-                                sphereA.isTrigger,
+								sphereA.layer,
+								sphereA.isTrigger,
 								capsule.actor,
-                                capsule.layer,
-                                capsule.isTrigger,
+								capsule.layer,
+								capsule.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
 						}
 					}
-				));
-			}
+				}));
 		}
 
 		// ボックスの当たり判定
 		for (auto& boxA : _boxDatas)
 		{
-			// ボックスVsボックス
-			for (auto& boxB : _boxDatas)
-			{
-				// 同じ場合は処理しない
-				if (boxA.actor == boxB.actor)
-					continue;
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					Vector3 hitPosition{};
+					Vector3 hitNormal{};
+					float penetration = 0.0f;
 
-				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-					std::to_string(jobResults.size()).c_str(),
-					ImGuiControl::Profiler::Color::Blue,
-					[&]()
+					// ボックスVsボックス
+					for (auto& boxB : _boxDatas)
 					{
-						Vector3 hitPosition{};
-						Vector3 hitNormal{};
-						float penetration = 0.0f;
+						// 同じ場合は処理しない
+						if (boxA.actor == boxB.actor)
+							continue;
 
 						if (Collision3D::IntersectBoxVsBox(
 							boxA.position,
@@ -208,18 +213,17 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								boxA.actor,
-                                boxA.layer,
-                                boxA.isTrigger,
+								boxA.layer,
+								boxA.isTrigger,
 								boxB.actor,
-                                boxB.layer,
-                                boxB.isTrigger,
+								boxB.layer,
+								boxB.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
 						}
 					}
-				));
-			}
+				}));
 
 			//      // ボックスVsカプセル
 				  //for (auto& capsule : _capsuleColliders)
@@ -252,20 +256,20 @@ void CollisionManager::Update()
 		// カプセルの当たり判定
 		for (auto& capsuleA : _capsuleDatas)
 		{
-			for (auto& capsuleB : _capsuleDatas)
-			{
-				// 同じ場合は処理しない
-				if (capsuleA.actor == capsuleB.actor)
-					continue;
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					Vector3 hitPosition{};
+					Vector3 hitNormal{};
+					float penetration = 0.0f;
 
-				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-					std::to_string(jobResults.size()).c_str(),
-					ImGuiControl::Profiler::Color::Blue,
-					[&]()
+					for (auto& capsuleB : _capsuleDatas)
 					{
-						Vector3 hitPosition{};
-						Vector3 hitNormal{};
-						float penetration = 0.0f;
+						// 同じ場合は処理しない
+						if (capsuleA.actor == capsuleB.actor)
+							continue;
 
 						if (Collision3D::IntersectCapsuleVsCapsule(
 							capsuleA.start,
@@ -280,18 +284,17 @@ void CollisionManager::Update()
 						{
 							PushCollisionData(
 								capsuleA.actor,
-                                capsuleA.layer,
-                                capsuleA.isTrigger,
+								capsuleA.layer,
+								capsuleA.isTrigger,
 								capsuleB.actor,
 								capsuleB.layer,
-                                capsuleB.isTrigger,
+								capsuleB.isTrigger,
 								hitPosition,
 								hitNormal,
 								penetration);
 						}
 					}
-				));
-			}
+				}));
 		}
 
 		// すべてのジョブの終了を待機
@@ -341,6 +344,10 @@ void CollisionManager::Update()
 			// 球Vsボックス
 			for (auto& box : _boxDatas)
 			{
+				//// 同じ場合は処理しない
+				//if (sphereA.actor == box.actor)
+				//	continue;
+
 				if (Collision3D::IntersectSphereVsBox(
 					sphereA.position,
 					sphereA.radius,
@@ -367,6 +374,10 @@ void CollisionManager::Update()
 			// 球Vsカプセル
 			for (auto& capsule : _capsuleDatas)
 			{
+				// 同じ場合は処理しない
+				if (sphereA.actor == capsule.actor)
+					continue;
+
 				if (Collision3D::IntersectSphereVsCapsule(
 					sphereA.position,
 					sphereA.radius,

@@ -6,6 +6,7 @@
 #include "../../Library/Component/Animator.h"
 
 #include "../../Library/Model/AnimationEvent.h"
+#include "../../Library/Model/ModelCollision.h"
 
 class SceneModelEditor : public Scene
 {
@@ -55,6 +56,8 @@ private:
 
 	// アニメーションデータ
 	AnimationEvent _animationEvent;
+	// モデルの衝突判定
+	ModelCollision _modelCollision;
 
 	// 追加アニメーションモデル
 	std::shared_ptr<Model> _animationModel;

@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
+    <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Model\AnimationEvent.cpp" />
     <ClCompile Include="Library\Model\Model.cpp" />
     <ClCompile Include="Library\2D\SkyMap.cpp" />
@@ -204,6 +205,7 @@
     <ClCompile Include="Library\Math\Quaternion.cpp" />
     <ClCompile Include="Library\Math\Transform.cpp" />
     <ClCompile Include="Library\Math\Vector.cpp" />
+    <ClCompile Include="Library\Model\ModelCollision.cpp" />
     <ClCompile Include="Library\Network\ClientAssignment.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
     <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
@@ -254,6 +256,7 @@
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
+    <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Model\AnimationEvent.h" />
     <ClInclude Include="Library\Model\Model.h" />
     <ClInclude Include="Library\2D\SkyMap.h" />
@@ -318,6 +321,7 @@
     <ClInclude Include="Library\Math\Random.h" />
     <ClInclude Include="Library\Math\Transform.h" />
     <ClInclude Include="Library\Math\Vector.h" />
+    <ClInclude Include="Library\Model\ModelCollision.h" />
     <ClInclude Include="Library\Network\ClientAssignment.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
     <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />

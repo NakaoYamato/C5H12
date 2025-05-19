@@ -47,6 +47,9 @@ void SceneModelEditor::Update(float elapsedTime)
     auto model = _modelActor.lock()->GetModel().lock();
     if (model)
     {
+        // 当たり判定表示
+        _modelCollision.DebugRender();
+
         // ノード表示
         if (_showNode)
             model->DebugDrawNode(_nodeColor);
@@ -150,6 +153,8 @@ void SceneModelEditor::DrawMenuBarGui()
 
 					// アニメーションイベントの読み込み
                     _animationEvent.Load(model.lock());
+					// モデルの衝突判定の読み込み
+					_modelCollision.Load(model.lock());
                 }
             }
 
@@ -212,6 +217,16 @@ void SceneModelEditor::DrawEditGui()
         {
             DrawEditAnimationGui();
 
+            ImGui::TreePop();
+        }
+        ImGui::Separator();
+        if (ImGui::TreeNode(u8"当たり判定"))
+        {
+			_modelCollision.DrawGui(true);
+            if (ImGui::Button(u8"当たり判定の書き出し"))
+            {
+                _modelCollision.Serialize(_filepath.c_str());
+            }
             ImGui::TreePop();
         }
         ImGui::Separator();

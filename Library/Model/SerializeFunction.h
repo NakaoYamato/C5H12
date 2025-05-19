@@ -14,6 +14,8 @@
 static const char* MODEL_EXTENSION = ".model";
 // アニメーションイベントのファイル拡張子
 static const char* ANIMATION_EVENT_EXTENSION = ".animEvent";
+// 当たり判定のファイル拡張子
+static const char* MODEL_COLLISION_EXTENSION = ".modelCollision";
 #pragma endregion
 
 

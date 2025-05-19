@@ -3,6 +3,8 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Scene/Scene.h"
 #include "../../Library/Component/Animator.h"
+#include "../../Library/Component/CharactorController.h"
+#include "../../Library/Component/Collider/ModelCollider.h"
 
 #include "../../Library/ResourceManager/GpuResourceManager.h"
 #include "../../Library/Algorithm/Converter.h"
@@ -15,11 +17,14 @@ void DragonActor::OnCreate()
 	// モデル読み込み
 	auto model = LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
 
-	GetTransform().SetLengthScale(0.01f);
+	GetTransform().SetLengthScale(0.02f);
 
 	// コンポーネント追加
 	_modelRenderer = AddComponent<ModelRenderer>();
 	auto animator = AddComponent<Animator>();
+	auto charactorController = AddComponent<CharactorController>();
+	charactorController->SetMass(1000.0f);
+	auto modelCollider = AddCollider<ModelCollider>();
 
 	// モデルがシリアライズされていなければアニメーションを設定
 	if (!model.lock()->GetResource()->IsSerialized())

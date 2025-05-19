@@ -1,0 +1,91 @@
+#pragma once
+
+#include "Model.h"
+#include "../../Library/Math/Vector.h"
+
+class ModelCollision
+{
+public:
+	struct SphereData
+	{
+		int nodeIndex		= -1;	// ノードインデックス
+		Vector3 position	= {};	// 中心座標
+		float radius		= 1.0f; // 半径
+
+		// シリアライズ
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version);
+	};
+	struct CapsuleData
+	{
+		int startNodeIndex	= -1;	// 開始ノードインデックス
+		int endNodeIndex	= -1;	// 終了ノードインデックス
+		Vector3 start		= {};	// 開始座標
+		Vector3 end			= {};	// 終了座標
+		float radius		= 1.0f; // 半径
+
+		// シリアライズ
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version);
+	};
+public:
+	ModelCollision() = default;
+	~ModelCollision() = default;
+
+	/// <summary>
+	/// モデル情報読み込み
+	/// </summary>
+	/// <param name="modelResource"></param>
+	void Load(std::weak_ptr<Model> model);
+	/// <summary>
+	/// デバッグ表示
+	/// </summary>
+	void DebugRender();
+	/// <summary>
+	/// GUI描画
+	/// </summary>
+	/// <param name="canEdit">編集可能か</param>
+	void DrawGui(bool canEdit = true);
+
+#pragma region ファイル操作
+	/// <summary>
+	/// データ書き出し
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns>失敗したらfalse</returns>
+	bool Serialize(const char* filename);
+
+	/// <summary>
+	/// データ読み込み
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns>失敗したらfalse</returns>
+	bool Deserialize(const char* filename);
+
+	/// <summary>
+	/// 要素全削除
+	/// </summary>
+	void Clear()
+	{
+		_sphereDatas.clear();
+		_capsuleDatas.clear();
+	}
+#pragma endregion
+
+#pragma region アクセサ
+	/// <summary>
+	/// 球データ取得
+	/// </summary>
+	const std::vector<SphereData>& GetSphereDatas() const { return _sphereDatas; }
+	/// <summary>
+	/// カプセルデータ取得
+	/// </summary>
+	const std::vector<CapsuleData>& GetCapsuleDatas() const { return _capsuleDatas; }
+#pragma endregion
+private:
+	std::weak_ptr<Model> _model;
+	std::vector<SphereData> _sphereDatas; // 球データ
+	std::vector<CapsuleData> _capsuleDatas; // カプセルデータ
+	// モデルのノード名
+	std::vector<const char*> _nodeNames;
+};

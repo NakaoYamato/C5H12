@@ -2,7 +2,6 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Scene/Scene.h"
-#include "../../Library/Component/Animator.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 
@@ -17,14 +16,16 @@ void DragonActor::OnCreate()
 	// モデル読み込み
 	auto model = LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
 
-	GetTransform().SetLengthScale(0.02f);
+	GetTransform().SetLengthScale(0.01f);
+	GetTransform().SetScale(1.5f);
 
 	// コンポーネント追加
 	_modelRenderer = AddComponent<ModelRenderer>();
-	auto animator = AddComponent<Animator>();
+	_animator = AddComponent<Animator>();
 	auto charactorController = AddComponent<CharactorController>();
 	charactorController->SetMass(1000.0f);
 	auto modelCollider = AddCollider<ModelCollider>();
+	_enemyController = AddComponent<EnemyController>();
 
 	// モデルがシリアライズされていなければアニメーションを設定
 	if (!model.lock()->GetResource()->IsSerialized())
@@ -38,17 +39,19 @@ void DragonActor::OnCreate()
 		// 再シリアライズ
 		model.lock()->ReSerialize();
 	}
+
 }
 
 // 開始関数
 void DragonActor::OnStart()
 {
-
+	_dragonStateMachine = std::make_unique<DragonStateMachine>(_enemyController.lock().get(), _animator.lock().get());
 }
 
 // 更新処理
 void DragonActor::OnUpdate(float elapsedTime)
 {
+	_dragonStateMachine->Execute(elapsedTime);
 	// 使用する角を設定
 	SetUseHorn();
 }
@@ -64,6 +67,8 @@ void DragonActor::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"ドラゴン"))
 		{
+			_dragonStateMachine->DrawGui();
+
 			static const char* modelTypeName[] =
 			{
 				u8"Brown",

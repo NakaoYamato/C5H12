@@ -3,6 +3,10 @@
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Component/ModelRenderer.h"
 
+#include "../../Library/Component/Animator.h"
+#include "../../Source/Component/Enemy/EnemyController.h"
+#include "../../Source/StateMachine/Enemy/Dragon/DragonStateMachine.h"
+
 class DragonActor : public Actor
 {
 public:
@@ -50,7 +54,11 @@ private:
 
 private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
+	std::weak_ptr<Animator> _animator;
+	std::weak_ptr<EnemyController> _enemyController;
 
 	ModelType _modelType = ModelType::Lava;
 	DrawHornType _drawHornType = DrawHornType::Horn01;
+
+	std::unique_ptr<DragonStateMachine> _dragonStateMachine;
 };

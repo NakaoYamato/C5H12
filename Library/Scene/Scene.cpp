@@ -5,7 +5,6 @@
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
-#include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 
 #include "../../Library/Component/Light/LightController.h"
@@ -18,6 +17,9 @@ void Scene::Initialize()
         L"",
         "./Data/Shader/FullscreenQuadVS.cso",
         "./Data/Shader/SpritePS.cso");
+
+    // レンダラー作成
+	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
 
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
@@ -137,7 +139,7 @@ void Scene::Render()
         gBuffer->ClearAndActivate(dc);
         {
             // モデルの描画
-            MeshRenderer::RenderOpaque(rc, true);
+            _meshRenderer.RenderOpaque(rc, true);
         }
         gBuffer->Deactivate(dc);
     }
@@ -175,11 +177,11 @@ void Scene::Render()
         else
         {
             // フォワードレンダリング
-            MeshRenderer::RenderOpaque(rc, false);
+            _meshRenderer.RenderOpaque(rc, false);
         }
 
         // モデルの描画
-        MeshRenderer::RenderAlpha(rc);
+        _meshRenderer.RenderAlpha(rc);
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
@@ -200,7 +202,7 @@ void Scene::Render()
         _actorManager.CastShadow(rc);
 
         // モデルの影描画処理
-        MeshRenderer::CastShadow(rc);
+        _meshRenderer.CastShadow(rc);
     }
     cascadedShadowMap->Deactivate(rc);
     // カスケードシャドウマップの処理終了

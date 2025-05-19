@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
 
 // 更新処理
@@ -21,7 +22,13 @@ void ModelRenderer::Render(const RenderContext& rc)
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, model.get(), _color, _shaderName, _renderType, _blendType, &_shaderParameter);
+		GetActor()->GetScene()->GetMeshRenderer().Draw(
+			&mesh, model.get(), 
+			_color, 
+			_shaderName, 
+			_renderType, 
+			_blendType, 
+			&_shaderParameter);
 	}
 }
 
@@ -34,7 +41,13 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		MeshRenderer::Draw(&mesh, model.get(), Vector4::White, "CascadedShadowMap", _renderType, BlendType::Opaque, &_shadowParameter);
+		GetActor()->GetScene()->GetMeshRenderer().Draw(
+			&mesh, model.get(), 
+			Vector4::White, 
+			"CascadedShadowMap", 
+			_renderType, 
+			BlendType::Opaque, 
+			&_shadowParameter);
 	}
 }
 
@@ -44,7 +57,9 @@ void ModelRenderer::DrawGui()
 	ImGui::ColorEdit4("color", &_color.x);
 	ImGui::Text((u8"現在のシェーダー:" + _shaderName).c_str());
 	ImGui::Separator();
-	auto shaderName = MeshRenderer::GetShaderNames(_renderType, Graphics::Instance().RenderingDeferred());
+	auto shaderName =
+		GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(
+			_renderType, Graphics::Instance().RenderingDeferred());
 	if (ImGui::TreeNodeEx(u8"使用可能のシェーダー"))
 	{
 		for (auto& name : shaderName)
@@ -96,6 +111,9 @@ void ModelRenderer::SetShader(std::string name)
 {
 	this->_shaderName = name;
 	// パラメータのkye受け取り
-	_shaderParameter = MeshRenderer::GetShaderParameterKey(_renderType, _shaderName, Graphics::Instance().RenderingDeferred());
+	_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+		_renderType, 
+		_shaderName,
+		Graphics::Instance().RenderingDeferred());
 }
 

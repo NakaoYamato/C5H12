@@ -5,6 +5,7 @@
 
 #include "../../Library/2D/Sprite.h"
 #include "../../Library/2D/SkyMap.h"
+#include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
 
@@ -102,11 +103,10 @@ public:
 	ActorManager& GetActorManager() { return _actorManager; }
 	// 当たり判定管理者取得
 	CollisionManager& GetCollisionManager() { return _collisionManager; }
-
 	// RenderContext取得
-	RenderContext& GetRenderContext() {
-		return _renderContext;
-	}
+	RenderContext& GetRenderContext() {	return _renderContext; }
+	// メッシュレンダラー取得
+	MeshRenderer& GetMeshRenderer() { return _meshRenderer; }
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
@@ -127,6 +127,7 @@ private:
 
 	Camera							_camera = {};
 	RenderContext					_renderContext;
+	MeshRenderer					_meshRenderer;
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
 	bool							_ready = false;

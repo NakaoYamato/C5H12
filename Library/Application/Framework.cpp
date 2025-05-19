@@ -7,7 +7,6 @@
 #include "../ResourceManager/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
 //#include "../Effekseer/EffectManager.h"
-#include "../Renderer/MeshRenderer.h"
 #include "../Renderer/PrimitiveRenderer.h"
 #include "../JobSystem/JobSystem.h"
 
@@ -165,8 +164,7 @@ bool Framework::Initialize() const
     // Graphicsの初期化
     Graphics::Instance().Initialize(_hwnd, FULLSCREEN);
 
-    // 各種レンダラー作成
-    MeshRenderer::Initialize(Graphics::Instance().GetDevice());
+    // レンダラー作成
     PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
 
     // ポストプロセス管理者初期化

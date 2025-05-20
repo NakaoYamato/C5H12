@@ -18,18 +18,17 @@ void ModelRenderer::Render(const RenderContext& rc)
 {
 	auto model = GetActor()->GetModel().lock();
 	if (model == nullptr) return;
+
 	auto& materialMap = model->GetMaterials();
 	const ModelResource* resource = model->GetResource();
-	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
-			&mesh, model.get(), 
+			&mesh,
+			model.get(), 
 			_color, 
 			&materialMap.at(mesh.materialIndex),
-			_shaderName, 
 			_renderType, 
-			_blendType, 
 			&_shaderParameter);
 	}
 }
@@ -39,18 +38,17 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 {
 	auto model = GetActor()->GetModel().lock();
 	if (model == nullptr) return;
+
 	auto& materialMap = model->GetMaterials();
 	const ModelResource* resource = model->GetResource();
-	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
-		GetActor()->GetScene()->GetMeshRenderer().Draw(
-			&mesh, model.get(), 
+		GetActor()->GetScene()->GetMeshRenderer().DrawShadow(
+			&mesh, 
+			model.get(), 
 			Vector4::White,
 			&materialMap.at(mesh.materialIndex),
-			"CascadedShadowMap", 
 			_renderType, 
-			BlendType::Opaque, 
 			&_shadowParameter);
 	}
 }
@@ -59,7 +57,6 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 void ModelRenderer::DrawGui()
 {
 	ImGui::ColorEdit4("color", &_color.x);
-	ImGui::Text((u8"現在のシェーダー:" + _shaderName).c_str());
 	ImGui::Separator();
 	auto shaderName =
 		GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(
@@ -96,16 +93,7 @@ void ModelRenderer::DrawGui()
 		// エラー防止のためPhongに変更
 		SetShader("Phong");
 	}
-	static const char* blendTypeName[] =
-	{
-		u8"Opaque",
-		u8"Alpha",
-	};
-	int bId = static_cast<int>(_blendType);
-	if (ImGui::Combo(u8"ブレンドタイプ", &bId, blendTypeName, _countof(blendTypeName)))
-	{
-		_blendType = static_cast<BlendType>(bId);
-	}
+
 	auto model = GetActor()->GetModel().lock();
 	if (model == nullptr) return;
 	model->DrawGui();
@@ -113,11 +101,11 @@ void ModelRenderer::DrawGui()
 
 void ModelRenderer::SetShader(std::string name)
 {
-	this->_shaderName = name;
-	// パラメータのkye受け取り
-	_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
-		_renderType, 
-		_shaderName,
-		Graphics::Instance().RenderingDeferred());
+	//this->_shaderName = name;
+	//// パラメータのkye受け取り
+	//_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+	//	_renderType, 
+	//	_shaderName,
+	//	Graphics::Instance().RenderingDeferred());
 }
 

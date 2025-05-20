@@ -7,6 +7,32 @@
 
 #include "../../Library/Math/Vector.h"
 
+/// <summary>
+/// ブレンドタイプ
+/// </summary>
+enum class BlendType
+{
+	Opaque,
+	Alpha,
+
+	BlendTypeMax
+};
+
+/// <summary>
+/// モデルのシェーダータイプ
+/// </summary>
+enum class ModelShaderType
+{
+	Phong,
+	Ramp,
+	Grass,
+	PBR,
+
+	CascadedShadowMap,
+
+	ModelShaderTypeMax
+};
+
 class Material
 {
 public:
@@ -65,14 +91,21 @@ public:
 	const TextureData& GetTextureData(const std::string& key) const { return _textureDatas.at(key); }
 	ID3D11ShaderResourceView* const* GetAddressOfTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.GetAddressOf(); }
 	ID3D11ShaderResourceView* GetTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.Get(); }
+	BlendType GetBlendType() const { return _blendType; }
+	ModelShaderType GetShaderType() const { return _shaderType; }
 
 	void SetName(const std::string& name) { _name = name; }
 	void SetColor(const std::string& key, const Vector4& color) { _colors[key] = color; }
 	void SetTextureData(const std::string& key, const TextureData& textureData) { _textureDatas[key] = textureData; }
+	void SetBlendType(BlendType type) { _blendType = type; }
+	void SetShaderType(ModelShaderType type);
 #pragma endregion
 
 private:
 	std::string										_name;
 	std::unordered_map<std::string, Vector4>		_colors;
 	std::unordered_map<std::string, TextureData>	_textureDatas;
+
+	BlendType		_blendType = BlendType::Opaque;
+	ModelShaderType	_shaderType = ModelShaderType::PBR;
 };

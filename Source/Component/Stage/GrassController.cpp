@@ -3,7 +3,6 @@
 void GrassController::Start()
 {
     _mr = this->GetActor()->GetComponent<ModelRenderer>();
-    assert(_mr.lock()->GetShaderName() == "Grass");
 }
 
 void GrassController::Update(float elapsedTime)

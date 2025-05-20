@@ -1,14 +1,37 @@
 #include "Material.h"
 
 #include "../../Library/ResourceManager/GpuResourceManager.h"
+#include "../../Library/Renderer/MeshRenderer.h"
 
 #include "../../Library/Algorithm/Converter.h"
 #include <imgui.h>
 
 void Material::DrawGui()
 {
+	static const char* blendTypeName[] =
+	{
+		u8"Opaque",
+		u8"Alpha",
+	};
+	static const char* shaderTypeNames[] =
+	{
+		u8"Phong",
+		u8"Ramp",
+		u8"Grass",
+		u8"PBR",
+	};
+
 	ImGui::Text((u8"マテリアル名:" + _name).c_str());
 	ImGui::Separator();
+	int bId = static_cast<int>(_blendType);
+	if (ImGui::Combo(u8"ブレンドタイプ", &bId, blendTypeName, _countof(blendTypeName)))
+		SetBlendType(static_cast<BlendType>(bId));
+	ImGui::Separator();
+	int shaderType = static_cast<int>(_shaderType);
+	if (ImGui::Combo(u8"シェーダー", &shaderType, shaderTypeNames, _countof(shaderTypeNames)))
+		SetShaderType(static_cast<ModelShaderType>(shaderType));
+	ImGui::Separator();
+
 	for (auto& [key, color] : _colors)
 	{
 		ImGui::ColorEdit4(key.c_str(), &color.x);
@@ -55,4 +78,9 @@ void Material::MakeDummyTexture(ID3D11Device* device,
 		value, dimension);
 	// テクスチャデータを格納
 	_textureDatas[key] = textureData;
+}
+
+void Material::SetShaderType(ModelShaderType type)
+{
+	_shaderType = type;
 }

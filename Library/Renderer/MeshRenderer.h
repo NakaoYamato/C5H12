@@ -20,17 +20,6 @@ enum class ModelRenderType
     ModelRenderTypeMax
 };
 
-/// <summary>
-/// ブレンドタイプ
-/// </summary>
-enum class BlendType
-{
-    Opaque,
-    Alpha,
-
-    BlendTypeMax
-};
-
 class MeshRenderer
 {
 private:
@@ -38,9 +27,10 @@ private:
     static const int INSTANCED_MAX = 100;
 
 #pragma region 定数バッファ
-    struct DynamicBoneCB// 通常モデル用
+    // 通常モデル用
+    struct DynamicBoneCB
     {
-        DirectX::XMFLOAT4 materialColor{ 1,1,1,1 };
+        DirectX::XMFLOAT4   materialColor{ 1,1,1,1 };
         DirectX::XMFLOAT4X4 boneTransforms[FBX_MAX_BONES]
     {
         {
@@ -51,19 +41,22 @@ private:
         }
     };
     };
-    struct StaticBoneCB// アニメーションなしモデル用
+    // アニメーションなしモデル用
+    struct StaticBoneCB
     {
-        DirectX::XMFLOAT4 materialColor{ 1,1,1,1 };
+        DirectX::XMFLOAT4   materialColor{ 1,1,1,1 };
         DirectX::XMFLOAT4X4 world{};
     };
-    struct InstancingModelCB// インスタンシングモデル用
+    // インスタンシングモデル用
+    struct InstancingModelCB
     {
-        DirectX::XMFLOAT4 materialColor[INSTANCED_MAX]{};
+        DirectX::XMFLOAT4   materialColor[INSTANCED_MAX]{};
         DirectX::XMFLOAT4X4 world[INSTANCED_MAX]{};
     };
 #pragma endregion
 
 #pragma region Info
+	// 描画用情報
     struct DrawInfo
     {
         Model*                      model       = nullptr;
@@ -72,17 +65,17 @@ private:
         Material*                   material    = nullptr;
         ShaderBase::Parameter*      parameter   = nullptr;
     };
+	// 半透明描画用情報
     struct AlphaDrawInfo
     {
 		DrawInfo				    drawInfo;
-        std::string                 shaderID;
         ModelRenderType             renderType;
         float			            distance = 0.0f;
     };
-    // インスタンシング描画用
+    // インスタンシング描画用情報
     struct InstancingDrawInfo
     {
-        std::string				    shaderId{};
+        ModelShaderType				shaderType{};
         using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
         std::vector<ModelParameter> modelParameters;
         Material*                   material = nullptr;
@@ -103,15 +96,29 @@ public:
     /// <param name="model"></param>
     /// <param name="color"></param>
     /// <param name="material"></param>
-    /// <param name="shaderId"></param>
     /// <param name="renderType"></param>
+    /// <param name="parameter"></param>
     void Draw(const ModelResource::Mesh* mesh,
         Model* model,
         const Vector4& color,
         Material* material,
-        std::string shaderId,
         ModelRenderType renderType,
-        BlendType blendType,
+        ShaderBase::Parameter* parameter);
+
+	/// <summary>
+	/// 影描画
+	/// </summary>
+	/// <param name="mesh"></param>
+	/// <param name="model"></param>
+	/// <param name="color"></param>
+	/// <param name="material"></param>
+	/// <param name="renderType"></param>
+	/// <param name="parameter"></param>
+	void DrawShadow(const ModelResource::Mesh* mesh,
+        Model* model,
+        const Vector4& color,
+        Material* material,
+        ModelRenderType renderType,
         ShaderBase::Parameter* parameter);
 
     /// <summary>
@@ -120,12 +127,12 @@ public:
     /// <param name="model"></param>
     /// <param name="color"></param>
     /// <param name="material"></param>
-    /// <param name="shaderId"></param>
+    /// <param name="shaderType"></param>
     /// <param name="world"></param>
     void DrawInstancing(Model* model,
         const Vector4& color,
         Material* material,
-        std::string shaderId,
+        ModelShaderType shaderType,
         const DirectX::XMFLOAT4X4& world,
         ShaderBase::Parameter* parameter);
 
@@ -162,7 +169,7 @@ public:
     /// <param name="type"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    ShaderBase::Parameter GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred);
+    ShaderBase::Parameter GetShaderParameterKey(ModelRenderType type, ModelShaderType key, bool deferred);
 
 private:
     // インスタンシングモデルの描画
@@ -182,13 +189,13 @@ private:
     InstancingModelCB	_cbInstancingSkeleton{};
 
     // シェーダーの配列
-    using ShaderMap = std::unordered_map<std::string, std::unique_ptr<ShaderBase>>;
+    using ShaderMap = std::unordered_map<ModelShaderType, std::unique_ptr<ShaderBase>>;
     ShaderMap                   _deferredShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
     ShaderMap                   _forwardShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
     std::unique_ptr<ShaderBase> _cascadedSMShader[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
     // 各モデルタイプのInfo
-    using DrawInfoMap = std::unordered_map<std::string, std::vector<DrawInfo>>;
+    using DrawInfoMap = std::unordered_map<ModelShaderType, std::vector<DrawInfo>>;
     using InstancingDrawInfoMap = std::unordered_map<Model*, InstancingDrawInfo>;
     DrawInfoMap                 _dynamicInfomap;
     DrawInfoMap                 _staticInfomap;

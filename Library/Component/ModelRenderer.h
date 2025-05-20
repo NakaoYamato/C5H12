@@ -36,23 +36,18 @@ public:
 #pragma region アクセサ
 	const ShaderBase::Parameter& GetShaderParameter()const { return _shaderParameter; }
 	const ShaderBase::Parameter& GetShadowParameter()const { return _shadowParameter; }
-	std::string GetShaderName()const { return _shaderName; }
 	ModelRenderType GetRenderType()const { return _renderType; }
-	BlendType GetBlendType()const { return _blendType; }
 	const Vector4& GetColor()const { return _color; }
 
 	void SetShaderParameter(const ShaderBase::Parameter& parameter) { this->_shaderParameter = parameter; }
 	void SetShadowParameter(const ShaderBase::Parameter& parameter) { this->_shadowParameter = parameter; }
 	void SetShader(std::string name);
 	void SetRenderType(ModelRenderType type) { this->_renderType = type; }
-	void SetBlendType(BlendType type) { this->_blendType = type; }
 	void SetColor(const Vector4& c) { this->_color = c; }
 #pragma endregion
 private:
 	ShaderBase::Parameter _shaderParameter;
 	ShaderBase::Parameter _shadowParameter;
-	std::string _shaderName = "PBR";
 	ModelRenderType _renderType = ModelRenderType::Dynamic;
-	BlendType _blendType = BlendType::Opaque;
 	Vector4 _color{ 1,1,1,1 };
 };

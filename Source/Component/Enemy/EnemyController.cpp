@@ -6,6 +6,9 @@
 
 void EnemyController::Start()
 {
+	// コンポーネント取得
+	_charactorController = GetActor()->GetComponent<CharactorController>();
+	_animator = GetActor()->GetComponent<Animator>();
 }
 
 void EnemyController::Update(float elapsedTime)

@@ -32,17 +32,6 @@ public:
 	// GUiの表示
 	void DrawGui();
 
-	// 指定のマテリアルのSRVを変更
-	void ChangeMaterialSRV(
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
-		int materialIndex,
-		std::string textureKey);
-	// 指定のマテリアルのSRVを変更
-	void ChangeMaterialSRV(
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
-		std::string materialName,
-		std::string textureKey);
-
 #pragma region アクセサ
 	// ノードの名前から番号を取得
 	int GetNodeIndex(const std::string& str)
@@ -58,13 +47,11 @@ public:
 	}
 
 	ModelResource* GetResource() { return _resource.get(); }
-	std::vector<Material>& GetMaterials() { return _materialMap; }
-	Material& GetMaterial(int index) { return _materialMap[index]; }
 	std::vector<ModelResource::Node>& GetPoseNodes() { return _poseNode; }
 	std::vector<ModelResource::Node>& GetAddressPoseNodes() { return _poseNode; }
 	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNode = nodes; }
 
-	const char* GetFilepath()const { return _serializePath.c_str(); }
+	const char* GetFilename()const { return _filename.c_str(); }
 #pragma endregion
 
 	// 再シリアライズ
@@ -80,12 +67,10 @@ protected:
 
 protected:
 	// ファイルパス
-	std::string _serializePath;
+	std::string _filename;
 
 	// モデルデータ
 	std::shared_ptr<ModelResource> _resource;
-	// マテリアル
-	std::vector<Material> _materialMap;
 
 	// 姿勢用ノード
 	std::vector<ModelResource::Node> _poseNode;

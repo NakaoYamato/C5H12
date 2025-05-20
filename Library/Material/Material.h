@@ -18,21 +18,6 @@ enum class BlendType
 	BlendTypeMax
 };
 
-/// <summary>
-/// モデルのシェーダータイプ
-/// </summary>
-enum class ModelShaderType
-{
-	Phong,
-	Ramp,
-	Grass,
-	PBR,
-
-	CascadedShadowMap,
-
-	ModelShaderTypeMax
-};
-
 class Material
 {
 public:
@@ -92,13 +77,13 @@ public:
 	ID3D11ShaderResourceView* const* GetAddressOfTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.GetAddressOf(); }
 	ID3D11ShaderResourceView* GetTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.Get(); }
 	BlendType GetBlendType() const { return _blendType; }
-	ModelShaderType GetShaderType() const { return _shaderType; }
+	const std::string& GetShaderName() const { return _shaderName; }
 
 	void SetName(const std::string& name) { _name = name; }
 	void SetColor(const std::string& key, const Vector4& color) { _colors[key] = color; }
 	void SetTextureData(const std::string& key, const TextureData& textureData) { _textureDatas[key] = textureData; }
 	void SetBlendType(BlendType type) { _blendType = type; }
-	void SetShaderType(ModelShaderType type);
+	void SetShaderName(std::string type) { _shaderName = type; }
 #pragma endregion
 
 private:
@@ -107,5 +92,5 @@ private:
 	std::unordered_map<std::string, TextureData>	_textureDatas;
 
 	BlendType		_blendType = BlendType::Opaque;
-	ModelShaderType	_shaderType = ModelShaderType::PBR;
+	std::string		_shaderName = "";
 };

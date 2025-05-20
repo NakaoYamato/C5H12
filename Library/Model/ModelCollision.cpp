@@ -18,7 +18,7 @@ void ModelCollision::Load(std::weak_ptr<Model> model)
     _model = model;
 
     // モデルのシリアライズパスからイベント情報のパスを取得
-    if (!Deserialize(_model.lock()->GetFilepath()))
+    if (!Deserialize(_model.lock()->GetFilename()))
     {
         // なかったら新規作成
         Clear();

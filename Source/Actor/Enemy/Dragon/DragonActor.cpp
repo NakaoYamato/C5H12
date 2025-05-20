@@ -124,7 +124,7 @@ void DragonActor::SetModelTexture()
 				nullptr);
 
 			// SRVの設定
-			GetModel().lock()->ChangeMaterialSRV(srv, materialName, textureKey);
+			_modelRenderer.lock()->ChangeMaterialSRV(srv, materialName, textureKey);
 
 			// テクスチャのファイル設定
 			for (auto& material : resource->GetAddressMaterials())

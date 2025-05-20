@@ -20,7 +20,7 @@ Model::Model(ID3D11Device* device, const char* filename)
     assert(_resource != nullptr);
 
     // シリアライズ用ファイルパス取得
-    _serializePath = _resource->GetSerializePath();
+    _filename = _resource->GetSerializePath();
 
     // ノードデータをコピー
     _poseNode.resize(_resource->GetNodes().size());
@@ -118,19 +118,6 @@ void Model::DrawGui()
 {
     if (ImGui::TreeNode(u8"モデル"))
     {
-        if (ImGui::TreeNode(u8"マテリアル"))
-        {
-            for (auto& material : _materialMap)
-            {
-                if (ImGui::TreeNode(material.GetName().c_str()))
-                {
-					material.DrawGui();
-                    ImGui::TreePop();
-                }
-            }
-            ImGui::TreePop();
-        }
-
         if (ImGui::TreeNode(u8"ノード"))
         {
             std::function<void(ModelResource::Node&)> NodeGui = [&](ModelResource::Node& node)
@@ -165,7 +152,7 @@ void Model::DrawGui()
             ImGui::TreePop();
         }
         ImGui::TreePop();
-        ImGui::InputText(u8"ファイルパス", &_serializePath);
+        ImGui::InputText(u8"ファイルパス", &_filename);
         if (ImGui::Button(u8"シリアライズ"))
         {
             ReSerialize();
@@ -182,34 +169,9 @@ void Model::DrawGui()
     }
 }
 
-// 指定のマテリアルのSRVを変更
-void Model::ChangeMaterialSRV(
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
-    int materialIndex, 
-    std::string textureKey)
-{
-    _materialMap.at(materialIndex).ChangeTextureSRV(srv, textureKey);
-}
-
-// 指定のマテリアルのSRVを変更
-void Model::ChangeMaterialSRV(
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, 
-    std::string materialName, 
-    std::string textureKey)
-{
-	for (auto& material : _materialMap)
-	{
-        if (material.GetName() == materialName)
-        {
-            material.ChangeTextureSRV(srv, textureKey);
-            return;
-        }
-	}
-}
-
 void Model::ReSerialize()
 {
-    _resource->Serialize(_serializePath.c_str());
+    _resource->Serialize(_filename.c_str());
 }
 
 /// COMオブジェクト生成
@@ -240,37 +202,5 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
         hr = device->CreateBuffer(&buffer_desc, &subresource_data,
             mesh.indexBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-    }
-
-    HRESULT hr{ S_OK };
-
-    // マテリアル作成
-    for (ModelResource::Material& modelMaterial : _resource->GetAddressMaterials())
-    {
-        auto& material = _materialMap.emplace_back();
-		material.SetName(modelMaterial.name);
-		// テクスチャ情報の取得
-        for (auto& [key, textureData] : modelMaterial.textureDatas)
-        {
-
-            if (textureData.filename.size() > 0)
-            {
-                std::filesystem::path path(fbx_filename);
-                path.replace_filename(textureData.filename);
-                material.LoadTexture(device, key, path.c_str());
-            }
-            else
-            {
-                material.MakeDummyTexture(device, key,
-                    textureData.dummyTextureValue,
-                    textureData.dummyTextureDimension);
-            }
-        }
-
-		// カラー情報の取得
-		for (auto& [key, color] : modelMaterial.colors)
-		{
-			material.SetColor(key, color);
-		}
     }
 }

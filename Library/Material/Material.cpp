@@ -13,23 +13,18 @@ void Material::DrawGui()
 		u8"Opaque",
 		u8"Alpha",
 	};
-	static const char* shaderTypeNames[] =
-	{
-		u8"Phong",
-		u8"Ramp",
-		u8"Grass",
-		u8"PBR",
-	};
 
 	ImGui::Text((u8"マテリアル名:" + _name).c_str());
+
 	ImGui::Separator();
 	int bId = static_cast<int>(_blendType);
 	if (ImGui::Combo(u8"ブレンドタイプ", &bId, blendTypeName, _countof(blendTypeName)))
 		SetBlendType(static_cast<BlendType>(bId));
 	ImGui::Separator();
-	int shaderType = static_cast<int>(_shaderType);
-	if (ImGui::Combo(u8"シェーダー", &shaderType, shaderTypeNames, _countof(shaderTypeNames)))
-		SetShaderType(static_cast<ModelShaderType>(shaderType));
+
+	ImGui::Text(u8"使用中のシェーダー:");
+	ImGui::SameLine();
+	ImGui::Text(_shaderName.c_str());
 	ImGui::Separator();
 
 	for (auto& [key, color] : _colors)
@@ -78,9 +73,4 @@ void Material::MakeDummyTexture(ID3D11Device* device,
 		value, dimension);
 	// テクスチャデータを格納
 	_textureDatas[key] = textureData;
-}
-
-void Material::SetShaderType(ModelShaderType type)
-{
-	_shaderType = type;
 }

@@ -75,7 +75,7 @@ private:
     // インスタンシング描画用情報
     struct InstancingDrawInfo
     {
-        ModelShaderType				shaderType{};
+        std::string 				shaderType{};
         using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
         std::vector<ModelParameter> modelParameters;
         Material*                   material = nullptr;
@@ -132,7 +132,7 @@ public:
     void DrawInstancing(Model* model,
         const Vector4& color,
         Material* material,
-        ModelShaderType shaderType,
+        std::string shaderType,
         const DirectX::XMFLOAT4X4& world,
         ShaderBase::Parameter* parameter);
 
@@ -156,7 +156,7 @@ public:
     void CastShadow(const RenderContext& rc);
 
     /// <summary>
-    /// ModelRenderTypeのシェーダー名を取得
+    /// ModelRenderTypeの使用可能シェーダーを取得
     /// </summary>
     /// <param name="type"></param>
     /// <param name="deferred"></param>
@@ -169,7 +169,7 @@ public:
     /// <param name="type"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    ShaderBase::Parameter GetShaderParameterKey(ModelRenderType type, ModelShaderType key, bool deferred);
+    ShaderBase::Parameter GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred);
 
 private:
     // インスタンシングモデルの描画
@@ -189,13 +189,13 @@ private:
     InstancingModelCB	_cbInstancingSkeleton{};
 
     // シェーダーの配列
-    using ShaderMap = std::unordered_map<ModelShaderType, std::unique_ptr<ShaderBase>>;
+    using ShaderMap = std::unordered_map<std::string, std::unique_ptr<ShaderBase>>;
     ShaderMap                   _deferredShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
     ShaderMap                   _forwardShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
     std::unique_ptr<ShaderBase> _cascadedSMShader[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
     // 各モデルタイプのInfo
-    using DrawInfoMap = std::unordered_map<ModelShaderType, std::vector<DrawInfo>>;
+    using DrawInfoMap = std::unordered_map<std::string, std::vector<DrawInfo>>;
     using InstancingDrawInfoMap = std::unordered_map<Model*, InstancingDrawInfo>;
     DrawInfoMap                 _dynamicInfomap;
     DrawInfoMap                 _staticInfomap;

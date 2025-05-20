@@ -4,30 +4,47 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Algorithm/Converter.h"
+
+// 開始処理
+void ModelRenderer::Start()
+{
+	if (GetActor()->GetModel().lock())
+	{
+		// モデルが存在するならセット
+		SetModel(GetActor()->GetModel());
+	}
+}
 
 // 更新処理
 void ModelRenderer::Update(float elapsedTime)
 {
-	auto model = GetActor()->GetModel().lock();
-	if (model == nullptr) return;
-	model->UpdateTransform(GetActor()->GetTransform().GetMatrix());
+	if (_model.lock() == nullptr)
+	{
+		// モデルが存在しないならリターン
+		auto model = GetActor()->GetModel().lock();
+		if (model == nullptr) return;
+
+		// モデルが存在するならセット
+		SetModel(GetActor()->GetModel());
+	}
+
+	_model.lock()->UpdateTransform(GetActor()->GetTransform().GetMatrix());
 }
 
 // 描画処理
 void ModelRenderer::Render(const RenderContext& rc)
 {
-	auto model = GetActor()->GetModel().lock();
-	if (model == nullptr) return;
+	if (_model.lock() == nullptr) return;
 
-	auto& materialMap = model->GetMaterials();
-	const ModelResource* resource = model->GetResource();
+	const ModelResource* resource = _model.lock()->GetResource();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
 			&mesh,
-			model.get(), 
+			_model.lock().get(),
 			_color, 
-			&materialMap.at(mesh.materialIndex),
+			&_materialMap.at(mesh.materialIndex),
 			_renderType, 
 			&_shaderParameter);
 	}
@@ -36,18 +53,16 @@ void ModelRenderer::Render(const RenderContext& rc)
 // 影描画
 void ModelRenderer::CastShadow(const RenderContext& rc)
 {
-	auto model = GetActor()->GetModel().lock();
-	if (model == nullptr) return;
+	if (_model.lock() == nullptr) return;
 
-	auto& materialMap = model->GetMaterials();
-	const ModelResource* resource = model->GetResource();
+	const ModelResource* resource = _model.lock()->GetResource();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
 		GetActor()->GetScene()->GetMeshRenderer().DrawShadow(
 			&mesh, 
-			model.get(), 
+			_model.lock().get(),
 			Vector4::White,
-			&materialMap.at(mesh.materialIndex),
+			&_materialMap.at(mesh.materialIndex),
 			_renderType, 
 			&_shadowParameter);
 	}
@@ -58,19 +73,33 @@ void ModelRenderer::DrawGui()
 {
 	ImGui::ColorEdit4("color", &_color.x);
 	ImGui::Separator();
-	auto shaderName =
-		GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(
-			_renderType, Graphics::Instance().RenderingDeferred());
-	if (ImGui::TreeNodeEx(u8"使用可能のシェーダー"))
+	if (ImGui::TreeNode(u8"マテリアル"))
 	{
-		for (auto& name : shaderName)
+		// 使用可能なシェーダー取得
+		auto activeShaderTypes =
+			GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(_renderType, Graphics::Instance().RenderingDeferred());
+		for (auto& material : _materialMap)
 		{
-			if (ImGui::TreeNodeEx(name, ImGuiTreeNodeFlags_Leaf))
+			if (ImGui::TreeNode(material.GetName().c_str()))
 			{
-				// ダブルクリックで変更
-				if (ImGui::IsItemClicked())
-					SetShader(name);
+				// シェーダー変更GUI
+				if (ImGui::TreeNode(u8"シェーダー変更"))
+				{
+					auto shaderType = material.GetShaderName();
+					for (auto& activeShaderType : activeShaderTypes)
+					{
+						bool active = activeShaderType == shaderType;
+						if (ImGui::RadioButton(activeShaderType, active))
+						{
+							material.SetShaderName(activeShaderType);
+						}
+					}
+					ImGui::TreePop();
+				}
+				ImGui::Separator();
 
+				// マテリアルのGUI描画
+				material.DrawGui();
 				ImGui::TreePop();
 			}
 		}
@@ -91,7 +120,7 @@ void ModelRenderer::DrawGui()
 	{
 		_renderType = static_cast<ModelRenderType>(rId);
 		// エラー防止のためPhongに変更
-		SetShader("Phong");
+		//SetShader("Phong");
 	}
 
 	auto model = GetActor()->GetModel().lock();
@@ -99,13 +128,68 @@ void ModelRenderer::DrawGui()
 	model->DrawGui();
 }
 
-void ModelRenderer::SetShader(std::string name)
+// 指定のマテリアルのSRVを変更
+void ModelRenderer::ChangeMaterialSRV(
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
+	int materialIndex,
+	std::string textureKey)
 {
-	//this->_shaderName = name;
-	//// パラメータのkye受け取り
-	//_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
-	//	_renderType, 
-	//	_shaderName,
-	//	Graphics::Instance().RenderingDeferred());
+	_materialMap.at(materialIndex).ChangeTextureSRV(srv, textureKey);
+}
+
+// 指定のマテリアルのSRVを変更
+void ModelRenderer::ChangeMaterialSRV(
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, 
+	std::string materialName, 
+	std::string textureKey)
+{
+	for (auto& material : _materialMap)
+	{
+		if (material.GetName() == materialName)
+		{
+			material.ChangeTextureSRV(srv, textureKey);
+			return;
+		}
+	}
+}
+
+void ModelRenderer::SetModel(std::weak_ptr<Model> model)
+{
+	_model = model;
+	auto resource = model.lock()->GetResource();
+	if (resource == nullptr) return;
+	// マテリアルの取得
+	std::string filename = model.lock()->GetFilename();
+	for (ModelResource::Material& modelMaterial : resource->GetAddressMaterials())
+	{
+		auto& material = _materialMap.emplace_back();
+		material.SetName(modelMaterial.name);
+		// テクスチャ情報の取得
+		for (auto& [key, textureData] : modelMaterial.textureDatas)
+		{
+
+			if (textureData.filename.size() > 0)
+			{
+				std::filesystem::path path(filename);
+				path.replace_filename(textureData.filename);
+				material.LoadTexture(Graphics::Instance().GetDevice(), key, path.c_str());
+			}
+			else
+			{
+				material.MakeDummyTexture(Graphics::Instance().GetDevice(), key,
+					textureData.dummyTextureValue,
+					textureData.dummyTextureDimension);
+			}
+		}
+
+		// カラー情報の取得
+		for (auto& [key, color] : modelMaterial.colors)
+		{
+			material.SetColor(key, color);
+		}
+
+		// シェーダーの初期設定
+		material.SetShaderName("PBR");
+	}
 }
 

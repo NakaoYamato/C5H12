@@ -1,5 +1,7 @@
 #include "PlayerController.h"
 
+#include "../../Source/Component/Enemy/EnemyController.h" 
+
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../External/nameof/include/nameof.hpp"
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
@@ -30,8 +32,6 @@ void PlayerController::DrawGui()
     // プレイヤーの状態を表示
     ImGui::Text(u8"プレイヤーの状態 : %s", nameof::nameof_enum(_state).data());
     ImGui::Separator();
-	ImGui::DragFloat(u8"移動速度", &_moveSpeed, 0.01f, 0.0f, 100.0f);
-	ImGui::DragFloat(u8"摩擦", &_friction, 0.01f, 0.0f, 100.0f);
 
 	if (ImGui::Button(u8"ダメージを受ける"))
 	{
@@ -48,4 +48,40 @@ void PlayerController::DrawGui()
 
 	ImGui::Separator();
 	_stateMachine->DrawGui();
+}
+
+// 接触時処理
+void PlayerController::OnContact(CollisionData& collisionData)
+{
+	// 攻撃判定
+	if (collisionData.myLayer == CollisionLayer::Attack)
+	{
+		// 敵にダメージを与える
+		auto enemy = collisionData.other->GetComponent<EnemyController>();
+		if (enemy != nullptr)
+		{
+			// 以前に当たっていないか確認
+			if (std::find(
+				_attackHitActors.begin(), _attackHitActors.end(), enemy->GetActor()->GetName()) 
+				!= _attackHitActors.end())
+				return;
+
+			enemy->AddDamage(_ATK, collisionData.hitPosition);
+
+			_attackHitActors.push_back(enemy->GetActor()->GetName());
+		}
+	}
+}
+
+// ダメージを与える
+void PlayerController::AddDamage(float damage, Vector3 hitPosition)
+{
+	// 体力を減少
+	_health -= damage;
+	//// 受けたダメージを加算
+	//_sustainedDamage += damage;
+	//// ノックバックダメージを加算
+	//_knockbackDamage += damage;
+	// ダメージを受けた位置を保存
+	_hitPosition = hitPosition;
 }

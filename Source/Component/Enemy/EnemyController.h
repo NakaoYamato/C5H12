@@ -2,8 +2,9 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
+#include "../../Source/Interface/Common/IDamagable.h"
 
-class EnemyController : public Component
+class EnemyController : public Component, public IDamagable
 {
 public:
     EnemyController() {}
@@ -18,4 +19,10 @@ public:
     void DrawGui() override;
     // Õ“Ëˆ—
     void OnContact(CollisionData& collisionData)override;
+
+	// ƒ_ƒ[ƒW‚ğ—^‚¦‚é
+    virtual void AddDamage(float damage, Vector3 hitPosition) override;
+
+protected:
+    float _ATK = 1.0f;
 };

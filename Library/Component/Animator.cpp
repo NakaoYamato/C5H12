@@ -219,6 +219,7 @@ void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
     _animationTimer = 0;
     _isLoop = loop;
     _isPlaying = true;
+    _activeAttackEvent = true;
 
     // ブレンドアニメーションパラメーター
     _blendTimer = 0.0f;
@@ -506,8 +507,9 @@ void Animator::UpdateAnimationEvent()
 
     for (auto& event : GetCurrentEvents())
     {
-        // 攻撃判定が発生したら
-        if (event.eventType == AnimationEvent::EventType::Attack)
+        // 攻撃イベント使用フラグがオンかつ攻撃判定が発生したら
+        if (_activeAttackEvent &&
+            event.eventType == AnimationEvent::EventType::Attack)
         {
             auto& collisionManager = GetActor()->GetScene()->GetCollisionManager();
 

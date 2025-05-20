@@ -244,6 +244,7 @@
     <ClCompile Include="Source\Actor\Stage\StageActor.cpp" />
     <ClCompile Include="Source\Actor\WeaponActor.cpp" />
     <ClCompile Include="Source\Component\Camera\PlayerCameraController.cpp" />
+    <ClCompile Include="Source\Component\Enemy\Dummy\DummyEnemyController.cpp" />
     <ClCompile Include="Source\Component\Enemy\EnemyController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Component\Player\PlayerInput.cpp" />
@@ -366,11 +367,13 @@
     <ClInclude Include="Source\Actor\Stage\StageActor.h" />
     <ClInclude Include="Source\Actor\WeaponActor.h" />
     <ClInclude Include="Source\Component\Camera\PlayerCameraController.h" />
+    <ClInclude Include="Source\Component\Enemy\Dummy\DummyEnemyController.h" />
     <ClInclude Include="Source\Component\Enemy\EnemyController.h" />
     <ClInclude Include="Source\Component\Player\PlayerController.h" />
     <ClInclude Include="Source\Component\Player\PlayerInput.h" />
     <ClInclude Include="Source\Component\Stage\GrassController.h" />
     <ClInclude Include="Source\Actor\Mediator\NetworkMediator.h" />
+    <ClInclude Include="Source\Interface\Common\IDamagable.h" />
     <ClInclude Include="Source\Scene\Test\SceneCollisionDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />

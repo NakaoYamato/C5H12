@@ -266,6 +266,8 @@ namespace SprintSubState
     class SprintAttackSubState : public StateBase<PlayerStateMachine>
     {
     public:
+        static constexpr float ATK = 1.0f;
+    public:
         SprintAttackSubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
         {
         }
@@ -277,6 +279,9 @@ namespace SprintSubState
             owner->GetAnimator()->SetIsUseRootMotion(true);
             owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
             owner->GetAnimator()->PlayAnimation(u8"Attack_Sprint", false, 0.2f);
+
+			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
+            owner->GetPlayer()->SetATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -418,6 +423,8 @@ namespace Attack1SubState
     class Combo1SubState : public StateBase<PlayerStateMachine>
     {
     public:
+        static constexpr float ATK = 1.0f;
+    public:
         Combo1SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
         {
         }
@@ -426,6 +433,8 @@ namespace Attack1SubState
         void OnEnter() override
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
+			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
+			owner->GetPlayer()->SetATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -441,6 +450,8 @@ namespace Attack1SubState
     class Combo2SubState : public StateBase<PlayerStateMachine>
     {
     public:
+        static constexpr float ATK = 1.0f;
+    public:
         Combo2SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
         {
         }
@@ -449,6 +460,8 @@ namespace Attack1SubState
         void OnEnter() override
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo2", false, 0.3f);
+			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
+			owner->GetPlayer()->SetATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -464,6 +477,8 @@ namespace Attack1SubState
     class Combo3SubState : public StateBase<PlayerStateMachine>
     {
     public:
+        static constexpr float ATK = 1.0f;
+    public:
         Combo3SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
         {
         }
@@ -472,6 +487,8 @@ namespace Attack1SubState
         void OnEnter() override
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo3", false, 0.3f);
+			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
+			owner->GetPlayer()->SetATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -487,6 +504,8 @@ namespace Attack1SubState
     class Combo4SubState : public StateBase<PlayerStateMachine>
     {
     public:
+        static constexpr float ATK = 1.0f;
+    public:
         Combo4SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
         {
         }
@@ -495,6 +514,8 @@ namespace Attack1SubState
         void OnEnter() override
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo4", false, 0.3f);
+			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
+			owner->GetPlayer()->SetATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {

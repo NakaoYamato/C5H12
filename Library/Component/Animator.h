@@ -77,6 +77,8 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	std::vector<AnimationEvent::EventData> GetCurrentEvents();
+
+	void SetActiveAttackEvent(bool active) { _activeAttackEvent = active; }
 #pragma endregion
 
 
@@ -188,6 +190,9 @@ private:
 
 #pragma region イベント
 	AnimationEvent _animationEvent{};
+
+	// 攻撃イベントを発生させるか
+	bool _activeAttackEvent = false;
 #pragma endregion
 
 

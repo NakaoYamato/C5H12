@@ -4,10 +4,11 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
 #include "../../Source/StateMachine/Player/PlayerStateMachine.h"
+#include "../../Source/Interface/Common/IDamagable.h"
 
 #include <PlayerDefine.h>
 
-class PlayerController : public Component
+class PlayerController : public Component, public IDamagable
 {
 public:
 	PlayerController() {}
@@ -18,12 +19,15 @@ public:
 
 	// 開始処理
 	void Start() override;
-
 	// 更新処理
 	void Update(float elapsedTime) override;
-
 	// GUI描画
 	void DrawGui() override;
+	// 接触時処理
+	void OnContact(CollisionData& collisionData) override;
+
+	// ダメージを与える
+	void AddDamage(float damage, Vector3 hitPosition) override;
 
     /// <summary>
     /// 移動方向に向く
@@ -64,6 +68,15 @@ public:
     void SetSustainedDamage(int damage) { _sustainedDamage = damage; }
     void SetKnockbackDamage(int damage) { _knockbackDamage = damage; }
     void SetIsDead(bool isDead) { _isDead = isDead; }
+	void SetATK(float atk) { 
+		_ATK = atk; 
+		ClearHitActors(); 
+	}
+
+	void ClearHitActors()
+	{
+		_attackHitActors.clear();
+	}
 #pragma endregion
 
 private:
@@ -82,6 +95,7 @@ private:
 	int _sustainedDamage = 0;
 	int _knockbackDamage = 5;
 	bool _isDead = false;
+	float _ATK = 1.0f;
 #pragma endregion
     // プレイヤーの状態
     PlayerMainStates _state = PlayerMainStates::None;
@@ -89,8 +103,5 @@ private:
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
 
-	// 移動速度
-	float _moveSpeed = 20.0f;
-	// 摩擦力
-	float _friction = 25.0f;
+	std::vector<std::string> _attackHitActors;
 };

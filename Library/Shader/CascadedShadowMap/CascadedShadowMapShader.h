@@ -8,9 +8,9 @@
 class CascadedShadowMapShader : public ShaderBase
 {
 public:
-	CascadedShadowMapShader(ID3D11Device * device,
+	CascadedShadowMapShader(ID3D11Device* device,
 		const char* vsName,
-		D3D11_INPUT_ELEMENT_DESC * inputDescs, UINT inputSize);
+		D3D11_INPUT_ELEMENT_DESC* inputDescs, UINT inputSize);
 	~CascadedShadowMapShader() override = default;
 
 	// 開始処理
@@ -18,8 +18,9 @@ public:
 
 	// 更新処理
 	void Update(const RenderContext& rc,
-		const ModelResource::Material* material,
-		Parameter* parameter) override;
+		const Material* material,
+		Parameter* parameter) override {
+	}
 
 	// 終了処理
 	void End(const RenderContext& rc) override;

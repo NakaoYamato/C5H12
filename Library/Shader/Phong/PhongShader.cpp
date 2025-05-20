@@ -47,26 +47,26 @@ void PhongShader::Begin(const RenderContext& rc)
 }
 
 void PhongShader::Update(const RenderContext& rc, 
-	const ModelResource::Material* material,
+	const Material* material,
 	Parameter* parameter)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// メッシュ用定数バッファ更新
 	CbMesh cbMesh{};
-	cbMesh.Ka = material->colors.at("Ambient");
-	cbMesh.Kd = material->colors.at("Diffuse");
-	cbMesh.Ks = material->colors.at("Specular");
+	cbMesh.Ka = material->GetColor("Ambient");
+	cbMesh.Kd = material->GetColor("Diffuse");
+	cbMesh.Ks = material->GetColor("Specular");
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
 	ID3D11ShaderResourceView* srvs[] = 
 	{
-		material->textureDatas.at("Diffuse").textureSRV.Get(),
-		material->textureDatas.at("Normal").textureSRV.Get(),
-		material->textureDatas.at("Specular").textureSRV.Get(),
-		material->textureDatas.at("Roughness").textureSRV.Get(),
-		material->textureDatas.at("Emissive").textureSRV.Get()
+		material->GetTextureSRV("Diffuse"),
+		material->GetTextureSRV("Normal"),
+		material->GetTextureSRV("Specular"),
+		material->GetTextureSRV("Roughness"),
+		material->GetTextureSRV("Emissive")
 	};
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }

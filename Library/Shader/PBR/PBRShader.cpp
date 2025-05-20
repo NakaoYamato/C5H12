@@ -45,14 +45,16 @@ void PBRShader::Begin(const RenderContext& rc)
 	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
 }
 
-void PBRShader::Update(const RenderContext& rc, const ModelResource::Material* material, Parameter* parameter)
+void PBRShader::Update(const RenderContext& rc, 
+	const Material* material,
+	Parameter* parameter)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	Vector4 pbrFactor = material->colors.at("PBRFactor");
+	Vector4 pbrFactor = material->GetColor("PBRFactor");
 	// メッシュ用定数バッファ更新
 	CbMesh cbMesh{};
-	cbMesh.baseColor = material->colors.at("Diffuse");
+	cbMesh.baseColor = material->GetColor("Diffuse");
 	cbMesh.roughness = pbrFactor.y;
 	cbMesh.metalness = pbrFactor.z;
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
@@ -60,10 +62,10 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Material* m
 	// シェーダーリソースビュー設定
 	ID3D11ShaderResourceView* srvs[] =
 	{
-		material->textureDatas.at("Diffuse").textureSRV.Get(),
-		material->textureDatas.at("Roughness").textureSRV.Get(),
-		material->textureDatas.at("Normal").textureSRV.Get(),
-		material->textureDatas.at("Emissive").textureSRV.Get()
+		material->GetTextureSRV("Diffuse"),
+		material->GetTextureSRV("Roughness"),
+		material->GetTextureSRV("Normal"),
+		material->GetTextureSRV("Emissive")
 	};
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }

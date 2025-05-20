@@ -5,6 +5,7 @@
 #include <string>
 
 #include "../Model/Model.h"
+#include "../Material/Material.h"
 #include "../Shader/ShaderBase.h"
 
 /// <summary>
@@ -65,28 +66,27 @@ private:
 #pragma region Info
     struct DrawInfo
     {
-        Model* model = nullptr;
-        const ModelResource::Mesh* mesh = nullptr;
-        Vector4				color{ 1,1,1,1 };
-        ShaderBase::Parameter* parameter;
+        Model*                      model       = nullptr;
+        const ModelResource::Mesh*  mesh        = nullptr;
+        Vector4				        color       = Vector4::White;
+        Material*                   material    = nullptr;
+        ShaderBase::Parameter*      parameter   = nullptr;
     };
     struct AlphaDrawInfo
     {
-        Model* model = nullptr;
-        const ModelResource::Mesh* mesh = nullptr;
-        Vector4				color{ 1,1,1,1 };
-        ShaderBase::Parameter* parameter;
-        std::string shaderID;
-        ModelRenderType renderType;
-        float			distance = 0.0f;
+		DrawInfo				    drawInfo;
+        std::string                 shaderID;
+        ModelRenderType             renderType;
+        float			            distance = 0.0f;
     };
     // インスタンシング描画用
     struct InstancingDrawInfo
     {
-        std::string				shaderId{};
+        std::string				    shaderId{};
         using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
         std::vector<ModelParameter> modelParameters;
-        ShaderBase::Parameter* parameter = nullptr;
+        Material*                   material = nullptr;
+        ShaderBase::Parameter*      parameter = nullptr;
     };
 #pragma endregion
 public:
@@ -102,11 +102,13 @@ public:
     /// <param name="mesh"></param>
     /// <param name="model"></param>
     /// <param name="color"></param>
+    /// <param name="material"></param>
     /// <param name="shaderId"></param>
     /// <param name="renderType"></param>
     void Draw(const ModelResource::Mesh* mesh,
         Model* model,
         const Vector4& color,
+        Material* material,
         std::string shaderId,
         ModelRenderType renderType,
         BlendType blendType,
@@ -117,10 +119,12 @@ public:
     /// </summary>
     /// <param name="model"></param>
     /// <param name="color"></param>
+    /// <param name="material"></param>
     /// <param name="shaderId"></param>
     /// <param name="world"></param>
     void DrawInstancing(Model* model,
         const Vector4& color,
+        Material* material,
         std::string shaderId,
         const DirectX::XMFLOAT4X4& world,
         ShaderBase::Parameter* parameter);
@@ -165,20 +169,10 @@ private:
     void RenderInstancing(const RenderContext& rc);
 
     // DynamicBoneModelのメッシュ描画
-    void DrawDynamicBoneMesh(const RenderContext& rc,
-        ShaderBase* shader,
-        Model* model,
-        const ModelResource::Mesh* mesh,
-        const Vector4& materialColor,
-        ShaderBase::Parameter* parameter);
+    void DrawDynamicBoneMesh(const RenderContext& rc, ShaderBase* shader, DrawInfo& drawInfo);
 
     // StaticBoneModelのメッシュ描画
-    void DrawStaticBoneModel(const RenderContext& rc,
-        ShaderBase* shader,
-        Model* model,
-        const ModelResource::Mesh* mesh,
-        const Vector4& materialColor,
-        ShaderBase::Parameter* parameter);
+    void DrawStaticBoneModel(const RenderContext& rc, ShaderBase* shader, DrawInfo& drawInfo);
 
 private:
     // 定数バッファのデータ

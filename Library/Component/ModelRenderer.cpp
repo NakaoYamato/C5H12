@@ -18,6 +18,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 {
 	auto model = GetActor()->GetModel().lock();
 	if (model == nullptr) return;
+	auto& materialMap = model->GetMaterials();
 	const ModelResource* resource = model->GetResource();
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
@@ -25,6 +26,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
 			&mesh, model.get(), 
 			_color, 
+			&materialMap.at(mesh.materialIndex),
 			_shaderName, 
 			_renderType, 
 			_blendType, 
@@ -37,13 +39,15 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 {
 	auto model = GetActor()->GetModel().lock();
 	if (model == nullptr) return;
+	auto& materialMap = model->GetMaterials();
 	const ModelResource* resource = model->GetResource();
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
 			&mesh, model.get(), 
-			Vector4::White, 
+			Vector4::White,
+			&materialMap.at(mesh.materialIndex),
 			"CascadedShadowMap", 
 			_renderType, 
 			BlendType::Opaque, 

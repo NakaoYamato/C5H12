@@ -123,13 +123,15 @@ void DragonActor::SetModelTexture()
 				srv.ReleaseAndGetAddressOf(),
 				nullptr);
 
-			// SRV設定
+			// SRVの設定
+			GetModel().lock()->ChangeMaterialSRV(srv, materialName, textureKey);
+
+			// テクスチャのファイル設定
 			for (auto& material : resource->GetAddressMaterials())
 			{
 				if (material.name == materialName)
 				{
 					material.textureDatas.at(textureKey).filename = ToString(filename).c_str();
-					material.textureDatas.at(textureKey).textureSRV = srv;
 					return;
 				}
 			}

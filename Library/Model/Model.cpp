@@ -53,7 +53,7 @@ Model::Model(ID3D11Device* device, const char* filename)
     Debug::Output::String(filename);
     Debug::Output::String("\n");
 
-    // COM生成
+    /// COMオブジェクト生成
     CreateComObject(device, filename);
 }
 
@@ -120,23 +120,11 @@ void Model::DrawGui()
     {
         if (ImGui::TreeNode(u8"マテリアル"))
         {
-            for (auto& material : _resource->GetAddressMaterials())
+            for (auto& material : _materialMap)
             {
-                if (ImGui::TreeNodeEx(&material, ImGuiTreeNodeFlags_Leaf, material.name.c_str()))
+                if (ImGui::TreeNode(material.GetName().c_str()))
                 {
-                    for (auto& [key, color] : material.colors)
-                    {
-                        ImGui::ColorEdit4(key.c_str(), &color.x);
-                    }
-                    for (auto& [key, texture] : material.textureDatas)
-                    {
-                        static float textureSize = 128.0f;
-                        ImGui::Image(texture.textureSRV.Get(), { textureSize ,textureSize });
-                        ImGui::SameLine();
-                        ImGui::Text(key.c_str());
-                        ImGui::SameLine();
-                        ImGui::Text(std::string("\n" + texture.filename).c_str());
-                    }
+					material.DrawGui();
                     ImGui::TreePop();
                 }
             }
@@ -194,11 +182,37 @@ void Model::DrawGui()
     }
 }
 
+// 指定のマテリアルのSRVを変更
+void Model::ChangeMaterialSRV(
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
+    int materialIndex, 
+    std::string textureKey)
+{
+    _materialMap.at(materialIndex).ChangeTextureSRV(srv, textureKey);
+}
+
+// 指定のマテリアルのSRVを変更
+void Model::ChangeMaterialSRV(
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, 
+    std::string materialName, 
+    std::string textureKey)
+{
+	for (auto& material : _materialMap)
+	{
+        if (material.GetName() == materialName)
+        {
+            material.ChangeTextureSRV(srv, textureKey);
+            return;
+        }
+	}
+}
+
 void Model::ReSerialize()
 {
     _resource->Serialize(_serializePath.c_str());
 }
 
+/// COMオブジェクト生成
 void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
 {
     for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
@@ -230,27 +244,33 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
 
     HRESULT hr{ S_OK };
 
-    // シェーダーリソースビューの作成
-    for (ModelResource::Material& material : _resource->GetAddressMaterials())
+    // マテリアル作成
+    for (ModelResource::Material& modelMaterial : _resource->GetAddressMaterials())
     {
-        for (auto& [key, textureData] : material.textureDatas)
+        auto& material = _materialMap.emplace_back();
+		material.SetName(modelMaterial.name);
+		// テクスチャ情報の取得
+        for (auto& [key, textureData] : modelMaterial.textureDatas)
         {
+
             if (textureData.filename.size() > 0)
             {
                 std::filesystem::path path(fbx_filename);
                 path.replace_filename(textureData.filename);
-                D3D11_TEXTURE2D_DESC texture2d_desc;
-                GpuResourceManager::LoadTextureFromFile(device, path.c_str(),
-                    textureData.textureSRV.ReleaseAndGetAddressOf(),
-                    &texture2d_desc);
+                material.LoadTexture(device, key, path.c_str());
             }
             else
             {
-                GpuResourceManager::MakeDummyTexture(device,
-                    textureData.textureSRV.ReleaseAndGetAddressOf(),
+                material.MakeDummyTexture(device, key,
                     textureData.dummyTextureValue,
                     textureData.dummyTextureDimension);
             }
         }
+
+		// カラー情報の取得
+		for (auto& [key, color] : modelMaterial.colors)
+		{
+			material.SetColor(key, color);
+		}
     }
 }

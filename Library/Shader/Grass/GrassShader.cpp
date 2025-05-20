@@ -53,7 +53,7 @@ void GrassShader::Begin(const RenderContext& rc)
 }
 
 void GrassShader::Update(const RenderContext& rc, 
-    const ModelResource::Material* material, 
+	const Material* material,
     Parameter* parameter)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;

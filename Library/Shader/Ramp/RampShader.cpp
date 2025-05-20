@@ -56,21 +56,21 @@ void RampShader::Begin(const RenderContext& rc)
 }
 
 void RampShader::Update(const RenderContext& rc,
-	const ModelResource::Material* material,
+	const Material* material,
 	Parameter* parameter)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// メッシュ用定数バッファ更新
 	CbMesh cbMesh{};
-	cbMesh.Ka = material->colors.at("Ambient");
-	cbMesh.Kd = material->colors.at("Diffuse");
-	cbMesh.Ks = material->colors.at("Specular");
+	cbMesh.Ka = material->GetColor("Ambient");
+	cbMesh.Kd = material->GetColor("Diffuse");
+	cbMesh.Ks = material->GetColor("Specular");
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
-	dc->PSSetShaderResources(0, 1, material->textureDatas.at("Diffuse").textureSRV.GetAddressOf());
-	dc->PSSetShaderResources(1, 1, material->textureDatas.at("Normal").textureSRV.GetAddressOf());
+	dc->PSSetShaderResources(0, 1, material->GetAddressOfTextureSRV("Diffuse"));
+	dc->PSSetShaderResources(1, 1, material->GetAddressOfTextureSRV("Normal"));
 }
 
 void RampShader::End(const RenderContext& rc)

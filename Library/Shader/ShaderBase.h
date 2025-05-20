@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include "../Graphics/RenderContext.h"
-#include "../Model/ModelResource.h"
+#include "../Material/Material.h"
 
 /// <summary>
 /// モデルの描画に使用するシェーダを指定するための基底クラス
@@ -24,7 +24,7 @@ public:
 
     // 更新処理
     virtual void Update(const RenderContext& rc,
-        const ModelResource::Material* material,
+        const Material* material,
         Parameter* parameter) = 0;
 
     // 終了処理

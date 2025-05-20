@@ -66,7 +66,6 @@ public:
 		struct TextureData
 		{
 			std::string filename;
-			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
 			DWORD dummyTextureValue = 0;
 			UINT dummyTextureDimension = 0;
 			// シリアライズ
@@ -181,25 +180,6 @@ public:
 	// アニメーションの追加
 	void AppendAnimations(ModelResource* animationResource,
 		std::string animationName = "");
-
-	// 指定のマテリアルのSRVを変更
-	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, int materialIndex, std::string textureKey)
-	{
-		_materials.at(materialIndex).textureDatas.at(textureKey).textureSRV = srv;
-	}
-	// 指定のマテリアルのSRVを変更
-	void ChangeMaterialSRV(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, std::string materialName, std::string textureKey)
-	{
-		for (auto& material : _materials)
-		{
-			if (material.name == materialName)
-			{
-				material.textureDatas.at(textureKey).textureSRV = srv;
-				return;
-			}
-		}
-		assert(!"Material Not Find!!");
-	}
 
 #pragma region アクセサ
 	const std::vector<Node>& GetNodes() const { return _nodes; }

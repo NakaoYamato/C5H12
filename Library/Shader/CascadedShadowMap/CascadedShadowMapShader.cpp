@@ -35,13 +35,6 @@ void CascadedShadowMapShader::Begin(const RenderContext& rc)
 	dc->PSSetShader(nullptr, nullptr, 0);
 }
 
-void CascadedShadowMapShader::Update(const RenderContext&, 
-	const ModelResource::Material*,
-	Parameter*)
-{
-	// “Á‚É‚â‚é‚±‚Æ‚Í‚È‚¢
-}
-
 void CascadedShadowMapShader::End(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;

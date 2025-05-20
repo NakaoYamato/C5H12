@@ -15,7 +15,7 @@ public:
 
 	// XVˆ—
 	void Update(const RenderContext& rc,
-		const ModelResource::Material* material,
+		const Material* material,
 		Parameter* parameter) override;
 
 	// I—¹ˆ—

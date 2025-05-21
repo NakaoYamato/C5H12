@@ -2,6 +2,7 @@
 
 #include "../EnemyController.h"
 #include "../../Source/StateMachine/Enemy/Wyvern/WyvernStateMachine.h" 
+#include "../../Source/BehaviorTree/Enemy/Wyvern/WyvernBehaviorTree.h"
 
 class WyvernEnemyController : public EnemyController
 {
@@ -21,4 +22,6 @@ public:
 private:
 	// ステートマシン
 	std::unique_ptr<WyvernStateMachine> _stateMachine;
+	// ビヘイビアツリー
+	std::unique_ptr<WyvernBehaviorTree> _behaviorTree;
 };

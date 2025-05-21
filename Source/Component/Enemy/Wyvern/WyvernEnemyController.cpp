@@ -6,6 +6,8 @@ void WyvernEnemyController::Start()
 	EnemyController::Start();
 	// ステートマシン初期化
 	_stateMachine = std::make_unique<WyvernStateMachine>(this, _animator.lock().get());
+
+	_behaviorTree = std::make_unique<WyvernBehaviorTree>();
 }
 // 更新処理
 void WyvernEnemyController::Update(float elapsedTime)

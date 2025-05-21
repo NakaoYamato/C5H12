@@ -243,6 +243,9 @@
     <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp" />
     <ClCompile Include="Source\Actor\Stage\StageActor.cpp" />
     <ClCompile Include="Source\Actor\WeaponActor.cpp" />
+    <ClCompile Include="Source\BehaviorTree\Enemy\Wyvern\WyvernActionDerived.cpp" />
+    <ClCompile Include="Source\BehaviorTree\Enemy\Wyvern\WyvernBehaviorTree.cpp" />
+    <ClCompile Include="Source\BehaviorTree\Enemy\Wyvern\WyvernJudgmentDerived.cpp" />
     <ClCompile Include="Source\Component\Camera\PlayerCameraController.cpp" />
     <ClCompile Include="Source\Component\Enemy\Dummy\DummyEnemyController.cpp" />
     <ClCompile Include="Source\Component\Enemy\EnemyController.cpp" />
@@ -261,6 +264,11 @@
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorActionBase.h" />
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorData.h" />
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorJudgmentBase.h" />
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorNodeBase.h" />
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Material\Material.h" />
@@ -367,6 +375,9 @@
     <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h" />
     <ClInclude Include="Source\Actor\Stage\StageActor.h" />
     <ClInclude Include="Source\Actor\WeaponActor.h" />
+    <ClInclude Include="Source\BehaviorTree\Enemy\Wyvern\WyvernActionDerived.h" />
+    <ClInclude Include="Source\BehaviorTree\Enemy\Wyvern\WyvernBehaviorTree.h" />
+    <ClInclude Include="Source\BehaviorTree\Enemy\Wyvern\WyvernJudgmentDerived.h" />
     <ClInclude Include="Source\Component\Camera\PlayerCameraController.h" />
     <ClInclude Include="Source\Component\Enemy\Dummy\DummyEnemyController.h" />
     <ClInclude Include="Source\Component\Enemy\EnemyController.h" />

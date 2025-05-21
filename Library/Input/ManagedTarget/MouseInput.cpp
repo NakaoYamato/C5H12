@@ -103,7 +103,7 @@ void MouseInputObserver::ClipCursorInWindow() const
 	RECT rect;
 	if (GetClientRect(_hWnd, &rect)) 
 	{
-		static constexpr float ClipCursorOffset = 30.0f;
+		static constexpr LONG ClipCursorOffset = 30;
 
 		POINT tl = { rect.left	+ ClipCursorOffset, rect.top	+ ClipCursorOffset };
 		POINT br = { rect.right - ClipCursorOffset, rect.bottom - ClipCursorOffset };

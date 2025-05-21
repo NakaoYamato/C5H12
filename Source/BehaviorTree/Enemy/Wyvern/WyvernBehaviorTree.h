@@ -10,13 +10,29 @@ class Animator;
 class WyvernBehaviorTree
 {
 public:
-	WyvernBehaviorTree();
+	WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* animator);
+
+	// ビヘイビアツリー実行
+	void Run(float elapsedTime);
+	// GUI描画
+	void DrawGui();
+
+#pragma region アクセサ
+	WyvernEnemyController* GetWyvern() { return _wyvern; }
+	Animator* GetAnimator() { return _animator; }
+	// キャンセルイベントを取得
+	bool CallCancelEvent() const { return _callCancelEvent; }
+#pragma endregion
 
 private:
 	// ビヘイビアツリー
-	std::unique_ptr<BehaviorTree<WyvernBehaviorTree>> behaviorTree;
+	std::unique_ptr<BehaviorTree<WyvernBehaviorTree>> _behaviorTree;
 	// ビヘイビアデータ
-	std::unique_ptr < BehaviorData<WyvernBehaviorTree>> behaviorData;
-	// ビヘイビアノード
-	std::unique_ptr < BehaviorNodeBase<WyvernBehaviorTree>> behaviorNode;
+	std::unique_ptr<BehaviorData<WyvernBehaviorTree>> _behaviorData;
+	// 起動中のビヘイビアノード
+	BehaviorNodeBase<WyvernBehaviorTree>* _activeNode = nullptr;
+
+	WyvernEnemyController*	_wyvern = nullptr;
+	Animator*				_animator = nullptr;
+	bool					_callCancelEvent = false;
 };

@@ -15,6 +15,8 @@ public:
 	void Start() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
+	// GUI描画
+	void DrawGui() override;
 
 	// ダメージを与える
 	void AddDamage(float damage, Vector3 hitPosition) override;

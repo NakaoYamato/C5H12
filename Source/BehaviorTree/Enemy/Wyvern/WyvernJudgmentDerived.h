@@ -14,6 +14,15 @@ public:
 	bool Judgment() override;
 };
 
+// AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class WyvernAttackJudgment :public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernAttackJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
+};
+
 // WanderNode‘JˆÚ”»’è
 class WyvernWanderJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
 {

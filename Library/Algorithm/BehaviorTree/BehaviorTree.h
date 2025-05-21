@@ -19,13 +19,13 @@ public:
 	{
 		// データをリセットして開始
 		data->Init();
-		return _root->Inference(data);
+		return _root->Inference(data).get();
 	}
 
 	// シーケンスノードから推論開始
 	BehaviorNodeBase<T>* SequenceBack(BehaviorNodeBase<T>* sequenceNode, BehaviorData<T>* data)
 	{
-		return sequenceNode->Inference(data);
+		return sequenceNode->Inference(data).get();
 	}
 
 	// ノード追加

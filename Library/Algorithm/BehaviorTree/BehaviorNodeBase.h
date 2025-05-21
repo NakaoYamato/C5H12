@@ -18,7 +18,7 @@ enum class SelectRule
 };
 
 template<class T>
-class BehaviorNodeBase
+class BehaviorNodeBase : public std::enable_shared_from_this<BehaviorNodeBase<T>>
 {
 public:
 	using NodeTempPtr		= std::shared_ptr<BehaviorNodeBase<T>>;
@@ -107,7 +107,7 @@ public:
 		return true;
 	}
 	// 優先順位選択
-	NodeTempPtr SelectPriority(std::vector<NodeTempPtr> list)
+	NodeTempPtr SelectPriority(std::vector<NodeTempPtr>* list)
 	{
 		NodeTempPtr selectNode = nullptr;
 		unsigned int priority = INT_MAX;
@@ -116,9 +116,9 @@ public:
 		for (int i = 0; i < list->size(); i++)
 		{
 			// list->at(i)->priority が低いほど優先
-			if (list->at(i)->priority < priority)
+			if (list->at(i)->_priority < priority)
 			{
-				priority = list->at(i)->priority;
+				priority = list->at(i)->_priority;
 				selectNode = list->at(i);
 			}
 		}
@@ -126,7 +126,7 @@ public:
 		return selectNode;
 	}
 	// ランダム選択
-	NodeTempPtr SelectRandom(std::vector<NodeTempPtr> list)
+	NodeTempPtr SelectRandom(std::vector<NodeTempPtr>* list)
 	{
 		int selectNo = 0;
 		int listSize = static_cast<int>(list->size());
@@ -139,7 +139,7 @@ public:
 		return (*list).at(selectNo);
 	}
 	// シーケンス選択
-	NodeTempPtr SelectSequence(std::vector<NodeTempPtr> list, BehaviorData<T>* data)
+	NodeTempPtr SelectSequence(std::vector<NodeTempPtr>* list, BehaviorData<T>* data)
 	{
 		int step = 0;
 
@@ -173,7 +173,7 @@ public:
 			// 子ノードが実行可能リストに含まれているか
 			if (_children.at(step)->GetName() == (*itr)->GetName())
 			{
-				data->PushSequenceNode(_children.at(step)->GetParent());
+				data->PushSequenceNode(_children.at(step)->GetParent().get());
 				data->SetSequenceStep(_children.at(step)->GetParent()->GetName(), step + 1);
 				return _children.at(step);
 			}
@@ -187,7 +187,9 @@ public:
 		// 名前が一致
 		if (_name == searchName)
 		{
-			return NodeTempPtr();
+			// テンプレートでshard_from_thisを使用するために
+			// this->shared_from_this()を使用する
+			return this->shared_from_this();
 		}
 		else 
 		{
@@ -215,10 +217,10 @@ public:
 		for (int i = 0; i < _children.size(); i++)
 		{
 			// children.at(i)->judgmentがnullptrでなければ
-			if (_children.at(i)->judgment != nullptr)
+			if (_children.at(i)->_judgment != nullptr)
 			{
 				// tureであればlistにchildren.at(i)を追加していく
-				if (_children.at(i)->judgment->Judgment())
+				if (_children.at(i)->_judgment->Judgment())
 					list.push_back(_children.at(i));
 			}
 			else 

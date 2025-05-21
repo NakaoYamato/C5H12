@@ -7,7 +7,7 @@
 #include "../../Library/Component/ShapeController.h"
 
 #include "../../Library/Component/ModelRenderer.h"
-#include "../../Source/Actor/Enemy/Dragon/DragonActor.h"
+#include "../../Source/Actor/Enemy/Wyvern/WyvernActor.h"
 
 void SceneDragonDebug::Initialize()
 {
@@ -36,6 +36,6 @@ void SceneDragonDebug::Initialize()
         auto boxC = box->AddComponent<ShapeController>();
     }
     {
-        auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
+        auto wyvern = RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
     }
 }

@@ -32,3 +32,21 @@ private:
 	Animator* _animator = nullptr;
 	bool _callCancelEvent = false;
 };
+
+#pragma region 各ステート
+#pragma region テスト用
+class WyvernAttackMedleyState final : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernAttackMedleyState(WyvernStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
+	~WyvernAttackMedleyState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "AttackMedley"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+};
+#pragma endregion
+
+
+#pragma endregion

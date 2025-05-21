@@ -13,7 +13,7 @@
 #include "../../Source/Actor/Player/PlayerActor.h"
 #include "../../Source/Component/Stage/GrassController.h"
 
-#include "../../Source/Actor/Enemy/Dragon/DragonActor.h"
+#include "../../Source/Actor/Enemy/Wyvern/WyvernActor.h"
 
 //初期化
 void SceneDebug::Initialize()
@@ -76,26 +76,25 @@ void SceneDebug::Initialize()
             }
         ));
 
-        // 検証結果:DragonActor::OnCreate()にて複数スレッドでテクスチャにアクセスするとエラー
         jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Dragon",
             ImGuiControl::Profiler::Color::Purple,
             [&]()
             {
-                auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
+                auto wyvern1 = RegisterActor<WyvernActor>("Wyvern1", ActorTag::Enemy);
             }
         ));
         jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Dragon",
             ImGuiControl::Profiler::Color::Purple,
             [&]()
             {
-                auto dragon1 = RegisterActor<DragonActor>("Dragon1", ActorTag::Enemy);
+                auto wyvern2 = RegisterActor<WyvernActor>("Wyvern2", ActorTag::Enemy);
             }
         ));
         jobResults.emplace_back(JobSystem::Instance().EnqueueJob("Dragon",
             ImGuiControl::Profiler::Color::Purple,
             [&]()
             {
-                auto dragon2 = RegisterActor<DragonActor>("Dragon2", ActorTag::Enemy);
+                auto wyvern3 = RegisterActor<WyvernActor>("Wyvern3", ActorTag::Enemy);
             }
         ));
 
@@ -157,13 +156,13 @@ void SceneDebug::Initialize()
         }
 
         {
-            auto dragon = RegisterActor<DragonActor>("Dragon", ActorTag::Enemy);
+            auto wyvern1 = RegisterActor<WyvernActor>("Wyvern1", ActorTag::Enemy);
         }
         {
-            auto dragon = RegisterActor<DragonActor>("Dragon1", ActorTag::Enemy);
+            auto wyvern2 = RegisterActor<WyvernActor>("Wyvern2", ActorTag::Enemy);
         }
         {
-            auto dragon = RegisterActor<DragonActor>("Dragon2", ActorTag::Enemy);
+            auto wyvern3 = RegisterActor<WyvernActor>("Wyvern3", ActorTag::Enemy);
         }
     }
 }

@@ -236,7 +236,6 @@
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
-    <ClCompile Include="Source\Actor\Enemy\Dragon\DragonActor.cpp" />
     <ClCompile Include="Source\Actor\Enemy\Dummy\DummyActor.cpp" />
     <ClCompile Include="Source\Actor\Enemy\Wyvern\WyvernActor.cpp" />
     <ClCompile Include="Source\Actor\Player\PlayerActor.cpp" />
@@ -256,7 +255,6 @@
     <ClCompile Include="Source\Scene\Test\SceneDragonDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
-    <ClCompile Include="Source\StateMachine\Enemy\Dragon\DragonStateMachine.cpp" />
     <ClCompile Include="Source\StateMachine\Enemy\Wyvern\WyvernStateMachine.cpp" />
     <ClCompile Include="Source\StateMachine\Player\PlayerStateMachine.cpp" />
   </ItemGroup>
@@ -362,7 +360,6 @@
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
-    <ClInclude Include="Source\Actor\Enemy\Dragon\DragonActor.h" />
     <ClInclude Include="Source\Actor\Enemy\Dummy\DummyActor.h" />
     <ClInclude Include="Source\Actor\Enemy\Wyvern\WyvernActor.h" />
     <ClInclude Include="Source\Actor\Player\PlayerActor.h" />
@@ -383,7 +380,6 @@
     <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
-    <ClInclude Include="Source\StateMachine\Enemy\Dragon\DragonStateMachine.h" />
     <ClInclude Include="Source\StateMachine\Enemy\Wyvern\WyvernStateMachine.h" />
     <ClInclude Include="Source\StateMachine\Player\PlayerStateMachine.h" />
   </ItemGroup>

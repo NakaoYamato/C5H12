@@ -83,28 +83,6 @@ void ActorManager::Update(float elapsedTime)
 	//----------------------------------------------------------------
 
 	//----------------------------------------------------------------
-	// LateUpdate処理
-	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-	{
-		float deltaTime = elapsedTime;
-		auto& [timeScale, duration] = _gameSpeeds[i];
-		if (duration > 0.0f)
-		{
-			duration -= elapsedTime;
-			deltaTime *= timeScale;
-		}
-
-		for (auto& actor : _updateActors[i])
-		{
-			// 各アクターの計算時間
-			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Green);
-
-			actor->LateUpdate(deltaTime);
-		}
-	}
-	//----------------------------------------------------------------
-
-	//----------------------------------------------------------------
 	// 削除処理
 	for (const std::shared_ptr<Actor>& actor : _removeActors)
 	{
@@ -135,7 +113,33 @@ void ActorManager::Update(float elapsedTime)
 	//----------------------------------------------------------------
 }
 
-/// 一定間隔の更新処理
+// 遅延更新処理
+void ActorManager::LateUpdate(float elapsedTime)
+{
+	//----------------------------------------------------------------
+	// LateUpdate処理
+	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+	{
+		float deltaTime = elapsedTime;
+		auto& [timeScale, duration] = _gameSpeeds[i];
+		if (duration > 0.0f)
+		{
+			duration -= elapsedTime;
+			deltaTime *= timeScale;
+		}
+
+		for (auto& actor : _updateActors[i])
+		{
+			// 各アクターの計算時間
+			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Green);
+
+			actor->LateUpdate(deltaTime);
+		}
+	}
+	//----------------------------------------------------------------
+}
+
+// 一定間隔の更新処理
 void ActorManager::FixedUpdate()
 {
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)

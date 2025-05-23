@@ -12,17 +12,14 @@ void CharactorController::Start()
 	_animator = GetActor()->GetComponent<Animator>();
 }
 
-// 遅延更新処理
-void CharactorController::LateUpdate(float elapsedTime)
+// 更新処理
+void CharactorController::Update(float elapsedTime)
 {
-    // 重力適応
-    if (_useGravity)
-        AddForce(_gravity);
-
-	/// めり込みの解消処理
-	ResolvPushOut();
-    /// 速度更新
-    UpdateVelocity(elapsedTime);
+	// 重力適応
+	if (_useGravity)
+		AddForce(_gravity);
+	/// 速度更新
+	UpdateVelocity(elapsedTime);
 	/// 位置更新
 	UpdatePosition(elapsedTime);
 	/// 回転更新
@@ -31,6 +28,13 @@ void CharactorController::LateUpdate(float elapsedTime)
 	/// ルートモーションによる回転更新
 	if (_rotateToDirectionByRootMotion)
 		UpdateRotation(elapsedTime, { _animator.lock()->GetRootMovement().x, _animator.lock()->GetRootMovement().z });
+}
+
+// 遅延更新処理
+void CharactorController::LateUpdate(float elapsedTime)
+{
+	/// めり込みの解消処理
+	ResolvPushOut();
 }
 
 void CharactorController::FixedUpdate()

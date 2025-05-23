@@ -40,34 +40,12 @@ public:
 		return node;
 	}
 
-	// ノード追加
-	void AddNode(
-		std::string parentName,
-		std::string entryName,
-		int priority,
-		SelectRule selectRule,
-		std::shared_ptr<BehaviorJudgmentBase<T>> judgment,
-		std::shared_ptr<BehaviorActionBase<T>> action)
+	// ルートノード取得
+	std::shared_ptr<BehaviorNodeBase<T>> GetRoot()
 	{
-		if (parentName != "")
-		{
-			std::shared_ptr<BehaviorNodeBase<T>> parentNode = _root->SearchNode(parentName);
-
-			if (parentNode != nullptr)
-			{
-				std::shared_ptr<BehaviorNodeBase<T>> sibling = parentNode->GetLastChild();
-				std::shared_ptr<BehaviorNodeBase<T>> addNode = std::make_shared<BehaviorNodeBase<T>>(entryName, parentNode, sibling, priority, selectRule, judgment, action, parentNode->GetHirerchyNo() + 1);
-
-				parentNode->AddChild(addNode);
-			}
-		}
-		else 
-		{
-			if (_root == nullptr)
-			{
-				_root = std::make_shared<BehaviorNodeBase<T>>(entryName, nullptr, nullptr, priority, selectRule, judgment, action, 1);
-			}
-		}
+		if (_root == nullptr)
+			_root = std::make_shared<BehaviorNodeBase<T>>("Root", nullptr, nullptr, 0, SelectRule::Priority, nullptr, nullptr, 1);
+		return _root;
 	}
 
 	// 実行

@@ -13,6 +13,8 @@ public:
 
 	// 初期化処理
     void Start() override;
+    // 更新処理
+	void Update(float elapsedTime) override;
     // 遅延更新処理
     void LateUpdate(float elapsedTime) override;
     // 固定間隔更新処理

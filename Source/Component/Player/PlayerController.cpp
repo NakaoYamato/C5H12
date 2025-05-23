@@ -3,8 +3,6 @@
 #include "../../Source/Component/Enemy/EnemyController.h" 
 
 #include "../../Library/DebugSupporter/DebugSupporter.h"
-#include "../../External/nameof/include/nameof.hpp"
-#include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 #include <imgui.h>
 
 void PlayerController::Start()

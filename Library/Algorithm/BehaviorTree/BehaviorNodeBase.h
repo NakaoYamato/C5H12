@@ -51,6 +51,12 @@ public:
 #pragma region アクセサ
 	// 名前ゲッター
 	std::string GetName() { return _name; }
+	// 選択ルール
+	SelectRule GetSelectRule() { return _selectRule; }
+	// 判定クラス
+	JudgmentTempPtr GetJudgment() { return _judgment; }
+	// 実行クラス
+	ActionTempPtr GetAction() { return _action; }
 	// 親ノードゲッター
 	NodeTempPtr GetParent() { return _parent; }
 	// 子ノードゲッター
@@ -98,6 +104,26 @@ public:
 		_children.clear();
 	}
 #pragma endregion
+	// ノード追加
+	NodeTempPtr AddNode(
+		std::string entryName,
+		int priority,
+		SelectRule selectRule,
+		JudgmentTempPtr judgment,
+		ActionTempPtr action)
+	{
+		NodeTempPtr addNode = std::make_shared<BehaviorNodeBase<T>>(
+			entryName,
+			this->shared_from_this(),
+			GetLastChild(),
+			priority,
+			selectRule,
+			judgment,
+			action,
+			this->_hierarchyNo + 1);
+		this->AddChild(addNode);
+		return addNode;
+	}
 
 	// 実行可否判定
 	bool Judgment()

@@ -25,6 +25,8 @@ public:
     virtual void AddDamage(float damage, Vector3 hitPosition) override;
 
 #pragma region アクセサ
+	std::shared_ptr<CharactorController> GetCharactorController() const { return _charactorController.lock(); }
+
 	const Vector3& GetTargetPosition() const { return _targetPosition; }
 	float GetATK() const { return _ATK; }
 	float GetSearchRange() const { return _searchRange; }
@@ -43,5 +45,5 @@ protected:
 	Vector3 _targetPosition = Vector3::Zero;
     float _ATK = 1.0f;
 	float _searchRange = 30.0f;
-    float _attackRange = 10.0f;
+    float _attackRange = 20.0f;
 };

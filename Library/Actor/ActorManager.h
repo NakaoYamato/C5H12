@@ -32,19 +32,16 @@ public:
 
 	// XVˆ—
 	void Update(float elapsedTime);
-
-	/// ˆê’èŠÔŠu‚ÌXVˆ—
+	// ’x‰„XVˆ—
+	void LateUpdate(float elapsedTime);
+	// ˆê’èŠÔŠu‚ÌXVˆ—
 	void FixedUpdate();
-
 	// •`‰æˆ—
 	void Render(const RenderContext& rc);
-
 	// ‰e•`‰æˆ—
 	void CastShadow(const RenderContext& rc);
-
 	// 3D•`‰æŒã‚Ì•`‰æˆ—
 	void DelayedRender(RenderContext& rc);
-
 	// Gui•`‰æ
 	void DrawGui();
 

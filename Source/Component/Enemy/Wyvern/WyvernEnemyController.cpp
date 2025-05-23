@@ -1,6 +1,7 @@
 #include "WyvernEnemyController.h"
 
 #include "../../Library/Scene/Scene.h"
+#include "../../Source/Component/Player/PlayerController.h"
 
 #include <imgui.h>
 
@@ -18,10 +19,15 @@ void WyvernEnemyController::Update(float elapsedTime)
 	{
 		auto& actorManager = GetActor()->GetScene()->GetActorManager();
 		auto& playerTags = actorManager.FindByTag(ActorTag::Player);
-		auto& player = playerTags[0];
-		if (player != nullptr)
+		for (auto& playerTag : playerTags)
 		{
-			SetTargetPosition(player->GetTransform().GetPosition());
+			// playerControllerを持っているアクターを取得
+			auto playerController = playerTag->GetComponent<PlayerController>();
+			if (playerController == nullptr)
+				continue;
+			SetTargetPosition(playerTag->GetTransform().GetPosition());
+
+			break;
 		}
 	}
 

@@ -25,6 +25,10 @@ public:
 #pragma endregion
 
 private:
+	// ビヘイビアツリーのGUI描画
+	void DrawBehaviorTreeGui(BehaviorNodeBase<WyvernBehaviorTree>* node);
+
+private:
 	// ビヘイビアツリー
 	std::unique_ptr<BehaviorTree<WyvernBehaviorTree>> _behaviorTree;
 	// ビヘイビアデータ

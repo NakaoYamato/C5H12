@@ -19,6 +19,8 @@ void CharactorController::LateUpdate(float elapsedTime)
     if (_useGravity)
         AddForce(_gravity);
 
+	/// めり込みの解消処理
+	ResolvPushOut();
     /// 速度更新
     UpdateVelocity(elapsedTime);
 	/// 位置更新
@@ -112,7 +114,7 @@ void CharactorController::UpdateVelocity(float deltaTime)
 /// 位置更新
 void CharactorController::UpdatePosition(float deltaTime)
 {
-	Vector3 movement = _velocity * deltaTime + _pushOut;
+	Vector3 movement = _velocity * deltaTime;
 	// ルートモーションの移動量取得
 	if (_animator.lock())
 		movement += _animator.lock()->GetRootMovement();
@@ -248,4 +250,18 @@ void CharactorController::UpdateRotation(float deltaTime, const Vector2& vec)
 	{
 		this->GetActor()->GetTransform().SetAngleY(angle.y + speed);
 	}
+}
+
+/// めり込みの解消処理
+void CharactorController::ResolvPushOut()
+{
+	if (_pushOut == Vector3::Zero)
+		return;
+
+	// スフィアキャストでめり込み解消
+	MoveAndSlide({ _pushOut.x, 0.0f, _pushOut.z }, false);
+	// 垂直処理
+	MoveAndSlide({ 0.0f, _pushOut.y, 0.0f }, true);
+
+	_pushOut = {};
 }

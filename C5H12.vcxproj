@@ -258,7 +258,6 @@
     <ClCompile Include="Source\Scene\Test\SceneDragonDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
-    <ClCompile Include="Source\StateMachine\Enemy\Wyvern\WyvernStateMachine.cpp" />
     <ClCompile Include="Source\StateMachine\Player\PlayerStateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -391,7 +390,6 @@
     <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
-    <ClInclude Include="Source\StateMachine\Enemy\Wyvern\WyvernStateMachine.h" />
     <ClInclude Include="Source\StateMachine\Player\PlayerStateMachine.h" />
   </ItemGroup>
   <ItemGroup>

@@ -96,6 +96,10 @@ public:
 	/// <param name="deltaTime"></param>
 	void UpdateRotation(float deltaTime, const Vector2& vec);
 
+    /// <summary>
+	/// ‚ß‚è‚İ‚Ì‰ğÁˆ—
+    /// </summary>
+    void ResolvPushOut();
 private:
 #pragma region ƒpƒ‰ƒ[ƒ^
     // ”¼Œa

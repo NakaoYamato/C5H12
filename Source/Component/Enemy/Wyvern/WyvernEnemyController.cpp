@@ -8,9 +8,7 @@
 void WyvernEnemyController::Start()
 {
 	EnemyController::Start();
-	// ステートマシン初期化
-	_stateMachine = std::make_unique<WyvernStateMachine>(this, _animator.lock().get());
-
+	// ビヘイビアツリー作成
 	_behaviorTree = std::make_unique<WyvernBehaviorTree>(this, _animator.lock().get());
 }
 // 更新処理

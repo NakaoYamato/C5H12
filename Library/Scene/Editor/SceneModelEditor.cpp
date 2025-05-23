@@ -47,6 +47,13 @@ void SceneModelEditor::Update(float elapsedTime)
     auto model = _modelActor.lock()->GetModel().lock();
     if (model)
     {
+        // ルートモーション移動値を足す
+		if (_animator.lock()->GetAnimationIndex() != -1)
+		{
+			Vector3 rootMotion = _animator.lock()->GetRootMovement();
+			_modelActor.lock()->GetTransform().SetPosition(_modelActor.lock()->GetTransform().GetPosition() + rootMotion);
+		}
+
         // 当たり判定表示
         _modelCollision.DebugRender();
 

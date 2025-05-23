@@ -264,12 +264,24 @@ public:
 
 		return result;
 	}
+	// 開始
+	void Enter()
+	{
+		if (_action != nullptr)
+			_action->OnEnter();
+	}
 	// 実行
 	BehaviorActionState Run(float elapsedTime)
 	{
 		if (_action != nullptr)
 			return _action->Run(elapsedTime);
 		return BehaviorActionState::Failed;
+	}
+	// 終了
+	void Exit()
+	{
+		if (_action != nullptr)
+			_action->OnExit();
 	}
 protected:
 	std::string		_name;			// 名前

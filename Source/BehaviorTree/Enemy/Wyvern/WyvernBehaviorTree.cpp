@@ -15,7 +15,6 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* 
 
 	_behaviorTree->AddNode("", "Root", 0, SelectRule::Priority, nullptr, nullptr);
 	{
-
 		_behaviorTree->AddNode("Root", "Battle", 4, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
 		{
 			_behaviorTree->AddNode("Battle", "Attack", 1, SelectRule::Random, std::make_shared<WyvernAttackJudgment>(this), nullptr);

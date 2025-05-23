@@ -19,13 +19,25 @@ public:
 	{
 		// データをリセットして開始
 		data->Init();
-		return _root->Inference(data).get();
+		BehaviorNodeBase<T>* node = _root->Inference(data).get();
+		if (node != nullptr)
+		{
+			// ノードの開始処理
+			node->Enter();
+		}
+		return node;
 	}
 
 	// シーケンスノードから推論開始
 	BehaviorNodeBase<T>* SequenceBack(BehaviorNodeBase<T>* sequenceNode, BehaviorData<T>* data)
 	{
-		return sequenceNode->Inference(data).get();
+		BehaviorNodeBase<T>* node = sequenceNode->Inference(data).get();
+		if (node != nullptr)
+		{
+			// ノードの開始処理
+			node->Enter();
+		}
+		return node;
 	}
 
 	// ノード追加
@@ -67,6 +79,9 @@ public:
 		// 正常終了
 		if (state == BehaviorActionState::Complete)
 		{
+			// 終了処理
+			actionNode->Exit();
+
 			// シーケンスの途中かを判断
 			BehaviorNodeBase<T>* sequenceNode = data->PopSequenceNode();
 
@@ -80,9 +95,13 @@ public:
 				// 途中ならそこから始める
 				return SequenceBack(sequenceNode, data);
 			}
-			// 失敗は終了
 		}
-		else if (state == BehaviorActionState::Failed) {
+		// 失敗は終了
+		else if (state == BehaviorActionState::Failed) 
+		{
+			// 終了処理
+			actionNode->Exit();
+
 			return nullptr;
 		}
 

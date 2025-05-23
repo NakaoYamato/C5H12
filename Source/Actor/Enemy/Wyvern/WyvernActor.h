@@ -5,7 +5,6 @@
 
 #include "../../Library/Component/Animator.h"
 #include "../../Source/Component/Enemy/Wyvern/WyvernEnemyController.h"
-#include "../../Source/StateMachine/Enemy/Wyvern/WyvernStateMachine.h"
 
 class WyvernActor : public Actor
 {

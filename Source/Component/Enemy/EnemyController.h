@@ -42,6 +42,6 @@ protected:
 
 	Vector3 _targetPosition = Vector3::Zero;
     float _ATK = 1.0f;
-	float _searchRange = 50.0f;
+	float _searchRange = 30.0f;
     float _attackRange = 10.0f;
 };

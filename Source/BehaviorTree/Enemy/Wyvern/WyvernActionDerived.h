@@ -10,6 +10,9 @@ class WyvernNormalAction : public BehaviorActionBase<WyvernBehaviorTree>
 {
 public:
 	WyvernNormalAction(WyvernBehaviorTree* owner) :BehaviorActionBase(owner) {}
+	// ŠJnˆ—
+	void OnEnter()override;
+	// Àsˆ—
 	BehaviorActionState Run(float elapsedTime) override;
 };
 

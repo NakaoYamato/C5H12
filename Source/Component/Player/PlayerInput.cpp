@@ -17,6 +17,7 @@ void PlayerInput::Update(float elapsedTime)
     auto player = _playerController.lock();
 	if (player == nullptr)
 		return;
+	auto stateMachine = player->GetPlayerStateMachine();
 
 	// “ü—Íˆ—
 	{
@@ -36,17 +37,17 @@ void PlayerInput::Update(float elapsedTime)
 		Vector2 movement = {};
 		movement.x = frontVec.x * lAxisValue.y + rightVec.x * lAxisValue.x;
 		movement.y = frontVec.z * lAxisValue.y + rightVec.z * lAxisValue.x;
-        player->SetMovement(Vector2::Normalize(movement));
+		stateMachine->SetMovement(movement);
 
         // ˆÚ“®—Ê‚ª‚ ‚ê‚ÎˆÚ“®’†‚Æ‚·‚é
-		player->SetIsMoving(movement.LengthSq() > 0.0f);
+		stateMachine->SetIsMoving(movement.LengthSq() > 0.0f);
 	}
 
-	player->SetIsDash(_INPUT_IS_PRESSED("Dash"));
-    player->SetIsGuard(_INPUT_IS_PRESSED("Guard") || _INPUT_IS_AXIS("Guard") > 0.0f);
+	stateMachine->SetIsDash(_INPUT_IS_PRESSED("Dash"));
+	stateMachine->SetIsGuard(_INPUT_IS_PRESSED("Guard") || _INPUT_IS_AXIS("Guard") > 0.0f);
 
-    player->SetIsAttack(_INPUT_IS_TRIGGERD("Action1"));
-    player->SetIsEvade(_INPUT_IS_TRIGGERD("Evade"));
+	stateMachine->SetIsAttack(_INPUT_IS_TRIGGERD("Action1"));
+	stateMachine->SetIsEvade(_INPUT_IS_TRIGGERD("Evade"));
 }
 
 // GUI•`‰æ

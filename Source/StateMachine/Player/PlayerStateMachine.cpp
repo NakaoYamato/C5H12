@@ -7,7 +7,7 @@
 #include <imgui.h>
 
 PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* animator) :
-    _player(player),
+	_player(player),
     _animator(animator)
 {
     // ステート設定
@@ -53,18 +53,18 @@ void PlayerStateMachine::Execute(float elapsedTime)
     }
 
     // 被弾処理
-    if (_player->GetSustainedDamage() > 0)
+    if (GetSustainedDamage() > 0)
     {
-        if (_player->GetSustainedDamage() >= _player->GetKnockbackDamage())
+        if (GetSustainedDamage() >= GetKnockbackDamage())
         {
-            if (_player->IsGuard())
+            if (IsGuard())
                 _stateMachine.ChangeState(GetPlayerMainStateName(PlayerMainStates::GuardBreak));
             else
                 _stateMachine.ChangeState(GetPlayerMainStateName(PlayerMainStates::HitKnockDown));
         }
         else
         {
-            if (_player->IsGuard())
+            if (IsGuard())
                 _stateMachine.ChangeState(GetPlayerMainStateName(PlayerMainStates::GuardHit));
             else
                 _stateMachine.ChangeState(GetPlayerMainStateName(PlayerMainStates::Hit));
@@ -72,7 +72,7 @@ void PlayerStateMachine::Execute(float elapsedTime)
     }
 
     // 死亡処理
-	if (_player->IsDead() && _stateMachine.GetStateName() != GetPlayerMainStateName(PlayerMainStates::Death))
+	if (IsDead() && _stateMachine.GetStateName() != GetPlayerMainStateName(PlayerMainStates::Death))
 	{
 		_stateMachine.ChangeState(GetPlayerMainStateName(PlayerMainStates::Death));
 	}
@@ -104,6 +104,14 @@ void PlayerStateMachine::DrawGui()
 
         ImGui::TreePop();
     }
+}
+
+void PlayerStateMachine::RotationMovement(float elapsedTime, float rotationSpeed)
+{
+    auto charactorController = _player->GetActor()->GetComponent<CharactorController>();
+    if (charactorController == nullptr)
+        return;
+    charactorController->UpdateRotation(elapsedTime, _movement * rotationSpeed);
 }
 
 // ステート変更
@@ -139,15 +147,15 @@ void PlayerIdleState::OnEnter()
 
 void PlayerIdleState::OnExecute(float elapsedTime)
 {
-    if (owner->GetPlayer()->IsAttack())
+    if (owner->IsAttack())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));
-	else if (owner->GetPlayer()->IsMoving())
+	else if (owner->IsMoving())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Run));
     // 回避移行
-    else if (owner->GetPlayer()->IsEvade())
+    else if (owner->IsEvade())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
 	// ガード移行
-	else if (owner->GetPlayer()->IsGuard())
+	else if (owner->IsGuard())
 		owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
 }
 #pragma endregion
@@ -160,7 +168,7 @@ const char* PlayerRunState::GetName() const
 void PlayerRunState::OnEnter()
 {
     // フラグを立てる
-    owner->GetPlayer()->SetIsMoving(true);
+    owner->SetIsMoving(true);
 
     owner->GetAnimator()->SetRootNodeIndex("root");
     owner->GetAnimator()->SetIsUseRootMotion(true);
@@ -170,25 +178,25 @@ void PlayerRunState::OnEnter()
 void PlayerRunState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
-    owner->GetPlayer()->RotationMovement(elapsedTime);
+    owner->RotationMovement(elapsedTime);
 
-    if (owner->GetPlayer()->IsAttack())
+    if (owner->IsAttack())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));
-    else if (owner->GetPlayer()->IsDash())
+    else if (owner->IsDash())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Sprint));
-    else if (!owner->GetPlayer()->IsMoving())
+    else if (!owner->IsMoving())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Idle));
     // 回避移行
-	else if (owner->GetPlayer()->IsEvade())
+	else if (owner->IsEvade())
 		owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
     // ガード移行
-    else if (owner->GetPlayer()->IsGuard())
+    else if (owner->IsGuard())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
 }
 void PlayerRunState::OnExit()
 {
     // フラグを下ろす
-    owner->GetPlayer()->SetIsMoving(false);
+    owner->SetIsMoving(false);
 }
 #pragma endregion
 
@@ -211,13 +219,13 @@ namespace SprintSubState
         void OnExecute(float elapsedTime) override
         {
             // 攻撃移行
-            if (owner->GetPlayer()->IsAttack())
+            if (owner->IsAttack())
                 owner->GetStateMachine().ChangeSubState(GetPlayerSubStateName(PlayerSubStates::SprintAttack));
             // 回避移行
-            else if (owner->GetPlayer()->IsEvade())
+            else if (owner->IsEvade())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
             // ガード移行
-            else if (owner->GetPlayer()->IsGuard())
+            else if (owner->IsGuard())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
             // アニメーションが終了していたら遷移
             else if (!owner->GetAnimator()->IsPlayAnimation())
@@ -247,16 +255,16 @@ namespace SprintSubState
         void OnExecute(float elapsedTime) override
         {
 			// 攻撃移行
-            if (owner->GetPlayer()->IsAttack())
+            if (owner->IsAttack())
                 owner->GetStateMachine().ChangeSubState(GetPlayerSubStateName(PlayerSubStates::SprintAttack));
             // 回避移行
-            else if (owner->GetPlayer()->IsEvade())
+            else if (owner->IsEvade())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
             // ガード移行
-            else if (owner->GetPlayer()->IsGuard())
+            else if (owner->IsGuard())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
             // ダッシュ解除で移動に遷移
-            else if (!owner->GetPlayer()->IsDash())
+            else if (!owner->IsDash())
                 owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Run));
         }
         void OnExit() override
@@ -291,13 +299,13 @@ namespace SprintSubState
             else if (owner->CallCancelEvent())
             {
                 // キャンセル攻撃
-                if (owner->GetPlayer()->IsAttack())
+                if (owner->IsAttack())
                     owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));
                 // 回避移行
-                else if (owner->GetPlayer()->IsEvade())
+                else if (owner->IsEvade())
                     owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
                 // ガード移行
-                else if (owner->GetPlayer()->IsGuard())
+                else if (owner->IsGuard())
                     owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
             }
         }
@@ -324,7 +332,7 @@ const char* PlayerSprintState::GetName() const
 void PlayerSprintState::OnEnter()
 {
     // フラグを立てる
-    owner->GetPlayer()->SetIsDash(true);
+    owner->SetIsDash(true);
 
     owner->GetAnimator()->SetRootNodeIndex("root");
     owner->GetAnimator()->SetIsUseRootMotion(true);
@@ -335,12 +343,12 @@ void PlayerSprintState::OnEnter()
 void PlayerSprintState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
-    owner->GetPlayer()->RotationMovement(elapsedTime);
+    owner->RotationMovement(elapsedTime);
 }
 void PlayerSprintState::OnExit()
 {
     // フラグを下ろす
-    owner->GetPlayer()->SetIsDash(false);
+    owner->SetIsDash(false);
 }
 #pragma endregion
 
@@ -368,7 +376,7 @@ void PlayerEvadeState::OnEnter()
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
 	// 入力方向から回避方向を決定
 	std::string evadeAnimationName = evadeAnimationNames[0];
-    Vector2 movement = owner->GetPlayer()->GetMovement();
+    Vector2 movement = owner->GetMovement();
 
     // 入力方向が0なら前転
     if (movement.LengthSq() == 0.0f)
@@ -404,13 +412,13 @@ void PlayerEvadeState::OnExecute(float elapsedTime)
     else if (owner->CallCancelEvent())
     {
 		// 攻撃移行
-		if (owner->GetPlayer()->IsAttack())
+		if (owner->IsAttack())
 			owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));
 		// 移動移行
-		else if (owner->GetPlayer()->IsMoving())
+		else if (owner->IsMoving())
 			owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Run));
         // ガード移行
-        else if (owner->GetPlayer()->IsGuard())
+        else if (owner->IsGuard())
             owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
     }
 }
@@ -440,7 +448,7 @@ namespace Attack1SubState
         {
             // 攻撃キャンセル判定
             if (owner->CallCancelEvent())
-                if (owner->GetPlayer()->IsAttack())
+                if (owner->IsAttack())
                     owner->GetStateMachine().ChangeSubState(GetPlayerSubStateName(PlayerSubStates::ComboAttack2));
         }
         void OnExit() override 
@@ -467,7 +475,7 @@ namespace Attack1SubState
         {
             // 攻撃キャンセル判定
             if (owner->CallCancelEvent())
-                if (owner->GetPlayer()->IsAttack())
+                if (owner->IsAttack())
                     owner->GetStateMachine().ChangeSubState(GetPlayerSubStateName(PlayerSubStates::ComboAttack3));
         }
         void OnExit() override 
@@ -494,7 +502,7 @@ namespace Attack1SubState
         {
             // 攻撃キャンセル判定
             if (owner->CallCancelEvent())
-                if (owner->GetPlayer()->IsAttack())
+                if (owner->IsAttack())
                     owner->GetStateMachine().ChangeSubState(GetPlayerSubStateName(PlayerSubStates::ComboAttack4));
         }
         void OnExit() override 
@@ -556,16 +564,16 @@ void PlayerAttack1State::OnExecute(float elapsedTime)
     if (owner->CallCancelEvent())
     {
         // 回避移行
-        if (owner->GetPlayer()->IsEvade())
+        if (owner->IsEvade())
             owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
         // ガード移行
-        else if (owner->GetPlayer()->IsGuard())
+        else if (owner->IsGuard())
             owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Guard));
     }
     else
     {
         // キャンセルがかかるまでの間は移動方向に向く
-        owner->GetPlayer()->RotationMovement(elapsedTime);
+        owner->RotationMovement(elapsedTime);
     }
 
     // アニメーションが終了していたら遷移
@@ -639,7 +647,7 @@ const char* PlayerGuardState::GetName() const
 void PlayerGuardState::OnEnter()
 {
     // フラグを立てる
-    owner->GetPlayer()->SetIsGuard(true);
+    owner->SetIsGuard(true);
 
 	owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
@@ -651,23 +659,23 @@ void PlayerGuardState::OnEnter()
 void PlayerGuardState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
-    owner->GetPlayer()->RotationMovement(elapsedTime);
+    owner->RotationMovement(elapsedTime);
 
     // 攻撃移行
-    if (owner->GetPlayer()->IsAttack())
+    if (owner->IsAttack())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Attack1));
     // 回避移行
-    else if (owner->GetPlayer()->IsEvade())
+    else if (owner->IsEvade())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Evade));
     // ガード解除
-    else if (!owner->GetPlayer()->IsGuard())
+    else if (!owner->IsGuard())
         owner->GetStateMachine().ChangeState(GetPlayerMainStateName(PlayerMainStates::Idle));
 }
 
 void PlayerGuardState::OnExit()
 {
     // フラグを下ろす
-    owner->GetPlayer()->SetIsGuard(false);
+    owner->SetIsGuard(false);
 }
 
 #pragma endregion

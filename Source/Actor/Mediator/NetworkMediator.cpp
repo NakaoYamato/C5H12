@@ -77,10 +77,10 @@ void NetworkMediator::OnFixedUpdate()
         auto playerController = myPlayer->GetPlayerController();
         if (playerController != nullptr)
         {
-            playerMove.movement = playerController->GetMovement();
             auto stateMachine = playerController->GetPlayerStateMachine();
             if (stateMachine != nullptr)
             {
+				playerMove.movement = stateMachine->GetMovement();
                 playerMove.state = GetPlayerMainStateFromName(stateMachine->GetStateName());
                 playerMove.subState = GetPlayerSubStateFromName(stateMachine->GetSubStateName());
             }
@@ -285,11 +285,10 @@ void NetworkMediator::ProcessNetworkData()
         auto playerController = player->GetPlayerController();
         if (playerController != nullptr)
         {
-            playerController->SetMovement(move.movement);
-
             auto stateMachine = playerController->GetPlayerStateMachine();
             if (stateMachine != nullptr)
             {
+				stateMachine->SetMovement(move.movement);
                 stateMachine->ChangeState(move.state, move.subState);
             }
         }

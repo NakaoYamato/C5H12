@@ -23,27 +23,23 @@ void PlayerController::Update(float elapsedTime)
     _stateMachine->Execute(elapsedTime);
 
 	// 受けたダメージを初期化
-	_sustainedDamage = 0;
+	_stateMachine->SetSustainedDamage(0);
 }
 
 // GUI描画
 void PlayerController::DrawGui()
 {
-    // プレイヤーの状態を表示
-    ImGui::Text(u8"プレイヤーの状態 : %s", nameof::nameof_enum(_state).data());
-    ImGui::Separator();
-
 	if (ImGui::Button(u8"ダメージを受ける"))
 	{
-		_sustainedDamage = 1;
+		_stateMachine->SetSustainedDamage(1);
 	}
 	if (ImGui::Button(u8"大ダメージを受ける"))
 	{
-		_sustainedDamage = _knockbackDamage;
+		_stateMachine->SetSustainedDamage(_stateMachine->GetKnockbackDamage());
 	}
 	if (ImGui::Button(u8"死亡"))
 	{
-		_isDead = true;
+		_stateMachine->SetIsDead(true);
 	}
 
 	ImGui::Separator();

@@ -154,6 +154,9 @@ void SceneModelEditor::DrawMenuBarGui()
                         _relativePath = "";
                     }
 
+                    // マテリアル削除
+                    _modelRenderer.lock()->GetMaterials().clear();
+
                     // モデルの読み込み
                     auto model = _modelActor.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
                     _animator.lock()->ResetModel(model.lock());
@@ -237,6 +240,12 @@ void SceneModelEditor::DrawEditGui()
             ImGui::TreePop();
         }
         ImGui::Separator();
+
+        if (ImGui::TreeNode(u8"テクスチャ編集"))
+        {
+            DrawTextureGui();
+            ImGui::TreePop();
+        }
     }
     ImGui::End();
 }
@@ -430,7 +439,62 @@ void SceneModelEditor::DrawAddAnimationGui()
                         _animationModel->GetResource()->GetNodes());
 				}
 			}
+
+            _animationModel.reset();
+            _addAnimationMap.clear();
 		}
 	}
 	ImGui::End();
+}
+
+// テクスチャのGUI描画
+void SceneModelEditor::DrawTextureGui()
+{
+    auto model = _modelActor.lock()->GetModel().lock();
+    auto& modelMaterials = model->GetResource()->GetAddressMaterials();
+    auto& materials = _modelRenderer.lock()->GetMaterials();
+    int index = 0;
+    for (auto& modelMaterial : modelMaterials)
+    {
+        if (ImGui::TreeNode(modelMaterial.name.c_str()))
+        {
+            for (auto& [key, textureData] : modelMaterial.textureDatas)
+            {
+                ImGui::Text("%s", key.c_str());
+                ImGui::SameLine();
+                ImGui::Text("%s", textureData.filename.c_str());
+                static float textureSize = 128.0f;
+                ImGui::Image(materials[index].GetTextureSRV(key), {textureSize,textureSize});
+                ImGui::PushID(&textureData.filename);
+                ImGui::SameLine();
+                if (ImGui::Button("..."))
+                {
+                    // ダイアログを開く
+                    std::string filepath;
+                    std::string currentDirectory;
+                    const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
+                    Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+                    // ファイルを選択したら
+                    if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                    {
+                        // 相対パス取得
+                        std::filesystem::path path =
+                            std::filesystem::relative(filepath, currentDirectory);
+                        textureData.filename = path.u8string();
+                        materials[index].LoadTexture(key, path.c_str());
+                    }
+                }
+                if (ImGui::Button("削除"))
+                {
+                    // テクスチャを削除
+                    textureData.filename = "";
+                    materials[index].MakeDummyTexture(key, 0xFF0000FF, 1);
+                }
+                ImGui::PopID();
+            }
+            ImGui::TreePop();
+        }
+
+        index++;
+    }
 }

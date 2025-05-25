@@ -43,7 +43,10 @@ void MeshCollider::DebugRender(const RenderContext& rc)
 
 	for (const auto& area : _collisionMesh.areas)
 	{
-		Debug::Renderer::DrawBox(area.boundingBox.Center, Vector3::Zero, area.boundingBox.Extents, Vector4::Yellow);
+        Vector3 extents = area.boundingBox.Extents;
+        // extents.yÇ™ñ≥å¿ëÂÇ≈ï\é¶Ç™Ç≈Ç´Ç»Ç≠Ç»ÇÈÇÃÇ≈ìKìñÇ…ï‚ê≥
+		extents.y = 10.0f;
+		Debug::Renderer::DrawBox(area.boundingBox.Center, Vector3::Zero, extents, Vector4::Yellow);
 	}
 	if (_isDebugDrawVertex)
 	{
@@ -161,7 +164,7 @@ void MeshCollider::RecalculateCollisionMesh()
 		_collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
 		_collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
 		_collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
-		_collisionMesh.areas[i].boundingBox.Extents.y = 10.0f; // ñ≥å¿
+		_collisionMesh.areas[i].boundingBox.Extents.y = FLT_MAX; // ñ≥å¿
 		_collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
 	}
 	for (int i = 0; i < _collisionMesh.triangles.size(); ++i)

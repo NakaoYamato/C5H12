@@ -20,7 +20,7 @@ std::string ToString(const std::wstring& str);
 /// </summary>
 /// <param name="str">マルチバイト文字</param>
 /// <returns>ワイド文字</returns>
-std::wstring ToWideString(const std::string& str);
+std::wstring ToWString(const std::string& str);
 
 /// <summary>
 /// enumをstringに変換

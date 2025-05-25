@@ -12,7 +12,7 @@ std::string ToString(const std::wstring& str)
 }
 
 /// マルチバイト文字列からワイド文字列へ変換
-std::wstring ToWideString(const std::string& str)
+std::wstring ToWString(const std::string& str)
 {
     return std::filesystem::path(str);
 }

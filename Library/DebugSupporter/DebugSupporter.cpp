@@ -184,10 +184,10 @@ namespace Debug
             }
 
             // カレントディレクトリ取得
-            char current_dir[MAX_PATH];
-            if (!::GetCurrentDirectoryA(MAX_PATH, current_dir))
+            char currentDir[MAX_PATH];
+            if (!::GetCurrentDirectoryA(MAX_PATH, currentDir))
             {
-                current_dir[0] = '\0';
+                currentDir[0] = '\0';
             }
 
             // ダイアログオープン
@@ -197,16 +197,16 @@ namespace Debug
             }
 
             // カレントディレクトリ復帰
-            if (current_dir[0] != '\0')
+            if (currentDir[0] != '\0')
             {
-                ::SetCurrentDirectoryA(current_dir);
+                ::SetCurrentDirectoryA(currentDir);
             }
 
             // 最終パスを記憶
             strcpy_s(s_path_buffer, MAX_PATH, path);
 
             filepath = path;
-            currentDirectory = current_dir;
+            currentDirectory = currentDir;
 
             return DialogResult::OK;
         }

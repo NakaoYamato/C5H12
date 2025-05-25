@@ -167,16 +167,25 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 		// テクスチャ情報の取得
 		for (auto& [key, textureData] : modelMaterial.textureDatas)
 		{
-
 			if (textureData.filename.size() > 0)
 			{
 				std::filesystem::path path(filename);
-				path.replace_filename(textureData.filename);
-				material.LoadTexture(Graphics::Instance().GetDevice(), key, path.c_str());
+				// textureData.filenameの先頭が"Texture"なら相対パス化
+                if (textureData.filename.find("Texture") == 0)
+                {
+					path.replace_filename(textureData.filename);
+					material.LoadTexture(key, path.c_str());
+                }
+				else
+				{
+                    // それ以外は絶対パスなのでそのまま読み込む
+					path = textureData.filename;
+                    material.LoadTexture(key, path.c_str());
+				}
 			}
 			else
 			{
-				material.MakeDummyTexture(Graphics::Instance().GetDevice(), key,
+				material.MakeDummyTexture(key,
 					textureData.dummyTextureValue,
 					textureData.dummyTextureDimension);
 			}

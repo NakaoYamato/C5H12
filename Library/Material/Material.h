@@ -40,22 +40,18 @@ public:
 	/// <summary>
 	/// ファイルからテクスチャを読み込む
 	/// </summary>
-	/// <param name="device"></param>
 	/// <param name="key"></param>
 	/// <param name="filename"></param>
-	void LoadTexture(ID3D11Device* device,
-		const std::string& key,
+	void LoadTexture(const std::string& key,
 		const wchar_t* filename);
 
 	/// <summary>
 	/// ダミーテクスチャ作成
 	/// </summary>
-	/// <param name="device"></param>
 	/// <param name="key"></param>
 	/// <param name="value"></param>
 	/// <param name="dimension"></param>
-	void MakeDummyTexture(ID3D11Device* device,
-		const std::string& key,
+	void MakeDummyTexture(const std::string& key,
 		DWORD value,
 		UINT dimension);
 	

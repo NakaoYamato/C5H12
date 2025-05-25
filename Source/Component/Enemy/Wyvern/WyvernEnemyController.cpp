@@ -9,6 +9,8 @@
 void WyvernEnemyController::Start()
 {
 	EnemyController::Start();
+
+	_charactorController.lock()->SetRadius(2.5f);
 	// ビヘイビアツリー作成
 	_behaviorTree = std::make_unique<WyvernBehaviorTree>(this, _animator.lock().get());
 }

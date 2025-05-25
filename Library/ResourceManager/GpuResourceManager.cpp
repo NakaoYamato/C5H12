@@ -284,7 +284,7 @@ void GpuResourceManager::CreateHsFromCso(ID3D11Device* device,
 }
 
 // テクスチャ読み込み
-void GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
+bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 	const wchar_t* filename, 
 	ID3D11ShaderResourceView** shaderResourceView,
 	D3D11_TEXTURE2D_DESC* texture2dDesc)
@@ -311,7 +311,9 @@ void GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 		{
 			hr = DirectX::CreateDDSTextureFromFile(device, ddsFilename.c_str(), resource.GetAddressOf(),
 				shaderResourceView);
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			// 失敗したらfalse
+			if (!SUCCEEDED(hr))
+				return false;
 
 			resources.insert(std::make_pair(ddsFilename.c_str(), *shaderResourceView));
 		}
@@ -330,7 +332,9 @@ void GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 		{
 			hr = DirectX::CreateWICTextureFromFile(device, filename, resource.GetAddressOf(),
 				shaderResourceView);
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			// 失敗したらfalse
+			if (!SUCCEEDED(hr))
+				return false;
 
 			resources.insert(std::make_pair(filename, *shaderResourceView));
 		}
@@ -343,6 +347,8 @@ void GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		texture2d->GetDesc(texture2dDesc);
 	}
+
+	return true;
 }
 
 // ダミーテクスチャ作成

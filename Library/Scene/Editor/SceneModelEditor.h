@@ -45,6 +45,8 @@ private:
 	void DrawEditAnimationGui();
 	// アニメーション追加GUI描画
 	void DrawAddAnimationGui();
+	// テクスチャのGUI描画
+    void DrawTextureGui();
 private:
 	std::string _filepath;
 	std::string _currentDirectory;

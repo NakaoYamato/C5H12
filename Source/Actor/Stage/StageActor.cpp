@@ -6,7 +6,8 @@
 // ê∂ê¨éûèàóù
 void StageActor::OnCreate()
 {
-    LoadModel("./Data/Model/Stage/ExampleStage/ExampleStage.fbx");
+    LoadModel("./Data/Model/Stage/Ground/ground.fbx");
+    GetTransform().SetPositionY(-5.0f);
 
     //LoadModel("./Data/Model/Stage/BasicTrainingStage/BasicTrainingStage.fbx");
     //GetTransform().SetLengthScale(0.1f);
@@ -18,7 +19,7 @@ void StageActor::OnCreate()
     auto modelCont = AddComponent<ModelRenderer>();
 
     modelCont->SetRenderType(ModelRenderType::Static);
-	modelCont->SetColor(Vector4::Gray);
+	//modelCont->SetColor(Vector4::Gray);
 
     AddCollider<MeshCollider>();
 }

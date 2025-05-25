@@ -93,9 +93,7 @@ void Animator::DrawGui()
     if (_animationIndex >= 0)
     {
         auto& currentAnimation = animations[_animationIndex];
-        ImGui::Text(u8"再生中のアニメーション:");
-        ImGui::SameLine();
-        ImGui::Text(animations[_animationIndex].name.c_str());
+        ImGui::InputText(u8"再生中のアニメーション", &animations[_animationIndex].name, ImGuiInputTextFlags_EnterReturnsTrue);
         ImGui::SliderFloat(u8"経過時間", &_animationTimer, 0.0f, currentAnimation.secondsLength);
         ImGui::Separator();
     }

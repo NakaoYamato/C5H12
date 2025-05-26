@@ -10,10 +10,10 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
-#include "../../Source/Actor/Player/PlayerActor.h"
-#include "../../Source/Component/Stage/GrassController.h"
+#include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Stage/GrassController.h"
 
-#include "../../Source/Actor/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 //èâä˙âª
 void SceneDebug::Initialize()

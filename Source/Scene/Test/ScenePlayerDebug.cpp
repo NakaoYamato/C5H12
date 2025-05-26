@@ -6,10 +6,10 @@
 #include "../../Library/Component/Light/PointLightController.h"
 
 #include "../../Library/Component/ModelRenderer.h"
-#include "../../Source/Actor/Player/PlayerActor.h"
-#include "../../Source/Actor/Stage/StageActor.h"
-#include "../../Source/Actor/Enemy/Dummy/DummyActor.h"
-#include "../../Source/Actor/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Stage/StageActor.h"
+#include "../../Source/Enemy/Dummy/DummyActor.h"
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 void ScenePlayerDebug::Initialize()
 {

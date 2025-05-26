@@ -1,13 +1,13 @@
 // Winsock2とWinsockの多重定義を避けるために、先にインクルード
-#include "../../Source/Actor/Mediator/NetworkMediator.h"
+#include "../../Source/Mediator/NetworkMediator.h"
 
 #include "SceneNetworkDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
 
 #include "../../Library/Component/ModelRenderer.h"
-#include "../../Source/Actor/Stage/StageActor.h"
-#include "../../Source/Actor/Enemy/Dummy/DummyActor.h"
+#include "../../Source/Stage/StageActor.h"
+#include "../../Source/Enemy/Dummy/DummyActor.h"
 
 //初期化
 void SceneNetworkDebug::Initialize()

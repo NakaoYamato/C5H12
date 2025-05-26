@@ -154,15 +154,25 @@ public:
 	// ランダム選択
 	NodeTempPtr SelectRandom(std::vector<NodeTempPtr>* list)
 	{
-		int selectNo = 0;
-		int listSize = static_cast<int>(list->size());
-		if (listSize <= 0)
-			return nullptr;
-
-		selectNo = std::rand() % listSize;
-
-		// listのselectNo番目の実態をリターン
-		return (*list).at(selectNo);
+		// priorityに応じて抽選確率を変える
+		std::vector<unsigned int> priorityList;
+		unsigned int prioritySum = 0;
+		for (size_t i = 0; i < list->size(); i++)
+		{
+			priorityList.push_back(list->at(i)->_priority);
+			prioritySum += list->at(i)->_priority;
+		}
+		
+		unsigned int randomNum = std::rand() % prioritySum;
+		for (size_t i = 0; i < list->size(); i++)
+		{
+			if (randomNum < list->at(i)->_priority)
+			{
+				return (*list).at(i);
+			}
+			randomNum -= list->at(i)->_priority;
+		}
+		return nullptr;
 	}
 	// シーケンス選択
 	NodeTempPtr SelectSequence(std::vector<NodeTempPtr>* list, BehaviorData<T>* data)

@@ -7,7 +7,7 @@
 #include "../../Library/Component/ShapeController.h"
 
 #include "../../Library/Component/ModelRenderer.h"
-#include "../../Source/Actor/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 void SceneDragonDebug::Initialize()
 {

@@ -183,6 +183,7 @@ private:
 	bool	_isPlaying		= false;
 	bool	_isLoop			= false;
 	bool	_useRootMotion	= false;
+	bool	_removeRootRotation = false;
 
 	Vector3	_rootOffset		= Vector3::Zero;
 	Vector3	_rootMovement	= Vector3::Zero;

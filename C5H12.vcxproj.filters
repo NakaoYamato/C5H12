@@ -207,13 +207,13 @@
     <ClCompile Include="Library\Shader\Grass\GrassShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Stage\GrassController.cpp">
+    <ClCompile Include="Source\Stage\GrassController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Player\PlayerActor.cpp">
+    <ClCompile Include="Source\Player\PlayerActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\PostProcess\GlowExtraction\GlowExtraction.cpp">
@@ -225,13 +225,13 @@
     <ClCompile Include="Library\PostProcess\FXAA\FXAA.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Player\PlayerSwordActor.cpp">
+    <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Player\PlayerShieldActor.cpp">
+    <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Player\PlayerInput.cpp">
+    <ClCompile Include="Source\Player\PlayerInput.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\Rigidbody.cpp">
@@ -243,7 +243,7 @@
     <ClCompile Include="Library\JobSystem\JobSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Player\PlayerController.cpp">
+    <ClCompile Include="Source\Player\PlayerController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp">
@@ -255,7 +255,7 @@
     <ClCompile Include="Library\Actor\Camera\MainCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\WeaponActor.cpp">
+    <ClCompile Include="Source\Player\Weapon\WeaponActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene\Test\SceneCollisionDebug.cpp">
@@ -270,16 +270,16 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Mediator\NetworkMediator.cpp">
+    <ClCompile Include="Source\Mediator\NetworkMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\CharactorController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Camera\PlayerCameraController.cpp">
+    <ClCompile Include="Source\Camera\PlayerCameraController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Stage\StageActor.cpp">
+    <ClCompile Include="Source\Stage\StageActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\Collider\MeshCollider.cpp">
@@ -306,16 +306,16 @@
     <ClCompile Include="Library\Algorithm\Converter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\StateMachine\Player\PlayerStateMachine.cpp">
+    <ClCompile Include="Source\Player\StateMachine\PlayerStateMachine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Model\AnimationEvent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Enemy\Dummy\DummyActor.cpp">
+    <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Enemy\EnemyController.cpp">
+    <ClCompile Include="Source\Enemy\EnemyController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp">
@@ -330,22 +330,22 @@
     <ClCompile Include="Library\Material\Material.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Enemy\Dummy\DummyEnemyController.cpp">
+    <ClCompile Include="Source\Enemy\Dummy\DummyEnemyController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Component\Enemy\Wyvern\WyvernEnemyController.cpp">
+    <ClCompile Include="Source\Enemy\Wyvern\WyvernEnemyController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Actor\Enemy\Wyvern\WyvernActor.cpp">
+    <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BehaviorTree\Enemy\Wyvern\WyvernBehaviorTree.cpp">
+    <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BehaviorTree\Enemy\Wyvern\WyvernActionDerived.cpp">
+    <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BehaviorTree\Enemy\Wyvern\WyvernJudgmentDerived.cpp">
+    <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernJudgmentDerived.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -572,13 +572,13 @@
     <ClInclude Include="Library\Shader\Grass\GrassShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Stage\GrassController.h">
+    <ClInclude Include="Source\Stage\GrassController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Shader\PBR\PBRShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Player\PlayerActor.h">
+    <ClInclude Include="Source\Player\PlayerActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\PostProcess\GlowExtraction\GlowExtraction.h">
@@ -590,16 +590,16 @@
     <ClInclude Include="Library\PostProcess\FXAA\FXAA.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Player\PlayerSwordActor.h">
+    <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Player\PlayerShieldActor.h">
+    <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\WeaponActor.h">
+    <ClInclude Include="Source\Player\Weapon\WeaponActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Player\PlayerInput.h">
+    <ClInclude Include="Source\Player\PlayerInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\Rigidbody.h">
@@ -611,7 +611,7 @@
     <ClInclude Include="Library\JobSystem\JobSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Player\PlayerController.h">
+    <ClInclude Include="Source\Player\PlayerController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h">
@@ -638,16 +638,16 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Mediator\NetworkMediator.h">
+    <ClInclude Include="Source\Mediator\NetworkMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\CharactorController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Camera\PlayerCameraController.h">
+    <ClInclude Include="Source\Camera\PlayerCameraController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Stage\StageActor.h">
+    <ClInclude Include="Source\Stage\StageActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\Collider\MeshCollider.h">
@@ -677,16 +677,16 @@
     <ClInclude Include="Library\Algorithm\StateMachine\StateMachine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\StateMachine\Player\PlayerStateMachine.h">
+    <ClInclude Include="Source\Player\StateMachine\PlayerStateMachine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Model\AnimationEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Enemy\Dummy\DummyActor.h">
+    <ClInclude Include="Source\Enemy\Dummy\DummyActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Enemy\EnemyController.h">
+    <ClInclude Include="Source\Enemy\EnemyController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\Collider\ModelCollider.h">
@@ -707,16 +707,16 @@
     <ClInclude Include="Source\Interface\Common\IDamagable.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Enemy\Dummy\DummyEnemyController.h">
+    <ClInclude Include="Source\Enemy\Dummy\DummyEnemyController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Component\Enemy\Wyvern\WyvernEnemyController.h">
+    <ClInclude Include="Source\Enemy\Wyvern\WyvernEnemyController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Actor\Enemy\Wyvern\WyvernActor.h">
+    <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\BehaviorTree\Enemy\Wyvern\WyvernBehaviorTree.h">
+    <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorActionBase.h">
@@ -734,10 +734,10 @@
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\BehaviorTree\Enemy\Wyvern\WyvernActionDerived.h">
+    <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\BehaviorTree\Enemy\Wyvern\WyvernJudgmentDerived.h">
+    <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernJudgmentDerived.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

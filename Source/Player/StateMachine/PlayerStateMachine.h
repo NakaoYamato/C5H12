@@ -7,8 +7,11 @@
 // 前方宣言
 class PlayerController;
 class Animator;
-enum class PlayerMainStates;
-enum class PlayerSubStates;
+namespace Network
+{
+	enum class PlayerMainStates;
+	enum class PlayerSubStates;
+}
 
 // プレイヤーの状態遷移を管理するクラス
 class PlayerStateMachine
@@ -33,7 +36,7 @@ public:
 	PlayerController* GetPlayer() { return _player; }
 	Animator* GetAnimator() { return _animator; }
 	// ステート変更
-	void ChangeState(PlayerMainStates mainStateName, PlayerSubStates subStateName);
+	void ChangeState(Network::PlayerMainStates mainStateName, Network::PlayerSubStates subStateName);
     // ステート名取得
     const char* GetStateName() { return _stateMachine.GetState()->GetName(); }
     // サブステート名取得

@@ -30,6 +30,11 @@ public:
 	virtual void ResetHealth() {
 		_health = _maxHealth;
 	}
+	/// <summary>
+	/// ”í’eˆÊ’u
+	/// </summary>
+	/// <returns></returns>
+	virtual Vector3 GetHitPosition() const { return _hitPosition; }
 protected:
 	float _health = 100.0f;
 	float _maxHealth = 100.0f;

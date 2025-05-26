@@ -18,6 +18,13 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* 
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
 	{
+		//auto damageNode = rootNode->AddNode("Damage", 0, SelectRule::Priority, std::make_shared<WyvernDamageJudgment>(this), nullptr);
+		{
+			//damageNode->AddNode("Normal", 1, SelectRule::Non, nullptr, std::make_shared<WyvernNormalAction>(this));
+			//damageNode->AddNode("Stagger", 2, SelectRule::Non, nullptr, std::make_shared<WyvernStaggerAction>(this));
+			//damageNode->AddNode("Death", 3, SelectRule::Non, nullptr, std::make_shared<WyvernDeathAction>(this));
+		}
+
 		//auto escapeNode = rootNode->AddNode("Escape", 1, SelectRule::Priority, nullptr, nullptr);
 		{
 			//escapeNode->AddNode("Leave", 0, SelectRule::Non, nullptr, std::make_shared<WyvernLeaveAction>(this));
@@ -30,15 +37,14 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* 
 			{
 				auto nearAttack = attackNode->AddNode("NearAttack", 1, SelectRule::Random, std::make_shared<WyvernNearAttackJudgment>(this), nullptr);
 				{
-					nearAttack->AddNode("Bite", 1, SelectRule::Non, nullptr, std::make_shared<WyvernBiteAction>(this));
-					nearAttack->AddNode("Claw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernClawAction>(this));
-					nearAttack->AddNode("Tail", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTailAction>(this));
-					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernBackStepAction>(this));
+					nearAttack->AddNode("Bite", 1, SelectRule::Non, nullptr, std::make_shared<WyvernStateAction>(this, "BiteAttack"));
+					nearAttack->AddNode("Claw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernStateAction>(this, "ClawAttack"));
+					nearAttack->AddNode("Tail", 1, SelectRule::Non, nullptr, std::make_shared<WyvernStateAction>(this, "TailAttack"));
+					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernStateAction>(this, "BackStep"));
 				}
-				attackNode->AddNode("Breath", 1, SelectRule::Non, nullptr, std::make_shared<WyvernBreathAction>(this));
-				attackNode->AddNode("JumpOn", 1, SelectRule::Non, nullptr, std::make_shared<WyvernJumpOnAction>(this));
+				attackNode->AddNode("Breath", 1, SelectRule::Non, nullptr, std::make_shared<WyvernStateAction>(this, "BreathAttack"));
 			}
-			auto pursuitNode = battleNode->AddNode("Pursuit", 2, SelectRule::Non, nullptr, std::make_shared<WyvernPursuitAction>(this));
+			auto pursuitNode = battleNode->AddNode("Pursuit", 2, SelectRule::Non, nullptr, std::make_shared<WyvernStateAction>(this, "Pursuit"));
 		}
 		auto scoutNode = rootNode->AddNode("Scout", 5, SelectRule::Priority, nullptr, nullptr);
 		{
@@ -46,16 +52,12 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* 
 			//{
 			//	wanderNode->AddNode("Normal", 1, SelectRule::Non, nullptr, std::make_shared<WyvernNormalAction>(this));
 			//}
-			//auto idleNode = scoutNode->AddNode("Idle", 2, SelectRule::Random, std::make_shared<WyvernIdleJudgment>(this), nullptr);
-			//{
-			//	idleNode->AddNode("Normal", 1, SelectRule::Non, nullptr, std::make_shared<WyvernNormalAction>(this));
-			//}
-			scoutNode->AddNode("Idle", 2, SelectRule::Non, nullptr, std::make_shared<WyvernIdleAction>(this));
+			scoutNode->AddNode("Idle", 2, SelectRule::Non, nullptr, nullptr);
 		}
 	}
 }
 
-void WyvernBehaviorTree::Run(float elapsedTime)
+void WyvernBehaviorTree::Execute(float elapsedTime)
 {
 	// 現在の実行ノードがなければ取得
 	if (_activeNode == nullptr)
@@ -66,7 +68,7 @@ void WyvernBehaviorTree::Run(float elapsedTime)
 	// 実行ノードがあれば実行
 	if (_activeNode != nullptr)
 	{
-		_activeNode = _behaviorTree->Run(_activeNode, _behaviorData.get(), elapsedTime);
+		_activeNode = _behaviorTree->Execute(_activeNode, _behaviorData.get(), elapsedTime);
 	}
 }
 

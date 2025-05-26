@@ -48,11 +48,19 @@ public:
 		return _root;
 	}
 
+	// 指定したノードの取得
+	BehaviorNodeBase<T>* GetNode(std::string searchName)
+	{
+		if (_root == nullptr)
+			return nullptr;
+		return _root->SearchNode(searchName).get();
+	}
+
 	// 実行
-	BehaviorNodeBase<T>* Run(BehaviorNodeBase<T>* actionNode, BehaviorData<T>* data, float elapsedTime)
+	BehaviorNodeBase<T>* Execute(BehaviorNodeBase<T>* actionNode, BehaviorData<T>* data, float elapsedTime)
 	{
 		// ノード実行
-		BehaviorActionState state = actionNode->Run(elapsedTime);
+		BehaviorActionState state = actionNode->Execute(elapsedTime);
 
 		// 正常終了
 		if (state == BehaviorActionState::Complete)

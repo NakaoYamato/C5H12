@@ -237,6 +237,8 @@
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
@@ -368,6 +370,8 @@
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />

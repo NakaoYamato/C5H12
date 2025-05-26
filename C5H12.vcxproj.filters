@@ -348,6 +348,12 @@
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernJudgmentDerived.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -738,6 +744,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernJudgmentDerived.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

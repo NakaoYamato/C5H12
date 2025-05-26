@@ -20,11 +20,11 @@ class BehaviorActionBase
 public:
 	BehaviorActionBase(T* owner): _owner(owner) {}
 	// 開始処理(仮想関数)
-	virtual void OnEnter() {}
+	virtual void Enter() {}
 	// 実行処理(純粋仮想関数)
-	virtual BehaviorActionState Run(float elapsedTime) = 0;
+	virtual BehaviorActionState Execute(float elapsedTime) = 0;
 	// 終了処理(仮想関数)
-	virtual void OnExit() {};
+	virtual void Exit() {};
 protected:
 	T*	_owner;
 	int _step = 0;

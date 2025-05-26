@@ -81,8 +81,8 @@ void NetworkMediator::OnFixedUpdate()
             if (stateMachine != nullptr)
             {
 				playerMove.movement = stateMachine->GetMovement();
-                playerMove.state = GetPlayerMainStateFromName(stateMachine->GetStateName());
-                playerMove.subState = GetPlayerSubStateFromName(stateMachine->GetSubStateName());
+                playerMove.state = Network::GetPlayerMainStateFromName(stateMachine->GetStateName());
+                playerMove.subState = Network::GetPlayerSubStateFromName(stateMachine->GetSubStateName());
             }
         }
         // サーバーに送信

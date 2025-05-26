@@ -13,7 +13,10 @@ void WyvernEnemyController::Start()
 	_charactorController.lock()->SetRadius(2.5f);
 	// ビヘイビアツリー作成
 	_behaviorTree = std::make_unique<WyvernBehaviorTree>(this, _animator.lock().get());
+	// ステートマシン作成
+	_stateMachine = std::make_unique<WyvernStateMachine>(this, _animator.lock().get());
 }
+
 // 更新処理
 void WyvernEnemyController::Update(float elapsedTime)
 {
@@ -33,15 +36,21 @@ void WyvernEnemyController::Update(float elapsedTime)
 		}
 	}
 
-	_behaviorTree->Run(elapsedTime);
+	// ビヘイビアツリーの実行
+	_behaviorTree->Execute(elapsedTime);
+	// ステートマシンの実行
+	_stateMachine->Execute(elapsedTime);
 }
 // GUI描画
 void WyvernEnemyController::DrawGui()
 {
+	EnemyController::DrawGui();
 	_behaviorTree->DrawGui();
+	_stateMachine->DrawGui();
 }
 // ダメージを与える
 void WyvernEnemyController::AddDamage(float damage, Vector3 hitPosition)
 {
 	EnemyController::AddDamage(damage, hitPosition);
+	_damageCounter += damage;
 }

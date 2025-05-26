@@ -304,20 +304,20 @@ public:
 	void Enter()
 	{
 		if (_action != nullptr)
-			_action->OnEnter();
+			_action->Enter();
 	}
 	// ŽÀs
-	BehaviorActionState Run(float elapsedTime)
+	BehaviorActionState Execute(float elapsedTime)
 	{
 		if (_action != nullptr)
-			return _action->Run(elapsedTime);
+			return _action->Execute(elapsedTime);
 		return BehaviorActionState::Failed;
 	}
 	// I—¹
 	void Exit()
 	{
 		if (_action != nullptr)
-			_action->OnExit();
+			_action->Exit();
 	}
 protected:
 	std::string		_name;			// –¼‘O

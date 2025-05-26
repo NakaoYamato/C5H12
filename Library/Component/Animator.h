@@ -101,6 +101,7 @@ public:
 	bool IsPlaying() const { return _isPlaying; }
 	bool IsLoop() const { return _isLoop; }
 	bool IsUseRootMotion() const { return _useRootMotion; }
+	bool IsRemoveRootRotation() const { return _removeRootRotation; }
 	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
 
 	/// <summary>
@@ -117,6 +118,7 @@ public:
 	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
 	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
 	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
+	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
 
 	/// <summary>
 	/// モデルをリセット
@@ -141,7 +143,6 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	const Vector3& GetRootMovement() const { return _rootMovement; }
-
 	/// <summary>
 	///	アニメーションイベント取得
 	/// </summary>

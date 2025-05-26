@@ -13,7 +13,7 @@ public:
 	WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* animator);
 
 	// ビヘイビアツリー実行
-	void Run(float elapsedTime);
+	void Execute(float elapsedTime);
 	// GUI描画
 	void DrawGui();
 

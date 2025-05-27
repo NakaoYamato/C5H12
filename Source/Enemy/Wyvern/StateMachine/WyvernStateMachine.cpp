@@ -13,6 +13,8 @@ WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* 
 	// ステートの登録
 	_stateMachine.RegisterState(std::make_unique<WyvernIdleState>(this));
 
+	_stateMachine.RegisterState(std::make_unique<WyvernToTargetState>(this));
+
 	_stateMachine.RegisterState(std::make_unique<WyvernBiteAttackState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernClawAttackState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernTailAttackState>(this));

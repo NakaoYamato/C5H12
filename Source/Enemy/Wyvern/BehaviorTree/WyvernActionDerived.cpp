@@ -3,12 +3,12 @@
 #include "WyvernBehaviorTree.h"
 #include "../WyvernEnemyController.h"
 
-void WyvernStateAction::Enter()
+void WyvernCompleteStateAction::Enter()
 {
 	_owner->GetWyvern()->GetState()->GetStateMachine().ChangeState(_startStateName);
 }
 
-BehaviorActionState WyvernStateAction::Execute(float elapsedTime)
+BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 {
 	std::string currentStateName = _owner->GetWyvern()->GetState()->GetStateName();
 
@@ -19,4 +19,22 @@ BehaviorActionState WyvernStateAction::Execute(float elapsedTime)
 	}
 	// それ以外は実行中
 	return BehaviorActionState::Run;
+}
+
+void WyvernOneAction::Enter()
+{
+	std::string currentStateName = _owner->GetWyvern()->GetState()->GetStateName();
+	// 現在のステートが実行するステートと同じなら何もしない
+	if (currentStateName == _stateName)
+	{
+		return;
+	}
+	// ステートを変更
+	_owner->GetWyvern()->GetState()->GetStateMachine().ChangeState(_stateName);
+}
+
+BehaviorActionState WyvernOneAction::Execute(float elapsedTime)
+{
+	// すぐに終了
+	return BehaviorActionState::Complete;
 }

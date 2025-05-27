@@ -21,9 +21,10 @@ public:
     // 衝突処理
     void OnContact(CollisionData& collisionData)override;
 
-	// ダメージを与える
-    virtual void AddDamage(float damage, Vector3 hitPosition) override;
-
+    // 指定位置との角度
+    float GetAngleToTarget(const Vector3& target);
+    // ターゲット方向を向く
+	virtual void LookAtTarget(const Vector3& target, float elapsedTime, float rotationSpeed);
 #pragma region アクセサ
 	std::shared_ptr<CharactorController> GetCharactorController() const { return _charactorController.lock(); }
 

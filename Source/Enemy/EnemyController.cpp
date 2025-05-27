@@ -34,8 +34,23 @@ void EnemyController::OnContact(CollisionData& collisionData)
 	}
 }
 
-void EnemyController::AddDamage(float damage, Vector3 hitPosition)
+// 指定位置との角度
+float EnemyController::GetAngleToTarget(const Vector3& target)
 {
-	_health -= damage;
-	_hitPosition = hitPosition;
+	auto& position = GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = GetTargetPosition();
+	auto targetDirection = (targetPosition - position).Normalize();
+	auto front = GetActor()->GetTransform().GetAxisZ().Normalize();
+	return std::acosf(front.Dot(targetDirection));
+}
+
+// ターゲット方向を向く
+void EnemyController::LookAtTarget(const Vector3& target, float elapsedTime, float rotationSpeed)
+{
+	auto& position = GetActor()->GetTransform().GetPosition();
+	auto targetDirection = (target - position);
+	// ターゲット方向に回転
+	auto charactorController = GetCharactorController();
+	Vector2 targetDirection2D = Vector2(targetDirection.x, targetDirection.z);
+	charactorController->UpdateRotation(elapsedTime, targetDirection2D.Normalize() * rotationSpeed);
 }

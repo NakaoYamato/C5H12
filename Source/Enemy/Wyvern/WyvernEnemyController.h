@@ -18,19 +18,20 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
-	// ダメージを与える
-	void AddDamage(float damage, Vector3 hitPosition) override;
-
+	// ダメージを受けた時の処理
+	void OnDamage(float damage, Vector3 hitPosition) override;
 #pragma region アクセサ
 	WyvernStateMachine* GetState() const { return _stateMachine.get(); }
 
 	float GetNearAttackRange() const { return _nearAttackRange; }
 	float GetNearAttackRadian() const { return _nearAttackRadian; }
 	float GetRotationSpeed() const { return _rotationSpeed; }
+	float GetLookAtRadian() const { return _lookAtRadian; }
 
 	void SetNearAttackRange(float nearAttackRange) { _nearAttackRange = nearAttackRange; }
 	void SetNearAttackRadian(float nearAttackRadian) { _nearAttackRadian = nearAttackRadian; }
 	void SetRotationSpeed(float rotationSpeed) { _rotationSpeed = rotationSpeed; }
+	void SetLookAtRadian(float lookAtRadian) { _lookAtRadian = lookAtRadian; }
 #pragma endregion
 
 private:
@@ -42,9 +43,11 @@ private:
 	// 近接攻撃範囲
 	float _nearAttackRange = 10.0f;
 	// 近接攻撃ができる角度
-	float _nearAttackRadian = DirectX::XMConvertToRadians(50.0f);
+	float _nearAttackRadian = DirectX::XMConvertToRadians(40.0f);
 	// 回転速度
 	float _rotationSpeed = 1.0f;
+	// ターゲットに向く角度
+	float _lookAtRadian = DirectX::XMConvertToRadians(20.0f);
 
 	// ダメージリアクションの間隔
 	float _damageReactionRate = 2.0f;

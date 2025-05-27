@@ -52,10 +52,10 @@ void WyvernEnemyController::DrawGui()
 	_behaviorTree->DrawGui();
 	_stateMachine->DrawGui();
 }
-// ダメージを与える
-void WyvernEnemyController::AddDamage(float damage, Vector3 hitPosition)
+
+// ダメージを受けた時の処理
+void WyvernEnemyController::OnDamage(float damage, Vector3 hitPosition)
 {
-	EnemyController::AddDamage(damage, hitPosition);
 	_damageCounter += damage;
 	if (_damageCounter >= _damageReactionRate)
 	{

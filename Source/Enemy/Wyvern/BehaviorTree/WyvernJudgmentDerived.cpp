@@ -14,6 +14,19 @@ bool WyvernBattleJudgment::Judgment()
 	return (position - targetPosition).Length() < searchRange;
 }
 
+// ConfrontNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernConfrontJudgment::Judgment()
+{
+	auto& targetPosition = _owner->GetWyvern()->GetTargetPosition();
+	// ƒ^[ƒQƒbƒg•ûŒü‚ÉŒü‚¢‚Ä‚¢‚é‚©”»’è
+	float angle = _owner->GetWyvern()->GetAngleToTarget(targetPosition);
+	// Œü‚¢‚Ä‚é‚È‚çfalse
+	if (angle < _owner->GetWyvern()->GetLookAtRadian())
+		return false;
+
+	return true;
+}
+
 // AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 bool WyvernAttackJudgment::Judgment()
 {

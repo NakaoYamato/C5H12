@@ -374,6 +374,20 @@ void Animator::BlendPoseNode(
         DirectX::XMStoreFloat3(&res.position, T);
     }
 }
+/// 現在のアニメーションの回転量を取り除く
+Quaternion Animator::RemoveRootRotation(int rootIndex)
+{
+    auto& poseNodes = _model.lock()->GetPoseNodes();
+    ModelResource::Node startRootNode{};
+    ComputeAnimation(_animationIndex, rootIndex, 0.0f, startRootNode);
+    // 回転量の差分を求める
+    Quaternion q = Quaternion::Multiply(
+        Quaternion::Inverse(poseNodes[rootIndex].rotation),
+        startRootNode.rotation);
+    // ルートの回転量を取り除く
+    poseNodes[rootIndex].rotation = startRootNode.rotation;
+    return q;
+}
 #pragma endregion
 
 #pragma region アニメーションイベント

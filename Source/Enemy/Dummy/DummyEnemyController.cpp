@@ -14,9 +14,8 @@ void DummyEnemyController::Update(float elapsedTime)
 	_shapeController.lock()->SetColor(Vector4::White);
 }
 
-// ダメージを与える
-void DummyEnemyController::AddDamage(float damage, Vector3 hitPosition)
+// ダメージを受けた時の処理
+void DummyEnemyController::OnDamage(float damage, Vector3 hitPosition)
 {
-	EnemyController::AddDamage(damage, hitPosition);
 	_shapeController.lock()->SetColor(Vector4::Red);
 }

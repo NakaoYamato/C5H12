@@ -30,6 +30,282 @@ void WyvernIdleState::OnExit()
 }
 #pragma endregion
 
+#pragma region ターゲットに向かう
+namespace WyvernToTargetSubStates
+{
+	class WalkForwardSubState : public StateBase<WyvernStateMachine>
+	{
+	public:
+		WalkForwardSubState(WyvernStateMachine* owner) : StateBase(owner) {}
+		const char* GetName() const override { return "WalkForward"; }
+		void OnEnter() override
+		{
+			owner->GetAnimator()->PlayAnimation(
+				u8"WalkForward",
+				true,
+				0.5f);
+			owner->GetAnimator()->SetRootNodeIndex("CG");
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+		}
+		void OnExecute(float elapsedTime) override 
+		{
+			auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+			float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
+			// ターゲット方向に回転
+			owner->GetWyvern()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+
+			// ターゲット方向に向いているか判定
+			float angleToTarget = owner->GetWyvern()->GetAngleToTarget(targetPosition);
+			if (angleToTarget < owner->GetWyvern()->GetLookAtRadian())
+			{
+				// ターゲットに到達したら待機状態へ遷移
+				owner->GetStateMachine().ChangeState("Idle");
+			}
+		}
+		void OnExit() override {}
+	};
+	class TurnLeft90SubState : public StateBase<WyvernStateMachine>
+	{
+	public:
+		TurnLeft90SubState(WyvernStateMachine* owner) : StateBase(owner) {}
+		const char* GetName() const override { return "TurnLeft90"; }
+		void OnEnter() override
+		{
+			owner->GetAnimator()->PlayAnimation(
+				u8"TurnLeft90",
+				false,
+				0.2f);
+			owner->GetAnimator()->SetRootNodeIndex("CG");
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetIsRemoveRootMovement(true);
+		}
+		void OnExecute(float elapsedTime) override 
+		{
+			// アニメーションが終了しているとき
+			if (!owner->GetAnimator()->IsPlayAnimation())
+			{
+				// 歩行状態に移行
+				owner->GetStateMachine().ChangeSubState("WalkForward");
+			}
+		}
+		void OnExit() override
+		{
+			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			// 回転量の差分を求める
+			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+
+			// 回転量をアクターに反映する
+			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			Vector3 angle{};
+			// ルートの行列の都合上z値をyに設定
+			angle.y = q.ToRollPitchYaw().z;
+			transform.AddRotation(angle);
+
+			// フラグを下ろす
+			owner->GetAnimator()->SetIsRemoveRootMovement(false);
+		}
+	};
+	class TurnLeft180SubState : public StateBase<WyvernStateMachine>
+	{
+	public:
+		TurnLeft180SubState(WyvernStateMachine* owner) : StateBase(owner) {}
+		const char* GetName() const override { return "TurnLeft180"; }
+		void OnEnter() override
+		{
+			owner->GetAnimator()->PlayAnimation(
+				u8"TurnLeft180",
+				false,
+				0.2f);
+			owner->GetAnimator()->SetRootNodeIndex("CG");
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetIsRemoveRootMovement(true);
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき
+			if (!owner->GetAnimator()->IsPlayAnimation())
+			{
+				// 歩行状態に移行
+				owner->GetStateMachine().ChangeSubState("WalkForward");
+			}
+		}
+		void OnExit() override
+		{
+			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			// 回転量の差分を求める
+			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+
+			// 回転量をアクターに反映する
+			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			Vector3 angle{};
+			// ルートの行列の都合上z値をyに設定
+			angle.y = q.ToRollPitchYaw().z;
+			transform.AddRotation(angle);
+
+			// フラグを下ろす
+			owner->GetAnimator()->SetIsRemoveRootMovement(false);
+		}
+	};
+	class TurnRight90SubState : public StateBase<WyvernStateMachine>
+	{
+	public:
+		TurnRight90SubState(WyvernStateMachine* owner) : StateBase(owner) {}
+		const char* GetName() const override { return "TurnRight90"; }
+		void OnEnter() override
+		{
+			owner->GetAnimator()->PlayAnimation(
+				u8"TurnRight90",
+				false,
+				0.2f);
+			owner->GetAnimator()->SetRootNodeIndex("CG");
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetIsRemoveRootMovement(true);
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき
+			if (!owner->GetAnimator()->IsPlayAnimation())
+			{
+				// 歩行状態に移行
+				owner->GetStateMachine().ChangeSubState("WalkForward");
+			}
+		}
+		void OnExit() override
+		{
+			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			// 回転量の差分を求める
+			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+			// 回転量をアクターに反映する
+			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			Vector3 angle{};
+			// ルートの行列の都合上z値をyに設定
+			angle.y = q.ToRollPitchYaw().z;
+			transform.AddRotation(angle);
+			// フラグを下ろす
+			owner->GetAnimator()->SetIsRemoveRootMovement(false);
+		}
+	};
+	class TurnRight180SubState : public StateBase<WyvernStateMachine>
+	{
+	public:
+		TurnRight180SubState(WyvernStateMachine* owner) : StateBase(owner) {}
+		const char* GetName() const override { return "TurnRight180"; }
+		void OnEnter() override
+		{
+			owner->GetAnimator()->PlayAnimation(
+				u8"TurnRight180",
+				false,
+				0.2f);
+			owner->GetAnimator()->SetRootNodeIndex("CG");
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetIsRemoveRootMovement(true);
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき
+			if (!owner->GetAnimator()->IsPlayAnimation())
+			{
+				// 歩行状態に移行
+				owner->GetStateMachine().ChangeSubState("WalkForward");
+			}
+		}
+		void OnExit() override
+		{
+			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			// 回転量の差分を求める
+			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+			// 回転量をアクターに反映する
+			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			Vector3 angle{};
+			// ルートの行列の都合上z値をyに設定
+			angle.y = q.ToRollPitchYaw().z;
+			transform.AddRotation(angle);
+			// フラグを下ろす
+			owner->GetAnimator()->SetIsRemoveRootMovement(false);
+		}
+	};
+}
+WyvernToTargetState::WyvernToTargetState(WyvernStateMachine* owner) :
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernToTargetSubStates::WalkForwardSubState>(owner));
+	RegisterSubState(std::make_unique<WyvernToTargetSubStates::TurnLeft90SubState>(owner));
+	RegisterSubState(std::make_unique<WyvernToTargetSubStates::TurnLeft180SubState>(owner));
+	RegisterSubState(std::make_unique<WyvernToTargetSubStates::TurnRight90SubState>(owner));
+	RegisterSubState(std::make_unique<WyvernToTargetSubStates::TurnRight180SubState>(owner));
+}
+void WyvernToTargetState::OnEnter()
+{
+	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto targetDirection = (targetPosition - position).Normalize();
+	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	// ターゲット位置からどの方向に回転するか判定
+	float crossY = front.Cross(targetDirection).y;
+	float dot = front.Dot(targetDirection);
+
+	std::string subStateName = "WalkForward";
+	if (crossY > 0.0f)
+	{
+		// ターゲット位置がワイバーンから見て右方向にある
+		// 90度以上角度があるか確認
+		if (dot < 0.0f)
+		{
+			// 一定量以上角度がある場合は180度回転
+ 			if (dot < -0.5f)
+			{
+				// 右に180度回転
+				subStateName = "TurnRight180";
+			}
+			else
+			{
+				// 右に90度回転
+				subStateName = "TurnRight90";
+			}
+		}
+	}
+	else
+	{
+		// ターゲット位置がワイバーンから見て左方向にある
+		// 90度以上角度があるか確認
+		if (dot < 0.0f)
+		{
+			// 一定量以上角度がある場合は180度回転
+			if (dot < -0.5f)
+			{
+				// 左に180度回転
+				subStateName = "TurnLeft180";
+			}
+			else
+			{
+				// 左に90度回転
+				subStateName = "TurnLeft90";
+			}
+		}
+	}
+	// サブステート設定
+	ChangeSubState(subStateName);
+}
+
+void WyvernToTargetState::OnExecute(float elapsedTime)
+{
+}
+
+void WyvernToTargetState::OnExit()
+{
+}
+#pragma endregion
+
 #pragma region 噛みつき攻撃
 void WyvernBiteAttackState::OnEnter()
 {
@@ -180,6 +456,11 @@ void WyvernBackStepState::OnEnter()
 }
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
+	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
+	// ターゲット方向に回転
+	owner->GetWyvern()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+
 	// アニメーションが終了しているとき
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
@@ -237,13 +518,12 @@ void WyvernPursuitState::OnExecute(float elapsedTime)
 	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position);
-	float nearAttackRange = owner->GetWyvern()->GetNearAttackRange();
 	float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
 	// ターゲット方向に回転
-	auto charactorController = owner->GetWyvern()->GetCharactorController();
-	Vector2 targetDirection2D = Vector2(targetDirection.x, targetDirection.z);
-	charactorController->UpdateRotation(elapsedTime, targetDirection2D.Normalize() * rotationSpeed);
+	owner->GetWyvern()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+	
 	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
+	float nearAttackRange = owner->GetWyvern()->GetNearAttackRange();
 	if (targetDirection.Length() < nearAttackRange)
 	{
 		// 攻撃範囲内なら完了
@@ -351,8 +631,8 @@ void WyvernDamageState::OnEnter()
 }
 void WyvernDamageState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているときかキャンセルイベントが発生しているとき
-	if (!owner->GetAnimator()->IsPlayAnimation() || owner->CallCancelEvent())
+	// アニメーションが終了しているとき
+	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
 		owner->GetStateMachine().ChangeState("Idle");
@@ -364,17 +644,8 @@ void WyvernDamageState::OnExit()
 	if (_applyRotation)
 	{
 		int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
-		auto& poseNodes = owner->GetWyvern()->GetActor()->GetModel().lock()->GetPoseNodes();
-		int animationIndex = owner->GetAnimator()->GetAnimationIndex();
-		ModelResource::Node startRootNode{};
-		owner->GetAnimator()->ComputeAnimation(animationIndex, rootNodeIndex, 0.0f, startRootNode);
 		// 回転量の差分を求める
-		Quaternion q = Quaternion::Multiply(
-			Quaternion::Inverse(poseNodes[rootNodeIndex].rotation),
-			startRootNode.rotation);
-		// ルートの回転量を取り除く
-		poseNodes[rootNodeIndex].rotation = startRootNode.rotation;
-		owner->GetWyvern()->GetActor()->GetModel().lock()->SetPoseNodes(poseNodes);
+		Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 
 		// 回転量をアクターに反映する
 		auto& transform = owner->GetWyvern()->GetActor()->GetTransform();

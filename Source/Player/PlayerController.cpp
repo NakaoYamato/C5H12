@@ -67,15 +67,7 @@ void PlayerController::OnContact(CollisionData& collisionData)
 	}
 }
 
-// ダメージを与える
-void PlayerController::AddDamage(float damage, Vector3 hitPosition)
+// ダメージを受けた時の処理
+void PlayerController::OnDamage(float damage, Vector3 hitPosition)
 {
-	// 体力を減少
-	_health -= damage;
-	//// 受けたダメージを加算
-	//_sustainedDamage += damage;
-	//// ノックバックダメージを加算
-	//_knockbackDamage += damage;
-	// ダメージを受けた位置を保存
-	_hitPosition = hitPosition;
 }

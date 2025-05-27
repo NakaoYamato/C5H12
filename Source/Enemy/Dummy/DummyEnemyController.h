@@ -15,8 +15,8 @@ public:
 	// 更新処理
 	void Update(float elapsedTime) override;
 
-	// ダメージを与える
-	void AddDamage(float damage, Vector3 hitPosition) override;
+	// ダメージを受けた時の処理
+	void OnDamage(float damage, Vector3 hitPosition) override;
 
 private:
 	std::weak_ptr<ShapeController> _shapeController;

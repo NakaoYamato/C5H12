@@ -26,8 +26,8 @@ public:
 	// 接触時処理
 	void OnContact(CollisionData& collisionData) override;
 
-	// ダメージを与える
-	void AddDamage(float damage, Vector3 hitPosition) override;
+	// ダメージを受けた時の処理
+	void OnDamage(float damage, Vector3 hitPosition) override;
 
 #pragma region アクセサ
 	// ステートマシン取得

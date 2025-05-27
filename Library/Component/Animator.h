@@ -69,6 +69,12 @@ public:
 		const std::vector<ModelResource::Node>& pose1,
 		float rate,
 		std::vector<ModelResource::Node>& result)const;
+
+	/// <summary>
+	/// 現在のアニメーションの回転量を取り除く
+	/// </summary>
+	/// <returns>回転変化量</returns>
+	Quaternion RemoveRootRotation(int rootIndex);
 #pragma endregion
 
 #pragma region アニメーションイベント

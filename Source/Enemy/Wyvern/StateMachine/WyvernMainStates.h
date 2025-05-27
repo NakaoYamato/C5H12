@@ -16,6 +16,21 @@ public:
 };
 #pragma endregion
 
+#pragma region ターゲットに向かう
+class WyvernToTargetState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernToTargetState(WyvernStateMachine* owner);
+	const char* GetName() const override { return "ToTarget"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
+};
+#pragma endregion
+
 #pragma region 噛みつき攻撃
 class WyvernBiteAttackState : public HierarchicalStateBase<WyvernStateMachine>
 {

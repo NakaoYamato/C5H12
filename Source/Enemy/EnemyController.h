@@ -31,11 +31,13 @@ public:
 	float GetATK() const { return _ATK; }
 	float GetSearchRange() const { return _searchRange; }
 	float GetAttackRange() const { return _attackRange; }
+	bool IsPerformDamageReaction() const { return _performDamageReaction; }
 
 	void SetTargetPosition(const Vector3& targetPosition) { _targetPosition = targetPosition; }
 	void SetATK(float atk) { _ATK = atk; }
 	void SetSearchRange(float searchRange) { _searchRange = searchRange; }
 	void SetAttackRange(float attackRange) { _attackRange = attackRange; }
+	void SetPerformDamageReaction(bool performDamageReaction) { _performDamageReaction = performDamageReaction; }
 #pragma endregion
 
 protected:
@@ -46,4 +48,7 @@ protected:
     float _ATK = 1.0f;
 	float _searchRange = 30.0f;
     float _attackRange = 20.0f;
+
+    // ダメージリアクションを行うかどうか
+	bool _performDamageReaction = false;
 };

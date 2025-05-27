@@ -181,6 +181,14 @@ Quaternion Quaternion::Slerp(const Quaternion& src, const Quaternion& dst, float
 		DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&src), DirectX::XMLoadFloat4(&dst), t));
 	return q;
 }
+// クォータニオン反転
+Quaternion Quaternion::Inverse(const Quaternion& q)
+{
+	Quaternion Q{};
+	DirectX::XMStoreFloat4(&Q,
+		DirectX::XMQuaternionInverse(DirectX::XMLoadFloat4(&q)));
+	return Q;
+}
 #pragma endregion
 
 // 回転行列に変換

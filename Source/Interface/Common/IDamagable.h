@@ -23,7 +23,7 @@ public:
 	/// <summary>
 	/// €–S‚µ‚Ä‚¢‚é‚©
 	/// </summary>
-	virtual bool IsDead() const { return _health > 0; }
+	virtual bool IsDead() const { return _health <= 0; }
 	/// <summary>
 	/// HP‰Šú‰»
 	/// </summary>

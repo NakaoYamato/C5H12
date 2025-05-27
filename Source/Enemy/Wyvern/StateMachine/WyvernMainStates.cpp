@@ -265,51 +265,88 @@ void WyvernDamageState::OnEnter()
 	auto hitPosition = owner->GetWyvern()->GetHitPosition();
 	auto targetDirection = (hitPosition - position).Normalize();
 	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
-	// 被弾位置から右前、右後ろ、左前、左後ろのどこに被弾するか判定
+	// 被弾位置から右前、右、右後ろ、左前、左、左後ろのどこに被弾するか判定
 	float crossY = front.Cross(targetDirection).y;
 	float dot = front.Dot(targetDirection);
-	if (crossY > 0.0f && dot > 0.0f)
+	if (crossY > 0.0f)
 	{
-		// 前方右に被弾
-		// アニメーション再生
-		owner->GetAnimator()->PlayAnimation(
-			u8"DamageFrontRight",
-			false,
-			0.5f);
-	}
-	else if (crossY < 0.0f && dot > 0.0f)
-	{
-		// 前方左に被弾
-		// アニメーション再生
-		owner->GetAnimator()->PlayAnimation(
-			u8"DamageFrontLeft",
-			false,
-			0.5f);
-	}
-	else if (crossY > 0.0f && dot < 0.0f)
-	{
-		// 後方右に被弾
-		// アニメーション再生
-		owner->GetAnimator()->PlayAnimation(
-			u8"DamageBackRight",
-			false,
-			0.5f);
-		//owner->GetAnimator()->SetIsRemoveRootRotation(true);
-		_isTurn = true; // 180度回転するフラグを立てる
+		// 右方向に被弾
+		if (dot > _frontAngleThreshold)
+		{
+			// 前方右に被弾
+			// アニメーション再生
+			owner->GetAnimator()->PlayAnimation(
+				u8"DamageFrontRight",
+				false,
+				0.5f);
+			owner->GetAnimator()->SetIsUseRootMotion(false);
+		}
+		else if (dot < _backAngleThreshold)
+		{
+			// 後方右に被弾
+			// アニメーション再生
+			owner->GetAnimator()->PlayAnimation(
+				u8"DamageBackRight",
+				false,
+				0.5f);
+			owner->GetAnimator()->SetIsUseRootMotion(false);
+			owner->GetAnimator()->SetIsRemoveRootMovement(true);
+			// アニメーションの回転量を反映させる
+			_applyRotation = true;
+		}
+		else
+		{
+			// 右方向に被弾
+			// アニメーション再生
+			owner->GetAnimator()->PlayAnimation(
+				u8"DamageRight",
+				false,
+				0.5f);
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			// アニメーションの回転量を反映させる
+			_applyRotation = true;
+		}
 	}
 	else
 	{
-		// 後方左に被弾
-		// アニメーション再生
-		owner->GetAnimator()->PlayAnimation(
-			u8"DamageBackLeft",
-			false,
-			0.5f);
-		//owner->GetAnimator()->SetIsRemoveRootRotation(true);
-		_isTurn = true; // 180度回転するフラグを立てる
+		// 左方向に被弾
+		if (dot > _frontAngleThreshold)
+		{
+			// 前方左に被弾
+			// アニメーション再生
+			owner->GetAnimator()->PlayAnimation(
+				u8"DamageFrontLeft",
+				false,
+				0.5f);
+			owner->GetAnimator()->SetIsUseRootMotion(false);
+		}
+		else if (dot < _backAngleThreshold)
+		{
+			// 後方左に被弾
+			// アニメーション再生
+			owner->GetAnimator()->PlayAnimation(
+				u8"DamageBackLeft",
+				false,
+				0.5f);
+			owner->GetAnimator()->SetIsUseRootMotion(false);
+			owner->GetAnimator()->SetIsRemoveRootMovement(true);
+			// アニメーションの回転量を反映させる
+			_applyRotation = true;
+		}
+		else
+		{
+			// 左方向に被弾
+			// アニメーション再生
+			owner->GetAnimator()->PlayAnimation(
+				u8"DamageLeft",
+				false,
+				0.5f);
+			owner->GetAnimator()->SetIsUseRootMotion(true);
+			// アニメーションの回転量を反映させる
+			_applyRotation = true;
+		}
 	}
 	owner->GetAnimator()->SetRootNodeIndex("CG");
-	owner->GetAnimator()->SetIsUseRootMotion(false);
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
 }
 void WyvernDamageState::OnExecute(float elapsedTime)
@@ -317,31 +354,40 @@ void WyvernDamageState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときかキャンセルイベントが発生しているとき
 	if (!owner->GetAnimator()->IsPlayAnimation() || owner->CallCancelEvent())
 	{
-		// 回転するフラグが立っているなら
-		if (_isTurn)
-		{
-			//// rootに設定したノードの回転量を取り除く
-			//int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
-			//auto& poseNodes = owner->GetWyvern()->GetActor()->GetModel().lock()->GetPoseNodes();
-			//poseNodes[rootNodeIndex].rotation = Quaternion::Identity;
-			//owner->GetWyvern()->GetActor()->GetModel().lock()->SetPoseNodes(poseNodes);
-
-			// 180度回転
-			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
-			transform.SetRotation(transform.GetRotation() - Vector3(0.0f, DirectX::XM_PI, 0.0f));
-			_isTurn = false; // フラグを下ろす
-		}
 		// 待機状態へ遷移
-		owner->GetAnimator()->PlayAnimation(
-			u8"Idle03Shake",
-			false,
-			1.5f);
-		owner->GetAnimator()->SetIsUseRootMotion(false);
-		//owner->GetStateMachine().ChangeState("Idle");
+		owner->GetStateMachine().ChangeState("Idle");
 	}
 }
 void WyvernDamageState::OnExit()
 {
+	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+	if (_applyRotation)
+	{
+		int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+		auto& poseNodes = owner->GetWyvern()->GetActor()->GetModel().lock()->GetPoseNodes();
+		int animationIndex = owner->GetAnimator()->GetAnimationIndex();
+		ModelResource::Node startRootNode{};
+		owner->GetAnimator()->ComputeAnimation(animationIndex, rootNodeIndex, 0.0f, startRootNode);
+		// 回転量の差分を求める
+		Quaternion q = Quaternion::Multiply(
+			Quaternion::Inverse(poseNodes[rootNodeIndex].rotation),
+			startRootNode.rotation);
+		// ルートの回転量を取り除く
+		poseNodes[rootNodeIndex].rotation = startRootNode.rotation;
+		owner->GetWyvern()->GetActor()->GetModel().lock()->SetPoseNodes(poseNodes);
+
+		// 回転量をアクターに反映する
+		auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+		Vector3 angle{};
+		// ルートの行列の都合上z値をyに設定
+		angle.y = q.ToRollPitchYaw().z;
+		transform.AddRotation(angle);
+
+		// フラグを下ろす
+		_applyRotation = false;
+		owner->GetAnimator()->SetIsRemoveRootMovement(false);
+	}
+
 	owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
@@ -349,7 +395,7 @@ void WyvernDamageState::OnExit()
 void WyvernDeathState::OnEnter()
 {
 	owner->GetAnimator()->PlayAnimation(
-		u8"Death",
+		u8"Death01",
 		false,
 		0.5f);
 	owner->GetAnimator()->SetRootNodeIndex("CG");
@@ -358,12 +404,6 @@ void WyvernDeathState::OnEnter()
 }
 void WyvernDeathState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき
-	if (!owner->GetAnimator()->IsPlayAnimation())
-	{
-		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
-	}
 }
 void WyvernDeathState::OnExit()
 {

@@ -52,6 +52,25 @@ void Animator::Update(float elapsedTime)
 	// ルートモーション計算
     CalcRootMotion(elapsedTime, poseNodes);
 
+    // 取り除き
+    if (_rootNodeIndex != -1)
+    {
+        ModelResource::Node startRootNode{};
+        ComputeAnimation(_animationIndex, _rootNodeIndex, 0.0f, startRootNode);
+        // 回転量の取り除き
+        if (_removeRootRotation)
+        {
+            // rootノードの回転量を取り除く
+            poseNodes[_rootNodeIndex].rotation = startRootNode.rotation;
+        }
+		// 位置量の取り除き
+		if (_removeRootMovement)
+		{
+			// rootノードの位置量を取り除く
+			poseNodes[_rootNodeIndex].position = startRootNode.position;
+		}
+    }
+
     // アニメーションイベントの更新
     UpdateAnimationEvent();
 }
@@ -86,6 +105,7 @@ void Animator::DrawGui()
 
     ImGui::Checkbox(u8"ルートモーションするか", &_useRootMotion);
     ImGui::Checkbox(u8"ルートの回転量を取り除くか", &_removeRootRotation);
+	ImGui::Checkbox(u8"ルートの位置量を取り除くか", &_removeRootMovement);
     ImGui::Combo(u8"ルートモーションノード", &_rootNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
     int option = static_cast<int>(_rootMotionOption);
     if (ImGui::Combo(u8"ルートモーションオプション", &option, optionNames, _countof(optionNames)))
@@ -494,9 +514,6 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         poseNodes[_rootNodeIndex].position = _rootOffset;
         break;
     }
-
-    if (_removeRootRotation)
-        poseNodes[_rootNodeIndex].rotation = startRootNode.rotation;
 
     // モデルの姿勢を更新
     _model.lock()->SetPoseNodes(poseNodes);

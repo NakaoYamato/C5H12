@@ -101,6 +101,7 @@ public:
 	bool IsPlaying() const { return _isPlaying; }
 	bool IsLoop() const { return _isLoop; }
 	bool IsUseRootMotion() const { return _useRootMotion; }
+	bool IsRemoveRootMovement() const { return _removeRootMovement; }
 	bool IsRemoveRootRotation() const { return _removeRootRotation; }
 	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
 
@@ -118,6 +119,7 @@ public:
 	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
 	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
 	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
+	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
 	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
 
 	/// <summary>
@@ -184,6 +186,7 @@ private:
 	bool	_isPlaying		= false;
 	bool	_isLoop			= false;
 	bool	_useRootMotion	= false;
+	bool	_removeRootMovement = false;
 	bool	_removeRootRotation = false;
 
 	Vector3	_rootOffset		= Vector3::Zero;

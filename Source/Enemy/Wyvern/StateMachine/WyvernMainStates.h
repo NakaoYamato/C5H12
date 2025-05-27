@@ -119,7 +119,13 @@ public:
 	// 終了処理
 	void OnExit() override;
 private:
-	bool _isTurn = false; // 回転するかどうか
+	// 前方向と判定する角度(cos値)
+	const float _frontAngleThreshold = 0.8f;
+	// 後方向と判定する角度(cos値)
+	const float _backAngleThreshold = -0.3f;
+
+	// アニメーションの回転を適用するかどうか
+	bool _applyRotation = false;
 };
 #pragma endregion
 

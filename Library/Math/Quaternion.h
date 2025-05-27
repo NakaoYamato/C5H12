@@ -58,6 +58,8 @@ public:
 	static Quaternion FromRollPitchYaw(const DirectX::XMFLOAT3& angle);
 	// クォータニオンの保管
 	static Quaternion Slerp(const Quaternion& src, const Quaternion& dst, float t);
+	// クォータニオン反転
+	static Quaternion Inverse(const Quaternion& q);
 #pragma endregion
 
 
@@ -76,6 +78,11 @@ public:
     {
         return Slerp(*this, q, t);
     }
+	// クォータニオン反転
+	Quaternion Inverse() const
+	{
+		return Inverse(*this);
+	}
 #pragma endregion
 
 

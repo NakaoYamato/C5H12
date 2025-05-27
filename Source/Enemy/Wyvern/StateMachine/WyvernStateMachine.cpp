@@ -51,13 +51,22 @@ void WyvernStateMachine::Execute(float elapsedTime)
             }
         }
     }
+
     // ”í’eˆ—
-	if (_wyvern->GetDamageCounter() > 0)
+	if (_wyvern->IsPerformDamageReaction())
 	{
         // ”í’e‘JˆÚ
 		_stateMachine.ChangeState("Damage");
-        _wyvern->SetDamageCounter(0.0f);
+        _wyvern->SetPerformDamageReaction(false);
 	}
+
+    // €–Sˆ—
+    if (_wyvern->IsDead() && _stateMachine.GetStateName() != "Death")
+    {
+        // €–S‘JˆÚ
+		_stateMachine.ChangeState("Death");
+    }
+
 
 	// ƒXƒe[ƒgƒ}ƒVƒ“‚ÌÀs
     _stateMachine.Update(elapsedTime);

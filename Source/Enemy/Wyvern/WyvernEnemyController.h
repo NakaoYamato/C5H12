@@ -27,12 +27,10 @@ public:
 	float GetNearAttackRange() const { return _nearAttackRange; }
 	float GetNearAttackRadian() const { return _nearAttackRadian; }
 	float GetRotationSpeed() const { return _rotationSpeed; }
-	float GetDamageCounter() const { return _damageCounter; }
 
 	void SetNearAttackRange(float nearAttackRange) { _nearAttackRange = nearAttackRange; }
 	void SetNearAttackRadian(float nearAttackRadian) { _nearAttackRadian = nearAttackRadian; }
 	void SetRotationSpeed(float rotationSpeed) { _rotationSpeed = rotationSpeed; }
-	void SetDamageCounter(float damageCounter) { _damageCounter = damageCounter; }
 #pragma endregion
 
 private:
@@ -48,5 +46,8 @@ private:
 	// 回転速度
 	float _rotationSpeed = 1.0f;
 
+	// ダメージリアクションの間隔
+	float _damageReactionRate = 2.0f;
+	// ダメージカウンター
 	float _damageCounter = 0.0f;
 };

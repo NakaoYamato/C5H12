@@ -10,6 +10,10 @@ void WyvernEnemyController::Start()
 {
 	EnemyController::Start();
 
+	// 体力設定
+	_maxHealth = 10.0f;
+	_health = _maxHealth;
+
 	_charactorController.lock()->SetRadius(2.5f);
 	// ビヘイビアツリー作成
 	_behaviorTree = std::make_unique<WyvernBehaviorTree>(this, _animator.lock().get());
@@ -53,4 +57,10 @@ void WyvernEnemyController::AddDamage(float damage, Vector3 hitPosition)
 {
 	EnemyController::AddDamage(damage, hitPosition);
 	_damageCounter += damage;
+	if (_damageCounter >= _damageReactionRate)
+	{
+		// ダメージリアクションを行う
+		SetPerformDamageReaction(true);
+		_damageCounter = 0.0f;
+	}
 }

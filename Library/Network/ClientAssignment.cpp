@@ -156,7 +156,7 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerMessageDataCallback(message);
     }
     break;
-    case Network::DataTag::Login:
+    case Network::DataTag::PlayerLogin:
 	{
         Network::PlayerLogin playerLogin;
 		if (!buffer.Read(&playerLogin, payloadLen))
@@ -168,7 +168,7 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerLoginCallback(playerLogin);
 	}
 	break;
-	case Network::DataTag::Logout:
+	case Network::DataTag::PlayerLogout:
 	{
 		Network::PlayerLogout playerLogout;
 		if (!buffer.Read(&playerLogout, payloadLen))
@@ -180,7 +180,7 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerLogoutCallback(playerLogout);
 	}
 	break;
-	case Network::DataTag::Sync:
+	case Network::DataTag::PlayerSync:
 	{
 		Network::PlayerSync playerSync;
 		if (!buffer.Read(&playerSync, payloadLen))
@@ -192,19 +192,7 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerSyncCallback(playerSync);
 	}
     break;
-	case Network::DataTag::AllSync:
-	{
-		Network::AllPlayerSync allPlayerSync;
-		if (!buffer.Read(&allPlayerSync, payloadLen))
-		{
-			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:AllSync");
-			return;
-		}
-		if (self->_allPlayerSyncCallback)
-			self->_allPlayerSyncCallback(allPlayerSync);
-	}
-    break;
-	case Network::DataTag::Move:
+	case Network::DataTag::PlayerMove:
 	{
 		Network::PlayerMove playerMove;
 		if (!buffer.Read(&playerMove, payloadLen))

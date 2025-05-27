@@ -86,7 +86,7 @@ void NetworkMediator::OnFixedUpdate()
             }
         }
         // サーバーに送信
-        _client->WriteRecord(Network::DataTag::Move, &playerMove, sizeof(playerMove));
+        _client->WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
     }
 }
 
@@ -141,16 +141,6 @@ void NetworkMediator::SetClientCollback()
             _logs.push_back("PlayerSync" + std::to_string(playerSync.id));
 
             _playerSyncs.push_back(playerSync);
-        });
-    _client->SetAllPlayerSyncCallback(
-        [this](const Network::AllPlayerSync& allPlayerSync)
-        {
-            // スレッドセーフ
-            std::lock_guard<std::mutex> lock(_mutex);
-
-            _logs.push_back("AllPlayerSync");
-
-            _allPlayerSyncs.push_back(allPlayerSync);
         });
     _client->SetPlayerLoginCallback(
         [this](const Network::PlayerLogin& playerLogin)
@@ -215,42 +205,6 @@ void NetworkMediator::ProcessNetworkData()
         player->GetTransform().SetAngleY(sync.angleY);
     }
     _playerSyncs.clear();
-    //===============================================================================
-
-    //===============================================================================
-    // 全体同期データの処理
-    for (auto& sync : _allPlayerSyncs)
-    {
-        // プレイヤー情報を更新
-        for (int i = 0; i < NETWORK_MAX_CONNECTION; i++)
-        {
-			// プレイヤーが存在しないならスキップ
-            if (sync.players[i].id == -1)continue;
-
-			// 自身のデータはスキップ
-			if (sync.players[i].id == myPlayerId)continue;
-
-            auto player = _players[sync.players[i].id].lock();
-            if (!player)
-            {
-                // プレイヤーが存在しないなら作成
-                player = CreatePlayer(sync.players[i].id, false).lock();
-            }
-            player->GetTransform().SetPosition(sync.players[i].position);
-            player->GetTransform().SetAngleY(sync.players[i].angleY);
-            // プレイヤーの状態を更新
-            auto playerController = player->GetPlayerController();
-            if (playerController != nullptr)
-            {
-                auto stateMachine = playerController->GetPlayerStateMachine();
-                if (stateMachine != nullptr)
-                {
-                    stateMachine->ChangeState(sync.players[i].state, sync.players[i].subState);
-                }
-            }
-        }
-    }
-    _allPlayerSyncs.clear();
     //===============================================================================
 
     //===============================================================================

@@ -23,6 +23,15 @@ public:
 #pragma region アクセサ
 	WyvernStateMachine* GetState() const { return _stateMachine.get(); }
 
+#pragma region ネットワーク用
+	// ステート変更
+	virtual void ChangeState(const char* mainStateName, const char* subStateName) override;
+	// ステート名取得
+	virtual const char* GetStateName() override;
+	// サブステート名取得
+	virtual const char* GetSubStateName() override;
+#pragma endregion
+
 	float GetNearAttackRange() const { return _nearAttackRange; }
 	float GetNearAttackRadian() const { return _nearAttackRadian; }
 	float GetRotationSpeed() const { return _rotationSpeed; }

@@ -58,14 +58,6 @@ public:
 	{
 		_playerSyncCallback = callback;
 	}
-	/// <summary>
-	/// AllPlayerSyncを受け取ったときのコールバック関数を設定する
-	/// </summary>
-	/// <param name="callback"></param>
-	void SetAllPlayerSyncCallback(std::function<void(const Network::AllPlayerSync&)> callback)
-	{
-		_allPlayerSyncCallback = callback;
-	}
     /// <summary>
     /// PlayerLoginを受け取ったときのコールバック関数を設定する
     /// </summary>
@@ -157,7 +149,6 @@ private:
 	std::function<void(const Network::PlayerLogin&)> _playerLoginCallback;
 	std::function<void(const Network::PlayerLogout&)> _playerLogoutCallback;
 	std::function<void(const Network::PlayerSync&)> _playerSyncCallback;
-	std::function<void(const Network::AllPlayerSync&)> _allPlayerSyncCallback;
 	std::function<void(const Network::PlayerMove&)> _playerMoveCallback;
 #pragma endregion
 

@@ -173,13 +173,13 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		std::cout << massageData.id << ":" << massageData.message << std::endl;
 	}
 	break;
-	case DataTag::Login:
+	case DataTag::PlayerLogin:
 	{
 		// Loginはクライアントが受け取るだけなので処理することはない
 		return;
 	}
 	break;
-	case DataTag::Logout:
+	case DataTag::PlayerLogout:
 	{
 		// サーバからクライアント情報を削除
 		int eraseId = self->EraseClient(connection);
@@ -188,73 +188,13 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		std::cout << eraseId << ":" << "Logout" << std::endl;
 	}
 	break;
-	case DataTag::Sync:
+	case DataTag::PlayerSync:
 	{
 		// Syncはクライアントが受け取るだけなので処理することはない
 		return;
 	}
 	break;
-	case DataTag::AllSync:
-	{
-		std::cout << "RECV AllSync" << std::endl;
-
-		AllPlayerSync allPlayerSync;
-		// バッファデータからpayLoadStrにデータに読み込み
-		if (!buffer.Read(&allPlayerSync, payloadLen)) {
-			std::cout << "Read Error" << std::endl;
-			return;
-		}
-
-		// 送信元のデータを保存
-		Player& recvPlayer = allPlayerSync.players[0];
-		auto client = self->GetClientFromConnection(connection);
-		client->isSync = true;
-        client->player.position = recvPlayer.position;
-        client->player.angleY = recvPlayer.angleY;
-
-		// 各クライアントがSyncを送信するまで返さない
-		for (const Client& client : self->clients)
-		{
-			if (client.isSync == false)
-				return;
-		}
-
-		// 送信データ作成
-        AllPlayerSync allPlayerSyncData;
-        for (int i = 0; i < NETWORK_MAX_CONNECTION; i++)
-        {
-			if (i < self->clients.size())
-				allPlayerSyncData.players[i] = self->clients[i].player;
-			else
-				allPlayerSyncData.players[i].id = -1;
-        }
-#ifdef USE_MRS
-		mrs::Buffer send;
-		send.Write(&allPlayerSyncData, sizeof(allPlayerSyncData));
-#endif // USE_MRS
-
-        // すべてのクライアントにすべてのクライアントのデータを送信
-		for (Client& client : self->clients)
-		{
-			// Syncフラグをfalseに戻す
-			client.isSync = false;
-
-#ifdef USE_MRS
-			mrs_write_record(
-				client.connection,						// 送信先コネクション
-				NETWORK_RECORD_OPTION,					// 通信オプション
-				payloadType,							// データコマンド
-				send.GetData(),								// 送信データ
-				send.GetDataLen()								// 送信サイズ
-			);
-#else
-			ENLWriteRecord(client.connection, payloadType, &allPlayerSyncData, sizeof(allPlayerSyncData));
-#endif // USE_MRS
-		}
-		return;
-	}
-	break;
-	case DataTag::Move:
+	case DataTag::PlayerMove:
 	{
 		PlayerMove playerMove;
 		// バッファデータからpayLoadStrにデータに読み込み
@@ -282,36 +222,6 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		}
 	}
 	break;
-	case DataTag::Attack:
-	{
-		//PlayerInput payloadData;
-		//// バッファデータからpayLoadStrにデータに読み込み
-		//if (!buffer.Read(&payloadData, payload_len)) {
-		//	std::cout << "Read Error" << std::endl;
-		//}
-
-		//std::cout << "recv data attack id:" << std::to_string(payloadData.id) << std::endl;
-		//std::cout << "position x:" << payloadData.position.x;
-		//std::cout << "y:" << payloadData.position.y;
-		//std::cout << "z:" << payloadData.position.z << std::endl;
-		//std::cout << "click_position x:" << payloadData.clickPosition.x;
-		//std::cout << "y:" << payloadData.clickPosition.y;
-		//std::cout << "z:" << payloadData.clickPosition.z << std::endl;
-
-		//for (const Client& client : self->clients)
-		//{
-		//	// 同じIDの場合
-		//	if (client.player->id == payloadData.id)
-		//	{
-		//		client.player->position = payloadData.position;
-		//		client.player->targetPosition = payloadData.clickPosition;
-		//		client.player->state = Player::State::Move;
-		//	}
-		//	// 受信データをクライアントに送信
-		//	ENLWriteRecord(client.enlConnection, payload_type, payload, payload_len);
-		//}
-		break;
-	}
 	}
 
 #ifdef USE_MRS
@@ -358,7 +268,7 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connectionData
 		mrs_write_record(
 			client.connection,						// 送信先コネクション
 			NETWORK_RECORD_OPTION,	// 通信オプション
-			static_cast<uint16>(Network::DataTag::Logout),	// データコマンド
+			static_cast<uint16>(Network::DataTag::PlayerLogout),	// データコマンド
 			&logout,								// 送信データ
 			sizeof(logout)							// 送信サイズ
 		);
@@ -407,7 +317,7 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 
 	// サーバにプレイヤー追加
 	Player player = Player();
-	player.id = self->id;
+	player.id = self->playerNextUniqueID;
 	player.position = DirectX::XMFLOAT3(0, 0, 0);
 	player.angleY = 0.0f;
 
@@ -415,7 +325,8 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 	newClient.connection = connection;
 	newClient.player = player;
 
-	self->AddID();
+	// ユニークIDをインクリメント
+	self->playerNextUniqueID++;
 	self->clients.emplace_back(newClient);
 	std::cout << "新規接続\t" << newClient.connection << std::endl;
 
@@ -430,7 +341,7 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 		mrs_write_record(
 			client.connection,						// 送信先コネクション
 			NETWORK_RECORD_OPTION,	// 通信オプション
-			static_cast<uint16>(Network::DataTag::Login),	// データコマンド
+			static_cast<uint16>(Network::DataTag::PlayerLogin),	// データコマンド
 			&playerLogin,								// 送信データ
 			sizeof(playerLogin)							// 送信サイズ
 		);
@@ -460,7 +371,7 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 		mrs_write_record(
 			connection,						// 送信先コネクション
 			NETWORK_RECORD_OPTION,	// 通信オプション
-			static_cast<uint16>(Network::DataTag::Sync),	// データコマンド
+			static_cast<uint16>(Network::DataTag::PlayerSync),	// データコマンド
 			send.GetData(),								// 送信データ
 			send.GetDataLen()							// 送信サイズ
 		);
@@ -472,6 +383,17 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 			sizeof(player)
 		);
 #endif // USE_MRS
+	}
+
+	// 最初の接続者なら敵を生成する
+	if (self->clients.size() == 1)
+	{
+		// 敵生成
+		EnemyCreate enemyCreate{};
+		enemyCreate.type = EnemyType::Wyvern;
+		enemyCreate.uniqueID = self->enemyNextUniqueID; // ユニークIDは0で初期化
+		enemyCreate.position = DirectX::XMFLOAT3(0, 10.0f, 10.0f);
+		enemyCreate.angleY = 0.0f;
 	}
 }
 #pragma endregion

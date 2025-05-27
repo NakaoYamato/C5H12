@@ -32,5 +32,8 @@
     <ClInclude Include="Define\PlayerDefine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Define\EnemyDefine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

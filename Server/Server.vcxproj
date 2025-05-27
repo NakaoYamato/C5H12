@@ -137,6 +137,7 @@
     <ClCompile Include="Source\ServerAssignment.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Define\EnemyDefine.h" />
     <ClInclude Include="Define\NetworkDefine.h" />
     <ClInclude Include="Define\PlayerDefine.h" />
     <ClInclude Include="Source\ServerAssignment.h" />

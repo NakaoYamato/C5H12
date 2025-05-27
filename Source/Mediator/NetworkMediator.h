@@ -6,11 +6,18 @@
 #include <mutex>
 
 #include "../../Library/Actor/Actor.h"
-#include "../../Source/Player/PlayerActor.h"
 #include "../../Library/Scene/Scene.h"
+#include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Enemy/EnemyController.h"
 
 class NetworkMediator : public Actor
 {
+public:
+    struct EnemyData
+    {
+        //std::weak_ptr<EnemyController>;
+    };
+
 public:
     ~NetworkMediator() override;
 
@@ -74,6 +81,10 @@ private:
     // key : ネットワークID
     // value : プレイヤーのポインタ
     std::unordered_map<int, std::weak_ptr<PlayerActor>> _players;
+	// 敵キャラクター情報
+	// key : ユニークID
+	// value : 敵のポインタ
+	std::unordered_map<int, std::weak_ptr<EnemyController>> _enemies;
     // サーバー通信
     std::shared_ptr<ClientAssignment> _client;
     // ユーザーが操作するプレイヤー
@@ -88,7 +99,6 @@ private:
     std::vector<Network::PlayerLogin> _playerLogins;
     std::vector<Network::PlayerLogout> _playerLogouts;
     std::vector<Network::PlayerSync> _playerSyncs;
-    std::vector<Network::AllPlayerSync> _allPlayerSyncs;
     std::vector<Network::PlayerMove> _playerMoves;
 #pragma endregion
 

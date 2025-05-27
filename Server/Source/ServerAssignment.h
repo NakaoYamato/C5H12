@@ -26,8 +26,10 @@ public:
 	/// </summary>
 	void Exit();
 
-	void AddID() { id++; }
-
+	/// <summary>
+	/// すべてのクライアント取得
+	/// </summary>
+	/// <returns></returns>
 	std::vector<Network::Client> GetClients() { return clients; }
 
 	/// <summary>
@@ -155,7 +157,10 @@ private:
 #pragma endregion
 
 private:
-	int id = 0;
+	// プレイヤーの次のユニークID
+	int playerNextUniqueID = 0;
+	// 敵の次のユニークID
+	int enemyNextUniqueID = 0;
 
 #ifdef USE_MRS
 	MrsServer mrsServer = nullptr;

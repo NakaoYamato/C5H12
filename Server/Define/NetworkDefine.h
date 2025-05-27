@@ -19,10 +19,12 @@
 #include <string>
 
 #include "PlayerDefine.h"
+#include "EnemyDefine.h"
 
 #define NETWORK_PORT_ADDRESS 7000
 #define NETWORK_MAX_CONNECTION 4
 #define NETWORK_MAX_MESSAGE_SIZE 512
+#define NETWORK_MAX_STATE_NAME_SIZE 32
 
 namespace Network
 {
@@ -33,13 +35,14 @@ namespace Network
 	{
 		Message = 1,
 
-		Login,
-		Logout,
-		Sync,
-        AllSync,
+		PlayerLogin,
+		PlayerLogout,
+		PlayerSync,
+		PlayerMove,
 
-		Move,
-		Attack,
+		EnemyCreate,
+		EnemySync,
+		EnemyMove,
 	};
 
 	struct Player
@@ -50,6 +53,18 @@ namespace Network
         float angleY = 0.0f;
 		PlayerMainStates state = PlayerMainStates::None;
         PlayerSubStates subState = PlayerSubStates::None;
+	};
+
+	struct Enemy
+	{
+		EnemyType type = EnemyType::None;
+		int uniqueID = -1;
+		int leaderID = -1; // 読み取り用
+		DirectX::XMFLOAT3 position = {};
+		float angleY = 0.0f;
+		float health = 100.0f;
+		char mainState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
+		char subState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
 	};
 
 	/// <summary>
@@ -73,6 +88,7 @@ namespace Network
 		char message[NETWORK_MAX_MESSAGE_SIZE] = { "\0" };
     };
 
+#pragma region プレイヤー情報
 	struct PlayerLogin
 	{
 		int id = -1;
@@ -89,20 +105,6 @@ namespace Network
 		DirectX::XMFLOAT3 position = {};
 		float angleY = 0.0f;
 	};
-
-	/// <summary>
-	/// Server: 受け取るときはplayers[0]にデータが入っている
-	///			送信するときはidは各プレイヤーのID
-	///			存在しないところはID == -1
-    /// Client:	受け取るときはidは各プレイヤーのID
-	///			存在しないところはID == -1
-    ///			送信するときはplayers[0]にデータを入れる
-	/// </summary>
-	struct AllPlayerSync
-	{
-		Player players[NETWORK_MAX_CONNECTION] = {};
-	};
-
 	struct PlayerMove
 	{
 		int id = -1;
@@ -110,8 +112,43 @@ namespace Network
 		DirectX::XMFLOAT2 movement = {};
 		float angleY = 0.0f;
 		PlayerMainStates state = PlayerMainStates::None;
-        PlayerSubStates subState = PlayerSubStates::None;
+		PlayerSubStates subState = PlayerSubStates::None;
 	};
+#pragma endregion
+
+#pragma region 敵情報
+	struct EnemyCreate
+	{
+		EnemyType type = EnemyType::None;
+		int uniqueID = -1;
+		int leaderID = -1;
+		DirectX::XMFLOAT3 position = {};
+		float angleY = {};
+	};
+
+	struct EnemySync
+	{
+		EnemyType type = EnemyType::None;
+		int uniqueID = -1;
+		int leaderID = -1;
+		DirectX::XMFLOAT3 position = {};
+		float angleY = {};
+		float health = 100.0f;
+		char mainState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
+		char subState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
+	};
+
+	struct EnemyMove
+	{
+		int uniqueID = -1;
+		DirectX::XMFLOAT3 position = {};
+		float angleY = {};
+		DirectX::XMFLOAT3 target = {};
+		char mainState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
+		char subState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
+	};
+#pragma endregion
+
 
 #pragma endregion
 }

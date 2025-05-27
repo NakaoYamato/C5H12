@@ -64,3 +64,20 @@ void WyvernEnemyController::OnDamage(float damage, Vector3 hitPosition)
 		_damageCounter = 0.0f;
 	}
 }
+
+#pragma region ネットワーク用
+void WyvernEnemyController::ChangeState(const char* mainStateName, const char* subStateName)
+{
+	_stateMachine->ChangeState(mainStateName, subStateName);
+}
+
+const char* WyvernEnemyController::GetStateName()
+{
+	return _stateMachine->GetStateName();
+}
+
+const char* WyvernEnemyController::GetSubStateName()
+{
+	return _stateMachine->GetSubStateName();
+}
+#pragma endregion

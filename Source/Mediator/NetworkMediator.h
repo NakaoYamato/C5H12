@@ -89,7 +89,8 @@ private:
     std::shared_ptr<ClientAssignment> _client;
     // ユーザーが操作するプレイヤー
     int myPlayerId = -1;
-
+	// リーダーのユニークID
+	int leaderPlayerId = -1;
     // スレッドセーフ用
     std::mutex _mutex;
 

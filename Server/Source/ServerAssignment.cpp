@@ -141,6 +141,59 @@ void ServerAssignment::Exit()
 	}
 }
 
+/// データ送信
+#ifdef USE_MRS
+void ServerAssignment::WriteRecord(MrsConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength)
+#else
+void ServerAssignment::WriteRecord(ENLConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength)
+#endif
+{
+#ifdef USE_MRS
+	mrs_write_record(
+		connection,					// 送信先コネクション
+		NETWORK_RECORD_OPTION,		// 通信オプション
+		static_cast<uint16>(tag),	// データコマンド
+		data,						// 送信データ
+		dataLength					// 送信サイズ
+	);
+#else
+	ENLWriteRecord(connection, static_cast<uint16>(tag), data, dataLength);
+#endif // USE_MRS
+}
+
+/// リーダーの選定
+void ServerAssignment::SelectingLeader()
+{
+	// リーダーがいるか確認
+	for (const Client& client : clients)
+	{
+		if (client.player.isLeader)
+		{
+			// リーダーがいる場合は処理しない
+			return;
+		}
+	}
+
+	playerLeaderID = -1; // リーダーIDを初期化
+	// 最初のプレイヤーをリーダーにする
+	if (!clients.empty())
+	{
+		playerLeaderID = clients[0].player.uniqueID;
+		clients[0].player.isLeader = true;
+		std::cout << "リーダー選定: " << playerLeaderID << std::endl;
+	}
+	// リーダーがいる場合は、リーダーの情報を全クライアントに送信
+	if (playerLeaderID != -1)
+	{
+		PlayerSetLeader setLeader{};
+		setLeader.playerUniqueID = playerLeaderID;
+		for (const Client& client : clients)
+		{
+			WriteRecord(client.connection, Network::DataTag::PlayerSetLeader, &setLeader, sizeof(setLeader));
+		}
+	}
+}
+
 #pragma region コールバック関数
 /// レコードが読み込み可能になった際に呼ばれるコールバック関数
 #ifdef USE_MRS
@@ -170,7 +223,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		}
 		// メッセージ表示
 		std::cout << "RECV Message" << std::endl;
-		std::cout << massageData.id << ":" << massageData.message << std::endl;
+		std::cout << massageData.playerUniqueID << ":" << massageData.message << std::endl;
 	}
 	break;
 	case DataTag::PlayerLogin:
@@ -214,7 +267,7 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		//std::cout << "state :" << playerMove.state;
 
 		// 送信元のプレイヤー情報を保存
-        auto client = self->GetClientFromID(playerMove.id);
+        auto client = self->GetClientFromID(playerMove.playerUniqueID);
 		if (client != nullptr)
 		{
 			client->player.position = playerMove.position;
@@ -224,25 +277,16 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 	break;
 	}
 
-#ifdef USE_MRS
 	// 受信データを全クライアントに送信
 	for (const Client& client : self->clients)
 	{
-		mrs_write_record(
-			client.connection,						// 送信先コネクション
-			NETWORK_RECORD_OPTION,	// 通信オプション
-			payloadType,								// データコマンド
+		self->WriteRecord(
+			client.connection,					// 送信先コネクション
+			static_cast<Network::DataTag>(payloadType),	// データコマンド
 			payload,								// 送信データ
-			payloadLen							// 送信サイズ
+			payloadLen								// 送信サイズ
 		);
 	}
-#else
-	// 受信データを全クライアントに送信
-	for (const Client& client : self->clients)
-	{
-		ENLWriteRecord(client.connection, payloadType, payload, payloadLen);
-	}
-#endif // USE_MRS
 }
 
 // ユーザが切断したときに呼ばれるコールバック関数
@@ -259,33 +303,21 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connectionData
 	for (const Client& client : self->clients)
 	{
 		if (client.connection != connection)continue;// 切断されたクライアントとコネクションが違う場合continue
-		logout.id = client.player.id;
+		logout.playerUniqueID = client.player.uniqueID;
 	}
 	for (const Client& client : self->clients)
 	{
 		if (client.connection == connection)continue;// 送信者には送らない
-#ifdef USE_MRS
-		mrs_write_record(
-			client.connection,						// 送信先コネクション
-			NETWORK_RECORD_OPTION,	// 通信オプション
-			static_cast<uint16>(Network::DataTag::PlayerLogout),	// データコマンド
-			&logout,								// 送信データ
-			sizeof(logout)							// 送信サイズ
-		);
-#else
-		ENLWriteRecord(
-			client.connection,
-			static_cast<uint16_t>(DataTag::Logout),
-			&logout,
-			sizeof(logout)
-		);
-#endif // USE_MRS
+		self->WriteRecord(client.connection, Network::DataTag::PlayerLogout, &logout, sizeof(logout));
 	}
 
 	// プレイヤー情報削除
 	self->EraseClient(connection);
 
 	std::cout << "切断\t" << connection << std::endl;
+
+	// リーダー選定
+	self->SelectingLeader();
 }
 
 // 接続されたときのコールバック関数
@@ -317,7 +349,7 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 
 	// サーバにプレイヤー追加
 	Player player = Player();
-	player.id = self->playerNextUniqueID;
+	player.uniqueID = self->playerNextUniqueID;
 	player.position = DirectX::XMFLOAT3(0, 0, 0);
 	player.angleY = 0.0f;
 
@@ -332,58 +364,29 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 
 	// ID送信
 	PlayerLogin playerLogin{};
-	playerLogin.id = player.id;
+	playerLogin.playerUniqueID = player.uniqueID;
 
 	// クライアントに接続者送信(接続者含む)
 	for (const Client& client : self->clients)
 	{
-#ifdef USE_MRS
-		mrs_write_record(
-			client.connection,						// 送信先コネクション
-			NETWORK_RECORD_OPTION,	// 通信オプション
-			static_cast<uint16>(Network::DataTag::PlayerLogin),	// データコマンド
-			&playerLogin,								// 送信データ
-			sizeof(playerLogin)							// 送信サイズ
-		);
-#else
-		ENLWriteRecord(
-			client.connection,
-			static_cast<uint16_t>(DataTag::Login),
-			&playerLogin,
-			sizeof(playerLogin)
-		);
-#endif // USE_MRS
+		self->WriteRecord(client.connection, Network::DataTag::PlayerLogin, &playerLogin, sizeof(playerLogin));
 	}
-	// 接続者に既存ログインユーザ送信
+	// "接続者"に既存ログインユーザ送信
 	for (const Client& client : self->clients)
 	{
         // 送信者には送らない
-		if (client.player.id == playerLogin.id)continue;
+		if (client.player.uniqueID == playerLogin.playerUniqueID)continue;
 
 		PlayerSync player{};
-		player.id = client.player.id;
+		player.playerUniqueID = client.player.uniqueID;
 		player.position = client.player.position;
 		player.angleY = client.player.angleY;
 
-#ifdef USE_MRS
-		mrs::Buffer send;
-		send.Write(&player, sizeof(player));
-		mrs_write_record(
-			connection,						// 送信先コネクション
-			NETWORK_RECORD_OPTION,	// 通信オプション
-			static_cast<uint16>(Network::DataTag::PlayerSync),	// データコマンド
-			send.GetData(),								// 送信データ
-			send.GetDataLen()							// 送信サイズ
-		);
-#else
-		ENLWriteRecord(
-			connection,
-			static_cast<uint16_t>(DataTag::Sync),
-			&player,
-			sizeof(player)
-		);
-#endif // USE_MRS
+		self->WriteRecord(connection, Network::DataTag::PlayerSync, &player, sizeof(player));
 	}
+
+	// リーダー選定
+	self->SelectingLeader();
 
 	// 最初の接続者なら敵を生成する
 	if (self->clients.size() == 1)

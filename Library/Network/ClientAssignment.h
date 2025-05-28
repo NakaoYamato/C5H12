@@ -75,6 +75,14 @@ public:
         _playerLogoutCallback = callback;
     }
 	/// <summary>
+	/// PlayerSetLeaderを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+	void SetPlayerSetLeaderCallback(std::function<void(const Network::PlayerSetLeader&)> callback)
+	{
+		_playerSetLeaderCallback = callback;
+	}
+	/// <summary>
 	/// PlayerMoveを受け取ったときのコールバック関数を設定する
 	/// </summary>
 	/// <param name="callback"></param>
@@ -148,6 +156,7 @@ private:
 	std::function<void(const Network::MessageData&)> _playerMessageDataCallback;
 	std::function<void(const Network::PlayerLogin&)> _playerLoginCallback;
 	std::function<void(const Network::PlayerLogout&)> _playerLogoutCallback;
+	std::function<void(const Network::PlayerSetLeader&)> _playerSetLeaderCallback;
 	std::function<void(const Network::PlayerSync&)> _playerSyncCallback;
 	std::function<void(const Network::PlayerMove&)> _playerMoveCallback;
 #pragma endregion

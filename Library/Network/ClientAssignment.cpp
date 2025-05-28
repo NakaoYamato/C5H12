@@ -180,6 +180,18 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerLogoutCallback(playerLogout);
 	}
 	break;
+	case Network::DataTag::PlayerSetLeader:
+	{
+		Network::PlayerSetLeader playerSetLeader;
+		if (!buffer.Read(&playerSetLeader, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:SetLeader");
+			return;
+		}
+		if (self->_playerSetLeaderCallback)
+			self->_playerSetLeaderCallback(playerSetLeader);
+	}
+	break;
 	case Network::DataTag::PlayerSync:
 	{
 		Network::PlayerSync playerSync;

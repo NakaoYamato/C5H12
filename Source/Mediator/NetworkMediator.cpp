@@ -72,7 +72,7 @@ void NetworkMediator::OnFixedUpdate()
 	if (myPlayer)
     {
 		Network::PlayerMove playerMove{};
-		playerMove.id = myPlayerId;
+		playerMove.playerUniqueID = myPlayerId;
 		playerMove.position = myPlayer->GetTransform().GetPosition();
         auto playerController = myPlayer->GetPlayerController();
         if (playerController != nullptr)
@@ -138,7 +138,7 @@ void NetworkMediator::SetClientCollback()
             // スレッドセーフ
             std::lock_guard<std::mutex> lock(_mutex);
 
-            _logs.push_back("PlayerSync" + std::to_string(playerSync.id));
+            _logs.push_back("PlayerSync" + std::to_string(playerSync.playerUniqueID));
 
             _playerSyncs.push_back(playerSync);
         });
@@ -148,7 +148,7 @@ void NetworkMediator::SetClientCollback()
             // スレッドセーフ
             std::lock_guard<std::mutex> lock(_mutex);
 
-            _logs.push_back("PlayerLogin" + std::to_string(playerLogin.id));
+            _logs.push_back("PlayerLogin" + std::to_string(playerLogin.playerUniqueID));
 
             _playerLogins.push_back(playerLogin);
         });
@@ -158,17 +158,27 @@ void NetworkMediator::SetClientCollback()
             // スレッドセーフ
             std::lock_guard<std::mutex> lock(_mutex);
 
-            _logs.push_back("PlayerLogout" + std::to_string(playerLogout.id));
+            _logs.push_back("PlayerLogout" + std::to_string(playerLogout.playerUniqueID));
 
             _playerLogouts.push_back(playerLogout);
         });
+	_client->SetPlayerSetLeaderCallback(
+		[this](const Network::PlayerSetLeader& playerSetLeader)
+		{
+			// スレッドセーフ
+			std::lock_guard<std::mutex> lock(_mutex);
+			_logs.push_back("PlayerSetLeader" + std::to_string(playerSetLeader.playerUniqueID));
+
+			// リーダー設定
+            leaderPlayerId = playerSetLeader.playerUniqueID;
+		});
     _client->SetPlayerMoveCallback(
         [this](const Network::PlayerMove& playerMove)
         {
             // スレッドセーフ
             std::lock_guard<std::mutex> lock(_mutex);
 
-            _logs.push_back("PlayerMove" + std::to_string(playerMove.id));
+            _logs.push_back("PlayerMove" + std::to_string(playerMove.playerUniqueID));
 
             _playerMoves.push_back(playerMove);
         });
@@ -185,7 +195,7 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& login : _playerLogins)
     {
         // プレイヤー作成
-        CreatePlayer(login.id, myPlayerId == -1);
+        CreatePlayer(login.playerUniqueID, myPlayerId == -1);
     }
     _playerLogins.clear();
     //===============================================================================
@@ -195,11 +205,11 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& sync : _playerSyncs)
     {
         // プレイヤー情報を更新
-        auto player = _players[sync.id].lock();
+        auto player = _players[sync.playerUniqueID].lock();
         if (!player)
         {
             // プレイヤーが存在しないなら作成
-            player = CreatePlayer(sync.id, false).lock();
+            player = CreatePlayer(sync.playerUniqueID, false).lock();
         }
         player->GetTransform().SetPosition(sync.position);
         player->GetTransform().SetAngleY(sync.angleY);
@@ -212,12 +222,12 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& logout : _playerLogouts)
     {
         // プレイヤー情報を削除
-        auto player = _players[logout.id].lock();
+        auto player = _players[logout.playerUniqueID].lock();
         if (player)
         {
             // プレイヤー削除
             player->Remove();
-            _players.erase(logout.id);
+            _players.erase(logout.playerUniqueID);
         }
     }
     _playerLogouts.clear();
@@ -228,11 +238,11 @@ void NetworkMediator::ProcessNetworkData()
 	for (auto& move : _playerMoves)
 	{
 		// プレイヤー情報を更新
-		auto player = _players[move.id].lock();
+		auto player = _players[move.playerUniqueID].lock();
         if (!player)
             continue;
 		// 自身の場合はスキップ
-		if (move.id == myPlayerId)
+		if (move.playerUniqueID == myPlayerId)
 			continue;
 		player->GetTransform().SetPosition(move.position);
         // プレイヤーの状態を更新
@@ -285,6 +295,9 @@ void NetworkMediator::DrawLogGui()
     {
         if (ImGui::BeginTabItem(u8"ログ"))
         {
+            bool flag = myPlayerId == leaderPlayerId;
+			ImGui::Checkbox(u8"リーダーかどうか", &flag);
+
             auto logs = GetLogs();
             ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(0, 0), ImGuiWindowFlags_NoTitleBar);
             for (std::string message : logs) {
@@ -314,7 +327,7 @@ void NetworkMediator::DrawMessageGui()
             if (ImGui::Button(u8"送信"))
             {
 				Network::MessageData messageData{};
-				messageData.id = myPlayerId;
+				messageData.playerUniqueID = myPlayerId;
 				_message.copy(messageData.message, sizeof(messageData.message) - 1);
 				// メッセージデータを送信
 				_client->WriteRecord(Network::DataTag::Message, &messageData, sizeof(messageData));
@@ -324,7 +337,7 @@ void NetworkMediator::DrawMessageGui()
             auto& messages = _messageDatas;
             ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(0, 0), ImGuiWindowFlags_NoTitleBar);
             for (auto& message : messages) {
-                ImGui::Text(u8"%d : %s", message.id, message.message);
+                ImGui::Text(u8"%d : %s", message.playerUniqueID, message.message);
             }
             ImGui::EndChild();
             ImGui::Spacing();

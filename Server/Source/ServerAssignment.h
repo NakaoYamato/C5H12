@@ -20,18 +20,33 @@ public:
 	/// 開始処理
 	/// </summary>
 	void Execute();
-
 	/// <summary>
 	/// 終了処理
 	/// </summary>
 	void Exit();
 
+private:
+	/// <summary>
+	/// データ送信
+	/// </summary>
+	/// <param name="connection"></param>
+	/// <param name="tag"></param>
+	/// <param name="data"></param>
+	/// <param name="dataLength"></param>
+#ifdef USE_MRS
+	void WriteRecord(MrsConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength);
+#else
+	void WriteRecord(ENLConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength);
+#endif
+	/// <summary>
+	/// リーダーの選定
+	/// </summary>
+	void SelectingLeader();
 	/// <summary>
 	/// すべてのクライアント取得
 	/// </summary>
 	/// <returns></returns>
 	std::vector<Network::Client> GetClients() { return clients; }
-
 	/// <summary>
     /// idからクライアントを取得
 	/// </summary>
@@ -41,7 +56,7 @@ public:
 	{
 		for (Network::Client& client : clients)
 		{
-			if (client.player.id == id)
+			if (client.player.uniqueID == id)
 			{
 				return &client;
 			}
@@ -161,6 +176,9 @@ private:
 	int playerNextUniqueID = 0;
 	// 敵の次のユニークID
 	int enemyNextUniqueID = 0;
+
+	// リーダーのユニークID
+	int playerLeaderID = -1;
 
 #ifdef USE_MRS
 	MrsServer mrsServer = nullptr;

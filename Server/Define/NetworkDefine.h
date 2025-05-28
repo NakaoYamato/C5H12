@@ -37,6 +37,7 @@ namespace Network
 
 		PlayerLogin,
 		PlayerLogout,
+		PlayerSetLeader,
 		PlayerSync,
 		PlayerMove,
 
@@ -47,7 +48,8 @@ namespace Network
 
 	struct Player
 	{
-		int id = -1;
+		int uniqueID = -1;
+		bool isLeader = false;
 		DirectX::XMFLOAT3 position = {};
         DirectX::XMFLOAT2 movement = {};
         float angleY = 0.0f;
@@ -84,30 +86,35 @@ namespace Network
 #pragma region 送信データ
     struct MessageData
     {
-		int id = 1;
+		int playerUniqueID = 1;
 		char message[NETWORK_MAX_MESSAGE_SIZE] = { "\0" };
     };
 
 #pragma region プレイヤー情報
 	struct PlayerLogin
 	{
-		int id = -1;
+		int playerUniqueID = -1;
 	};
 
 	struct PlayerLogout
 	{
-		int id = -1;
+		int playerUniqueID = -1;
+	};
+
+	struct PlayerSetLeader
+	{
+		int playerUniqueID = -1;
 	};
 
 	struct PlayerSync
 	{
-		int id = -1;
+		int playerUniqueID = -1;
 		DirectX::XMFLOAT3 position = {};
 		float angleY = 0.0f;
 	};
 	struct PlayerMove
 	{
-		int id = -1;
+		int playerUniqueID = -1;
 		DirectX::XMFLOAT3 position = {};
 		DirectX::XMFLOAT2 movement = {};
 		float angleY = 0.0f;

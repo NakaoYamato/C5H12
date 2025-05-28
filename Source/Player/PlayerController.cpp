@@ -9,6 +9,7 @@ void PlayerController::Start()
 {
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_animator = GetActor()->GetComponent<Animator>();
+	_hitEffectController = GetActor()->GetComponent<EffekseerEffectController>();
 
 	_charactorController.lock()->SetMaxSpeedXZ(5.0f);
 
@@ -55,6 +56,7 @@ void PlayerController::OnContactEnter(CollisionData& collisionData)
 		if (enemy != nullptr)
 		{
 			enemy->AddDamage(_ATK, collisionData.hitPosition);
+			_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);
 		}
 	}
 }

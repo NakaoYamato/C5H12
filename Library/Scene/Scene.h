@@ -8,6 +8,7 @@
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
+#include "../../Library/Effekseer/EffekseerEffectManager.h"
 
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/Component/Light/LightController.h"
@@ -103,6 +104,8 @@ public:
 	ActorManager& GetActorManager() { return _actorManager; }
 	// 当たり判定管理者取得
 	CollisionManager& GetCollisionManager() { return _collisionManager; }
+	// Effekseerエフェクトマネージャー取得
+	EffekseerEffectManager* GetEffekseerEffectManager() { return _effekseerEffectManager.get(); }
 	// RenderContext取得
 	RenderContext& GetRenderContext() {	return _renderContext; }
 	// メッシュレンダラー取得
@@ -132,6 +135,7 @@ private:
 	TextureRenderer					_textureRenderer;
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
+	std::unique_ptr<EffekseerEffectManager>			_effekseerEffectManager;
 
 	bool							_ready = false;
 };

@@ -5,6 +5,7 @@
 #include "../../Library/Component/Animator.h"
 #include "StateMachine/PlayerStateMachine.h"
 #include "../../Source/Interface/Common/IDamagable.h"
+#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
 #include <PlayerDefine.h>
 
@@ -47,5 +48,6 @@ private:
 #pragma endregion
 
 	std::weak_ptr<CharactorController> _charactorController;
+	std::weak_ptr<EffekseerEffectController> _hitEffectController;
 	std::weak_ptr<Animator> _animator;
 };

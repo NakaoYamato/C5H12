@@ -4,6 +4,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Component/CharactorController.h"
+#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 #include "PlayerInput.h"
 
 #include "../../Source/Camera/PlayerCameraController.h"
@@ -25,15 +26,18 @@ void PlayerActor::OnCreate()
 	auto animator		= this->AddComponent<Animator>();
 	_charactorController = this->AddComponent<CharactorController>();
 	_playerController	= this->AddComponent<PlayerController>();
+	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
+	if (_isUserControlled)
+	{
+		this->AddComponent<PlayerInput>();
+	}
+
+	// コライダー設定
     auto collider		= this->AddCollider<CapsuleCollider>();
 	collider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
 	collider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));
 	collider->SetRadius(0.5f);
-	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
-    if (_isUserControlled)
-    {
-		this->AddComponent<PlayerInput>();
-    }
 
 	// 剣生成
 	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);

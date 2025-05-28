@@ -151,6 +151,8 @@
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
+    <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
+    <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
     <ClCompile Include="Library\Model\AnimationEvent.cpp" />
     <ClCompile Include="Library\Model\Model.cpp" />
@@ -272,6 +274,8 @@
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
+    <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
+    <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Material\Material.h" />
     <ClInclude Include="Library\Model\AnimationEvent.h" />
     <ClInclude Include="Library\Model\Model.h" />

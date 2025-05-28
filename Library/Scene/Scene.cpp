@@ -15,6 +15,8 @@ void Scene::Initialize()
     // レンダラー作成
 	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
 	_textureRenderer.Initialize(Graphics::Instance().GetDevice());
+	// Effekseerエフェクトマネージャー作成
+	_effekseerEffectManager = std::make_unique<EffekseerEffectManager>();
 
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
@@ -49,6 +51,9 @@ void Scene::Update(float elapsedTime)
 
     // ゲームオブジェクトの遅延更新処理
     _actorManager.LateUpdate(elapsedTime);
+
+	// Effekseerの更新
+	_effekseerEffectManager->Update(elapsedTime);
 }
 
 /// 一定間隔の更新処理
@@ -177,6 +182,9 @@ void Scene::Render()
 
         // モデルの描画
         _meshRenderer.RenderAlpha(rc);
+
+		// Effekseerの描画
+		_effekseerEffectManager->Render(rc.camera->GetView(), rc.camera->GetProjection());
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());

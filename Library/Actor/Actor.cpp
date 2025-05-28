@@ -10,8 +10,6 @@
 
 #include "../Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
-#include "../../External/nameof/include/nameof.hpp"
-#include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 
 #include <ImGuizmo.h>
 
@@ -219,14 +217,6 @@ void Actor::DrawGui()
 		}
 		if (ImGui::BeginTabItem(u8"コライダー"))
 		{
-			ImGui::Separator();
-			ImGui::Text(u8"当たり判定を除く対象");
-			for (auto& [tag, flag] : _judgeTags)
-			{
-				ImGui::Checkbox(nameof::nameof_enum(tag).data(), &flag);
-			}
-			ImGui::Separator();
-
 			int index = 0;
 			for (std::shared_ptr<ColliderBase>& collider : _colliders)
 			{
@@ -271,6 +261,21 @@ void Actor::Contact(CollisionData& collisionData)
 	}
 
 	OnContact(collisionData);
+}
+
+void Actor::ContactEnter(CollisionData& collisionData)
+{
+	// 各コンポーネントの接触処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->OnContactEnter(collisionData);
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->OnContactEnter(collisionData);
+	}
+
+	OnContactEnter(collisionData);
 }
 
 // 削除処理

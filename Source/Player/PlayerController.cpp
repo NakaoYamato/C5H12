@@ -45,7 +45,7 @@ void PlayerController::DrawGui()
 }
 
 // ÚGŽžˆ—
-void PlayerController::OnContact(CollisionData& collisionData)
+void PlayerController::OnContactEnter(CollisionData& collisionData)
 {
 	// UŒ‚”»’è
 	if (collisionData.myLayer == CollisionLayer::Attack)
@@ -54,15 +54,7 @@ void PlayerController::OnContact(CollisionData& collisionData)
 		auto enemy = collisionData.other->GetComponent<EnemyController>();
 		if (enemy != nullptr)
 		{
-			// ˆÈ‘O‚É“–‚½‚Á‚Ä‚¢‚È‚¢‚©Šm”F
-			if (std::find(
-				_attackHitActors.begin(), _attackHitActors.end(), enemy->GetActor()->GetName()) 
-				!= _attackHitActors.end())
-				return;
-
 			enemy->AddDamage(_ATK, collisionData.hitPosition);
-
-			_attackHitActors.push_back(enemy->GetActor()->GetName());
 		}
 	}
 }

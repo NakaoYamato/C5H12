@@ -73,6 +73,7 @@ public:
         float radius;
 		bool isTrigger = false;
     };
+
 public:
 	CollisionManager() {}
 	~CollisionManager() {}
@@ -155,6 +156,43 @@ private:
 	/// </summary>
 	void SetDataByCollider();
 
+	// コンテナに情報を追加
+	void PushCollisionData(
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap,
+		Actor* actorA,
+		CollisionLayer layerA,
+		bool isTriggerA,
+		Actor* actorB,
+		CollisionLayer layerB,
+		bool isTriggerB,
+		const Vector3& hitPosition,
+		const Vector3& hitNormal,
+		float penetration);
+
+#pragma region 各当たり判定
+	void SphereVsSphere(
+		const SphereData& sphereA,
+		const SphereData& sphereB,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+	void SphereVsBox(
+		const SphereData& sphere,
+		const BoxData& box,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+	void SphereVsCapsule(
+		const SphereData& sphere,
+		const CapsuleData& capsule,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+	void BoxVsBox(
+		const BoxData& boxA,
+		const BoxData& boxB,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+	void CapsuleVsCapsule(
+		const CapsuleData& capsuleA,
+		const CapsuleData& capsuleB,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+#pragma endregion
+
+
 private:
 	std::vector<SphereCollider*>	_sphereColliders; // 球コライダー
 	std::vector<BoxCollider*>		_boxColliders; // ボックスコライダー
@@ -167,4 +205,8 @@ private:
     std::vector<CapsuleData> _capsuleDatas;
 
     std::mutex _mutex; // スレッドセーフ用
+
+	// 各アクターごとの前フレームでの接触情報
+	using ContactData = std::unordered_map<CollisionLayer, std::vector<std::string>>;
+	std::unordered_map<std::string, ContactData> _oldContactDatas;
 };

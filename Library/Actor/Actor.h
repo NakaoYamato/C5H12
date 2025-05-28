@@ -13,7 +13,6 @@
 // 前方宣言
 class Component;
 class ColliderBase;
-enum class ActorTag;
 class Scene;
 
 /// <summary>
@@ -83,6 +82,11 @@ public:
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	void Contact(CollisionData& collisionData);
+	/// <summary>
+	/// 接触した瞬間の処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	void ContactEnter(CollisionData& collisionData);
 
 	/// <summary>
 	// 自身を削除処理
@@ -169,15 +173,11 @@ public:
 	const char* GetName() const { return _name.c_str(); }
 	Transform& GetTransform() { return _transform; }
 	std::weak_ptr<Model> GetModel() { return _model; }
-	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return _judgeTags; }
 
 	void SetScene(Scene* scene) { this->_scene = scene; }
 	void SetName(const char* name) { this->_name = name; }
 	void SetTransform(const Transform& t) { this->_transform = t; }
 	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
-	// そのタグに対して当たり判定を行うかのフラグをセット
-	void SetJudgeTagFlag(ActorTag tag, bool f) { _judgeTags[tag] = f; }
-
 #pragma region フラグ関係
 	void SetActiveFlag(bool b) { this->_isActive = b; }
 	void SetShowFlag(bool b) { this->_isShowing = b; }
@@ -225,19 +225,28 @@ protected:
 	/// _FIXED_UPDATE_INTERVAL　が一定間隔(秒)
 	/// </summary>
 	virtual void OnFixedUpdate() {};
-	// トランスフォーム更新
+	/// <summary>
+	/// トランスフォーム更新
+	/// </summary>
 	virtual void UpdateTransform();
-	// ギズモ描画
+	/// <summary>
+	/// ギズモ描画
+	/// </summary>
 	virtual void DrawGuizmo();
-	// GUI描画
+	/// <summary>
+	/// GUI描画時処理
+	/// </summary>
 	virtual void OnDrawGui() {};
-
 	/// <summary>
 	/// 接触時処理
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	virtual void OnContact(CollisionData& collisionData) {}
-
+	/// <summary>
+	/// 接触した瞬間の処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContactEnter(CollisionData& collisionData) {}
 	/// <summary>
 	/// 自身削除時処理
 	/// </summary>
@@ -246,24 +255,23 @@ protected:
 
 protected:
 	// 所属するシーン
-	Scene* _scene = nullptr;
+	Scene*					_scene = nullptr;
 	// 名前
-	std::string			_name;
+	std::string				_name;
 	// トランスフォーム
-	Transform			_transform;
+	Transform				_transform;
 	// モデル
 	std::shared_ptr<Model>	_model;
+	// コンポーネント
+	std::vector<std::shared_ptr<Component>>		_components;
+	// 当たり判定コンポーネント
+	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
 
+#pragma region 各種フラグ
 	bool				_isActive = true;
 	bool				_isShowing = true;
 	bool				_drawDebug = true;
 	bool				_useGuizmo = true;
 	bool 				_drawHierarchy = false;
-
-	std::vector<std::shared_ptr<Component>>	_components;
-	// 当たり判定コンポーネント
-	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
-
-	// 各タグに対して当たり判定を行うかのフラグ
-	std::unordered_map<ActorTag, bool> _judgeTags;
+#pragma endregion
 };

@@ -24,7 +24,7 @@ public:
 	// GUI•`‰æ
 	void DrawGui() override;
 	// ÚGˆ—
-	void OnContact(CollisionData& collisionData) override;
+	void OnContactEnter(CollisionData& collisionData) override;
 
 	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚Ìˆ—
 	void OnDamage(float damage, Vector3 hitPosition) override;
@@ -36,12 +36,6 @@ public:
 	void SetATK(float atk) 
 	{ 
 		_ATK = atk; 
-		ClearHitActors(); 
-	}
-
-	void ClearHitActors()
-	{
-		_attackHitActors.clear();
 	}
 #pragma endregion
 
@@ -54,6 +48,4 @@ private:
 
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
-
-	std::vector<std::string> _attackHitActors;
 };

@@ -21,11 +21,4 @@ void ColliderBase::DrawGui()
 /// 接触の解消処理
 void ColliderBase::OnContact(CollisionData& collisionData)
 {   
-    // トリガーでなければ押し出し処理
-    //if (!_isTrigger)
-    //{
-    //    // 自身のトランスフォームを取得
-    //    Transform& transform = GetActor()->GetTransform();
-    //    transform.SetPosition(transform.GetPosition() + collisionData.hitNormal * collisionData.penetration);
-    //}
 }

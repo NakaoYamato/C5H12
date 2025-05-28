@@ -61,7 +61,10 @@ public:
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	virtual void OnContact(CollisionData& collisionData) {}
-
+	/// オブジェクトとの接触した瞬間時の処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContactEnter(CollisionData& collisionData) {}
 	// GUI描画
 	virtual void DrawGui() {}
 

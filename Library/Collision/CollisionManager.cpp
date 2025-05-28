@@ -10,43 +10,6 @@ void CollisionManager::Update()
 {
 	// 衝突情報のコンテナ
     std::unordered_map<Actor*, std::vector<CollisionData>> collisionDataMap;
-	// コンテナに情報を追加
-	auto PushCollisionData = [&](
-		Actor* actorA, 
-		CollisionLayer layerA,
-        bool isTriggerA,
-		Actor* actorB,
-		CollisionLayer layerB,
-		bool isTriggerB,
-		const Vector3& hitPosition,
-		const Vector3& hitNormal,
-		float penetration)
-		{
-			// スレッドセーフ
-			std::lock_guard<std::mutex> lock(_mutex);
-
-			// 接触情報を保存
-			CollisionData dataA;
-            dataA.myLayer = layerA;
-            dataA.isTrigger = isTriggerA;
-			dataA.other = actorB;
-            dataA.otherIsTrigger = isTriggerB;
-            dataA.otherLayer = layerB;
-			dataA.hitPosition = hitPosition;
-			dataA.hitNormal = hitNormal;
-			dataA.penetration = penetration;
-			collisionDataMap[actorA].push_back(dataA);
-			CollisionData dataB;
-            dataB.myLayer = layerB;
-            dataB.isTrigger = isTriggerB;
-			dataB.other = actorA;
-			dataB.otherIsTrigger = isTriggerA;
-			dataB.otherLayer = layerA;
-			dataB.hitPosition = hitPosition;
-			dataB.hitNormal = -hitNormal;
-			dataB.penetration = penetration;
-			collisionDataMap[actorB].push_back(dataB);
-		};
 
 	// 各コンポーネントの情報を設定
 	SetDataByCollider();
@@ -59,44 +22,21 @@ void CollisionManager::Update()
 		std::vector<std::future<void>> jobResults;
 
 		// 球の当たり判定
-		for (auto& sphereA : _sphereDatas)
+		for (size_t sphereIndex = 0; sphereIndex < _sphereDatas.size(); ++sphereIndex)
 		{
+			auto& sphereA = _sphereDatas[sphereIndex];
 			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
 				std::to_string(jobResults.size()).c_str(),
 				ImGuiControl::Profiler::Color::Blue,
 				[&]()
 				{
-					Vector3 hitPosition{};
-					Vector3 hitNormal{};
-					float penetration = 0.0f;
-
 					// 球Vs球
-					for (auto& sphereB : _sphereDatas)
+					for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
 					{
+						auto& sphereB = _sphereDatas[sphereBIndex];
 						// 同じ場合は処理しない
-						if (sphereA.actor == sphereB.actor)
-							continue;
-
-						if (Collision3D::IntersectSphereVsSphere(
-							sphereA.position,
-							sphereA.radius,
-							sphereB.position,
-							sphereB.radius,
-							hitPosition,
-							hitNormal,
-							penetration))
-						{
-							PushCollisionData(
-								sphereA.actor,
-								sphereA.layer,
-								sphereA.isTrigger,
-								sphereB.actor,
-								sphereB.layer,
-								sphereB.isTrigger,
-								hitPosition,
-								hitNormal,
-								penetration);
-						}
+						if (sphereA.actor == sphereB.actor)continue;
+						SphereVsSphere(sphereA, sphereB, collisionDataMap);
 					}
 				}));
 
@@ -105,38 +45,12 @@ void CollisionManager::Update()
 				ImGuiControl::Profiler::Color::Blue,
 				[&]()
 				{
-					Vector3 hitPosition{};
-					Vector3 hitNormal{};
-					float penetration = 0.0f;
-
 					// 球Vsボックス
 					for (auto& box : _boxDatas)
 					{
 						// 同じ場合は処理しない
-						if (sphereA.actor == box.actor)
-							continue;
-
-						if (Collision3D::IntersectSphereVsBox(
-							sphereA.position,
-							sphereA.radius,
-							box.position,
-							box.halfSize,
-							box.rotation,
-							hitPosition,
-							hitNormal,
-							penetration))
-						{
-							PushCollisionData(
-								sphereA.actor,
-								sphereA.layer,
-								sphereA.isTrigger,
-								box.actor,
-								box.layer,
-								box.isTrigger,
-								hitPosition,
-								hitNormal,
-								penetration);
-						}
+						if (sphereA.actor == box.actor)continue;
+						SphereVsBox(sphereA, box, collisionDataMap);
 					}
 				}));
 
@@ -145,83 +59,33 @@ void CollisionManager::Update()
 				ImGuiControl::Profiler::Color::Blue,
 				[&]()
 				{
-					Vector3 hitPosition{};
-					Vector3 hitNormal{};
-					float penetration = 0.0f;
-
 					// 球Vsカプセル
 					for (auto& capsule : _capsuleDatas)
 					{
 						// 同じ場合は処理しない
-						if (sphereA.actor == capsule.actor)
-							continue;
-
-						if (Collision3D::IntersectSphereVsCapsule(
-							sphereA.position,
-							sphereA.radius,
-							capsule.start,
-							capsule.end,
-							capsule.radius,
-							hitPosition,
-							hitNormal,
-							penetration))
-						{
-							PushCollisionData(
-								sphereA.actor,
-								sphereA.layer,
-								sphereA.isTrigger,
-								capsule.actor,
-								capsule.layer,
-								capsule.isTrigger,
-								hitPosition,
-								hitNormal,
-								penetration);
-						}
+						if (sphereA.actor == capsule.actor)continue;
+						SphereVsCapsule(sphereA, capsule, collisionDataMap);
 					}
 				}));
 		}
 
 		// ボックスの当たり判定
-		for (auto& boxA : _boxDatas)
+		for (size_t boxIndex = 0; boxIndex < _boxDatas.size(); ++boxIndex)
 		{
+			auto& boxA = _boxDatas[boxIndex];
+
 			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
 				std::to_string(jobResults.size()).c_str(),
 				ImGuiControl::Profiler::Color::Blue,
 				[&]()
 				{
-					Vector3 hitPosition{};
-					Vector3 hitNormal{};
-					float penetration = 0.0f;
-
 					// ボックスVsボックス
-					for (auto& boxB : _boxDatas)
+					for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
 					{
+						auto& boxB = _boxDatas[boxBIndex];
 						// 同じ場合は処理しない
-						if (boxA.actor == boxB.actor)
-							continue;
-
-						if (Collision3D::IntersectBoxVsBox(
-							boxA.position,
-							boxA.halfSize,
-							boxA.rotation,
-							boxB.position,
-							boxB.halfSize,
-							boxB.rotation,
-							hitPosition,
-							hitNormal,
-							penetration))
-						{
-							PushCollisionData(
-								boxA.actor,
-								boxA.layer,
-								boxA.isTrigger,
-								boxB.actor,
-								boxB.layer,
-								boxB.isTrigger,
-								hitPosition,
-								hitNormal,
-								penetration);
-						}
+						if (boxA.actor == boxB.actor)continue;
+						BoxVsBox(boxA, boxB, collisionDataMap);
 					}
 				}));
 
@@ -254,45 +118,22 @@ void CollisionManager::Update()
 		}
 
 		// カプセルの当たり判定
-		for (auto& capsuleA : _capsuleDatas)
+		for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
 		{
+			auto& capsuleA = _capsuleDatas[capsuleIndex];
+
 			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
 				std::to_string(jobResults.size()).c_str(),
 				ImGuiControl::Profiler::Color::Blue,
 				[&]()
 				{
-					Vector3 hitPosition{};
-					Vector3 hitNormal{};
-					float penetration = 0.0f;
-
-					for (auto& capsuleB : _capsuleDatas)
+					for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
 					{
-						// 同じ場合は処理しない
-						if (capsuleA.actor == capsuleB.actor)
-							continue;
+						auto& capsuleB = _capsuleDatas[capsuleBIndex];
 
-						if (Collision3D::IntersectCapsuleVsCapsule(
-							capsuleA.start,
-							capsuleA.end,
-							capsuleA.radius,
-							capsuleB.start,
-							capsuleB.end,
-							capsuleB.radius,
-							hitPosition,
-							hitNormal,
-							penetration))
-						{
-							PushCollisionData(
-								capsuleA.actor,
-								capsuleA.layer,
-								capsuleA.isTrigger,
-								capsuleB.actor,
-								capsuleB.layer,
-								capsuleB.isTrigger,
-								hitPosition,
-								hitNormal,
-								penetration);
-						}
+						// 同じ場合は処理しない
+						if (capsuleA.actor == capsuleB.actor)continue;
+						CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
 					}
 				}));
 		}
@@ -310,130 +151,49 @@ void CollisionManager::Update()
 		float penetration = 0.0f;
 
 		// 球の当たり判定
-		for (auto& sphereA : _sphereDatas)
+		for (size_t sphereIndex = 0; sphereIndex < _sphereDatas.size(); ++sphereIndex)
 		{
-			// 球Vs球
-			for (auto& sphereB : _sphereDatas)
-			{
-				// 同じ場合は処理しない
-				if (sphereA.actor == sphereB.actor)
-					continue;
+			auto& sphereA = _sphereDatas[sphereIndex];
 
-				if (Collision3D::IntersectSphereVsSphere(
-					sphereA.position,
-					sphereA.radius,
-					sphereB.position,
-					sphereB.radius,
-					hitPosition,
-					hitNormal,
-					penetration))
-				{
-					PushCollisionData(
-						sphereA.actor,
-                        sphereA.layer,
-                        sphereA.isTrigger,
-						sphereB.actor,
-                        sphereB.layer,
-                        sphereB.isTrigger,
-						hitPosition,
-						hitNormal,
-						penetration);
-				}
+			// 球Vs球
+			for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
+			{
+				auto& sphereB = _sphereDatas[sphereBIndex];
+
+				// 同じ場合は処理しない
+				if (sphereA.actor == sphereB.actor)continue;
+				SphereVsSphere(sphereA, sphereB, collisionDataMap);
 			}
 
 			// 球Vsボックス
 			for (auto& box : _boxDatas)
 			{
-				//// 同じ場合は処理しない
-				//if (sphereA.actor == box.actor)
-				//	continue;
-
-				if (Collision3D::IntersectSphereVsBox(
-					sphereA.position,
-					sphereA.radius,
-					box.position,
-					box.halfSize,
-					box.rotation,
-					hitPosition,
-					hitNormal,
-					penetration))
-				{
-					PushCollisionData(
-						sphereA.actor,
-                        sphereA.layer,
-                        sphereA.isTrigger,
-                        box.actor,
-                        box.layer,
-                        box.isTrigger,
-						hitPosition,
-						hitNormal,
-						penetration);
-				}
+				// 同じ場合は処理しない
+				if (sphereA.actor == box.actor)continue;
+				SphereVsBox(sphereA, box, collisionDataMap);
 			}
 
 			// 球Vsカプセル
 			for (auto& capsule : _capsuleDatas)
 			{
 				// 同じ場合は処理しない
-				if (sphereA.actor == capsule.actor)
-					continue;
-
-				if (Collision3D::IntersectSphereVsCapsule(
-					sphereA.position,
-					sphereA.radius,
-					capsule.start,
-					capsule.end,
-					capsule.radius,
-					hitPosition,
-					hitNormal,
-					penetration))
-				{
-					PushCollisionData(
-                        sphereA.actor,
-                        sphereA.layer,
-                        sphereA.isTrigger,
-                        capsule.actor,
-                        capsule.layer,
-                        capsule.isTrigger,
-						hitPosition,
-						hitNormal,
-						penetration);
-				}
+				if (sphereA.actor == capsule.actor)continue;
+				SphereVsCapsule(sphereA, capsule, collisionDataMap);
 			}
 		}
 
 		// ボックスの当たり判定
-		for (auto& boxA : _boxDatas)
+		for (size_t boxIndex = 0; boxIndex < _boxDatas.size(); ++boxIndex)
 		{
-			// ボックスVsボックス
-			for (auto& boxB : _boxDatas)
-			{
-				// 同じ場合は処理しない
-				if (boxA.actor == boxB.actor)
-					continue;
+			auto& boxA = _boxDatas[boxIndex];
 
-				if (Collision3D::IntersectBoxVsBox(
-					boxA.position,
-					boxA.halfSize,
-					boxA.rotation,
-					boxB.position,
-					boxB.halfSize,
-					boxB.rotation,
-					hitPosition,
-					hitNormal,
-					penetration))
-				{
-					PushCollisionData(
-                        boxA.actor,
-                        boxA.layer,
-                        boxA.isTrigger,
-                        boxB.actor,
-                        boxB.layer,
-                        boxB.isTrigger,
-						hitPosition,
-						hitNormal,
-						penetration);
-				}
+			// ボックスVsボックス
+			for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
+			{
+				auto& boxB = _boxDatas[boxBIndex];
+				// 同じ場合は処理しない
+				if (boxA.actor == boxB.actor)continue;
+				BoxVsBox(boxA, boxB, collisionDataMap);
 			}
 
 			//      // ボックスVsカプセル
@@ -465,36 +225,17 @@ void CollisionManager::Update()
 		}
 
 		// カプセルの当たり判定
-		for (auto& capsuleA : _capsuleDatas)
+		for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
 		{
-			for (auto& capsuleB : _capsuleDatas)
-			{
-				// 同じ場合は処理しない
-				if (capsuleA.actor == capsuleB.actor)
-					continue;
+			auto& capsuleA = _capsuleDatas[capsuleIndex];
 
-				if (Collision3D::IntersectCapsuleVsCapsule(
-					capsuleA.start,
-					capsuleA.end,
-					capsuleA.radius,
-					capsuleB.start,
-					capsuleB.end,
-					capsuleB.radius,
-					hitPosition,
-					hitNormal,
-					penetration))
-				{
-					PushCollisionData(
-                        capsuleA.actor,
-                        capsuleA.layer,
-                        capsuleA.isTrigger,
-                        capsuleB.actor,
-                        capsuleB.layer,
-                        capsuleB.isTrigger,
-						hitPosition,
-						hitNormal,
-						penetration);
-				}
+			for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
+			{
+				auto& capsuleB = _capsuleDatas[capsuleBIndex];
+
+				// 同じ場合は処理しない
+				if (capsuleA.actor == capsuleB.actor)continue;
+				CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
 			}
 		}
 	}
@@ -502,10 +243,33 @@ void CollisionManager::Update()
     // 接触情報を各アクターに通知
 	for (auto& [actor, datas] : collisionDataMap)
 	{
+		ContactData currentContactData;
+		// 前フレームに接触したアクターを取得
+		auto& oldContactData = _oldContactDatas[actor->GetName()];
+
 		for (auto& data : datas)
 		{
-			actor->Contact(data);
+			// 前フレームに接触していたか確認
+			bool isOldContact = std::find(
+				oldContactData[data.myLayer].begin(), oldContactData[data.myLayer].end(),
+				data.other->GetName()) != oldContactData[data.myLayer].end();
+			// 今回のフレームで接触していたか確認
+			bool isCurrentContact = std::find(
+				currentContactData[data.myLayer].begin(), currentContactData[data.myLayer].end(),
+				data.other->GetName()) != currentContactData[data.myLayer].end();
+
+			// 前フレームで接触していないなら
+			if (!isOldContact && !isCurrentContact)
+				actor->ContactEnter(data);
+			else
+				actor->Contact(data);
+
+			currentContactData[data.myLayer].push_back(data.other->GetName());
 		}
+
+		// 今回のフレームで接触したアクターの名前を保存
+		oldContactData.clear();
+		oldContactData = currentContactData;
 	}
 
 	// データをクリア
@@ -764,5 +528,205 @@ void CollisionManager::SetDataByCollider()
 				capsule->GetEnd().TransformCoord(transform.GetMatrix()),
 				capsule->GetRadius(),
 				capsule->IsTrigger()));
+	}
+}
+
+// コンテナに情報を追加
+void CollisionManager::PushCollisionData(
+	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap,
+	Actor* actorA,
+	CollisionLayer layerA,
+	bool isTriggerA, 
+	Actor* actorB, 
+	CollisionLayer layerB, 
+	bool isTriggerB, 
+	const Vector3& hitPosition,
+	const Vector3& hitNormal,
+	float penetration)
+{
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
+
+	// 接触情報を保存
+	CollisionData dataA;
+	dataA.myLayer = layerA;
+	dataA.isTrigger = isTriggerA;
+	dataA.other = actorB;
+	dataA.otherIsTrigger = isTriggerB;
+	dataA.otherLayer = layerB;
+	dataA.hitPosition = hitPosition;
+	dataA.hitNormal = hitNormal;
+	dataA.penetration = penetration;
+	collisionDataMap[actorA].push_back(dataA);
+	CollisionData dataB;
+	dataB.myLayer = layerB;
+	dataB.isTrigger = isTriggerB;
+	dataB.other = actorA;
+	dataB.otherIsTrigger = isTriggerA;
+	dataB.otherLayer = layerA;
+	dataB.hitPosition = hitPosition;
+	dataB.hitNormal = -hitNormal;
+	dataB.penetration = penetration;
+	collisionDataMap[actorB].push_back(dataB);
+}
+
+void CollisionManager::SphereVsSphere(
+	const SphereData& sphereA,
+	const SphereData& sphereB,
+	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+	if (Collision3D::IntersectSphereVsSphere(
+		sphereA.position,
+		sphereA.radius,
+		sphereB.position,
+		sphereB.radius,
+		hitPosition,
+		hitNormal,
+		penetration))
+	{
+		PushCollisionData(
+			collisionDataMap,
+			sphereA.actor,
+			sphereA.layer,
+			sphereA.isTrigger,
+			sphereB.actor,
+			sphereB.layer,
+			sphereB.isTrigger,
+			hitPosition,
+			hitNormal,
+			penetration);
+	}
+}
+
+void CollisionManager::SphereVsBox(
+	const SphereData& sphere, 
+	const BoxData& box, 
+	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+	if (Collision3D::IntersectSphereVsBox(
+		sphere.position,
+		sphere.radius,
+		box.position,
+		box.halfSize,
+		box.rotation,
+		hitPosition,
+		hitNormal,
+		penetration))
+	{
+		PushCollisionData(
+			collisionDataMap,
+			sphere.actor,
+			sphere.layer,
+			sphere.isTrigger,
+			box.actor,
+			box.layer,
+			box.isTrigger,
+			hitPosition,
+			hitNormal,
+			penetration);
+	}
+}
+
+void CollisionManager::SphereVsCapsule(
+	const SphereData& sphere,
+	const CapsuleData& capsule,
+	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+	if (Collision3D::IntersectSphereVsCapsule(
+		sphere.position,
+		sphere.radius,
+		capsule.start,
+		capsule.end,
+		capsule.radius,
+		hitPosition,
+		hitNormal,
+		penetration))
+	{
+		PushCollisionData(
+			collisionDataMap,
+			sphere.actor,
+			sphere.layer,
+			sphere.isTrigger,
+			capsule.actor,
+			capsule.layer,
+			capsule.isTrigger,
+			hitPosition,
+			hitNormal,
+			penetration);
+	}
+}
+
+void CollisionManager::BoxVsBox(
+	const BoxData& boxA, 
+	const BoxData& boxB, 
+	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+	if (Collision3D::IntersectBoxVsBox(
+		boxA.position,
+		boxA.halfSize,
+		boxA.rotation,
+		boxB.position,
+		boxB.halfSize,
+		boxB.rotation,
+		hitPosition,
+		hitNormal,
+		penetration))
+	{
+		PushCollisionData(
+			collisionDataMap,
+			boxA.actor,
+			boxA.layer,
+			boxA.isTrigger,
+			boxB.actor,
+			boxB.layer,
+			boxB.isTrigger,
+			hitPosition,
+			hitNormal,
+			penetration);
+	}
+}
+
+void CollisionManager::CapsuleVsCapsule(
+	const CapsuleData& capsuleA,
+	const CapsuleData& capsuleB,
+	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+	if (Collision3D::IntersectCapsuleVsCapsule(
+		capsuleA.start,
+		capsuleA.end,
+		capsuleA.radius,
+		capsuleB.start,
+		capsuleB.end,
+		capsuleB.radius,
+		hitPosition,
+		hitNormal,
+		penetration))
+	{
+		PushCollisionData(
+			collisionDataMap,
+			capsuleA.actor,
+			capsuleA.layer,
+			capsuleA.isTrigger,
+			capsuleB.actor,
+			capsuleB.layer,
+			capsuleB.isTrigger,
+			hitPosition,
+			hitNormal,
+			penetration);
 	}
 }

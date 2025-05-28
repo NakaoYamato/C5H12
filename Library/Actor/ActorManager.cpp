@@ -378,12 +378,6 @@ void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
 #endif
 	// スレッドセーフ
 	std::lock_guard<std::mutex> lock(_mutex);
-	// 当たり判定フラグを設定
-	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-	{
-		actor->SetJudgeTagFlag(static_cast<ActorTag>(i), true);
-	}
-	actor->SetJudgeTagFlag(ActorTag::DrawContextParameter, false);
 	//　startActorsに登録
 	_startActors[static_cast<size_t>(tag)].emplace_back(actor);
 }

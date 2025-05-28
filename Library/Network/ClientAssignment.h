@@ -90,6 +90,30 @@ public:
     {
         _playerMoveCallback = callback;
     }
+	/// <summary>
+	/// EnemyCreateを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+	void SetEnemyCreateCallback(std::function<void(const Network::EnemyCreate&)> callback)
+	{
+		_enemyCreateCallback = callback;
+	}
+	/// <summary>
+	/// EnemySyncを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+	void SetEnemySyncCallback(std::function<void(const Network::EnemySync&)> callback)
+	{
+		_enemySyncCallback = callback;
+	}
+	/// <summary>
+	/// EnemyMoveを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+	void SetEnemyMoveCallback(std::function<void(const Network::EnemyMove&)> callback)
+	{
+		_enemyMoveCallback = callback;
+	}
 #pragma endregion
 
 private:
@@ -159,6 +183,10 @@ private:
 	std::function<void(const Network::PlayerSetLeader&)> _playerSetLeaderCallback;
 	std::function<void(const Network::PlayerSync&)> _playerSyncCallback;
 	std::function<void(const Network::PlayerMove&)> _playerMoveCallback;
+
+	std::function<void(const Network::EnemyCreate&)> _enemyCreateCallback;
+	std::function<void(const Network::EnemySync&)> _enemySyncCallback;
+	std::function<void(const Network::EnemyMove&)> _enemyMoveCallback;
 #pragma endregion
 
 	// デバッグ用

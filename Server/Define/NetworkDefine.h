@@ -64,6 +64,7 @@ namespace Network
 		int leaderID = -1; // “Ç‚ÝŽæ‚è—p
 		DirectX::XMFLOAT3 position = {};
 		float angleY = 0.0f;
+		DirectX::XMFLOAT3 target = {};
 		float health = 100.0f;
 		char mainState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
 		char subState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
@@ -131,6 +132,7 @@ namespace Network
 		int leaderID = -1;
 		DirectX::XMFLOAT3 position = {};
 		float angleY = {};
+		float health = 100.0f;
 	};
 
 	struct EnemySync
@@ -141,8 +143,6 @@ namespace Network
 		DirectX::XMFLOAT3 position = {};
 		float angleY = {};
 		float health = 100.0f;
-		char mainState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
-		char subState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
 	};
 
 	struct EnemyMove

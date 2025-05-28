@@ -5,6 +5,7 @@
 
 #include "../../Library/Component/Animator.h"
 #include "WyvernEnemyController.h"
+#include "BehaviorTree/WyvernBehaviorTree.h"
 
 class WyvernActor : public Actor
 {
@@ -27,6 +28,7 @@ public:
 		Horn06,
 	};
 public:
+	WyvernActor() {}
 	~WyvernActor()override {}
 	// 生成時処理
 	void OnCreate() override;
@@ -36,10 +38,14 @@ public:
 	void OnDrawGui() override;
 
 #pragma region アクセサ
+	std::weak_ptr<WyvernEnemyController> GetWyvernEnemyController() const { return _wyvernEnemyController; }
+
 	// テクスチャを設定
 	void SetModelType(TextureType type) { this->_textureType = type; }
 	// 角を設定
 	void SetDrawHornType(DrawHornType type) { this->_drawHornType = type; }
+
+	void SetExecuteBehaviorTree(bool execute) { _executeBehaviorTree = execute; }
 #pragma endregion
 
 private:
@@ -53,6 +59,10 @@ private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<WyvernEnemyController> _wyvernEnemyController;
+	// ビヘイビアツリー
+	std::unique_ptr<WyvernBehaviorTree> _behaviorTree;
+	// ビヘイビアツリーを処理するかどうか
+	bool _executeBehaviorTree = true;
 
 	TextureType _textureType = TextureType::Lava;
 	DrawHornType _drawHornType = DrawHornType::Horn01;

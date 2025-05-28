@@ -1,5 +1,8 @@
 #include "NetworkMediator.h"
 
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
+
+#include <string>
 #include <imgui.h>
 
 NetworkMediator::~NetworkMediator()
@@ -31,6 +34,21 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 
     /// 受け取ったデータを処理
     ProcessNetworkData();
+
+	// 自身がリーダーで、敵が存在しない場合は敵を生成
+	if (myPlayerId != -1 && myPlayerId == leaderPlayerId && _enemies.empty() && !_sendEnemyCreate)
+	{
+		_sendEnemyCreate = true; // 敵生成フラグを立てる
+
+		// 敵の生成命令を送る
+		Network::EnemyCreate enemyCreate{};
+		enemyCreate.type = Network::EnemyType::Wyvern; // ここではワイバーンを生成する例
+		enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
+		enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
+        enemyCreate.position = Vector3(0.0f, 10.0f, 10.0f);
+		enemyCreate.health = 100.0f; // 初期体力を設定
+        _client->WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
+	}
 }
 
 // 遅延更新処理
@@ -88,6 +106,28 @@ void NetworkMediator::OnFixedUpdate()
         // サーバーに送信
         _client->WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
     }
+
+	// 敵の移動情報送信
+	for (auto& [uniqueID, enemyData] : _enemies)
+	{
+        // 自身が管理していない敵ならスキップ
+        if (enemyData.controllerID != myPlayerId)
+            continue;
+
+		auto enemyController = enemyData.enemyController.lock();
+		if (enemyController)
+		{
+			Network::EnemyMove enemyMove{};
+			enemyMove.uniqueID = uniqueID;
+			enemyMove.position = enemyController->GetActor()->GetTransform().GetPosition();
+			enemyMove.angleY = enemyController->GetActor()->GetTransform().GetRotation().y;
+			enemyMove.target = enemyController->GetTargetPosition();
+            strcpy_s(enemyMove.mainState, enemyController->GetStateName());
+            strcpy_s(enemyMove.subState, enemyController->GetSubStateName());
+			// サーバーに送信
+			_client->WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
+		}
+	}
 }
 
 void NetworkMediator::OnDrawGui()
@@ -119,6 +159,38 @@ std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControll
     // コンテナに登録
     _players[id] = player;
     return player;
+}
+
+/// 敵の生成
+std::weak_ptr<EnemyController> NetworkMediator::CreateEnemy(
+    int uniqueID,
+    int controllerID, 
+    Network::EnemyType type, 
+    const Vector3& position,
+    float angleY,
+    float health)
+{
+    if (type == Network::EnemyType::Wyvern)
+    {
+        // 敵キャラクターの生成
+        auto enemy = _scene->RegisterActor<WyvernActor>(
+            "Enemy" + std::to_string(uniqueID),
+            ActorTag::Enemy
+        );
+        enemy->GetTransform().SetPosition(position);
+        enemy->GetTransform().SetAngleY(angleY);
+        enemy->SetExecuteBehaviorTree(controllerID == myPlayerId);
+		enemy->GetWyvernEnemyController().lock()->ResetHealth(health);
+
+        EnemyData enemyData{};
+        enemyData.controllerID = controllerID;
+        enemyData.enemyController = enemy->GetWyvernEnemyController();
+
+        // コンテナに登録
+        _enemies[uniqueID] = enemyData;
+        return enemyData.enemyController;
+    }
+    return std::weak_ptr<EnemyController>();
 }
 
 /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
@@ -182,6 +254,33 @@ void NetworkMediator::SetClientCollback()
 
             _playerMoves.push_back(playerMove);
         });
+	_client->SetEnemyCreateCallback(
+		[this](const Network::EnemyCreate& enemyCreate)
+		{
+			// スレッドセーフ
+			std::lock_guard<std::mutex> lock(_mutex);
+			_logs.push_back("EnemyCreate" + std::to_string(enemyCreate.uniqueID));
+
+            _enemyCreates.push_back(enemyCreate);
+		});
+	_client->SetEnemySyncCallback(
+		[this](const Network::EnemySync& enemySync)
+		{
+			// スレッドセーフ
+			std::lock_guard<std::mutex> lock(_mutex);
+			_logs.push_back("EnemySync" + std::to_string(enemySync.uniqueID));
+
+            _enemySyncs.push_back(enemySync);
+		});
+	_client->SetEnemyMoveCallback(
+		[this](const Network::EnemyMove& enemyMove)
+		{
+			// スレッドセーフ
+			std::lock_guard<std::mutex> lock(_mutex);
+			_logs.push_back("EnemyMove" + std::to_string(enemyMove.uniqueID));
+
+			_enemyMoves.push_back(enemyMove);
+		});
 }
 
 /// 受け取ったデータを処理
@@ -258,6 +357,63 @@ void NetworkMediator::ProcessNetworkData()
         }
 	}
     _playerMoves.clear();
+	//===============================================================================
+
+	//===============================================================================
+	// 敵生成データの処理
+	for (auto& enemyCreate : _enemyCreates)
+	{
+        CreateEnemy(
+            enemyCreate.uniqueID,
+            enemyCreate.leaderID,
+            enemyCreate.type,
+            enemyCreate.position,
+            enemyCreate.angleY,
+            enemyCreate.health);
+	}
+	_enemyCreates.clear();
+	//===============================================================================
+
+    //===============================================================================
+	// 敵同期データの処理
+	for (auto& enemySync : _enemySyncs)
+	{
+        if (_enemies.find(enemySync.uniqueID) == _enemies.end())
+        {
+			// 敵が存在しない場合は生成
+            CreateEnemy(
+                enemySync.uniqueID,
+                enemySync.leaderID,
+                enemySync.type,
+                enemySync.position,
+                enemySync.angleY,
+                enemySync.health);
+        }
+	}
+	_enemySyncs.clear();
+    //===============================================================================
+
+	//===============================================================================
+	// 敵の移動データの処理
+	for (auto& enemyMove : _enemyMoves)
+	{
+        if (_enemies.find(enemyMove.uniqueID) == _enemies.end())
+			continue; // 敵が存在しない場合はスキップ
+
+		auto& enemyData = _enemies[enemyMove.uniqueID];
+		// 敵情報を更新
+		auto enemy = enemyData.enemyController.lock();
+		if (!enemy)
+			continue;
+		// 自身が管理している敵ならスキップ
+        if (enemyData.controllerID == myPlayerId)
+            continue;
+		enemy->GetActor()->GetTransform().SetPosition(enemyMove.position);
+		enemy->GetActor()->GetTransform().SetAngleY(enemyMove.angleY);
+		enemy->SetTargetPosition(enemyMove.target);
+		enemy->ChangeState(enemyMove.mainState, enemyMove.subState);
+	}
+	_enemyMoves.clear();
 	//===============================================================================
 }
 

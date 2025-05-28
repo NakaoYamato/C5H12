@@ -216,6 +216,42 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerMoveCallback(playerMove);
 	}
 	break;
+	case Network::DataTag::EnemyCreate:
+	{
+		Network::EnemyCreate enemyCreate;
+		if (!buffer.Read(&enemyCreate, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemyCreate");
+			return;
+		}
+		if (self->_enemyCreateCallback)
+			self->_enemyCreateCallback(enemyCreate);
+	}
+	break;
+	case Network::DataTag::EnemySync:
+	{
+		Network::EnemySync enemySync;
+		if (!buffer.Read(&enemySync, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemySync");
+			return;
+		}
+		if (self->_enemySyncCallback)
+			self->_enemySyncCallback(enemySync);
+	}
+	break;
+	case Network::DataTag::EnemyMove:
+	{
+		Network::EnemyMove enemyMove;
+		if (!buffer.Read(&enemyMove, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemyMove");
+			return;
+		}
+		if (self->_enemyMoveCallback)
+			self->_enemyMoveCallback(enemyMove);
+	}
+	break;
 	}
 }
 #pragma endregion

@@ -101,4 +101,37 @@ void WyvernStateMachine::DrawGui()
 
 void WyvernStateMachine::ChangeState(const char* mainStateName, const char* subStateName)
 {
+	// 遷移先が無効な場合は何もしない
+	if (mainStateName == nullptr || mainStateName[0] == '\0')
+		return;
+
+	std::string currentMainState = GetStateName();
+	std::string currentSubState = GetSubStateName();
+
+    // 現在のステートと変更先が違うなら変更
+    if (currentMainState != mainStateName)
+		_stateMachine.ChangeState(mainStateName);
+	// サブステートがあるなら変更
+	if (subStateName != nullptr && subStateName[0] != '\0')
+	{
+		// 現在のサブステートと変更先が違うなら変更
+		if (currentSubState != subStateName)
+			_stateMachine.ChangeSubState(subStateName);
+	}
+}
+
+const char* WyvernStateMachine::GetStateName()
+{
+    if (!_stateMachine.GetState())
+		return "";
+
+    return _stateMachine.GetState()->GetName();
+}
+
+const char* WyvernStateMachine::GetSubStateName()
+{
+    if (!_stateMachine.GetState())
+        return "";
+
+    return _stateMachine.GetState()->GetSubStateName();
 }

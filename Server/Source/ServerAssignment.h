@@ -6,6 +6,7 @@
 #include <thread>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 /// <summary>
 /// サーバー
@@ -186,6 +187,9 @@ private:
 	ENLServer mrsServer = -1;
 #endif // USE_MRS
 
+	// クライアントのリスト
 	std::vector<Network::Client> clients;
+	// 敵のリスト
+	std::unordered_map<int, Network::Enemy> enemiesMap;
 	bool loop = true;
 };

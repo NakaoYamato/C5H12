@@ -1,9 +1,11 @@
 #include "WyvernActor.h"
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/ResourceManager/GpuResourceManager.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Source/Player/PlayerController.h"
 
 #include <imgui.h>
 
@@ -24,12 +26,35 @@ void WyvernActor::OnCreate()
 	_wyvernEnemyController		= AddComponent<WyvernEnemyController>();
 	auto charactorController	= AddComponent<CharactorController>();
 	charactorController->SetMass(1000.0f);
+
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();
+
+	// ビヘイビアツリー作成
+	_behaviorTree = std::make_unique<WyvernBehaviorTree>(_wyvernEnemyController.lock().get(), _animator.lock().get());
 }
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)
 {
+	if (_executeBehaviorTree)
+	{
+		// ターゲット座標にプレイヤー座標を設定
+		auto& actorManager = GetScene()->GetActorManager();
+		auto& playerTags = actorManager.FindByTag(ActorTag::Player);
+		for (auto& playerTag : playerTags)
+		{
+			// playerControllerを持っているアクターを取得
+			auto playerController = playerTag->GetComponent<PlayerController>();
+			if (playerController == nullptr)
+				continue;
+			_wyvernEnemyController.lock()->SetTargetPosition(playerTag->GetTransform().GetPosition());
+
+			break;
+		}
+
+		// ビヘイビアツリーの実行
+		_behaviorTree->Execute(elapsedTime);
+	}
 	// 使用する角を設定
 	SetUseHorn();
 }
@@ -63,6 +88,11 @@ void WyvernActor::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"ワイバーン"))
 		{
+			bool flag = _executeBehaviorTree;
+			ImGui::Checkbox(u8"ビヘイビアツリーを実行する", &flag);
+			// ビヘイビアツリーのGUI描画
+			_behaviorTree->DrawGui();
+
 			int mt = static_cast<int>(_textureType);
 			if (ImGui::Combo(u8"使用するテクスチャ", &mt, modelTypeName, _countof(modelTypeName)))
 			{

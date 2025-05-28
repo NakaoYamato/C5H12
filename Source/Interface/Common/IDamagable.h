@@ -46,7 +46,8 @@ public:
 	/// <summary>
 	/// HP‰Šú‰»
 	/// </summary>
-	virtual void ResetHealth() {
+	virtual void ResetHealth(float maxHealth) {
+		_maxHealth = maxHealth;
 		_health = _maxHealth;
 	}
 	/// <summary>

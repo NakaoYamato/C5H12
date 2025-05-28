@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../EnemyController.h"
-#include "BehaviorTree/WyvernBehaviorTree.h"
 #include "StateMachine/WyvernStateMachine.h"
 
 class WyvernEnemyController : public EnemyController
@@ -44,8 +43,6 @@ public:
 #pragma endregion
 
 private:
-	// ビヘイビアツリー
-	std::unique_ptr<WyvernBehaviorTree> _behaviorTree;
 	// ステートマシン
 	std::unique_ptr<WyvernStateMachine> _stateMachine;
 

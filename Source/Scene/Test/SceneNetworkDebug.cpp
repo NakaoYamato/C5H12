@@ -7,7 +7,6 @@
 
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/Stage/StageActor.h"
-#include "../../Source/Enemy/Dummy/DummyActor.h"
 
 //èâä˙âª
 void SceneNetworkDebug::Initialize()
@@ -26,8 +25,5 @@ void SceneNetworkDebug::Initialize()
     }
     {
         auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
-    }
-    {
-        auto enemy = RegisterActor<DummyActor>("Enemy", ActorTag::Enemy);
     }
 }

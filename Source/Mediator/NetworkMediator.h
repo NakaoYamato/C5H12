@@ -15,7 +15,9 @@ class NetworkMediator : public Actor
 public:
     struct EnemyData
     {
-        //std::weak_ptr<EnemyController>;
+        // 管理しているプレイヤーのID
+        int controllerID = -1;
+        std::weak_ptr<EnemyController> enemyController;
     };
 
 public:
@@ -47,6 +49,20 @@ private:
     /// <param name="id"></param>
     /// <param name="isControlled"></param>
     std::weak_ptr<PlayerActor> CreatePlayer(int id, bool isControlled);
+
+	/// <summary>
+	/// 敵の生成
+	/// </summary>
+	/// <param name="uniqueId"></param>
+	/// <param name="type"></param>
+	/// <returns></returns>
+	std::weak_ptr<EnemyController> CreateEnemy(
+        int uniqueID,
+		int controllerID,
+        Network::EnemyType type,
+        const Vector3& position,
+        float angleY,
+        float health);
 
     /// <summary>
     /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
@@ -81,10 +97,10 @@ private:
     // key : ネットワークID
     // value : プレイヤーのポインタ
     std::unordered_map<int, std::weak_ptr<PlayerActor>> _players;
-	// 敵キャラクター情報
+	// 各敵キャラクター情報
 	// key : ユニークID
 	// value : 敵のポインタ
-	std::unordered_map<int, std::weak_ptr<EnemyController>> _enemies;
+	std::unordered_map<int, EnemyData> _enemies;
     // サーバー通信
     std::shared_ptr<ClientAssignment> _client;
     // ユーザーが操作するプレイヤー
@@ -101,6 +117,10 @@ private:
     std::vector<Network::PlayerLogout> _playerLogouts;
     std::vector<Network::PlayerSync> _playerSyncs;
     std::vector<Network::PlayerMove> _playerMoves;
+
+    std::vector<Network::EnemyCreate> _enemyCreates;
+	std::vector<Network::EnemySync> _enemySyncs;
+	std::vector<Network::EnemyMove> _enemyMoves;
 #pragma endregion
 
     // データ同期間隔(秒)
@@ -109,4 +129,6 @@ private:
 
     std::string _message;
     std::vector<std::string> _logs;
+
+	bool _sendEnemyCreate = false; // 敵生成のフラグ
 };

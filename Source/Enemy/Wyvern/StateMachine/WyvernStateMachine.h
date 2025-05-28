@@ -26,9 +26,9 @@ public:
 	// ステート変更
 	void ChangeState(const char* mainStateName, const char* subStateName);
 	// ステート名取得
-	const char* GetStateName() { return _stateMachine.GetState()->GetName(); }
+	const char* GetStateName();
 	// サブステート名取得
-	const char* GetSubStateName() { return _stateMachine.GetState()->GetSubStateName(); }
+	const char* GetSubStateName();
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 #pragma endregion

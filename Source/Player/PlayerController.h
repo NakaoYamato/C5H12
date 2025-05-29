@@ -27,6 +27,8 @@ public:
 	// 接触時処理
 	void OnContactEnter(CollisionData& collisionData) override;
 
+	// ダメージを与える
+	bool AddDamage(float damage, Vector3 hitPosition) override;
 	// ダメージを受けた時の処理
 	void OnDamage(float damage, Vector3 hitPosition) override;
 
@@ -48,6 +50,6 @@ private:
 #pragma endregion
 
 	std::weak_ptr<CharactorController> _charactorController;
-	std::weak_ptr<EffekseerEffectController> _hitEffectController;
 	std::weak_ptr<Animator> _animator;
+	std::weak_ptr<EffekseerEffectController> _hitEffectController;
 };

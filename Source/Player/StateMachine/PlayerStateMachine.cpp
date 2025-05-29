@@ -133,6 +133,21 @@ void PlayerStateMachine::ChangeState(Network::PlayerMainStates mainStateName, Ne
     }
 }
 
+// ステート名取得
+const char* PlayerStateMachine::GetStateName()
+{
+	if (!_stateMachine.GetState())
+        return nullptr;
+    return _stateMachine.GetState()->GetName();
+}
+
+const char* PlayerStateMachine::GetSubStateName()
+{
+    if (!_stateMachine.GetState())
+        return nullptr;
+    return _stateMachine.GetState()->GetSubStateName();
+}
+
 #pragma region 各ステート
 #pragma region 待機
 const char* PlayerIdleState::GetName() const

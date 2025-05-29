@@ -4,6 +4,7 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
 #include "../../Source/Interface/Common/IDamagable.h"
+#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
 class EnemyController : public Component, public IDamagable
 {
@@ -18,8 +19,8 @@ public:
     void Update(float elapsedTime) override;
     // GUI•`‰æ
     void DrawGui() override;
-    // Õ“Ëˆ—
-    void OnContact(CollisionData& collisionData)override;
+    // ÚGˆ—
+    void OnContactEnter(CollisionData& collisionData) override;
 
     // w’èˆÊ’u‚Æ‚ÌŠp“x
     float GetAngleToTarget(const Vector3& target);
@@ -53,6 +54,7 @@ public:
 protected:
     std::weak_ptr<CharactorController> _charactorController;
     std::weak_ptr<Animator> _animator;
+    std::weak_ptr<EffekseerEffectController> _hitEffectController;
 
 	Vector3 _targetPosition = Vector3::Zero;
     float _ATK = 1.0f;

@@ -37,10 +37,12 @@ public:
 private:
 	// メニューバーのGUI描画
 	void DrawMenuBarGui();
-	// 編集GUI描画
-	void DrawEditGui();
-	// 表示GUI描画
-	void DrawShowGui();
+	// モデルGUI描画
+	void DrawModelGui();
+	// アニメーションイベントGUI描画
+	void DrawAnimationEventGui();
+	// モデル当たり判定GUI描画
+	void DrawModelColliderGui();
 	// アニメーション編集GUI描画
 	void DrawEditAnimationGui();
 	// アニメーション追加GUI描画
@@ -68,6 +70,7 @@ private:
 	// デバッグ用
 	bool _showNode = true;
 	Vector4 _nodeColor = Vector4::Red;
+	bool _showCollision = true;
 
 	int _selectingMeshIndex = -1;
 	float _vertexPointRadius = 0.05f;

@@ -11,14 +11,16 @@ public:
 	/// </summary>
 	/// <param name="damage">ダメージ量</param>
 	/// <param name="hitPosition">ダメージを受けた場所</param>
-	virtual void AddDamage(float damage, Vector3 hitPosition)
+	/// <returns>ダメージを与えられたか</returns>
+	virtual bool AddDamage(float damage, Vector3 hitPosition)
 	{
-		if (_invisible) return; // 無敵状態ならダメージを受けない
+		if (_invisible) return false; // 無敵状態ならダメージを受けない
 		_health -= damage;
 		_hitPosition = hitPosition;
 		if (_health < 0.0f)
 			_health = 0.0f;
 		OnDamage(damage, hitPosition);
+		return true;
 	}
 	/// <summary>
 	/// ダメージを受けたときの処理

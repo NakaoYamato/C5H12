@@ -4,23 +4,25 @@
 
 #include <imgui.h>
 
+// 開始処理
 void EnemyController::Start()
 {
 	// コンポーネント取得
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_animator = GetActor()->GetComponent<Animator>();
+	_hitEffectController = GetActor()->GetComponent<EffekseerEffectController>();
 }
-
+// 更新処理
 void EnemyController::Update(float elapsedTime)
 {
 }
-
+// GUI描画
 void EnemyController::DrawGui()
 {
 	ImGui::Text(u8"体力 : %f", _health);
 }
-
-void EnemyController::OnContact(CollisionData& collisionData)
+// 接触時処理
+void EnemyController::OnContactEnter(CollisionData& collisionData)
 {
 	// 攻撃判定
 	if (collisionData.myLayer == CollisionLayer::Attack)
@@ -29,7 +31,11 @@ void EnemyController::OnContact(CollisionData& collisionData)
 		if (player != nullptr)
 		{
 			// プレイヤーにダメージを与える
-			player->AddDamage(_ATK, _hitPosition);
+			if (player->AddDamage(_ATK, _hitPosition))
+			{
+				// ダメージを与えたらヒットエフェクト再生
+				_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);
+			}
 		}
 	}
 }

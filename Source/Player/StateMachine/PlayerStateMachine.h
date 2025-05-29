@@ -38,9 +38,9 @@ public:
 	// ステート変更
 	void ChangeState(Network::PlayerMainStates mainStateName, Network::PlayerSubStates subStateName);
     // ステート名取得
-    const char* GetStateName() { return _stateMachine.GetState()->GetName(); }
+	const char* GetStateName();
     // サブステート名取得
-    const char* GetSubStateName() { return _stateMachine.GetState()->GetSubStateName(); }
+	const char* GetSubStateName();
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 	const Vector2& GetMovement() const { return _movement; }

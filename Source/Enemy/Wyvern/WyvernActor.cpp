@@ -6,6 +6,7 @@
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Source/Player/PlayerController.h"
+#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
 #include <imgui.h>
 
@@ -26,6 +27,7 @@ void WyvernActor::OnCreate()
 	_wyvernEnemyController		= AddComponent<WyvernEnemyController>();
 	auto charactorController	= AddComponent<CharactorController>();
 	charactorController->SetMass(1000.0f);
+	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();

@@ -3,6 +3,7 @@
 #include "../../Source/Enemy/EnemyController.h" 
 
 #include "../../Library/DebugSupporter/DebugSupporter.h"
+#include <PlayerDefine.h>
 #include <imgui.h>
 
 void PlayerController::Start()
@@ -55,13 +56,44 @@ void PlayerController::OnContactEnter(CollisionData& collisionData)
 		auto enemy = collisionData.other->GetComponent<EnemyController>();
 		if (enemy != nullptr)
 		{
-			enemy->AddDamage(_ATK, collisionData.hitPosition);
-			_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);
+			if (enemy->AddDamage(_ATK, collisionData.hitPosition))
+			{
+				// ダメージを与えたらヒットエフェクト再生
+				_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);
+			}
 		}
 	}
+}
+
+// ダメージを与える
+bool PlayerController::AddDamage(float damage, Vector3 hitPosition)
+{
+	Vector3 vec = hitPosition - GetActor()->GetTransform().GetPosition();
+	Vector3 front = GetActor()->GetTransform().GetAxisZ();
+
+	// プレイヤーがガード状態で攻撃地点がプレイヤーの前方向ならガード処理
+	if (_stateMachine->GetStateName() == Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard) &&
+		vec.Dot(front) > 0.0f)
+	{
+		// ガード成功
+		_stateMachine->ChangeState(Network::PlayerMainStates::GuardHit, Network::PlayerSubStates::None);
+		return false;
+	}
+	// 通常処理
+	return IDamagable::AddDamage(damage, hitPosition);
 }
 
 // ダメージを受けた時の処理
 void PlayerController::OnDamage(float damage, Vector3 hitPosition)
 {
+	if (damage >= 2.0f)
+	{
+		// 大きくのけぞる
+		_stateMachine->ChangeState(Network::PlayerMainStates::HitKnockDown, Network::PlayerSubStates::None);
+	}
+	else
+	{
+		// 軽くのけぞる
+		_stateMachine->ChangeState(Network::PlayerMainStates::Hit, Network::PlayerSubStates::None);
+	}
 }

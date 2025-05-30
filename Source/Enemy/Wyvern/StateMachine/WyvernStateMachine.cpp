@@ -6,9 +6,10 @@
 
 #include <imgui.h>
 
-WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* animator) :
+WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* animator, Damageable* damageable) :
 	_wyvern(wyvern),
-	_animator(animator)
+	_animator(animator),
+	_damageable(damageable)
 {
 	// ƒXƒe[ƒg‚Ì“o˜^
 	_stateMachine.RegisterState(std::make_unique<WyvernIdleState>(this));
@@ -63,7 +64,7 @@ void WyvernStateMachine::Execute(float elapsedTime)
 	}
 
     // €–Sˆ—
-    if (_wyvern->IsDead() && _stateMachine.GetStateName() != "Death")
+    if (GetDamageable()->IsDead() && _stateMachine.GetStateName() != "Death")
     {
         // €–S‘JˆÚ
 		_stateMachine.ChangeState("Death");

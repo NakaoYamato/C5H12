@@ -2,11 +2,11 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
+#include "../../Source/Common/Damageable.h"
 #include "../../Library/Component/Animator.h"
-#include "../../Source/Interface/Common/IDamagable.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
-class EnemyController : public Component, public IDamagable
+class EnemyController : public Component
 {
 public:
     EnemyController() {}
@@ -30,7 +30,6 @@ public:
 	virtual void LookAtTarget(const Vector3& target, float elapsedTime, float rotationSpeed);
 #pragma region アクセサ
 	std::shared_ptr<CharactorController> GetCharactorController() const { return _charactorController.lock(); }
-
 #pragma region ネットワーク用
     // ステート変更
     virtual void ChangeState(const char* mainStateName, const char* subStateName) {};
@@ -41,6 +40,7 @@ public:
 #pragma endregion
 
 	const Vector3& GetTargetPosition() const { return _targetPosition; }
+
 	float GetATK() const { return _ATK; }
 	float GetSearchRange() const { return _searchRange; }
 	float GetAttackRange() const { return _attackRange; }
@@ -57,6 +57,7 @@ protected:
     std::weak_ptr<CharactorController> _charactorController;
     std::weak_ptr<Animator> _animator;
     std::weak_ptr<EffekseerEffectController> _hitEffectController;
+    std::weak_ptr<Damageable> _damageable;
 
 	Vector3 _targetPosition = Vector3::Zero;
     float _ATK = 1.0f;

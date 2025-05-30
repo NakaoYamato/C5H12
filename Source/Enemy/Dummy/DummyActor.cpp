@@ -7,17 +7,16 @@
 // ¶¬Žžˆ—
 void DummyActor::OnCreate()
 {
-    GetTransform().SetPosition(Vector3(0.0f, 3.0f, 5.0f));
+    EnemyActor::OnCreate();
 
-    auto charactorController = this->AddComponent<CharactorController>();
-    auto shapeController = this->AddComponent<ShapeController>();
     this->AddComponent<DummyEnemyController>();
-
-    charactorController->SetRadius(1.2f);
-    charactorController->SetStepOffset(0.0f);
-    charactorController->SetMass(100.0f);
-
+    auto shapeController = this->AddComponent<ShapeController>();
     shapeController->SetType(ShapeType::Capsule);
+
+    GetTransform().SetPosition(Vector3(0.0f, 3.0f, 5.0f));
+    _charactorController.lock()->SetRadius(1.2f);
+    _charactorController.lock()->SetStepOffset(0.0f);
+    _charactorController.lock()->SetMass(100.0f);
 
     auto collider = this->AddCollider<CapsuleCollider>();
     collider->SetStart(Vector3(0.0f, 1.0f, 0.0f));

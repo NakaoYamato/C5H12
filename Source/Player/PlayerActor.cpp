@@ -8,6 +8,7 @@
 #include "PlayerInput.h"
 
 #include "../../Source/Camera/PlayerCameraController.h"
+#include "../../Source/Common/Damageable.h"
 
 #include "Weapon/Warrior/PlayerShieldActor.h"
 #include "Weapon/Warrior/PlayerSwordActor.h"
@@ -22,10 +23,11 @@ void PlayerActor::OnCreate()
 
 	// コンポーネント追加
 	//auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
-	auto modelRenderer	= this->AddComponent<ModelRenderer>();
-	auto animator		= this->AddComponent<Animator>();
-	_charactorController = this->AddComponent<CharactorController>();
-	_playerController	= this->AddComponent<PlayerController>();
+	auto damageable			= this->AddComponent<Damageable>();
+	auto modelRenderer		= this->AddComponent<ModelRenderer>();
+	auto animator			= this->AddComponent<Animator>();
+	_charactorController	= this->AddComponent<CharactorController>();
+	_playerController		= this->AddComponent<PlayerController>();
 	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
 	if (_isUserControlled)

@@ -36,6 +36,7 @@ void MeshCollider::DebugRender(const RenderContext& rc)
 {
 	// デバッグ描画フラグがオフなら何もしない
 	if (!GetActor()->IsDrawingDebug())return;
+	if (!GetActor()->IsDrawingHierarchy())return;
 
 	// 有効でなければ描画しない
 	if (!IsActive())

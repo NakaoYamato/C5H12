@@ -180,7 +180,7 @@ std::weak_ptr<EnemyController> NetworkMediator::CreateEnemy(
         enemy->GetTransform().SetPosition(position);
         enemy->GetTransform().SetAngleY(angleY);
         enemy->SetExecuteBehaviorTree(controllerID == myPlayerId);
-		enemy->GetWyvernEnemyController().lock()->ResetHealth(health);
+		enemy->GetDamageable().lock()->ResetHealth(health);
 
         EnemyData enemyData{};
         enemyData.controllerID = controllerID;

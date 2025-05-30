@@ -13,6 +13,8 @@
 // 生成時処理
 void WyvernActor::OnCreate()
 {
+	EnemyActor::OnCreate();
+
 	// モデル読み込み
 	auto model = LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
 	// モデルがシリアライズされていなければエラー
@@ -20,13 +22,12 @@ void WyvernActor::OnCreate()
 
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetScale(1.5f);
+	_charactorController.lock()->SetMass(1000.0f);
 
 	// コンポーネント追加
 	_modelRenderer				= AddComponent<ModelRenderer>();
 	_animator					= AddComponent<Animator>();
 	_wyvernEnemyController		= AddComponent<WyvernEnemyController>();
-	auto charactorController	= AddComponent<CharactorController>();
-	charactorController->SetMass(1000.0f);
 	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加

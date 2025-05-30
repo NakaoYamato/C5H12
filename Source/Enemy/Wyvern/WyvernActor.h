@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../Library/Actor/Actor.h"
+#include "../EnemyActor.h"
 #include "../../Library/Component/ModelRenderer.h"
 
 #include "../../Library/Component/Animator.h"
 #include "WyvernEnemyController.h"
 #include "BehaviorTree/WyvernBehaviorTree.h"
 
-class WyvernActor : public Actor
+class WyvernActor : public EnemyActor
 {
 public:
 	enum class TextureType

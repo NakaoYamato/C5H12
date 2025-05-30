@@ -9,7 +9,21 @@ void WyvernEnemyController::Start()
 
 	_charactorController.lock()->SetRadius(2.5f);
 	// ステートマシン作成
-	_stateMachine = std::make_unique<WyvernStateMachine>(this, _animator.lock().get());
+	_stateMachine = std::make_unique<WyvernStateMachine>(this, _animator.lock().get(), _damageable.lock().get());
+
+	// ダメージを受けた時の処理
+	_damageable.lock()->SetOnDamageCallback(
+		[&](float damage, Vector3 hitPosition) -> void
+		{
+			_damageCounter += damage;
+			if (_damageCounter >= _damageReactionRate)
+			{
+				// ダメージリアクションを行う
+				SetPerformDamageReaction(true);
+				_damageCounter = 0.0f;
+			}
+		}
+	);
 }
 
 // 更新処理
@@ -23,18 +37,6 @@ void WyvernEnemyController::DrawGui()
 {
 	EnemyController::DrawGui();
 	_stateMachine->DrawGui();
-}
-
-// ダメージを受けた時の処理
-void WyvernEnemyController::OnDamage(float damage, Vector3 hitPosition)
-{
-	_damageCounter += damage;
-	if (_damageCounter >= _damageReactionRate)
-	{
-		// ダメージリアクションを行う
-		SetPerformDamageReaction(true);
-		_damageCounter = 0.0f;
-	}
 }
 
 #pragma region ネットワーク用

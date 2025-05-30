@@ -12,6 +12,7 @@ void EnemyController::Start()
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_animator = GetActor()->GetComponent<Animator>();
 	_hitEffectController = GetActor()->GetComponent<EffekseerEffectController>();
+	_damageable = GetActor()->GetComponent<Damageable>();
 }
 // 更新処理
 void EnemyController::Update(float elapsedTime)
@@ -22,7 +23,7 @@ void EnemyController::DelayedRender(const RenderContext& rc)
 {
 	// 頭上にHPパーセント表示
 	std::wstring str = L"HP:";
-	str += std::to_wstring(static_cast<int>(_health / _maxHealth * 100.0f));
+	str += std::to_wstring(static_cast<int>(_damageable.lock()->GetHealth() / _damageable.lock()->GetMaxHealth() * 100.0f));
 	str += L"%";
 	GetActor()->GetScene()->GetTextRenderer().Draw3D(
 		FontType::MSGothic,
@@ -34,7 +35,7 @@ void EnemyController::DelayedRender(const RenderContext& rc)
 // GUI描画
 void EnemyController::DrawGui()
 {
-	ImGui::Text(u8"体力 : %f", _health);
+	ImGui::Text(u8"体力 : %f", _damageable.lock()->GetHealth());
 }
 // 接触時処理
 void EnemyController::OnContactEnter(CollisionData& collisionData)
@@ -42,11 +43,11 @@ void EnemyController::OnContactEnter(CollisionData& collisionData)
 	// 攻撃判定
 	if (collisionData.myLayer == CollisionLayer::Attack)
 	{
-		auto player = collisionData.other->GetComponent<PlayerController>();
-		if (player != nullptr)
+		// ダメージを与える
+		auto damageable = collisionData.other->GetComponent<Damageable>();
+		if (damageable != nullptr)
 		{
-			// プレイヤーにダメージを与える
-			if (player->AddDamage(_ATK, _hitPosition))
+			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
 			{
 				// ダメージを与えたらヒットエフェクト再生
 				_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);

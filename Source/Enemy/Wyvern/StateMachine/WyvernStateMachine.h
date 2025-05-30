@@ -3,6 +3,7 @@
 #include <variant>
 #include "../../Library/Algorithm/StateMachine/StateMachine.h"
 #include "../../Library/Math/Vector.h"
+#include "../../Source/Common/Damageable.h"
 
 // 前方宣言
 class WyvernEnemyController;
@@ -11,7 +12,7 @@ class Animator;
 class WyvernStateMachine
 {
 public:
-	WyvernStateMachine(WyvernEnemyController* wyvern, Animator* animator);
+	WyvernStateMachine(WyvernEnemyController* wyvern, Animator* animator, Damageable* damageable);
 	~WyvernStateMachine() {}
 	// 実行処理
 	void Execute(float elapsedTime);
@@ -22,6 +23,7 @@ public:
 	StateMachine<WyvernStateMachine>& GetStateMachine() { return _stateMachine; }
 	WyvernEnemyController* GetWyvern() { return _wyvern; }
 	Animator* GetAnimator() { return _animator; }
+	Damageable* GetDamageable() { return _damageable; }
 
 	// ステート変更
 	void ChangeState(const char* mainStateName, const char* subStateName);
@@ -38,6 +40,7 @@ private:
 	StateMachine<WyvernStateMachine> _stateMachine;
 	WyvernEnemyController* _wyvern = nullptr;
 	Animator* _animator = nullptr;
+	Damageable* _damageable = nullptr;
 
 	bool					_callCancelEvent = false;
 };

@@ -542,7 +542,7 @@ void WyvernPursuitState::OnExit()
 void WyvernDamageState::OnEnter()
 {
 	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto hitPosition = owner->GetWyvern()->GetHitPosition();
+	auto hitPosition = owner->GetDamageable()->GetHitPosition();
 	auto targetDirection = (hitPosition - position).Normalize();
 	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	// 被弾位置から右前、右、右後ろ、左前、左、左後ろのどこに被弾するか判定

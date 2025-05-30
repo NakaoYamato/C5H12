@@ -16,9 +16,6 @@ public:
 	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
-
-	// ダメージを受けた時の処理
-	void OnDamage(float damage, Vector3 hitPosition) override;
 #pragma region アクセサ
 	WyvernStateMachine* GetState() const { return _stateMachine.get(); }
 

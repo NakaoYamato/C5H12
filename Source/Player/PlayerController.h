@@ -4,12 +4,12 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
 #include "StateMachine/PlayerStateMachine.h"
-#include "../../Source/Interface/Common/IDamagable.h"
+#include "../../Source/Common/Damageable.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
 #include <PlayerDefine.h>
 
-class PlayerController : public Component, public IDamagable
+class PlayerController : public Component
 {
 public:
 	PlayerController() {}
@@ -28,11 +28,6 @@ public:
 	void DrawGui() override;
 	// 接触時処理
 	void OnContactEnter(CollisionData& collisionData) override;
-
-	// ダメージを与える
-	bool AddDamage(float damage, Vector3 hitPosition) override;
-	// ダメージを受けた時の処理
-	void OnDamage(float damage, Vector3 hitPosition) override;
 
 #pragma region アクセサ
 	// ステートマシン取得
@@ -59,4 +54,5 @@ private:
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<EffekseerEffectController> _hitEffectController;
+	std::weak_ptr<Damageable> _damageable;
 };

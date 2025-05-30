@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../Library/Actor/Actor.h"
+#include "../EnemyActor.h"
 #include "../../Library/Component/ShapeController.h"
 
-class DummyActor : public Actor
+class DummyActor : public EnemyActor
 {
 public:
     ~DummyActor()override {}

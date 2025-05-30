@@ -12,6 +12,7 @@
 // ‰Šú‰»
 void Scene::Initialize()
 {
+	_primitive = std::make_unique<Primitive>(Graphics::Instance().GetDevice());
     // ƒŒƒ“ƒ_ƒ‰[ì¬
 	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
 	_textureRenderer.Initialize(Graphics::Instance().GetDevice());

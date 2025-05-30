@@ -5,6 +5,7 @@
 
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/2D/SkyMap.h"
+#include "../../Library/2D/Primitive.h"
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Renderer/TextRenderer.h"
@@ -102,20 +103,21 @@ public:
 	}
 
 #pragma region アクセサ
+	Primitive* GetPrimitive() const { return _primitive.get(); }
 	// アクター管理者取得
-	ActorManager& GetActorManager() { return _actorManager; }
+	ActorManager&			GetActorManager()			{ return _actorManager; }
 	// 当たり判定管理者取得
-	CollisionManager& GetCollisionManager() { return _collisionManager; }
+	CollisionManager&		GetCollisionManager()		{ return _collisionManager; }
 	// Effekseerエフェクトマネージャー取得
 	EffekseerEffectManager& GetEffekseerEffectManager() { return _effekseerEffectManager; }
 	// RenderContext取得
-	RenderContext& GetRenderContext() {	return _renderContext; }
+	RenderContext&			GetRenderContext()			{ return _renderContext; }
 	// メッシュレンダラー取得
-	MeshRenderer& GetMeshRenderer() { return _meshRenderer; }
+	MeshRenderer&			GetMeshRenderer()			{ return _meshRenderer; }
 	// テクスチャレンダラー取得
-	TextureRenderer& GetTextureRenderer() { return _textureRenderer; }
+	TextureRenderer&		GetTextureRenderer()		{ return _textureRenderer; }
 	// テキストレンダラー取得
-	TextRenderer& GetTextRenderer() { return _textRenderer; }
+	TextRenderer&			GetTextRenderer()			{ return _textRenderer; }
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
@@ -128,6 +130,7 @@ public:
 #pragma endregion
 private:
 	std::unique_ptr<SkyMap>			_skyMap;
+	std::unique_ptr<Primitive>		_primitive;
 
 #pragma region シーン必須オブジェクト
 	std::weak_ptr<LightController>	_directionalLight;

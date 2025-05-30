@@ -11,6 +11,9 @@
 #include "../../Source/Enemy/EnemyActor.h"
 #include "../../Source/Enemy/EnemyController.h"
 
+/// <summary>
+/// 通信を管理するメディエーター
+/// </summary>
 class NetworkMediator : public Actor
 {
 public:

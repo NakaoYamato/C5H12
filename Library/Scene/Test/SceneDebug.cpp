@@ -14,6 +14,7 @@
 #include "../../Source/Stage/GrassController.h"
 
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Stage/StageActor.h"
 
 //‰Šú‰»
 void SceneDebug::Initialize()
@@ -123,18 +124,7 @@ void SceneDebug::Initialize()
             light->AddComponent<PointLightController>();
         }
         {
-            auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
-
-            //stage->LoadModel("./Data/Model/Stage/Land/Land.fbx");
-            //stage->GetTransform().SetPositionY(-2.7f);
-            //stage->GetTransform().SetLengthScale(0.1f);
-            //auto modelCont = stage->AddComponent<ModelRenderer>();
-
-            stage->LoadModel("./Data/Model/Stage/Test/test.fbx");
-            stage->GetTransform().SetLengthScale(0.01f);
-            auto modelCont = stage->AddComponent<ModelRenderer>();
-
-            modelCont->SetRenderType(ModelRenderType::Static);
+            auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
         }
         {
             //auto stage = actorManager.Create("StageGrass", ActorTag::Stage);

@@ -56,6 +56,9 @@ void PlayerController::Update(float elapsedTime)
 {
 	// s“®ˆ—
     _stateMachine->Execute(elapsedTime);
+
+	// UŒ‚—Í‚ÌXV
+	_ATK = _BaseATK * _ATKFactor;
 }
 
 // 3D•`‰æŒã‚Ì•`‰æˆ—
@@ -77,6 +80,9 @@ void PlayerController::DrawGui()
 	{
 		_stateMachine->SetIsDead(true);
 	}
+	ImGui::DragFloat(u8"UŒ‚—Í",		&_ATK, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat(u8"Šî–{UŒ‚—Í", &_BaseATK, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat(u8"UŒ‚”{—¦",	&_ATKFactor, 0.01f, 0.0f, 10.0f);
 
 	ImGui::Separator();
 	_stateMachine->DrawGui();

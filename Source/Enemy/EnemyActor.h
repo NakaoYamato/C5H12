@@ -21,8 +21,13 @@ public:
 	{
 		return _damageable;
 	}
+
+	void SetIsExecuteBehaviorTree(bool execute) { _isExecuteBehavior = execute; }
 #pragma endregion
 protected:
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Damageable> _damageable;
+
+	// s“®‘JˆÚˆ—‚ğˆ—‚·‚é‚©‚Ç‚¤‚©
+	bool _isExecuteBehavior = true;
 };

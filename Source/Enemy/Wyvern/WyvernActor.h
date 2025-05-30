@@ -44,8 +44,6 @@ public:
 	void SetModelType(TextureType type) { this->_textureType = type; }
 	// 角を設定
 	void SetDrawHornType(DrawHornType type) { this->_drawHornType = type; }
-
-	void SetExecuteBehaviorTree(bool execute) { _executeBehaviorTree = execute; }
 #pragma endregion
 
 private:
@@ -61,8 +59,6 @@ private:
 	std::weak_ptr<WyvernEnemyController> _wyvernEnemyController;
 	// ビヘイビアツリー
 	std::unique_ptr<WyvernBehaviorTree> _behaviorTree;
-	// ビヘイビアツリーを処理するかどうか
-	bool _executeBehaviorTree = true;
 
 	TextureType _textureType = TextureType::Lava;
 	DrawHornType _drawHornType = DrawHornType::Horn01;

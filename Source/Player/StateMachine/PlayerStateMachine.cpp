@@ -285,7 +285,7 @@ namespace SprintSubState
             owner->GetAnimator()->PlayAnimation(u8"Attack_Sprint", false, 0.2f);
 
 			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
-            owner->GetPlayer()->SetATK(ATK);
+            owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -438,7 +438,7 @@ namespace Attack1SubState
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
 			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
-			owner->GetPlayer()->SetATK(ATK);
+			owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -465,7 +465,7 @@ namespace Attack1SubState
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo2", false, 0.3f);
 			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
-			owner->GetPlayer()->SetATK(ATK);
+			owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -492,7 +492,7 @@ namespace Attack1SubState
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo3", false, 0.3f);
 			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
-			owner->GetPlayer()->SetATK(ATK);
+			owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -519,7 +519,7 @@ namespace Attack1SubState
         {
             owner->GetAnimator()->PlayAnimation(u8"Attack_Combo4", false, 0.3f);
 			// UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
-			owner->GetPlayer()->SetATK(ATK);
+			owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {

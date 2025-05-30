@@ -38,21 +38,30 @@ public:
 		return _charactorController.lock();
 	}
 	// 攻撃力のセット
-	void SetATK(float atk) 
-	{ 
-		_ATK = atk; 
-	}
+	void SetATK(float atk) { _ATK = atk; }
+	// 基本攻撃力のセット
+	void SetBaseATK(float baseATK) { _BaseATK = baseATK; }
+	// ダメージ倍率のセット
+	void SetATKFactor(float atkFactor) { _ATKFactor = atkFactor; }
 #pragma endregion
 
 private:
 #pragma region ステート制御
 	// ステートマシン
 	std::unique_ptr<PlayerStateMachine> _stateMachine;
-	float _ATK = 1.0f;
 #pragma endregion
 
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<EffekseerEffectController> _hitEffectController;
 	std::weak_ptr<Damageable> _damageable;
+
+#pragma region 攻撃関係
+	// 最終攻撃力
+	float _ATK = 1.0f;
+	// 基本攻撃力
+	float _BaseATK = 1.0f;
+	// ダメージ倍率
+	float _ATKFactor = 1.0f;
+#pragma endregion
 };

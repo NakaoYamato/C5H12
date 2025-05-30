@@ -8,6 +8,7 @@
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Enemy/EnemyActor.h"
 #include "../../Source/Enemy/EnemyController.h"
 
 class NetworkMediator : public Actor
@@ -16,8 +17,9 @@ public:
     struct EnemyData
     {
         // 管理しているプレイヤーのID
-        int controllerID = -1;
-        std::weak_ptr<EnemyController> enemyController;
+        int                             controllerID = -1;
+        std::weak_ptr<EnemyActor>       enemyActor;
+        std::weak_ptr<EnemyController>  enemyController;
     };
 
 public:
@@ -49,26 +51,27 @@ private:
     /// <param name="id"></param>
     /// <param name="isControlled"></param>
     std::weak_ptr<PlayerActor> CreatePlayer(int id, bool isControlled);
-
 	/// <summary>
 	/// 敵の生成
 	/// </summary>
 	/// <param name="uniqueId"></param>
 	/// <param name="type"></param>
 	/// <returns></returns>
-	std::weak_ptr<EnemyController> CreateEnemy(
+	std::weak_ptr<EnemyActor> CreateEnemy(
         int uniqueID,
 		int controllerID,
         Network::EnemyType type,
         const Vector3& position,
         float angleY,
         float health);
-
+    /// <summary>
+    /// リーダーの再設定
+    /// </summary>
+    void ResetLeader();
     /// <summary>
     /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
     /// </summary>
     void SetClientCollback();
-
     /// <summary>
     /// 受け取ったデータを処理
     /// </summary>
@@ -107,6 +110,8 @@ private:
     int myPlayerId = -1;
 	// リーダーのユニークID
 	int leaderPlayerId = -1;
+	// 次のリーダーのユニークID
+	int nextLeaderPlayerId = -1;
     // スレッドセーフ用
     std::mutex _mutex;
 
@@ -130,5 +135,6 @@ private:
     std::string _message;
     std::vector<std::string> _logs;
 
-	bool _sendEnemyCreate = false; // 敵生成のフラグ
+    // 敵生成のフラグ
+	bool _sendEnemyCreate = false;
 };

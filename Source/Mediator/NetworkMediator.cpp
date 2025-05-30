@@ -35,6 +35,10 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
     /// 受け取ったデータを処理
     ProcessNetworkData();
 
+    // リーダーの再設定解決処理
+	if (nextLeaderPlayerId != -1)
+        ResetLeader();
+
 	// 自身がリーダーで、敵が存在しない場合は敵を生成
 	if (myPlayerId != -1 && myPlayerId == leaderPlayerId && _enemies.empty() && !_sendEnemyCreate)
 	{
@@ -114,14 +118,15 @@ void NetworkMediator::OnFixedUpdate()
         if (enemyData.controllerID != myPlayerId)
             continue;
 
+		auto enemyActor = enemyData.enemyActor.lock();
 		auto enemyController = enemyData.enemyController.lock();
-		if (enemyController)
+		if (enemyActor && enemyController)
 		{
 			Network::EnemyMove enemyMove{};
-			enemyMove.uniqueID = uniqueID;
-			enemyMove.position = enemyController->GetActor()->GetTransform().GetPosition();
-			enemyMove.angleY = enemyController->GetActor()->GetTransform().GetRotation().y;
-			enemyMove.target = enemyController->GetTargetPosition();
+			enemyMove.uniqueID          = uniqueID;
+			enemyMove.position          = enemyActor->GetTransform().GetPosition();
+			enemyMove.angleY            = enemyActor->GetTransform().GetRotation().y;
+			enemyMove.target            = enemyController->GetTargetPosition();
             strcpy_s(enemyMove.mainState, enemyController->GetStateName());
             strcpy_s(enemyMove.subState, enemyController->GetSubStateName());
 			// サーバーに送信
@@ -148,13 +153,13 @@ std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControll
     // 要素チェック
     if (_players[id].lock()) return std::weak_ptr<PlayerActor>();
 
+    auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
+
     // ユーザーが操作するプレイヤーか
     if (isControlled)
     {
         myPlayerId = id;
     }
-
-    auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
 
     // コンテナに登録
     _players[id] = player;
@@ -162,7 +167,7 @@ std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControll
 }
 
 /// 敵の生成
-std::weak_ptr<EnemyController> NetworkMediator::CreateEnemy(
+std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
     int uniqueID,
     int controllerID, 
     Network::EnemyType type, 
@@ -179,18 +184,41 @@ std::weak_ptr<EnemyController> NetworkMediator::CreateEnemy(
         );
         enemy->GetTransform().SetPosition(position);
         enemy->GetTransform().SetAngleY(angleY);
-        enemy->SetExecuteBehaviorTree(controllerID == myPlayerId);
+        enemy->SetIsExecuteBehaviorTree(controllerID == myPlayerId);
 		enemy->GetDamageable().lock()->ResetHealth(health);
 
         EnemyData enemyData{};
         enemyData.controllerID = controllerID;
-        enemyData.enemyController = enemy->GetWyvernEnemyController();
+        enemyData.enemyActor = enemy;
+		enemyData.enemyController = enemy->GetWyvernEnemyController();
 
         // コンテナに登録
         _enemies[uniqueID] = enemyData;
-        return enemyData.enemyController;
+        return enemyData.enemyActor;
     }
-    return std::weak_ptr<EnemyController>();
+    return std::weak_ptr<EnemyActor>();
+}
+
+/// リーダーの再設定
+void NetworkMediator::ResetLeader()
+{
+    leaderPlayerId = nextLeaderPlayerId;
+
+	// 自身がリーダーになった場合敵の行動遷移処理を自身が行う
+	if (myPlayerId == leaderPlayerId)
+	{
+		// 敵の行動遷移処理を自身が行う
+		for (auto& [uniqueID, enemyData] : _enemies)
+		{
+			auto enemyActor = enemyData.enemyActor.lock();
+			if (enemyActor)
+			{
+                enemyActor->SetIsExecuteBehaviorTree(true);
+			}
+		}
+	}
+	// 次のリーダーのユニークIDをリセット
+	nextLeaderPlayerId = -1;
 }
 
 /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
@@ -241,8 +269,8 @@ void NetworkMediator::SetClientCollback()
 			std::lock_guard<std::mutex> lock(_mutex);
 			_logs.push_back("PlayerSetLeader" + std::to_string(playerSetLeader.playerUniqueID));
 
-			// リーダー設定
-            leaderPlayerId = playerSetLeader.playerUniqueID;
+			// 次のリーダーのユニークIDを設定
+			nextLeaderPlayerId = playerSetLeader.playerUniqueID;
 		});
     _client->SetPlayerMoveCallback(
         [this](const Network::PlayerMove& playerMove)

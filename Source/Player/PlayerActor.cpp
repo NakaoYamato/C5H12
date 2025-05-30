@@ -34,6 +34,11 @@ void PlayerActor::OnCreate()
 	{
 		this->AddComponent<PlayerInput>();
 	}
+	else
+	{
+		// 攻撃力の倍率を0にしてダメージを与えられないようにする
+		_playerController.lock()->SetATKFactor(0.0f);
+	}
 
 	// コライダー設定
     auto collider		= this->AddCollider<CapsuleCollider>();

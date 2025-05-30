@@ -39,7 +39,7 @@ void WyvernActor::OnCreate()
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)
 {
-	if (_executeBehaviorTree)
+	if (_isExecuteBehavior)
 	{
 		// ターゲット座標にプレイヤー座標を設定
 		auto& actorManager = GetScene()->GetActorManager();
@@ -91,7 +91,7 @@ void WyvernActor::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"ワイバーン"))
 		{
-			bool flag = _executeBehaviorTree;
+			bool flag = _isExecuteBehavior;
 			ImGui::Checkbox(u8"ビヘイビアツリーを実行する", &flag);
 			// ビヘイビアツリーのGUI描画
 			_behaviorTree->DrawGui();

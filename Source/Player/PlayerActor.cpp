@@ -8,7 +8,6 @@
 #include "PlayerInput.h"
 
 #include "../../Source/Camera/PlayerCameraController.h"
-#include "../../Source/Common/Damageable.h"
 
 #include "Weapon/Warrior/PlayerShieldActor.h"
 #include "Weapon/Warrior/PlayerSwordActor.h"
@@ -23,7 +22,7 @@ void PlayerActor::OnCreate()
 
 	// コンポーネント追加
 	//auto modelRenderer = AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
-	auto damageable			= this->AddComponent<Damageable>();
+	_damageable			= this->AddComponent<Damageable>();
 	auto modelRenderer		= this->AddComponent<ModelRenderer>();
 	auto animator			= this->AddComponent<Animator>();
 	_charactorController	= this->AddComponent<CharactorController>();

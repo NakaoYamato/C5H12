@@ -216,6 +216,17 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerMoveCallback(playerMove);
 	}
 	break;
+	case Network::DataTag::PlayerApplyDamage:
+	{
+		Network::PlayerApplyDamage playerApplyDamage;
+		if (!buffer.Read(&playerApplyDamage, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:ApplyDamage");
+			return;
+		}
+		if (self->_playerApplyDamageCallback)
+			self->_playerApplyDamageCallback(playerApplyDamage);
+	}
 	case Network::DataTag::EnemyCreate:
 	{
 		Network::EnemyCreate enemyCreate;

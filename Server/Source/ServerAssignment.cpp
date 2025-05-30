@@ -277,7 +277,28 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		if (client != nullptr)
 		{
 			client->player.position = playerMove.position;
+			client->player.movement = playerMove.movement;
+			client->player.angleY = playerMove.angleY;
 			client->player.state = playerMove.state;
+			client->player.subState = playerMove.subState;
+		}
+	}
+	break;
+	case DataTag::PlayerApplyDamage:
+	{
+		// プレイヤーにダメージを適用する場合の処理
+		PlayerApplyDamage playerDamage;
+		// バッファデータからpayLoadStrにデータに読み込み
+		if (!buffer.Read(&playerDamage, payloadLen)) {
+			std::cout << "Read Error" << std::endl;
+			return;
+		}
+		std::cout << "RECV PlayerApplyDamage" << std::endl;
+		// プレイヤー情報を更新
+		auto client = self->GetClientFromID(playerDamage.playerUniqueID);
+		if (client != nullptr)
+		{
+			client->player.health -= playerDamage.damage; // ダメージを適用
 		}
 	}
 	break;

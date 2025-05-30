@@ -40,6 +40,7 @@ namespace Network
 		PlayerSetLeader,
 		PlayerSync,
 		PlayerMove,
+		PlayerApplyDamage,
 
 		EnemyCreate,
 		EnemySync,
@@ -54,6 +55,7 @@ namespace Network
 		DirectX::XMFLOAT3 position = {};
         DirectX::XMFLOAT2 movement = {};
         float angleY = 0.0f;
+		float health = 100.0f;
 		PlayerMainStates state = PlayerMainStates::None;
         PlayerSubStates subState = PlayerSubStates::None;
 	};
@@ -97,17 +99,14 @@ namespace Network
 	{
 		int playerUniqueID = -1;
 	};
-
 	struct PlayerLogout
 	{
 		int playerUniqueID = -1;
 	};
-
 	struct PlayerSetLeader
 	{
 		int playerUniqueID = -1;
 	};
-
 	struct PlayerSync
 	{
 		int playerUniqueID = -1;
@@ -122,6 +121,12 @@ namespace Network
 		float angleY = 0.0f;
 		PlayerMainStates state = PlayerMainStates::None;
 		PlayerSubStates subState = PlayerSubStates::None;
+	};
+	struct PlayerApplyDamage
+	{
+		int playerUniqueID = -1;
+		float damage = 0.0f;
+		DirectX::XMFLOAT3 hitPosition = {};
 	};
 #pragma endregion
 

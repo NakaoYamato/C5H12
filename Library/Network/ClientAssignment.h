@@ -91,6 +91,14 @@ public:
         _playerMoveCallback = callback;
     }
 	/// <summary>
+	/// PlayerApplyDamageを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+	void SetPlayerApplyDamageCallback(std::function<void(const Network::PlayerApplyDamage&)> callback)
+	{
+		_playerApplyDamageCallback = callback;
+	}
+	/// <summary>
 	/// EnemyCreateを受け取ったときのコールバック関数を設定する
 	/// </summary>
 	/// <param name="callback"></param>
@@ -185,17 +193,18 @@ private:
 #endif // USE_MRS
 
 #pragma region サーバーからの各種データ受け取りを行ったときのコールバック関数
-	std::function<void(const Network::MessageData&)> _playerMessageDataCallback;
-	std::function<void(const Network::PlayerLogin&)> _playerLoginCallback;
-	std::function<void(const Network::PlayerLogout&)> _playerLogoutCallback;
-	std::function<void(const Network::PlayerSetLeader&)> _playerSetLeaderCallback;
-	std::function<void(const Network::PlayerSync&)> _playerSyncCallback;
-	std::function<void(const Network::PlayerMove&)> _playerMoveCallback;
+	std::function<void(const Network::MessageData&)>		_playerMessageDataCallback;
+	std::function<void(const Network::PlayerLogin&)>		_playerLoginCallback;
+	std::function<void(const Network::PlayerLogout&)>		_playerLogoutCallback;
+	std::function<void(const Network::PlayerSetLeader&)>	_playerSetLeaderCallback;
+	std::function<void(const Network::PlayerSync&)>			_playerSyncCallback;
+	std::function<void(const Network::PlayerMove&)>			_playerMoveCallback;
+	std::function<void(const Network::PlayerApplyDamage&)>	_playerApplyDamageCallback;
 
-	std::function<void(const Network::EnemyCreate&)> _enemyCreateCallback;
-	std::function<void(const Network::EnemySync&)> _enemySyncCallback;
-	std::function<void(const Network::EnemyMove&)> _enemyMoveCallback;
-	std::function<void(const Network::EnemyApplayDamage&)> _enemyApplayDamageCallback;
+	std::function<void(const Network::EnemyCreate&)>		_enemyCreateCallback;
+	std::function<void(const Network::EnemySync&)>			_enemySyncCallback;
+	std::function<void(const Network::EnemyMove&)>			_enemyMoveCallback;
+	std::function<void(const Network::EnemyApplayDamage&)>	_enemyApplayDamageCallback;
 #pragma endregion
 
 	// デバッグ用

@@ -65,6 +65,10 @@ private:
         float angleY,
         float health);
     /// <summary>
+	/// 自身のプレイヤーのダメージ送信
+    /// </summary>
+    void SendMyPlayerDamage();
+    /// <summary>
 	/// 敵のダメージ送信
     /// </summary>
     void SendEnemyDamage();
@@ -121,15 +125,16 @@ private:
 
 #pragma region サーバーからの受信データ
 	// プレイヤーメッセージデータ
-    std::vector<Network::MessageData> _messageDatas;
-    std::vector<Network::PlayerLogin> _playerLogins;
-    std::vector<Network::PlayerLogout> _playerLogouts;
-    std::vector<Network::PlayerSync> _playerSyncs;
-    std::vector<Network::PlayerMove> _playerMoves;
+    std::vector<Network::MessageData>       _messageDatas;
+    std::vector<Network::PlayerLogin>       _playerLogins;
+    std::vector<Network::PlayerLogout>      _playerLogouts;
+    std::vector<Network::PlayerSync>        _playerSyncs;
+    std::vector<Network::PlayerMove>        _playerMoves;
+    std::vector<Network::PlayerApplyDamage> _playerApplyDamages;
 
-    std::vector<Network::EnemyCreate> _enemyCreates;
-	std::vector<Network::EnemySync> _enemySyncs;
-	std::vector<Network::EnemyMove> _enemyMoves;
+    std::vector<Network::EnemyCreate>       _enemyCreates;
+	std::vector<Network::EnemySync>         _enemySyncs;
+	std::vector<Network::EnemyMove>         _enemyMoves;
 	std::vector<Network::EnemyApplayDamage> _enemyApplayDamages;
 #pragma endregion
 

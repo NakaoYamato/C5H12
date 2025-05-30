@@ -58,6 +58,8 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 // 遅延更新処理
 void NetworkMediator::OnLateUpdate(float elapsedTime)
 {
+    /// 自身のプレイヤーのダメージ送信
+    SendMyPlayerDamage();
     /// 敵のダメージ送信
     SendEnemyDamage();
 }
@@ -73,10 +75,10 @@ void NetworkMediator::OnFixedUpdate()
 		playerMove.playerUniqueID = myPlayerId;
 		playerMove.position = myPlayer->GetTransform().GetPosition();
         auto playerController = myPlayer->GetPlayerController();
-        if (playerController != nullptr)
+        if (playerController)
         {
             auto stateMachine = playerController->GetPlayerStateMachine();
-            if (stateMachine != nullptr)
+            if (stateMachine)
             {
 				playerMove.movement = stateMachine->GetMovement();
                 playerMove.state = Network::GetPlayerMainStateFromName(stateMachine->GetStateName());
@@ -173,6 +175,28 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
         return enemyData.enemyActor;
     }
     return std::weak_ptr<EnemyActor>();
+}
+
+/// 自身のプレイヤーのダメージ送信
+void NetworkMediator::SendMyPlayerDamage()
+{
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
+	// 自身のプレイヤーのダメージを送信
+	auto myPlayer = _players[myPlayerId].lock();
+	if (myPlayer)
+	{
+        auto damageable = myPlayer->GetDamageable();
+		if (damageable && damageable->GetLastDamage() > 0.0f)
+		{
+			Network::PlayerApplyDamage playerApplyDamage{};
+			playerApplyDamage.playerUniqueID = myPlayerId; // ダメージを受けたプレイヤーのユニークID
+			playerApplyDamage.damage = damageable->GetLastDamage();
+			playerApplyDamage.hitPosition = damageable->GetHitPosition();
+			// サーバーに送信
+			_client->WriteRecord(Network::DataTag::PlayerApplyDamage, &playerApplyDamage, sizeof(playerApplyDamage));
+		}
+	}
 }
 
 /// 敵のダメージ送信
@@ -284,6 +308,14 @@ void NetworkMediator::SetClientCollback()
 
             _playerMoves.push_back(playerMove);
         });
+	_client->SetPlayerApplyDamageCallback(
+		[this](const Network::PlayerApplyDamage& playerApplyDamage)
+		{
+			// スレッドセーフ
+			std::lock_guard<std::mutex> lock(_mutex);
+			_logs.push_back("PlayerApplyDamage" + std::to_string(playerApplyDamage.playerUniqueID));
+			_playerApplyDamages.push_back(playerApplyDamage);
+		});
 	_client->SetEnemyCreateCallback(
 		[this](const Network::EnemyCreate& enemyCreate)
 		{
@@ -398,6 +430,29 @@ void NetworkMediator::ProcessNetworkData()
     _playerMoves.clear();
 	//===============================================================================
 
+    //===============================================================================
+	// プレイヤーのダメージデータの処理
+	for (auto& playerApplyDamage : _playerApplyDamages)
+	{
+		// 自身が送信したダメージならスキップ
+		if (playerApplyDamage.playerUniqueID == myPlayerId)
+			continue;
+		// プレイヤー情報を更新
+
+		auto player = _players[playerApplyDamage.playerUniqueID].lock();
+		if (player)
+		{
+            auto damageable = player->GetDamageable();
+			if (damageable)
+			{
+				damageable->SetHelth(damageable->GetHealth() - playerApplyDamage.damage);
+				damageable->SetHitPosition(playerApplyDamage.hitPosition);
+			}
+		}
+	}
+	_playerApplyDamages.clear();
+    //===============================================================================
+
 	//===============================================================================
 	// 敵生成データの処理
 	for (auto& enemyCreate : _enemyCreates)
@@ -490,6 +545,23 @@ void NetworkMediator::DrawNetworkGui()
     {
         if (ImGui::BeginTabItem(u8"サーバー"))
         {
+            if (ImGui::Button(u8"ワイバーン追加"))
+            {
+                if (myPlayerId != -1 && myPlayerId == leaderPlayerId)
+                {
+                    _sendEnemyCreate = true; // 敵生成フラグを立てる
+
+                    // 敵の生成命令を送る
+                    Network::EnemyCreate enemyCreate{};
+                    enemyCreate.type = Network::EnemyType::Wyvern; // ここではワイバーンを生成する例
+                    enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
+                    enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
+                    enemyCreate.position = Vector3(0.0f, 10.0f, 10.0f);
+                    enemyCreate.health = 100.0f; // 初期体力を設定
+                    _client->WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
+                }
+            }
+
             // サーバーGUI表示
             _client->DrawGui();
 

@@ -2,6 +2,7 @@
 
 #include "../../Source/Enemy/EnemyController.h" 
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include <PlayerDefine.h>
 #include <imgui.h>
@@ -17,6 +18,7 @@ void PlayerController::Start()
     _stateMachine = std::make_unique<PlayerStateMachine>(this, _animator.lock().get());
 }
 
+// 更新処理
 void PlayerController::Update(float elapsedTime)
 {
 	// 行動処理
@@ -24,6 +26,18 @@ void PlayerController::Update(float elapsedTime)
 
 	// 受けたダメージを初期化
 	_stateMachine->SetSustainedDamage(0);
+}
+
+// 3D描画後の描画処理
+void PlayerController::DelayedRender(const RenderContext& rc)
+{
+	// 頭上に名前表示
+	GetActor()->GetScene()->GetTextRenderer().Draw3D(
+		FontType::MSGothic,
+		GetActor()->GetName(),
+		GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 2.0f, 0.0f),
+		Vector4::White
+	);
 }
 
 // GUI描画

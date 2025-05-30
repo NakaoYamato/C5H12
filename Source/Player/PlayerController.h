@@ -22,6 +22,8 @@ public:
 	void Start() override;
 	// XVˆ—
 	void Update(float elapsedTime) override;
+	// 3D•`‰æŒã‚Ì•`‰æˆ—
+	void DelayedRender(const RenderContext& rc) override;
 	// GUI•`‰æ
 	void DrawGui() override;
 	// ÚGˆ—

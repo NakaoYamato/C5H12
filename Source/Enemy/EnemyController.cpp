@@ -2,6 +2,7 @@
 
 #include "../../Source/Player/PlayerController.h"
 
+#include "../../Library/Scene/Scene.h"
 #include <imgui.h>
 
 // 開始処理
@@ -15,6 +16,20 @@ void EnemyController::Start()
 // 更新処理
 void EnemyController::Update(float elapsedTime)
 {
+}
+// 3D描画後の描画処理
+void EnemyController::DelayedRender(const RenderContext& rc)
+{
+	// 頭上にHPパーセント表示
+	std::wstring str = L"HP:";
+	str += std::to_wstring(static_cast<int>(_health / _maxHealth * 100.0f));
+	str += L"%";
+	GetActor()->GetScene()->GetTextRenderer().Draw3D(
+		FontType::MSGothic,
+		str.c_str(),
+		GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 4.0f, 0.0f),
+		Vector4::White
+	);
 }
 // GUI描画
 void EnemyController::DrawGui()

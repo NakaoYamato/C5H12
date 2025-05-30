@@ -15,6 +15,11 @@ void Scene::Initialize()
     // レンダラー作成
 	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
 	_textureRenderer.Initialize(Graphics::Instance().GetDevice());
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		_textRenderer.Initialize(Graphics::Instance().GetDevice(),
+			Graphics::Instance().GetDeviceContext());
+    }
 	// Effekseerエフェクトマネージャー作成
 	_effekseerEffectManager = std::make_unique<EffekseerEffectManager>();
 
@@ -70,6 +75,8 @@ void Scene::Render()
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
     ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
     ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
+    float screenWidth = graphics.GetScreenWidth();
+	float screenHeight = graphics.GetScreenHeight();
 
     // 各種マネジャー取得
     RenderState* renderState = graphics.GetRenderState();
@@ -274,6 +281,9 @@ void Scene::Render()
 
     // 3D描画後の描画処理
     _actorManager.DelayedRender(rc);
+
+    // テキスト描画
+	_textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
 }
 
 // デバッグ用Gui描画

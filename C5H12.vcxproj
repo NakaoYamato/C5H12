@@ -224,6 +224,7 @@
     <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp" />
     <ClCompile Include="Library\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
+    <ClCompile Include="Library\Renderer\TextRenderer.cpp" />
     <ClCompile Include="Library\Renderer\TextureRenderer.cpp" />
     <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
     <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp" />
@@ -357,6 +358,7 @@
     <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h" />
     <ClInclude Include="Library\Renderer\MeshRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
+    <ClInclude Include="Library\Renderer\TextRenderer.h" />
     <ClInclude Include="Library\Renderer\TextureRenderer.h" />
     <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />
     <ClInclude Include="Library\ResourceManager\ModelResourceManager.h" />

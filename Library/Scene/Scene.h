@@ -3,14 +3,16 @@
 #include <d3d11.h>
 #include <memory>
 
+#include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/2D/SkyMap.h"
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
+#include "../../Library/Renderer/TextRenderer.h"
+
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
 #include "../../Library/Effekseer/EffekseerEffectManager.h"
 
-#include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Camera/Camera.h"
 
@@ -112,6 +114,8 @@ public:
 	MeshRenderer& GetMeshRenderer() { return _meshRenderer; }
 	// テクスチャレンダラー取得
 	TextureRenderer& GetTextureRenderer() { return _textureRenderer; }
+	// テキストレンダラー取得
+	TextRenderer& GetTextRenderer() { return _textRenderer; }
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
@@ -133,6 +137,8 @@ private:
 	RenderContext					_renderContext;
 	MeshRenderer					_meshRenderer;
 	TextureRenderer					_textureRenderer;
+	TextRenderer					_textRenderer;
+
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
 	std::unique_ptr<EffekseerEffectManager>			_effekseerEffectManager;

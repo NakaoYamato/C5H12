@@ -2,16 +2,12 @@
 
 #include "../../Graphics/Graphics.h"
 
-EffekseerEffectManager::EffekseerEffectManager()
+/// 初期化
+void EffekseerEffectManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc)
 {
-    Graphics& graphics = Graphics::Instance();
-    // 別スレッド中にデバイスコンテキストが使われていた場合に
-    // 同時アクセスしないように排他制御する
-    std::lock_guard<std::mutex> lock(graphics.GetMutex());
-
     //Effekseerレンダラを作成
     effekseerRenderer = EffekseerRendererDX11::Renderer::Create(
-        graphics.GetDevice(), graphics.GetDeviceContext(), 2048
+        device, dc, 2048
     );
 
     //Effekseerマネージャー生成
@@ -33,12 +29,13 @@ EffekseerEffectManager::EffekseerEffectManager()
     effekseerManager->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
 }
 
-//更新処理
+/// 更新処理
 void EffekseerEffectManager::Update(float elapsedTime)
 {
     effekseerManager->Update(elapsedTime * 60.0f);
 }
-//描画処理
+
+/// 描画処理
 void EffekseerEffectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
 {
     //ビュー&プロジェクション行列をEffekseerレンダラに設定

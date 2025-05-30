@@ -103,6 +103,15 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	float GetAnimationTimer() const { return _animationTimer; }
+	/// <summary>
+	/// アニメーションの終了時間取得
+	/// </summary>
+	/// <returns></returns>
+	float GetAnimationEndTime() const
+	{
+		if (_animationIndex == -1) return 0.0f;
+		return _model.lock()->GetResource()->GetAnimations().at(_animationIndex).secondsLength;
+	}
 
 	bool IsPlaying() const { return _isPlaying; }
 	bool IsLoop() const { return _isLoop; }

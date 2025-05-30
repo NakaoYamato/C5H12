@@ -37,6 +37,11 @@ public:
 #pragma region アクセサ
 	// ステートマシン取得
     PlayerStateMachine* GetPlayerStateMachine() { return _stateMachine.get(); }
+	// キャラクターコントローラー取得
+	std::shared_ptr<CharactorController> GetCharactorController()
+	{
+		return _charactorController.lock();
+	}
 	// 攻撃力のセット
 	void SetATK(float atk) 
 	{ 

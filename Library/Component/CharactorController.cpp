@@ -71,11 +71,16 @@ void CharactorController::DrawGui()
     ImGui::DragFloat3(u8"重力", &_gravity.x, 0.01f);
     ImGui::Checkbox(u8"重力使用", &_useGravity);
     ImGui::Separator();
+    ImGui::Checkbox(u8"押し出されるか", &_isPushable);
+    ImGui::Separator();
 }
 
 // 接触の解消処理
 void CharactorController::OnContact(CollisionData& collisionData)
 {   
+	if (!_isPushable)
+		return;
+
 	// トリガーでなければ押し出し処理
     if (!collisionData.isTrigger && !collisionData.otherIsTrigger)
     {

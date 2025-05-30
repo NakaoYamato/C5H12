@@ -21,7 +21,11 @@ void Scene::Initialize()
 			Graphics::Instance().GetDeviceContext());
     }
 	// Effekseerエフェクトマネージャー作成
-	_effekseerEffectManager = std::make_unique<EffekseerEffectManager>();
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _effekseerEffectManager.Initialize(Graphics::Instance().GetDevice(),
+            Graphics::Instance().GetDeviceContext());
+    }
 
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
@@ -58,7 +62,7 @@ void Scene::Update(float elapsedTime)
     _actorManager.LateUpdate(elapsedTime);
 
 	// Effekseerの更新
-	_effekseerEffectManager->Update(elapsedTime);
+	_effekseerEffectManager.Update(elapsedTime);
 }
 
 /// 一定間隔の更新処理
@@ -191,7 +195,7 @@ void Scene::Render()
         _meshRenderer.RenderAlpha(rc);
 
 		// Effekseerの描画
-		_effekseerEffectManager->Render(rc.camera->GetView(), rc.camera->GetProjection());
+		_effekseerEffectManager.Render(rc.camera->GetView(), rc.camera->GetProjection());
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());

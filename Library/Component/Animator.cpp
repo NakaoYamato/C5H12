@@ -542,47 +542,58 @@ void Animator::UpdateAnimationEvent()
 
     for (auto& event : GetCurrentEvents())
     {
-        // 攻撃イベント使用フラグがオンかつ攻撃判定が発生したら
-        if (_activeAttackEvent &&
-            event.eventType == AnimationEvent::EventType::Attack)
+		if (event.eventType == AnimationEvent::EventType::Flag)
+			continue;
+
+        auto& collisionManager = GetActor()->GetScene()->GetCollisionManager();
+
+        auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
+        DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
+        DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
+        DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
+        DirectX::XMFLOAT4X4 transform = {};
+
+        DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
+
+		CollisionLayer layer = CollisionLayer::None;
+        if (event.eventType == AnimationEvent::EventType::Attack)
         {
-            auto& collisionManager = GetActor()->GetScene()->GetCollisionManager();
+            // 攻撃イベント使用フラグがオフなら処理しない
+            if (!_activeAttackEvent)
+                continue;
+			layer = CollisionLayer::Attack;
+        }
+		else if (event.eventType == AnimationEvent::EventType::Hit)
+		{
+			layer = CollisionLayer::Hit;
+		}
 
-            auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
-            DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
-            DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
-            DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
-            DirectX::XMFLOAT4X4 transform = {};
-
-            DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
-
-            // 攻撃判定生成
-            switch (event.shapeType)
-            {
-            case AnimationEvent::ShapeType::Sphere:
-                collisionManager.RegisterSphereData(
-                    GetActor().get(),
-                    CollisionLayer::Attack,
-                    Vector3(transform._41, transform._42, transform._43),
-                    event.scale.x);
-                break;
-            case AnimationEvent::ShapeType::Box:
-                collisionManager.RegisterBoxData(
-                    GetActor().get(),
-                    CollisionLayer::Attack,
-                    event.position.TransformCoord(node.worldTransform),
-                    event.scale,
-                    event.angle);
-                break;
-            case AnimationEvent::ShapeType::Capsule:
-                collisionManager.RegisterCapsuleData(
-                    GetActor().get(),
-                    CollisionLayer::Attack,
-                    event.position.TransformCoord(node.worldTransform),
-                    event.angle.TransformCoord(node.worldTransform),
-                    event.scale.x);
-                break;
-            }
+        // 判定生成
+        switch (event.shapeType)
+        {
+        case AnimationEvent::ShapeType::Sphere:
+            collisionManager.RegisterSphereData(
+                GetActor().get(),
+                layer,
+                Vector3(transform._41, transform._42, transform._43),
+                event.scale.x);
+            break;
+        case AnimationEvent::ShapeType::Box:
+            collisionManager.RegisterBoxData(
+                GetActor().get(),
+                layer,
+                event.position.TransformCoord(node.worldTransform),
+                event.scale,
+                event.angle);
+            break;
+        case AnimationEvent::ShapeType::Capsule:
+            collisionManager.RegisterCapsuleData(
+                GetActor().get(),
+                layer,
+                event.position.TransformCoord(node.worldTransform),
+                event.angle.TransformCoord(node.worldTransform),
+                event.scale.x);
+            break;
         }
     }
 }

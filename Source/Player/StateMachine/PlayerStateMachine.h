@@ -50,10 +50,6 @@ public:
 	bool IsAttack() const { return _isAttack; }
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
-	// 受けたダメージを取得
-	int GetSustainedDamage() const { return _sustainedDamage; }
-	// ノックバックダメージを取得
-	int GetKnockbackDamage() const { return _knockbackDamage; }
 
 	void SetMovement(const Vector2& movement)	{ _movement = movement; }
 	void SetIsMoving(bool isMoving)				{ _isMoving = isMoving; }
@@ -62,8 +58,6 @@ public:
 	void SetIsAttack(bool isAttack)				{ _isAttack = isAttack; }
 	void SetIsGuard(bool isGuard)				{ _isGuard = isGuard; }
 	void SetIsDead(bool isDead)					{ _isDead = isDead; }
-	void SetSustainedDamage(int damage)			{ _sustainedDamage = damage; }
-	void SetKnockbackDamage(int damage)			{ _knockbackDamage = damage; }
 #pragma endregion
 private:
 	StateMachine<PlayerStateMachine> _stateMachine;
@@ -80,9 +74,6 @@ private:
 	bool _isAttack		= false;
 	bool _isGuard		= false;
 	bool _isDead		= false;
-	// 受けたダメージダメージ
-	int _sustainedDamage = 0;
-	int _knockbackDamage = 5;
 #pragma endregion
 
 };
@@ -188,7 +179,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 class PlayerHitKnockDownState final : public HierarchicalStateBase<PlayerStateMachine>
 {
@@ -199,7 +190,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 class PlayerGuardHitState final : public HierarchicalStateBase<PlayerStateMachine>
 {
@@ -210,7 +201,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 class PlayerGuardBreakState final : public HierarchicalStateBase<PlayerStateMachine>
 {
@@ -221,7 +212,7 @@ public:
 	const char* GetName() const override;
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 #pragma endregion
 

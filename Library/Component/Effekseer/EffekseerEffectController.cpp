@@ -19,7 +19,7 @@ void EffekseerEffectController::Start()
     Effekseer::ConvertUtf8ToUtf16(utf16Filename, 256, _effectFileName.c_str());
 
     //Effekseer::Managerを取得
-    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager()->GetEffekseerManager();
+    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 
     //Effekseerエフェクトを読み込み
     effekseerEffect = Effekseer::Effect::Create(effekseerManager, (EFK_CHAR*)utf16Filename);
@@ -27,7 +27,7 @@ void EffekseerEffectController::Start()
 //再生
 Effekseer::Handle EffekseerEffectController::Play(const Vector3& position, float scale)
 {
-    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager()->GetEffekseerManager();
+    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 
     Effekseer::Handle handle = effekseerManager->Play(effekseerEffect, position.x, position.y, position.z);
 
@@ -37,27 +37,27 @@ Effekseer::Handle EffekseerEffectController::Play(const Vector3& position, float
 //停止
 void EffekseerEffectController::Stop(Effekseer::Handle handle)
 {
-    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager()->GetEffekseerManager();
+    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
     effekseerManager->StopEffect(handle);
 }
 //座標設定
 void EffekseerEffectController::SetPosition(Effekseer::Handle handle, const Vector3& position)
 {
-    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager()->GetEffekseerManager();
+    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 
     effekseerManager->SetLocation(handle, position.x, position.y, position.z);
 }
 //スケール設定
 void EffekseerEffectController::SetScale(Effekseer::Handle handle, const Vector3& scale)
 {
-    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager()->GetEffekseerManager();
+    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 
     effekseerManager->SetScale(handle, scale.x, scale.y, scale.z);
 }
 // 角度設定
 void EffekseerEffectController::SetAngle(Effekseer::Handle handle, const Vector3& angle)
 {
-    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager()->GetEffekseerManager();
+    Effekseer::ManagerRef effekseerManager = GetActor()->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 
     effekseerManager->SetRotation(handle, angle.x, angle.y, angle.z);
 }

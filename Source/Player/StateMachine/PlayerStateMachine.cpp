@@ -52,25 +52,6 @@ void PlayerStateMachine::Execute(float elapsedTime)
         }
     }
 
-    // 被弾処理
-    if (GetSustainedDamage() > 0)
-    {
-        if (GetSustainedDamage() >= GetKnockbackDamage())
-        {
-            if (IsGuard())
-                _stateMachine.ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::GuardBreak));
-            else
-                _stateMachine.ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::HitKnockDown));
-        }
-        else
-        {
-            if (IsGuard())
-                _stateMachine.ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::GuardHit));
-            else
-                _stateMachine.ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Hit));
-        }
-    }
-
     // 死亡処理
 	if (IsDead() && _stateMachine.GetStateName() != Network::GetPlayerMainStateName(Network::PlayerMainStates::Death))
 	{
@@ -715,6 +696,13 @@ void PlayerHitState::OnEnter()
 	owner->GetAnimator()->SetIsUseRootMotion(true);
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     owner->GetAnimator()->PlayAnimation(HitAnimationNames[std::rand() % _countof(HitAnimationNames)], false, 0.2f);
+
+    // 被弾モーション中は押し出されないようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(false);
+	}
 }
 
 void PlayerHitState::OnExecute(float elapsedTime)
@@ -722,6 +710,16 @@ void PlayerHitState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
         owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+}
+
+void PlayerHitState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
 }
 
 const char* PlayerHitKnockDownState::GetName() const
@@ -735,6 +733,13 @@ void PlayerHitKnockDownState::OnEnter()
     owner->GetAnimator()->SetIsUseRootMotion(true);
     owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     owner->GetAnimator()->PlayAnimation("Hit_knockdown", false, 0.2f);
+
+    // 被弾モーション中は押し出されないようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(false);
+    }
 }
 
 void PlayerHitKnockDownState::OnExecute(float elapsedTime)
@@ -742,6 +747,16 @@ void PlayerHitKnockDownState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
         owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+}
+
+void PlayerHitKnockDownState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
 }
 
 const char* PlayerGuardHitState::GetName() const
@@ -762,6 +777,13 @@ void PlayerGuardHitState::OnEnter()
     owner->GetAnimator()->SetIsUseRootMotion(true);
     owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     owner->GetAnimator()->PlayAnimation(GuardHitAnimationNames[std::rand() % _countof(GuardHitAnimationNames)], false, 0.2f);
+
+    // 被弾モーション中は押し出されないようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(false);
+    }
 }
 
 void PlayerGuardHitState::OnExecute(float elapsedTime)
@@ -769,6 +791,16 @@ void PlayerGuardHitState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
         owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+}
+
+void PlayerGuardHitState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
 }
 
 const char* PlayerGuardBreakState::GetName() const
@@ -782,6 +814,13 @@ void PlayerGuardBreakState::OnEnter()
     owner->GetAnimator()->SetIsUseRootMotion(true);
     owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     owner->GetAnimator()->PlayAnimation("Guard_Break", false, 0.2f);
+
+    // 被弾モーション中は押し出されないようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(false);
+    }
 }
 
 void PlayerGuardBreakState::OnExecute(float elapsedTime)
@@ -789,6 +828,16 @@ void PlayerGuardBreakState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!owner->GetAnimator()->IsPlayAnimation())
         owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+}
+
+void PlayerGuardBreakState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
 }
 
 #pragma endregion

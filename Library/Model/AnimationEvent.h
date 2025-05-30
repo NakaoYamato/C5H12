@@ -6,6 +6,7 @@
 
 #include "../../Library/Math/Vector.h"
 #include "Model.h"
+#include "ModelCollision.h"
 
 class AnimationEvent
 {
@@ -69,14 +70,12 @@ public:
 	/// </summary>
 	/// <param name="modelResource"></param>
 	void Load(std::weak_ptr<Model> model);
-
 	/// <summary>
 	/// デバッグ表示
 	/// </summary>
 	/// <param name="animName"></param>
 	/// <param name="animElapsedTime"></param>
 	void DebugRender(const std::string& animName, float animElapsedTime);
-
 	/// <summary>
 	/// GUI描画
 	/// </summary>
@@ -89,7 +88,6 @@ public:
 	/// </summary>
 	/// <param name="canEdit">編集可能か</param>
 	void DrawMassageListGui(bool canEdit = true);
-
 #pragma region ファイル操作
 	/// <summary>
 	/// データ書き出し

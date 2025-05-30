@@ -23,9 +23,6 @@ void PlayerController::Update(float elapsedTime)
 {
 	// 行動処理
     _stateMachine->Execute(elapsedTime);
-
-	// 受けたダメージを初期化
-	_stateMachine->SetSustainedDamage(0);
 }
 
 // 3D描画後の描画処理
@@ -43,14 +40,6 @@ void PlayerController::DelayedRender(const RenderContext& rc)
 // GUI描画
 void PlayerController::DrawGui()
 {
-	if (ImGui::Button(u8"ダメージを受ける"))
-	{
-		_stateMachine->SetSustainedDamage(1);
-	}
-	if (ImGui::Button(u8"大ダメージを受ける"))
-	{
-		_stateMachine->SetSustainedDamage(_stateMachine->GetKnockbackDamage());
-	}
 	if (ImGui::Button(u8"死亡"))
 	{
 		_stateMachine->SetIsDead(true);

@@ -107,7 +107,7 @@ public:
 	// 当たり判定管理者取得
 	CollisionManager& GetCollisionManager() { return _collisionManager; }
 	// Effekseerエフェクトマネージャー取得
-	EffekseerEffectManager* GetEffekseerEffectManager() { return _effekseerEffectManager.get(); }
+	EffekseerEffectManager& GetEffekseerEffectManager() { return _effekseerEffectManager; }
 	// RenderContext取得
 	RenderContext& GetRenderContext() {	return _renderContext; }
 	// メッシュレンダラー取得
@@ -141,7 +141,7 @@ private:
 
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
-	std::unique_ptr<EffekseerEffectManager>			_effekseerEffectManager;
+	EffekseerEffectManager			_effekseerEffectManager;
 
 	bool							_ready = false;
 };

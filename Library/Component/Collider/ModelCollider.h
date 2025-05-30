@@ -18,6 +18,9 @@ public:
 	void DebugRender(const RenderContext& rc) override;
 	// GUI•`‰æ
 	void DrawGui() override;
+
+	// ƒ‚ƒfƒ‹“–‚½‚è”»’èî•ñæ“¾
+	const ModelCollision& GetModelCollision() const { return _modelCollision; }
 private:
 	// ƒ‚ƒfƒ‹“–‚½‚è”»’èî•ñ
 	ModelCollision _modelCollision;

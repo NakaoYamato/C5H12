@@ -55,6 +55,7 @@ public:
     bool IsUseGravity() const { return _useGravity; }
 	bool IsRotateToDirection() const { return _rotateToDirection; }
 	bool IsRotateToDirectionByRootMotion() const { return _rotateToDirectionByRootMotion; }
+	bool IsPushable() const { return _isPushable; }
 
     void SetRadius(float radius) { _radius = radius; }
     void SetSkinWidth(float skinWidth) { _skinWidth = skinWidth; }
@@ -70,6 +71,7 @@ public:
     void SetUseGravity(bool useGravity) { _useGravity = useGravity; }
 	void SetRotateToDirection(bool rotateToDirection) { _rotateToDirection = rotateToDirection; }
 	void SetRotateToDirectionByRootMotion(bool rotateToDirection) { _rotateToDirectionByRootMotion = rotateToDirection; }
+	void SetIsPushable(bool isContact) { _isPushable = isContact; }
 #pragma endregion
 public:
     /// <summary>
@@ -147,5 +149,7 @@ private:
 #pragma region è’ìÀä÷åW
     // âüÇµèoÇµó 
     Vector3 _pushOut = {};
+    // è’ìÀèàóùÇÇ∑ÇÈÇ©
+	bool _isPushable = true;
 #pragma endregion
 };

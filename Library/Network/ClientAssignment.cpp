@@ -252,6 +252,18 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_enemyMoveCallback(enemyMove);
 	}
 	break;
+	case Network::DataTag::EnemyApplayDamage:
+	{
+		Network::EnemyApplayDamage enemyApplayDamage;
+		if (!buffer.Read(&enemyApplayDamage, payloadLen))
+		{
+			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemyApplayDamage");
+			return;
+		}
+		if (self->_enemyApplayDamageCallback)
+			self->_enemyApplayDamageCallback(enemyApplayDamage);
+	}
+	break;
 	}
 }
 #pragma endregion

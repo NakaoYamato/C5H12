@@ -58,32 +58,8 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 // 遅延更新処理
 void NetworkMediator::OnLateUpdate(float elapsedTime)
 {
-    // プレイヤーの同期処理
-    _syncTimer += elapsedTime;
-    if (_syncTimer >= _syncTime && _players[myPlayerId].lock())
-    {
-        //auto myPlayer = _players[myPlayerId].lock();
-        //// プレイヤーの同期
-        //Network::AllPlayerSync sync{};
-        //// players[0]にデータを入れる
-        //sync.players[0].id = myPlayerId;
-        //sync.players[0].position = myPlayer->GetTransform().GetPosition();
-        //sync.players[0].angleY = myPlayer->GetTransform().GetRotation().y;
-        //auto playerController = myPlayer->GetPlayerController();
-        //if (playerController != nullptr)
-        //{
-        //    auto stateMachine = playerController->GetPlayerStateMachine();
-        //    if (stateMachine != nullptr)
-        //    {
-        //        sync.players[0].state = GetPlayerMainStateFromName(stateMachine->GetStateName());
-        //        sync.players[0].subState = GetPlayerSubStateFromName(stateMachine->GetSubStateName());
-        //    }
-        //}
-        //// サーバーに送信
-        //_client->WriteRecord(Network::DataTag::AllSync, &sync, sizeof(sync));
-
-        _syncTimer = 0.0f;
-    }
+    /// 敵のダメージ送信
+    SendEnemyDamage();
 }
 
 // 固定間隔更新処理
@@ -199,6 +175,32 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
     return std::weak_ptr<EnemyActor>();
 }
 
+/// 敵のダメージ送信
+void NetworkMediator::SendEnemyDamage()
+{
+	// スレッドセーフ
+	std::lock_guard<std::mutex> lock(_mutex);
+	// 敵のダメージを送信
+	for (auto& [uniqueID, enemyData] : _enemies)
+	{
+		auto enemyActor = enemyData.enemyActor.lock();
+		if (enemyActor)
+		{
+			auto damageable = enemyActor->GetDamageable().lock();
+			if (damageable && damageable->GetLastDamage() > 0.0f)
+			{
+				Network::EnemyApplayDamage enemyApplayDamage{};
+				enemyApplayDamage.playerUniqueID = myPlayerId; // ダメージを与えたプレイヤーのユニークID
+                enemyApplayDamage.uniqueID = uniqueID;
+                enemyApplayDamage.damage = damageable->GetLastDamage();
+                enemyApplayDamage.hitPosition = damageable->GetHitPosition();
+				// サーバーに送信
+				_client->WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
+			}
+		}
+	}
+}
+
 /// リーダーの再設定
 void NetworkMediator::ResetLeader()
 {
@@ -308,6 +310,15 @@ void NetworkMediator::SetClientCollback()
 			_logs.push_back("EnemyMove" + std::to_string(enemyMove.uniqueID));
 
 			_enemyMoves.push_back(enemyMove);
+		});
+	_client->SetEnemyApplayDamageCallback(
+		[this](const Network::EnemyApplayDamage& enemyApplayDamage)
+		{
+			// スレッドセーフ
+			std::lock_guard<std::mutex> lock(_mutex);
+			_logs.push_back("EnemyApplayDamage" + std::to_string(enemyApplayDamage.uniqueID));
+
+            _enemyApplayDamages.push_back(enemyApplayDamage);
 		});
 }
 
@@ -443,6 +454,29 @@ void NetworkMediator::ProcessNetworkData()
 	}
 	_enemyMoves.clear();
 	//===============================================================================
+
+	//===============================================================================
+	// 敵のダメージデータの処理
+	for (auto& enemyApplayDamage : _enemyApplayDamages)
+	{
+		// 自身が送信したダメージならスキップ
+		if (enemyApplayDamage.playerUniqueID == myPlayerId)
+			continue;
+
+		auto& enemyData = _enemies[enemyApplayDamage.uniqueID];
+		auto enemyActor = enemyData.enemyActor.lock();
+		if (enemyActor)
+		{
+			auto damageable = enemyActor->GetDamageable().lock();
+			if (damageable)
+			{
+				damageable->SetHelth(damageable->GetHealth() - enemyApplayDamage.damage);
+				damageable->SetHitPosition(enemyApplayDamage.hitPosition);
+			}
+		}
+	}
+	_enemyApplayDamages.clear();
+    //===============================================================================
 }
 
 /// ネットワークGUIの表示
@@ -456,8 +490,6 @@ void NetworkMediator::DrawNetworkGui()
     {
         if (ImGui::BeginTabItem(u8"サーバー"))
         {
-            ImGui::DragFloat(u8"データ同期間隔(秒)", &_syncTime, 0.001f, 0.001f, 2.0f);
-
             // サーバーGUI表示
             _client->DrawGui();
 

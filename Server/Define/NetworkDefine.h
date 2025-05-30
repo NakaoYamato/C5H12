@@ -44,6 +44,7 @@ namespace Network
 		EnemyCreate,
 		EnemySync,
 		EnemyMove,
+		EnemyApplayDamage,
 	};
 
 	struct Player
@@ -153,6 +154,14 @@ namespace Network
 		DirectX::XMFLOAT3 target = {};
 		char mainState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
 		char subState[NETWORK_MAX_STATE_NAME_SIZE] = { "\0" };
+	};
+
+	struct EnemyApplayDamage
+	{
+		int playerUniqueID = -1;
+		int uniqueID = -1;
+		float damage = 0.0f;
+		DirectX::XMFLOAT3 hitPosition = {};
 	};
 #pragma endregion
 

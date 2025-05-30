@@ -114,6 +114,14 @@ public:
 	{
 		_enemyMoveCallback = callback;
 	}
+	/// <summary>
+	/// EnemyApplayDamageを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+	void SetEnemyApplayDamageCallback(std::function<void(const Network::EnemyApplayDamage&)> callback)
+	{
+		_enemyApplayDamageCallback = callback;
+	}
 #pragma endregion
 
 private:
@@ -187,6 +195,7 @@ private:
 	std::function<void(const Network::EnemyCreate&)> _enemyCreateCallback;
 	std::function<void(const Network::EnemySync&)> _enemySyncCallback;
 	std::function<void(const Network::EnemyMove&)> _enemyMoveCallback;
+	std::function<void(const Network::EnemyApplayDamage&)> _enemyApplayDamageCallback;
 #pragma endregion
 
 	// デバッグ用

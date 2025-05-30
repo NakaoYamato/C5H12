@@ -16,8 +16,6 @@ public:
 	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
-#pragma region アクセサ
-	WyvernStateMachine* GetState() const { return _stateMachine.get(); }
 
 #pragma region ネットワーク用
 	// ステート変更
@@ -27,6 +25,9 @@ public:
 	// サブステート名取得
 	virtual const char* GetSubStateName() override;
 #pragma endregion
+
+#pragma region アクセサ
+	WyvernStateMachine* GetState() const { return _stateMachine.get(); }
 
 	float GetNearAttackRange() const { return _nearAttackRange; }
 	float GetNearAttackRadian() const { return _nearAttackRadian; }

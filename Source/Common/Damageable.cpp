@@ -10,6 +10,8 @@ void Damageable::Update(float elapsedTime)
 {
 	if (_invisibleTimer > 0.0f)
 		_invisibleTimer -= elapsedTime;
+	// 前フレームに受けたダメージ量をリセット
+	_lastDamage = 0.0f;
 }
 // HP初期化
 void Damageable::ResetHealth(float maxHealth)
@@ -32,5 +34,7 @@ bool Damageable::AddDamage(float damage, Vector3 hitPosition)
 	// ダメージを受けたときのコールバック関数呼び出し
 	if (_onDamageCallback)
 		_onDamageCallback(damage, hitPosition);
+	// 受けたダメージ量を記録
+	_lastDamage += damage;
 	return true;
 }

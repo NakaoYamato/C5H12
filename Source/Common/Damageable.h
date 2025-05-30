@@ -32,6 +32,8 @@ public:
 	bool IsDead() const { return _health <= 0; }
 	// 被弾位置取得
 	const Vector3& GetHitPosition() const { return _hitPosition; }
+	// 前フレームに受けたダメージ量
+	float GetLastDamage() const { return _lastDamage; }
 
 	// 無敵状態にする
 	void SetInvisible(float time) { _invisibleTimer = time; }
@@ -39,6 +41,8 @@ public:
 	void SetHelth(float health) { _health = health; }
 	// 最大HPを設定
 	void SetMaxHealth(float maxHealth) { _maxHealth = maxHealth; }
+	// 被弾位置を設定
+	void SetHitPosition(const Vector3& position) { _hitPosition = position; }
 	// ダメージを受ける判定のコールバック関数を設定
 	void SetTakeableDamageCallback(std::function<bool(float, Vector3)> callback) { _takeableDamageCallback = callback; }
 	// ダメージを受けたときのコールバック関数を設定
@@ -48,9 +52,14 @@ public:
 private:
 	// 無敵状態タイマー
 	float _invisibleTimer = 0.0f; 
+	// 現在のHP
 	float _health = 100.0f;
+	// 最大HP
 	float _maxHealth = 100.0f;
+	// 被弾位置
 	Vector3 _hitPosition = Vector3::Zero;
+	// 前フレームに受けたダメージ量
+	float _lastDamage = 0.0f;
 
 	// ダメージを受ける判定のコールバック関数
 	std::function<bool(float, Vector3)> _takeableDamageCallback;

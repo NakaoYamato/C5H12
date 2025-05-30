@@ -65,6 +65,10 @@ private:
         float angleY,
         float health);
     /// <summary>
+	/// 敵のダメージ送信
+    /// </summary>
+    void SendEnemyDamage();
+    /// <summary>
     /// リーダーの再設定
     /// </summary>
     void ResetLeader();
@@ -126,11 +130,8 @@ private:
     std::vector<Network::EnemyCreate> _enemyCreates;
 	std::vector<Network::EnemySync> _enemySyncs;
 	std::vector<Network::EnemyMove> _enemyMoves;
+	std::vector<Network::EnemyApplayDamage> _enemyApplayDamages;
 #pragma endregion
-
-    // データ同期間隔(秒)
-    float _syncTime = 1.0f;
-    float _syncTimer = 0.0f;
 
     std::string _message;
     std::vector<std::string> _logs;

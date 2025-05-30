@@ -334,6 +334,22 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		strcpy_s(enemy.subState, enemyMove.subState);
 	}
 	break;
+	case DataTag::EnemyApplayDamage:
+	{
+		// 敵にダメージを適用する場合の処理
+		EnemyApplayDamage enemyDamage;
+		// バッファデータからpayLoadStrにデータに読み込み
+		if (!buffer.Read(&enemyDamage, payloadLen)) {
+			std::cout << "Read Error" << std::endl;
+			return;
+		}
+		std::cout << "RECV EnemyApplayDamage" << std::endl;
+
+		// 敵情報を更新
+		auto& enemy = self->enemiesMap[enemyDamage.uniqueID];
+		enemy.health -= enemyDamage.damage; // ダメージを適用
+	}
+	break;
 	}
 
 	// 受信データを全クライアントに送信

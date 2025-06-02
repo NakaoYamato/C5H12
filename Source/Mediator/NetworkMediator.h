@@ -28,11 +28,11 @@ public:
 public:
     ~NetworkMediator() override;
 
-    // 開始時処理
+    // 生成時処理
     void OnCreate() override;
     // 開始時処理
     void OnStart() override;
-    /// 更新前処理
+    // 更新前処理
     void OnPreUpdate(float elapsedTime) override;
     // 遅延更新処理
 	void OnLateUpdate(float elapsedTime) override;

@@ -11,6 +11,8 @@
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
+#include "../../Mediator/CanvasMediator.h"
+
 void ScenePlayerDebug::Initialize()
 {
     Scene::Initialize();
@@ -23,6 +25,9 @@ void ScenePlayerDebug::Initialize()
 
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
+    {
+        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
+    }
     {
         auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
     }

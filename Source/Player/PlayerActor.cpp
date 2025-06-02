@@ -6,6 +6,7 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 #include "PlayerInput.h"
+#include "UI/PlayerHealthUIController.h"
 
 #include "../../Source/Camera/PlayerCameraController.h"
 
@@ -38,6 +39,8 @@ void PlayerActor::OnCreate()
 		// 攻撃力の倍率を0にしてダメージを与えられないようにする
 		_playerController.lock()->SetATKFactor(0.0f);
 	}
+	// HPUIコントローラー追加
+	auto hpUIController = this->AddComponent<PlayerHealthUIController>(_isUserControlled, _damageable.lock());
 
 	// コライダー設定
     auto collider		= this->AddCollider<CapsuleCollider>();

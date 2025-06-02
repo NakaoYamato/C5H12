@@ -226,6 +226,21 @@ protected:
 	/// </summary>
 	virtual void OnFixedUpdate() {};
 	/// <summary>
+	/// 描画時処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void OnRender(const RenderContext& rc) {};
+	/// <summary>
+	/// デバッグ表示時処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void OnDebugRender(const RenderContext& rc) {};
+	/// <summary>
+	/// 3D描画後の描画時処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void OnDelayedRender(const RenderContext& rc) {};
+	/// <summary>
 	/// トランスフォーム更新
 	/// </summary>
 	virtual void UpdateTransform();

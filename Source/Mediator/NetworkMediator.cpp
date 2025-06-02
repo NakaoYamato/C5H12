@@ -14,6 +14,7 @@ NetworkMediator::~NetworkMediator()
     }
 }
 
+// 生成時処理
 void NetworkMediator::OnCreate()
 {
     // サーバー作成

@@ -133,6 +133,9 @@ void Actor::Render(const RenderContext& rc)
 	{
 		collider->Render(rc);
 	}
+
+	// 描画時処理
+	OnRender(rc);
 }
 
 // デバッグ表示
@@ -151,6 +154,9 @@ void Actor::DebugRender(const RenderContext& rc)
 	{
 		collider->DebugRender(rc);
 	}
+
+	// デバッグ表示時処理
+	OnDebugRender(rc);
 }
 
 // 影描画
@@ -175,6 +181,9 @@ void Actor::DelayedRender(const RenderContext& rc)
 	{
 		component->DelayedRender(rc);
 	}
+
+	// 3D描画後の描画時処理
+	OnDelayedRender(rc);
 }
 
 // Gui描画

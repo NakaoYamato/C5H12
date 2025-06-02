@@ -18,6 +18,7 @@ enum class ActorTag
 	Stage,
 	Player,
 	Enemy,
+	UI,
 
 	ActorTagMax
 };
@@ -52,14 +53,12 @@ public:
 	/// <param name="tag">検索するタグ</param>
 	/// <returns>そのタグに含まれる全要素</returns>
 	ActorMap& FindByTag(ActorTag tag);
-
 	/// <summary>
 	/// 指定要素の取得(startActorsから検索)
 	/// </summary>
 	/// <param name="tag">検索するタグ</param>
 	/// <returns>そのタグに含まれる全要素</returns>
 	ActorMap& FindByTagInStartActors(ActorTag tag);
-
 	/// <summary>
 	/// 指定要素の取得
 	/// </summary>
@@ -67,7 +66,6 @@ public:
 	/// <param name="tag">検索する際の補助、GameObjectTagMax指定で全タグから検索</param>
 	/// <returns>成功でポインタ、失敗でnullptr</returns>
 	std::shared_ptr<Actor> FindByName(const std::string& name, ActorTag tag = ActorTag::ActorTagMax);
-
 	/// <summary>
 	/// 指定要素を開始アクターから取得
 	/// </summary>
@@ -75,6 +73,33 @@ public:
 	/// <param name="tag">検索する際の補助、GameObjectTagMax指定で全タグから検索</param>
 	/// <returns>成功でポインタ、失敗でnullptr</returns>
 	std::shared_ptr<Actor> FindByNameFromStartActor(const std::string& name, ActorTag tag = ActorTag::ActorTagMax);
+	/// <summary>
+	/// 指定クラスのアクター取得
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <returns></returns>
+	template<class T>
+	std::shared_ptr<T> FindByClass(ActorTag tag)
+	{
+		auto& actors = FindByTag(tag);
+		for (auto& actor : actors)
+		{
+			// T型にキャストして返す
+			std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(actor);
+			if (casted)
+				return casted;
+		}
+		// スタートアクターからも検索
+		auto& startActors = FindByTagInStartActors(tag);
+		for (auto& actor : startActors)
+		{
+			// T型にキャストして返す
+			std::shared_ptr<T> casted = std::dynamic_pointer_cast<T>(actor);
+			if (casted)
+				return casted;
+		}
+		return nullptr;
+	}
 #pragma endregion
 
 	/// <summary>

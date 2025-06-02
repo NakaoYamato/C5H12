@@ -247,6 +247,7 @@
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Mediator\CanvasMediator.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
+    <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp" />
     <ClCompile Include="Source\Stage\StageActor.cpp" />
@@ -386,6 +387,7 @@
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Mediator\CanvasMediator.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
+    <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h" />
     <ClInclude Include="Source\Stage\StageActor.h" />

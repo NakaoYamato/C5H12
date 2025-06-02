@@ -17,6 +17,14 @@
 class NetworkMediator : public Actor
 {
 public:
+    enum class State
+    {
+        Awaiting,
+        Connecting,
+
+		StateMax,
+    };
+
     struct EnemyData
     {
         // 管理しているプレイヤーのID
@@ -106,7 +114,14 @@ private:
 #pragma endregion
 
 
-private:
+private:	
+    // ネットワークの状態
+	State _state = State::Awaiting;
+	// 接続先のIPアドレス
+    std::string _ipAddress = "127.0.0.1";
+    // 接続開始フラグ
+	bool _isConnecting = false;
+
     // 各プレイヤー情報
     // key : ネットワークID
     // value : プレイヤーのポインタ

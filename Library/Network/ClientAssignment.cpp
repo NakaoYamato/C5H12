@@ -227,6 +227,7 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		if (self->_playerApplyDamageCallback)
 			self->_playerApplyDamageCallback(playerApplyDamage);
 	}
+	break;
 	case Network::DataTag::EnemyCreate:
 	{
 		Network::EnemyCreate enemyCreate;

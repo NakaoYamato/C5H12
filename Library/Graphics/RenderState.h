@@ -24,6 +24,8 @@ enum class DepthState
 	TestOnly,
 	WriteOnly,
 	NoTestNoWrite,
+	SpriteMask,	// スプライトマスク用
+	SpriteApplyMask,	// スプライトマスク適用用
 
 	EnumCount
 };

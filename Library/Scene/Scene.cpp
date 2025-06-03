@@ -281,7 +281,7 @@ void Scene::Render()
 
     // レンダーステート設定
     dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
     dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
     // 3D描画後の描画処理

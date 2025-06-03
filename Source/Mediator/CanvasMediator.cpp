@@ -60,77 +60,87 @@ void UIController::DrawGui()
 		"RIGHT_CENTER",
 		"RIGHT_DOWN"
 	};
-	if (ImGui::Combo(u8"中心位置", reinterpret_cast<int*>(&_centerAlignment), alignmentNames, IM_ARRAYSIZE(alignmentNames)))
-		RecalcCenter(_centerAlignment);
 
-	ImGui::DragFloat2(u8"位置",		&_position.x, 0.1f, -1000.0f, 1000.0f);
-	ImGui::DragFloat2(u8"スケール",	&_scale.x, 0.01f, 0.01f, 1000.0f);
-	ImGui::DragFloat2(u8"画像位置",	&_texPos.x, 0.01f, 0.01f, 1000.0f);
-	ImGui::DragFloat2(u8"画像サイズ",	&_texSize.x, 0.01f, 0.01f, 1000.0f);
-	ImGui::DragFloat2(u8"中心",		&_center.x, 0.01f, -1000.0f, 1000.0f);
-	ImGui::DragFloat(u8"角度",		&_angle, 0.1f, -360.0f, 360.0f);
-	ImGui::ColorEdit4(u8"色",		&_color.x);
-}
-
-// 画像読み込み
-void UIController::LoadTexture(const wchar_t* filename, CenterAlignment alignment)
-{
-	_sprite = std::make_unique<Sprite>(Graphics::Instance().GetDevice(), filename);
-	RecalcCenter(alignment);
-}
-
-// 中心位置を再計算
-void UIController::RecalcCenter(CenterAlignment alignment)
-{
-	switch (alignment)
+	for (auto& [name, spriteData] : _spriteDatas)
 	{
-	case LEFT_UP:
-		_center = { 0.0f,0.0f };
-		break;
-	case LEFT_CENTER:
-		_center = { 0.0f,_texSize.y / 2.0f };
-		break;
-	case LEFT_DOWN:
-		_center = { 0.0f,_texSize.y };
-		break;
-	case CENTER_UP:
-		_center = { _texSize.x / 2.0f,0.0f };
-		break;
-	case CENTER_CENTER:
-		_center = { _texSize.x / 2.0f,_texSize.y / 2.0f };
-		break;
-	case CENTER_DOWN:
-		_center = { _texSize.x / 2.0f,_texSize.y };
-		break;
-	case RIGHT_UP:
-		_center = { _texSize.x,0.0f };
-		break;
-	case RIGHT_CENTER:
-		_center = { _texSize.x,_texSize.y / 2.0f };
-		break;
-	case RIGHT_DOWN:
-		_center = { _texSize.x,_texSize.y };
-		break;
-	default:
-		_center = { 0.0f,0.0f };
-		break;
+		if (ImGui::TreeNode(name.c_str()))
+		{
+			if (ImGui::Combo(u8"中心位置", reinterpret_cast<int*>(&spriteData.centerAlignment), alignmentNames, IM_ARRAYSIZE(alignmentNames)))
+				spriteData.RecalcCenter(spriteData.centerAlignment);
+
+			ImGui::DragFloat2(u8"位置",			&spriteData.position.x, 0.1f, -1000.0f, 1000.0f);
+			ImGui::DragFloat2(u8"スケール",		&spriteData.scale.x, 0.01f, 0.01f, 1000.0f);
+			ImGui::DragFloat2(u8"画像位置",		&spriteData.texPos.x, 0.01f, 0.01f, 1000.0f);
+			ImGui::DragFloat2(u8"画像サイズ",	&spriteData.texSize.x, 0.01f, 0.01f, 1000.0f);
+			ImGui::DragFloat2(u8"中心",			&spriteData.center.x, 0.01f, -1000.0f, 1000.0f);
+			ImGui::DragFloat(u8"角度",			&spriteData.angle, 0.1f, -360.0f, 360.0f);
+			ImGui::ColorEdit4(u8"色",			&spriteData.color.x);
+
+			ImGui::TreePop();
+		}
 	}
 }
 
+// 画像読み込み
+void UIController::LoadTexture(const std::string& spriteName, const wchar_t* filename, CenterAlignment alignment)
+{
+	_spriteDatas[spriteName].sprite = std::make_unique<Sprite>(Graphics::Instance().GetDevice(), filename);
+	_spriteDatas[spriteName].RecalcCenter(alignment);
+}
+
 void UIController::SpriteRender(
+	const std::string& spriteName,
 	const RenderContext& rc, 
 	const Vector2& offset,
 	const Vector2& offsetScale)
 {
-	if (_sprite)
+	if (_spriteDatas[spriteName].sprite)
 	{
-		_sprite->Render(rc.deviceContext,
-			_position + offset,
-			{ _scale.x * offsetScale.x, _scale.y * offsetScale.y },
-			_texPos,
-			_texSize,
-			_center,
-			DirectX::XMConvertToRadians(_angle),
-			_color);
+		_spriteDatas[spriteName].sprite->Render(rc.deviceContext,
+			_spriteDatas[spriteName].position + offset,
+			{ _spriteDatas[spriteName].scale.x * offsetScale.x, _spriteDatas[spriteName].scale.y * offsetScale.y },
+			_spriteDatas[spriteName].texPos,
+			_spriteDatas[spriteName].texSize,
+			_spriteDatas[spriteName].center,
+			DirectX::XMConvertToRadians(_spriteDatas[spriteName].angle),
+			_spriteDatas[spriteName].color);
+	}
+}
+
+// 中心位置を再計算
+void UIController::SpriteData::RecalcCenter(CenterAlignment alignment)
+{
+	switch (alignment)
+	{
+	case LEFT_UP:
+		center = { 0.0f,0.0f };
+		break;
+	case LEFT_CENTER:
+		center = { 0.0f,texSize.y / 2.0f };
+		break;
+	case LEFT_DOWN:
+		center = { 0.0f,texSize.y };
+		break;
+	case CENTER_UP:
+		center = { texSize.x / 2.0f,0.0f };
+		break;
+	case CENTER_CENTER:
+		center = { texSize.x / 2.0f,texSize.y / 2.0f };
+		break;
+	case CENTER_DOWN:
+		center = { texSize.x / 2.0f,texSize.y };
+		break;
+	case RIGHT_UP:
+		center = { texSize.x,0.0f };
+		break;
+	case RIGHT_CENTER:
+		center = { texSize.x,texSize.y / 2.0f };
+		break;
+	case RIGHT_DOWN:
+		center = { texSize.x,texSize.y };
+		break;
+	default:
+		center = { 0.0f,0.0f };
+		break;
 	}
 }

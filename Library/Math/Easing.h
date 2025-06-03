@@ -3,7 +3,7 @@
 #include <cmath>
 
 // •âŠ®ˆ—
-inline float EasingLerp(float src, float dst, float t, float(*Easing)(float))
+inline float EasingLerp(float src, float dst, float t, float(*Easing)(float) = nullptr)
 {
     float easingFactor = Easing != nullptr ?
         Easing(t) :

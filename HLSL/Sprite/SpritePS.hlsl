@@ -7,7 +7,9 @@ SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 float4 main(VsOut pin) : SV_TARGET
 {
     float4 color = colorMap.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord) * pin.color;
-    float alpha = color.a;
+    if (color.a < 0.01f)
+        discard;
 
-    return float4(color.rgb, alpha);
+    return color;
+
 }

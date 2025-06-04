@@ -113,7 +113,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);.\External\mrs_2.0.0\mrs\library\mrs\windows\enet_uv_openssl_1.1.1\2017\MD\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;xaudio2.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -139,7 +139,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);.\External\mrs_2.0.0\mrs\library\mrs\windows\enet_uv_openssl_1.1.1\2017\MD\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;xaudio2.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -241,6 +241,8 @@
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
     <ClCompile Include="Source\Enemy\EnemyActor.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
@@ -381,6 +383,8 @@
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
     <ClInclude Include="Source\Enemy\EnemyActor.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.h" />
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.h" />
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />

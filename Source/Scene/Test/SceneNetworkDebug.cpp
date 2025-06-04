@@ -7,6 +7,7 @@
 
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/Stage/StageActor.h"
+#include "../../Library/ResourceManager/ModelResourceManager.h"
 
 #include "../../Mediator/CanvasMediator.h"
 //‰Šú‰»

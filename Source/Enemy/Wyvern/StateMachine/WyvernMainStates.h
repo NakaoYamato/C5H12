@@ -1,5 +1,6 @@
 #pragma once
 #include "WyvernStateMachine.h"
+#include "../Breath/WyvernBreathActor.h"
 
 #pragma region 待機
 class WyvernIdleState : public HierarchicalStateBase<WyvernStateMachine>
@@ -103,6 +104,10 @@ public:
 	void OnExecute(float elapsedTime) override;
 	// 終了処理
 	void OnExit() override;
+
+private:
+	std::weak_ptr<WyvernBreathActor> _fireBreathActor; // ブレスのエフェクトを表示するアクター
+	Vector3 _fireBreathOffset = Vector3(-19.0f, 100.0f, 0.0f); // ブレスの位置
 };
 #pragma endregion
 

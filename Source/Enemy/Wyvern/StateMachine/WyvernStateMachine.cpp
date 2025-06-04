@@ -34,6 +34,7 @@ WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* 
 void WyvernStateMachine::Execute(float elapsedTime)
 {
     _callCancelEvent = false;
+    _fireBreath = false;
 
     // アニメーションイベント取得
     if (GetAnimator()->IsPlayAnimation())
@@ -52,6 +53,11 @@ void WyvernStateMachine::Execute(float elapsedTime)
             {
                 _callCancelEvent = true;
             }
+            // ブレス攻撃判定
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBreath")
+			{
+				_fireBreath = true;
+			}
         }
     }
 

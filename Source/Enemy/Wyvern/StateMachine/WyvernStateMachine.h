@@ -33,6 +33,8 @@ public:
 	const char* GetSubStateName();
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
+	// ブレス攻撃イベントを取得
+	bool CallFireBreathEvent() const { return _fireBreath; }
 #pragma endregion
 
 
@@ -42,5 +44,6 @@ private:
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
 
-	bool					_callCancelEvent = false;
+	bool		_callCancelEvent = false;
+	bool		_fireBreath = false;
 };

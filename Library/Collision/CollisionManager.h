@@ -205,8 +205,4 @@ private:
     std::vector<CapsuleData> _capsuleDatas;
 
     std::mutex _mutex; // スレッドセーフ用
-
-	// 各アクターごとの前フレームでの接触情報
-	using ContactData = std::unordered_map<CollisionLayer, std::vector<std::string>>;
-	std::unordered_map<std::string, ContactData> _oldContactDatas;
 };

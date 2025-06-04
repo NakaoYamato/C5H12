@@ -44,8 +44,6 @@ public:
     void OnPreUpdate(float elapsedTime) override;
     // ’x‰„XVˆ—
 	void OnLateUpdate(float elapsedTime) override;
-    // ŒÅ’èŠÔŠuXVˆ—
-    void OnFixedUpdate() override;
     // GUI•`‰æ
     void OnDrawGui() override;
 
@@ -158,6 +156,10 @@ private:
 
     std::string _message;
     std::vector<std::string> _logs;
+
+    // î•ñ‚Ì’èŠú‘—MŠÔŠu(0.1•b‚É1‰ñ)
+	float _sendInterval = 0.1f;
+	float _sendTimer = 0.0f;
 
     // “G¶¬‚Ìƒtƒ‰ƒO
 	bool _sendEnemyCreate = false;

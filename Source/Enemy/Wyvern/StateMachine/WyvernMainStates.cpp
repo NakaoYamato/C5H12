@@ -1,6 +1,7 @@
 #include "WyvernMainStates.h"
 
 #include "../../Library/Component/Animator.h"
+#include "../../Library/Scene/Scene.h"
 #include "../WyvernEnemyController.h"
 
 #include <imgui.h>
@@ -487,7 +488,30 @@ void WyvernBreathAttackState::OnEnter()
 }
 void WyvernBreathAttackState::OnExecute(float elapsedTime)
 {
-	// TODO ブレスの生成
+	// ブレスの生成
+	if (owner->CallFireBreathEvent() && !_fireBreathActor.lock())
+	{
+		// ブレスを生成
+		_fireBreathActor = owner->GetWyvern()->GetActor()->GetScene()->RegisterActor<WyvernBreathActor>(
+			std::string(owner->GetWyvern()->GetActor()->GetName()) + "BreathEffect",
+			ActorTag::Enemy);
+		// 親を設定
+		_fireBreathActor.lock()->GetBreathController()->SetBreathActor(owner->GetWyvern()->GetActor());
+		// ブレスの位置をモデルの頭に設定
+		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		int nodeIndex = model->GetNodeIndex("Head");
+		Vector3 position = Vector3::TransformCoord(_fireBreathOffset + model->GetPoseNodes()[nodeIndex].position,
+			model->GetPoseNodes()[nodeIndex].worldTransform);
+		_fireBreathActor.lock()->GetTransform().SetPosition(position);
+		// ブレスの方向を設定
+		Vector3 direction = Vector3::TransformNormal(Vector3::Up, model->GetPoseNodes()[nodeIndex].worldTransform);
+		_fireBreathActor.lock()->GetBreathController()->SetBreathDirection(direction.Normalize());
+	}
+	// ブレスの削除
+	if (!owner->CallFireBreathEvent() && _fireBreathActor.lock())
+	{
+		_fireBreathActor.lock()->Remove();
+	}
 
 	// アニメーションが終了しているとき
 	if (!owner->GetAnimator()->IsPlayAnimation())
@@ -498,6 +522,12 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 }
 void WyvernBreathAttackState::OnExit()
 {
+	// ブレスのエフェクトを削除
+	if (_fireBreathActor.lock())
+	{
+		_fireBreathActor.lock()->Remove();
+	}
+
 	owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion

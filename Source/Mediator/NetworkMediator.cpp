@@ -84,66 +84,60 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
         SendMyPlayerDamage();
         /// 敵のダメージ送信
         SendEnemyDamage();
-        break;
-    }
-}
 
-// 固定間隔更新処理
-void NetworkMediator::OnFixedUpdate()
-{
-    // ステートによる処理分岐
-    switch (_state)
-    {
-    case NetworkMediator::State::Awaiting:
-        break;
-    case NetworkMediator::State::Connecting:
-    {
-        // プレイヤーの移動情報送信
-        auto myPlayer = _players[myPlayerId].lock();
-        if (myPlayer)
-        {
-            Network::PlayerMove playerMove{};
-            playerMove.playerUniqueID = myPlayerId;
-            playerMove.position = myPlayer->GetTransform().GetPosition();
-            auto playerController = myPlayer->GetPlayerController();
-            if (playerController)
+        // 送信タイマー更新
+		_sendTimer += elapsedTime;
+		// 一定時間ごとに送信
+        if (_sendTimer >= _sendInterval)
+		{
+			_sendTimer -= _sendInterval; // タイマーリセット
+
+            // プレイヤーの移動情報送信
+            auto myPlayer = _players[myPlayerId].lock();
+            if (myPlayer)
             {
-                auto stateMachine = playerController->GetPlayerStateMachine();
-                if (stateMachine)
+                Network::PlayerMove playerMove{};
+                playerMove.playerUniqueID = myPlayerId;
+                playerMove.position = myPlayer->GetTransform().GetPosition();
+                auto playerController = myPlayer->GetPlayerController();
+                if (playerController)
                 {
-                    playerMove.movement = stateMachine->GetMovement();
-                    playerMove.state = Network::GetPlayerMainStateFromName(stateMachine->GetStateName());
-                    playerMove.subState = Network::GetPlayerSubStateFromName(stateMachine->GetSubStateName());
+                    auto stateMachine = playerController->GetPlayerStateMachine();
+                    if (stateMachine)
+                    {
+                        playerMove.movement = stateMachine->GetMovement();
+                        playerMove.state = Network::GetPlayerMainStateFromName(stateMachine->GetStateName());
+                        playerMove.subState = Network::GetPlayerSubStateFromName(stateMachine->GetSubStateName());
+                    }
+                }
+                // サーバーに送信
+                _client->WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
+            }
+
+            // 敵の移動情報送信
+            for (auto& [uniqueID, enemyData] : _enemies)
+            {
+                // 自身が管理していない敵ならスキップ
+                if (enemyData.controllerID != myPlayerId)
+                    continue;
+
+                auto enemyActor = enemyData.enemyActor.lock();
+                auto enemyController = enemyData.enemyController.lock();
+                if (enemyActor && enemyController)
+                {
+                    Network::EnemyMove enemyMove{};
+                    enemyMove.uniqueID = uniqueID;
+                    enemyMove.position = enemyActor->GetTransform().GetPosition();
+                    enemyMove.angleY = enemyActor->GetTransform().GetRotation().y;
+                    enemyMove.target = enemyController->GetTargetPosition();
+                    strcpy_s(enemyMove.mainState, enemyController->GetStateName());
+                    strcpy_s(enemyMove.subState, enemyController->GetSubStateName());
+                    // サーバーに送信
+                    _client->WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
                 }
             }
-            // サーバーに送信
-            _client->WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
-        }
-
-        // 敵の移動情報送信
-        for (auto& [uniqueID, enemyData] : _enemies)
-        {
-            // 自身が管理していない敵ならスキップ
-            if (enemyData.controllerID != myPlayerId)
-                continue;
-
-            auto enemyActor = enemyData.enemyActor.lock();
-            auto enemyController = enemyData.enemyController.lock();
-            if (enemyActor && enemyController)
-            {
-                Network::EnemyMove enemyMove{};
-                enemyMove.uniqueID = uniqueID;
-                enemyMove.position = enemyActor->GetTransform().GetPosition();
-                enemyMove.angleY = enemyActor->GetTransform().GetRotation().y;
-                enemyMove.target = enemyController->GetTargetPosition();
-                strcpy_s(enemyMove.mainState, enemyController->GetStateName());
-                strcpy_s(enemyMove.subState, enemyController->GetSubStateName());
-                // サーバーに送信
-                _client->WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
-            }
         }
         break;
-    }
     }
 }
 
@@ -587,6 +581,11 @@ void NetworkMediator::DrawNetworkGui()
 					_isConnecting = true;
                 }
             }
+
+            ImGui::Separator();
+
+			ImGui::DragFloat(u8"送信間隔", &_sendInterval, 0.1f, 0.1f, 10.0f, u8"%.1f秒");
+            ImGui::Separator();
 
             if (ImGui::Button(u8"ワイバーン追加"))
             {

@@ -162,10 +162,26 @@ void Model::DrawGui()
     if (_debugNodeIndex != -1)
     {
         DirectX::XMFLOAT4X4 worldTransform = _poseNode[_debugNodeIndex].worldTransform;
-        worldTransform._11 = 1.0f;
-        worldTransform._22 = 1.0f;
-        worldTransform._33 = 1.0f;
-        Debug::Renderer::DrawAxis(worldTransform);
+        //worldTransform._11 = 1.0f;
+        //worldTransform._22 = 1.0f;
+        //worldTransform._33 = 1.0f;
+        //Debug::Renderer::DrawAxis(worldTransform);
+
+		Vector3 p = {
+			worldTransform._41,
+			worldTransform._42,
+			worldTransform._43
+		};
+		Vector3 x = Vector3::TransformCoord(Vector3(Vector3::Right) * 10.0f, worldTransform);
+		Vector3 y = Vector3::TransformCoord(Vector3(Vector3::Up) * 10.0f, worldTransform);
+		Vector3 z = Vector3::TransformCoord(Vector3(Vector3::Front) * 10.0f, worldTransform);
+        Debug::Renderer::AddVertex(p);
+        Debug::Renderer::AddVertex(x);
+        Debug::Renderer::AddVertex(p);
+        Debug::Renderer::AddVertex(y);
+        Debug::Renderer::AddVertex(p);
+        Debug::Renderer::AddVertex(z);
+
     }
 }
 

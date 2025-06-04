@@ -98,7 +98,7 @@ public:
 		actor->SetName(name.c_str());
 		actor->SetScene(this);
 		_actorManager.Register(actor, tag);
-		actor->Create();
+		actor->Create(tag);
 		return actor;
 	}
 

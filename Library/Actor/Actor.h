@@ -16,6 +16,21 @@ class ColliderBase;
 class Scene;
 
 /// <summary>
+/// ゲームオブジェクトのタグ
+/// </summary>
+enum class ActorTag
+{
+	DrawContextParameter,	// 描画の前準備
+	Stage,
+	Player,
+	Enemy,
+	UI,
+
+	ActorTagMax
+};
+
+
+/// <summary>
 /// ゲームオブジェクトの基底クラス
 /// </summary>
 class Actor : public std::enable_shared_from_this<Actor>
@@ -28,7 +43,7 @@ public:
 	/// <summary>
 	/// 生成処理
 	/// </summary>
-	void Create();
+	void Create(ActorTag tag);
 	/// <summary>
 	/// 削除時処理
 	/// </summary>
@@ -87,7 +102,13 @@ public:
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	void ContactEnter(CollisionData& collisionData);
-
+	/// <summary>
+	///	前フレームに接触したアクター情報をクリア
+	/// </summary>
+	void CrearLastContactActors()
+	{
+		_lastContactActors.clear();
+	}
 	/// <summary>
 	// 自身を削除処理
 	/// </summary>
@@ -169,10 +190,12 @@ public:
 #pragma endregion
 
 #pragma region アクセサ
+	ActorTag GetTag() const { return _tag; }
 	Scene* GetScene() { return _scene; }
 	const char* GetName() const { return _name.c_str(); }
 	Transform& GetTransform() { return _transform; }
 	std::weak_ptr<Model> GetModel() { return _model; }
+	std::unordered_map<CollisionLayer, std::vector<Actor*>>& GetLastContactActors() { return _lastContactActors; }
 
 	void SetScene(Scene* scene) { this->_scene = scene; }
 	void SetName(const char* name) { this->_name = name; }
@@ -269,6 +292,8 @@ protected:
 #pragma endregion
 
 protected:
+	// タグ
+	ActorTag				_tag = ActorTag::ActorTagMax; // 初期値は無効なタグ
 	// 所属するシーン
 	Scene*					_scene = nullptr;
 	// 名前
@@ -281,6 +306,9 @@ protected:
 	std::vector<std::shared_ptr<Component>>		_components;
 	// 当たり判定コンポーネント
 	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
+
+	// 前フレームに接触したレイヤーごとのアクター
+	std::unordered_map<CollisionLayer, std::vector<Actor*>> _lastContactActors;
 
 #pragma region 各種フラグ
 	bool				_isActive = true;

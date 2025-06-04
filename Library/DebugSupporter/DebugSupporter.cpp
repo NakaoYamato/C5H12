@@ -377,6 +377,7 @@ namespace Debug
                         ImGui::PopStyleColor();
                     };
 
+                DrawDebugFlagGui(DebugInput::BTN_F3, "Slowdown");
                 DrawDebugFlagGui(DebugInput::BTN_F4, "DebugCamera");
                 DrawDebugFlagGui(DebugInput::BTN_F5, "FixedTime");
                 DrawDebugFlagGui(DebugInput::BTN_F7, "DebugDraw");

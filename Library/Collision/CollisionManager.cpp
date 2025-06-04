@@ -243,20 +243,23 @@ void CollisionManager::Update()
     // 接触情報を各アクターに通知
 	for (auto& [actor, datas] : collisionDataMap)
 	{
-		ContactData currentContactData;
+		if (!actor->IsActive())
+			continue;
+
+		std::unordered_map<CollisionLayer, std::vector<Actor*>> currentContactActors;
 		// 前フレームに接触したアクターを取得
-		auto& oldContactData = _oldContactDatas[actor->GetName()];
+		auto& lastContactActors = actor->GetLastContactActors();
 
 		for (auto& data : datas)
 		{
 			// 前フレームに接触していたか確認
 			bool isOldContact = std::find(
-				oldContactData[data.myLayer].begin(), oldContactData[data.myLayer].end(),
-				data.other->GetName()) != oldContactData[data.myLayer].end();
+				lastContactActors[data.myLayer].begin(), lastContactActors[data.myLayer].end(),
+				data.other) != lastContactActors[data.myLayer].end();
 			// 今回のフレームで接触していたか確認
 			bool isCurrentContact = std::find(
-				currentContactData[data.myLayer].begin(), currentContactData[data.myLayer].end(),
-				data.other->GetName()) != currentContactData[data.myLayer].end();
+				currentContactActors[data.myLayer].begin(), currentContactActors[data.myLayer].end(),
+				data.other) != currentContactActors[data.myLayer].end();
 
 			// 前フレームで接触していないなら
 			if (!isOldContact && !isCurrentContact)
@@ -264,12 +267,12 @@ void CollisionManager::Update()
 			else
 				actor->Contact(data);
 
-			currentContactData[data.myLayer].push_back(data.other->GetName());
+			currentContactActors[data.myLayer].push_back(data.other);
 		}
 
 		// 今回のフレームで接触したアクターの名前を保存
-		oldContactData.clear();
-		oldContactData = currentContactData;
+		lastContactActors.clear();
+		lastContactActors = currentContactActors;
 	}
 
 	// データをクリア

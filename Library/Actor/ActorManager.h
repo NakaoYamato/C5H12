@@ -9,20 +9,6 @@
 
 #include "Actor.h"
 
-/// <summary>
-/// ゲームオブジェクトのタグ
-/// </summary>
-enum class ActorTag
-{
-	DrawContextParameter,	// 描画の前準備
-	Stage,
-	Player,
-	Enemy,
-	UI,
-
-	ActorTagMax
-};
-
 using ActorMap = std::vector<std::shared_ptr<Actor>>;
 
 class ActorManager

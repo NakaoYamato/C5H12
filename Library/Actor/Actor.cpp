@@ -15,8 +15,12 @@
 
 #pragma region ActorManager‚ÅŒÄ‚ÔŠÖ”
 /// ¶¬ˆ—
-void Actor::Create()
+void Actor::Create(ActorTag tag)
 {
+	// ƒ^ƒO‚ðÝ’è
+	_tag = tag;
+
+	// ¶¬Žžˆ—
 	OnCreate();
 }
 
@@ -290,6 +294,7 @@ void Actor::ContactEnter(CollisionData& collisionData)
 // íœˆ—
 void Actor::Remove()
 {
+	_isActive = false;
 	OnRemove();
     _scene->GetActorManager().Remove(shared_from_this());
 }

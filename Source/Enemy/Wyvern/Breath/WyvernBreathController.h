@@ -38,4 +38,13 @@ private:
 	float _breathRangeMax = 10.0f;
 	// 攻撃力
 	float _ATK = 2.0f;
+
+	// パーティクルの生存時間
+	float _particleLifeTime = 2.0f;
+	// パーティクルの速度
+	float _particleSpeed = 30.0f;
+	// パーティクルの分散率
+	Vector3 _particleSpread = Vector3(0.5f, 0.2f, 0.5f);
+	// パーティクルのスケール
+	float _particleScale = 0.2f;
 };

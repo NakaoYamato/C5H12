@@ -1,6 +1,8 @@
 #include "../ComputeParticle.hlsli"
 #include "../../Function/ToMatrix.hlsli"
 
+#define DRAW_BILLBOARD 1
+
 // パーティクル管理バッファ
 StructuredBuffer<ParticleData> particleDataBuffer : register(t0);
 StructuredBuffer<ParticleHeader> particleHeaderBuffer : register(t1);
@@ -18,7 +20,7 @@ void main(point GS_IN gin[1], inout TriangleStream<PS_IN> output)
     float3 scale = !isAlive ? float3(0, 0, 0) : particleDataBuffer[vertexId].scale.xyz;
 #if DRAW_BILLBOARD
     //  ビルボード行列生成(ビュー行列の逆行列で良い。ただし移動値はいらない)
-    float4x4 billboardMatrix = inverse_view_transform;
+    float4x4 billboardMatrix = invView;
     billboardMatrix._41_42_43 = float3(0, 0, 0);
     billboardMatrix._44 = 1.0f;
 #endif
@@ -26,7 +28,7 @@ void main(point GS_IN gin[1], inout TriangleStream<PS_IN> output)
 	//  ワールド行列生成
     float4x4 scaleMatrix = ToMatrixScaling(scale);
 #if DRAW_BILLBOARD
-    float4x4 rotationMatrix = mul(billboardMatrix, matrix_rotation_roll_pitch_yaw(particleDataBuffer[vertexId].rotation.xyz));
+    float4x4 rotationMatrix = mul(billboardMatrix, ToMatrixRotationRollPitchYaw(particleDataBuffer[vertexId].rotation.xyz));
 #else
     float4x4 rotationMatrix = ToMatrixRotationRollPitchYaw(particleDataBuffer[vertexId].rotation.xyz);
 #endif

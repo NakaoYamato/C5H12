@@ -1,5 +1,7 @@
 #include "WyvernBreathController.h"
 
+#include "../../Library/Scene/Scene.h"
+#include "../../Library/Math/Random.h"
 #include "../../Source/Common/Damageable.h"
 
 #include <imgui.h>
@@ -14,6 +16,48 @@ void WyvernBreathController::Update(float elapsedTime)
 	if (auto capsuleCollider = _capsuleCollider.lock())
 	{
 		capsuleCollider->SetEnd(_breathDirection * _breathRange);
+	}
+
+	// パーティクル生成
+	Vector3 pos = GetActor()->GetTransform().GetPosition();
+	int max = 100;
+	for (int i = 0; i < max; i++)
+	{
+		Vector3 p = pos;
+		p.x += 0.5f * Random::RandBias();
+		p.y += 0.5f * Random::RandBias();
+		p.z += 0.5f * Random::RandBias();
+
+		// TODO : 放射状に飛ばす
+		Vector3 v = _breathDirection * _particleSpeed;
+		v.x *= _particleSpread.x * Random::RandNormal();
+		v.y *= _particleSpread.y * Random::RandNormal();
+		v.z *= _particleSpread.z * Random::RandNormal();
+
+		DirectX::XMFLOAT3 f = _breathDirection;
+		f.x *= 2.0f * Random::RandNormal();
+		f.y *= 2.0f * Random::RandNormal();
+		f.z *= 2.0f * Random::RandNormal();
+		DirectX::XMFLOAT2 s = { _particleScale,_particleScale };
+
+		ParticleRenderer::EmitData data{};
+		// 更新タイプ
+		data.parameter.x = 2.0f;
+		data.parameter.y = _particleLifeTime;
+		// 発生位置
+		data.position = p;
+		// 発生方向
+		data.velocity = v;
+		// 加速力
+		data.acceleration.x = f.x;
+		data.acceleration.y = f.y;
+		data.acceleration.z = f.z;
+		// 大きさ
+		data.scale.x = s.x;
+		data.scale.y = s.y;
+		data.scale.z = 0.0f;
+
+		GetActor()->GetScene()->GetParticleRenderer().Emit(data);
 	}
 }
 // GUI描画

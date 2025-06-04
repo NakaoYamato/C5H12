@@ -9,6 +9,7 @@
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Renderer/TextRenderer.h"
+#include "../../Library/Renderer/ParticleRenderer.h"
 
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
@@ -118,6 +119,8 @@ public:
 	TextureRenderer&		GetTextureRenderer()		{ return _textureRenderer; }
 	// テキストレンダラー取得
 	TextRenderer&			GetTextRenderer()			{ return _textRenderer; }
+	// パーティクルレンダラー取得
+	ParticleRenderer&		GetParticleRenderer()		{ return _particleRenderer; }
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
@@ -141,6 +144,7 @@ private:
 	MeshRenderer					_meshRenderer;
 	TextureRenderer					_textureRenderer;
 	TextRenderer					_textRenderer;
+	ParticleRenderer				_particleRenderer;
 
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;

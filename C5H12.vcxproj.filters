@@ -381,6 +381,12 @@
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Renderer\ParticleRenderer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Scene\Editor\SceneParticleEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -803,6 +809,12 @@
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Renderer\ParticleRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Scene\Editor\SceneParticleEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -826,6 +838,8 @@
     <None Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRendering.hlsli" />
     <None Include="HLSL\Define\SamplerStateDefine.hlsli" />
     <None Include="HLSL\PostProcess\FXAA\FXAA.hlsl" />
+    <None Include="HLSL\Particle\ComputeParticle.hlsli" />
+    <None Include="HLSL\Particle\Sort\ComputeParticleBitonicSort.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -875,5 +889,15 @@
     <FxCompile Include="HLSL\PostProcess\FXAA\FXAAPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteWithDepthPS.hlsl" />
     <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl" />
+    <FxCompile Include="HLSL\Particle\ComputeParticleInitCS.hlsl" />
+    <FxCompile Include="HLSL\Particle\ComputeParticleEmitCS.hlsl" />
+    <FxCompile Include="HLSL\Particle\ComputeParticleUpdateCS.hlsl" />
+    <FxCompile Include="HLSL\Particle\ComputeParticleBeginFrameCS.hlsl" />
+    <FxCompile Include="HLSL\Particle\ComputeParticleEndFrameCS.hlsl" />
+    <FxCompile Include="HLSL\Particle\Sort\ComputeParticleBitonicSortB2CS.hlsl" />
+    <FxCompile Include="HLSL\Particle\Sort\ComputeParticleBitonicSortC2CS.hlsl" />
+    <FxCompile Include="HLSL\Particle\Render\ComputeParticleRenderVS.hlsl" />
+    <FxCompile Include="HLSL\Particle\Render\ComputeParticleRenderGS.hlsl" />
+    <FxCompile Include="HLSL\Particle\Render\ComputeParticleRenderPS.hlsl" />
   </ItemGroup>
 </Project>

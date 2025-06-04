@@ -1,3 +1,6 @@
+#ifndef __SCENE_CONSTANT_BUFFER_H__
+#define __SCENE_CONSTANT_BUFFER_H__
+
 // シーン定数バッファ
 cbuffer SCENE_CONSTANT_BUFFER : register(b0)
 {
@@ -11,3 +14,5 @@ cbuffer SCENE_CONSTANT_BUFFER : register(b0)
     float4 lightColor;
     float4 cameraPosition;
 }
+
+#endif  //  __SCENE_CONSTANT_BUFFER_H__

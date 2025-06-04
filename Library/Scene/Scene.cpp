@@ -21,6 +21,8 @@ void Scene::Initialize()
 		_textRenderer.Initialize(Graphics::Instance().GetDevice(),
 			Graphics::Instance().GetDeviceContext());
     }
+	_particleRenderer.Initialize(Graphics::Instance().GetDevice());
+
 	// Effekseerエフェクトマネージャー作成
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
@@ -64,6 +66,9 @@ void Scene::Update(float elapsedTime)
 
 	// Effekseerの更新
 	_effekseerEffectManager.Update(elapsedTime);
+
+	// パーティクルの更新
+	_particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
 }
 
 /// 一定間隔の更新処理
@@ -197,6 +202,9 @@ void Scene::Render()
 
 		// Effekseerの描画
 		_effekseerEffectManager.Render(rc.camera->GetView(), rc.camera->GetProjection());
+
+		// パーティクルの描画
+		_particleRenderer.Render(rc.deviceContext);
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());

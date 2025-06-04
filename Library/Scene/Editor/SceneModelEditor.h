@@ -18,16 +18,12 @@ public:
 	const char* GetName()const { return u8"ModelEditor"; }
 	// ŠK‘wæ“¾
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Editor; }
-
 	//‰Šú‰»
 	void Initialize()override;
-
 	// XVˆ—
 	void Update(float elapsedTime)override;
-
 	// Gui•`‰æˆ—
 	void DrawGui()override;
-
 	// ©g‚ğV‹K‚Ìƒ|ƒCƒ“ƒ^‚Å“n‚·
 	std::shared_ptr<Scene> GetNewShared() override
 	{

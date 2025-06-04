@@ -13,6 +13,7 @@ enum class SamplerState
 	LinearClamp,
 	BorderPoint,
 	Comparison,		// カスケードシャドウマップ
+	Anisotropic,
 
 	EnumCount
 };

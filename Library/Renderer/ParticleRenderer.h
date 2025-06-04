@@ -8,14 +8,27 @@ class ParticleRenderer
 public:
 	// パーティクルスレッド数
 	static constexpr UINT NumParticleThread = 1024;
+	// 描画時のSRVセット番号
+	static constexpr UINT TextureSRVStartNum = 30;
+
+	// パーティクル処理タイプ
+	enum class ParticleType : UINT
+	{
+		None = 0,			// 無効
+		Billboard = 1,		// ビルボード
+	};
 
 	// パーティクル生成用構造体
 	struct EmitData
 	{
-		// x	: パーティクル処理タイプ
-		// y	: 生存時間
-		// zw	: 空き
-		Vector4 parameter;
+		// 処理タイプ
+		ParticleType	type = ParticleType::None;
+		// 切り取り座標番号
+		UINT	texcoordIndex = 0;
+		// 生存時間
+		float	timer = 0.0f;
+		// テクスチャアニメーションの速度
+		float	texAnimTime = 0.0f;
 
 		Vector4 position = { 0,0,0,0 };
 		Vector4 rotation = { 0,0,0,0 };
@@ -30,10 +43,14 @@ public:
 	// パーティクル構造体
 	struct ParticleData
 	{
-		// x	: パーティクル処理タイプ
-		// y	: 生存時間
-		// z,w	: 空き
-		Vector4 parameter;
+		// 処理タイプ
+		ParticleType	type = ParticleType::None;
+		// 切り取り座標番号
+		UINT	texcoordIndex = 0;
+		// 生存時間
+		float	timer = 0.0f;
+		// テクスチャアニメーションの速度
+		float	texAnimTime = 0.0f;
 
 		Vector4 position = { 0,0,0,0 };
 		Vector4 rotation = { 0,0,0,0 };
@@ -112,7 +129,7 @@ public:
     /// </summary>
     /// <param name="device"></param>
     /// <param name="particlesCount"></param>
-    void Initialize(ID3D11Device* device, UINT particlesCount = 100000, DirectX::XMUINT2 splitCount = DirectX::XMUINT2(4, 4));
+    void Initialize(ID3D11Device* device, UINT particlesCount = 100000, DirectX::XMUINT2 splitCount = DirectX::XMUINT2(3, 2));
 	/// <summary>
 	/// パーティクル生成
 	/// </summary>

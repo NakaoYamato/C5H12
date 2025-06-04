@@ -23,13 +23,13 @@ public:
 	virtual ~FrameBuffer() = default;
 
 	void Clear(ID3D11DeviceContext* immediateContext,
-		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 0.0f),
+		const Vector4& color = Vector4::Zero,
 		const float& depth = 1.0f) const;
 
 	void Activate(ID3D11DeviceContext* immediateContext);
 
 	void ClearAndActivate(ID3D11DeviceContext* immediateContext,
-		const Vector4& color = Vector4(0.0f, 0.0f, 0.0f, 0.0f),
+		const Vector4& color = Vector4::Zero,
 		const float& depth = 1.0f);
 
 	void Deactivate(ID3D11DeviceContext* immediateContext);

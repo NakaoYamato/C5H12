@@ -39,6 +39,8 @@ private:
 	// 攻撃力
 	float _ATK = 2.0f;
 
+	// パーティクル生成数
+	int _particleCount = 10;
 	// パーティクルの生存時間
 	float _particleLifeTime = 2.0f;
 	// パーティクルの速度
@@ -46,5 +48,5 @@ private:
 	// パーティクルの分散率
 	Vector3 _particleSpread = Vector3(0.5f, 0.2f, 0.5f);
 	// パーティクルのスケール
-	float _particleScale = 0.2f;
+	float _particleScale = 1.0f;
 };

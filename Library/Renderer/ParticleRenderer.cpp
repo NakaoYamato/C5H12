@@ -174,7 +174,7 @@ void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount, Dir
 	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/ComputeParticleRenderPS.cso", _pixelShader.GetAddressOf());
 
 	// 画像読み込み
-	GpuResourceManager::LoadTextureFromFile(device, L"./Data/Texture/Particle/particle256x256.png", _textureSRV.GetAddressOf(), nullptr);
+	GpuResourceManager::LoadTextureFromFile(device, L"./Data/Texture/Particle/AdobeStock_255896219.png", _textureSRV.GetAddressOf(), nullptr);
 }
 
 /// パーティクル生成
@@ -332,7 +332,7 @@ void ParticleRenderer::Render(ID3D11DeviceContext* dc)
 	dc->IASetInputLayout(nullptr);
 
 	// リソース設定
-	dc->PSSetShaderResources(0, 1, _textureSRV.GetAddressOf());
+	dc->PSSetShaderResources(TextureSRVStartNum, 1, _textureSRV.GetAddressOf());
 	dc->GSSetShaderResources(0, 1, _particleDataSRV.GetAddressOf());
 	dc->GSSetShaderResources(1, 1, _particleHeaderSRV.GetAddressOf());
 
@@ -353,7 +353,7 @@ void ParticleRenderer::Render(ID3D11DeviceContext* dc)
 
 	// リソースクリア
 	ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-	dc->PSSetShaderResources(0, 1, nullSRV);
+	dc->PSSetShaderResources(TextureSRVStartNum, 1, nullSRV);
 	dc->GSSetShaderResources(0, 1, nullSRV);
 	dc->GSSetShaderResources(1, 1, nullSRV);
 }

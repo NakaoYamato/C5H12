@@ -20,8 +20,7 @@ void WyvernBreathController::Update(float elapsedTime)
 
 	// パーティクル生成
 	Vector3 pos = GetActor()->GetTransform().GetPosition();
-	int max = 100;
-	for (int i = 0; i < max; i++)
+	for (int i = 0; i < _particleCount; i++)
 	{
 		Vector3 p = pos;
 		p.x += 0.5f * Random::RandBias();
@@ -42,8 +41,10 @@ void WyvernBreathController::Update(float elapsedTime)
 
 		ParticleRenderer::EmitData data{};
 		// 更新タイプ
-		data.parameter.x = 2.0f;
-		data.parameter.y = _particleLifeTime;
+		data.type = ParticleRenderer::ParticleType::Billboard;
+		data.texcoordIndex = 2;
+		data.timer = _particleLifeTime;
+		data.texAnimTime = 0.4f;
 		// 発生位置
 		data.position = p;
 		// 発生方向

@@ -204,7 +204,9 @@ void Scene::Render()
 		_effekseerEffectManager.Render(rc.camera->GetView(), rc.camera->GetProjection());
 
 		// パーティクルの描画
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Additive), nullptr, 0xFFFFFFFF);
 		_particleRenderer.Render(rc.deviceContext);
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
         // プリミティブ描画
         PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());

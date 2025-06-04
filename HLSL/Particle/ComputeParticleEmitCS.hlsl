@@ -29,10 +29,10 @@ void main(uint3 dTid : SV_DispatchThreadID)
     particle_header_buffer[header_index].depth          = 1; //  ê[ìx
     particle_header_buffer[header_index].dummy          = 0; //  ãÛÇ´
     
-    particleDataBuffer[particleIndex].parameter.x      = emitParticleButter[emit_index].parameter.x;
-    particleDataBuffer[particleIndex].parameter.y      = emitParticleButter[emit_index].parameter.y;
-    particleDataBuffer[particleIndex].parameter.z      = 0.0f;
-    particleDataBuffer[particleIndex].parameter.w      = 0.0f;
+    particleDataBuffer[particleIndex].type             = emitParticleButter[emit_index].type;
+    particleDataBuffer[particleIndex].texcoordIndex    = emitParticleButter[emit_index].texcoordIndex;
+    particleDataBuffer[particleIndex].timer            = emitParticleButter[emit_index].timer;
+    particleDataBuffer[particleIndex].texAnimTime      = emitParticleButter[emit_index].texAnimTime;
     
     particleDataBuffer[particleIndex].position         = emitParticleButter[emit_index].position;
     particleDataBuffer[particleIndex].rotation         = emitParticleButter[emit_index].rotation;

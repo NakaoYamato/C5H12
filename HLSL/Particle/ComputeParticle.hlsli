@@ -3,10 +3,24 @@
 // パーティクルスレッド数
 static const int NumParticleThread = 1024;
 
+// パーティクル処理タイプ
+static const uint ParticleTypeNone = 0;
+static const uint ParticleTypeBillboard = 1;
+
+// パーティクルのテクスチャ開始番号
+#define ParticleTextureStartIndex t30
+
 // 生成パーティクル構造体
 struct EmitParticleData
 {
-    float4 parameter; // x : パーティクル処理タイプ, y : 生存時間, zw : 空き
+    // 処理タイプ
+    uint type;
+    // 切り取り座標番号
+    uint texcoordIndex;
+    // 生存時間
+    float timer;
+	// テクスチャアニメーション間隔
+    float texAnimTime;
     
     float4 position; // 生成座標
     float4 rotation; // 回転情報
@@ -21,7 +35,14 @@ struct EmitParticleData
 // パーティクル構造体
 struct ParticleData
 {
-    float4 parameter; // x : パーティクル処理タイプ, y : 生存時間, z,w : 空き
+    // 処理タイプ
+    uint type;
+    // 切り取り座標番号
+    uint texcoordIndex;
+    // 残り生存時間
+    float timer;
+	// テクスチャアニメーション間隔
+    float texAnimTime;
     
     float4 position; // 生成座標
     float4 rotation; // 回転情報
@@ -84,7 +105,7 @@ struct GS_IN
 struct PS_IN
 {
     float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float4 color    : COLOR;
     float2 texcoord : TEXCOORD;
 };
 

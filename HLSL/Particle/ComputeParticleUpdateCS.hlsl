@@ -25,8 +25,9 @@ void main(uint3 dTid : SV_DispatchThreadID)
     ParticleData data = particleDataBuffer[dataIndex];
     
     // 経過時間処理
-    data.parameter.y -= elapsedTime;
-    if (data.parameter.y < 0.0)
+    float oldTime = data.timer;
+    data.timer -= elapsedTime;
+    if (data.timer < 0.0)
     {
         // 寿命が尽きたら未使用リストに追加
         header.alive = 0;
@@ -47,8 +48,21 @@ void main(uint3 dTid : SV_DispatchThreadID)
     // 位置更新
     data.position.xyz += data.velocity.xyz * elapsedTime;
     
+    // アニメーション処理
+    if (data.texAnimTime > 0.0f)
+    {
+        uint oldValue = (uint) (oldTime / data.texAnimTime);
+        uint currentValue = (uint) (data.timer / data.texAnimTime);
+        
+        if (oldValue != currentValue)
+        {
+            // テクスチャアニメーションの更新
+            data.texcoordIndex++;
+        }
+    }
+    
     //  切り取り座標を算出
-    uint type = (uint) (data.parameter.x + 0.5f);
+    uint type = (uint) (data.texcoordIndex + 0.5f);
     float w = 1.0 / textureSplitCount.x;
     float h = 1.0 / textureSplitCount.y;
     float2 uv = float2((type % textureSplitCount.x) * w, (type / textureSplitCount.x) * h);
@@ -56,7 +70,7 @@ void main(uint3 dTid : SV_DispatchThreadID)
     data.texcoord.zw = float2(w, h);
         
     //  徐々に透明にしていく
-    data.color.a = saturate(data.parameter.y);
+    data.color.a = saturate(data.timer);
     
     // 深度ソート値算出
     header.depth = mul(float4(data.position.xyz, 1), viewProjection).w;

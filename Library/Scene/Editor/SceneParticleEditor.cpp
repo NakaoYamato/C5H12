@@ -31,8 +31,9 @@ void SceneParticleEditor::Update(float elapsedTime)
 
 			ParticleRenderer::EmitData data{};
 			// 更新タイプ
-			data.parameter.x = 2.0f;
-			data.parameter.y = 3.0f;
+			data.type = ParticleRenderer::ParticleType::Billboard;
+			data.texcoordIndex = 2;
+			data.timer = 3.0f;
 			// 発生位置
 			data.position.x = p.x;
 			data.position.y = p.y;

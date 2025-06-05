@@ -150,6 +150,14 @@
   <ItemGroup>
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
+    <ClCompile Include="Library\Audio\AudioLoader.cpp" />
+    <ClCompile Include="Library\Audio\AudioResource.cpp" />
+    <ClCompile Include="Library\Audio\AudioSystem.cpp" />
+    <ClCompile Include="Library\Audio\MasterVoice.cpp" />
+    <ClCompile Include="Library\Audio\SaveWav.cpp" />
+    <ClCompile Include="Library\Audio\SourceVoice.cpp" />
+    <ClCompile Include="Library\Audio\SubmixVoice.cpp" />
+    <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
@@ -281,6 +289,14 @@
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorJudgmentBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorNodeBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="Library\Audio\AudioLoader.h" />
+    <ClInclude Include="Library\Audio\AudioResource.h" />
+    <ClInclude Include="Library\Audio\AudioSystem.h" />
+    <ClInclude Include="Library\Audio\MasterVoice.h" />
+    <ClInclude Include="Library\Audio\SaveWav.h" />
+    <ClInclude Include="Library\Audio\SourceVoice.h" />
+    <ClInclude Include="Library\Audio\SubmixVoice.h" />
+    <ClInclude Include="Library\Audio\VoiceRecorder\VoiceRecorder.h" />
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />

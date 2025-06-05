@@ -3,10 +3,10 @@
 #include "../Graphics/Graphics.h"
 #include "../ImGui/ImGuiManager.h"
 #include "../Input/Input.h"
+#include "../Audio/AudioSystem.h"
 #include "../DebugSupporter/DebugSupporter.h"
 #include "../ResourceManager/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
-//#include "../Effekseer/EffectManager.h"
 #include "../Renderer/PrimitiveRenderer.h"
 #include "../JobSystem/JobSystem.h"
 
@@ -175,9 +175,6 @@ bool Framework::Initialize() const
     // 入力監視クラスの初期化
     Input::Instance().Initialize(_hwnd);
 
-    //// エフェクトマネージャー初期化
-    //EffectManager::Instance().Initialize();
-
     // シーンの初期化
     SceneManager::Instance().Initialize();
 
@@ -225,8 +222,8 @@ void Framework::Update(float elapsedTime)
     // ポストエフェクトの更新
     PostProcessManager::Instance().Update(elapsedTime);
 
-    //// 3Dエフェクト更新
-    //EffectManager::Instance().Update(elapsedTime);
+    // オーディオ更新
+    AudioSystem::Instance().Update();
 }
 
 /// 一定間隔の更新処理
@@ -291,8 +288,8 @@ bool Framework::Uninitialize()
     // エフェクトマネージャーの終了の後にエフェクトの終了処理を行うとエラーになるので防ぐ
     SceneManager::Instance().Clear();
 
-    // エフェクトマネージャー終了化
-    //EffectManager::Instance().Finalize();
+    // オーディオ終了化
+    AudioSystem::Instance().Finalize();
 
     // ジョブシステム終了
     JobSystem::Instance().Finalize();

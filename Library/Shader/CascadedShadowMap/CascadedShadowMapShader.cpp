@@ -1,6 +1,6 @@
 #include "CascadedShadowMapShader.h"
 #include "../../HrTrace.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 CascadedShadowMapShader::CascadedShadowMapShader(ID3D11Device* device, 
     const char* vsName,

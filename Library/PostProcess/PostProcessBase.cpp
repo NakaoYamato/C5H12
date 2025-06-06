@@ -1,5 +1,5 @@
 #include "PostProcessBase.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 PostProcessBase::PostProcessBase(ID3D11Device* device,
 	uint32_t width, uint32_t height,

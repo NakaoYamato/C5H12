@@ -1,6 +1,6 @@
 #include "FrameBuffer.h"
 #include "../HRTrace.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 FrameBuffer::FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, bool hasDepthstencil)
 {

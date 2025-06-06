@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "../../Library/HRTrace.h"
-#include "../../Library/ResourceManager/GpuResourceManager.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 
 class PrimitiveRendererData
 {

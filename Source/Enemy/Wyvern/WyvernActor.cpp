@@ -2,7 +2,7 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/ResourceManager/GpuResourceManager.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Source/Player/PlayerController.h"

@@ -112,8 +112,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);.\External\mrs_2.0.0\mrs\library\mrs\windows\enet_uv_openssl_1.1.1\2017\MD\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;xaudio2.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);.\External\mrs_2.0.0\mrs\library\mrs\windows\enet_uv_openssl_1.1.1\2017\MD\x64\$(Configuration);.\External\DirectXTex\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;DirectXTex.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;xaudio2.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -138,8 +138,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);.\External\mrs_2.0.0\mrs\library\mrs\windows\enet_uv_openssl_1.1.1\2017\MD\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;xaudio2.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\DirectXTK-main\x64\$(Configuration);.\External\assimp\lib\x64\$(Configuration);.\External\Effekseer170e\lib\vs2022\MD\x64\$(Configuration);.\External\EccNetworkLib\lib\$(Configuration);.\External\mrs_2.0.0\mrs\library\mrs\windows\enet_uv_openssl_1.1.1\2017\MD\x64\$(Configuration);.\External\DirectXTex\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;DirectXTex.lib;dxgi.lib;xinput.lib;assimp.lib;zlibstatic.lib;Effekseer.lib;EffekseerRendererDX11.lib;ENL.lib;Ws2_32.lib;mrs.lib;uv.lib;enet.lib;crypto.lib;ssl.lib;psapi.lib;Iphlpapi.lib;Userenv.lib;winmm.lib;Advapi32.lib;Gdi32.lib;Crypt32.lib;xaudio2.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -154,13 +154,13 @@
     <ClCompile Include="Library\Audio\AudioResource.cpp" />
     <ClCompile Include="Library\Audio\AudioSystem.cpp" />
     <ClCompile Include="Library\Audio\MasterVoice.cpp" />
-    <ClCompile Include="Library\Audio\SaveWav.cpp" />
     <ClCompile Include="Library\Audio\SourceVoice.cpp" />
     <ClCompile Include="Library\Audio\SubmixVoice.cpp" />
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
+    <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
     <ClCompile Include="Library\Model\AnimationEvent.cpp" />
     <ClCompile Include="Library\Model\Model.cpp" />
@@ -235,8 +235,8 @@
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
     <ClCompile Include="Library\Renderer\TextRenderer.cpp" />
     <ClCompile Include="Library\Renderer\TextureRenderer.cpp" />
-    <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp" />
-    <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp" />
+    <ClCompile Include="Library\Graphics\GpuResourceManager.cpp" />
+    <ClCompile Include="Library\Model\ModelResourceManager.cpp" />
     <ClCompile Include="Library\Model\ModelResource.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneModelEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneParticleEditor.cpp" />
@@ -293,7 +293,6 @@
     <ClInclude Include="Library\Audio\AudioResource.h" />
     <ClInclude Include="Library\Audio\AudioSystem.h" />
     <ClInclude Include="Library\Audio\MasterVoice.h" />
-    <ClInclude Include="Library\Audio\SaveWav.h" />
     <ClInclude Include="Library\Audio\SourceVoice.h" />
     <ClInclude Include="Library\Audio\SubmixVoice.h" />
     <ClInclude Include="Library\Audio\VoiceRecorder\VoiceRecorder.h" />
@@ -301,6 +300,7 @@
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
+    <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\Material\Material.h" />
     <ClInclude Include="Library\Model\AnimationEvent.h" />
     <ClInclude Include="Library\Model\Model.h" />
@@ -385,8 +385,8 @@
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
     <ClInclude Include="Library\Renderer\TextRenderer.h" />
     <ClInclude Include="Library\Renderer\TextureRenderer.h" />
-    <ClInclude Include="Library\ResourceManager\GpuResourceManager.h" />
-    <ClInclude Include="Library\ResourceManager\ModelResourceManager.h" />
+    <ClInclude Include="Library\Graphics\GpuResourceManager.h" />
+    <ClInclude Include="Library\Model\ModelResourceManager.h" />
     <ClInclude Include="Library\Model\ModelResource.h" />
     <ClInclude Include="Library\Model\SerializeFunction.h" />
     <ClInclude Include="Library\Scene\Editor\SceneModelEditor.h" />

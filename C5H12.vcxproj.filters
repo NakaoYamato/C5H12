@@ -42,7 +42,7 @@
     <ClCompile Include="Library\Graphics\ConstantBufferManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\ResourceManager\GpuResourceManager.cpp">
+    <ClCompile Include="Library\Graphics\GpuResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Graphics\RenderState.cpp">
@@ -117,7 +117,7 @@
     <ClCompile Include="Library\Model\ModelResource.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\ResourceManager\ModelResourceManager.cpp">
+    <ClCompile Include="Library\Model\ModelResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp">
@@ -408,7 +408,7 @@
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Audio\SaveWav.cpp">
+    <ClCompile Include="Library\Exporter\Exporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -446,7 +446,7 @@
     <ClInclude Include="Library\Graphics\ConstantBufferManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\ResourceManager\GpuResourceManager.h">
+    <ClInclude Include="Library\Graphics\GpuResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Graphics\RenderContext.h">
@@ -539,7 +539,7 @@
     <ClInclude Include="Library\Model\SerializeFunction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\ResourceManager\ModelResourceManager.h">
+    <ClInclude Include="Library\Model\ModelResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h">
@@ -860,7 +860,7 @@
     <ClInclude Include="Library\Audio\VoiceRecorder\VoiceRecorder.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Audio\SaveWav.h">
+    <ClInclude Include="Library\Exporter\Exporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

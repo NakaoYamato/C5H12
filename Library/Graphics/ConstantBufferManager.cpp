@@ -1,5 +1,5 @@
 #include "ConstantBufferManager.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 
 ConstantBufferManager::ConstantBufferManager(ID3D11Device* device)
 {

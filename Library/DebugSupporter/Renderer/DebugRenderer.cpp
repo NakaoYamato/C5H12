@@ -1,7 +1,7 @@
 #include "DebugRenderer.h"
 
 #include "../../Library/HRTrace.h"
-#include "../../Library/ResourceManager/GpuResourceManager.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Math/Quaternion.h"
 
 #include "../DebugSupporter.h"

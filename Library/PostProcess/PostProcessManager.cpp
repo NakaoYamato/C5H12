@@ -3,7 +3,7 @@
 #include<imgui.h>
 
 #include "../Algorithm/Converter.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 
 #include "../PostProcess/GlowExtraction/GlowExtraction.h"
 #include "../PostProcess/GaussianFilter/GaussianFilter.h"

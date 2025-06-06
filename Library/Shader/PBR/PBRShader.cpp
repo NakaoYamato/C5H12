@@ -1,5 +1,5 @@
 #include "PBRShader.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 PBRShader::PBRShader(ID3D11Device* device,
     const char* vsName,

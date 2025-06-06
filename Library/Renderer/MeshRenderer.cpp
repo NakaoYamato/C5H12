@@ -1,6 +1,6 @@
 #include "MeshRenderer.h"
 
-#include "../ResourceManager/GpuResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 #include "../../Shader/Phong/PhongShader.h"
 #include "../../Shader/Ramp/RampShader.h"
 #include "../../Shader/Grass/GrassShader.h"

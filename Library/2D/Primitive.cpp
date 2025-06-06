@@ -1,5 +1,5 @@
 #include "Primitive.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 
 Primitive::Primitive(ID3D11Device* device)
 {

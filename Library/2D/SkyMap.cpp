@@ -1,5 +1,5 @@
 #include "SkyMap.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 
 #include "../HRTrace.h"
 

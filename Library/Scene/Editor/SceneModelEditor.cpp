@@ -9,6 +9,9 @@
 
 #include "../../DebugSupporter/DebugSupporter.h"
 
+#include "../../Library/Exporter/Exporter.h"
+#include "../../Library/PostProcess/PostProcessManager.h"
+
 void SceneModelEditor::Initialize()
 {
     Scene::Initialize();
@@ -103,6 +106,21 @@ void SceneModelEditor::Update(float elapsedTime)
             // 当たり判定表示
 			_animationEvent.DebugRender(_animator.lock()->GetAnimationName(), _animator.lock()->GetAnimationTimer());
         }
+    }
+
+
+    if (::GetAsyncKeyState('C') & 0x8000)
+    {
+        // 画面キャプチャ
+		std::wstring filename = L"./Data/Debug/Capture/" + std::to_wstring(GetTickCount64()) + L".png";
+
+		if (Exporter::SavePngFile(
+            Graphics::Instance().GetDevice(),
+            Graphics::Instance().GetDeviceContext(),
+            PostProcessManager::Instance().GetAppliedEffectSRV().Get(),
+            filename))
+		{
+		}
     }
 }
 

@@ -6,8 +6,8 @@
 #include <imgui.h>
 
 #include "../HRTrace.h"
-#include "../ResourceManager/ModelResourceManager.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "ModelResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 #include "../Math/Quaternion.h"
 
 #include "../DebugSupporter/DebugSupporter.h"

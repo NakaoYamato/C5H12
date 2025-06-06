@@ -3,7 +3,7 @@
 #include "CascadedShadowMap.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 #include <array>
 

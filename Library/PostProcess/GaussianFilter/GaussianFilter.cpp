@@ -1,7 +1,7 @@
 #include "GaussianFilter.h"
 #include <imgui.h>
 
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 #include "../../HRTrace.h"
 
 GaussianFilter::GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t height) :

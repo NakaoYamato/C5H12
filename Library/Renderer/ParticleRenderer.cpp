@@ -1,7 +1,7 @@
 #include "ParticleRenderer.h"
 
 #include "../../Library/HRTrace.h"
-#include "../../Library/ResourceManager/GpuResourceManager.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 
 /// ‰Šú‰»
 void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount, DirectX::XMUINT2 splitCount)

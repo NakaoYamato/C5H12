@@ -1,6 +1,6 @@
 #include "RampShader.h"
 #include "../../HRTrace.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 RampShader::RampShader(ID3D11Device* device,
 	const char* vsName, 

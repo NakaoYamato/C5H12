@@ -4,7 +4,7 @@
 #include <string>
 
 #include "../HRTrace.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "GpuResourceManager.h"
 #include "../DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
@@ -149,15 +149,13 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 
 	// レンダーターゲットビュー生成
 	{
-		ID3D11Texture2D* backBuffer{};
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> renderTargetBuffer;
 		hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
-			reinterpret_cast<LPVOID*>(&backBuffer));
+			reinterpret_cast<LPVOID*>(renderTargetBuffer.ReleaseAndGetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-		hr = _device->CreateRenderTargetView(backBuffer, NULL, _renderTargetView.GetAddressOf());
+		hr = _device->CreateRenderTargetView(renderTargetBuffer.Get(), NULL, _renderTargetView.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-		backBuffer->Release();
 	}
 
 	// ビューポート設定

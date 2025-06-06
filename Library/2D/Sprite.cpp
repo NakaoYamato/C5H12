@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "../HRTrace.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "../Graphics/GpuResourceManager.h"
 
 Sprite::Sprite(ID3D11Device* device,
     const wchar_t* filename, 

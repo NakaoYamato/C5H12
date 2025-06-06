@@ -1,5 +1,5 @@
 #include "PhongShader.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 
 PhongShader::PhongShader(ID3D11Device* device, 

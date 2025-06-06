@@ -310,6 +310,9 @@ void Scene::DrawGui()
 	//　当たり判定のGui表示
 	_collisionManager.DrawGui();
 
+	// パーティクルのGui表示
+	_particleRenderer.DrawGui();
+
     if(_skyMap)
         _skyMap->DrawGui();
 }

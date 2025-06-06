@@ -29,9 +29,10 @@ void main(uint3 dTid : SV_DispatchThreadID)
     particle_header_buffer[header_index].depth          = 1; //  ê[ìx
     particle_header_buffer[header_index].dummy          = 0; //  ãÛÇ´
     
-    particleDataBuffer[particleIndex].type             = emitParticleButter[emit_index].type;
-    particleDataBuffer[particleIndex].texcoordIndex    = emitParticleButter[emit_index].texcoordIndex;
-    particleDataBuffer[particleIndex].timer            = emitParticleButter[emit_index].timer;
+    particleDataBuffer[particleIndex].updateType       = emitParticleButter[emit_index].updateType;
+    particleDataBuffer[particleIndex].renderType       = emitParticleButter[emit_index].renderType;
+    particleDataBuffer[particleIndex].lifeTime         = emitParticleButter[emit_index].timer;
+    particleDataBuffer[particleIndex].elapsedTime      = 0.0f;
     particleDataBuffer[particleIndex].texAnimTime      = emitParticleButter[emit_index].texAnimTime;
     
     particleDataBuffer[particleIndex].position         = emitParticleButter[emit_index].position;
@@ -39,5 +40,12 @@ void main(uint3 dTid : SV_DispatchThreadID)
     particleDataBuffer[particleIndex].scale            = emitParticleButter[emit_index].scale;
     particleDataBuffer[particleIndex].velocity         = emitParticleButter[emit_index].velocity;
     particleDataBuffer[particleIndex].acceleration     = emitParticleButter[emit_index].acceleration;
-    particleDataBuffer[particleIndex].color            = emitParticleButter[emit_index].color;
+    particleDataBuffer[particleIndex].startColor       = emitParticleButter[emit_index].startColor;
+    particleDataBuffer[particleIndex].endColor         = emitParticleButter[emit_index].endColor;
+    
+    particleDataBuffer[particleIndex].texPosition      = emitParticleButter[emit_index].texPosition;
+    particleDataBuffer[particleIndex].texSize          = emitParticleButter[emit_index].texSize;
+    particleDataBuffer[particleIndex].texSplit         = emitParticleButter[emit_index].texSplit;
+    particleDataBuffer[particleIndex].texcoordIndex    = emitParticleButter[emit_index].texcoordIndex;
+    particleDataBuffer[particleIndex].texAnimTime      = emitParticleButter[emit_index].texAnimTime;
 }

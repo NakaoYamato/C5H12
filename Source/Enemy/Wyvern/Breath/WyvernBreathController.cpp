@@ -20,6 +20,7 @@ void WyvernBreathController::Update(float elapsedTime)
 
 	// パーティクル生成
 	Vector3 pos = GetActor()->GetTransform().GetPosition();
+	auto textureData = GetActor()->GetScene()->GetParticleRenderer().GetTextureData("Breath");
 	for (int i = 0; i < _particleCount; i++)
 	{
 		Vector3 p = pos;
@@ -39,10 +40,10 @@ void WyvernBreathController::Update(float elapsedTime)
 		f.z *= 2.0f * Random::RandNormal();
 		DirectX::XMFLOAT2 s = { _particleScale,_particleScale };
 
-		ParticleRenderer::EmitData data{};
+		ParticleEmitData data{};
 		// 更新タイプ
-		data.type = ParticleRenderer::ParticleType::Billboard;
-		data.texcoordIndex = 2;
+		data.renderType = ParticleRenderType::Billboard;
+		//data.texcoordIndex = 2;
 		data.timer = _particleLifeTime;
 		data.texAnimTime = 0.4f;
 		// 発生位置
@@ -57,6 +58,10 @@ void WyvernBreathController::Update(float elapsedTime)
 		data.scale.x = s.x;
 		data.scale.y = s.y;
 		data.scale.z = 0.0f;
+
+		data.texPosition = textureData.texPosition;
+		data.texSize = textureData.texSize;
+		data.texSplit = textureData.texSplit;
 
 		GetActor()->GetScene()->GetParticleRenderer().Emit(data);
 	}

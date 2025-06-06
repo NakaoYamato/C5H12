@@ -5,6 +5,7 @@
 #include <wrl.h>
 #include <wincodec.h>
 
+/// WAVファイルを保存する
 void Exporter::SaveWavFile(
 	const std::string& filename,
 	const BYTE* data,
@@ -38,6 +39,7 @@ void Exporter::SaveWavFile(
     out.close();
 }
 
+/// SRVをPNGファイルとして保存する
 bool Exporter::SavePngFile(
     ID3D11Device* device,
     ID3D11DeviceContext* dc,
@@ -86,4 +88,35 @@ bool Exporter::SavePngFile(
     );
 
     return SUCCEEDED(hr);
+}
+
+bool Exporter::SaveJsonFile(const std::string& filename, const nlohmann::json& jsonData)
+{
+    std::ofstream writing_file;
+    writing_file.open(filename, std::ios::out);
+	if (writing_file.is_open())
+	{
+        writing_file << jsonData.dump() << std::endl;
+        writing_file.close();
+
+        return true;
+	}
+    else
+    {
+        return false; // ファイルが開けなかった場合は失敗
+    }
+}
+
+bool Exporter::LoadJsonFile(const std::string& filename, nlohmann::json* jsonData)
+{
+    std::ifstream ifs(filename.c_str());
+    if (ifs.good())
+    {
+        ifs >> *jsonData;
+        return true;
+    }
+    else
+    {
+		return false;
+    }
 }

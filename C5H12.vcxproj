@@ -218,6 +218,8 @@
     <ClCompile Include="Library\Math\Vector.cpp" />
     <ClCompile Include="Library\Model\ModelCollision.cpp" />
     <ClCompile Include="Library\Network\ClientAssignment.cpp" />
+    <ClCompile Include="Library\Particle\ParticleEmiter.cpp" />
+    <ClCompile Include="Library\Particle\ParticleCanvas.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
     <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
     <ClCompile Include="Library\PostProcess\DepthOfField\DepthOfField.cpp" />
@@ -368,6 +370,9 @@
     <ClInclude Include="Library\Math\Vector.h" />
     <ClInclude Include="Library\Model\ModelCollision.h" />
     <ClInclude Include="Library\Network\ClientAssignment.h" />
+    <ClInclude Include="Library\Particle\ParticleEmiter.h" />
+    <ClInclude Include="Library\Particle\ParticleCanvas.h" />
+    <ClInclude Include="Library\Particle\ParticleDefine.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
     <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />
     <ClInclude Include="Library\PostProcess\DepthOfField\DepthOfField.h" />

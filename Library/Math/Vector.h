@@ -50,15 +50,15 @@ public:
 #pragma endregion
 
 #pragma region 静的メンバ関数
-    //  VECTOR2の長さの二乗を取得
+    //  Vector2の長さの二乗を取得
     static float   LengthSq(const Vector2&);
-    //  VECTOR2の長さを取得
+    //  Vector2の長さを取得
     static float   Length(const Vector2&);
-    //  VECTOR2を単位化
+    //  Vector2を単位化
     static Vector2 Normalize(const Vector2&);
-    //  VECTOR2対VECTOR2の内積
+    //  Vector2対Vector2の内積
     static float Dot(const Vector2& src, const Vector2& dst);
-    //  VECTOR2対VECTOR2の外積
+    //  Vector2対Vector2の外積
     static Vector2 Cross(const Vector2& src, const Vector2& dst);
     //  srcとdstで保管処理
     //  t   : 経過時間(0.0f ~ 1.0f)
@@ -66,15 +66,15 @@ public:
 #pragma endregion
 
 #pragma region 関数
-    //  VECTOR2の長さの二乗を取得
+    //  Vector2の長さの二乗を取得
 	float Length() const { return Length(*this); }
-    //  VECTOR2の長さを取得
+    //  Vector2の長さを取得
 	float LengthSq() const { return LengthSq(*this); }
-    //  VECTOR2対VECTOR2の内積
+    //  Vector2対Vector2の内積
 	float Dot(const Vector2& v) const { return Dot(*this, v); }
-    //  VECTOR2対VECTOR2の外積
+    //  Vector2対Vector2の外積
     Vector2 Cross(const Vector2& rhs) const { return Cross(*this, rhs); }
-    //  VECTOR2を単位化
+    //  Vector2を単位化
 	Vector2 Normalize() const { return Normalize(*this); }
     //  thisとdstで保管処理
 	Vector2 Lerp(const Vector2& dst, float t, float (*Easing)(float) = nullptr) const
@@ -84,7 +84,7 @@ public:
 #pragma endregion
 };
 //--------------------------------------------------
-// VECTOR3
+// Vector3
 class Vector3 : public DirectX::XMFLOAT3
 {
 public:
@@ -124,22 +124,24 @@ public:
 #pragma endregion
 
 #pragma region 静的メンバ関数
-    //  VECTOR3の長さの二乗を取得
+    //  Vector3の長さの二乗を取得
     static float   LengthSq(const Vector3&);
-    //  VECTOR3の長さを取得
+    //  Vector3の長さを取得
     static float   Length(const Vector3&);
-    //  VECTOR3を単位化
+    //  Vector3を単位化
     static Vector3 Normalize(const Vector3&);
-    //  VECTOR3対VECTOR3の内積
+    //  Vector3対Vector3の内積
     static float Dot(const Vector3& src, const Vector3& dst);
-    //  VECTOR3対VECTOR3の外積
+    //  Vector3対Vector3の外積
     static Vector3 Cross(const Vector3& src, const Vector3& dst);
+    // Vector3対Vector3の各項目掛け算
+	static Vector3 Multiply(const Vector3& src, const Vector3& dst);
     //  srcとdstで保管処理
     //  t   : 経過時間(0.0f ~ 1.0f)
     static Vector3 Lerp(const Vector3& src, const Vector3& dst, float t, float (*Easing)(float) = nullptr);
-    //  VECTOR3を度数法に変換
+    //  Vector3を度数法に変換
     static Vector3 ToDegrees(const Vector3& v);
-    //  VECTOR3を弧度法に変換
+    //  Vector3を弧度法に変換
     static Vector3 ToRadians(const Vector3& v);
     //  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
     static Vector3 FromRotationMatrix(const DirectX::XMFLOAT4X4& r);
@@ -157,27 +159,33 @@ public:
     /// <param name="normalVec">正規化されたベクトル</param>
     /// <returns>ラジアン</returns>
     static Vector3 CalcAngle(const Vector3& normalVec);
+    // 乱数取得
+    static Vector3 Random(const Vector3& min, const Vector3& max);
+	// 0~1の範囲でランダムな値を取得
+    static Vector3 RandomBias();
+	// -1~1の範囲でランダムな値を取得
+    static Vector3 RandomNormal();
 #pragma endregion
 
 #pragma region 関数
-    //  VECTOR3の長さの二乗を取得
+    //  Vector3の長さの二乗を取得
 	float Length() const { return Vector3::Length(*this); }
-    //  VECTOR3の長さを取得
+    //  Vector3の長さを取得
 	float LengthSq() const { return Vector3::LengthSq(*this); }
-    //  VECTOR3対VECTOR3の内積
+    //  Vector3対Vector3の内積
 	float Dot(const Vector3& v) const { return Vector3::Dot(*this, v); }
-    //  VECTOR3対VECTOR3の外積
+    //  Vector3対Vector3の外積
 	Vector3 Cross(const Vector3& rhs) const { return Vector3::Cross(*this, rhs); }
-    //  VECTOR3を単位化
+    //  Vector3を単位化
 	Vector3 Normalize() const { return Vector3::Normalize(*this); }
     //  thisとdstで保管処理
 	Vector3 Lerp(const Vector3& dst, float t, float (*Easing)(float) = nullptr) const
 	{
 		return Vector3::Lerp(*this, dst, t, Easing);
 	}
-    //  VECTOR3を度数法に変換
+    //  Vector3を度数法に変換
 	Vector3 ToDegrees() const { return Vector3::ToDegrees(*this); }
-    //  VECTOR3を弧度法に変換
+    //  Vector3を弧度法に変換
 	Vector3 ToRadians() const { return Vector3::ToRadians(*this); }
     // 行列との掛け算
 	Vector3 TransformCoord(const DirectX::XMFLOAT4X4& m) const
@@ -210,7 +218,7 @@ public:
 };
 
 //--------------------------------------------------
-// VECTOR4
+// Vector4
 class Vector4 : public DirectX::XMFLOAT4
 {
 public:
@@ -226,6 +234,7 @@ public:
     static constexpr DirectX::XMFLOAT4 Up       = { 0.0f, 1.0f, 0.0f, 0.0f };
     static constexpr DirectX::XMFLOAT4 Front    = { 0.0f, 0.0f, 1.0f, 0.0f };
     static constexpr DirectX::XMFLOAT4 Zero     = { 0.0f, 0.0f, 0.0f, 0.0f };
+    static constexpr DirectX::XMFLOAT4 One      = { 1.0f, 1.0f, 1.0f, 1.0f };
     static constexpr DirectX::XMFLOAT4 Black    = { 0.0f, 0.0f, 0.0f, 0.0f };
     static constexpr DirectX::XMFLOAT4 White    = { 1.0f, 1.0f, 1.0f, 1.0f };
     static constexpr DirectX::XMFLOAT4 Gray     = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -235,7 +244,19 @@ public:
     static constexpr DirectX::XMFLOAT4 Yellow   = { 1.0f, 1.0f, 0.0f, 1.0f };
 #pragma endregion
 
+#pragma region 静的メンバ関数
+    // Vector4対Vector4の各項目掛け算
+    static Vector4 Multiply(const Vector4& src, const Vector4& dst);
+    // 乱数取得
+    static Vector4 Random(const Vector4& min, const Vector4& max);
+    // 0~1の範囲でランダムな値を取得
+    static Vector4 RandomBias();
+    // -1~1の範囲でランダムな値を取得
+    static Vector4 RandomNormal();
+#pragma endregion
+
 #pragma region 演算子オーバーロード
+    Vector4 operator+(const Vector4&) const;
     Vector4 operator*(float) const;
     Vector4 operator*(const Vector4&) const;
 #pragma endregion

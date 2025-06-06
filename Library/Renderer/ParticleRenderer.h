@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../Library/Graphics/RenderContext.h"
-#include "../../Library/Math/Vector.h"
+#include "../../Library/Particle/ParticleDefine.h"
+#include "../../Library/Particle/ParticleCanvas.h"
 
 class ParticleRenderer
 {
@@ -11,56 +11,47 @@ public:
 	// 描画時のSRVセット番号
 	static constexpr UINT TextureSRVStartNum = 30;
 
-	// パーティクル処理タイプ
-	enum class ParticleType : UINT
-	{
-		None = 0,			// 無効
-		Billboard = 1,		// ビルボード
-	};
-
-	// パーティクル生成用構造体
-	struct EmitData
-	{
-		// 処理タイプ
-		ParticleType	type = ParticleType::None;
-		// 切り取り座標番号
-		UINT	texcoordIndex = 0;
-		// 生存時間
-		float	timer = 0.0f;
-		// テクスチャアニメーションの速度
-		float	texAnimTime = 0.0f;
-
-		Vector4 position = { 0,0,0,0 };
-		Vector4 rotation = { 0,0,0,0 };
-		Vector4 scale = { 1,1,1,0 };
-
-		Vector4 velocity = { 0,0,0,0 };
-		Vector4 acceleration = { 0,0,0,0 };
-
-		Vector4 color = { 1,1,1,1 };
-	};
-
-	// パーティクル構造体
+	// GPU上のパーティクル構造体
 	struct ParticleData
 	{
 		// 処理タイプ
-		ParticleType	type = ParticleType::None;
-		// 切り取り座標番号
-		UINT	texcoordIndex = 0;
+		ParticleUpdateType	updateType = ParticleUpdateType::Default;
+		// 描画タイプ
+		ParticleRenderType	renderType = ParticleRenderType::Default;
 		// 生存時間
-		float	timer = 0.0f;
+		float	lifeTime = 0.0f;
+		// 経過時間
+		float	elapsedTime = 0.0f;
+
+		// 発生位置
+		Vector4 position = Vector4::Zero;
+		// 回転(ラジアン)
+		Vector4 rotation = Vector4::Zero;
+		// 大きさ
+		Vector4 scale = Vector4::One;
+		// 速度
+		Vector4 velocity = Vector4::Zero;
+		// 加速力
+		Vector4 acceleration = Vector4::Zero;
+		// 初期色
+		Vector4 startColor = Vector4::White;
+		// 終了色
+		Vector4 endColor = Vector4::White;
+		// 現在の色
+		Vector4 color = Vector4::White;
+
+		// テクスチャ座標(uv)
+		Vector4 texcoord = Vector4::Zero;
+		// テクスチャ座標
+		Vector2 texPosition = Vector2::Zero;
+		// テクスチャの大きさ
+		Vector2 texSize = Vector2::One;
+		// テクスチャの分割数
+		DirectX::XMUINT2 texSplit = DirectX::XMUINT2();
+		// テクスチャ切り取り番号
+		UINT	texcoordIndex = 0;
 		// テクスチャアニメーションの速度
 		float	texAnimTime = 0.0f;
-
-		Vector4 position = { 0,0,0,0 };
-		Vector4 rotation = { 0,0,0,0 };
-		Vector4 scale = { 1,1,1,0 };
-
-		Vector4 velocity = { 0,0,0,0 };
-		Vector4 acceleration = { 0,0,0,0 };
-
-		Vector4 texcoord = { 0,0,0,0 };
-		Vector4 color = { 1,1,1,1 };
 	};
 
 	// パーティクルヘッダー構造体
@@ -76,7 +67,7 @@ public:
 	struct CommonConstants
 	{
 		float				elapsedTime;
-		DirectX::XMUINT2	textureSplitCount;
+		Vector2				canvasSize;
 		UINT				systemNumParticles;
 
 		UINT				totalEmitCount;
@@ -129,12 +120,12 @@ public:
     /// </summary>
     /// <param name="device"></param>
     /// <param name="particlesCount"></param>
-    void Initialize(ID3D11Device* device, UINT particlesCount = 100000, DirectX::XMUINT2 splitCount = DirectX::XMUINT2(3, 2));
+    void Initialize(ID3D11Device* device, UINT particlesCount = 100000);
 	/// <summary>
 	/// パーティクル生成
 	/// </summary>
 	/// <param name="data"></param>
-	void Emit(const EmitData& data);
+	void Emit(const ParticleEmitData& data);
 	/// <summary>
 	/// 更新処理
 	/// </summary>
@@ -146,16 +137,41 @@ public:
 	/// </summary>
 	/// <param name="rc"></param>
 	void Render(ID3D11DeviceContext* dc);
+	/// <summary>
+	/// GUI描画
+	/// </summary>
+	void DrawGui();
 
+	/// <summary>
+	/// テクスチャデータの登録
+	/// </summary>
+	/// <param name="key"></param>
+	/// <param name="filepath"></param>
+	/// <param name="split"></param>
+	/// <returns></returns>
+	ParticleCanvas::TextureData RegisterTextureData(const std::string& key, 
+		const std::wstring& filepath,
+		DirectX::XMUINT2 split = DirectX::XMUINT2(1, 1));
+	/// <summary>
+	/// テクスチャデータの取得
+	/// </summary>
+	/// <param name="key"></param>
+	/// <returns></returns>
+	ParticleCanvas::TextureData GetTextureData(const std::string& key) const;
+	/// <summary>
+	/// テクスチャデータのコンテナ取得
+	/// </summary>
+	/// <returns></returns>
+	std::unordered_map<std::string, ParticleCanvas::TextureData>& GetTextureDatas() { return _textureDatas; }
 private:
+	std::unique_ptr<ParticleCanvas> _particleCanvas;
+	std::unordered_map<std::string, ParticleCanvas::TextureData> _textureDatas;
 
 	UINT _numParticles{};
 	UINT _numEmitParticles{};
 	bool _oneShotInitialize = false;
-	DirectX::XMUINT2 _textureSplitCount{};
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _textureSRV;
 
-	std::vector<EmitData>								_emitParticles;
+	std::vector<ParticleEmitData>						_emitParticles;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>				_commonConstantBuffer;
 
 	// パーティクルバッファ
@@ -196,4 +212,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>				_particleHeaderBuffer;
 	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView>	_particleHeaderUAV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	_particleHeaderSRV;
+
+	// デバッグ表示用
+	bool _debugDraw = false;
 };

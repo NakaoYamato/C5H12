@@ -25,9 +25,9 @@ void main(uint3 dTid : SV_DispatchThreadID)
     ParticleData data = particleDataBuffer[dataIndex];
     
     // 経過時間処理
-    float oldTime = data.timer;
-    data.timer -= elapsedTime;
-    if (data.timer < 0.0)
+    float oldElapsedTime = data.elapsedTime;
+    data.elapsedTime    += elapsedTime;
+    if (data.elapsedTime > data.lifeTime)
     {
         // 寿命が尽きたら未使用リストに追加
         header.alive = 0;
@@ -51,8 +51,8 @@ void main(uint3 dTid : SV_DispatchThreadID)
     // アニメーション処理
     if (data.texAnimTime > 0.0f)
     {
-        uint oldValue = (uint) (oldTime / data.texAnimTime);
-        uint currentValue = (uint) (data.timer / data.texAnimTime);
+        uint oldValue = (uint) (oldElapsedTime / data.texAnimTime);
+        uint currentValue = (uint) (data.elapsedTime / data.texAnimTime);
         
         if (oldValue != currentValue)
         {
@@ -62,15 +62,17 @@ void main(uint3 dTid : SV_DispatchThreadID)
     }
     
     //  切り取り座標を算出
-    uint type = (uint) (data.texcoordIndex + 0.5f);
-    float w = 1.0 / textureSplitCount.x;
-    float h = 1.0 / textureSplitCount.y;
-    float2 uv = float2((type % textureSplitCount.x) * w, (type / textureSplitCount.x) * h);
+    float w = (data.texSize.x / data.texSplit.x) / canvasSize.x;
+    float h = (data.texSize.y / data.texSplit.y) / canvasSize.y;
+    float2 uv = float2(
+    data.texPosition.x / canvasSize.x + (uint)(data.texcoordIndex % data.texSplit.x) * w,
+    data.texPosition.y / canvasSize.y + (uint)(data.texcoordIndex / data.texSplit.x) * h);
     data.texcoord.xy = uv;
     data.texcoord.zw = float2(w, h);
-        
-    //  徐々に透明にしていく
-    data.color.a = saturate(data.timer);
+    
+    // 色の補間
+    float timerRate = data.elapsedTime / data.lifeTime;
+    data.color = data.endColor * timerRate + data.startColor * (1.0f - timerRate);
     
     // 深度ソート値算出
     header.depth = mul(float4(data.position.xyz, 1), viewProjection).w;

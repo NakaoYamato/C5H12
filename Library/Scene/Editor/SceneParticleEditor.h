@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../SceneManager.h"
+#include "../../Library/Particle/ParticleEmiter.h"
 
 class SceneParticleEditor : public Scene
 {
@@ -22,6 +23,9 @@ public:
 	{
 		return std::make_shared<SceneParticleEditor>();
 	}
+
+private:
+	ParticleEmiter _particleEmiter; // パーティクルエミッター
 };
 
 // メニューバーに登録

@@ -3,10 +3,11 @@
 #include "../../Library/HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
 
-/// 初期化
-void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount, DirectX::XMUINT2 splitCount)
-{
+#include <imgui.h>
 
+/// 初期化
+void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount)
+{
 	HRESULT hr = S_OK;
 
 	// バイトニックソートの使用上、パーティクル数を2の累乗にしておく
@@ -18,7 +19,6 @@ void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount, Dir
 	// パーティクル数をスレッド数に合わせて制限
 	_numParticles = ((particlesCount + (NumParticleThread - 1)) / NumParticleThread) * NumParticleThread;
 	_numEmitParticles = min(_numParticles, 10000); // 1Fでの生成制限数
-	_textureSplitCount = splitCount;
 	_oneShotInitialize = false;
 
 	// 定数バッファ
@@ -88,9 +88,9 @@ void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount, Dir
 	{
 		D3D11_BUFFER_DESC desc{};
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		desc.ByteWidth = sizeof(EmitData) * _numEmitParticles;
+		desc.ByteWidth = sizeof(ParticleEmitData) * _numEmitParticles;
 		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-		desc.StructureByteStride = sizeof(EmitData);
+		desc.StructureByteStride = sizeof(ParticleEmitData);
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		hr = device->CreateBuffer(&desc, nullptr,
 			_particleEmitBuffer.GetAddressOf());
@@ -173,12 +173,16 @@ void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount, Dir
 	GpuResourceManager::CreateGsFromCso(device, "./Data/Shader/ComputeParticleRenderGS.cso", _geometryShader.GetAddressOf());
 	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/ComputeParticleRenderPS.cso", _pixelShader.GetAddressOf());
 
+	// キャンバス作成
+	_particleCanvas = std::make_unique<ParticleCanvas>();
+
 	// 画像読み込み
-	GpuResourceManager::LoadTextureFromFile(device, L"./Data/Texture/Particle/AdobeStock_255896219.png", _textureSRV.GetAddressOf(), nullptr);
+	RegisterTextureData("Breath", L"./Data/Texture/Particle/AdobeStock_255896219.png", { 3,2 });
+	RegisterTextureData("Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
 }
 
 /// パーティクル生成
-void ParticleRenderer::Emit(const EmitData& data)
+void ParticleRenderer::Emit(const ParticleEmitData& data)
 {
 	// 生成数が制限を超えている場合は何もしない
 	if (_emitParticles.size() >= _numEmitParticles)
@@ -197,7 +201,8 @@ void ParticleRenderer::Update(ID3D11DeviceContext* dc, float elapsedTime)
 		// 定数バッファ更新
 		CommonConstants constant{};
 		constant.elapsedTime = elapsedTime;
-		constant.textureSplitCount = _textureSplitCount;
+		constant.canvasSize.x = static_cast<float>(ParticleCanvas::CanvasWidth);
+		constant.canvasSize.y = static_cast<float>(ParticleCanvas::CanvasHeight);
 		constant.systemNumParticles = _numParticles;
 		constant.totalEmitCount = static_cast<UINT>(_emitParticles.size());
 		dc->UpdateSubresource(_commonConstantBuffer.Get(), 0, nullptr, &constant, 0, 0);
@@ -246,7 +251,7 @@ void ParticleRenderer::Update(ID3D11DeviceContext* dc, float elapsedTime)
 		// エミットバッファ更新
 		D3D11_BOX writeBox = {};
 		writeBox.left = 0;
-		writeBox.right = static_cast<UINT>(_emitParticles.size() * sizeof(EmitData));
+		writeBox.right = static_cast<UINT>(_emitParticles.size() * sizeof(ParticleEmitData));
 		writeBox.top = 0;
 		writeBox.bottom = 1;
 		writeBox.front = 0;
@@ -256,7 +261,7 @@ void ParticleRenderer::Update(ID3D11DeviceContext* dc, float elapsedTime)
 			0,
 			&writeBox,
 			_emitParticles.data(),
-			static_cast<UINT>(_emitParticles.size() * sizeof(EmitData)),
+			static_cast<UINT>(_emitParticles.size() * sizeof(ParticleEmitData)),
 			0);
 		dc->CSSetShader(_emitComputeShader.Get(), nullptr, 0);
 		dc->DispatchIndirect(_indirectDataBuffer.Get(), EmitDispatchIndirectOffset);
@@ -332,7 +337,7 @@ void ParticleRenderer::Render(ID3D11DeviceContext* dc)
 	dc->IASetInputLayout(nullptr);
 
 	// リソース設定
-	dc->PSSetShaderResources(TextureSRVStartNum, 1, _textureSRV.GetAddressOf());
+	dc->PSSetShaderResources(TextureSRVStartNum, 1, _particleCanvas->GetColorSRV().GetAddressOf());
 	dc->GSSetShaderResources(0, 1, _particleDataSRV.GetAddressOf());
 	dc->GSSetShaderResources(1, 1, _particleHeaderSRV.GetAddressOf());
 
@@ -356,4 +361,58 @@ void ParticleRenderer::Render(ID3D11DeviceContext* dc)
 	dc->PSSetShaderResources(TextureSRVStartNum, 1, nullSRV);
 	dc->GSSetShaderResources(0, 1, nullSRV);
 	dc->GSSetShaderResources(1, 1, nullSRV);
+}
+
+/// GUI描画
+void ParticleRenderer::DrawGui()
+{
+	// メニューバー
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu(u8"デバッグ"))
+		{
+			ImGui::Checkbox(u8"パーティクル", &_debugDraw);
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	if (_debugDraw)
+	{
+		if (ImGui::Begin(u8"パーティクル"))
+		{
+			_particleCanvas->DrawGui();
+		}
+		ImGui::End();
+	}
+}
+
+/// テクスチャの登録
+ParticleCanvas::TextureData ParticleRenderer::RegisterTextureData(const std::string& key, 
+	const std::wstring& filepath,
+	DirectX::XMUINT2	split)
+{
+	// すでに登録されている場合はそのまま返す
+	auto it = _textureDatas.find(key);
+	if (it != _textureDatas.end())
+	{
+		return it->second;
+	}
+	// テクスチャのロード
+	_textureDatas[key] = _particleCanvas->Load(filepath.c_str(), split);
+	// ロードしたテクスチャ情報を返す
+	return _textureDatas[key];
+}
+
+/// テクスチャデータの取得
+ParticleCanvas::TextureData ParticleRenderer::GetTextureData(const std::string& key) const
+{
+	// キーが存在しない場合はエラー
+	if (_textureDatas.find(key) == _textureDatas.end())
+	{
+		_ASSERT_EXPR(false, L"テクスチャが登録されていません");
+		return ParticleCanvas::TextureData();
+	}
+
+	return _textureDatas.at(key);
 }

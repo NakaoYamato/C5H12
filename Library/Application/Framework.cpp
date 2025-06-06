@@ -5,7 +5,7 @@
 #include "../Input/Input.h"
 #include "../Audio/AudioSystem.h"
 #include "../DebugSupporter/DebugSupporter.h"
-#include "../ResourceManager/ModelResourceManager.h"
+#include "../Model/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
 #include "../Renderer/PrimitiveRenderer.h"
 #include "../JobSystem/JobSystem.h"

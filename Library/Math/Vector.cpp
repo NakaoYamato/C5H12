@@ -1,4 +1,6 @@
-#include "VECTOR.h"
+#include "Vector.h"
+
+#include "Random.h"
 
 #pragma region Vector2
 #pragma region 演算子オーバーロード
@@ -218,6 +220,15 @@ Vector3 Vector3::Cross(const Vector3& src, const Vector3& dst)
         DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&src), DirectX::XMLoadFloat3(&dst)));
     return v;
 }
+// Vector3対Vector3の各項目掛け算
+Vector3 Vector3::Multiply(const Vector3& src, const Vector3& dst)
+{
+    return Vector3(
+		src.x * dst.x,
+		src.y * dst.y,
+		src.z * dst.z
+    );
+}
 //  srcとdstで保管処理
 //  t   : 経過時間(0.0f ~ 1.0f)
 Vector3 Vector3::Lerp(const Vector3& src, const Vector3& dst, float t, float(*Easing)(float))
@@ -311,11 +322,80 @@ Vector3 Vector3::CalcAngle(const Vector3& normalVec)
     res.z = std::acosf(normalVec.z);
     return res;
 }
+// 乱数取得
+Vector3 Vector3::Random(const Vector3& min, const Vector3& max)
+{
+    return Vector3(
+		Random::Rand(min.x, max.x),
+		Random::Rand(min.y, max.y),
+		Random::Rand(min.z, max.z)
+    );
+}
+// 0~1の範囲でランダムな値を取得
+Vector3 Vector3::RandomBias()
+{
+    return Vector3(
+		Random::RandBias(),
+		Random::RandBias(),
+		Random::RandBias()
+    );
+}
+// -1~1の範囲でランダムな値を取得
+Vector3 Vector3::RandomNormal()
+{
+    return Vector3(
+		Random::RandNormal(),
+		Random::RandNormal(),
+		Random::RandNormal()
+    );
+}
 #pragma endregion
 
 #pragma endregion
 
 #pragma region Vector4
+#pragma region 静的メンバ関数
+Vector4 Vector4::Multiply(const Vector4& src, const Vector4& dst)
+{
+    return Vector4(
+        src.x * dst.x,
+        src.y * dst.y,
+        src.z * dst.z,
+		src.w * dst.w
+    );
+}
+Vector4 Vector4::Random(const Vector4& min, const Vector4& max)
+{
+    return Vector4(
+        Random::Rand(min.x, max.x),
+        Random::Rand(min.y, max.y),
+        Random::Rand(min.z, max.z),
+		Random::Rand(min.w, max.w)
+    );
+}
+Vector4 Vector4::RandomBias()
+{
+    return Vector4(
+        Random::RandBias(),
+        Random::RandBias(),
+        Random::RandBias(),
+		Random::RandBias()
+    );
+}
+Vector4 Vector4::RandomNormal()
+{
+    return Vector4(
+        Random::RandNormal(),
+        Random::RandNormal(),
+        Random::RandNormal(),
+		Random::RandNormal()
+    );
+}
+#pragma endregion
+Vector4 Vector4::operator+(const Vector4&) const
+{
+	return Vector4(x + x, y + y, z + z, w + w);
+}
 Vector4 Vector4::operator*(float f) const
 {
     return Vector4(x * f, y * f, z * f, w);

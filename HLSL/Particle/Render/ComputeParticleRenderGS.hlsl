@@ -20,7 +20,7 @@ void main(point GS_IN gin[1], inout TriangleStream<PS_IN> output)
 	//  ワールド行列生成
     float4x4 scaleMatrix = ToMatrixScaling(scale);
     float4x4 rotationMatrix = ToMatrixRotationRollPitchYaw(particleDataBuffer[vertexId].rotation.xyz);
-    if (particleDataBuffer[vertexId].type == ParticleTypeBillboard)
+    if (particleDataBuffer[vertexId].renderType == ParticleRenderTypeBillboard)
     {
         //  ビルボード行列生成(ビュー行列の逆行列で良い。ただし移動値はいらない)
         float4x4 billboardMatrix = invView;
@@ -37,7 +37,7 @@ void main(point GS_IN gin[1], inout TriangleStream<PS_IN> output)
     float4 texcoord = particleDataBuffer[vertexId].texcoord;
     float4 color = particleDataBuffer[vertexId].color;
 
-    //  頂点生成
+    //  頂点生成(ローカル座標)
     static const float4 vertexPositions[4] =
     {
         float4(-0.5f, -0.5f, 0, 1),
@@ -47,10 +47,10 @@ void main(point GS_IN gin[1], inout TriangleStream<PS_IN> output)
     };
     static const float2 vertexTexcoord[4] =
     {
-        float2(0, 0),
-        float2(1, 0),
         float2(0, 1),
         float2(1, 1),
+        float2(0, 0),
+        float2(1, 0),
     };
     for (uint i = 0; i < 4; i++)
     {

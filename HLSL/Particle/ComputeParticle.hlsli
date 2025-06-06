@@ -3,9 +3,12 @@
 // パーティクルスレッド数
 static const int NumParticleThread = 1024;
 
-// パーティクル処理タイプ
-static const uint ParticleTypeNone = 0;
-static const uint ParticleTypeBillboard = 1;
+// パーティクル更新タイプ
+static const uint ParticleUpdateTypeDefault = 0;
+
+// パーティクル描画タイプ
+static const uint ParticleRenderTypeDefault = 0;
+static const uint ParticleRenderTypeBillboard = 1;
 
 // パーティクルのテクスチャ開始番号
 #define ParticleTextureStartIndex t30
@@ -13,46 +16,82 @@ static const uint ParticleTypeBillboard = 1;
 // 生成パーティクル構造体
 struct EmitParticleData
 {
-    // 処理タイプ
-    uint type;
-    // 切り取り座標番号
-    uint texcoordIndex;
+	// 更新タイプ
+    uint updateType;
+    // 描画タイプ
+    uint renderType;
     // 生存時間
     float timer;
-	// テクスチャアニメーション間隔
+    float padding_0;
+    
+    // 生成座標
+    float4 position;
+    // 回転情報
+    float4 rotation;
+    // 拡縮情報
+    float4 scale;
+    // 初速
+    float4 velocity;
+    // 加速度
+    float4 acceleration;
+    // 初期色
+    float4 startColor;
+    // 終了色
+    float4 endColor;
+    
+	// テクスチャ座標
+    float2 texPosition;
+	// テクスチャの大きさ
+    float2 texSize;
+	// テクスチャの分割数
+    uint2 texSplit;
+    // テクスチャ切り取り番号
+    uint texcoordIndex;
+	// テクスチャアニメーションの速度
     float texAnimTime;
-    
-    float4 position; // 生成座標
-    float4 rotation; // 回転情報
-    float4 scale; // 拡縮情報
-    
-    float4 velocity; // 初速
-    float4 acceleration; // 加速度
-    
-    float4 color; // 色情報
 };
 
 // パーティクル構造体
 struct ParticleData
 {
-    // 処理タイプ
-    uint type;
-    // 切り取り座標番号
+	// 更新タイプ
+    uint updateType;
+    // 描画タイプ
+    uint renderType;
+    // 生存時間
+    float lifeTime;
+    // 経過時間
+    float elapsedTime;
+    
+    // 生成座標
+    float4 position;
+    // 回転情報
+    float4 rotation;
+    // 拡縮情報
+    float4 scale;
+    // 初速
+    float4 velocity;
+    // 加速度
+    float4 acceleration;
+    // 初期色
+    float4 startColor;
+    // 終了色
+    float4 endColor;
+    // 現在の色
+    float4 color;
+    
+    // テクスチャ座標(uv)
+    float4 texcoord;
+	// テクスチャ座標
+    float2 texPosition;
+	// テクスチャの大きさ
+    float2 texSize;
+	// テクスチャの分割数
+    uint2 texSplit;
+    // テクスチャ切り取り番号
     uint texcoordIndex;
-    // 残り生存時間
-    float timer;
-	// テクスチャアニメーション間隔
+	// テクスチャアニメーションの速度
     float texAnimTime;
-    
-    float4 position; // 生成座標
-    float4 rotation; // 回転情報
-    float4 scale; // 拡縮情報
-    
-    float4 velocity; // 初速
-    float4 acceleration; // 加速度
-    
-    float4 texcoord; // UV情報
-    float4 color; // 色情報
 };
 
 // パーティクルヘッダー構造体
@@ -87,7 +126,7 @@ static const uint IndirectArgumentsDrawIndirect = 40;
 cbuffer COMPUTE_PARTICLE_COMMON_CONSTANT_BUFFER : register(b10)
 {
     float   elapsedTime;
-    uint2   textureSplitCount;
+    float2  canvasSize;
     uint    systemNumParticles;
     // 生成予定のパーティクル数
     uint    totalEmitCount;

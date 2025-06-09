@@ -35,3 +35,10 @@ void Transform::DrawGui()
     Vector3 wp = GetWorldPosition();
     ImGui::DragFloat3("world position", &wp.x, 0.1f);
 }
+
+/// 指定方向（ワールド空間）を向く
+void Transform::LookAt(const Vector3& worldDirection)
+{
+	Quaternion q = Quaternion::LookAt(_position, GetAxisZ(), _position + worldDirection);
+	_angle = Quaternion::ToRollPitchYaw(q);
+}

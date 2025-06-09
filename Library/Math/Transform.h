@@ -15,6 +15,11 @@ public:
 	// デバッグGUI表示
 	void DrawGui();
 
+	/// <summary>
+	/// 指定方向（ワールド空間）を向く
+	/// </summary>
+	/// <param name="worldDirection"></param>
+	void LookAt(const Vector3& worldDirection);
 #pragma region アクセサ
 	/// <summary>
 	/// 座標取得(ローカル)

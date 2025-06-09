@@ -31,10 +31,14 @@ struct ParticleEmitData
 
 	// 発生位置
 	Vector4 position = Vector4::Zero;
-	// 回転(ラジアン)
-	Vector4 rotation = Vector4::Zero;
-	// 大きさ
-	Vector4 scale = Vector4::One;
+	// 開始時の回転(ラジアン)
+	Vector4 startRotation = Vector4::Zero;
+	// 終了時の回転(ラジアン)
+	Vector4 endRotation = Vector4::Zero;
+	// 開始時の大きさ
+	Vector4 startScale = Vector4::One;
+	// 終了時の大きさ
+	Vector4 endScale = Vector4::One;
 	// 速度
 	Vector4 velocity = Vector4::Zero;
 	// 加速力

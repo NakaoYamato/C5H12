@@ -25,27 +25,29 @@ void main(uint3 dTid : SV_DispatchThreadID)
     
     //  パーティクル生成処理
     particle_header_buffer[header_index].alive          = 1; //  生存フラグ
-    particle_header_buffer[header_index].particleIndex = particleIndex; //  パーティクルデータバッファの座標
+    particle_header_buffer[header_index].particleIndex  = particleIndex; //  パーティクルデータバッファの座標
     particle_header_buffer[header_index].depth          = 1; //  深度
     particle_header_buffer[header_index].dummy          = 0; //  空き
     
-    particleDataBuffer[particleIndex].updateType       = emitParticleButter[emit_index].updateType;
-    particleDataBuffer[particleIndex].renderType       = emitParticleButter[emit_index].renderType;
-    particleDataBuffer[particleIndex].lifeTime         = emitParticleButter[emit_index].timer;
-    particleDataBuffer[particleIndex].elapsedTime      = 0.0f;
-    particleDataBuffer[particleIndex].texAnimTime      = emitParticleButter[emit_index].texAnimTime;
+    particleDataBuffer[particleIndex].updateType        = emitParticleButter[emit_index].updateType;
+    particleDataBuffer[particleIndex].renderType        = emitParticleButter[emit_index].renderType;
+    particleDataBuffer[particleIndex].lifeTime          = emitParticleButter[emit_index].timer;
+    particleDataBuffer[particleIndex].elapsedTime       = 0.0f;
+    particleDataBuffer[particleIndex].texAnimTime       = emitParticleButter[emit_index].texAnimTime;
     
-    particleDataBuffer[particleIndex].position         = emitParticleButter[emit_index].position;
-    particleDataBuffer[particleIndex].rotation         = emitParticleButter[emit_index].rotation;
-    particleDataBuffer[particleIndex].scale            = emitParticleButter[emit_index].scale;
-    particleDataBuffer[particleIndex].velocity         = emitParticleButter[emit_index].velocity;
-    particleDataBuffer[particleIndex].acceleration     = emitParticleButter[emit_index].acceleration;
-    particleDataBuffer[particleIndex].startColor       = emitParticleButter[emit_index].startColor;
-    particleDataBuffer[particleIndex].endColor         = emitParticleButter[emit_index].endColor;
+    particleDataBuffer[particleIndex].position          = emitParticleButter[emit_index].position;
+    particleDataBuffer[particleIndex].startRotation     = emitParticleButter[emit_index].startRotation;
+    particleDataBuffer[particleIndex].endRotation       = emitParticleButter[emit_index].endRotation;
+    particleDataBuffer[particleIndex].startScale        = emitParticleButter[emit_index].startScale;
+    particleDataBuffer[particleIndex].endScale          = emitParticleButter[emit_index].endScale;
+    particleDataBuffer[particleIndex].velocity          = emitParticleButter[emit_index].velocity;
+    particleDataBuffer[particleIndex].acceleration      = emitParticleButter[emit_index].acceleration;
+    particleDataBuffer[particleIndex].startColor        = emitParticleButter[emit_index].startColor;
+    particleDataBuffer[particleIndex].endColor          = emitParticleButter[emit_index].endColor;
     
-    particleDataBuffer[particleIndex].texPosition      = emitParticleButter[emit_index].texPosition;
-    particleDataBuffer[particleIndex].texSize          = emitParticleButter[emit_index].texSize;
-    particleDataBuffer[particleIndex].texSplit         = emitParticleButter[emit_index].texSplit;
-    particleDataBuffer[particleIndex].texcoordIndex    = emitParticleButter[emit_index].texcoordIndex;
-    particleDataBuffer[particleIndex].texAnimTime      = emitParticleButter[emit_index].texAnimTime;
+    particleDataBuffer[particleIndex].texPosition       = emitParticleButter[emit_index].texPosition;
+    particleDataBuffer[particleIndex].texSize           = emitParticleButter[emit_index].texSize;
+    particleDataBuffer[particleIndex].texSplit          = emitParticleButter[emit_index].texSplit;
+    particleDataBuffer[particleIndex].texcoordIndex     = emitParticleButter[emit_index].texcoordIndex;
+    particleDataBuffer[particleIndex].texAnimTime       = emitParticleButter[emit_index].texAnimTime;
 }

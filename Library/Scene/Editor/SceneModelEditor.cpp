@@ -32,14 +32,15 @@ void SceneModelEditor::Initialize()
 
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
+
+    // グリッド表示
+	SetShowGrid(true);
 }
 
 void SceneModelEditor::Update(float elapsedTime)
 {
 	Scene::Update(elapsedTime);
 
-    // グリッド表示
-    Debug::Renderer::DrawGrid(10);
     Debug::Renderer::DrawAxis(DirectX::XMFLOAT4X4(
         1,0,0,0,
         0,1,0,0,

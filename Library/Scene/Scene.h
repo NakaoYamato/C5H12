@@ -130,6 +130,9 @@ public:
 	virtual Camera* GetMainCamera() {
 		return &_camera;
 	}
+
+	// グリッド表示フラグ取得
+	void SetShowGrid(bool show) { _showGrid = show; }
 #pragma endregion
 private:
 	std::unique_ptr<SkyMap>			_skyMap;
@@ -150,5 +153,9 @@ private:
 	CollisionManager				_collisionManager;
 	EffekseerEffectManager			_effekseerEffectManager;
 
+	// 初期化終了フラグ
 	bool							_ready = false;
+
+	// グリッド表示フラグ
+	bool							_showGrid = false;
 };

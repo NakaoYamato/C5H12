@@ -22,6 +22,7 @@ void main(uint3 dTid : SV_DispatchThreadID)
     if (header.alive == 0)
         return;
     
+    // パーティクルデータ取得
     ParticleData data = particleDataBuffer[dataIndex];
     
     // 経過時間処理
@@ -42,11 +43,20 @@ void main(uint3 dTid : SV_DispatchThreadID)
         return;
     }
     
+    // タイマーの割合を算出
+    float timerRate = data.elapsedTime / data.lifeTime;
+    
     // 速度更新
     data.velocity.xyz += data.acceleration.xyz * elapsedTime;
     
     // 位置更新
     data.position.xyz += data.velocity.xyz * elapsedTime;
+    
+    // 回転更新
+    data.rotation = lerp(data.startRotation, data.endRotation, timerRate);
+    
+    // 拡縮更新
+    data.scale = lerp(data.startScale, data.endScale, timerRate);
     
     // アニメーション処理
     if (data.texAnimTime > 0.0f)
@@ -71,8 +81,7 @@ void main(uint3 dTid : SV_DispatchThreadID)
     data.texcoord.zw = float2(w, h);
     
     // 色の補間
-    float timerRate = data.elapsedTime / data.lifeTime;
-    data.color = data.endColor * timerRate + data.startColor * (1.0f - timerRate);
+    data.color = lerp(data.startColor, data.endColor, timerRate);
     
     // 深度ソート値算出
     header.depth = mul(float4(data.position.xyz, 1), viewProjection).w;

@@ -5,7 +5,8 @@
 void WyvernBreathActor::OnCreate()
 {
 	auto capsule = this->AddCollider<CapsuleCollider>();
-	_breathController = this->AddComponent<WyvernBreathController>(capsule);
+	auto particleController = this->AddComponent<ParticleController>("./Data/Particle/Wyvern/Breath.json");
+	_breathController = this->AddComponent<WyvernBreathController>();
 
 	capsule->SetLayer(CollisionLayer::Attack);
 }

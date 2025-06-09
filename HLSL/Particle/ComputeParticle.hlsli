@@ -27,9 +27,11 @@ struct EmitParticleData
     // ¶¬À•W
     float4 position;
     // ‰ñ“]î•ñ
-    float4 rotation;
+    float4 startRotation;
+    float4 endRotation;
     // Šgkî•ñ
-    float4 scale;
+    float4 startScale;
+    float4 endScale;
     // ‰‘¬
     float4 velocity;
     // ‰Á‘¬“x
@@ -66,8 +68,12 @@ struct ParticleData
     // ¶¬À•W
     float4 position;
     // ‰ñ“]î•ñ
+    float4 startRotation;
+    float4 endRotation;
     float4 rotation;
     // Šgkî•ñ
+    float4 startScale;
+    float4 endScale;
     float4 scale;
     // ‰‘¬
     float4 velocity;

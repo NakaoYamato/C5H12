@@ -69,6 +69,10 @@ void Scene::Update(float elapsedTime)
 
 	// パーティクルの更新
 	_particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+
+    // グリッド表示
+    if (_showGrid)
+        Debug::Renderer::DrawGrid(10);
 }
 
 /// 一定間隔の更新処理

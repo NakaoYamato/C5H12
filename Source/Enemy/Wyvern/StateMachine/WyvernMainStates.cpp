@@ -503,9 +503,8 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 		Vector3 position = Vector3::TransformCoord(_fireBreathOffset + model->GetPoseNodes()[nodeIndex].position,
 			model->GetPoseNodes()[nodeIndex].worldTransform);
 		_fireBreathActor.lock()->GetTransform().SetPosition(position);
-		// ブレスの方向を設定
-		Vector3 direction = Vector3::TransformNormal(Vector3::Up, model->GetPoseNodes()[nodeIndex].worldTransform);
-		_fireBreathActor.lock()->GetBreathController()->SetBreathDirection(direction.Normalize());
+		// ブレスのアクターを頭の向いている方向に向かせる
+		_fireBreathActor.lock()->GetTransform().LookAt(Vector3::TransformNormal(Vector3::Up, model->GetPoseNodes()[nodeIndex].worldTransform));
 	}
 	// ブレスの削除
 	if (!owner->CallFireBreathEvent() && _fireBreathActor.lock())

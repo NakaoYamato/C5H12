@@ -5,6 +5,7 @@
 
 #include "../../Math/Random.h"
 
+#include "../../DebugSupporter/DebugSupporter.h"
 #include "../../External/nameof/include/nameof.hpp"
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 #include <imgui.h>
@@ -90,10 +91,10 @@ void ParticleEmiter::ExtensionFloat::DrawGui(const char* label, const char* cons
 	if (ImGui::TreeNode(label))
 	{
 		ImGui::Combo(u8"処理", reinterpret_cast<int*>(&processType), processTypes, processTypeCount);
-		ImGui::DragFloat(u8"ベース", &base);
+		ImGui::DragFloat(u8"ベース", &base, 0.1f);
 		if (ProcessType::Random <= processType && processType <= ProcessType::RandomNormal)
 		{
-			ImGui::DragFloat(u8"ランダム値", &value0);
+			ImGui::DragFloat(u8"ランダム値", &value0, 0.1f);
 		}
 		ImGui::TreePop();
 	}
@@ -129,13 +130,10 @@ Vector3 ParticleEmiter::ExtensionVector3::Processing() const
 		return base;
 	case ParticleEmiter::ProcessType::Random:
 		return Vector3::Random(Vector3::Zero, value0) + base;
-		break;
 	case ParticleEmiter::ProcessType::RandomBias:
 		return Vector3::Multiply(Vector3::RandomBias(), value0) + base;
-		break;
 	case ParticleEmiter::ProcessType::RandomNormal:
 		return Vector3::Multiply(Vector3::RandomNormal(), value0) + base;
-		break;
 	default:
 		return base;
 	}
@@ -146,10 +144,10 @@ void ParticleEmiter::ExtensionVector3::DrawGui(const char* label, const char* co
 	if (ImGui::TreeNode(label))
 	{
 		ImGui::Combo(u8"処理", reinterpret_cast<int*>(&processType), processTypes, processTypeCount);
-		ImGui::DragFloat3(u8"ベース", &base.x);
+		ImGui::DragFloat3(u8"ベース", &base.x, 0.1f);
 		if (ProcessType::Random <= processType && processType <= ProcessType::RandomNormal)
 		{
-			ImGui::DragFloat3(u8"ランダム値", &value0.x);
+			ImGui::DragFloat3(u8"ランダム値", &value0.x, 0.1f);
 		}
 		ImGui::TreePop();
 	}
@@ -264,7 +262,7 @@ void ParticleEmiter::ExtensionVector4::Load(const char* label, nlohmann::json& j
 }
 
 /// 更新処理
-void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer)
+void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer, const DirectX::XMFLOAT4X4& transform)
 {
 	// 再生中でない場合は何もしない
 	if (!_playing)
@@ -278,7 +276,7 @@ void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer)
 	if (_emitIntervalElapsedTimer >= _emitIntervalTime)
 	{
 		// パーティクルを生成
-		Emit(renderer);
+		Emit(renderer, transform);
 		// 生成間隔タイマーをリセット
 		_emitIntervalElapsedTimer = 0.0f;
 	}
@@ -292,7 +290,7 @@ void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer)
 }
 
 /// パーティクルを生成
-void ParticleEmiter::Emit(ParticleRenderer& renderer)
+void ParticleEmiter::Emit(ParticleRenderer& renderer, const DirectX::XMFLOAT4X4& transform)
 {
 	// パーティクルデータを取得
 	auto textureData = renderer.GetTextureData(_textureKey);
@@ -309,21 +307,22 @@ void ParticleEmiter::Emit(ParticleRenderer& renderer)
 	for (int i = 0; i < emitCount; ++i)
 	{
 		// 生存時間
-		data.timer = _lifeTimer.Processing();
+		data.timer			= _lifeTimer.Processing();
 		// 発生位置
-		data.position = _position.Processing();
+		data.position		= _position.Processing().TransformCoord(transform);
 		// 回転(ラジアン)
-		data.rotation = _rotation.Processing();
+		data.startRotation	= _startRotation.Processing();
+		data.endRotation	= _endRotation.Processing();
 		// 大きさ
-		data.scale = _scale.Processing();
+		data.startScale		= _startScale.Processing();
+		data.endScale		= _endScale.Processing();
 		// 速度
-		data.velocity = _velocity.Processing();
+		data.velocity		= _velocity.Processing().TransformNormal(transform);
 		// 加速力
-		data.acceleration = _acceleration.Processing();
-		// 初期色
-		data.startColor = _startColor.Processing();
-		// 終了色
-		data.endColor = _endColor.Processing();
+		data.acceleration	= _acceleration.Processing().TransformNormal(transform);
+		// 色
+		data.startColor		= _startColor.Processing();
+		data.endColor		= _endColor.Processing();
 		// テクスチャアニメーション
 		data.texAnimTime = _texAnimTime.Processing();
 
@@ -383,8 +382,10 @@ void ParticleEmiter::DrawGui(ParticleRenderer& renderer)
 	_emitCount.		DrawGui(u8"生成数", ProcessTypeNames, _countof(ProcessTypeNames));
 	_lifeTimer.		DrawGui(u8"生存時間", ProcessTypeNames, _countof(ProcessTypeNames));
 	_position.		DrawGui(u8"発生位置", ProcessTypeNames, _countof(ProcessTypeNames));
-	_rotation.		DrawGui(u8"回転", ProcessTypeNames, _countof(ProcessTypeNames));
-	_scale.			DrawGui(u8"大きさ", ProcessTypeNames, _countof(ProcessTypeNames));
+	_startRotation.	DrawGui(u8"初期回転", ProcessTypeNames, _countof(ProcessTypeNames));
+	_endRotation.	DrawGui(u8"終了回転", ProcessTypeNames, _countof(ProcessTypeNames));
+	_startScale.	DrawGui(u8"初期大きさ", ProcessTypeNames, _countof(ProcessTypeNames));
+	_endScale.		DrawGui(u8"終了大きさ", ProcessTypeNames, _countof(ProcessTypeNames));
 	_velocity.		DrawGui(u8"速度", ProcessTypeNames, _countof(ProcessTypeNames));
 	_acceleration.	DrawGui(u8"加速力", ProcessTypeNames, _countof(ProcessTypeNames));
 	_startColor.	DrawGui(u8"初期色", ProcessTypeNames, _countof(ProcessTypeNames));
@@ -394,18 +395,42 @@ void ParticleEmiter::DrawGui(ParticleRenderer& renderer)
 	ImGui::InputText(u8"シリアライズファイルパス", &_serializedFilePath);
 	if (ImGui::Button(u8"書き出し"))
 	{
-		Export(_serializedFilePath);
+		// ダイアログを開く
+		char filename[256] = { 0 };
+		static const char* filter = "Particle Files(*.json)\0*.json;\0All Files(*.*)\0*.*;\0\0";
+		Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
+			filename,
+			sizeof(filename),
+			filter, 
+			nullptr,
+			"json");
+		// ファイルを選択したら
+		if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+		{
+			_serializedFilePath = filename;
+			Export(filename);
+		}
 	}
 	if (ImGui::Button(u8"読み込み"))
 	{
-		Inport(_serializedFilePath);
+		// ダイアログを開く
+		std::string filepath;
+		std::string currentDirectory;
+		static const char* filter = "Particle File(*.json)\0*.json;\0\0";
+		Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter); 
+		// ファイルを選択したら
+		if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+		{
+			_serializedFilePath = filepath;
+			Inport(_serializedFilePath);
+		}
 	}
 }
 
-void ParticleEmiter::Play(ParticleRenderer& renderer)
+void ParticleEmiter::Play(ParticleRenderer& renderer, const DirectX::XMFLOAT4X4& transform)
 {
 	// パーティクルを生成
-	Emit(renderer);
+	Emit(renderer, transform);
 	_playing = true;
 	_playingTime = _playTime.Processing();
 	_emitIntervalTime = _emitInterval.Processing();
@@ -432,9 +457,11 @@ void ParticleEmiter::Export(std::string filename)
 
 		_position.Export("position", &jsonData);
 
-		_rotation.Export("rotation", &jsonData);
+		_startRotation.Export("startRotation", &jsonData);
+		_endRotation.Export("endRotation", &jsonData);
 
-		_scale.Export("scale", &jsonData);
+		_startScale.Export("startScale", &jsonData);
+		_endScale.Export("endScale", &jsonData);
 
 		_velocity.Export("velocity", &jsonData);
 
@@ -466,11 +493,15 @@ void ParticleEmiter::Inport(std::string filename)
 	_emitCount.Load("emitCount", jsonData);
 	_lifeTimer.Load("lifeTimer", jsonData);
 	_position.Load("position", jsonData);
-	_rotation.Load("rotation", jsonData);
-	_scale.Load("scale", jsonData);
+	_startRotation.Load("startRotation", jsonData);
+	_endRotation.Load("endRotation", jsonData);
+	_startScale.Load("startScale", jsonData);
+	_endScale.Load("endScale", jsonData);
 	_velocity.Load("velocity", jsonData);
 	_acceleration.Load("acceleration", jsonData);
 	_startColor.Load("startColor", jsonData);
 	_endColor.Load("endColor", jsonData);
 	_texAnimTime.Load("texAnimTime", jsonData);
+
+	_serializedFilePath = filename;
 }

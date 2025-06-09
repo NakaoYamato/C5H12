@@ -45,9 +45,9 @@ public:
 	struct ExtensionVector3
 	{
 		ProcessType processType = ProcessType::None; // 処理タイプ
-		Vector3		base = Vector3::Zero; // 基準値
-		Vector3		value0 = Vector3::Zero; // 値0
-		Vector3		value1 = Vector3::Zero; // 値1
+		Vector3		base = Vector3::One; // 基準値
+		Vector3		value0 = Vector3::One; // 値0
+		Vector3		value1 = Vector3::One; // 値1
 
 		Vector3 Processing() const;
 		void DrawGui(const char* label, const char* const processTypes[], int processTypeCount);
@@ -57,9 +57,9 @@ public:
 	struct ExtensionVector4
 	{
 		ProcessType processType = ProcessType::None; // 処理タイプ
-		Vector4		base = Vector4::Zero; // 基準値
-		Vector4		value0 = Vector4::Zero; // 値0
-		Vector4		value1 = Vector4::Zero; // 値1
+		Vector4		base = Vector4::One; // 基準値
+		Vector4		value0 = Vector4::One; // 値0
+		Vector4		value1 = Vector4::One; // 値1
 
 		Vector4 Processing() const;
 		void DrawGui(const char* label, const char* const processTypes[], int processTypeCount);
@@ -75,20 +75,21 @@ public:
 	/// </summary>
 	/// <param name="elapsedTime"></param>
 	/// <param name="renderer"></param>
-	void Update(float elapsedTime, ParticleRenderer& renderer);
+	/// <param name="transform"></param>
+	void Update(float elapsedTime, ParticleRenderer& renderer, const DirectX::XMFLOAT4X4& transform);
 	/// <summary>
 	/// パーティクルを生成
 	/// </summary>
-	/// <param name="canvas">パーティクルキャンバス</param>
-	/// <param name="data">パーティクルデータ</param>
-	void Emit(ParticleRenderer& renderer);
+	/// <param name="renderer"></param>
+	/// <param name="transform"></param>
+	void Emit(ParticleRenderer& renderer, const DirectX::XMFLOAT4X4& transform);
 	/// <summary>
 	/// Gui描画
 	/// </summary>
 	/// <param name="renderer"></param>
 	void DrawGui(ParticleRenderer& renderer);
 
-	void Play(ParticleRenderer& renderer);
+	void Play(ParticleRenderer& renderer, const DirectX::XMFLOAT4X4& transform);
 	bool IsPlaying() const { return _playing; }
 	void Stop()
 	{
@@ -134,10 +135,14 @@ private:
 	ExtensionFloat	_lifeTimer;
 	// 発生位置
 	ExtensionVector3 _position;
-	// 回転
-	ExtensionVector3 _rotation;
-	// 大きさ
-	ExtensionVector3 _scale;
+	// 開始時の回転
+	ExtensionVector3 _startRotation;
+	// 終了時の回転
+	ExtensionVector3 _endRotation;
+	// 開始時の大きさ
+	ExtensionVector3 _startScale;
+	// 終了時の大きさ
+	ExtensionVector3 _endScale;
 	// 速度
 	ExtensionVector3 _velocity;
 	// 加速力

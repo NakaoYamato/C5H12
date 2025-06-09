@@ -14,10 +14,6 @@ public:
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Editor; }
 	// 初期化
 	void Initialize() override;
-	// 更新処理
-	void Update(float elapsedTime) override;
-	// Gui描画処理
-	void DrawGui() override;
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
 	{

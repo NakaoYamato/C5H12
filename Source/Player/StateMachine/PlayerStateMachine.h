@@ -66,6 +66,7 @@ private:
 
 #pragma region 各種フラグ
 	bool _callCancelEvent = false;
+	bool _callInvisivleEvent = false;
 	// 入力方向をワールド空間に変換したもの
 	Vector2 _movement	= { 0.0f, 0.0f };
 	bool _isMoving		= false;

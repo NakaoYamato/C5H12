@@ -31,6 +31,8 @@ PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* anima
 void PlayerStateMachine::Execute(float elapsedTime)
 {
     _callCancelEvent = false;
+	bool oldInvisibleEvent = _callInvisivleEvent;
+	_callInvisivleEvent = false;
 
     // アニメーションイベント取得
     if (GetAnimator()->IsPlayAnimation())
@@ -49,8 +51,24 @@ void PlayerStateMachine::Execute(float elapsedTime)
             {
                 _callCancelEvent = true;
             }
+            // 無敵判定
+            if (animationEvent.GetMessageList().at(event.messageIndex) == "Invisible")
+            {
+                _callInvisivleEvent = true;
+            }
         }
     }
+
+	if (_callInvisivleEvent && !oldInvisibleEvent)
+	{
+		// 無敵状態に入る
+		_player->GetDamageable()->SetInvisible(true);
+	}
+	else if (!_callInvisivleEvent && oldInvisibleEvent)
+	{
+		// 無敵状態から抜ける
+        _player->GetDamageable()->SetInvisible(false);
+	}
 
     // 死亡処理
 	if (IsDead() && _stateMachine.GetStateName() != Network::GetPlayerMainStateName(Network::PlayerMainStates::Death))

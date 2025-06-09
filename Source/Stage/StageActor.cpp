@@ -12,9 +12,9 @@ void StageActor::OnCreate()
     //LoadModel("./Data/Model/Stage/BasicTrainingStage/BasicTrainingStage.fbx");
     //GetTransform().SetLengthScale(0.01f);
 
-    LoadModel("./Data/Model/Stage/Land/Land.fbx");
+    LoadModel("./Data/Model/Stage/Plane/Plane.fbx");
     GetTransform().SetLengthScale(0.1f);
-    GetTransform().SetPositionY(-2.7f); 
+    //GetTransform().SetPositionY(-2.7f); 
     
     auto modelCont = AddComponent<ModelRenderer>();
 

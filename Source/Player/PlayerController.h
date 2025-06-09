@@ -37,6 +37,10 @@ public:
 	{
 		return _charactorController.lock();
 	}
+	std::shared_ptr<Damageable> GetDamageable()
+	{
+		return _damageable.lock();
+	}
 	// 攻撃力のセット
 	void SetATK(float atk) { _ATK = atk; }
 	// 基本攻撃力のセット

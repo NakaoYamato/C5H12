@@ -252,6 +252,7 @@
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
+    <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
     <ClCompile Include="Source\Enemy\EnemyActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.cpp" />
@@ -408,6 +409,7 @@
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
+    <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
     <ClInclude Include="Source\Enemy\EnemyActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.h" />

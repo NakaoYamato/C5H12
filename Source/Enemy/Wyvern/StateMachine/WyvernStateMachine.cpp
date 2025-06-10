@@ -34,7 +34,8 @@ WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* 
 void WyvernStateMachine::Execute(float elapsedTime)
 {
     _callCancelEvent = false;
-    _fireBreath = false;
+    _callFireBreath = false;
+    _callLookAtTarget = false;
 
     // アニメーションイベント取得
     if (GetAnimator()->IsPlayAnimation())
@@ -54,9 +55,14 @@ void WyvernStateMachine::Execute(float elapsedTime)
                 _callCancelEvent = true;
             }
             // ブレス攻撃判定
-			else if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBreath")
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBreath")
 			{
-				_fireBreath = true;
+				_callFireBreath = true;
+			}
+            // ルックアット判定
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "LookAtTarget")
+			{
+                _callLookAtTarget = true;
 			}
         }
     }
@@ -76,6 +82,48 @@ void WyvernStateMachine::Execute(float elapsedTime)
 		_stateMachine.ChangeState("Death");
     }
 
+	// ターゲットを向く処理
+    if (_callLookAtTarget)
+    {
+        // 頭のノード取得
+        auto model = GetWyvern()->GetActor()->GetModel().lock();
+        int nodeIndex = model->GetNodeIndex("Head");
+		auto& headNode = model->GetPoseNodes()[nodeIndex];
+        // 頭の親ノード取得
+        auto headParentNode = model->GetPoseNodes()[nodeIndex].parent;
+
+        DirectX::XMMATRIX headParentInvTransform = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&headParentNode->worldTransform));
+
+		// ターゲット方向に向く
+        Quaternion nextQ = Quaternion::LookAt(
+            Vector3::Zero,
+            Vector3::Up,
+            Vector3::TransformCoord(GetWyvern()->GetTargetPosition() + _headRotationOffset, headParentInvTransform));
+
+        // 回転制限
+		Vector3 euler = Vector3::NormalizeEuler(Quaternion::ToRollPitchYaw(nextQ));
+		Vector3 parentEuler = Vector3::NormalizeEuler(Quaternion::ToRollPitchYaw(headParentNode->rotation));
+		// X軸方向の回転制限
+		float limitX = DirectX::XMConvertToRadians(_headRotationLimitX);
+		// X軸回転量が制限を超えている場合は制限値に設定し親に反映
+        if (euler.x > limitX || euler.x < -limitX)
+        {
+			if (euler.x > 0.0f)
+                parentEuler.x += euler.x - limitX;
+			else
+                parentEuler.x += euler.x - limitX;
+            euler.x = std::clamp(euler.x, -limitX, limitX);
+        }
+		euler.y = 0.0f; // Y軸方向の回転は制限しない
+		// 親ノードの回転値を更新
+		headParentNode->rotation = Quaternion::FromRollPitchYaw(parentEuler);
+        nextQ = Quaternion::FromRollPitchYaw(euler);
+
+		headNode.rotation = nextQ;
+
+        // 行列更新
+		model->UpdateNodeTransform(headParentNode);
+    }
 
 	// ステートマシンの実行
     _stateMachine.Update(elapsedTime);
@@ -85,6 +133,9 @@ void WyvernStateMachine::DrawGui()
 {
     if (ImGui::TreeNode(u8"ステートマシン"))
     {
+		ImGui::DragFloat(u8"頭の回転制限角度", &_headRotationLimitX, 1.0f, 0.0f, 90.0f, "%.1f°");
+
+        ImGui::Separator();
         std::string str = u8"現在のステート:";
         str += _stateMachine.GetState()->GetName();
         ImGui::Text("%s", str.c_str());

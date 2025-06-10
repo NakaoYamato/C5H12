@@ -10,6 +10,15 @@ class Vector3;
 class Vector4;
 #pragma endregion
 
+// 角度の正規化（-180～180度／-π～πラジアン）をする
+static float NormalizeAngle(float radian)
+{
+    //角度の正規化（-180～180度／-π～πラジアン）をする
+    return radian > DirectX::XM_PI ? NormalizeAngle(radian - DirectX::XM_2PI) :
+        radian < -DirectX::XM_PI ? NormalizeAngle(radian + DirectX::XM_2PI) :
+        radian;
+}
+
 // Vector2
 class Vector2 : public DirectX::XMFLOAT2
 {
@@ -121,6 +130,9 @@ public:
     static constexpr DirectX::XMFLOAT3 Right    = { 1.0f,0.0f,0.0f };
     static constexpr DirectX::XMFLOAT3 Up       = { 0.0f,1.0f,0.0f };
     static constexpr DirectX::XMFLOAT3 Front    = { 0.0f,0.0f,1.0f };
+    static constexpr DirectX::XMFLOAT3 Left     = { -1.0f,0.0f,0.0f };
+    static constexpr DirectX::XMFLOAT3 Down     = { 0.0f,-1.0f,0.0f };
+    static constexpr DirectX::XMFLOAT3 Back     = { 0.0f,0.0f,-1.0f };
 #pragma endregion
 
 #pragma region 静的メンバ関数
@@ -139,6 +151,8 @@ public:
     //  srcとdstで保管処理
     //  t   : 経過時間(0.0f ~ 1.0f)
     static Vector3 Lerp(const Vector3& src, const Vector3& dst, float t, float (*Easing)(float) = nullptr);
+    //  Vector3をオイラー角で単位化
+	static Vector3 NormalizeEuler(const Vector3& v);
     //  Vector3を度数法に変換
     static Vector3 ToDegrees(const Vector3& v);
     //  Vector3を弧度法に変換
@@ -183,6 +197,8 @@ public:
 	{
 		return Vector3::Lerp(*this, dst, t, Easing);
 	}
+    //  Vector3をオイラー角で単位化
+	Vector3 NormalizeEuler() const { return Vector3::NormalizeEuler(*this); }
     //  Vector3を度数法に変換
 	Vector3 ToDegrees() const { return Vector3::ToDegrees(*this); }
     //  Vector3を弧度法に変換

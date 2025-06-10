@@ -25,10 +25,11 @@ public:
 
 	// トランスフォーム更新処理
 	void UpdateTransform(const DirectX::XMFLOAT4X4& world);
-
+	// ノードのトランスフォーム更新処理
+	// ※親が存在するノードのみ
+	void UpdateNodeTransform(ModelResource::Node* node);
 	// ノードのデバッグ表示
 	void DebugDrawNode(Vector4 nodeColor = Vector4::Red);
-
 	// GUiの表示
 	void DrawGui();
 
@@ -37,7 +38,7 @@ public:
 	int GetNodeIndex(const std::string& str)
 	{
 		int i = 0;
-		for (auto& node : _poseNode)
+		for (auto& node : _poseNodes)
 		{
 			if (node.name == str)
 				return i;
@@ -47,9 +48,9 @@ public:
 	}
 
 	ModelResource* GetResource() { return _resource.get(); }
-	std::vector<ModelResource::Node>& GetPoseNodes() { return _poseNode; }
-	std::vector<ModelResource::Node>& GetAddressPoseNodes() { return _poseNode; }
-	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNode = nodes; }
+	std::vector<ModelResource::Node>& GetPoseNodes() { return _poseNodes; }
+	std::vector<ModelResource::Node>& GetAddressPoseNodes() { return _poseNodes; }
+	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNodes = nodes; }
 
 	const char* GetFilename()const { return _filename.c_str(); }
 #pragma endregion
@@ -68,13 +69,10 @@ protected:
 protected:
 	// ファイルパス
 	std::string _filename;
-
 	// モデルデータ
 	std::shared_ptr<ModelResource> _resource;
-
 	// 姿勢用ノード
-	std::vector<ModelResource::Node> _poseNode;
-
+	std::vector<ModelResource::Node> _poseNodes;
 	// デバッグ用
 	int _debugNodeIndex = -1;
 };

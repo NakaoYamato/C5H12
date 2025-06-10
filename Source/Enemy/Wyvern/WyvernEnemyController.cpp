@@ -29,7 +29,11 @@ void WyvernEnemyController::Start()
 // 更新処理
 void WyvernEnemyController::Update(float elapsedTime)
 {
-	// ステートマシンの実行
+}
+// 遅延更新処理
+void WyvernEnemyController::LateUpdate(float elapsedTime)
+{
+	// アニメーション処理をした後にステートマシンの実行
 	_stateMachine->Execute(elapsedTime);
 }
 // GUI描画

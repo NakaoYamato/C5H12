@@ -108,7 +108,6 @@ Quaternion Quaternion::LookAt(const DirectX::XMFLOAT3& position, const DirectX::
 	);
 	PosToTarget = DirectX::XMVector3Normalize(PosToTarget);
 	DirectX::XMVECTOR Axis = DirectX::XMVector3Cross(Front, PosToTarget);
-	float angle = 0.0f;
 	// ŠOÏ‚ÌŒvZ‚ª¸”s‚µ‚Ä‚¢‚é‚È‚ç‘O•ûŒü‚Æw’è•ûŒü‚ª“¯‚¶
 	if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(Axis)) == 0.0f || DirectX::XMVector3IsNaN(Axis))
 	{
@@ -116,6 +115,7 @@ Quaternion Quaternion::LookAt(const DirectX::XMFLOAT3& position, const DirectX::
 	}
 	else
 	{
+		Axis = DirectX::XMVector3Normalize(Axis);
 		// ‰ñ“]Šp‚ğ‹‚ß‚é
 		float angle = acosf(
 			DirectX::XMVectorGetX(

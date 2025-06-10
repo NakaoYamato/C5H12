@@ -23,11 +23,11 @@ Model::Model(ID3D11Device* device, const char* filename)
     _filename = _resource->GetSerializePath();
 
     // ノードデータをコピー
-    _poseNode.resize(_resource->GetNodes().size());
-    for (size_t i = 0; i < _poseNode.size(); ++i)
+    _poseNodes.resize(_resource->GetNodes().size());
+    for (size_t i = 0; i < _poseNodes.size(); ++i)
     {
         const ModelResource::Node& node = _resource->GetNodes().at(i);
-        ModelResource::Node& copyNode = _poseNode.at(i);
+        ModelResource::Node& copyNode = _poseNodes.at(i);
         // データをコピー
         copyNode.name = node.name;
         copyNode.parentIndex = node.parentIndex;
@@ -37,14 +37,14 @@ Model::Model(ID3D11Device* device, const char* filename)
     }
 
     // 親、子供の再構築
-    for (size_t i = 0; i < _poseNode.size(); ++i)
+    for (size_t i = 0; i < _poseNodes.size(); ++i)
     {
-        ModelResource::Node& copyNode = _poseNode.at(i);
+        ModelResource::Node& copyNode = _poseNodes.at(i);
 
         if (copyNode.parentIndex != -1)
         {
-            copyNode.parent = &_poseNode.at(copyNode.parentIndex);
-            _poseNode.at(copyNode.parentIndex).children.emplace_back(&copyNode);
+            copyNode.parent = &_poseNodes.at(copyNode.parentIndex);
+            _poseNodes.at(copyNode.parentIndex).children.emplace_back(&copyNode);
         }
     }
 
@@ -60,7 +60,7 @@ Model::Model(ID3D11Device* device, const char* filename)
 // トランスフォーム更新処理
 void Model::UpdateTransform(const DirectX::XMFLOAT4X4& world)
 {
-    for (ModelResource::Node& node : _poseNode)
+    for (ModelResource::Node& node : _poseNodes)
     {
         // ローカル行列算出
         DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
@@ -85,6 +85,31 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& world)
         DirectX::XMStoreFloat4x4(&node.localTransform, LocalT);
         DirectX::XMStoreFloat4x4(&node.worldTransform, WorldT);
     }
+}
+
+// ノードのトランスフォーム更新処理
+void Model::UpdateNodeTransform(ModelResource::Node* node)
+{
+    // ローカル行列算出
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node->scale.x, node->scale.y, node->scale.z);
+    DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&node->rotation));
+    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(node->position.x, node->position.y, node->position.z);
+
+    DirectX::XMMATRIX LocalT = S * R * T;
+
+    // ワールド行列算出
+    DirectX::XMMATRIX ParentWorld = DirectX::XMLoadFloat4x4(&node->parent->worldTransform);
+    DirectX::XMMATRIX WorldT = LocalT * ParentWorld;
+
+    // 計算結果を保存
+    DirectX::XMStoreFloat4x4(&node->localTransform, LocalT);
+    DirectX::XMStoreFloat4x4(&node->worldTransform, WorldT);
+
+	// 子供のワールドトランスフォームを更新
+	for (auto& child : node->children)
+	{
+		UpdateNodeTransform(child);
+	}
 }
 
 // ノードのデバッグ表示
@@ -148,7 +173,7 @@ void Model::DrawGui()
                         ImGui::TreePop();
                     }
                 };
-            NodeGui(_poseNode.at(0));
+            NodeGui(_poseNodes.at(0));
             ImGui::TreePop();
         }
         ImGui::TreePop();
@@ -161,7 +186,7 @@ void Model::DrawGui()
 
     if (_debugNodeIndex != -1)
     {
-        DirectX::XMFLOAT4X4 worldTransform = _poseNode[_debugNodeIndex].worldTransform;
+        DirectX::XMFLOAT4X4 worldTransform = _poseNodes[_debugNodeIndex].worldTransform;
         //worldTransform._11 = 1.0f;
         //worldTransform._22 = 1.0f;
         //worldTransform._33 = 1.0f;

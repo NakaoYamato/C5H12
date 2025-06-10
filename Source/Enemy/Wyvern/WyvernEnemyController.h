@@ -14,6 +14,8 @@ public:
 	void Start() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
+	// 遅延更新処理
+	void LateUpdate(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
 

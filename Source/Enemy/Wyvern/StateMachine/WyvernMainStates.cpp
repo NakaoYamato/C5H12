@@ -44,7 +44,7 @@ namespace WyvernToTargetSubStates
 			owner->GetAnimator()->PlayAnimation(
 				u8"WalkForward",
 				true,
-				0.5f);
+				1.0f);
 			owner->GetAnimator()->SetRootNodeIndex("CG");
 			owner->GetAnimator()->SetIsUseRootMotion(true);
 			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
@@ -488,23 +488,27 @@ void WyvernBreathAttackState::OnEnter()
 }
 void WyvernBreathAttackState::OnExecute(float elapsedTime)
 {
-	// ブレスの生成
-	if (owner->CallFireBreathEvent() && !_fireBreathActor.lock())
+	// ブレス処理
+	if (owner->CallFireBreathEvent())
 	{
-		// ブレスを生成
-		_fireBreathActor = owner->GetWyvern()->GetActor()->GetScene()->RegisterActor<WyvernBreathActor>(
-			std::string(owner->GetWyvern()->GetActor()->GetName()) + "BreathEffect",
-			ActorTag::Enemy);
-		// 親を設定
-		_fireBreathActor.lock()->GetBreathController()->SetBreathActor(owner->GetWyvern()->GetActor());
 		// ブレスの位置をモデルの頭に設定
 		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
 		int nodeIndex = model->GetNodeIndex("Head");
-		Vector3 position = Vector3::TransformCoord(_fireBreathOffset + model->GetPoseNodes()[nodeIndex].position,
-			model->GetPoseNodes()[nodeIndex].worldTransform);
-		_fireBreathActor.lock()->GetTransform().SetPosition(position);
-		// ブレスのアクターを頭の向いている方向に向かせる
-		_fireBreathActor.lock()->GetTransform().LookAt(Vector3::TransformNormal(Vector3::Up, model->GetPoseNodes()[nodeIndex].worldTransform));
+		// ブレスの生成
+		if (!_fireBreathActor.lock())
+		{
+			// ブレスを生成
+			_fireBreathActor = owner->GetWyvern()->GetActor()->GetScene()->RegisterActor<WyvernBreathActor>(
+				std::string(owner->GetWyvern()->GetActor()->GetName()) + "BreathEffect",
+				ActorTag::Enemy);
+			// 親を設定
+			_fireBreathActor.lock()->GetBreathController()->SetBreathActor(owner->GetWyvern()->GetActor());
+			Vector3 position = Vector3::TransformCoord(_fireBreathOffset + model->GetPoseNodes()[nodeIndex].position,
+				model->GetPoseNodes()[nodeIndex].worldTransform);
+			_fireBreathActor.lock()->GetTransform().SetPosition(position);
+			// ブレスのアクターを頭の向いている方向に向かせる
+			_fireBreathActor.lock()->GetTransform().LookAt(Vector3::TransformNormal(Vector3::Up, model->GetPoseNodes()[nodeIndex].worldTransform));
+		}
 	}
 	// ブレスの削除
 	if (!owner->CallFireBreathEvent() && _fireBreathActor.lock())
@@ -537,7 +541,7 @@ void WyvernPursuitState::OnEnter()
 	owner->GetAnimator()->PlayAnimation(
 		u8"RunForward",
 		true,
-		0.5f);
+		1.0f);
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);

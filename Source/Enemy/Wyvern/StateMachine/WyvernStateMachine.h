@@ -34,7 +34,9 @@ public:
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 	// ブレス攻撃イベントを取得
-	bool CallFireBreathEvent() const { return _fireBreath; }
+	bool CallFireBreathEvent() const { return _callFireBreath; }
+	// ターゲットを見つめるイベントを取得
+	bool CallLookAtTargetEvent() const { return _callLookAtTarget; }
 #pragma endregion
 
 
@@ -44,6 +46,12 @@ private:
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
 
+	// 頭の回転時のターゲットオフセット
+	Vector3 _headRotationOffset = Vector3(0.0f, 1.5f, 0.0f);
+	// 頭の回転制限角度（X軸方向）
+	float _headRotationLimitX = 45.0f;
+
 	bool		_callCancelEvent = false;
-	bool		_fireBreath = false;
+	bool		_callFireBreath = false;
+	bool		_callLookAtTarget = false;
 };

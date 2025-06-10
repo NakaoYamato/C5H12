@@ -1,7 +1,6 @@
 #include "Vector.h"
 
 #include "Random.h"
-
 #pragma region Vector2
 #pragma region 演算子オーバーロード
 Vector2& Vector2::operator=(const Vector2& v)
@@ -238,6 +237,11 @@ Vector3 Vector3::Lerp(const Vector3& src, const Vector3& dst, float t, float(*Ea
         EasingLerp(src.y, dst.y, t, Easing),
         EasingLerp(src.z, dst.z, t, Easing)
     );
+}
+//  Vector3をオイラー角で単位化
+Vector3 Vector3::NormalizeEuler(const Vector3& v)
+{
+    return Vector3(NormalizeAngle(v.x), NormalizeAngle(v.y), NormalizeAngle(v.z));
 }
 //  VECTOR3を度数法に変換
 Vector3 Vector3::ToDegrees(const Vector3& v)

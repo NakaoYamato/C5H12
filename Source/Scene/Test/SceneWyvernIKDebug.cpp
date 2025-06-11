@@ -125,38 +125,38 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 		DirectX::XMVECTOR RootWorldAxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(RootToMidleNorm, RootToTargetNorm));
 		float rootAngle = acosf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(RootToMidleNorm, RootToTargetNorm)));
 
-		{
-			// 求めた回転軸をローカル座標変換
-			DirectX::XMVECTOR RootLocalAxis = DirectX::XMVector4Transform(RootWorldAxis, DirectX::XMMatrixInverse(nullptr, RootTransform));
-			DirectX::XMVECTOR OldRootLocalRotation = DirectX::XMLoadFloat4(&rootNode.rotation);
-			// ローカル回転軸と回転角を使ってQuaternion
-			DirectX::XMVECTOR RootLocalQuaternion = DirectX::XMQuaternionMultiply(OldRootLocalRotation, DirectX::XMQuaternionRotationNormal(RootLocalAxis, rootAngle));
+		//{
+		//	// 求めた回転軸をローカル座標変換
+		//	DirectX::XMVECTOR RootLocalAxis = DirectX::XMVector4Transform(RootWorldAxis, DirectX::XMMatrixInverse(nullptr, RootTransform));
+		//	DirectX::XMVECTOR OldRootLocalRotation = DirectX::XMLoadFloat4(&rootNode.rotation);
+		//	// ローカル回転軸と回転角を使ってQuaternion
+		//	DirectX::XMVECTOR RootLocalQuaternion = DirectX::XMQuaternionMultiply(OldRootLocalRotation, DirectX::XMQuaternionRotationNormal(RootLocalAxis, rootAngle));
 
-			// ノードの長さの総数よりターゲットまでの距離が短ければ
-			if (boneLength > targetLength)
-			{
-				// ヘロンの公式から三角形の面積を求める
-				float s = (rootToMidleLength + midleToTipLength + targetLength) / 2;
-				float S = sqrtf(s * (s - rootToMidleLength) * (s - midleToTipLength) * (s - targetLength));
-				// 面積＊２/ 底辺で高さを求める
-				float height = S * 2 / rootToMidleLength;
-				// 直角三角形の斜辺と高さから角度を求める
-				float angle = asinf(height / targetLength);
+		//	// ノードの長さの総数よりターゲットまでの距離が短ければ
+		//	if (boneLength > targetLength)
+		//	{
+		//		// ヘロンの公式から三角形の面積を求める
+		//		float s = (rootToMidleLength + midleToTipLength + targetLength) / 2;
+		//		float S = sqrtf(s * (s - rootToMidleLength) * (s - midleToTipLength) * (s - targetLength));
+		//		// 面積＊２/ 底辺で高さを求める
+		//		float height = S * 2 / rootToMidleLength;
+		//		// 直角三角形の斜辺と高さから角度を求める
+		//		float angle = asinf(height / targetLength);
 
-				// 根本ノードからポールターゲットへのベクトル
-				DirectX::XMVECTOR RootToPoleVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(PoleWorldPosition, RootPosition));
+		//		// 根本ノードからポールターゲットへのベクトル
+		//		DirectX::XMVECTOR RootToPoleVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(PoleWorldPosition, RootPosition));
 
-				// ポールターゲットを利用した回転軸を算出
-				RootWorldAxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(RootToMidleNorm, RootToPoleVec));
-				RootLocalAxis = DirectX::XMVector4Transform(RootWorldAxis, DirectX::XMMatrixInverse(nullptr, RootTransform));
-				// 三角形の面積から算出した角度を反映させる
-				RootLocalQuaternion = DirectX::XMQuaternionMultiply(RootLocalQuaternion, DirectX::XMQuaternionRotationAxis(RootLocalAxis, angle));
-			}
+		//		// ポールターゲットを利用した回転軸を算出
+		//		RootWorldAxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(RootToMidleNorm, RootToPoleVec));
+		//		RootLocalAxis = DirectX::XMVector4Transform(RootWorldAxis, DirectX::XMMatrixInverse(nullptr, RootTransform));
+		//		// 三角形の面積から算出した角度を反映させる
+		//		RootLocalQuaternion = DirectX::XMQuaternionMultiply(RootLocalQuaternion, DirectX::XMQuaternionRotationAxis(RootLocalAxis, angle));
+		//	}
 
-			DirectX::XMStoreFloat4(&rootNode.rotation, DirectX::XMQuaternionNormalize(RootLocalQuaternion));
-			// 自分以下の行列を更新
-			model->UpdateNodeTransform(&rootNode);
-		}
+		//	DirectX::XMStoreFloat4(&rootNode.rotation, DirectX::XMQuaternionNormalize(RootLocalQuaternion));
+		//	// 自分以下の行列を更新
+		//	model->UpdateNodeTransform(&rootNode);
+		//}
 
 		// 行列が変化してるので再取得
 		RootTransform = DirectX::XMLoadFloat4x4(&rootNode.worldTransform);
@@ -172,17 +172,17 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 		DirectX::XMVECTOR MidleWorldAxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(MidleToTipVec, MidleToTargetVec));
 		float midleAngle = acosf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(MidleToTargetVec, MidleToTipVec)));
 
-		{
-			// 求めた回転軸をローカル座標変換
-			DirectX::XMVECTOR MidleLocalAxis = DirectX::XMVector4Transform(MidleWorldAxis, DirectX::XMMatrixInverse(nullptr, MidTransform));
-			DirectX::XMVECTOR OldMidleLocalRotation = DirectX::XMLoadFloat4(&midNode.rotation);
+		//{
+		//	// 求めた回転軸をローカル座標変換
+		//	DirectX::XMVECTOR MidleLocalAxis = DirectX::XMVector4Transform(MidleWorldAxis, DirectX::XMMatrixInverse(nullptr, MidTransform));
+		//	DirectX::XMVECTOR OldMidleLocalRotation = DirectX::XMLoadFloat4(&midNode.rotation);
 
-			// ローカル回転軸と回転角を使ってQuaternionを作成
-			MidleLocalAxis = DirectX::XMQuaternionMultiply(OldMidleLocalRotation, DirectX::XMQuaternionRotationNormal(MidleLocalAxis, midleAngle));
-			DirectX::XMStoreFloat4(&midNode.rotation, DirectX::XMQuaternionNormalize(MidleLocalAxis));
-			// 自分以下の行列を更新
-			model->UpdateNodeTransform(&midNode);
-		}
+		//	// ローカル回転軸と回転角を使ってQuaternionを作成
+		//	MidleLocalAxis = DirectX::XMQuaternionMultiply(OldMidleLocalRotation, DirectX::XMQuaternionRotationNormal(MidleLocalAxis, midleAngle));
+		//	DirectX::XMStoreFloat4(&midNode.rotation, DirectX::XMQuaternionNormalize(MidleLocalAxis));
+		//	// 自分以下の行列を更新
+		//	model->UpdateNodeTransform(&midNode);
+		//}
     }
 
 	// デバッグ表示

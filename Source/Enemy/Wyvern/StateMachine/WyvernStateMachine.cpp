@@ -85,44 +85,44 @@ void WyvernStateMachine::Execute(float elapsedTime)
 	// ターゲットを向く処理
     if (_callLookAtTarget)
     {
-        // 頭のノード取得
-        auto model = GetWyvern()->GetActor()->GetModel().lock();
-        int nodeIndex = model->GetNodeIndex("Head");
-		auto& headNode = model->GetPoseNodes()[nodeIndex];
-        // 頭の親ノード取得
-        auto headParentNode = model->GetPoseNodes()[nodeIndex].parent;
+  //      // 頭のノード取得
+  //      auto model = GetWyvern()->GetActor()->GetModel().lock();
+  //      int nodeIndex = model->GetNodeIndex("Head");
+		//auto& headNode = model->GetPoseNodes()[nodeIndex];
+  //      // 頭の親ノード取得
+  //      auto headParentNode = model->GetPoseNodes()[nodeIndex].parent;
 
-        DirectX::XMMATRIX headParentInvTransform = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&headParentNode->worldTransform));
+  //      DirectX::XMMATRIX headParentInvTransform = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&headParentNode->worldTransform));
 
-		// ターゲット方向に向く
-        Quaternion nextQ = Quaternion::LookAt(
-            Vector3::Zero,
-            Vector3::Up,
-            Vector3::TransformCoord(GetWyvern()->GetTargetPosition() + _headRotationOffset, headParentInvTransform));
+		//// ターゲット方向に向く
+  //      Quaternion nextQ = Quaternion::LookAt(
+  //          Vector3::Zero,
+  //          Vector3::Up,
+  //          Vector3::TransformCoord(GetWyvern()->GetTargetPosition() + _headRotationOffset, headParentInvTransform));
 
-        // 回転制限
-		Vector3 euler = Vector3::NormalizeEuler(Quaternion::ToRollPitchYaw(nextQ));
-		Vector3 parentEuler = Vector3::NormalizeEuler(Quaternion::ToRollPitchYaw(headParentNode->rotation));
-		// X軸方向の回転制限
-		float limitX = DirectX::XMConvertToRadians(_headRotationLimitX);
-		// X軸回転量が制限を超えている場合は制限値に設定し親に反映
-        if (euler.x > limitX || euler.x < -limitX)
-        {
-			if (euler.x > 0.0f)
-                parentEuler.x += euler.x - limitX;
-			else
-                parentEuler.x += euler.x - limitX;
-            euler.x = std::clamp(euler.x, -limitX, limitX);
-        }
-		euler.y = 0.0f; // Y軸方向の回転は制限しない
-		// 親ノードの回転値を更新
-		headParentNode->rotation = Quaternion::FromRollPitchYaw(parentEuler);
-        nextQ = Quaternion::FromRollPitchYaw(euler);
+  //      // 回転制限
+		//Vector3 euler = Vector3::NormalizeEuler(Quaternion::ToRollPitchYaw(nextQ));
+		//Vector3 parentEuler = Vector3::NormalizeEuler(Quaternion::ToRollPitchYaw(headParentNode->rotation));
+		//// X軸方向の回転制限
+		//float limitX = DirectX::XMConvertToRadians(_headRotationLimitX);
+		//// X軸回転量が制限を超えている場合は制限値に設定し親に反映
+  //      if (euler.x > limitX || euler.x < -limitX)
+  //      {
+		//	if (euler.x > 0.0f)
+  //              parentEuler.x += euler.x - limitX;
+		//	else
+  //              parentEuler.x += euler.x - limitX;
+  //          euler.x = std::clamp(euler.x, -limitX, limitX);
+  //      }
+		//euler.y = 0.0f; // Y軸方向の回転は制限しない
+		//// 親ノードの回転値を更新
+		//headParentNode->rotation = Quaternion::FromRollPitchYaw(parentEuler);
+  //      nextQ = Quaternion::FromRollPitchYaw(euler);
 
-		headNode.rotation = nextQ;
+		//headNode.rotation = nextQ;
 
-        // 行列更新
-		model->UpdateNodeTransform(headParentNode);
+  //      // 行列更新
+		//model->UpdateNodeTransform(headParentNode);
     }
 
 	// ステートマシンの実行

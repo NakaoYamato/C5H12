@@ -266,7 +266,9 @@
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Scene\Test\SceneTwoBoneIKDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneLookAtDebug.cpp" />
+    <ClCompile Include="Source\Scene\Test\SceneWyvernIKDebug.cpp" />
     <ClCompile Include="Source\Stage\StageActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\WeaponActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.cpp" />
@@ -425,6 +427,8 @@
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h" />
     <ClInclude Include="Source\Scene\Test\SceneLookAtDebug.h" />
+    <ClInclude Include="Source\Scene\Test\SceneTwoBoneIKDebug.h" />
+    <ClInclude Include="Source\Scene\Test\SceneWyvernIKDebug.h" />
     <ClInclude Include="Source\Stage\StageActor.h" />
     <ClInclude Include="Source\Player\Weapon\WeaponActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.h" />

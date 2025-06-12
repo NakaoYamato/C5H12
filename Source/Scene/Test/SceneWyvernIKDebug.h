@@ -32,7 +32,7 @@ private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator>		 _animator;
 	// ポールターゲット
-	Vector3 _poleLocalPosition = Vector3::Zero;
+	Vector3 _poleLocalPosition = Vector3::Up;
 
 	bool _calculateIK = false;
 	bool _playerIK = false;

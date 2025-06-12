@@ -233,6 +233,7 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 	{
 		ImGui::Checkbox(u8"IK計算", &_calculateIK);
 		ImGui::DragFloat3(u8"ターゲット位置", (float*)&_targetActor.lock()->GetTransform().GetPosition(), 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3(u8"ポールターゲット位置", &_poleLocalPosition.x, 0.1f, -100.0f, 100.0f);
 		if (ImGui::Checkbox(u8"プレイヤーか", &_playerIK))
 		{
 			if (_playerIK)

@@ -7,6 +7,7 @@
 
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Scene/Scene.h"
+#include "../../Library/Audio/VoiceRecorder/VoiceRecorder.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/EnemyActor.h"
 #include "../../Source/Enemy/EnemyController.h"
@@ -138,6 +139,9 @@ private:
 	int nextLeaderPlayerId = -1;
     // スレッドセーフ用
     std::mutex _mutex;
+
+    // 音声録音用
+    VoiceRecorder _voiceRecorder;
 
 #pragma region サーバーからの受信データ
 	// プレイヤーメッセージデータ

@@ -12,11 +12,15 @@ NetworkMediator::~NetworkMediator()
         // サーバー終了処理
         _client->Exit();
     }
+    // 音声レコーダーの停止
+    _voiceRecorder.StopRecording();
 }
 
 // 生成時処理
 void NetworkMediator::OnCreate()
 {
+    // 音声レコーダーの初期化
+    _voiceRecorder.StartRecording();
 }
 
 void NetworkMediator::OnStart()

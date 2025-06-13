@@ -295,7 +295,6 @@ void Actor::ContactEnter(CollisionData& collisionData)
 void Actor::Remove()
 {
 	_isActive = false;
-	OnRemove();
     _scene->GetActorManager().Remove(shared_from_this());
 }
 

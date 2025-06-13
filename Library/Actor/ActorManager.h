@@ -122,9 +122,14 @@ public:
 	void SetGameSpeed(ActorTag tag, float scale, float duration);
 
 private:
+	/// <summary>
+	/// 削除更新処理
+	/// </summary>
+	void UpdateRemove();
+
+private:
 	ActorMap _startActors[static_cast<size_t>(ActorTag::ActorTagMax)];
 	ActorMap _updateActors[static_cast<size_t>(ActorTag::ActorTagMax)];
-	std::set<std::shared_ptr<Actor>> _selectionActors;
 	std::set<std::shared_ptr<Actor>> _removeActors;
 
 	// 複数スレッドでのアクセスを防ぐためのミューテックス

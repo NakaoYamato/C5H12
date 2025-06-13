@@ -14,7 +14,7 @@ public:
 	void OnCreate() override;
 
 	// 削除処理
-	void OnRemove() override;
+	void OnDeleted() override;
 
 #pragma region アクセサ
 	std::shared_ptr<CharactorController> GetCharactorController()

@@ -304,9 +304,37 @@ void SceneModelEditor::DrawModelColliderGui()
 // アニメーション編集GUI描画
 void SceneModelEditor::DrawEditAnimationGui()
 {
-    if (ImGui::Begin(u8"アニメーション編集"))
+    if (ImGui::Begin(u8"モデルデータ編集"))
     {
         auto model = _modelActor.lock()->GetModel().lock();
+
+        if (ImGui::TreeNode(u8"ノード"))
+        {
+            std::function<void(ModelResource::Node&)> NodeGui = [&](ModelResource::Node& node)
+                {
+                    if (ImGui::TreeNodeEx(&node, ImGuiTreeNodeFlags_DefaultOpen, node.name.c_str()))
+                    {
+                        ImGui::DragFloat3(u8"position", &node.position.x, 0.1f);
+                        Vector3 degrees = Vector3::ToDegrees(Quaternion::ToRollPitchYaw(node.rotation));
+                        if (ImGui::DragFloat3(u8"degrees", &degrees.x, 0.1f))
+                        {
+                            node.rotation = Quaternion::FromRollPitchYaw(Vector3::ToRadians(degrees));
+                        }
+                        ImGui::DragFloat3(u8"scale", &node.scale.x, 0.1f);
+                        ImGui::Separator();
+
+                        for (auto child : node.children)
+                        {
+                            ImGui::Separator();
+                            NodeGui(*child);
+                        }
+
+                        ImGui::TreePop();
+                    }
+                };
+			NodeGui(model->GetResource()->GetAddressNodes()[0]);
+            ImGui::TreePop();
+        }
 
         if (ImGui::Button(u8"すべてのアニメーションを90度回転"))
         {

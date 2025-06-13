@@ -285,10 +285,6 @@ protected:
 	/// </summary>
 	/// <param name="collisionData">ÚGî•ñ</param>
 	virtual void OnContactEnter(CollisionData& collisionData) {}
-	/// <summary>
-	/// ©gíœˆ—
-	/// </summary>
-	virtual void OnRemove() {};
 #pragma endregion
 
 protected:

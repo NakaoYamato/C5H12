@@ -74,7 +74,7 @@ void PlayerActor::OnCreate()
 }
 
 // íœˆ—
-void PlayerActor::OnRemove()
+void PlayerActor::OnDeleted()
 {
 	if (_swordActor.lock())
 	{

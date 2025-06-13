@@ -84,32 +84,7 @@ void ActorManager::Update(float elapsedTime)
 
 	//----------------------------------------------------------------
 	// çÌèúèàóù
-	for (const std::shared_ptr<Actor>& actor : _removeActors)
-	{
-		actor->Deleted();
-
-		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		{
-			std::vector<std::shared_ptr<Actor>>::iterator itStart = std::find(_startActors[i].begin(), _startActors[i].end(), actor);
-			if (itStart != _startActors[i].end())
-			{
-				_startActors[i].erase(itStart);
-			}
-
-			std::vector<std::shared_ptr<Actor>>::iterator itUpdate = std::find(_updateActors[i].begin(), _updateActors[i].end(), actor);
-			if (itUpdate != _updateActors[i].end())
-			{
-				_updateActors[i].erase(itUpdate);
-			}
-
-			std::set<std::shared_ptr<Actor>>::iterator itSelection = _selectionActors.find(actor);
-			if (itSelection != _selectionActors.end())
-			{
-				_selectionActors.erase(itSelection);
-			}
-		}
-	}
-	_removeActors.clear();
+	UpdateRemove();
 	//----------------------------------------------------------------
 }
 
@@ -362,12 +337,10 @@ std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string&
 void ActorManager::Clear()
 {
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		_startActors[i].clear();
-	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		_updateActors[i].clear();
-
-	_selectionActors.clear();
-	_removeActors.clear();
+	{
+		Remove(static_cast<ActorTag>(i));
+	}
+	UpdateRemove();
 }
 
 void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
@@ -405,4 +378,29 @@ void ActorManager::Remove(ActorTag tag)
 void ActorManager::SetGameSpeed(ActorTag tag, float scale, float duration)
 {
 	_gameSpeeds[static_cast<size_t>(tag)] = std::make_pair(scale, duration);
+}
+
+/// çÌèúçXêVèàóù
+void ActorManager::UpdateRemove()
+{
+	for (const std::shared_ptr<Actor>& actor : _removeActors)
+	{
+		actor->Deleted();
+
+		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+		{
+			std::vector<std::shared_ptr<Actor>>::iterator itStart = std::find(_startActors[i].begin(), _startActors[i].end(), actor);
+			if (itStart != _startActors[i].end())
+			{
+				_startActors[i].erase(itStart);
+			}
+
+			std::vector<std::shared_ptr<Actor>>::iterator itUpdate = std::find(_updateActors[i].begin(), _updateActors[i].end(), actor);
+			if (itUpdate != _updateActors[i].end())
+			{
+				_updateActors[i].erase(itUpdate);
+			}
+		}
+	}
+	_removeActors.clear();
 }

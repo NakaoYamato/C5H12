@@ -20,10 +20,11 @@ class CollisionManager
 public:
     struct SphereData
     {
-		SphereData(Actor* actor, CollisionLayer layer, const Vector3& position, float radius, bool isTrigger)
+		SphereData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& position, float radius, bool isTrigger)
 		{
             this->actor = actor;
             this->layer = layer;
+			this->mask = mask;
             this->position = position;
             this->radius = radius;
             this->isTrigger = isTrigger;
@@ -31,16 +32,18 @@ public:
 
         Actor* actor = nullptr;
 		CollisionLayer layer = CollisionLayer::None;
+		CollisionLayerMask mask = 0;
 		Vector3 position = {};
         float radius = 0.0f;
         bool isTrigger = false;
     };
     struct BoxData
     {
-        BoxData(Actor* actor, CollisionLayer layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
+        BoxData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
         {
             this->actor = actor;
             this->layer = layer;
+			this->mask = mask;
             this->position = position;
             this->halfSize = halfSize;
             this->rotation = rotation;
@@ -49,6 +52,7 @@ public:
 
         Actor* actor;
 		CollisionLayer layer = CollisionLayer::None;
+		CollisionLayerMask mask = 0;
 		Vector3 position;
 		Vector3 halfSize;
         Vector3 rotation;
@@ -56,10 +60,11 @@ public:
     };
     struct CapsuleData
     {
-        CapsuleData(Actor* actor, CollisionLayer layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
+        CapsuleData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
         {
             this->actor = actor;
             this->layer = layer;
+			this->mask = mask;
             this->start = start;
             this->end = end;
             this->radius = radius;
@@ -68,6 +73,7 @@ public:
 
         Actor* actor;
 		CollisionLayer layer = CollisionLayer::None;
+		CollisionLayerMask mask = 0;
         Vector3 start;
         Vector3 end;
         float radius;
@@ -132,11 +138,11 @@ public:
 	void RegisterMeshCollider(MeshCollider* meshCollider);
 
     // 球データ登録
-    void RegisterSphereData(Actor* actor, CollisionLayer layer, const Vector3& position, float radius, bool isTrigger = true);
+    void RegisterSphereData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& position, float radius, bool isTrigger = true);
     // ボックスデータ登録
-    void RegisterBoxData(Actor* actor, CollisionLayer layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger = true);
+    void RegisterBoxData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger = true);
     // カプセルデータ登録
-    void RegisterCapsuleData(Actor* actor, CollisionLayer layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger = true);
+    void RegisterCapsuleData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& start, const Vector3& end, float radius, bool isTrigger = true);
 #pragma endregion
 
 #pragma region 削除

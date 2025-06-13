@@ -556,12 +556,15 @@ void Animator::UpdateAnimationEvent()
         DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
 
 		CollisionLayer layer = CollisionLayer::None;
+		CollisionLayerMask layerMask = CollisionLayerMaskAll;
         if (event.eventType == AnimationEvent::EventType::Attack)
         {
             // 攻撃イベント使用フラグがオフなら処理しない
             if (!_activeAttackEvent)
                 continue;
 			layer = CollisionLayer::Attack;
+            // 被弾レイヤー以外に当たらないようにする
+			layerMask = GetCollisionLayerMask(CollisionLayer::Hit);
         }
 		else if (event.eventType == AnimationEvent::EventType::Hit)
 		{
@@ -575,6 +578,7 @@ void Animator::UpdateAnimationEvent()
             collisionManager.RegisterSphereData(
                 GetActor().get(),
                 layer,
+                layerMask,
                 Vector3(transform._41, transform._42, transform._43),
                 event.scale.x);
             break;
@@ -582,6 +586,7 @@ void Animator::UpdateAnimationEvent()
             collisionManager.RegisterBoxData(
                 GetActor().get(),
                 layer,
+                layerMask,
                 event.position.TransformCoord(node.worldTransform),
                 event.scale,
                 event.angle);
@@ -590,6 +595,7 @@ void Animator::UpdateAnimationEvent()
             collisionManager.RegisterCapsuleData(
                 GetActor().get(),
                 layer,
+                layerMask,
                 event.position.TransformCoord(node.worldTransform),
                 event.angle.TransformCoord(node.worldTransform),
                 event.scale.x);

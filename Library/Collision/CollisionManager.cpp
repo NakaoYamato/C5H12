@@ -34,8 +34,6 @@ void CollisionManager::Update()
 					for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
 					{
 						auto& sphereB = _sphereDatas[sphereBIndex];
-						// 同じ場合は処理しない
-						if (sphereA.actor == sphereB.actor)continue;
 						SphereVsSphere(sphereA, sphereB, collisionDataMap);
 					}
 				}));
@@ -48,8 +46,6 @@ void CollisionManager::Update()
 					// 球Vsボックス
 					for (auto& box : _boxDatas)
 					{
-						// 同じ場合は処理しない
-						if (sphereA.actor == box.actor)continue;
 						SphereVsBox(sphereA, box, collisionDataMap);
 					}
 				}));
@@ -62,8 +58,6 @@ void CollisionManager::Update()
 					// 球Vsカプセル
 					for (auto& capsule : _capsuleDatas)
 					{
-						// 同じ場合は処理しない
-						if (sphereA.actor == capsule.actor)continue;
 						SphereVsCapsule(sphereA, capsule, collisionDataMap);
 					}
 				}));
@@ -83,8 +77,6 @@ void CollisionManager::Update()
 					for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
 					{
 						auto& boxB = _boxDatas[boxBIndex];
-						// 同じ場合は処理しない
-						if (boxA.actor == boxB.actor)continue;
 						BoxVsBox(boxA, boxB, collisionDataMap);
 					}
 				}));
@@ -130,9 +122,6 @@ void CollisionManager::Update()
 					for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
 					{
 						auto& capsuleB = _capsuleDatas[capsuleBIndex];
-
-						// 同じ場合は処理しない
-						if (capsuleA.actor == capsuleB.actor)continue;
 						CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
 					}
 				}));
@@ -159,25 +148,18 @@ void CollisionManager::Update()
 			for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
 			{
 				auto& sphereB = _sphereDatas[sphereBIndex];
-
-				// 同じ場合は処理しない
-				if (sphereA.actor == sphereB.actor)continue;
 				SphereVsSphere(sphereA, sphereB, collisionDataMap);
 			}
 
 			// 球Vsボックス
 			for (auto& box : _boxDatas)
 			{
-				// 同じ場合は処理しない
-				if (sphereA.actor == box.actor)continue;
 				SphereVsBox(sphereA, box, collisionDataMap);
 			}
 
 			// 球Vsカプセル
 			for (auto& capsule : _capsuleDatas)
 			{
-				// 同じ場合は処理しない
-				if (sphereA.actor == capsule.actor)continue;
 				SphereVsCapsule(sphereA, capsule, collisionDataMap);
 			}
 		}
@@ -191,8 +173,6 @@ void CollisionManager::Update()
 			for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
 			{
 				auto& boxB = _boxDatas[boxBIndex];
-				// 同じ場合は処理しない
-				if (boxA.actor == boxB.actor)continue;
 				BoxVsBox(boxA, boxB, collisionDataMap);
 			}
 
@@ -232,9 +212,6 @@ void CollisionManager::Update()
 			for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
 			{
 				auto& capsuleB = _capsuleDatas[capsuleBIndex];
-
-				// 同じ場合は処理しない
-				if (capsuleA.actor == capsuleB.actor)continue;
 				CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
 			}
 		}
@@ -423,19 +400,19 @@ void CollisionManager::RegisterMeshCollider(MeshCollider* meshCollider)
 	_meshColliders.push_back(meshCollider);
 }
 // 球データ登録
-void CollisionManager::RegisterSphereData(Actor* actor, CollisionLayer layer, const Vector3& position, float radius, bool isTrigger)
+void CollisionManager::RegisterSphereData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& position, float radius, bool isTrigger)
 {
-    _sphereDatas.push_back(SphereData(actor, layer, position, radius, isTrigger));
+    _sphereDatas.push_back(SphereData(actor, layer, mask, position, radius, isTrigger));
 }
 // ボックスデータ登録
-void CollisionManager::RegisterBoxData(Actor* actor, CollisionLayer layer, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
+void CollisionManager::RegisterBoxData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& position, const Vector3& halfSize, const Vector3& rotation, bool isTrigger)
 {
-    _boxDatas.push_back(BoxData(actor, layer, position, halfSize, rotation, isTrigger));
+    _boxDatas.push_back(BoxData(actor, layer, mask, position, halfSize, rotation, isTrigger));
 }
 // カプセルデータ登録
-void CollisionManager::RegisterCapsuleData(Actor* actor, CollisionLayer layer, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
+void CollisionManager::RegisterCapsuleData(Actor* actor, CollisionLayer layer, CollisionLayerMask mask, const Vector3& start, const Vector3& end, float radius, bool isTrigger)
 {
-    _capsuleDatas.push_back(CapsuleData(actor, layer, start, end, radius, isTrigger));
+    _capsuleDatas.push_back(CapsuleData(actor, layer, mask, start, end, radius, isTrigger));
 }
 
 #pragma endregion
@@ -504,6 +481,7 @@ void CollisionManager::SetDataByCollider()
 			SphereData(
 				sphere->GetActor().get(),
                 sphere->GetLayer(),
+				sphere->GetLayerMask(),
 				sphere->GetPosition().TransformCoord(transform.GetMatrix()),
 				sphere->GetRadius(),
 				sphere->IsTrigger()));
@@ -515,6 +493,7 @@ void CollisionManager::SetDataByCollider()
 			BoxData(
 				box->GetActor().get(),
                 box->GetLayer(),
+				box->GetLayerMask(),
 				box->GetPosition().TransformCoord(transform.GetMatrix()),
 				box->GetHalfSize(),
 				transform.GetRotation(),
@@ -527,6 +506,7 @@ void CollisionManager::SetDataByCollider()
 			CapsuleData(
 				capsule->GetActor().get(),
                 capsule->GetLayer(),
+				capsule->GetLayerMask(),
 				capsule->GetStart().TransformCoord(transform.GetMatrix()),
 				capsule->GetEnd().TransformCoord(transform.GetMatrix()),
 				capsule->GetRadius(),
@@ -578,6 +558,14 @@ void CollisionManager::SphereVsSphere(
 	const SphereData& sphereB,
 	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
 {
+	// 同じ場合は処理しない
+	if (sphereA.actor == sphereB.actor)return;
+	// マスクチェック
+	if (!CheckCollisionLayer(
+		sphereA.layer, sphereA.mask,
+		sphereB.layer, sphereB.mask))
+		return;
+
 	Vector3 hitPosition{};
 	Vector3 hitNormal{};
 	float penetration = 0.0f;
@@ -609,6 +597,14 @@ void CollisionManager::SphereVsBox(
 	const BoxData& box, 
 	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
 {
+	// 同じ場合は処理しない
+	if (sphere.actor == box.actor)return;
+	// マスクチェック
+	if (!CheckCollisionLayer(
+		sphere.layer, sphere.mask,
+		box.layer, box.mask))
+		return;
+
 	Vector3 hitPosition{};
 	Vector3 hitNormal{};
 	float penetration = 0.0f;
@@ -641,6 +637,14 @@ void CollisionManager::SphereVsCapsule(
 	const CapsuleData& capsule,
 	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
 {
+	// 同じ場合は処理しない
+	if (sphere.actor == capsule.actor)return;
+	// マスクチェック
+	if (!CheckCollisionLayer(
+		sphere.layer, sphere.mask,
+		capsule.layer, capsule.mask))
+		return;
+
 	Vector3 hitPosition{};
 	Vector3 hitNormal{};
 	float penetration = 0.0f;
@@ -673,6 +677,14 @@ void CollisionManager::BoxVsBox(
 	const BoxData& boxB, 
 	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
 {
+	// 同じ場合は処理しない
+	if (boxA.actor == boxB.actor)return;
+	// マスクチェック
+	if (!CheckCollisionLayer(
+		boxA.layer, boxA.mask,
+		boxB.layer, boxB.mask))
+		return;
+
 	Vector3 hitPosition{};
 	Vector3 hitNormal{};
 	float penetration = 0.0f;
@@ -706,6 +718,14 @@ void CollisionManager::CapsuleVsCapsule(
 	const CapsuleData& capsuleB,
 	std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
 {
+	// 同じ場合は処理しない
+	if (capsuleA.actor == capsuleB.actor)return;
+	// マスクチェック
+	if(!CheckCollisionLayer(
+		capsuleA.layer, capsuleA.mask,
+		capsuleB.layer, capsuleB.mask))
+		return;
+
 	Vector3 hitPosition{};
 	Vector3 hitNormal{};
 	float penetration = 0.0f;

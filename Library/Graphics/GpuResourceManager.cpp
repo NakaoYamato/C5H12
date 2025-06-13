@@ -9,6 +9,7 @@
 #include "../../External/DirectXTex/DDS.h"
 #include "../../External/DirectXTK-main/WICTextureLoader.h"
 #include "../../External/DirectXTK-main/DDSTextureLoader.h"
+#include "../../External/DirectXTex/DirectXTex.h"
 #include "../HRTrace.h"
 
 #include "../DebugSupporter/DebugSupporter.h"
@@ -292,56 +293,91 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 	static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> resources;
 
 	HRESULT hr = { S_OK };
-	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-
-	// DDSファイルがあるか確認
-	std::filesystem::path ddsFilename(filename);
-	ddsFilename.replace_extension("dds");
-	if (std::filesystem::exists(ddsFilename.c_str()))
+	// 以前に読み込んだことがあるか確認
+	auto it = resources.find(filename);
+	if (it != resources.end())
 	{
-		// 過去に読み込んだことがあるか確認
-		auto it = resources.find(ddsFilename.c_str());
-		if (it != resources.end())
+		// 過去に読み込んだデータを取得
+		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+		*shaderResourceView = it->second.Get();
+		(*shaderResourceView)->AddRef();
+		(*shaderResourceView)->GetResource(resource.GetAddressOf());
+		if (texture2dDesc)
 		{
-			*shaderResourceView = it->second.Get();
-			(*shaderResourceView)->AddRef();
-			(*shaderResourceView)->GetResource(resource.GetAddressOf());
+			Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
+			resource.Get()->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
+			texture2d->GetDesc(texture2dDesc);
 		}
-		else
-		{
-			hr = DirectX::CreateDDSTextureFromFile(device, ddsFilename.c_str(), resource.GetAddressOf(),
-				shaderResourceView);
-			// 失敗したらfalse
-			if (!SUCCEEDED(hr))
-				return false;
+		return true;
+	}
 
-			resources.insert(std::make_pair(ddsFilename.c_str(), *shaderResourceView));
-		}
+	// ファイル拡張子を確認してそれに応じた読み込みを行う
+	std::filesystem::path filepath(filename);
+	std::string extension = filepath.extension().string();
+	// 小文字化
+	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
+
+	DirectX::TexMetadata metadata;
+	DirectX::ScratchImage scratch_image;
+	if (extension == ".dds")
+	{
+		hr = DirectX::GetMetadataFromDDSFile(filepath.wstring().c_str(), DirectX::DDS_FLAGS_NONE, metadata);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
+		hr = DirectX::LoadFromDDSFile(filepath.wstring().c_str(), DirectX::DDS_FLAGS_NONE, &metadata, scratch_image);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
+	}
+	else if (extension == ".tga")
+	{
+		hr = DirectX::GetMetadataFromTGAFile(filepath.wstring().c_str(), metadata);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
+		hr = DirectX::LoadFromTGAFile(filepath.wstring().c_str(), &metadata, scratch_image);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
+	}
+	else if (extension == ".hdr")
+	{
+		hr = DirectX::GetMetadataFromHDRFile(filepath.wstring().c_str(), metadata);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
+		hr = DirectX::LoadFromHDRFile(filepath.wstring().c_str(), &metadata, scratch_image);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
 	}
 	else
 	{
-		// 過去に読み込んだことがあるか確認
-		auto it = resources.find(filename);
-		if (it != resources.end())
-		{
-			*shaderResourceView = it->second.Get();
-			(*shaderResourceView)->AddRef();
-			(*shaderResourceView)->GetResource(resource.GetAddressOf());
-		}
-		else
-		{
-			hr = DirectX::CreateWICTextureFromFile(device, filename, resource.GetAddressOf(),
-				shaderResourceView);
-			// 失敗したらfalse
-			if (!SUCCEEDED(hr))
-				return false;
-
-			resources.insert(std::make_pair(filename, *shaderResourceView));
-		}
+		hr = DirectX::GetMetadataFromWICFile(filepath.wstring().c_str(), DirectX::WIC_FLAGS_NONE, metadata);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
+		hr = DirectX::LoadFromWICFile(filepath.wstring().c_str(), DirectX::WIC_FLAGS_NONE, &metadata, scratch_image);
+		// 失敗したらfalse
+		if (!SUCCEEDED(hr))
+			return false;
 	}
-	
+
+	// シェーダーリソースビュー作成
+	hr = DirectX::CreateShaderResourceView(device,
+		scratch_image.GetImages(), 
+		scratch_image.GetImageCount(),
+		metadata, shaderResourceView);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	// 生成したデータをセット
+	resources.insert(std::make_pair(filepath.wstring(), *shaderResourceView));
+
 	if (texture2dDesc)
 	{
+		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+		(*shaderResourceView)->GetResource(resource.GetAddressOf());
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
 		hr = resource.Get()->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));

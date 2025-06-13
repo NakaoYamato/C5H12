@@ -122,8 +122,8 @@ public:
 private:
 	// ブレスのエフェクトを表示するアクター
 	std::weak_ptr<WyvernBreathActor> _fireBreathActor;
-	// ブレスの位置
-	Vector3 _fireBreathOffset = Vector3(-19.0f, 100.0f, 0.0f);
+	// ブレスの位置(頭ノードのローカル空間)
+	Vector3 _fireBreathOffset = Vector3(-20.0f, 100.0f, 0.0f);
 };
 #pragma endregion
 

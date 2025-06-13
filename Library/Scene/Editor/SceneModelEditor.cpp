@@ -172,14 +172,14 @@ void SceneModelEditor::DrawMenuBarGui()
                     }
                     catch (...)
                     {
-                        _relativePath = "";
+                        _relativePath.clear();
                     }
 
                     // マテリアル削除
                     _modelRenderer.lock()->GetMaterials().clear();
 
                     // モデルの読み込み
-                    auto model = _modelActor.lock()->LoadModel(_relativePath.c_str() != "" ? _relativePath.c_str() : _filepath.c_str());
+                    auto model = _modelActor.lock()->LoadModel(_relativePath.size() != 0 ? _relativePath.c_str() : _filepath.c_str());
                     _animator.lock()->ResetModel(model.lock());
 
 					// アニメーションイベントの読み込み

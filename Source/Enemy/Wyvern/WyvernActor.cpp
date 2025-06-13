@@ -32,6 +32,7 @@ void WyvernActor::OnCreate()
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();
+	modelCollider->SetLayer(CollisionLayer::Hit);
 
 	// ビヘイビアツリー作成
 	_behaviorTree = std::make_unique<WyvernBehaviorTree>(_wyvernEnemyController.lock().get(), _animator.lock().get());

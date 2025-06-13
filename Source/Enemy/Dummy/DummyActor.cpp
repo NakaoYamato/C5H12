@@ -22,5 +22,6 @@ void DummyActor::OnCreate()
     collider->SetStart(Vector3(0.0f, 1.0f, 0.0f));
     collider->SetEnd(Vector3(0.0f, 3.0f, 0.0f));
     collider->SetRadius(1.2f);
+    collider->SetLayer(CollisionLayer::Hit);
 }
 

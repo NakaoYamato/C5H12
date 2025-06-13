@@ -11,11 +11,15 @@
 // 開始処理
 void WyvernBreathController::Start()
 {
-	_capsuleCollider = GetActor()->GetCollider<CapsuleCollider>();
+	auto capsuleColliders = GetActor()->GetColliders<CapsuleCollider>();
+	for (auto& capsule : capsuleColliders)
+	{
+		// ブレスのカプセルコライダーを登録
+		_capsuleColliders.push_back(capsule);
+		capsule->SetRadius(_breathRadius);
+	}
 	_particleController = GetActor()->GetComponent<ParticleController>();
 	_particleController.lock()->Play();
-
-	_capsuleCollider.lock()->SetRadius(_breathRadius);
 }
 
 // 削除処理
@@ -33,14 +37,21 @@ void WyvernBreathController::Update(float elapsedTime)
 	_breathRange += _breathSpeed * elapsedTime;
 	_breathRange = std::clamp(_breathRange, 0.0f, _breathRangeMax);
 	// カプセルコライダーの位置と方向を更新
-	if (auto capsuleCollider = _capsuleCollider.lock())
+	for (size_t i = 0; i < 3; ++i)
 	{
-		capsuleCollider->SetEnd(Vector3(Vector3::Front) * _breathRange);
+		if (i >= _capsuleColliders.size()) break;
+		auto capsule = _capsuleColliders[i].lock();
+		if (capsule == nullptr) continue;
+		// ブレスのカプセルコライダーの位置を更新
+		Vector3 direction = Vector3(Vector3::Front) + Vector3(Vector3::Right) * _breathWaver * ((float)i - 1.0f);
+		capsule->SetStart(_collisionOffset);
+		capsule->SetEnd(_collisionOffset + direction.Normalize() * _breathRange);
 	}
 }
 // GUI描画
 void WyvernBreathController::DrawGui()
 {
+	ImGui::DragFloat3(u8"ブレスのオフセット", &_collisionOffset.x, 0.1f, -100.0f, 100.0f);
 	ImGui::DragFloat(u8"ブレスの速度", &_breathSpeed, 1.0f, 0.0f, 1000.0f);
 	ImGui::DragFloat(u8"ブレスの距離", &_breathRange, 1.0f, 0.0f, 10000.0f);
 	ImGui::DragFloat(u8"ブレスの最大距離", &_breathRangeMax, 1.0f, 0.0f, 10000.0f);
@@ -50,6 +61,7 @@ void WyvernBreathController::OnContactEnter(CollisionData& collisionData)
 {
 	// 攻撃判定
 	if (collisionData.myLayer == CollisionLayer::Attack &&
+		collisionData.otherLayer == CollisionLayer::Hit &&
 		collisionData.other != _breathActor.lock().get())
 	{
 		// ダメージを与える

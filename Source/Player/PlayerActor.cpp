@@ -46,6 +46,7 @@ void PlayerActor::OnCreate()
 	collider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
 	collider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));
 	collider->SetRadius(0.5f);
+	collider->SetLayer(CollisionLayer::Hit);
 
 	// Œ•¶¬
 	{

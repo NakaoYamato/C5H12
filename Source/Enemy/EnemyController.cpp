@@ -41,7 +41,7 @@ void EnemyController::DrawGui()
 void EnemyController::OnContactEnter(CollisionData& collisionData)
 {
 	// UŒ‚”»’è
-	if (collisionData.myLayer == CollisionLayer::Attack)
+	if (collisionData.myLayer == CollisionLayer::Attack && collisionData.otherLayer == CollisionLayer::Hit)
 	{
 		// ƒ_ƒ[ƒW‚ð—^‚¦‚é
 		auto damageable = collisionData.other->GetComponent<Damageable>();

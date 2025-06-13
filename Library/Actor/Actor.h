@@ -182,11 +182,23 @@ public:
 		}
 		return nullptr;
 	}
-	std::shared_ptr<ColliderBase> GetCollider(size_t index)
+	/// <summary>
+	/// 当たり判定コンポーネント取得
+	/// </summary>
+	/// <typeparam name="T">Colliderを継承したすべてのコンポーネント</typeparam>
+	/// <returns>失敗でsize() == 0</returns>
+	template<class T>
+	std::vector<std::shared_ptr<T>> GetColliders()
 	{
-		return _colliders[index];
+		std::vector<std::shared_ptr<T>> result;
+		for (std::shared_ptr<ColliderBase>& component : _colliders)
+		{
+			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
+			if (p == nullptr) continue;
+			result.push_back(p);
+		}
+		return result;
 	}
-	size_t GetColliderComponentSize()const { return _colliders.size(); }
 #pragma endregion
 
 #pragma region アクセサ
@@ -303,7 +315,7 @@ protected:
 	// 当たり判定コンポーネント
 	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
 
-	// 前フレームに接触したレイヤーごとのアクター
+	// 自身のレイヤーごとの前フレームに接触したレイヤーごとのアクター
 	std::unordered_map<CollisionLayer, std::vector<Actor*>> _lastContactActors;
 
 #pragma region 各種フラグ

@@ -139,7 +139,7 @@ void ModelResource::Load(std::string filename)
 
     // ファイル読み込み
     _aScene = _aImporter.ReadFile(filename, flag);
-    _ASSERT_EXPR_A(_aScene, "3D Model File not found");
+    _ASSERT_EXPR_A(_aScene, _aImporter.GetErrorString());
 
     // ノードの読み込み
     LoadNodes(_nodes);

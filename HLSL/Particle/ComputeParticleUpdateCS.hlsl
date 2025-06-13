@@ -38,8 +38,8 @@ void main(uint3 dTid : SV_DispatchThreadID)
         particleHeaderBuffer[headerIndex] = header;
         
         // €–S”‚ğƒJƒEƒ“ƒg
-        uint original_count;
-        indirectDataBuffer.InterlockedAdd(IndirectArgumentsNumDeadParticle, 1, original_count);
+        uint originalCount;
+        indirectDataBuffer.InterlockedAdd(IndirectArgumentsNumDeadParticle, 1, originalCount);
         return;
     }
     

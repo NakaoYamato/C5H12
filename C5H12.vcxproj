@@ -160,6 +160,7 @@
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Component\ParticleController.cpp" />
+    <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
@@ -254,6 +255,7 @@
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
+    <ClCompile Include="Source\Common\Targetable.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
     <ClCompile Include="Source\Enemy\EnemyActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.cpp" />
@@ -267,6 +269,7 @@
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Scene\Game\SceneTitle.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneTwoBoneIKDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneLookAtDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernIKDebug.cpp" />
@@ -308,6 +311,7 @@
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Component\ParticleController.h" />
+    <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\Material\Material.h" />
@@ -415,6 +419,7 @@
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
+    <ClInclude Include="Source\Common\Targetable.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
     <ClInclude Include="Source\Enemy\EnemyActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.h" />
@@ -428,6 +433,7 @@
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h" />
+    <ClInclude Include="Source\Scene\Game\SceneTitle.h" />
     <ClInclude Include="Source\Scene\Test\SceneLookAtDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneTwoBoneIKDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernIKDebug.h" />

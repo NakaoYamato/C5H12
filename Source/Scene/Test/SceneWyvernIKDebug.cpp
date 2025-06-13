@@ -8,10 +8,8 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
-void SceneWyvernIKDebug::Initialize()
+void SceneWyvernIKDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -37,9 +35,8 @@ void SceneWyvernIKDebug::Initialize()
     SetShowGrid(true);
 }
 
-void SceneWyvernIKDebug::Update(float elapsedTime)
+void SceneWyvernIKDebug::OnUpdate(float elapsedTime)
 {
-    Scene::Update(elapsedTime);
 	if (_twoBoneIK)
 		UpdateTwoBoneIK(elapsedTime);
 	else

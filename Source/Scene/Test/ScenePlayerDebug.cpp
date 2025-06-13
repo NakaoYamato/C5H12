@@ -13,10 +13,8 @@
 
 #include "../../Mediator/CanvasMediator.h"
 
-void ScenePlayerDebug::Initialize()
+void ScenePlayerDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -24,7 +22,6 @@ void ScenePlayerDebug::Initialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
     // オブジェクト作成
-    ActorManager& actorManager = GetActorManager();
     {
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }

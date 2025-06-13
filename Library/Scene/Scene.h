@@ -55,35 +55,35 @@ public:
 	// 階層取得
 	virtual SceneMenuLevel GetLevel() const = 0;
 
+#pragma region SceneManagerで呼ぶ関数
 	// 初期化
 	virtual void Initialize();
-
 	// 終了化
 	virtual void Finalize();
-
 	// 更新処理
 	virtual void Update(float elapsedTime);
-
-	/// 一定間隔の更新処理
+	// 一定間隔の更新処理
 	virtual void FixedUpdate();
-
 	// 描画処理
 	virtual void Render();
-
-	// Gui描画処理
+	// GUI描画処理
 	virtual void DrawGui();
+#pragma endregion
 
-	// 自身を新規のポインタで渡す
-	virtual std::shared_ptr<Scene> GetNewShared() = 0;
-
-	// 準備完了しているか
-	bool IsReady()const { return _ready; }
-
-	// 準備完了設定
-	void SetReady() { _ready = true; }
-
-	// スカイマップ設定
-	void SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM);
+#pragma region 仮想関数
+	// 初期化
+	virtual void OnInitialize() {}
+	// 終了化
+	virtual void OnFinalize() {}
+	// 更新処理
+	virtual void OnUpdate(float elapsedTime) {}
+	// 一定間隔の更新処理
+	virtual void OnFixedUpdate() {}
+	// 描画処理
+	virtual void OnRender() {}
+	// GUI描画処理
+	virtual void OnDrawGui() {}
+#pragma endregion
 
 	/// <summary>
 	/// アクター登録
@@ -104,6 +104,9 @@ public:
 	}
 
 #pragma region アクセサ
+	// 自身を新規のポインタで渡す
+	virtual std::shared_ptr<Scene> GetNewShared() = 0;
+
 	Primitive* GetPrimitive() const { return _primitive.get(); }
 	// アクター管理者取得
 	ActorManager&			GetActorManager()			{ return _actorManager; }
@@ -131,8 +134,15 @@ public:
 		return &_camera;
 	}
 
+	// スカイマップ設定
+	void SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM);
+
 	// グリッド表示フラグ取得
 	void SetShowGrid(bool show) { _showGrid = show; }
+	// 準備完了しているか
+	bool IsReady()const { return _ready; }
+	// 準備完了設定
+	void SetReady() { _ready = true; }
 #pragma endregion
 private:
 	std::unique_ptr<SkyMap>			_skyMap;

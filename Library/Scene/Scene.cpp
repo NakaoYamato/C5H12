@@ -41,12 +41,16 @@ void Scene::Initialize()
     {
         auto mainCamera = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::DrawContextParameter);
     }
+
+    OnInitialize();
 }
 
 // 終了化
 void Scene::Finalize()
 {
     _actorManager.Clear();
+
+    OnFinalize();
 }
 
 //更新処理
@@ -73,6 +77,8 @@ void Scene::Update(float elapsedTime)
     // グリッド表示
     if (_showGrid)
         Debug::Renderer::DrawGrid(10);
+
+	OnUpdate(elapsedTime);
 }
 
 /// 一定間隔の更新処理
@@ -80,6 +86,8 @@ void Scene::FixedUpdate()
 {
     // ゲームオブジェクトの更新
     _actorManager.FixedUpdate();
+
+    OnFixedUpdate();
 }
 
 //描画処理
@@ -303,6 +311,8 @@ void Scene::Render()
 
     // テキスト描画
 	_textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+
+    OnRender();
 }
 
 // デバッグ用Gui描画
@@ -319,6 +329,8 @@ void Scene::DrawGui()
 
     if(_skyMap)
         _skyMap->DrawGui();
+
+    OnDrawGui();
 }
 
 // スカイマップ設定

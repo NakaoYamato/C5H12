@@ -10,10 +10,8 @@
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Library/Component/CharactorController.h"
 
-void SceneCollisionDebug::Initialize()
+void SceneCollisionDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",

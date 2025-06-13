@@ -17,10 +17,8 @@
 #include "../../Source/Stage/StageActor.h"
 
 //‰Šú‰»
-void SceneDebug::Initialize()
+void SceneDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds", 

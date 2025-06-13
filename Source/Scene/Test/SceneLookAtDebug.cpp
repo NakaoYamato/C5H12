@@ -7,10 +7,8 @@
 
 #include <imgui.h>
 
-void SceneLookAtDebug::Initialize()
+void SceneLookAtDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -34,10 +32,8 @@ void SceneLookAtDebug::Initialize()
 }
 
 // 更新処理
-void SceneLookAtDebug::Update(float elapsedTime)
+void SceneLookAtDebug::OnUpdate(float elapsedTime)
 {
-    Scene::Update(elapsedTime);
-
     // 初期姿勢時の頭ノードのローカル空間前方向を求める
 	if (_headLocalForward == Vector3::Zero)
     {

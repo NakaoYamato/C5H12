@@ -10,10 +10,8 @@
 
 #include "../../Mediator/CanvasMediator.h"
 //‰Šú‰»
-void SceneNetworkDebug::Initialize()
+void SceneNetworkDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",

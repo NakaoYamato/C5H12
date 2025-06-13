@@ -4,10 +4,9 @@
 
 #include <imgui.h>
 
-void SceneParticleEditor::Initialize()
+// 初期化
+void SceneParticleEditor::OnInitialize()
 {
-    Scene::Initialize();
-
 	// パーティクル用アクター生成
 	auto particleActor = RegisterActor<Actor>(u8"ParticleEmiter", ActorTag::DrawContextParameter);
 	auto particleController = particleActor->AddComponent<ParticleController>(u8"./Data/Particle/ParticleEmiter.json");

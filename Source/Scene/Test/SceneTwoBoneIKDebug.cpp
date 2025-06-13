@@ -6,10 +6,8 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
-void SceneTwoBoneIKDebug::Initialize()
+void SceneTwoBoneIKDebug::OnInitialize()
 {
-	Scene::Initialize();
-
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
 	SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -62,10 +60,8 @@ void SceneTwoBoneIKDebug::Initialize()
 	SetShowGrid(true);
 }
 
-void SceneTwoBoneIKDebug::Update(float elapsedTime)
+void SceneTwoBoneIKDebug::OnUpdate(float elapsedTime)
 {
-	Scene::Update(elapsedTime);
-
 	// ポールターゲットのワールド行列を更新
 	{
 		// 中間ボーン付近にポールターゲットを配置する

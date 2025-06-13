@@ -9,10 +9,8 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
-void SceneDragonDebug::Initialize()
+void SceneDragonDebug::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",

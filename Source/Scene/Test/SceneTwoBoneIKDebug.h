@@ -14,9 +14,9 @@ public:
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Debug; }
 
 	//初期化
-	void Initialize()override;
+	void OnInitialize()override;
 	// 更新処理
-	void Update(float elapsedTime)override;
+	void OnUpdate(float elapsedTime)override;
 
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
@@ -61,7 +61,7 @@ private:
 		}
 	};
 
-	Bone								bones[4];
+	Bone								bones[4] = {};
 	DirectX::XMFLOAT4X4					targetWorldTransform{};
 	DirectX::XMFLOAT4X4					poleLocalTransform{};
 	DirectX::XMFLOAT4X4					poleWorldTransform{};

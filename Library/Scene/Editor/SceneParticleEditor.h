@@ -13,7 +13,7 @@ public:
 	// ŠK‘wæ“¾
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Editor; }
 	// ‰Šú‰»
-	void Initialize() override;
+	void OnInitialize() override;
 	// ©g‚ğV‹K‚Ìƒ|ƒCƒ“ƒ^‚Å“n‚·
 	std::shared_ptr<Scene> GetNewShared() override
 	{

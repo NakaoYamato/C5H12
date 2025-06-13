@@ -12,10 +12,8 @@ public:
 	const char* GetName()const { return u8"DragonDebug"; }
 	// ŠK‘wæ“¾
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Debug; }
-
 	//‰Šú‰»
-	void Initialize()override;
-
+	void OnInitialize()override;
 	// ©g‚ğV‹K‚Ìƒ|ƒCƒ“ƒ^‚Å“n‚·
 	std::shared_ptr<Scene> GetNewShared() override
 	{

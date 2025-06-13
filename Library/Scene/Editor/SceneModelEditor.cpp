@@ -12,10 +12,8 @@
 #include "../../Library/Exporter/Exporter.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
 
-void SceneModelEditor::Initialize()
+void SceneModelEditor::OnInitialize()
 {
-    Scene::Initialize();
-
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -37,10 +35,8 @@ void SceneModelEditor::Initialize()
 	SetShowGrid(true);
 }
 
-void SceneModelEditor::Update(float elapsedTime)
+void SceneModelEditor::OnUpdate(float elapsedTime)
 {
-	Scene::Update(elapsedTime);
-
     Debug::Renderer::DrawAxis(DirectX::XMFLOAT4X4(
         1,0,0,0,
         0,1,0,0,

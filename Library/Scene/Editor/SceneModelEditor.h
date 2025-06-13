@@ -19,9 +19,9 @@ public:
 	// ŠK‘wæ“¾
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Editor; }
 	//‰Šú‰»
-	void Initialize()override;
+	void OnInitialize()override;
 	// XVˆ—
-	void Update(float elapsedTime)override;
+	void OnUpdate(float elapsedTime)override;
 	// Gui•`‰æˆ—
 	void DrawGui()override;
 	// ©g‚ğV‹K‚Ìƒ|ƒCƒ“ƒ^‚Å“n‚·

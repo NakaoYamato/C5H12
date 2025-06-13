@@ -14,7 +14,7 @@ public:
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Debug; }
 
 	//初期化
-	void Initialize()override;
+	void OnInitialize()override;
 
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override

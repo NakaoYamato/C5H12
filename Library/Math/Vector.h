@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Easing.h"
+#include "MathF.h"
 
 #include <DirectXMath.h>
 
@@ -179,6 +180,10 @@ public:
     static Vector3 RandomBias();
 	// -1~1の範囲でランダムな値を取得
     static Vector3 RandomNormal();
+	// Vector3の値をminとmaxで制限
+    static Vector3 Clamp(const Vector3& v, const Vector3& min, const Vector3& max);
+	// Vector3の値を中心と半径で制限
+    static Vector3 ClampSphere(const Vector3& v, const Vector3& center, float radius);
 #pragma endregion
 
 #pragma region 関数
@@ -230,6 +235,16 @@ public:
 	{
 		return Vector3::CalcAngle(*this);
 	}
+    // Vector3の値をminとmaxで制限
+    Vector3 Clamp(const Vector3& min, const Vector3& max) const
+    {
+		return Vector3::Clamp(*this, min, max);
+    }
+    // Vector3の値を中心と半径で制限
+    Vector3 ClampSphere(const Vector3& center, float radius) const
+    {
+		return Vector3::ClampSphere(*this, center, radius);
+    }
 #pragma endregion
 };
 

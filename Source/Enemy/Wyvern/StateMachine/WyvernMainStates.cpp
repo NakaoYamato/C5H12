@@ -3,6 +3,7 @@
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Scene/Scene.h"
 #include "../WyvernEnemyController.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 
@@ -370,6 +371,20 @@ void WyvernClawAttackState::OnEnter()
 			u8"AttackWingFistRight",
 			false,
 			0.5f);
+
+		// 手のノードインデックスを取得
+		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		_handNodeIndex = model->GetNodeIndex("R Hand");
+		// ターゲット位置設定
+		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&owner->GetWyvern()->GetActor()->GetTransform().GetMatrix());
+		Vector3 targetLocalPosition = targetPosition.TransformCoord(DirectX::XMMatrixInverse(nullptr, WyvernTransform));
+		targetLocalPosition = targetLocalPosition.ClampSphere(Vector3(
+			TargetLocalLimitPositionX,
+			0.0f, 
+			TargetLocalLimitPositionZ),
+			TargetLocalLimitRadius);
+		targetLocalPosition.y = 0.0f; // y座標は0にする
+		_targetWorldPosition = targetLocalPosition.TransformCoord(WyvernTransform);
 	}
 	else
 	{
@@ -379,13 +394,83 @@ void WyvernClawAttackState::OnEnter()
 			u8"AttackWingFistLeft",
 			false,
 			0.5f);
+
+		// 手のノードインデックスを取得
+		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		_handNodeIndex = model->GetNodeIndex("L Hand");
+		// ターゲット位置設定
+		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&owner->GetWyvern()->GetActor()->GetTransform().GetMatrix());
+		Vector3 targetLocalPosition = targetPosition.TransformCoord(DirectX::XMMatrixInverse(nullptr, WyvernTransform));
+		targetLocalPosition = targetLocalPosition.ClampSphere(Vector3(
+			-TargetLocalLimitPositionX,
+			0.0f,
+			TargetLocalLimitPositionZ),
+			TargetLocalLimitRadius);
+		targetLocalPosition.y = 0.0f; // y座標は0にする
+		_targetWorldPosition = targetLocalPosition.TransformCoord(WyvernTransform);
 	}
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
 	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+
+	_lerpTimer = 0.0f;
 }
 void WyvernClawAttackState::OnExecute(float elapsedTime)
 {
+	// 手の位置をターゲット位置に設定
+	float animationTimer = owner->GetAnimator()->GetAnimationTimer();
+	if (animationTimer > 1.7f)
+	{
+		_lerpTimer -= elapsedTime * _endLerpSpeed;
+	}
+	else if (animationTimer >= 1.2f)
+	{
+		_lerpTimer += elapsedTime * _startLerpSpeed;
+	}
+	if (_lerpTimer > 0.0f)
+	{
+		// モデル情報、手のノード情報、手の親ノード情報を取得
+		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		auto& handNode = model->GetPoseNodes()[_handNodeIndex];
+		auto armNord = handNode.parent;
+
+		// 現在の腕のアニメーション回転量を取得
+		Quaternion animationMidRotation = armNord->rotation;
+		// 腕ノードを初期姿勢に戻す
+		armNord->rotation = Quaternion::Identity;
+		model->UpdateNodeTransform(armNord);
+
+		// 腕ノードをターゲット方向に向ける
+		DirectX::XMMATRIX ArmTransform = DirectX::XMLoadFloat4x4(&armNord->worldTransform);
+		DirectX::XMMATRIX HandTransform = DirectX::XMLoadFloat4x4(&handNode.worldTransform);
+		DirectX::XMVECTOR TargetWorldPosition = DirectX::XMLoadFloat3(&_targetWorldPosition);
+		DirectX::XMVECTOR ArmPosition = ArmTransform.r[3];
+		DirectX::XMVECTOR HandPosition = HandTransform.r[3];
+		// 腕ノードからターゲットへのベクトル
+		DirectX::XMVECTOR ArmToTargetNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TargetWorldPosition, ArmPosition));
+		// 腕ノードから手ノードへのベクトル
+		DirectX::XMVECTOR ArmToHandNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HandPosition, ArmPosition));
+		// 腕ノードからターゲットへのベクトルと腕ノードから手ノードへのベクトルで腕ノードの回転角と回転軸を作る
+		DirectX::XMVECTOR ArmWorldAxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(ArmToHandNormal, ArmToTargetNormal));
+		float ArmAngle = acosf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(ArmToTargetNormal, ArmToHandNormal)));
+
+		// 求めた回転軸をローカル座標変換
+		DirectX::XMVECTOR ArmLocalAxis = DirectX::XMVector4Transform(ArmWorldAxis, DirectX::XMMatrixInverse(nullptr, ArmTransform));
+		DirectX::XMVECTOR OldArmLocalRotation = DirectX::XMLoadFloat4(&armNord->rotation);
+		// ローカル回転軸と回転角を使ってQuaternionを作成
+		ArmLocalAxis = DirectX::XMQuaternionMultiply(OldArmLocalRotation, DirectX::XMQuaternionRotationAxis(ArmLocalAxis, ArmAngle));
+		Quaternion nextRotation{};
+		DirectX::XMStoreFloat4(&nextRotation, DirectX::XMQuaternionNormalize(ArmLocalAxis));
+		// 補間処理
+		armNord->rotation = Quaternion::Slerp(
+			animationMidRotation,
+			nextRotation,
+			MathF::Clamp01(_lerpTimer));
+
+		// 自分以下の行列を更新
+		model->UpdateNodeTransform(armNord);
+	}
+
 	// アニメーションが終了しているとき
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{

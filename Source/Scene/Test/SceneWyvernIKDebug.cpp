@@ -3,7 +3,7 @@
 #include "../../Library/Input/Input.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../DebugSupporter/DebugSupporter.h"
-
+#include "../../Library/Math/MathF.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -27,7 +27,8 @@ void SceneWyvernIKDebug::Initialize()
 	_animator = modelActor->AddComponent<Animator>();
 
     _targetActor = RegisterActor<Actor>(u8"Target", ActorTag::Stage);
-	_targetActor.lock()->GetTransform().SetPosition(Vector3(5.7f, 2.0f, -0.5f));
+	//_targetActor.lock()->GetTransform().SetPosition(Vector3(5.7f, 2.0f, -0.5f));
+	_targetActor.lock()->GetTransform().SetPosition(Vector3(-1.0f, 0.0f, 4.0f));
 
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
@@ -39,7 +40,41 @@ void SceneWyvernIKDebug::Initialize()
 void SceneWyvernIKDebug::Update(float elapsedTime)
 {
     Scene::Update(elapsedTime);
+	if (_twoBoneIK)
+		UpdateTwoBoneIK(elapsedTime);
+	else
+		UpdateAnimationIK(elapsedTime);
+	if (ImGui::Begin(u8"デバッグ"))
+	{
+		ImGui::Checkbox(u8"TwoBoneIK", &_twoBoneIK);
+		ImGui::Checkbox(u8"IK計算", &_calculateIK);
+		ImGui::DragFloat3(u8"ターゲット位置", (float*)&_targetActor.lock()->GetTransform().GetPosition(), 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3(u8"ポールターゲット位置", &_poleLocalPosition.x, 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat(u8"LERP速度", &_lerpSpeed, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat(u8"LERPタイマー", &_lerpTimer, 0.1f, 0.0f, 10.0f);
+		if (ImGui::Checkbox(u8"プレイヤーか", &_playerIK))
+		{
+			if (_playerIK)
+			{
+				// プレイヤーのモデルを表示
+				_animator.lock()->GetActor()->LoadModel("./Data/Model/Player/ARPG_Warrior.fbx");
+				_animator.lock()->ResetModel(_animator.lock()->GetActor()->GetModel().lock());
+				_model = _animator.lock()->GetActor()->GetModel();
+			}
+			else
+			{
+				// ワイバーンのモデルを表示
+				_animator.lock()->GetActor()->LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
+				_animator.lock()->ResetModel(_animator.lock()->GetActor()->GetModel().lock());
+				_model = _animator.lock()->GetActor()->GetModel();
+			}
+		}
+	}
+	ImGui::End();
+}
 
+void SceneWyvernIKDebug::UpdateTwoBoneIK(float elapsedTime)
+{
 	Vector3 debugVec3 = Vector3::Zero;
 
 	auto model = _model.lock();
@@ -63,19 +98,11 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 	auto& midNode = model->GetPoseNodes()[midNodeIndex];
 	auto& endNode = model->GetPoseNodes()[endNodeIndex];
 
-	//if (!_animator.lock()->IsPlayAnimation())
-	//{
-	//	_animator.lock()->PlayAnimation(
-	//		u8"AttackWingFistLeft",
-	//		false,
-	//		1.5f);
-	//}
-
 	// ポールターゲットをギズモで動かす
-	const DirectX::XMFLOAT4X4& view = GetMainCamera()->GetView();
-	const DirectX::XMFLOAT4X4& projection = GetMainCamera()->GetProjection();
 	if (_INPUT_IS_PRESSED("Evade"))
 	{
+		const DirectX::XMFLOAT4X4& view = GetMainCamera()->GetView();
+		const DirectX::XMFLOAT4X4& projection = GetMainCamera()->GetProjection();
 		DirectX::XMMATRIX MidNodeTransform = DirectX::XMLoadFloat4x4(&midNode.worldTransform);
 		DirectX::XMMATRIX PoleLocalTransform = DirectX::XMMatrixTranslation(_poleLocalPosition.x, _poleLocalPosition.y, _poleLocalPosition.z);
 		DirectX::XMFLOAT4X4 poleWorldTransform{};
@@ -95,7 +122,7 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 	DirectX::XMVECTOR PoleWorldPosition = DirectX::XMLoadFloat3(&_poleLocalPosition.TransformCoord(midNode.worldTransform));
 
 	if (_calculateIK)
-    {
+	{
 		// 初期姿勢に戻す
 		rootNode.rotation = Quaternion::Identity;
 		midNode.rotation = Quaternion::Identity;
@@ -103,12 +130,12 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 		model->UpdateNodeTransform(&rootNode);
 
 		// 各ノードのワールド座標取得
-        DirectX::XMMATRIX RootTransform = DirectX::XMLoadFloat4x4(&rootNode.worldTransform);
-        DirectX::XMMATRIX MidTransform = DirectX::XMLoadFloat4x4(&midNode.worldTransform);
-        DirectX::XMMATRIX TipTransform = DirectX::XMLoadFloat4x4(&endNode.worldTransform);
-        DirectX::XMVECTOR RootPosition = RootTransform.r[3];
-        DirectX::XMVECTOR MidPosition = MidTransform.r[3];
-        DirectX::XMVECTOR TipPosition = TipTransform.r[3];
+		DirectX::XMMATRIX RootTransform = DirectX::XMLoadFloat4x4(&rootNode.worldTransform);
+		DirectX::XMMATRIX MidTransform = DirectX::XMLoadFloat4x4(&midNode.worldTransform);
+		DirectX::XMMATRIX TipTransform = DirectX::XMLoadFloat4x4(&endNode.worldTransform);
+		DirectX::XMVECTOR RootPosition = RootTransform.r[3];
+		DirectX::XMVECTOR MidPosition = MidTransform.r[3];
+		DirectX::XMVECTOR TipPosition = TipTransform.r[3];
 
 		// 各ノードの長さ算出
 		DirectX::XMVECTOR RootToMidle = DirectX::XMVectorSubtract(MidPosition, RootPosition);
@@ -185,7 +212,7 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 			// 自分以下の行列を更新
 			model->UpdateNodeTransform(&midNode);
 		}
-    }
+	}
 
 	// デバッグ表示
 	DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -231,27 +258,94 @@ void SceneWyvernIKDebug::Update(float elapsedTime)
 
 	if (ImGui::Begin(u8"デバッグ"))
 	{
-		ImGui::Checkbox(u8"IK計算", &_calculateIK);
-		ImGui::DragFloat3(u8"ターゲット位置", (float*)&_targetActor.lock()->GetTransform().GetPosition(), 0.1f, -100.0f, 100.0f);
-		ImGui::DragFloat3(u8"ポールターゲット位置", &_poleLocalPosition.x, 0.1f, -100.0f, 100.0f);
-		if (ImGui::Checkbox(u8"プレイヤーか", &_playerIK))
-		{
-			if (_playerIK)
-			{
-				// プレイヤーのモデルを表示
-				_animator.lock()->GetActor()->LoadModel("./Data/Model/Player/ARPG_Warrior.fbx");
-				_animator.lock()->ResetModel(_animator.lock()->GetActor()->GetModel().lock());
-				_model = _animator.lock()->GetActor()->GetModel();
-			}
-			else
-			{
-				// ワイバーンのモデルを表示
-				_animator.lock()->GetActor()->LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
-				_animator.lock()->ResetModel(_animator.lock()->GetActor()->GetModel().lock());
-				_model = _animator.lock()->GetActor()->GetModel();
-			}
-		}
 		ImGui::DragFloat3(u8"デバッグ", &debugVec3.x, 0.1f, -100.0f, 100.0f);
 	}
 	ImGui::End();
+}
+
+void SceneWyvernIKDebug::UpdateAnimationIK(float elapsedTime)
+{
+	if (_playerIK)
+		return;
+
+	auto model = _model.lock();
+	int rootNodeIndex = model->GetNodeIndex("L UpperArm");
+	int midNodeIndex = model->GetNodeIndex("L Forearm");
+	int endNodeIndex = model->GetNodeIndex("L Hand");
+	auto& rootNode = model->GetPoseNodes()[rootNodeIndex];
+	auto& midNode = model->GetPoseNodes()[midNodeIndex];
+	auto& endNode = model->GetPoseNodes()[endNodeIndex];
+
+	if (!_animator.lock()->IsPlayAnimation())
+	{
+		_animator.lock()->PlayAnimation(
+			u8"AttackWingFistLeft",
+			false,
+			1.5f);
+		_lerpTimer = 0.0f;
+	}
+
+	float animationTimer = _animator.lock()->GetAnimationTimer();
+	if (animationTimer > 1.7f)
+	{
+		_lerpTimer -= elapsedTime * _lerpSpeed;
+	}
+	else if (animationTimer >= 1.2f)
+	{
+		_lerpTimer += elapsedTime * _lerpSpeed;
+	}
+
+	// z : 2.6 ~ 4.0
+	// x : 0.0 ~ -1.3
+	//  => 半径0.7 中心 (-0.7, 0.0, 3.3)
+	// ターゲット位置の制限
+	{
+		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&_animator.lock()->GetActor()->GetTransform().GetMatrix());
+		Vector3 targetPosition = _targetActor.lock()->GetTransform().GetPosition();
+		Vector3 targetLocalPosition = targetPosition.TransformCoord(DirectX::XMMatrixInverse(nullptr, WyvernTransform));
+		targetLocalPosition = targetLocalPosition.ClampSphere(Vector3(-0.7f * 100.0f, 0.0f, 3.3f * 100.0f), 0.7f * 100.0f);
+		_targetActor.lock()->GetTransform().SetPosition(targetLocalPosition.TransformCoord(WyvernTransform));
+	}
+
+	if (_calculateIK && _lerpTimer > 0.0f)
+	{
+		// 現在の姿勢を取得
+		Quaternion animationMidRotation = midNode.rotation;
+		// 初期姿勢に戻す
+		midNode.rotation = Quaternion::Identity;
+		model->UpdateNodeTransform(&rootNode);
+
+		// midNodeをターゲット方向に向ける
+		DirectX::XMMATRIX MidTransform = DirectX::XMLoadFloat4x4(&midNode.worldTransform);
+		DirectX::XMMATRIX EndTransform = DirectX::XMLoadFloat4x4(&endNode.worldTransform);
+		DirectX::XMVECTOR TargetWorldPosition = DirectX::XMLoadFloat3(&_targetActor.lock()->GetTransform().GetPosition());
+		DirectX::XMVECTOR MidPosition = MidTransform.r[3];
+		DirectX::XMVECTOR EndPosition = EndTransform.r[3];
+		// 中間ノードからターゲットへのベクトル
+		DirectX::XMVECTOR MidleToTargetVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TargetWorldPosition, MidPosition));
+		// 中間ノードから先端ノードへのベクトル
+		DirectX::XMVECTOR MidleToEndVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(EndPosition, MidPosition));
+		// 中間ノードからターゲットへのベクトルと中間ノードから先端ノードへのベクトルで中間ノードの回転角と回転軸を作る
+		DirectX::XMVECTOR MidleWorldAxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(MidleToEndVec, MidleToTargetVec));
+		float midleAngle = acosf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(MidleToTargetVec, MidleToEndVec)));
+		{
+			// 求めた回転軸をローカル座標変換
+			DirectX::XMVECTOR MidleLocalAxis = DirectX::XMVector4Transform(MidleWorldAxis, DirectX::XMMatrixInverse(nullptr, MidTransform));
+			DirectX::XMVECTOR OldMidleLocalRotation = DirectX::XMLoadFloat4(&Quaternion::Identity);
+			// ローカル回転軸と回転角を使ってQuaternionを作成
+			MidleLocalAxis = DirectX::XMQuaternionMultiply(OldMidleLocalRotation, DirectX::XMQuaternionRotationAxis(MidleLocalAxis, midleAngle));
+			Quaternion nextRotation{};
+			DirectX::XMStoreFloat4(&nextRotation, DirectX::XMQuaternionNormalize(MidleLocalAxis));
+			// 補間処理
+			midNode.rotation = Quaternion::Slerp(
+				animationMidRotation,
+				nextRotation,
+				MathF::Clamp01(_lerpTimer));
+
+			// 自分以下の行列を更新
+			model->UpdateNodeTransform(&midNode);
+		}
+	}
+
+	Debug::Renderer::DrawSphere(_targetActor.lock()->GetTransform().GetPosition(), 0.1f, Vector4::Green);
 }

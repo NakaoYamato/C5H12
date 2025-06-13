@@ -353,6 +353,22 @@ Vector3 Vector3::RandomNormal()
 		Random::RandNormal()
     );
 }
+// Vector3‚Ì’l‚ğmin‚Æmax‚Å§ŒÀ
+Vector3 Vector3::Clamp(const Vector3& v, const Vector3& min, const Vector3& max)
+{
+    return Vector3(
+        MathF::Clamp(v.x, min.x, max.x),
+        MathF::Clamp(v.y, min.y, max.y),
+        MathF::Clamp(v.z, min.z, max.z));
+}
+// Vector3‚Ì’l‚ğ’†S‚Æ”¼Œa‚Å§ŒÀ
+Vector3 Vector3::ClampSphere(const Vector3& v, const Vector3& center, float radius)
+{
+	Vector3 diff = v - center;
+	float length = diff.Length();
+	length = MathF::Clamp(length, 0.0f, radius);
+    return center + diff.Normalize() * length;
+}
 #pragma endregion
 
 #pragma endregion

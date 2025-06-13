@@ -59,6 +59,20 @@ public:
 	void OnExecute(float elapsedTime) override;
 	// 終了処理
 	void OnExit() override;
+private:
+	static constexpr float TargetLocalLimitPositionX = 70.0f;
+	static constexpr float TargetLocalLimitPositionZ = 330.0f;
+	static constexpr float TargetLocalLimitRadius = 90.0f;
+	static constexpr float LerpStartAnimationTime	= 1.2f;
+	static constexpr float LerpEndAnimationTime		= 1.7f;
+
+	// ターゲット位置
+	Vector3 _targetWorldPosition = Vector3(0.0f, 0.0f, 0.0f);
+	// 手のノードインデックス
+	int _handNodeIndex		= -1;
+	float _lerpTimer		= 0.0f;
+	float _startLerpSpeed	= 10.0f;
+	float _endLerpSpeed		= 15.0f;
 };
 #pragma endregion
 

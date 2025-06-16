@@ -5,8 +5,9 @@
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Algorithm/Converter.h"
-#include "../../Source/Player/PlayerController.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+
+#include "../../Source/Player/PlayerController.h"
 
 #include <imgui.h>
 
@@ -28,37 +29,18 @@ void WyvernActor::OnCreate()
 	_modelRenderer				= AddComponent<ModelRenderer>();
 	_animator					= AddComponent<Animator>();
 	_wyvernEnemyController		= AddComponent<WyvernEnemyController>();
+	_wyvernBehaviorController	= AddComponent<WyvernBehaviorController>();
 	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();
 	modelCollider->SetLayer(CollisionLayer::Hit);
 
-	// ビヘイビアツリー作成
-	_behaviorTree = std::make_unique<WyvernBehaviorTree>(_wyvernEnemyController.lock().get(), _animator.lock().get());
+	_wyvernBehaviorController.lock()->SetIsExecuteBehaviorTree(_isExecuteBehavior);
 }
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)
 {
-	if (_isExecuteBehavior)
-	{
-		// ターゲット座標にプレイヤー座標を設定
-		auto& actorManager = GetScene()->GetActorManager();
-		auto& playerTags = actorManager.FindByTag(ActorTag::Player);
-		for (auto& playerTag : playerTags)
-		{
-			// playerControllerを持っているアクターを取得
-			auto playerController = playerTag->GetComponent<PlayerController>();
-			if (playerController == nullptr)
-				continue;
-			_wyvernEnemyController.lock()->SetTargetPosition(playerTag->GetTransform().GetPosition());
-
-			break;
-		}
-
-		// ビヘイビアツリーの実行
-		_behaviorTree->Execute(elapsedTime);
-	}
 	// 使用する角を設定
 	SetUseHorn();
 }
@@ -94,8 +76,6 @@ void WyvernActor::OnDrawGui()
 		{
 			bool flag = _isExecuteBehavior;
 			ImGui::Checkbox(u8"ビヘイビアツリーを実行する", &flag);
-			// ビヘイビアツリーのGUI描画
-			_behaviorTree->DrawGui();
 
 			int mt = static_cast<int>(_textureType);
 			if (ImGui::Combo(u8"使用するテクスチャ", &mt, modelTypeName, _countof(modelTypeName)))
@@ -117,6 +97,15 @@ void WyvernActor::OnDrawGui()
 
 		ImGui::EndTabBar();
 	}
+}
+
+// ビヘイビアツリーを実行するかどうか
+void WyvernActor::SetIsExecuteBehaviorTree(bool execute)
+{
+	EnemyActor::SetIsExecuteBehaviorTree(execute);
+
+	// ビヘイビアコントローラーの設定変更
+	_wyvernBehaviorController.lock()->SetIsExecuteBehaviorTree(execute);
 }
 
 // モデルのテクスチャを設定

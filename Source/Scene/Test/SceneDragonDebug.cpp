@@ -7,6 +7,7 @@
 #include "../../Library/Component/ShapeController.h"
 
 #include "../../Library/Component/ModelRenderer.h"
+#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 void SceneDragonDebug::OnInitialize()
@@ -19,6 +20,10 @@ void SceneDragonDebug::OnInitialize()
 
     // オブジェクト作成
     ActorManager& actorManager = GetActorManager();
+    {
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+        metaAI->AddComponent<MetaAI>();
+    }
     {
         auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
 

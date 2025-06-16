@@ -6,6 +6,7 @@
 #include "../../Library/Component/Light/PointLightController.h"
 
 #include "../../Library/Component/ModelRenderer.h"
+#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Dummy/DummyActor.h"
@@ -22,6 +23,10 @@ void ScenePlayerDebug::OnInitialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
     // オブジェクト作成
+    {
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+		metaAI->AddComponent<MetaAI>();
+    }
     {
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }

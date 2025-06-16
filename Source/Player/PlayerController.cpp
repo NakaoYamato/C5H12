@@ -14,6 +14,9 @@ void PlayerController::Start()
 	_animator = GetActor()->GetComponent<Animator>();
 	_hitEffectController = GetActor()->GetComponent<EffekseerEffectController>();
 	_damageable = GetActor()->GetComponent<Damageable>();
+	_targetable = GetActor()->GetComponent<Targetable>();
+
+
 	_damageable.lock()->SetTakeableDamageCallback(
 		[&](float damage, Vector3 hitPosition) -> bool
 		{
@@ -102,6 +105,8 @@ void PlayerController::OnContactEnter(CollisionData& collisionData)
 			{
 				// ダメージを与えたらヒットエフェクト再生
 				_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);
+				// 自身のヘイト値を増やす
+				_targetable.lock()->AddHateValue(_ATK);
 			}
 		}
 	}

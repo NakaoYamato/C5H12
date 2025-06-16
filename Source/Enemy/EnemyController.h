@@ -2,9 +2,10 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
-#include "../../Source/Common/Damageable.h"
-#include "../../Library/Component/Animator.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+#include "../../Library/Component/Animator.h"
+
+#include "../../Source/Common/Damageable.h"
 
 class EnemyController : public Component
 {

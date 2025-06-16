@@ -5,10 +5,10 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
-#include "../../Library/Component/ModelRenderer.h"
+#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Stage/StageActor.h"
-
 #include "../../Mediator/CanvasMediator.h"
+
 //初期化
 void SceneNetworkDebug::OnInitialize()
 {
@@ -19,6 +19,10 @@ void SceneNetworkDebug::OnInitialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
     // オブジェクト作成
+    {
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+        metaAI->AddComponent<MetaAI>();
+    }
     {
         auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
     }

@@ -2,10 +2,10 @@
 
 #include "../EnemyActor.h"
 #include "../../Library/Component/ModelRenderer.h"
-
 #include "../../Library/Component/Animator.h"
+
 #include "WyvernEnemyController.h"
-#include "BehaviorTree/WyvernBehaviorTree.h"
+#include "WyvernBehaviorController.h"
 
 class WyvernActor : public EnemyActor
 {
@@ -39,17 +39,17 @@ public:
 
 #pragma region アクセサ
 	std::weak_ptr<WyvernEnemyController> GetWyvernEnemyController() const { return _wyvernEnemyController; }
-
 	// テクスチャを設定
 	void SetModelType(TextureType type) { this->_textureType = type; }
 	// 角を設定
 	void SetDrawHornType(DrawHornType type) { this->_drawHornType = type; }
+	// ビヘイビアツリーを実行するかどうか
+	void SetIsExecuteBehaviorTree(bool execute) override;
 #pragma endregion
 
 private:
 	// モデルのテクスチャを設定
 	void SetModelTexture();
-
 	// 使用する角を設定
 	void SetUseHorn();
 
@@ -57,8 +57,7 @@ private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<WyvernEnemyController> _wyvernEnemyController;
-	// ビヘイビアツリー
-	std::unique_ptr<WyvernBehaviorTree> _behaviorTree;
+	std::weak_ptr<WyvernBehaviorController> _wyvernBehaviorController;
 
 	TextureType _textureType = TextureType::Lava;
 	DrawHornType _drawHornType = DrawHornType::Horn01;

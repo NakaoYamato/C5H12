@@ -3,9 +3,11 @@
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
-#include "StateMachine/PlayerStateMachine.h"
-#include "../../Source/Common/Damageable.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+
+#include "../../Source/Common/Damageable.h"
+#include "../../Source/Common/Targetable.h"
+#include "StateMachine/PlayerStateMachine.h"
 
 #include <PlayerDefine.h>
 
@@ -59,6 +61,7 @@ private:
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<EffekseerEffectController> _hitEffectController;
 	std::weak_ptr<Damageable> _damageable;
+	std::weak_ptr<Targetable> _targetable;
 
 #pragma region çUåÇä÷åW
 	// ç≈èIçUåÇóÕ

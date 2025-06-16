@@ -2,15 +2,33 @@
 
 #include "../../Library/Component/Component.h"
 
-class Targetable : public Component
+class Targetable : public Component , public std::enable_shared_from_this<Targetable>
 {
+public:
+	// w‰c
+	enum class Faction
+	{
+		Player,
+		Enemy,
+		Neutral,
+	};
+
 public:
 	Targetable() {}
 	~Targetable() override = default;
 	// –¼‘Oæ“¾
 	const char* GetName() const override { return "Targetable"; }
 
+	// ŠJnˆ—
+	void Start() override;
+	// Gui•`‰æˆ—
+	void DrawGui() override;
+
 #pragma region ƒAƒNƒZƒT
+	// w‰cæ“¾
+	Faction GetFaction() const { return _faction; }
+	// w‰cİ’è
+	void SetFaction(Faction faction) { _faction = faction; }
 	// ƒwƒCƒg’læ“¾
 	float GetHateValue() const { return _hateValue; }
 	// ƒwƒCƒg’lİ’è
@@ -24,6 +42,8 @@ public:
 #pragma endregion
 
 private:
+	// w‰c
+	Faction _faction = Faction::Neutral;
 	// ƒwƒCƒg’l
 	float _hateValue = 0.0f;
 	// ƒ^[ƒQƒbƒg‰Â”\‚©

@@ -21,8 +21,8 @@ public:
 	{
 		return _damageable;
 	}
-
-	void SetIsExecuteBehaviorTree(bool execute) { _isExecuteBehavior = execute; }
+	// ビヘイビアツリーを実行するかどうか
+	virtual void SetIsExecuteBehaviorTree(bool execute) { _isExecuteBehavior = execute; }
 #pragma endregion
 protected:
 	std::weak_ptr<CharactorController> _charactorController;

@@ -95,6 +95,7 @@ void ClientAssignment::Connect(ENLConnection connection, void* connectionData)
 	// connectionに紐づいているポインタからメンバ変数を参照する
 	ClientAssignment* self = static_cast<ClientAssignment*>(connectionData);
 	self->_logs.push_back(u8"サーバーと接続");
+	self->_isDisconnected = false;
 
 #ifdef USE_MRS
 	// レコードが読み込み可能になった際に呼ばれるCallBack関数の設定
@@ -119,6 +120,7 @@ void ClientAssignment::Disconnect(ENLConnection connection, void* connectionData
 	// connectionに紐づいているポインタからメンバ変数を参照する
 	ClientAssignment* self = static_cast<ClientAssignment*>(connectionData);
 	self->_logs.push_back(u8"サーバーと切断");
+	self->_isDisconnected = true;
 }
 
 /// サーバーからデータが送られたときに呼ばれる関数
@@ -283,6 +285,10 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 // GUI表示
 void ClientAssignment::DrawGui()
 {
+	bool flag = _isDisconnected;
+	ImGui::Checkbox(u8"切断されているか", &flag);
+	ImGui::Separator();
+
 	ImGui::Text(u8"ログ");
 	ImGui::BeginChild(ImGui::GetID((void*)0), ImVec2(250, 470), ImGuiWindowFlags_NoTitleBar);
 	for (std::string message : _logs) {

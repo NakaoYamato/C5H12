@@ -427,6 +427,14 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 	ServerAssignment* self = reinterpret_cast<ServerAssignment*>(serverData);
 
 #ifdef USE_MRS
+	// 現在の接続数が最大接続数を超えている場合は接続を拒否
+	if (self->clients.size() >= NETWORK_MAX_CONNECTION)
+	{
+		std::cout << "接続拒否: 最大接続数を超えています。" << std::endl;
+		mrs_close(connection);
+		return;
+	}
+
 	// connectionに紐づける
 	mrs_connection_set_data(connection, self);
 	// レコードが読み込み可能になった際に呼ばれるCallBack関数の設定
@@ -434,11 +442,18 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 	// ユーザが切断したときに呼ばれるCallBack関数の設定
 	mrs_set_disconnect_callback(connection, Disconnect);
 #else
+	// 現在の接続数が最大接続数を超えている場合は接続を拒否
+	if (self->clients.size() >= NETWORK_MAX_CONNECTION)
+	{
+		std::cout << "接続拒否: 最大接続数を超えています。" << std::endl;
+		ENLClose(connection);
+		return;
+	}
+
 	// レコードが読み込み可能になった際に呼ばれるCallBack関数の設定
 	SetReadCallback(connection, ReadRecord);
 	// ユーザが切断したときに呼ばれるCallBack関数の設定
 	SetDisconnectCallback(connection, Disconnect);
-
 	// connectionに紐づける
 	SetClientData(connection, self);
 #endif // USE_MRS

@@ -130,6 +130,11 @@ public:
 	{
 		_enemyApplayDamageCallback = callback;
 	}
+	/// <summary>
+	/// 接続が切れたかどうか
+	/// </summary>
+	/// <returns></returns>
+	bool IsDisconnected() const { return _isDisconnected; }
 #pragma endregion
 
 private:
@@ -206,6 +211,9 @@ private:
 	std::function<void(const Network::EnemyMove&)>			_enemyMoveCallback;
 	std::function<void(const Network::EnemyApplayDamage&)>	_enemyApplayDamageCallback;
 #pragma endregion
+
+	// 接続が切れたフラグ
+	bool _isDisconnected = false;
 
 	// デバッグ用
 	bool _drawGui = false;

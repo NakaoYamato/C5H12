@@ -29,7 +29,7 @@ void ModelRenderer::Update(float elapsedTime)
 		SetModel(GetActor()->GetModel());
 	}
 
-	_model.lock()->UpdateTransform(GetActor()->GetTransform().GetMatrix());
+	_model.lock()->UpdateTransform(_model.lock()->GetPoseNodes(), GetActor()->GetTransform().GetMatrix());
 }
 
 // •`‰æˆ—

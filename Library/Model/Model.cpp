@@ -58,9 +58,9 @@ Model::Model(ID3D11Device* device, const char* filename)
 }
 
 // トランスフォーム更新処理
-void Model::UpdateTransform(const DirectX::XMFLOAT4X4& world)
+void Model::UpdateTransform(std::vector<ModelResource::Node>& poseNode, const DirectX::XMFLOAT4X4& world) const
 {
-    for (ModelResource::Node& node : _poseNodes)
+    for (ModelResource::Node& node : poseNode)
     {
         // ローカル行列算出
         DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);

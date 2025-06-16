@@ -9,6 +9,7 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Audio/VoiceRecorder/VoiceRecorder.h"
 #include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Player/PlayerController.h"
 #include "../../Source/Enemy/EnemyActor.h"
 #include "../../Source/Enemy/EnemyController.h"
 
@@ -26,12 +27,26 @@ public:
 		StateMax,
     };
 
+	/// <summary>
+	/// プレイヤー情報
+	/// </summary>
+	struct PlayerData
+	{
+		std::weak_ptr<PlayerActor>      playerActor;
+		std::weak_ptr<PlayerController> playerController;
+        std::weak_ptr<Damageable>		damageable;
+	};
+
+    /// <summary>
+    /// エネミー情報
+    /// </summary>
     struct EnemyData
     {
         // 管理しているプレイヤーのID
         int                             controllerID = -1;
         std::weak_ptr<EnemyActor>       enemyActor;
         std::weak_ptr<EnemyController>  enemyController;
+        std::weak_ptr<Damageable>		damageable;
     };
 
 public:
@@ -124,7 +139,7 @@ private:
     // 各プレイヤー情報
     // key : ネットワークID
     // value : プレイヤーのポインタ
-    std::unordered_map<int, std::weak_ptr<PlayerActor>> _players;
+    std::unordered_map<int, PlayerData> _players;
 	// 各敵キャラクター情報
 	// key : ユニークID
 	// value : 敵のポインタ

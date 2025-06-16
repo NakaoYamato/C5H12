@@ -58,6 +58,8 @@ void WyvernStateMachine::Execute(float elapsedTime)
 			if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBreath")
 			{
 				_callFireBreath = true;
+                // ブレス攻撃のグローバル位置を設定
+				_breathGlobalPosition = event.position;
 			}
             // ルックアット判定
 			if (animationEvent.GetMessageList().at(event.messageIndex) == "LookAtTarget")

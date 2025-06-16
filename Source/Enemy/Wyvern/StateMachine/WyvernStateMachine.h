@@ -31,6 +31,9 @@ public:
 	const char* GetStateName();
 	// サブステート名取得
 	const char* GetSubStateName();
+
+	// ブレス攻撃のグローバル位置を設定
+	const Vector3& GetBreathGlobalPosition() const { return _breathGlobalPosition; }
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 	// ブレス攻撃イベントを取得
@@ -46,6 +49,8 @@ private:
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
 
+	// ブレス攻撃のグローバル位置
+	Vector3 _breathGlobalPosition = Vector3::Zero;
 	// 頭の回転時のターゲットオフセット
 	Vector3 _headRotationOffset = Vector3(0.0f, 1.5f, 0.0f);
 	// 頭の回転制限角度（X軸方向）

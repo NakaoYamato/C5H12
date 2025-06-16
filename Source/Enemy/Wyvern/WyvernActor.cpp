@@ -220,7 +220,7 @@ void WyvernActor::SetModelTexture()
 // Žg—p‚·‚éŠp‚ðÝ’è
 void WyvernActor::SetUseHorn()
 {
-	auto& nodes = GetModel().lock()->GetAddressPoseNodes();
+	auto& nodes = GetModel().lock()->GetPoseNodes();
 	// posenode‚©‚ç"Kuzar3_Horn"‚ðŠÜ‚Þnode‚ð‘SŽæ“¾
 	ModelResource::Node* horns[6] = {};
 	std::vector<int> hornIncludeIndices;

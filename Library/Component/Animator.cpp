@@ -82,7 +82,7 @@ void Animator::DebugRender(const RenderContext& rc)
     if (GetAnimationIndex() != -1)
     {
         // “–‚½‚è”»’è•\Ž¦
-        _animationEvent.DebugRender(GetAnimationName(), GetAnimationTimer());
+        _animationEvent.DebugRender(GetAnimationName(), GetAnimationTimer(), GetActor()->GetTransform().GetMatrix());
     }
 }
 

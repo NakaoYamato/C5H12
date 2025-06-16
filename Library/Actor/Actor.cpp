@@ -48,7 +48,7 @@ void Actor::Start()
 	if (_model != nullptr)
 	{
 		// モデルの行列を更新
-		_model->UpdateTransform(_transform.GetMatrix());
+		_model->UpdateTransform(_model->GetPoseNodes(), _transform.GetMatrix());
 	}
 
 	// 各コンポーネントのスタート処理

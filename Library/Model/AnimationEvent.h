@@ -75,7 +75,7 @@ public:
 	/// </summary>
 	/// <param name="animName"></param>
 	/// <param name="animElapsedTime"></param>
-	void DebugRender(const std::string& animName, float animElapsedTime);
+	void DebugRender(const std::string& animName, float animElapsedTime, const DirectX::XMFLOAT4X4& world);
 	/// <summary>
 	/// GUI•`‰æ
 	/// </summary>

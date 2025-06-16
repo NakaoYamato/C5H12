@@ -101,7 +101,7 @@ void SceneModelEditor::OnUpdate(float elapsedTime)
         if (_animator.lock()->GetAnimationIndex() != -1)
         {
             // “–‚½‚è”»’è•\Ž¦
-			_animationEvent.DebugRender(_animator.lock()->GetAnimationName(), _animator.lock()->GetAnimationTimer());
+			_animationEvent.DebugRender(_animator.lock()->GetAnimationName(), _animator.lock()->GetAnimationTimer(), _modelActor.lock()->GetTransform().GetMatrix());
         }
     }
 

@@ -24,14 +24,14 @@ void PlayerActor::OnCreate()
 
 	// コンポーネント追加
 	//auto modelRenderer		= AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
-	_damageable					= this->AddComponent<Damageable>();
+	auto damageable				= this->AddComponent<Damageable>();
 	auto targetable				= this->AddComponent<Targetable>();
 	auto modelRenderer			= this->AddComponent<ModelRenderer>();
 	auto animator				= this->AddComponent<Animator>();
-	_charactorController		= this->AddComponent<CharactorController>();
-	_playerController			= this->AddComponent<PlayerController>();
+	auto charactorController	= this->AddComponent<CharactorController>();
+	auto playerController		= this->AddComponent<PlayerController>();
 	auto effekseerController	= this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
-	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, _damageable.lock());
+	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
 	if (_isUserControlled)
 		this->AddComponent<PlayerInput>();
@@ -41,11 +41,11 @@ void PlayerActor::OnCreate()
 
 	// パラメータ設定
 	GetTransform().SetLengthScale(0.01f);
-	_damageable.lock()->SetMaxHealth(10.0f);
+	damageable->SetMaxHealth(10.0f);
 	targetable->SetFaction(Targetable::Faction::Player);
 	// 操作対象でなければ攻撃力の倍率を0にしてダメージを与えられないようにする
 	if (!_isUserControlled)
-		_playerController.lock()->SetATKFactor(0.0f);
+		playerController->SetATKFactor(0.0f);
 
 	collider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
 	collider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));

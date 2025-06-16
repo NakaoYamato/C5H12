@@ -24,7 +24,7 @@ public:
 	virtual ~Model() {}
 
 	// トランスフォーム更新処理
-	void UpdateTransform(const DirectX::XMFLOAT4X4& world);
+	void UpdateTransform(std::vector<ModelResource::Node>& poseNode, const DirectX::XMFLOAT4X4& world) const;
 	// ノードのトランスフォーム更新処理
 	// ※親が存在するノードのみ
 	void UpdateNodeTransform(ModelResource::Node* node);
@@ -49,7 +49,6 @@ public:
 
 	ModelResource* GetResource() { return _resource.get(); }
 	std::vector<ModelResource::Node>& GetPoseNodes() { return _poseNodes; }
-	std::vector<ModelResource::Node>& GetAddressPoseNodes() { return _poseNodes; }
 	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNodes = nodes; }
 
 	const char* GetFilename()const { return _filename.c_str(); }

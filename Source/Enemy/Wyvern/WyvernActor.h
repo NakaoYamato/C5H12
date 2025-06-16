@@ -38,7 +38,6 @@ public:
 	void OnDrawGui() override;
 
 #pragma region アクセサ
-	std::weak_ptr<WyvernEnemyController> GetWyvernEnemyController() const { return _wyvernEnemyController; }
 	// テクスチャを設定
 	void SetModelType(TextureType type) { this->_textureType = type; }
 	// 角を設定

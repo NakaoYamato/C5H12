@@ -97,13 +97,13 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
 			_sendTimer -= _sendInterval; // タイマーリセット
 
             // プレイヤーの移動情報送信
-            auto myPlayer = _players[myPlayerId].lock();
-            if (myPlayer)
+            auto playerActor = _players[myPlayerId].playerActor.lock();
+            if (playerActor)
             {
                 Network::PlayerMove playerMove{};
                 playerMove.playerUniqueID = myPlayerId;
-                playerMove.position = myPlayer->GetTransform().GetPosition();
-                auto playerController = myPlayer->GetPlayerController();
+                playerMove.position = playerActor->GetTransform().GetPosition();
+                auto playerController = _players[myPlayerId].playerController.lock();
                 if (playerController)
                 {
                     auto stateMachine = playerController->GetPlayerStateMachine();
@@ -161,7 +161,8 @@ void NetworkMediator::OnDrawGui()
 std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControlled)
 {
     // 要素チェック
-    if (_players[id].lock()) return std::weak_ptr<PlayerActor>();
+    if (_players.find(id) != _players.end() && _players[id].playerActor.lock())
+        return _players[id].playerActor;
 
     auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
 
@@ -172,7 +173,9 @@ std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControll
     }
 
     // コンテナに登録
-    _players[id] = player;
+    _players[id].playerActor = player;
+	_players[id].playerController = player->GetComponent<PlayerController>();
+	_players[id].damageable = player->GetComponent<Damageable>();
     return player;
 }
 
@@ -192,15 +195,18 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
             "Enemy" + std::to_string(uniqueID),
             ActorTag::Enemy
         );
-        enemy->GetTransform().SetPosition(position);
-        enemy->GetTransform().SetAngleY(angleY);
-        enemy->SetIsExecuteBehaviorTree(controllerID == myPlayerId);
-		enemy->GetDamageable().lock()->ResetHealth(health);
 
         EnemyData enemyData{};
         enemyData.controllerID = controllerID;
         enemyData.enemyActor = enemy;
-		enemyData.enemyController = enemy->GetWyvernEnemyController();
+        enemyData.enemyController = enemy->GetComponent<EnemyController>();
+        enemyData.damageable = enemy->GetComponent<Damageable>();
+
+        enemy->GetTransform().SetPosition(position);
+        enemy->GetTransform().SetAngleY(angleY);
+        enemy->SetIsExecuteBehaviorTree(controllerID == myPlayerId);
+        enemyData.damageable.lock()->ResetHealth(health);
+
 
         // コンテナに登録
         _enemies[uniqueID] = enemyData;
@@ -215,10 +221,10 @@ void NetworkMediator::SendMyPlayerDamage()
 	// スレッドセーフ
 	std::lock_guard<std::mutex> lock(_mutex);
 	// 自身のプレイヤーのダメージを送信
-	auto myPlayer = _players[myPlayerId].lock();
-	if (myPlayer)
+    auto myPlayer = _players[myPlayerId];
+	if (myPlayer.playerActor.lock())
 	{
-        auto damageable = myPlayer->GetDamageable();
+		auto damageable = myPlayer.damageable.lock();
 		if (damageable && damageable->GetLastDamage() > 0.0f)
 		{
 			Network::PlayerApplyDamage playerApplyDamage{};
@@ -242,7 +248,7 @@ void NetworkMediator::SendEnemyDamage()
 		auto enemyActor = enemyData.enemyActor.lock();
 		if (enemyActor)
 		{
-			auto damageable = enemyActor->GetDamageable().lock();
+			auto damageable = enemyData.damageable.lock();
 			if (damageable && damageable->GetLastDamage() > 0.0f)
 			{
 				Network::EnemyApplayDamage enemyApplayDamage{};
@@ -407,14 +413,14 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& sync : _playerSyncs)
     {
         // プレイヤー情報を更新
-        auto player = _players[sync.playerUniqueID].lock();
-        if (!player)
+		auto playerActor = _players[sync.playerUniqueID].playerActor.lock();
+        if (!playerActor)
         {
             // プレイヤーが存在しないなら作成
-            player = CreatePlayer(sync.playerUniqueID, false).lock();
+            playerActor = CreatePlayer(sync.playerUniqueID, false).lock();
         }
-        player->GetTransform().SetPosition(sync.position);
-        player->GetTransform().SetAngleY(sync.angleY);
+        playerActor->GetTransform().SetPosition(sync.position);
+        playerActor->GetTransform().SetAngleY(sync.angleY);
     }
     _playerSyncs.clear();
     //===============================================================================
@@ -424,11 +430,11 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& logout : _playerLogouts)
     {
         // プレイヤー情報を削除
-        auto player = _players[logout.playerUniqueID].lock();
-        if (player)
+        auto playerActor = _players[logout.playerUniqueID].playerActor.lock();
+        if (playerActor)
         {
             // プレイヤー削除
-            player->Remove();
+            playerActor->Remove();
             _players.erase(logout.playerUniqueID);
         }
     }
@@ -440,15 +446,17 @@ void NetworkMediator::ProcessNetworkData()
 	for (auto& move : _playerMoves)
 	{
 		// プレイヤー情報を更新
-		auto player = _players[move.playerUniqueID].lock();
-        if (!player)
+        auto playerActor = _players[move.playerUniqueID].playerActor.lock();
+        if (playerActor == nullptr)
             continue;
+
 		// 自身の場合はスキップ
 		if (move.playerUniqueID == myPlayerId)
 			continue;
-		player->GetTransform().SetPosition(move.position);
+
+        playerActor->GetTransform().SetPosition(move.position);
         // プレイヤーの状態を更新
-        auto playerController = player->GetPlayerController();
+        auto playerController = _players[move.playerUniqueID].playerController.lock();
         if (playerController != nullptr)
         {
             auto stateMachine = playerController->GetPlayerStateMachine();
@@ -469,12 +477,12 @@ void NetworkMediator::ProcessNetworkData()
 		// 自身が送信したダメージならスキップ
 		if (playerApplyDamage.playerUniqueID == myPlayerId)
 			continue;
-		// プレイヤー情報を更新
 
-		auto player = _players[playerApplyDamage.playerUniqueID].lock();
-		if (player)
+		// プレイヤー情報を更新
+        auto playerActor = _players[playerApplyDamage.playerUniqueID].playerActor.lock();
+		if (playerActor)
 		{
-            auto damageable = player->GetDamageable();
+            auto damageable = _players[playerApplyDamage.playerUniqueID].damageable.lock();
 			if (damageable)
 			{
 				damageable->SetHelth(damageable->GetHealth() - playerApplyDamage.damage);
@@ -554,7 +562,7 @@ void NetworkMediator::ProcessNetworkData()
 		auto enemyActor = enemyData.enemyActor.lock();
 		if (enemyActor)
 		{
-			auto damageable = enemyActor->GetDamageable().lock();
+            auto damageable = enemyData.damageable.lock();
 			if (damageable)
 			{
 				damageable->SetHelth(damageable->GetHealth() - enemyApplayDamage.damage);

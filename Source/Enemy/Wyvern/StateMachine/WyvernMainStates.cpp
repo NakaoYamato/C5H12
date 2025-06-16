@@ -582,17 +582,18 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 		// ブレスの生成
 		if (!_fireBreathActor.lock())
 		{
+			// ブレスのグローバル座標取得
+			Vector3 breathGlobalPosition = owner->GetBreathGlobalPosition();
 			// ブレスを生成
 			_fireBreathActor = owner->GetWyvern()->GetActor()->GetScene()->RegisterActor<WyvernBreathActor>(
 				std::string(owner->GetWyvern()->GetActor()->GetName()) + "BreathEffect",
 				ActorTag::Enemy);
 			// 親を設定
 			_fireBreathActor.lock()->GetBreathController()->SetBreathActor(owner->GetWyvern()->GetActor());
-			Vector3 position = Vector3::TransformCoord(_fireBreathOffset + model->GetPoseNodes()[nodeIndex].position,
-				model->GetPoseNodes()[nodeIndex].worldTransform);
+			Vector3 position = Vector3::TransformCoord(breathGlobalPosition, owner->GetWyvern()->GetActor()->GetTransform().GetMatrix());
 			_fireBreathActor.lock()->GetTransform().SetPosition(position);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			_fireBreathActor.lock()->GetTransform().LookAt(Vector3::TransformNormal(Vector3::Up, model->GetPoseNodes()[nodeIndex].worldTransform));
+			_fireBreathActor.lock()->GetTransform().SetAngleY(owner->GetWyvern()->GetActor()->GetTransform().GetRotation().y);
 		}
 	}
 	// ブレスの削除

@@ -24,6 +24,7 @@ public:
 		keystates[VK_SHIFT]		= FALSE;
 		keystates[VK_CONTROL]	= FALSE;
 		keystates[VK_MENU]		= FALSE;
+		keystates[VK_ESCAPE]	= FALSE;
 		keystates[VK_SPACE]		= FALSE;
 
 		keystates[VK_LEFT]	= FALSE;

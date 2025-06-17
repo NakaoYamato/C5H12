@@ -11,7 +11,9 @@
 #include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Menu/MenuInput.h"
 
+#include "../../Mediator/InputMediator.h"
 #include "../../Mediator/CanvasMediator.h"
 
 void ScenePlayerDebug::OnInitialize()
@@ -26,6 +28,10 @@ void ScenePlayerDebug::OnInitialize()
     {
         auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
 		metaAI->AddComponent<MetaAI>();
+    }
+    {
+        auto inputMediator = RegisterActor<InputMediator>("InputMediator", ActorTag::DrawContextParameter);
+        inputMediator->AddComponent<MenuInput>();
     }
     {
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);

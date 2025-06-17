@@ -27,8 +27,9 @@ const char* KeybordInputObserver::ToString(int vKey)
 	case VK_CLEAR:	return u8"Clear";
 	case VK_RETURN:	return u8"Enter";
 	case VK_SHIFT:	return u8"Shift";
-	case VK_CONTROL:	return u8"Ctrl";
+	case VK_CONTROL:return u8"Ctrl";
 	case VK_MENU:	return u8"ALT";
+	case VK_ESCAPE: return u8"Escape";
 
 	case VK_LEFT:	return u8"¶•ûŒü";
 	case VK_UP:		return u8"ã•ûŒü";

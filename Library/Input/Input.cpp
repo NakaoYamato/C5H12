@@ -8,24 +8,25 @@
 Input::Input()
 {
 	// ÉAÉNÉVÉáÉìÇÃìoò^
-	_inputActionMap["OK"] = { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
-	_inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_SHOULDER}};
-	_inputActionMap["Evade"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_A}};
-	_inputActionMap["Action1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_Y}, {InputType::InputMouse,VK_LBUTTON} };
-	_inputActionMap["Guard"] = { {InputType::InputMouse,VK_XBUTTON2} };
-	_inputActionMap["LookOn"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
+	_inputActionMap["OK"]		= { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
+	_inputActionMap["Dash"]		= { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_SHOULDER}};
+	_inputActionMap["Evade"]	= { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_A}};
+	_inputActionMap["Action1"]	= { {InputType::InputGamepad,XINPUT_GAMEPAD_Y}, {InputType::InputMouse,VK_LBUTTON} };
+	_inputActionMap["Guard"]	= { {InputType::InputMouse,VK_XBUTTON2} };
+	_inputActionMap["LookOn"]	= { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
+	_inputActionMap["Menu"]		= { {InputType::InputKeyboard, VK_ESCAPE}, {InputType::InputGamepad,XINPUT_GAMEPAD_START} };
 
-	_moveActionMap["AxisLX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
-	_moveActionMap["AxisLY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
-	_moveActionMap["AxisRX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };
-	_moveActionMap["AxisRY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RY} ,{InputType::InputGamepad,GAMEPAD_AXIS_RY} ,{InputType::InputMouse,MOUSE_AXIS_RY} };
-    _moveActionMap["MousePositionX"] = { {InputType::InputMouse,MOUSE_POSITION_X} };
-    _moveActionMap["MousePositionY"] = { {InputType::InputMouse,MOUSE_POSITION_Y} };
-	_moveActionMap["MouseMoveX"] = { {InputType::InputMouse,MOUSE_MOVE_X} };
-	_moveActionMap["MouseMoveY"] = { {InputType::InputMouse,MOUSE_MOVE_Y} };
-	_moveActionMap["MouseWheel"] = { {InputType::InputMouse,MOUSE_WHEEL} };
-	_moveActionMap["MouseOldWheel"] = { {InputType::InputMouse,MOUSE_OLD_WHEEL} };
-	_moveActionMap["Guard"] = { {InputType::InputGamepad,GAMEPAD_TRIGGER_R} };
+	_moveActionMap["AxisLX"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
+	_moveActionMap["AxisLY"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
+	_moveActionMap["AxisRX"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };
+	_moveActionMap["AxisRY"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_RY} ,{InputType::InputGamepad,GAMEPAD_AXIS_RY} ,{InputType::InputMouse,MOUSE_AXIS_RY} };
+    _moveActionMap["MousePositionX"]	= { {InputType::InputMouse,MOUSE_POSITION_X} };
+    _moveActionMap["MousePositionY"]	= { {InputType::InputMouse,MOUSE_POSITION_Y} };
+	_moveActionMap["MouseMoveX"]		= { {InputType::InputMouse,MOUSE_MOVE_X} };
+	_moveActionMap["MouseMoveY"]		= { {InputType::InputMouse,MOUSE_MOVE_Y} };
+	_moveActionMap["MouseWheel"]		= { {InputType::InputMouse,MOUSE_WHEEL} };
+	_moveActionMap["MouseOldWheel"]		= { {InputType::InputMouse,MOUSE_OLD_WHEEL} };
+	_moveActionMap["Guard"]				= { {InputType::InputGamepad,GAMEPAD_TRIGGER_R} };
 
 	// ìoò^ÇµÇΩÉAÉNÉVÉáÉìÇÃì¸óÕäƒéãèÓïÒÇäiî[
 	for (const auto& mapInfo : _inputActionMap)

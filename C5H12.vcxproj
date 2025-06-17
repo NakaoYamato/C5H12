@@ -267,6 +267,8 @@
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernBehaviorController.cpp" />
     <ClCompile Include="Source\Mediator\CanvasMediator.cpp" />
+    <ClCompile Include="Source\Mediator\InputMediator.cpp" />
+    <ClCompile Include="Source\Menu\MenuInput.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
@@ -435,6 +437,8 @@
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernBehaviorController.h" />
     <ClInclude Include="Source\Mediator\CanvasMediator.h" />
+    <ClInclude Include="Source\Mediator\InputMediator.h" />
+    <ClInclude Include="Source\Menu\MenuInput.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />

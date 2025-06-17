@@ -91,9 +91,9 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
         // 参考:https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
         switch (wparam)
         {
-        case VK_ESCAPE:
-            PostMessage(hwnd, WM_CLOSE, 0, 0);
-            break;
+        //case VK_ESCAPE:
+        //    PostMessage(hwnd, WM_CLOSE, 0, 0);
+        //    break;
 #ifdef _DEBUG
             // デバッグ中のみ有効化
         case VK_F1:

@@ -1,6 +1,7 @@
 #include "SpriteRenderer.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Collision/CollisionMath.h"
 
 #include <imgui.h>
 
@@ -89,7 +90,32 @@ void SpriteRenderer::LoadTexture(const std::string& spriteName,
 	CenterAlignment alignment)
 {
 	_spriteDatas[spriteName].sprite = std::make_unique<Sprite>(Graphics::Instance().GetDevice(), filename);
+    _spriteDatas[spriteName].texSize = _spriteDatas[spriteName].sprite->GetTextureSize();
 	_spriteDatas[spriteName].RecalcCenter(alignment);
+}
+// 画像との当たり判定
+bool SpriteRenderer::IsHit(const std::string& name, const Vector2& pos) const
+{
+    if (_spriteDatas.find(name) != _spriteDatas.end())
+    {
+        const auto& spriteData = _spriteDatas.at(name);
+
+		Vector2 aabbHalfSize{};
+		{
+			aabbHalfSize.x = spriteData.texSize.x * spriteData.scale.x / 2.0f;
+			aabbHalfSize.y = spriteData.texSize.y * spriteData.scale.y / 2.0f;
+		}
+		Vector2 aabbCenter{};
+		{
+			// centerの値から左上の座標を求める
+			aabbCenter.x = spriteData.position.x - (spriteData.center.x / spriteData.texSize.x) * aabbHalfSize.x * 2.0f;
+			aabbCenter.y = spriteData.position.y - (spriteData.center.y / spriteData.texSize.y) * aabbHalfSize.y * 2.0f;
+		}
+		aabbCenter += aabbHalfSize;
+
+		return Collision2D::IntersectPointVsAABB(pos, aabbCenter, aabbHalfSize);
+    }
+	return false;
 }
 // スプライト描画
 void SpriteRenderer::SpriteRender(const std::string& spriteName, 

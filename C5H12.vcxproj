@@ -271,6 +271,7 @@
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Scene\Game\SceneGame.cpp" />
     <ClCompile Include="Source\Scene\Game\SceneTitle.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneTwoBoneIKDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneLookAtDebug.cpp" />
@@ -293,6 +294,7 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerStateMachine.cpp" />
+    <ClCompile Include="Source\Title\TitleUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
@@ -437,6 +439,7 @@
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h" />
+    <ClInclude Include="Source\Scene\Game\SceneGame.h" />
     <ClInclude Include="Source\Scene\Game\SceneTitle.h" />
     <ClInclude Include="Source\Scene\Test\SceneLookAtDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneTwoBoneIKDebug.h" />
@@ -459,6 +462,7 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerStateMachine.h" />
+    <ClInclude Include="Source\Title\TitleUI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

@@ -313,3 +313,13 @@ namespace Collision3D
         const DirectX::XMVECTOR& aabbPos,
         const DirectX::XMVECTOR& aabbRadii);
 }
+
+namespace Collision2D
+{
+    // Point Vs AABB
+    bool IntersectPointVsAABB(
+        const Vector2& point,
+        const Vector2& aabbPos, // íÜêS
+        const Vector2& aabbSize // îºï”í∑
+    );
+}

@@ -49,6 +49,8 @@ public:
 	void DrawGui() override;
 	// 画像読み込み
 	void LoadTexture(const std::string& spriteName, const wchar_t* filename, CenterAlignment alignment);
+	// 画像との当たり判定
+	bool IsHit(const std::string& name, const Vector2& pos) const;
 
 #pragma region アクセサ
 	CenterAlignment GetCenterAlignment(const std::string& name) const { return _spriteDatas.at(name).centerAlignment; }
@@ -57,7 +59,7 @@ public:
 	const Vector2& GetTexPos(const std::string& name)const { return _spriteDatas.at(name).texPos; }
 	const Vector2& GetTexSize(const std::string& name)const { return _spriteDatas.at(name).texSize; }
 	const Vector2& GetCenter(const std::string& name)const { return _spriteDatas.at(name).center; }
-	float           GetAngle(const std::string& name)const { return _spriteDatas.at(name).angle; }
+	float          GetAngle(const std::string& name)const { return _spriteDatas.at(name).angle; }
 	const Vector4& GetColor(const std::string& name)const { return _spriteDatas.at(name).color; }
 
 	void SetCenterAlignment(const std::string& name, CenterAlignment alignment) {

@@ -2,6 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Component/SpriteRenderer.h"
+#include "../../Source/Title/TitleUI.h"
 
 // èâä˙âª
 void SceneTitle::OnInitialize()
@@ -15,6 +16,13 @@ void SceneTitle::OnInitialize()
     {
 		auto background = RegisterActor<Actor>("Background", ActorTag::UI);
 		auto spriteRenderer = background->AddComponent<SpriteRenderer>();
-		spriteRenderer->LoadTexture("TitleBackground", L"./Data/Texture/Title/Background.png", SpriteRenderer::CenterAlignment::CENTER_CENTER);
+		spriteRenderer->LoadTexture("TitleBackground", L"./Data/Texture/Title/Background.png", SpriteRenderer::CenterAlignment::LEFT_UP);
+    }
+    {
+        auto startButton = RegisterActor<Actor>("StartButton", ActorTag::UI);
+        auto spriteRenderer = startButton->AddComponent<SpriteRenderer>();
+        spriteRenderer->LoadTexture("StartButton", L"./Data/Texture/Title/Start.png", SpriteRenderer::CenterAlignment::CENTER_CENTER);
+        spriteRenderer->SetPosition("StartButton", Vector2(600.0f, 600.0f));
+        auto titleUI = startButton->AddComponent<TitleUI>();
     }
 }

@@ -1,0 +1,24 @@
+#pragma once
+
+#include "../../Library/Scene/SceneManager.h"
+
+class SceneGame : public Scene
+{
+public:
+    SceneGame() {}
+    ~SceneGame() override {}
+    // 名前取得
+    const char* GetName() const override { return u8"Game"; }
+    // 階層取得
+    SceneMenuLevel GetLevel() const override { return SceneMenuLevel::Game; }
+    // 初期化
+    void OnInitialize() override;
+    // 自身を新規のポインタで渡す
+    std::shared_ptr<Scene> GetNewShared() override
+    {
+        return std::make_shared<SceneGame>();
+    }
+};
+
+// メニューバーに登録
+_REGISTER_SCENE(SceneGame)

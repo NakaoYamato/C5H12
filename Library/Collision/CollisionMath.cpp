@@ -2248,3 +2248,16 @@ bool Collision3D::IntersectCapsuleVsAABB(const DirectX::XMVECTOR& position, cons
 
 	return false;
 }
+
+bool Collision2D::IntersectPointVsAABB(const Vector2& point, const Vector2& aabbPos, const Vector2& aabbSize)
+{
+	Vector2 localPoint{};
+	localPoint.x = point.x - aabbPos.x;
+	localPoint.y = point.y - aabbPos.y;
+
+	if (localPoint.x  < -aabbSize.x || localPoint.x > aabbSize.x)
+		return false;
+	if (localPoint.y  < -aabbSize.y || localPoint.y > aabbSize.y)
+		return false;
+	return true;
+}

@@ -19,6 +19,8 @@ Input::Input()
 	_moveActionMap["AxisLY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
 	_moveActionMap["AxisRX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };
 	_moveActionMap["AxisRY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RY} ,{InputType::InputGamepad,GAMEPAD_AXIS_RY} ,{InputType::InputMouse,MOUSE_AXIS_RY} };
+    _moveActionMap["MousePositionX"] = { {InputType::InputMouse,MOUSE_POSITION_X} };
+    _moveActionMap["MousePositionY"] = { {InputType::InputMouse,MOUSE_POSITION_Y} };
 	_moveActionMap["MouseMoveX"] = { {InputType::InputMouse,MOUSE_MOVE_X} };
 	_moveActionMap["MouseMoveY"] = { {InputType::InputMouse,MOUSE_MOVE_Y} };
 	_moveActionMap["MouseWheel"] = { {InputType::InputMouse,MOUSE_WHEEL} };

@@ -54,4 +54,8 @@ void ScenePlayerDebug::OnInitialize()
     //{
     //    auto player = RegisterActor<PlayerActor>("Player" + std::to_string(i), ActorTag::Player, false);
     //}
+
+    // ó\Çﬂì«Ç›çûÇﬁÉÇÉfÉã
+    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::PlayerModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::WyvernModelFilePath()));
 }

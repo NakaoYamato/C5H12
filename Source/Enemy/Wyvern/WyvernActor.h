@@ -27,6 +27,11 @@ public:
 		Horn05,
 		Horn06,
 	};
+
+	static const char* WyvernModelFilePath()
+	{
+		return "./Data/Model/Dragons/Kuzar the Magnificent.fbx";
+	}
 public:
 	WyvernActor() {}
 	~WyvernActor()override {}

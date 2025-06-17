@@ -8,6 +8,7 @@
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Stage/StageActor.h"
 #include "../../Mediator/CanvasMediator.h"
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 //èâä˙âª
 void SceneNetworkDebug::OnInitialize()
@@ -32,4 +33,8 @@ void SceneNetworkDebug::OnInitialize()
     {
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }
+
+    // ó\Çﬂì«Ç›çûÇﬁÉÇÉfÉã
+    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::PlayerModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::WyvernModelFilePath()));
 }

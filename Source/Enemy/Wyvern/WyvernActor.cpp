@@ -17,7 +17,7 @@ void WyvernActor::OnCreate()
 	EnemyActor::OnCreate();
 
 	// モデル読み込み
-	auto model = LoadModel("./Data/Model/Dragons/Kuzar the Magnificent.fbx");
+	auto model = LoadModel(WyvernModelFilePath());
 	// モデルがシリアライズされていなければエラー
 	assert(model.lock()->GetResource()->IsSerialized());
 

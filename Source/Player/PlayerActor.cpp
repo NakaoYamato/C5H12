@@ -20,7 +20,7 @@ void PlayerActor::OnCreate()
 {
 	// モデル読み込み
 	//auto model = LoadModel("./Data/Model/Player/2025_03_25.fbx");
-	auto model = LoadModel("./Data/Model/Player/ARPG_Warrior.fbx");
+	auto model = LoadModel(PlayerModelFilePath());
 
 	// コンポーネント追加
 	//auto modelRenderer		= AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");

@@ -19,6 +19,10 @@ public:
 	{
 		return std::make_shared<SceneNetworkDebug>();
 	}
+
+private:
+	// 予め読み込むモデルのリスト
+	std::vector<std::shared_ptr<Model>> _preloadModels;
 };
 
 // メニューバーに登録

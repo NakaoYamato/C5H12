@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../../Library/Actor/Actor.h"
-#include "../../Library/Component/Component.h"
+#include "../../Library/2D/Sprite.h"
+#include "../../Library/Scene/Scene.h"
 
-#include "../../Library/Component/SpriteRenderer.h"
+#include "../../Source/Menu/MenuInput.h"
 
 #include <unordered_map>
 
@@ -11,8 +12,8 @@ class MenuObjectBase;
 class MenuCategoryBase;
 class MenuItemBase;
 
-using MenuCategoryRef = MenuCategoryBase*;
-using MenuItemRef = MenuItemBase*;
+using MenuCategoryRef	= std::shared_ptr<MenuCategoryBase>;
+using MenuItemRef		= std::shared_ptr<MenuItemBase>;
 
 class MenuMediator : public Actor
 {
@@ -35,13 +36,13 @@ public:
 	//void ReceiveCommand(const MenuCategoryBase* sender, const std::string& command);
 
 	// メニューカテゴリー登録
-	void RegisterMenuCategory(MenuCategoryBase* category, std::string categoryName);
+	void RegisterMenuCategory(MenuCategoryRef category);
 	// メニューカテゴリー削除
-	void UnregisterMenuCategory(MenuCategoryBase* category);
+	void UnregisterMenuCategory(MenuCategoryRef category);
 	// メニューアイテム登録
-	void RegisterMenuItemController(std::string categoryName, MenuItemBase* controller, std::string itemName);
+	void RegisterMenuItemController(std::string categoryName, MenuItemRef controller);
 	// メニューアイテム削除
-	void UnregisterMenuItemController(std::string categoryName, MenuItemBase* controller);
+	void UnregisterMenuItemController(std::string categoryName, MenuItemRef controller);
 
 	const MenuPair* GetMenuPair(const std::string& categoryName) const
 	{
@@ -54,7 +55,13 @@ public:
 		}
 		return nullptr; // 失敗
 	}
+	std::shared_ptr<MenuInput> GetMenuInput() const
+	{
+		return _menuInput.lock();
+	}
 private:
+	// MenuInputへの参照
+	std::weak_ptr<MenuInput> _menuInput;
 	// カテゴリーとアイテムの関係を記録したマップ
 	std::vector<MenuPair> _menuMap;
 	// メニューカテゴリー名とコントローラーのマップ
@@ -63,24 +70,49 @@ private:
 	std::unordered_map<std::string, MenuItemRef> _menuItemMap;
 	// 選択中のカテゴリー番号
 	int _selectedCategoryIndex = 0;
+	// 選択中のアイテム番号
+	int _selectedItemIndex = 0;
+
+	// カテゴリーのオフセット
+	Vector2 _categoryOffset = Vector2(0.0f, 100.0f);
+	// カテゴリーの間隔
+	Vector2 _categoryInterval = Vector2(200.0f, 0.0f);
+	// アイテムのオフセット
+	Vector2 _itemOffset = Vector2(0.0f, 150.0f);
+	// アイテムの間隔
+	Vector2 _itemInterval = Vector2(0.0f, 50.0f);
 };
 
-class MenuObjectBase : public SpriteRenderer
+class MenuObjectBase
 {
 public:
-	// 3D描画後の描画処理
-	// ※メディエーターで制御するため処理しない
-	void DelayedRender(const RenderContext& rc) override {}
+	MenuObjectBase() = delete;
+	MenuObjectBase(MenuMediator* menuMediator, const std::string& menuName) :
+		_menuMediator(menuMediator)
+	{
+		SetMenuName(menuName);
+	}
+	virtual ~MenuObjectBase() {}
 	/// <summary>
-	/// UI描画
+	///	更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void Update(float elapsedTime) {};
+	/// <summary>
+	/// 描画
 	/// </summary>
 	/// <param name="rc"></param>
 	/// <param name="offset"></param>
 	/// <param name="offsetScale"></param>
-	virtual void DrawUI(
+	virtual void Render(
+		Scene* scene,
 		const RenderContext& rc,
 		const Vector2& offset,
 		const Vector2& offsetScale) = 0;
+	/// <summary>
+	/// GUI描画
+	/// </summary>
+	virtual void DrawGui() {};
 
 	// メニュー名を設定
 	void SetMenuName(const std::string& menuName)
@@ -92,20 +124,34 @@ public:
 	{
 		return _menuName;
 	}
-protected:
-	// MenuMediatorを探す
-	std::weak_ptr<MenuMediator> FindMenuMediator();
+	// 選択状態を設定
+	void SetSelected(bool isSelected)
+	{
+		_isSelected = isSelected;
+	}
+	// 選択状態を取得
+	bool IsSelected() const
+	{
+		return _isSelected;
+	}
 protected:
 	// MenuMediatorへの参照
-	std::weak_ptr<MenuMediator> _menuMediator;
+	MenuMediator* _menuMediator;
 	// メニュー名
 	std::string _menuName;
+	// スプライトのマップ
+	std::unordered_map<std::string, Sprite> _sprites;
+
+	// 選択されているか
+	bool _isSelected = false;
 };
 
 class MenuCategoryBase : public MenuObjectBase
 {
 public:
-	MenuCategoryBase() {}
+	MenuCategoryBase(MenuMediator* menuMediator, const std::string& menuName) :
+		MenuObjectBase(menuMediator, menuName) {
+	}
 	virtual ~MenuCategoryBase() {}
 
 	// メニューアイテムのコマンドを実行
@@ -115,7 +161,9 @@ public:
 class MenuItemBase : public MenuObjectBase
 {
 public:
-	MenuItemBase() {}
+	MenuItemBase(MenuMediator* menuMediator, const std::string& menuName) :
+		MenuObjectBase(menuMediator, menuName) {
+	}
 	virtual ~MenuItemBase() {}
 
 	// メニューアイテムのコマンドを実行

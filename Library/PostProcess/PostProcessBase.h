@@ -6,7 +6,7 @@
 #include <string>
 
 #include "FrameBuffer.h"
-#include "../2D/Sprite.h"
+#include "../2D/SpriteResource.h"
 
 // ポストエフェクト用基底クラス
 class PostProcessBase
@@ -57,7 +57,7 @@ protected:
 
 protected:
 	std::unique_ptr<FrameBuffer> _frameBuffer;
-	std::unique_ptr<Sprite> _fullscreenQuad;
+	std::unique_ptr<SpriteResource> _fullscreenQuad;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
 
 	std::unordered_map<std::string, float> _startData;

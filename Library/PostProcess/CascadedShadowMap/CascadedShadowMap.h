@@ -8,7 +8,7 @@
 
 #include "../../Graphics/RenderContext.h"
 #include "../../Library/Math/Vector.h"
-#include "../../2D/Sprite.h"
+#include "../../2D/SpriteResource.h"
 
 // 福井先生のひみつフォルダから引用
 // 参考資料 https://learnopengl.com/Guest-Articles/2021/CSM
@@ -112,5 +112,5 @@ private:
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _cachedRTV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _cachedDSV;
 
-    std::unique_ptr<Sprite> _fullscreenQuad;
+    std::unique_ptr<SpriteResource> _fullscreenQuad;
 };

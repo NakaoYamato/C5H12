@@ -2,7 +2,6 @@
 
 #include "Component.h"
 #include "../../Library/2D/Sprite.h"
-#include "../../Library/Math/Easing.h"
 
 #include <unordered_map>
 
@@ -11,33 +10,6 @@
 /// </summary>
 class SpriteRenderer : public Component
 {
-public:
-	enum CenterAlignment
-	{
-		LEFT_UP,
-		LEFT_CENTER,
-		LEFT_DOWN,
-		CENTER_UP,
-		CENTER_CENTER,
-		CENTER_DOWN,
-		RIGHT_UP,
-		RIGHT_CENTER,
-		RIGHT_DOWN,
-	};
-	struct SpriteData
-	{
-		std::unique_ptr<Sprite> sprite;
-		CenterAlignment         centerAlignment = CenterAlignment::CENTER_CENTER;
-		Vector2                 position{};
-		Vector2                 scale{ 1.0f, 1.0f };
-		Vector2                 texPos{};
-		Vector2                 texSize{};
-		Vector2                 center{};
-		float                   angle{};
-		Vector4                 color{ 1,1,1,1 };
-		// 中心位置を再計算
-		void RecalcCenter(CenterAlignment alignment);
-	};
 public:
 	SpriteRenderer() {}
 	~SpriteRenderer() override = default;
@@ -48,31 +20,31 @@ public:
 	// GUI描画
 	void DrawGui() override;
 	// 画像読み込み
-	void LoadTexture(const std::string& spriteName, const wchar_t* filename, CenterAlignment alignment);
+	void LoadTexture(const std::string& spriteName, const wchar_t* filename, Sprite::CenterAlignment alignment);
 	// 画像との当たり判定
 	bool IsHit(const std::string& name, const Vector2& pos) const;
 
 #pragma region アクセサ
-	CenterAlignment GetCenterAlignment(const std::string& name) const { return _spriteDatas.at(name).centerAlignment; }
-	const Vector2& GetPosition(const std::string& name)const { return _spriteDatas.at(name).position; }
-	const Vector2& GetScale(const std::string& name)const { return _spriteDatas.at(name).scale; }
-	const Vector2& GetTexPos(const std::string& name)const { return _spriteDatas.at(name).texPos; }
-	const Vector2& GetTexSize(const std::string& name)const { return _spriteDatas.at(name).texSize; }
-	const Vector2& GetCenter(const std::string& name)const { return _spriteDatas.at(name).center; }
-	float          GetAngle(const std::string& name)const { return _spriteDatas.at(name).angle; }
-	const Vector4& GetColor(const std::string& name)const { return _spriteDatas.at(name).color; }
+	Sprite::CenterAlignment GetCenterAlignment(const std::string& name) const { return _sprites.at(name).GetCenterAlignment(); }
+	const Vector2& GetPosition(const std::string& name)const { return _sprites.at(name).GetPosition(); }
+	const Vector2& GetScale(const std::string& name)const { return _sprites.at(name).GetScale(); }
+	const Vector2& GetTexPos(const std::string& name)const { return _sprites.at(name).GetTexPos(); }
+	const Vector2& GetTexSize(const std::string& name)const { return _sprites.at(name).GetTexSize(); }
+	const Vector2& GetCenter(const std::string& name)const { return _sprites.at(name).GetCenter(); }
+	float          GetAngle(const std::string& name)const { return _sprites.at(name).GetAngle(); }
+	const Vector4& GetColor(const std::string& name)const { return _sprites.at(name).GetColor(); }
 
-	void SetCenterAlignment(const std::string& name, CenterAlignment alignment) {
-		_spriteDatas.at(name).centerAlignment = alignment;
-		_spriteDatas.at(name).RecalcCenter(alignment);
+	void SetCenterAlignment(const std::string& name, Sprite::CenterAlignment alignment) {
+		_sprites.at(name).SetCenterAlignment(alignment);
+		_sprites.at(name).RecalcCenter(alignment);
 	}
-	void SetPosition(const std::string& name, const Vector2& p) { _spriteDatas.at(name).position = p; }
-	void SetScale(const std::string& name, const Vector2& s) { _spriteDatas.at(name).scale = s; }
-	void SetTexPos(const std::string& name, const Vector2& p) { _spriteDatas.at(name).texPos = p; }
-	void SetTexSize(const std::string& name, const Vector2& s) { _spriteDatas.at(name).texSize = s; }
-	void SetCenter(const std::string& name, const Vector2& c) { _spriteDatas.at(name).center = c; }
-	void SetAngle(const std::string& name, float a) { _spriteDatas.at(name).angle = a; }
-	void SetColor(const std::string& name, const Vector4& c) { _spriteDatas.at(name).color = c; }
+	void SetPosition(const std::string& name, const Vector2& p) { _sprites.at(name).SetPosition(p); }
+	void SetScale(const std::string& name, const Vector2& s) { _sprites.at(name).SetScale(s); }
+	void SetTexPos(const std::string& name, const Vector2& p) { _sprites.at(name).SetTexPos(p); }
+	void SetTexSize(const std::string& name, const Vector2& s) { _sprites.at(name).SetTexSize(s); }
+	void SetCenter(const std::string& name, const Vector2& c) { _sprites.at(name).SetCenter(c); }
+	void SetAngle(const std::string& name, float a) { _sprites.at(name).SetAngle(a); }
+	void SetColor(const std::string& name, const Vector4& c) { _sprites.at(name).SetColor(c); }
 #pragma endregion
 
 protected:
@@ -84,5 +56,5 @@ protected:
 		const Vector2& offsetScale);
 
 private:
-	std::unordered_map<std::string, SpriteData> _spriteDatas;
+	std::unordered_map<std::string, Sprite> _sprites;
 };

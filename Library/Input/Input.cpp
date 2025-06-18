@@ -16,6 +16,13 @@ Input::Input()
 	_inputActionMap["LookOn"]	= { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
 	_inputActionMap["Menu"]		= { {InputType::InputKeyboard, VK_ESCAPE}, {InputType::InputGamepad,XINPUT_GAMEPAD_START} };
 
+	_inputActionMap["Up"]		= { {InputType::InputKeyboard, 'W'}, {InputType::InputKeyboard, VK_UP}, {InputType::InputGamepad,XINPUT_GAMEPAD_DPAD_UP}};
+	_inputActionMap["Down"]		= { {InputType::InputKeyboard, 'S'}, {InputType::InputKeyboard, VK_DOWN}, {InputType::InputGamepad,XINPUT_GAMEPAD_DPAD_DOWN}};
+	_inputActionMap["Left"]		= { {InputType::InputKeyboard, 'A'}, {InputType::InputKeyboard, VK_LEFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_DPAD_LEFT}};
+	_inputActionMap["Right"]	= { {InputType::InputKeyboard, 'D'}, {InputType::InputKeyboard, VK_RIGHT}, {InputType::InputGamepad,XINPUT_GAMEPAD_DPAD_RIGHT}};
+	_inputActionMap["Select"]	= { {InputType::InputKeyboard, 'F'}, {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_A}};
+	_inputActionMap["Back"]		= { {InputType::InputKeyboard, VK_ESCAPE}, {InputType::InputKeyboard, VK_BACK}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
+
 	_moveActionMap["AxisLX"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
 	_moveActionMap["AxisLY"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
 	_moveActionMap["AxisRX"]			= { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };

@@ -1,96 +1,75 @@
 #pragma once
 
-#include <d3d11.h>
-#include <DirectXMath.h>
-#include <wrl.h>
+#include "../../Library/2D/SpriteResource.h"
+#include "../../Library/Math/Easing.h"
+#include "../../Library/Graphics/RenderContext.h"
 
-#include "../Math/Vector.h"
+#include <string>
+#include <memory>
 
 class Sprite
 {
 public:
-	/// <summary>
-	/// コンストラクタ（テクスチャ生成）
-	/// </summary>
-	/// <param name="device"></param>
-	/// <param name="filename">テクスチャのパス</param>
-	/// <param name="vsShaderFilename"></param>
-	/// <param name="psShaderFilename"></param>
-	Sprite(ID3D11Device* device, 
-		const wchar_t* filename,
-		const char* vsShaderFilename = ".\\Data\\Shader\\SpriteVS.cso",
-		const char* psShaderFilename = ".\\Data\\Shader\\SpritePS.cso");
-	/// <summary>
-	/// コンストラクタ（SRVを直接受け取る）
-	/// </summary>
-	/// <param name="device"></param>
-	/// <param name="srv">受け取るSRV</param>
-	/// <param name="vsShaderFilename"></param>
-	/// <param name="psShaderFilename"></param>
-	Sprite(ID3D11Device* device,
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
-		const char* vsShaderFilename = ".\\Data\\Shader\\SpriteVS.cso",
-		const char* psShaderFilename = ".\\Data\\Shader\\SpritePS.cso");
-
-	Sprite() = delete;
-	virtual ~Sprite();
-
-	/// <summary>
-	/// 描画処理
-	/// </summary>
-	/// <param name="immediateContext"></param>
-	/// <param name="position">描画座標</param>
-	/// <param name="scale">描画スケール</param>
-	/// <param name="texPos">切り取り座標</param>
-	/// <param name="texSize">切り取りサイズ((0.0f, 0.0f)でsrvの大きさで描画)</param>
-	/// <param name="center">中心座標</param>
-	/// <param name="angle">角度(ラジアン)</param>
-	/// <param name="color">描画色</param>
-	void Render(ID3D11DeviceContext* immediateContext,
-		const Vector2& position,
-		const Vector2& scale = Vector2::One,
-		const Vector2& texPos = Vector2::Zero,
-		const Vector2& texSize = Vector2::Zero,
-		const Vector2& center = Vector2::Zero,
-		float angle = 0.0f,
-		const Vector4& color = Vector4::White) const;
-
-	/// <summary>
-	/// FullscreenQuadの代わり
-	/// </summary>
-	/// <param name="immediateContext"></param>
-	/// <param name="shaderResourceView">srv</param>
-	/// <param name="startSlot">srvをセットする位置</param>
-	/// <param name="numViews"></param>
-	void Blit(ID3D11DeviceContext* immediateContext,
-		ID3D11ShaderResourceView** shaderResourceView,
-		uint32_t startSlot, uint32_t numViews,
-		ID3D11PixelShader* pixelShader = nullptr);
-
-	/// <summary>
-	/// SRVの大きさ取得
-	/// </summary>
-	/// <returns></returns>
-	const Vector2 GetTextureSize()
+	enum CenterAlignment
 	{
-		return Vector2(static_cast<float>(_texture2dDesc.Width), static_cast<float>(_texture2dDesc.Height));
-	}
-private:
-	bool _isLoadFile = true;
-
-private:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> _inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
-
-	struct Vertex
-	{
-		Vector3 position{};
-		Vector4 color{};
-		Vector2 texcoord{};
+		LeftUp,
+		LeftCenter,
+		LeftDown,
+		CenterUp,
+		CenterCenter,
+		CenterDown,
+		RightUp,
+		RightCenter,
+		RightDown,
 	};
+public:
+	Sprite() = default;
+	Sprite(const wchar_t* filename, CenterAlignment alignment = CenterAlignment::CenterCenter);
+	~Sprite() = default;
+	// 描画
+	virtual void Render(
+		const RenderContext& rc,
+		const Vector2& offset,
+		const Vector2& offsetScale);
+	// GUI描画
+	void DrawGui();
+	// 画像読み込み
+	void LoadTexture(const wchar_t* filename, CenterAlignment alignment);
+	// 画像との当たり判定
+	bool IsHit(const Vector2& pos) const;
+	// 中心位置を再計算
+	void RecalcCenter(CenterAlignment alignment);
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _srv;
-	D3D11_TEXTURE2D_DESC _texture2dDesc{};
+#pragma region アクセサ
+	CenterAlignment GetCenterAlignment() const { return _centerAlignment; }
+	const Vector2& GetPosition()const { return _position; }
+	const Vector2& GetScale()const { return _scale; }
+	const Vector2& GetTexPos()const { return _texPos; }
+	const Vector2& GetTexSize()const { return _texSize; }
+	const Vector2& GetCenter()const { return _center; }
+	float          GetAngle()const { return _angle; }
+	const Vector4& GetColor()const { return _color; }
+
+	void SetCenterAlignment(CenterAlignment alignment) {
+		_centerAlignment = alignment;
+		RecalcCenter(alignment);
+	}
+	void SetPosition(const Vector2& p) { _position = p; }
+	void SetScale(const Vector2& s) { _scale = s; }
+	void SetTexPos(const Vector2& p) { _texPos = p; }
+	void SetTexSize(const Vector2& s) { _texSize = s; }
+	void SetCenter(const Vector2& c) { _center = c; }
+	void SetAngle(float a) { _angle = a; }
+	void SetColor(const Vector4& c) { _color = c; }
+#pragma endregion
+private:
+	std::unique_ptr<SpriteResource> _sprite;
+	CenterAlignment					_centerAlignment = CenterAlignment::CenterCenter;
+	Vector2							_position	= Vector2::Zero;
+	Vector2							_scale		= Vector2::One;
+	Vector2							_texPos		= Vector2::Zero;
+	Vector2							_texSize	= Vector2::Zero;
+	Vector2							_center		= Vector2::Zero;
+	float							_angle		= 0.0f;
+	Vector4							_color		= Vector4::White;
 };

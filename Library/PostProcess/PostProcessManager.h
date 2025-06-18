@@ -84,6 +84,6 @@ private:
 	// ƒuƒ‹[ƒ€—p
 	std::unique_ptr<FrameBuffer> _bloomRenderFrame;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> _bloomPS;
-	std::unique_ptr<Sprite> _fullscreenQuad;
+	std::unique_ptr<SpriteResource> _fullscreenQuad;
 
 };

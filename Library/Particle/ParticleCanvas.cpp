@@ -1,7 +1,7 @@
 #include "ParticleCanvas.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/2D/Sprite.h"
+#include "../../Library/2D/SpriteResource.h"
 
 #include "../../Library/Exporter/Exporter.h"
 #include "../../Library/Algorithm/Converter.h"
@@ -23,7 +23,7 @@ ParticleCanvas::TextureData ParticleCanvas::Load(const wchar_t* filename, Direct
 		return it->second;
 	}
 	// テクスチャのロード
-	Sprite sprite(Graphics::Instance().GetDevice(), filename);
+	SpriteResource sprite(Graphics::Instance().GetDevice(), filename);
 
 	{
 		// スレッドセーフ

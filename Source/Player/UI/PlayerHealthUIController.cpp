@@ -20,13 +20,13 @@ void PlayerHealthUIController::Start()
 		_canvasMediator.lock()->AddOtherUserHealthUI(this);
 	}
 	// 画像読み込み
-	LoadTexture(FrameSprite, L"Data/Texture/UI/Frame.png", CenterAlignment::LEFT_CENTER);
+	LoadTexture(FrameSprite, L"Data/Texture/UI/Frame.png", Sprite::CenterAlignment::LeftCenter);
 	SetPosition(FrameSprite, InitialPosition); // 初期位置を設定
-	LoadTexture(MaskSprite, L"Data/Texture/UI/Mask.png", CenterAlignment::LEFT_CENTER);
+	LoadTexture(MaskSprite, L"Data/Texture/UI/Mask.png", Sprite::CenterAlignment::LeftCenter);
 	SetPosition(MaskSprite, InitialPosition); // 初期位置を設定
-	LoadTexture(GaugeSprite, L"Data/Texture/UI/HPGauge.png", CenterAlignment::LEFT_CENTER);
+	LoadTexture(GaugeSprite, L"Data/Texture/UI/HPGauge.png", Sprite::CenterAlignment::LeftCenter);
 	SetPosition(GaugeSprite, InitialPosition); // 初期位置を設定
-	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/DamageGauge.png", CenterAlignment::LEFT_CENTER);
+	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/DamageGauge.png", Sprite::CenterAlignment::LeftCenter);
 	SetPosition(DamageGaugeSprite, InitialPosition); // 初期位置を設定
 }
 // 削除処理

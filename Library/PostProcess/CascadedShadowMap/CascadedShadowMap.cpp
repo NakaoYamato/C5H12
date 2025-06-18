@@ -96,7 +96,7 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 		sizeof(ParametricConstants),
 		_parametricConstantBuffer.GetAddressOf());
 
-	_fullscreenQuad = std::make_unique<Sprite>(device,
+	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/CascadedShadowMapPS.cso");

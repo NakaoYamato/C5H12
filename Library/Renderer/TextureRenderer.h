@@ -7,7 +7,7 @@
 #include <wrl.h>
 #include <memory>
 
-#include "../../Library/2D/Sprite.h"
+#include "../../Library/2D/SpriteResource.h"
 #include "../Math/Vector.h"
 
 class TextureRenderer
@@ -34,5 +34,5 @@ public:
 		ID3D11PixelShader* pixelShader = nullptr);
 
 private:
-	std::unique_ptr<Sprite>			_fullscreenQuad;
+	std::unique_ptr<SpriteResource>			_fullscreenQuad;
 };

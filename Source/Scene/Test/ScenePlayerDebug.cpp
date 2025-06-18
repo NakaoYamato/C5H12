@@ -11,10 +11,10 @@
 #include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Menu/MenuInput.h"
 
 #include "../../Mediator/InputMediator.h"
 #include "../../Mediator/CanvasMediator.h"
+#include "../../Mediator/MenuMediator.h"
 
 void ScenePlayerDebug::OnInitialize()
 {
@@ -31,10 +31,6 @@ void ScenePlayerDebug::OnInitialize()
     }
     {
         auto inputMediator = RegisterActor<InputMediator>("InputMediator", ActorTag::DrawContextParameter);
-        inputMediator->AddComponent<MenuInput>();
-    }
-    {
-        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }
     {
         auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
@@ -48,6 +44,12 @@ void ScenePlayerDebug::OnInitialize()
     {
         auto wyvern = RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
         wyvern->GetTransform().SetPosition(Vector3(0.0f, 10.0f, -10.0f));
+    }
+    {
+		auto menu = RegisterActor<MenuMediator>("MenuMediator", ActorTag::UI);
+    }
+    {
+        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }
     // •‰‰×ƒeƒXƒg
     //for (int i = 0; i < 10; ++i)

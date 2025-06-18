@@ -7,7 +7,7 @@ PostProcessBase::PostProcessBase(ID3D11Device* device,
 {
 	_frameBuffer = std::make_unique<FrameBuffer>(device,
 		width, height);
-	_fullscreenQuad = std::make_unique<Sprite>(device,
+	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
 		".\\Data\\Shader\\FullscreenQuadVS.cso",
 		psName);

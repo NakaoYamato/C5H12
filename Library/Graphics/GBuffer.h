@@ -94,6 +94,6 @@ private:
 
 	// SSR—p
 	SSRConstants _ssrConstants;
-	std::unique_ptr<Sprite> _ssrFullscreenQuad;
+	std::unique_ptr<SpriteResource> _ssrFullscreenQuad;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> _ssrConstantBuffer;
 };

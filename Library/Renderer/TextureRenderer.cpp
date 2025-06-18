@@ -3,7 +3,7 @@
 /// ‰Šú‰»
 void TextureRenderer::Initialize(ID3D11Device* device)
 {
-	_fullscreenQuad = std::make_unique<Sprite>(device,
+	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/SpritePS.cso");

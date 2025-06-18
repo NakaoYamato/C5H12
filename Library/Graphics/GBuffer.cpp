@@ -112,7 +112,7 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 		width, height);
 
 	// SSR—p•Ï”‰Šú‰»
-	_ssrFullscreenQuad = std::make_unique<Sprite>(device,
+	_ssrFullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/ScreenSpaceReflectionPS.cso");

@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
+    <ClCompile Include="Library\2D\SpriteResource.cpp" />
     <ClCompile Include="Library\Audio\AudioLoader.cpp" />
     <ClCompile Include="Library\Audio\AudioResource.cpp" />
     <ClCompile Include="Library\Audio\AudioSystem.cpp" />
@@ -269,7 +270,10 @@
     <ClCompile Include="Source\Mediator\CanvasMediator.cpp" />
     <ClCompile Include="Source\Mediator\InputMediator.cpp" />
     <ClCompile Include="Source\Mediator\MenuMediator.cpp" />
+    <ClCompile Include="Source\Menu\Item\ExitMenuItem.cpp" />
+    <ClCompile Include="Source\Menu\Category\MenuCategory.cpp" />
     <ClCompile Include="Source\Menu\MenuInput.cpp" />
+    <ClCompile Include="Source\Menu\Item\MenuItem.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
@@ -302,6 +306,7 @@
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
+    <ClInclude Include="Library\2D\SpriteResource.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorActionBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorData.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorJudgmentBase.h" />
@@ -440,7 +445,10 @@
     <ClInclude Include="Source\Mediator\CanvasMediator.h" />
     <ClInclude Include="Source\Mediator\InputMediator.h" />
     <ClInclude Include="Source\Mediator\MenuMediator.h" />
+    <ClInclude Include="Source\Menu\Item\ExitMenuItem.h" />
+    <ClInclude Include="Source\Menu\Category\MenuCategory.h" />
     <ClInclude Include="Source\Menu\MenuInput.h" />
+    <ClInclude Include="Source\Menu\Item\MenuItem.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />

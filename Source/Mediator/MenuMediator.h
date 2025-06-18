@@ -72,6 +72,8 @@ private:
 	int _selectedCategoryIndex = 0;
 	// 選択中のアイテム番号
 	int _selectedItemIndex = 0;
+	// アイテムを開いているか
+	bool _isItemOpen = false;
 
 	// カテゴリーのオフセット
 	Vector2 _categoryOffset = Vector2(0.0f, 100.0f);
@@ -168,4 +170,18 @@ public:
 
 	// メニューアイテムのコマンドを実行
 	virtual void ExecuteCommand(const std::string& command) = 0;
+
+	// アイテムが開いているかどうかを取得
+	bool IsOpen() const
+	{
+		return _isOpen;
+	}
+	// アイテムが開いているかどうかを設定
+	void SetOpen(bool isOpen)
+	{
+		_isOpen = isOpen;
+	}
+private:
+	// アイテムを開いているかどうか
+	bool _isOpen = false;
 };

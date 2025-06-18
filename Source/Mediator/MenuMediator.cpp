@@ -47,6 +47,8 @@ void MenuMediator::OnLateUpdate(float elapsedTime)
 	if (_menuInput.lock()->IsInput(MenuInput::InputType::Down))
 		_selectedItemIndex++;
 
+	if (!_isItemOpen && _menuInput.lock()->IsInput(MenuInput::InputType::Back))
+		_menuInput.lock()->CloseMenu();
 
 	// 選択中のカテゴリーインデックスを範囲内に調整
 	if (_selectedCategoryIndex < 0)
@@ -63,6 +65,7 @@ void MenuMediator::OnLateUpdate(float elapsedTime)
 	}
 
 	// 選択中のカテゴリーのアイテムを強調表示
+	_isItemOpen = false;
 	for (auto& [categoryName, itemNameList] : _menuMap)
 	{
 		auto category = _menuCategoryMap.find(categoryName);
@@ -84,7 +87,24 @@ void MenuMediator::OnLateUpdate(float elapsedTime)
 					if (i == _selectedItemIndex)
 					{
 						it->second->SetSelected(true);
-						it->second->Update(elapsedTime);
+
+						// 開いていない場合入力によって開く
+						if (!it->second->IsOpen())
+						{
+							if (_menuInput.lock()->IsInput(MenuInput::InputType::Select))
+							{
+								it->second->SetOpen(true);
+							}
+							_isItemOpen = true;
+						}
+						else
+						{
+							it->second->Update(elapsedTime);
+							if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
+							{
+								it->second->SetOpen(false);
+							}
+						}
 					}
 					else
 					{

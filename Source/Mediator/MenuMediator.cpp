@@ -38,17 +38,21 @@ void MenuMediator::OnLateUpdate(float elapsedTime)
 	if (_menuMap.size() <= _selectedCategoryIndex)
 		return;
 
-	if (_menuInput.lock()->IsInput(MenuInput::InputType::Left))
-		_selectedCategoryIndex--;
-	if (_menuInput.lock()->IsInput(MenuInput::InputType::Right))
-		_selectedCategoryIndex++;
-	if (_menuInput.lock()->IsInput(MenuInput::InputType::Up))
-		_selectedItemIndex--;
-	if (_menuInput.lock()->IsInput(MenuInput::InputType::Down))
-		_selectedItemIndex++;
+	// アイテムを開いていない場合、入力処理を行う
+	if (!_isItemOpen)
+	{
+		if (_menuInput.lock()->IsInput(MenuInput::InputType::Left))
+			_selectedCategoryIndex--;
+		if (_menuInput.lock()->IsInput(MenuInput::InputType::Right))
+			_selectedCategoryIndex++;
+		if (_menuInput.lock()->IsInput(MenuInput::InputType::Up))
+			_selectedItemIndex--;
+		if (_menuInput.lock()->IsInput(MenuInput::InputType::Down))
+			_selectedItemIndex++;
 
-	if (!_isItemOpen && _menuInput.lock()->IsInput(MenuInput::InputType::Back))
-		_menuInput.lock()->CloseMenu();
+		if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
+			_menuInput.lock()->CloseMenu();
+	}
 
 	// 選択中のカテゴリーインデックスを範囲内に調整
 	if (_selectedCategoryIndex < 0)
@@ -95,10 +99,10 @@ void MenuMediator::OnLateUpdate(float elapsedTime)
 							{
 								it->second->SetOpen(true);
 							}
-							_isItemOpen = true;
 						}
 						else
 						{
+							_isItemOpen = true;
 							it->second->Update(elapsedTime);
 							if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
 							{
@@ -169,6 +173,9 @@ void MenuMediator::OnDrawGui()
 		if (ImGui::BeginTabItem(u8"メニュー"))
 		{
 			ImGui::DragInt(u8"選択中カテゴリー", &_selectedCategoryIndex, 1.0f, 0, static_cast<int>(_menuMap.size() - 1));
+			ImGui::DragInt(u8"選択中アイテム", &_selectedItemIndex, 1.0f, 0, static_cast<int>(_menuMap[_selectedCategoryIndex].second.size() - 1));
+			ImGui::Checkbox(u8"アイテムを開く", &_isItemOpen);
+			ImGui::Separator();
 			ImGui::DragFloat2(u8"カテゴリーオフセット", &_categoryOffset.x, 1.0f, -1000.0f, 1000.0f);
 			ImGui::DragFloat2(u8"カテゴリー間隔", &_categoryInterval.x, 1.0f, 0.0f, 1000.0f);
 			ImGui::DragFloat2(u8"アイテムオフセット", &_itemOffset.x, 1.0f, -1000.0f, 1000.0f);

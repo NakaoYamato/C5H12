@@ -20,7 +20,7 @@ void MenuItem::Render(Scene* scene, const RenderContext& rc, const Vector2& offs
 		FontType::MSGothic,
 		_menuName.c_str(),
 		(*_sprites.begin()).second.GetPosition() + offset,
-		IsSelected() ? Vector4::Red : Vector4::White,
+		IsSelected() ? IsOpen() ? Vector4::Green : Vector4::Red : Vector4::White,
 		0.0f,
 		_textOffset,
 		_textSize);

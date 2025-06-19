@@ -59,7 +59,7 @@ void PlayerInput::Update(float elapsedTime)
 	stateMachine->SetIsEvade(_INPUT_IS_TRIGGERD("Evade"));
 
 	// ƒƒjƒ…[‰æ–Ê‹N“®“ü—Í
-	if (_INPUT_IS_RELEASED("Menu"))
+	if (_INPUT_IS_TRIGGERD("Menu"))
 	{
 		if (_inputMediator.lock())
 		{

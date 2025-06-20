@@ -130,6 +130,8 @@ public:
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
 		_components.emplace_back(component);
+		// コンポーネントの生成時処理
+		component->OnCreate();
 		return component;
 	}
 
@@ -163,6 +165,8 @@ public:
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
 		_colliders.emplace_back(component);
+		// コンポーネントの生成時処理
+		component->OnCreate();
 		return component;
 	}
 

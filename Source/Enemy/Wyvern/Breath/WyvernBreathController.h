@@ -14,7 +14,7 @@ public:
 	// 開始処理
 	void Start() override;
 	// 削除処理
-	void Deleted() override;
+	void OnDelete() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
 	// GUI描画

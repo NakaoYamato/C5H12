@@ -140,9 +140,22 @@ public:
 	// グリッド表示フラグ取得
 	void SetShowGrid(bool show) { _showGrid = show; }
 	// 準備完了しているか
-	bool IsReady()const { return _ready; }
-	// 準備完了設定
-	void SetReady() { _ready = true; }
+	bool IsReady()const { return _completionLoading >= 1.0f; }
+	// ロード進捗率取得
+	float GetCompletionLoading() const
+	{
+		return _completionLoading;
+	}
+	// ロード進捗率設定
+	void SetCompletionLoading(float completion)
+	{
+		_completionLoading = std::clamp(completion, 0.0f, 1.0f);
+	}
+	// ロード進捗率設定
+	void AddCompletionLoading(float completion)
+	{
+		_completionLoading = std::clamp(_completionLoading + completion, 0.0f, 1.0f);
+	}
 #pragma endregion
 private:
 	std::unique_ptr<SkyMap>			_skyMap;
@@ -163,9 +176,8 @@ private:
 	CollisionManager				_collisionManager;
 	EffekseerEffectManager			_effekseerEffectManager;
 
-	// 初期化終了フラグ
-	bool							_ready = false;
-
+	// ロード進捗率
+	float							_completionLoading = 0.0f;
 	// グリッド表示フラグ
 	bool							_showGrid = false;
 };

@@ -15,13 +15,17 @@ public:
 	virtual const char* GetName() const = 0;
 
 	/// <summary>
-	/// 開始時処理
+	/// 生成時処理
 	/// </summary>
-	virtual void Start() {}
+	virtual void OnCreate() {}
 	/// <summary>
 	/// 削除時処理
 	/// </summary>
-	virtual void Deleted() {}
+	virtual void OnDelete() {}
+	/// <summary>
+	/// 開始時処理
+	/// </summary>
+	virtual void Start() {}
 	/// <summary>
 	/// 更新処理
 	/// </summary>

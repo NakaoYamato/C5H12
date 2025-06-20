@@ -30,7 +30,7 @@ void CapsuleCollider::DebugRender(const RenderContext& rc)
 }
 
 // 削除時処理
-void CapsuleCollider::Deleted()
+void CapsuleCollider::OnDelete()
 {
 	// コライダーの削除
 	GetActor()->GetScene()->GetCollisionManager().UnregisterCapsuleCollider(this);

@@ -384,6 +384,11 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 		texture2d->GetDesc(texture2dDesc);
 	}
 
+	Debug::Output::String(L"テクスチャ読み込み成功\n");
+	Debug::Output::String("\t");
+	Debug::Output::String(filename);
+	Debug::Output::String("\n");
+
 	return true;
 }
 

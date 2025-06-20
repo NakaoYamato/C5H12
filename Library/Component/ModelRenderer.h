@@ -15,8 +15,8 @@ public:
 	// 名前取得
 	const char* GetName()const { return "ModelRenderer"; }
 
-	// 開始処理
-	void Start()override;
+	// 生成時処理
+	void OnCreate()override;
 	// 更新処理
 	void Update(float elapsedTime) override;
 	// 1秒ごとの更新処理
@@ -47,14 +47,13 @@ public:
 	std::vector<Material>& GetMaterials() { return _materialMap; }
 	Material& GetMaterial(int index) { return _materialMap[index]; }
 
+	// モデル設定
+	void SetModel(std::weak_ptr<Model> model);
 	void SetShaderParameter(const ShaderBase::Parameter& parameter) { this->_shaderParameter = parameter; }
 	void SetShadowParameter(const ShaderBase::Parameter& parameter) { this->_shadowParameter = parameter; }
 	void SetRenderType(ModelRenderType type) { this->_renderType = type; }
 	void SetColor(const Vector4& c) { this->_color = c; }
 #pragma endregion
-private:
-	void SetModel(std::weak_ptr<Model> model);
-
 private:
 	std::weak_ptr<Model> _model;
 

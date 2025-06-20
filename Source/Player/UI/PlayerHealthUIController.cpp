@@ -30,7 +30,7 @@ void PlayerHealthUIController::Start()
 	SetPosition(DamageGaugeSprite, InitialPosition); // ‰ŠúˆÊ’u‚ğİ’è
 }
 // íœˆ—
-void PlayerHealthUIController::Deleted()
+void PlayerHealthUIController::OnDelete()
 {
 	if (_canvasMediator.lock())
 	{

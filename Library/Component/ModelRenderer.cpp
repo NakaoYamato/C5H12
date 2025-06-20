@@ -6,10 +6,10 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Algorithm/Converter.h"
 
-// 開始処理
-void ModelRenderer::Start()
+// 生成時処理
+void ModelRenderer::OnCreate()
 {
-	if (GetActor()->GetModel().lock())
+	if (GetActor()->GetModel().lock() && !_model.lock().get())
 	{
 		// モデルが存在するならセット
 		SetModel(GetActor()->GetModel());

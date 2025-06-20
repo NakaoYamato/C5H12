@@ -30,7 +30,7 @@ void BoxCollider::DebugRender(const RenderContext& rc)
 }
 
 // 削除時処理
-void BoxCollider::Deleted()
+void BoxCollider::OnDelete()
 {
 	// コライダーの削除
 	GetActor()->GetScene()->GetCollisionManager().UnregisterBoxCollider(this);

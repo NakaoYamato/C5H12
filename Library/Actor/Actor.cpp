@@ -30,11 +30,11 @@ void Actor::Deleted()
 	// 各コンポーネントの削除処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
-		component->Deleted();
+		component->OnDelete();
 	}
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
-		collider->Deleted();
+		collider->OnDelete();
 	}
 
 	OnDeleted();

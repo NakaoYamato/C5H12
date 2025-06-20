@@ -14,7 +14,7 @@ void MeshCollider::Start()
 }
 
 // 削除時処理
-void MeshCollider::Deleted()
+void MeshCollider::OnDelete()
 {
 	// コライダーの削除
 	GetActor()->GetScene()->GetCollisionManager().UnregisterMeshCollider(this);

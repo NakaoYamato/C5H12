@@ -14,7 +14,7 @@ public:
 	// デバッグ描画処理
 	void DebugRender(const RenderContext& rc) override;
 	// 削除時処理
-	void Deleted() override;
+	void OnDelete() override;
 	// GUI描画
 	void DrawGui() override;
 #pragma region アクセサ

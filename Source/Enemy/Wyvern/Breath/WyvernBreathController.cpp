@@ -23,7 +23,7 @@ void WyvernBreathController::Start()
 }
 
 // íœˆ—
-void WyvernBreathController::Deleted()
+void WyvernBreathController::OnDelete()
 {
 	_particleController.lock()->Stop();
 }

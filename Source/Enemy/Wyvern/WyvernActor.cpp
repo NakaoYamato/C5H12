@@ -17,7 +17,7 @@ void WyvernActor::OnCreate()
 	EnemyActor::OnCreate();
 
 	// モデル読み込み
-	auto model = LoadModel(WyvernModelFilePath());
+	auto model = LoadModel(GetModelFilePath());
 	// モデルがシリアライズされていなければエラー
 	assert(model.lock()->GetResource()->IsSerialized());
 

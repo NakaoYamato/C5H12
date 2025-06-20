@@ -49,6 +49,8 @@ public:
 
 	ModelResource* GetResource() { return _resource.get(); }
 	std::vector<ModelResource::Node>& GetPoseNodes() { return _poseNodes; }
+	// マテリアルの取得
+	std::vector<Material>& GetMaterials() { return _materialMap; }
 	void SetPoseNodes(const std::vector<ModelResource::Node>& nodes) { this->_poseNodes = nodes; }
 
 	const char* GetFilename()const { return _filename.c_str(); }
@@ -63,7 +65,7 @@ protected:
 	/// </summary>
 	/// <param name="device"></param>
 	/// <param name="fbx_filename"></param>
-	void CreateComObject(ID3D11Device* device, const char* fbx_filename);
+	void CreateComObject(ID3D11Device* device, const char* fbxFilename);
 
 protected:
 	// ファイルパス
@@ -72,6 +74,8 @@ protected:
 	std::shared_ptr<ModelResource> _resource;
 	// 姿勢用ノード
 	std::vector<ModelResource::Node> _poseNodes;
+	// マテリアル
+	std::vector<Material> _materialMap;
 	// デバッグ用
 	int _debugNodeIndex = -1;
 };

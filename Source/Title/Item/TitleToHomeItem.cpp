@@ -13,9 +13,6 @@ TitleToHomeItem::TitleToHomeItem(TitleMediator* titleMediator, const std::string
 // çXêVèàóù
 void TitleToHomeItem::Update(float elapsedTime)
 {
-	if (!_isActive)
-		return;
-
 	Vector2 mousePos{};
 	mousePos.x = _INPUT_IS_AXIS("MousePositionX");
 	mousePos.y = _INPUT_IS_AXIS("MousePositionY");
@@ -41,8 +38,5 @@ void TitleToHomeItem::Update(float elapsedTime)
 // ï`âÊ
 void TitleToHomeItem::Render(Scene* scene, const RenderContext& rc)
 {
-	if (!_isActive)
-		return;
-
 	_sprites["StartButton"].Render(rc, Vector2::Zero, Vector2::One);
 }

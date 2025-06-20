@@ -13,9 +13,6 @@ TitleToOnlineItem::TitleToOnlineItem(TitleMediator* titleMediator, const std::st
 // çXêVèàóù
 void TitleToOnlineItem::Update(float elapsedTime)
 {
-	if (!_isActive)
-		return;
-
 	Vector2 mousePos{};
 	mousePos.x = _INPUT_IS_AXIS("MousePositionX");
 	mousePos.y = _INPUT_IS_AXIS("MousePositionY");
@@ -40,8 +37,5 @@ void TitleToOnlineItem::Update(float elapsedTime)
 // ï`âÊ
 void TitleToOnlineItem::Render(Scene* scene, const RenderContext& rc)
 {
-	if (!_isActive)
-		return;
-
 	_sprites["Button"].Render(rc, Vector2::Zero, Vector2::One);
 }

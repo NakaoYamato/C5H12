@@ -159,46 +159,48 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 	auto resource = model.lock()->GetResource();
 	if (resource == nullptr) return;
 	// マテリアルの取得
-	std::string filename = model.lock()->GetFilename();
-	for (ModelResource::Material& modelMaterial : resource->GetAddressMaterials())
-	{
-		auto& material = _materialMap.emplace_back();
-		material.SetName(modelMaterial.name);
-		// テクスチャ情報の取得
-		for (auto& [key, textureData] : modelMaterial.textureDatas)
-		{
-			if (textureData.filename.size() > 0)
-			{
-				std::filesystem::path path(filename);
-				// textureData.filenameの先頭が"Texture"なら相対パス化
-                if (textureData.filename.find("Texture") == 0)
-                {
-					path.replace_filename(textureData.filename);
-					material.LoadTexture(key, path.c_str());
-                }
-				else
-				{
-                    // それ以外は絶対パスなのでそのまま読み込む
-					path = textureData.filename;
-                    material.LoadTexture(key, path.c_str());
-				}
-			}
-			else
-			{
-				material.MakeDummyTexture(key,
-					textureData.dummyTextureValue,
-					textureData.dummyTextureDimension);
-			}
-		}
+	_materialMap.clear();
+	_materialMap = _model.lock()->GetMaterials();
+	//std::string filename = model.lock()->GetFilename();
+	//for (ModelResource::Material& modelMaterial : resource->GetAddressMaterials())
+	//{
+	//	auto& material = _materialMap.emplace_back();
+	//	material.SetName(modelMaterial.name);
+	//	// テクスチャ情報の取得
+	//	for (auto& [key, textureData] : modelMaterial.textureDatas)
+	//	{
+	//		if (textureData.filename.size() > 0)
+	//		{
+	//			std::filesystem::path path(filename);
+	//			// textureData.filenameの先頭が"Texture"なら相対パス化
+ //               if (textureData.filename.find("Texture") == 0)
+ //               {
+	//				path.replace_filename(textureData.filename);
+	//				material.LoadTexture(key, path.c_str());
+ //               }
+	//			else
+	//			{
+ //                   // それ以外は絶対パスなのでそのまま読み込む
+	//				path = textureData.filename;
+ //                   material.LoadTexture(key, path.c_str());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			material.MakeDummyTexture(key,
+	//				textureData.dummyTextureValue,
+	//				textureData.dummyTextureDimension);
+	//		}
+	//	}
 
-		// カラー情報の取得
-		for (auto& [key, color] : modelMaterial.colors)
-		{
-			material.SetColor(key, color);
-		}
+	//	// カラー情報の取得
+	//	for (auto& [key, color] : modelMaterial.colors)
+	//	{
+	//		material.SetColor(key, color);
+	//	}
 
-		// シェーダーの初期設定
-		material.SetShaderName("PBR");
-	}
+	//	// シェーダーの初期設定
+	//	material.SetShaderName("PBR");
+	//}
 }
 

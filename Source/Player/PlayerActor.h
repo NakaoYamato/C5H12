@@ -7,7 +7,7 @@
 class PlayerActor : public Actor
 {
 public:
-	static const char* PlayerModelFilePath()
+	static const char* GetModelFilePath()
 	{
 		return "./Data/Model/Player/ARPG_Warrior.fbx";
 	}

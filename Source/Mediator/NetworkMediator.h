@@ -54,8 +54,6 @@ public:
 
     // 生成時処理
     void OnCreate() override;
-    // 開始時処理
-    void OnStart() override;
     // 更新前処理
     void OnPreUpdate(float elapsedTime) override;
     // 遅延更新処理
@@ -63,6 +61,10 @@ public:
     // GUI描画
     void OnDrawGui() override;
 
+    // サーバー開始
+    void ExecuteServer(const std::string& ipAddress);
+
+    // ログ取得
     const std::vector<std::string>& GetLogs()
     {
         // スレッドセーフ

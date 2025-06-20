@@ -1,16 +1,16 @@
-#include "ExitMenuItem.h"
+#include "MenuExitItem.h"
 
 #include "../../Library/Graphics/Graphics.h"
 #include <imgui.h>
 
-ExitMenuItem::ExitMenuItem(MenuMediator* menuMediator, const std::string& itemName)
+MenuExitItem::MenuExitItem(MenuMediator* menuMediator, const std::string& itemName)
 	: MenuItemBase(menuMediator, itemName)
 {
 	_sprites["Base"].LoadTexture(L"./Data/Texture/Menu/ExitButton.png", Sprite::CenterAlignment::LeftCenter);
 	_sprites["Base"].SetColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f)); // 半透明に設定
 }
 
-void ExitMenuItem::Update(float elapsedTime)
+void MenuExitItem::Update(float elapsedTime)
 {
 	if (_menuMediator->GetMenuInput()->IsInput(MenuInput::InputType::Select))
 	{
@@ -19,7 +19,7 @@ void ExitMenuItem::Update(float elapsedTime)
 	}
 }
 
-void ExitMenuItem::Render(Scene* scene, const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale)
+void MenuExitItem::Render(Scene* scene, const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale)
 {
 	// アイテムの描画処理を実装
 	for (auto& [name, sprite] : _sprites)
@@ -30,13 +30,18 @@ void ExitMenuItem::Render(Scene* scene, const RenderContext& rc, const Vector2& 
 		FontType::MSGothic,
 		_menuName.c_str(),
 		(*_sprites.begin()).second.GetPosition() + offset,
-		IsSelected() ? IsOpen() ? Vector4::Green : Vector4::Red : Vector4::White,
+		IsSelected() ? Vector4::Red : Vector4::White,
 		0.0f,
 		_textOffset,
 		_textSize);
+
+	if (IsOpen())
+	{
+
+	}
 }
 
-void ExitMenuItem::DrawGui()
+void MenuExitItem::DrawGui()
 {
 	// スプライトのGUI描画
 	for (auto& [name, spriteData] : _sprites) {
@@ -49,6 +54,6 @@ void ExitMenuItem::DrawGui()
 	ImGui::DragFloat2(u8"テキストサイズ", &_textSize.x, 1.0f, -1000.0f, 1000.0f);
 }
 
-void ExitMenuItem::ExecuteCommand(const std::string& command)
+void MenuExitItem::ExecuteCommand(const std::string& command)
 {
 }

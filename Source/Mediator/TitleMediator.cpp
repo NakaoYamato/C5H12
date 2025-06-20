@@ -26,7 +26,6 @@ const char* TitleMediator::ToOnlineSettingItem	= "ToOnlineSettingItem";
 // 生成時処理
 void TitleMediator::OnCreate()
 {
-
 	// タイトルアイテムの登録
 	RegisterTitleItem(std::make_shared<TitleToHomeItem>(this, ToHomeItem));
 	RegisterTitleItem(std::make_shared<TitleToOnlineItem>(this, ToOnlineItem));
@@ -63,7 +62,8 @@ void TitleMediator::OnLateUpdate(float elapsedTime)
 	// タイトルアイテムの更新
 	for (const auto& item : _titleItems)
 	{
-		item->Update(elapsedTime);
+		if (item->IsActive())
+			item->Update(elapsedTime);
 	}
 }
 // UI描画処理
@@ -72,7 +72,8 @@ void TitleMediator::OnDelayedRender(const RenderContext& rc)
 	// タイトルアイテムの描画
 	for (const auto& item : _titleItems)
 	{
-		item->Render(GetScene(), rc);
+		if (item->IsActive())
+			item->Render(GetScene(), rc);
 	}
 }
 // GUI描画
@@ -114,6 +115,30 @@ void TitleMediator::OnDrawGui()
 		ImGui::EndTabBar();
 	}
 }
+// コマンドを受信
+void TitleMediator::ReceiveCommand(const std::string& sender, const std::string& target, const std::string& command, float delayTime)
+{
+	CommandData commandData;
+	commandData.sender = sender;
+	commandData.target = target;
+	commandData.command = command;
+	commandData.delayTime = delayTime;
+	_commandList.push_back(commandData);
+}
+// タイトルアイテムの登録
+void TitleMediator::RegisterTitleItem(TitleItemRef item)
+{
+	_titleItems.push_back(item);
+}
+// タイトルアイテムの削除
+void TitleMediator::UnregisterTitleItem(TitleItemRef item)
+{
+	auto it = std::remove(_titleItems.begin(), _titleItems.end(), item);
+	if (it != _titleItems.end())
+	{
+		_titleItems.erase(it, _titleItems.end());
+	}
+}
 // コマンドを実行
 void TitleMediator::ExecuteCommand(const CommandData& command)
 {
@@ -124,7 +149,7 @@ void TitleMediator::ExecuteCommand(const CommandData& command)
 			command.target == TitleMediator::AllItem)
 		{
 			// コマンドを実行
-			item->ExecuteCommand(command.command);
+			item->ExecuteCommand(command);
 		}
 	}
 }
@@ -144,13 +169,13 @@ void TitleItemBase::DrawGui()
 	}
 }
 // コマンドを実行
-void TitleItemBase::ExecuteCommand(const std::string& command)
+void TitleItemBase::ExecuteCommand(const TitleMediator::CommandData& commandData)
 {
-	if (command == TitleMediator::ActivateCommand)
+	if (commandData.command == TitleMediator::ActivateCommand)
 	{
 		_isActive = true;
 	}
-	else if (command == TitleMediator::DeactivateCommand)
+	else if (commandData.command == TitleMediator::DeactivateCommand)
 	{
 		_isActive = false;
 	}

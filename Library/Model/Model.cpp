@@ -216,7 +216,7 @@ void Model::ReSerialize()
 }
 
 /// COMオブジェクト生成
-void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
+void Model::CreateComObject(ID3D11Device* device, const char* fbxFilename)
 {
     for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
     {
@@ -243,5 +243,45 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbx_filename)
         hr = device->CreateBuffer(&buffer_desc, &subresource_data,
             mesh.indexBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+    }
+    for (ModelResource::Material& modelMaterial : _resource->GetAddressMaterials())
+    {
+        auto& material = _materialMap.emplace_back();
+        material.SetName(modelMaterial.name);
+        // テクスチャ情報の取得
+        for (auto& [key, textureData] : modelMaterial.textureDatas)
+        {
+            if (textureData.filename.size() > 0)
+            {
+                std::filesystem::path path(fbxFilename);
+                // textureData.filenameの先頭が"Texture"なら相対パス化
+                if (textureData.filename.find("Texture") == 0)
+                {
+                    path.replace_filename(textureData.filename);
+                    material.LoadTexture(key, path.c_str());
+                }
+                else
+                {
+                    // それ以外は絶対パスなのでそのまま読み込む
+                    path = textureData.filename;
+                    material.LoadTexture(key, path.c_str());
+                }
+            }
+            else
+            {
+                material.MakeDummyTexture(key,
+                    textureData.dummyTextureValue,
+                    textureData.dummyTextureDimension);
+            }
+        }
+
+        // カラー情報の取得
+        for (auto& [key, color] : modelMaterial.colors)
+        {
+            material.SetColor(key, color);
+        }
+
+        // シェーダーの初期設定
+        material.SetShaderName("PBR");
     }
 }

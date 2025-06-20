@@ -18,15 +18,11 @@ void NetworkMediator::OnCreate()
 {
     // 音声レコーダーの初期化
     _voiceRecorder.StartRecording();
-}
-
-void NetworkMediator::OnStart()
-{
     // コールバック設定
     SetClientCollback();
 }
 
-/// 更新前処理
+// 更新前処理
 void NetworkMediator::OnPreUpdate(float elapsedTime)
 {
 	// ステートによる処理分岐
@@ -37,9 +33,18 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 		if (_isConnecting)
 		{
 			_isConnecting = false; // フラグを下ろす
-			_state = NetworkMediator::State::Connecting; // ステートを接続中に変更
-			// サーバー接続開始
-			_client.Execute(_ipAddress.c_str());
+            if (_ipAddress.empty())
+            {
+                _logs.push_back("IP address is empty.");
+                return;
+            }
+            else
+            {
+                // ステートを接続中に変更
+                _state = NetworkMediator::State::Connecting;
+                // サーバー接続開始
+                _client.Execute(_ipAddress.c_str());
+            }
 		}
         break;
     case NetworkMediator::State::Connecting:
@@ -151,6 +156,15 @@ void NetworkMediator::OnDrawGui()
 
     /// メッセージの表示
     DrawMessageGui();
+}
+
+// サーバー開始
+void NetworkMediator::ExecuteServer(const std::string& ipAddress)
+{
+    // 接続開始フラグを立てる
+	_isConnecting = true;
+    // IPアドレスを設定
+	_ipAddress = ipAddress;
 }
 
 /// プレイヤー作成

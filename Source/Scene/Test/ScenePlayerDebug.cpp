@@ -3,9 +3,6 @@
 #include "../../Library/Graphics/Graphics.h"
 
 // コンポーネント
-#include "../../Library/Component/Light/PointLightController.h"
-
-#include "../../Library/Component/ModelRenderer.h"
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Stage/StageActor.h"
@@ -66,9 +63,5 @@ void ScenePlayerDebug::OnInitialize()
     //{
     //    auto player = RegisterActor<PlayerActor>("Player" + std::to_string(i), ActorTag::Player, false);
     //}
-
-    // 予め読み込むモデル
-    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::PlayerModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::WyvernModelFilePath()));
     AddCompletionLoading(CompletionLoadingRate);
 }

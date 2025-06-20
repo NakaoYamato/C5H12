@@ -21,7 +21,7 @@ void SceneLoading::Initialize()
 
 	// ロードバーの読み込み
 	_sprites["LoadingBar"].LoadTexture(L"./Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-	_sprites["LoadingBar"].SetPosition(Vector2(950.0f, 40.0f));
+	_sprites["LoadingBar"].SetPosition(Vector2(870.0f, 40.0f));
 }
 //終了化 
 void SceneLoading::Finalize()

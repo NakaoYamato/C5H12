@@ -5,7 +5,7 @@
 void PlayerShieldActor::OnCreate()
 {
 	// ÉÇÉfÉãì«Ç›çûÇ›
-	LoadModel("./Data/Model/Player/Shield/SM_Round_Metal_Shield.fbx");
+	LoadModel(GetModelFilePath());
 
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetPosition(Vector3(0.0f, -0.2f, 0.1f));

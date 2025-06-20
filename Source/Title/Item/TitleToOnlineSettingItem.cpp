@@ -14,15 +14,10 @@ TitleToOnlineSettingItem::TitleToOnlineSettingItem(TitleMediator* titleMediator,
 // XVˆ—
 void TitleToOnlineSettingItem::Update(float elapsedTime)
 {
-	if (!_isActive)
-		return;
 }
 // •`‰æ
 void TitleToOnlineSettingItem::Render(Scene* scene, const RenderContext& rc)
 {
-	if (!_isActive)
-		return;
-
 	// ImGui‚Åˆ—
 	if (ImGui::Begin(u8"İ’è"))
 	{

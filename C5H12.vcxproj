@@ -271,7 +271,7 @@
     <ClCompile Include="Source\Mediator\InputMediator.cpp" />
     <ClCompile Include="Source\Mediator\MenuMediator.cpp" />
     <ClCompile Include="Source\Mediator\TitleMediator.cpp" />
-    <ClCompile Include="Source\Menu\Item\ExitMenuItem.cpp" />
+    <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
     <ClCompile Include="Source\Menu\Category\MenuCategory.cpp" />
     <ClCompile Include="Source\Menu\MenuInput.cpp" />
     <ClCompile Include="Source\Menu\Item\MenuItem.cpp" />
@@ -451,7 +451,7 @@
     <ClInclude Include="Source\Mediator\InputMediator.h" />
     <ClInclude Include="Source\Mediator\MenuMediator.h" />
     <ClInclude Include="Source\Mediator\TitleMediator.h" />
-    <ClInclude Include="Source\Menu\Item\ExitMenuItem.h" />
+    <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />
     <ClInclude Include="Source\Menu\Category\MenuCategory.h" />
     <ClInclude Include="Source\Menu\MenuInput.h" />
     <ClInclude Include="Source\Menu\Item\MenuItem.h" />

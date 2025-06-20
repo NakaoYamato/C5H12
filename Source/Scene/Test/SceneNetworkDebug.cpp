@@ -35,6 +35,6 @@ void SceneNetworkDebug::OnInitialize()
     }
 
     // ó\Çﬂì«Ç›çûÇﬁÉÇÉfÉã
-    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::PlayerModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::WyvernModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::GetModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::GetModelFilePath()));
 }

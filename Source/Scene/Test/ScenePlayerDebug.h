@@ -19,10 +19,6 @@ public:
 	{
 		return std::make_shared<ScenePlayerDebug>();
 	}
-
-private:
-	// 予め読み込むモデルのリスト
-	std::vector<std::shared_ptr<Model>> _preloadModels;
 };
 
 // メニューバーに登録

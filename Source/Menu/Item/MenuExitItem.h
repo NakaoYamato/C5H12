@@ -2,10 +2,10 @@
 
 #include "../../Source/Mediator/MenuMediator.h"
 
-class ExitMenuItem : public MenuItemBase
+class MenuExitItem : public MenuItemBase
 {
 public:
-	ExitMenuItem(MenuMediator* menuMediator, const std::string& itemName);
+	MenuExitItem(MenuMediator* menuMediator, const std::string& itemName);
 	void Update(float elapsedTime) override;
 	void Render(Scene* scene, const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale) override;
 	void DrawGui() override;

@@ -11,5 +11,5 @@ public:
 	// 描画
 	void Render(Scene* scene, const RenderContext& rc) override;
 	// コマンドを実行
-	void ExecuteCommand(const std::string& command);
+	void ExecuteCommand(const TitleMediator::CommandData& commandData) override;
 };

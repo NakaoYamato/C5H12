@@ -5,7 +5,16 @@
 
 #include "../../Source/Menu/Category/MenuCategory.h"
 #include "../../Source/Menu/Item/MenuItem.h"
-#include "../../Source/Menu/Item/ExitMenuItem.h"
+#include "../../Source/Menu/Item/MenuExitItem.h"
+
+#pragma region コマンド名
+const char* MenuMediator::ActivateCommand = "Activate";
+const char* MenuMediator::DeactivateCommand = "Deactivate";
+#pragma endregion
+#pragma region 対象
+const char* MenuMediator::AllCategory = "AllCategory";
+const char* MenuMediator::AllItem = "AllItem";
+#pragma endregion
 
 // 生成時処理
 void MenuMediator::OnCreate()
@@ -21,142 +30,153 @@ void MenuMediator::OnCreate()
 		auto item1Item = std::make_shared<MenuItem>(this, u8"Item1");
 		RegisterMenuItemController(category0Category->GetMenuName(), item1Item);
 	}
-	auto category1Category = std::make_shared<MenuCategory>(this, u8"Category1");
-	RegisterMenuCategory(category1Category);
+	auto systemCategory = std::make_shared<MenuCategory>(this, u8"System");
+	RegisterMenuCategory(systemCategory);
 	{
 		auto item0Item = std::make_shared<MenuItem>(this, u8"Item0");
-		RegisterMenuItemController(category1Category->GetMenuName(), item0Item);
-		auto exitItem = std::make_shared<ExitMenuItem>(this, u8"Exit");
-		RegisterMenuItemController(category1Category->GetMenuName(), exitItem);
+		RegisterMenuItemController(systemCategory->GetMenuName(), item0Item);
+		auto exitItem = std::make_shared<MenuExitItem>(this, u8"Exit");
+		RegisterMenuItemController(systemCategory->GetMenuName(), exitItem);
 	}
 }
 // 遅延更新処理
 void MenuMediator::OnLateUpdate(float elapsedTime)
 {
+	// メニュー入力がアクティブでない場合は何もしない
 	if (_menuInput.lock() == nullptr || !_menuInput.lock()->IsActive())
 		return;
-	if (_menuMap.size() <= _selectedCategoryIndex)
-		return;
 
-	// アイテムを開いていない場合、入力処理を行う
-	if (!_isItemOpen)
+	// 各カテゴリーの更新
+	for (auto& category : _categoryMap)
 	{
-		if (_menuInput.lock()->IsInput(MenuInput::InputType::Left))
-			_selectedCategoryIndex--;
-		if (_menuInput.lock()->IsInput(MenuInput::InputType::Right))
-			_selectedCategoryIndex++;
-		if (_menuInput.lock()->IsInput(MenuInput::InputType::Up))
-			_selectedItemIndex--;
-		if (_menuInput.lock()->IsInput(MenuInput::InputType::Down))
-			_selectedItemIndex++;
-
-		if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
-			_menuInput.lock()->CloseMenu();
+		if (category->IsActive())
+			category->Update(elapsedTime);
 	}
-
-	// 選択中のカテゴリーインデックスを範囲内に調整
-	if (_selectedCategoryIndex < 0)
-		_selectedCategoryIndex = static_cast<int>(_menuMap.size()) - 1;
-	if (_selectedCategoryIndex >= static_cast<int>(_menuMap.size()))
-		_selectedCategoryIndex = 0;
-	// 選択中のアイテムインデックスを範囲内に調整
-	if (_menuMap.at(_selectedCategoryIndex).second.size() > 0)
+	// 各アイテムの更新
+	for (auto& [categoryName, itemList] : _categoryItemsMap)
 	{
-		if (_selectedItemIndex < 0)
-			_selectedItemIndex = static_cast<int>(_menuMap.at(_selectedCategoryIndex).second.size()) - 1;
-		if (_selectedItemIndex >= static_cast<int>(_menuMap.at(_selectedCategoryIndex).second.size()))
-			_selectedItemIndex = 0;
-	}
-
-	// 選択中のカテゴリーのアイテムを強調表示
-	_isItemOpen = false;
-	for (auto& [categoryName, itemNameList] : _menuMap)
-	{
-		auto category = _menuCategoryMap.find(categoryName);
-		if (category == _menuCategoryMap.end())
-			continue;
-
-		// 選択中のカテゴリーを選択状態にし、選択外のカテゴリーを非選択状態にする
-		if (categoryName == _menuMap[_selectedCategoryIndex].first)
+		for (auto& item : itemList)
 		{
-			category->second->SetSelected(true);
-			category->second->Update(elapsedTime);
-
-			// 選択中のアイテムを選択状態にし、選択外のアイテムを非選択状態にする
-			for (size_t i = 0; i < itemNameList.size(); ++i)
-			{
-				auto it = _menuItemMap.find(itemNameList[i]);
-				if (it != _menuItemMap.end())
-				{
-					if (i == _selectedItemIndex)
-					{
-						it->second->SetSelected(true);
-
-						// 開いていない場合入力によって開く
-						if (!it->second->IsOpen())
-						{
-							if (_menuInput.lock()->IsInput(MenuInput::InputType::Select))
-							{
-								it->second->SetOpen(true);
-							}
-						}
-						else
-						{
-							_isItemOpen = true;
-							it->second->Update(elapsedTime);
-							if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
-							{
-								it->second->SetOpen(false);
-							}
-						}
-					}
-					else
-					{
-						it->second->SetSelected(false);
-					}
-				}
-			}
-		}
-		else
-		{
-			category->second->SetSelected(false);
+			if (item->IsActive())
+				item->Update(elapsedTime);
 		}
 	}
+
+	//if (_menuMap.size() <= _selectedCategoryIndex)
+	//	return;
+
+	//// アイテムを開いていない場合、入力処理を行う
+	//if (!_isItemOpen)
+	//{
+	//	if (_menuInput.lock()->IsInput(MenuInput::InputType::Left))
+	//		_selectedCategoryIndex--;
+	//	if (_menuInput.lock()->IsInput(MenuInput::InputType::Right))
+	//		_selectedCategoryIndex++;
+	//	if (_menuInput.lock()->IsInput(MenuInput::InputType::Up))
+	//		_selectedItemIndex--;
+	//	if (_menuInput.lock()->IsInput(MenuInput::InputType::Down))
+	//		_selectedItemIndex++;
+
+	//	if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
+	//		_menuInput.lock()->CloseMenu();
+	//}
+
+	//// 選択中のカテゴリーインデックスを範囲内に調整
+	//if (_selectedCategoryIndex < 0)
+	//	_selectedCategoryIndex = static_cast<int>(_menuMap.size()) - 1;
+	//if (_selectedCategoryIndex >= static_cast<int>(_menuMap.size()))
+	//	_selectedCategoryIndex = 0;
+	//// 選択中のアイテムインデックスを範囲内に調整
+	//if (_menuMap.at(_selectedCategoryIndex).second.size() > 0)
+	//{
+	//	if (_selectedItemIndex < 0)
+	//		_selectedItemIndex = static_cast<int>(_menuMap.at(_selectedCategoryIndex).second.size()) - 1;
+	//	if (_selectedItemIndex >= static_cast<int>(_menuMap.at(_selectedCategoryIndex).second.size()))
+	//		_selectedItemIndex = 0;
+	//}
+
+	//// 選択中のカテゴリーのアイテムを強調表示
+	//_isItemOpen = false;
+	//for (auto& [categoryName, itemNameList] : _menuMap)
+	//{
+	//	auto category = _menuCategoryMap.find(categoryName);
+	//	if (category == _menuCategoryMap.end())
+	//		continue;
+
+	//	// 選択中のカテゴリーを選択状態にし、選択外のカテゴリーを非選択状態にする
+	//	if (categoryName == _menuMap[_selectedCategoryIndex].first)
+	//	{
+	//		category->second->SetSelected(true);
+	//		category->second->Update(elapsedTime);
+
+	//		// 選択中のアイテムを選択状態にし、選択外のアイテムを非選択状態にする
+	//		for (size_t i = 0; i < itemNameList.size(); ++i)
+	//		{
+	//			auto it = _menuItemMap.find(itemNameList[i]);
+	//			if (it != _menuItemMap.end())
+	//			{
+	//				if (i == _selectedItemIndex)
+	//				{
+	//					it->second->SetSelected(true);
+
+	//					// 開いていない場合入力によって開く
+	//					if (!it->second->IsOpen())
+	//					{
+	//						if (_menuInput.lock()->IsInput(MenuInput::InputType::Select))
+	//						{
+	//							it->second->SetOpen(true);
+	//						}
+	//					}
+	//					else
+	//					{
+	//						_isItemOpen = true;
+	//						it->second->Update(elapsedTime);
+	//						if (_menuInput.lock()->IsInput(MenuInput::InputType::Back))
+	//						{
+	//							it->second->SetOpen(false);
+	//						}
+	//					}
+	//				}
+	//				else
+	//				{
+	//					it->second->SetSelected(false);
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else
+	//	{
+	//		category->second->SetSelected(false);
+	//	}
+	//}
 }
 // UI描画処理
 void MenuMediator::OnDelayedRender(const RenderContext& rc)
 {
+	// メニュー入力がアクティブでない場合は何もしない
 	if (_menuInput.lock() == nullptr || !_menuInput.lock()->IsActive())
 		return;
-	if (_menuMap.size() <= _selectedCategoryIndex)
-		return;
 
-	size_t categoryCount = _menuMap.size();
-	for (size_t i = 0; i < categoryCount; ++i)
+	// 各カテゴリーの描画
+	Vector2 categoryOffset = _categoryOffset;
+	for (auto& category : _categoryMap)
 	{
-		Vector2 categoryOffset = _categoryOffset + _categoryInterval * static_cast<float>(i);
-		Vector2 categoryOffsetScale = Vector2::One;
-		auto& [category, itemList] = _menuMap[i];
-
-		if (!category.empty())
+		if (category->IsActive())
 		{
-			// カテゴリーの描画
-			_menuCategoryMap[category]->Render(GetScene(), rc, categoryOffset, categoryOffsetScale);
-
-			// カテゴリーのアイテムを描画
-			if (i == _selectedCategoryIndex)
+			category->Render(GetScene(), rc, categoryOffset, Vector2::One);
+			categoryOffset += _categoryInterval;
+		}
+	}
+	// 各アイテムの更新
+	for (auto& [categoryName, itemList] : _categoryItemsMap)
+	{
+		Vector2 itemOffset = _itemOffset;
+		for (auto& item : itemList)
+		{
+			if (item->IsActive())
 			{
-				Vector2 itemOffset = _itemOffset;
-				Vector2 itemOffsetScale = Vector2::One;
-				for (const auto& itemName : itemList)
-				{
-					auto it = _menuItemMap.find(itemName);
-					if (it != _menuItemMap.end())
-					{
-						it->second->Render(GetScene(), rc, itemOffset, itemOffsetScale);
-						itemOffset += _itemInterval; // アイテム間隔を適用
-					}
-				}
+				item->Render(GetScene(), rc, categoryOffset, Vector2::One);
+				itemOffset += _itemInterval;
 			}
 		}
 	}
@@ -172,21 +192,17 @@ void MenuMediator::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"メニュー"))
 		{
-			ImGui::DragInt(u8"選択中カテゴリー", &_selectedCategoryIndex, 1.0f, 0, static_cast<int>(_menuMap.size() - 1));
-			ImGui::DragInt(u8"選択中アイテム", &_selectedItemIndex, 1.0f, 0, static_cast<int>(_menuMap[_selectedCategoryIndex].second.size() - 1));
-			ImGui::Checkbox(u8"アイテムを開く", &_isItemOpen);
-			ImGui::Separator();
 			ImGui::DragFloat2(u8"カテゴリーオフセット", &_categoryOffset.x, 1.0f, -1000.0f, 1000.0f);
 			ImGui::DragFloat2(u8"カテゴリー間隔", &_categoryInterval.x, 1.0f, 0.0f, 1000.0f);
 			ImGui::DragFloat2(u8"アイテムオフセット", &_itemOffset.x, 1.0f, -1000.0f, 1000.0f);
 			ImGui::DragFloat2(u8"アイテム間隔", &_itemInterval.x, 1.0f, -1000.0f, 1000.0f);
 
 			ImGui::Separator();
-			if (ImGui::TreeNode(u8"メニューカテゴリー"))
+			if (ImGui::TreeNode(u8"カテゴリー"))
 			{
-				for (const auto& [categoryName, category] : _menuCategoryMap)
+				for (auto& category : _categoryMap)
 				{
-					if (ImGui::TreeNode(categoryName.c_str()))
+					if (ImGui::TreeNode(category->GetMenuName().c_str()))
 					{
 						// カテゴリーのGUI描画
 						category->DrawGui();
@@ -195,14 +211,21 @@ void MenuMediator::OnDrawGui()
 				}
 				ImGui::TreePop();
 			}
-			if (ImGui::TreeNode(u8"メニューアイテム"))
+			if (ImGui::TreeNode(u8"アイテム"))
 			{
-				for (const auto& [itemName, item] : _menuItemMap)
+				for (const auto& [categoryName, items] : _categoryItemsMap)
 				{
-					if (ImGui::TreeNode(itemName.c_str()))
+					if (ImGui::TreeNode(categoryName.c_str()))
 					{
-						// アイテムのGUI描画
-						item->DrawGui();
+						for (auto& item : items)
+						{
+							if (ImGui::TreeNode(item->GetMenuName().c_str()))
+							{
+								// アイテムのGUI描画
+								item->DrawGui();
+								ImGui::TreePop();
+							}
+						}
 						ImGui::TreePop();
 					}
 				}
@@ -215,54 +238,47 @@ void MenuMediator::OnDrawGui()
 		ImGui::EndTabBar();
 	}
 }
-
+// コマンドを受信
+void MenuMediator::ReceiveCommand(const std::string& sender, const std::string& target, const std::string& command, float delayTime)
+{
+}
 // メニューカテゴリー登録
 void MenuMediator::RegisterMenuCategory(MenuCategoryRef category)
 {
-	_menuCategoryMap[category->GetMenuName()] = category;
-	_menuMap.push_back(MenuPair(category->GetMenuName(), std::vector<std::string>()));
+	_categoryMap.push_back(category);
 }
 // メニューカテゴリー削除
 void MenuMediator::UnregisterMenuCategory(MenuCategoryRef category)
 {
-	auto it = _menuCategoryMap.find(category->GetMenuName());
-	if (it != _menuCategoryMap.end())
+	// カテゴリーに含まれるアイテムを削除
+	_categoryItemsMap[category->GetMenuName()].clear();
+	// カテゴリー自体を削除
+	auto it = std::find(_categoryMap.begin(), _categoryMap.end(), category);
+	if (it != _categoryMap.end())
 	{
-		_menuCategoryMap.erase(it);
+		_categoryMap.erase(it);
 	}
-	// カテゴリー名を削除
-	auto menuIt = std::remove_if(_menuMap.begin(), _menuMap.end(),
-		[&category](const MenuPair& pair) { return pair.first == category->GetMenuName(); });
 }
 // メニューアイテム登録
 void MenuMediator::RegisterMenuItemController(std::string categoryName, MenuItemRef controller)
 {
-	auto it = _menuCategoryMap.find(categoryName);
-	if (it != _menuCategoryMap.end())
-	{
-		_menuItemMap[controller->GetMenuName()] = controller;
-	}
-	// カテゴリー名とアイテム名を追加
-	auto menuIt = std::find_if(_menuMap.begin(), _menuMap.end(),
-		[&categoryName](const MenuPair& pair) { return pair.first == categoryName; });
-	if (menuIt != _menuMap.end())
-	{
-		menuIt->second.push_back(controller->GetMenuName());
-	}
+	_categoryItemsMap[categoryName].push_back(controller);
 }
 // メニューアイテム削除
 void MenuMediator::UnregisterMenuItemController(std::string categoryName, MenuItemRef controller)
 {
-	auto it = _menuItemMap.find(controller->GetMenuName());
-	if (it != _menuItemMap.end())
+	auto itemMap = _categoryItemsMap.find(categoryName);
+	if (itemMap != _categoryItemsMap.end())
 	{
-		_menuItemMap.erase(it);
+		auto& itemList = itemMap->second;
+		auto it = std::remove(itemList.begin(), itemList.end(), controller);
+		if (it != itemList.end())
+		{
+			itemList.erase(it, itemList.end());
+		}
 	}
-	// アイテム名を削除
-	auto itemIt = std::find_if(_menuMap.begin(), _menuMap.end(),
-		[&categoryName](const MenuPair& pair) { return pair.first == categoryName; });
-	if (itemIt != _menuMap.end())
-	{
-		itemIt->second.erase(std::remove(itemIt->second.begin(), itemIt->second.end(), controller->GetMenuName()), itemIt->second.end());
-	}
+}
+// コマンドを実行
+void MenuMediator::ExecuteCommand(const CommandData& command)
+{
 }

@@ -6,8 +6,10 @@
 
 #include <unordered_map>
 
+#pragma region 前方宣言
 class TitleItemBase;
 using TitleItemRef = std::shared_ptr<TitleItemBase>;
+#pragma endregion
 
 class TitleMediator : public Actor
 {
@@ -29,7 +31,7 @@ public:
 	static const char* DeactivateCommand;
 #pragma endregion
 
-#pragma region アイテム名
+#pragma region 対象
 	static const char* AllItem;
 
 	static const char* ToHomeItem;
@@ -53,29 +55,11 @@ public:
 	void OnDrawGui() override;
 
 	// コマンドを受信
-	void ReceiveCommand(const std::string& sender, const std::string& target, const std::string& command, float delayTime = 0.0f)
-	{
-		CommandData commandData;
-		commandData.sender = sender;
-		commandData.target = target;
-		commandData.command = command;
-		commandData.delayTime = delayTime;
-		_commandList.push_back(commandData);
-	}
+	void ReceiveCommand(const std::string& sender, const std::string& target, const std::string& command, float delayTime = 0.0f);
 	// タイトルアイテムの登録
-	void RegisterTitleItem(TitleItemRef item)
-	{
-		_titleItems.push_back(item);
-	}
+	void RegisterTitleItem(TitleItemRef item);
 	// タイトルアイテムの削除
-	void UnregisterTitleItem(TitleItemRef item)
-	{
-		auto it = std::remove(_titleItems.begin(), _titleItems.end(), item);
-		if (it != _titleItems.end())
-		{
-			_titleItems.erase(it, _titleItems.end());
-		}
-	}
+	void UnregisterTitleItem(TitleItemRef item);
 private:
 	// コマンドを実行
 	void ExecuteCommand(const CommandData& command);
@@ -103,13 +87,12 @@ public:
 	// GUI描画
 	virtual void DrawGui();
 	// コマンドを実行
-	virtual void ExecuteCommand(const std::string& command);
+	virtual void ExecuteCommand(const TitleMediator::CommandData& commandData);
 
 	// タイトルアイテム名を取得
-	const std::string& GetName() const
-	{
-		return _titleName;
-	}
+	const std::string& GetName() const { return _titleName; }
+	// タイトルアイテムがアクティブかどうか
+	bool IsActive() const {	return _isActive; }
 protected:
 	// タイトルメディエーターへの参照
 	TitleMediator* _titleMediator = nullptr;

@@ -18,9 +18,6 @@ TitleToExitItem::TitleToExitItem(TitleMediator* titleMediator, const std::string
 // 更新処理
 void TitleToExitItem::Update(float elapsedTime)
 {
-	if (!_isActive)
-		return;
-
 	// ImGuiのウィンドウを選択していたら処理しない
 	if (ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_AnyWindow) ||
 		ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow))
@@ -49,12 +46,10 @@ void TitleToExitItem::Update(float elapsedTime)
 // 描画
 void TitleToExitItem::Render(Scene* scene, const RenderContext& rc)
 {
-	if (!_isActive)
-		return;
 	_sprites["Button"].Render(rc, Vector2::Zero, Vector2::One);
 }
 // コマンドを実行
-void TitleToExitItem::ExecuteCommand(const std::string& command)
+void TitleToExitItem::ExecuteCommand(const TitleMediator::CommandData& commandData)
 {
 	// 常にアクティブなので何もしない
 }

@@ -6,7 +6,7 @@
 void PlayerSwordActor::OnCreate()
 {
 	// ÉÇÉfÉãì«Ç›çûÇ›
-	LoadModel("./Data/Model/Player/Sword/SM_Sword_1.fbx");
+	LoadModel(GetModelFilePath());
 
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetPosition(Vector3(0.03f, 0.11f, -0.03f));

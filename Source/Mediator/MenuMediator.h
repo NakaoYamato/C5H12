@@ -8,18 +8,43 @@
 
 #include <unordered_map>
 
+#pragma region 前方宣言
 class MenuObjectBase;
 class MenuCategoryBase;
 class MenuItemBase;
 
-using MenuCategoryRef	= std::shared_ptr<MenuCategoryBase>;
-using MenuItemRef		= std::shared_ptr<MenuItemBase>;
+using MenuCategoryRef = std::shared_ptr<MenuCategoryBase>;
+using MenuItemRef = std::shared_ptr<MenuItemBase>;
+#pragma endregion
 
 class MenuMediator : public Actor
 {
 public:
 	// Key: カテゴリー名, Value: アイテム名のリスト
 	using MenuPair = std::pair<std::string, std::vector<std::string>>;
+
+	struct CommandData
+	{
+		// 送信者
+		std::string sender;
+		// 対象
+		std::string target;
+		// コマンドの種類
+		std::string command;
+		// 遅延時間（秒）
+		float delayTime = 0.0f;
+	};
+
+#pragma region コマンド名
+	static const char* ActivateCommand;
+	static const char* DeactivateCommand;
+#pragma endregion
+
+#pragma region 対象
+	static const char* AllCategory;
+	static const char* AllItem;
+
+#pragma endregion
 
 public:
 	~MenuMediator() override {}
@@ -32,9 +57,8 @@ public:
 	// GUI描画
 	void OnDrawGui() override;
 
-	// MenuCategoryControllerBaseからの命令を受信
-	//void ReceiveCommand(const MenuCategoryBase* sender, const std::string& command);
-
+	// コマンドを受信
+	void ReceiveCommand(const std::string& sender, const std::string& target, const std::string& command, float delayTime = 0.0f);
 	// メニューカテゴリー登録
 	void RegisterMenuCategory(MenuCategoryRef category);
 	// メニューカテゴリー削除
@@ -43,37 +67,21 @@ public:
 	void RegisterMenuItemController(std::string categoryName, MenuItemRef controller);
 	// メニューアイテム削除
 	void UnregisterMenuItemController(std::string categoryName, MenuItemRef controller);
+	// 入力コントローラー取得
+	std::shared_ptr<MenuInput> GetMenuInput() const { return _menuInput.lock(); }
+private:
+	// コマンドを実行
+	void ExecuteCommand(const CommandData& command);
 
-	const MenuPair* GetMenuPair(const std::string& categoryName) const
-	{
-		for (const auto& pair : _menuMap)
-		{
-			if (pair.first == categoryName)
-			{
-				return &pair;
-			}
-		}
-		return nullptr; // 失敗
-	}
-	std::shared_ptr<MenuInput> GetMenuInput() const
-	{
-		return _menuInput.lock();
-	}
 private:
 	// MenuInputへの参照
 	std::weak_ptr<MenuInput> _menuInput;
-	// カテゴリーとアイテムの関係を記録したマップ
-	std::vector<MenuPair> _menuMap;
-	// メニューカテゴリー名とコントローラーのマップ
-	std::unordered_map<std::string, MenuCategoryRef> _menuCategoryMap;
-	// メニューアイテム名とコントローラーのマップ
-	std::unordered_map<std::string, MenuItemRef> _menuItemMap;
-	// 選択中のカテゴリー番号
-	int _selectedCategoryIndex = 0;
-	// 選択中のアイテム番号
-	int _selectedItemIndex = 0;
-	// アイテムを開いているか
-	bool _isItemOpen = false;
+	// カテゴリーマップ
+	std::vector<MenuCategoryRef> _categoryMap;
+	// カテゴリーごとのアイテムマップ
+	std::unordered_map<std::string, std::vector<MenuItemRef>> _categoryItemsMap;
+	// コマンドリスト
+	std::vector<CommandData> _commandList;
 
 	// カテゴリーのオフセット
 	Vector2 _categoryOffset = Vector2(0.0f, 100.0f);
@@ -126,6 +134,16 @@ public:
 	{
 		return _menuName;
 	}
+	// アクティブ状態を取得
+	bool IsActive() const
+	{
+		return _isActive;
+	}
+	// アクティブ状態を設定
+	void SetActive(bool isActive)
+	{
+		_isActive = isActive;
+	}
 	// 選択状態を設定
 	void SetSelected(bool isSelected)
 	{
@@ -143,7 +161,8 @@ protected:
 	std::string _menuName;
 	// スプライトのマップ
 	std::unordered_map<std::string, Sprite> _sprites;
-
+	// アクティブかどうか
+	bool _isActive = true;
 	// 選択されているか
 	bool _isSelected = false;
 };

@@ -28,7 +28,7 @@ public:
 		Horn06,
 	};
 
-	static const char* WyvernModelFilePath()
+	static const char* GetModelFilePath()
 	{
 		return "./Data/Model/Dragons/Kuzar the Magnificent.fbx";
 	}

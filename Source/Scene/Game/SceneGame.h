@@ -24,6 +24,10 @@ public:
     {
         return std::make_shared<SceneGame>();
     }
+
+private:
+    // 予め読み込むモデルのリスト
+    std::vector<std::shared_ptr<Model>> _preloadModels;
 };
 
 // メニューバーに登録

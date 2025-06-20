@@ -2,6 +2,11 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
+// ネットワーク有効フラグ
+bool SceneGame::NetworkEnabled = false;
+// ネットワークアドレス
+std::string SceneGame::NetworkAddress = "127.0.0.1";
+
 void SceneGame::OnInitialize()
 {
     ID3D11Device* device = Graphics::Instance().GetDevice();

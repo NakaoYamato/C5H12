@@ -7,11 +7,8 @@
 
 NetworkMediator::~NetworkMediator()
 {
-    if (_client)
-    {
-        // サーバー終了処理
-        _client->Exit();
-    }
+    // サーバー終了処理
+    _client.Exit();
     // 音声レコーダーの停止
     _voiceRecorder.StopRecording();
 }
@@ -25,8 +22,7 @@ void NetworkMediator::OnCreate()
 
 void NetworkMediator::OnStart()
 {
-    // サーバー作成
-    _client = std::make_shared<ClientAssignment>();
+    // コールバック設定
     SetClientCollback();
 }
 
@@ -43,12 +39,12 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 			_isConnecting = false; // フラグを下ろす
 			_state = NetworkMediator::State::Connecting; // ステートを接続中に変更
 			// サーバー接続開始
-			_client->Execute(_ipAddress.c_str());
+			_client.Execute(_ipAddress.c_str());
 		}
         break;
     case NetworkMediator::State::Connecting:
         // サーバー更新
-        _client->Update();
+        _client.Update();
 
         /// 受け取ったデータを処理
         ProcessNetworkData();
@@ -69,7 +65,7 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
             enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
             enemyCreate.position = Vector3(0.0f, 10.0f, 10.0f);
             enemyCreate.health = 100.0f; // 初期体力を設定
-            _client->WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
+            _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
         }
         break;
     }
@@ -115,7 +111,7 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
                     }
                 }
                 // サーバーに送信
-                _client->WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
+                _client.WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
             }
 
             // 敵の移動情報送信
@@ -137,7 +133,7 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
                     strcpy_s(enemyMove.mainState, enemyController->GetStateName());
                     strcpy_s(enemyMove.subState, enemyController->GetSubStateName());
                     // サーバーに送信
-                    _client->WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
+                    _client.WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
                 }
             }
         }
@@ -232,7 +228,7 @@ void NetworkMediator::SendMyPlayerDamage()
 			playerApplyDamage.damage = damageable->GetLastDamage();
 			playerApplyDamage.hitPosition = damageable->GetHitPosition();
 			// サーバーに送信
-			_client->WriteRecord(Network::DataTag::PlayerApplyDamage, &playerApplyDamage, sizeof(playerApplyDamage));
+			_client.WriteRecord(Network::DataTag::PlayerApplyDamage, &playerApplyDamage, sizeof(playerApplyDamage));
 		}
 	}
 }
@@ -257,7 +253,7 @@ void NetworkMediator::SendEnemyDamage()
                 enemyApplayDamage.damage = damageable->GetLastDamage();
                 enemyApplayDamage.hitPosition = damageable->GetHitPosition();
 				// サーバーに送信
-				_client->WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
+				_client.WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
 			}
 		}
 	}
@@ -288,7 +284,7 @@ void NetworkMediator::ResetLeader()
 /// サーバーからの各種データ受け取りを行ったときのコールバック関数設定
 void NetworkMediator::SetClientCollback()
 {
-    _client->SetPlayerMessageDataCallback(
+    _client.SetPlayerMessageDataCallback(
         [this](const Network::MessageData& messageData)
         {
             // スレッドセーフ
@@ -296,7 +292,7 @@ void NetworkMediator::SetClientCollback()
 
 			_messageDatas.push_back(messageData);
         });
-    _client->SetPlayerSyncCallback(
+    _client.SetPlayerSyncCallback(
         [this](const Network::PlayerSync& playerSync)
         {
             // スレッドセーフ
@@ -306,7 +302,7 @@ void NetworkMediator::SetClientCollback()
 
             _playerSyncs.push_back(playerSync);
         });
-    _client->SetPlayerLoginCallback(
+    _client.SetPlayerLoginCallback(
         [this](const Network::PlayerLogin& playerLogin)
         {
             // スレッドセーフ
@@ -316,7 +312,7 @@ void NetworkMediator::SetClientCollback()
 
             _playerLogins.push_back(playerLogin);
         });
-    _client->SetPlayerLogoutCallback(
+    _client.SetPlayerLogoutCallback(
         [this](const Network::PlayerLogout& playerLogout)
         {
             // スレッドセーフ
@@ -326,7 +322,7 @@ void NetworkMediator::SetClientCollback()
 
             _playerLogouts.push_back(playerLogout);
         });
-	_client->SetPlayerSetLeaderCallback(
+	_client.SetPlayerSetLeaderCallback(
 		[this](const Network::PlayerSetLeader& playerSetLeader)
 		{
 			// スレッドセーフ
@@ -336,7 +332,7 @@ void NetworkMediator::SetClientCollback()
 			// 次のリーダーのユニークIDを設定
 			nextLeaderPlayerId = playerSetLeader.playerUniqueID;
 		});
-    _client->SetPlayerMoveCallback(
+    _client.SetPlayerMoveCallback(
         [this](const Network::PlayerMove& playerMove)
         {
             // スレッドセーフ
@@ -346,7 +342,7 @@ void NetworkMediator::SetClientCollback()
 
             _playerMoves.push_back(playerMove);
         });
-	_client->SetPlayerApplyDamageCallback(
+	_client.SetPlayerApplyDamageCallback(
 		[this](const Network::PlayerApplyDamage& playerApplyDamage)
 		{
 			// スレッドセーフ
@@ -354,7 +350,7 @@ void NetworkMediator::SetClientCollback()
 			_logs.push_back("PlayerApplyDamage" + std::to_string(playerApplyDamage.playerUniqueID));
 			_playerApplyDamages.push_back(playerApplyDamage);
 		});
-	_client->SetEnemyCreateCallback(
+	_client.SetEnemyCreateCallback(
 		[this](const Network::EnemyCreate& enemyCreate)
 		{
 			// スレッドセーフ
@@ -363,7 +359,7 @@ void NetworkMediator::SetClientCollback()
 
             _enemyCreates.push_back(enemyCreate);
 		});
-	_client->SetEnemySyncCallback(
+	_client.SetEnemySyncCallback(
 		[this](const Network::EnemySync& enemySync)
 		{
 			// スレッドセーフ
@@ -372,7 +368,7 @@ void NetworkMediator::SetClientCollback()
 
             _enemySyncs.push_back(enemySync);
 		});
-	_client->SetEnemyMoveCallback(
+	_client.SetEnemyMoveCallback(
 		[this](const Network::EnemyMove& enemyMove)
 		{
 			// スレッドセーフ
@@ -381,7 +377,7 @@ void NetworkMediator::SetClientCollback()
 
 			_enemyMoves.push_back(enemyMove);
 		});
-	_client->SetEnemyApplayDamageCallback(
+	_client.SetEnemyApplayDamageCallback(
 		[this](const Network::EnemyApplayDamage& enemyApplayDamage)
 		{
 			// スレッドセーフ
@@ -612,12 +608,12 @@ void NetworkMediator::DrawNetworkGui()
                     enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
                     enemyCreate.position = Vector3(0.0f, 10.0f, 10.0f);
                     enemyCreate.health = 100.0f; // 初期体力を設定
-                    _client->WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
+                    _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
                 }
             }
 
             // サーバーGUI表示
-            _client->DrawGui();
+            _client.DrawGui();
 
             ImGui::EndTabItem();
         }
@@ -672,7 +668,7 @@ void NetworkMediator::DrawMessageGui()
 				messageData.playerUniqueID = myPlayerId;
 				_message.copy(messageData.message, sizeof(messageData.message) - 1);
 				// メッセージデータを送信
-				_client->WriteRecord(Network::DataTag::Message, &messageData, sizeof(messageData));
+				_client.WriteRecord(Network::DataTag::Message, &messageData, sizeof(messageData));
 				// メッセージをクリア
 				_message.clear();
             }

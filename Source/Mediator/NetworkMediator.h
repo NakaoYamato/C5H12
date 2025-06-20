@@ -135,6 +135,8 @@ private:
     std::string _ipAddress = "127.0.0.1";
     // 接続開始フラグ
 	bool _isConnecting = false;
+    // サーバー通信
+    ClientAssignment _client;
 
     // 各プレイヤー情報
     // key : ネットワークID
@@ -144,8 +146,6 @@ private:
 	// key : ユニークID
 	// value : 敵のポインタ
 	std::unordered_map<int, EnemyData> _enemies;
-    // サーバー通信
-    std::shared_ptr<ClientAssignment> _client;
     // ユーザーが操作するプレイヤー
     int myPlayerId = -1;
 	// リーダーのユニークID

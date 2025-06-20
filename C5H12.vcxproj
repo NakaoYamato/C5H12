@@ -270,6 +270,7 @@
     <ClCompile Include="Source\Mediator\CanvasMediator.cpp" />
     <ClCompile Include="Source\Mediator\InputMediator.cpp" />
     <ClCompile Include="Source\Mediator\MenuMediator.cpp" />
+    <ClCompile Include="Source\Mediator\TitleMediator.cpp" />
     <ClCompile Include="Source\Menu\Item\ExitMenuItem.cpp" />
     <ClCompile Include="Source\Menu\Category\MenuCategory.cpp" />
     <ClCompile Include="Source\Menu\MenuInput.cpp" />
@@ -301,7 +302,11 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerStateMachine.cpp" />
-    <ClCompile Include="Source\Title\TitleUI.cpp" />
+    <ClCompile Include="Source\Title\Item\TitleToExitItem.cpp" />
+    <ClCompile Include="Source\Title\Item\TitleToHomeItem.cpp" />
+    <ClCompile Include="Source\Title\Item\TitleToOfflineItem.cpp" />
+    <ClCompile Include="Source\Title\Item\TitleToOnlineItem.cpp" />
+    <ClCompile Include="Source\Title\Item\TitleToOnlineSettingItem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Primitive.h" />
@@ -445,6 +450,7 @@
     <ClInclude Include="Source\Mediator\CanvasMediator.h" />
     <ClInclude Include="Source\Mediator\InputMediator.h" />
     <ClInclude Include="Source\Mediator\MenuMediator.h" />
+    <ClInclude Include="Source\Mediator\TitleMediator.h" />
     <ClInclude Include="Source\Menu\Item\ExitMenuItem.h" />
     <ClInclude Include="Source\Menu\Category\MenuCategory.h" />
     <ClInclude Include="Source\Menu\MenuInput.h" />
@@ -476,7 +482,11 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerStateMachine.h" />
-    <ClInclude Include="Source\Title\TitleUI.h" />
+    <ClInclude Include="Source\Title\Item\TitleToExitItem.h" />
+    <ClInclude Include="Source\Title\Item\TitleToHomeItem.h" />
+    <ClInclude Include="Source\Title\Item\TitleToOfflineItem.h" />
+    <ClInclude Include="Source\Title\Item\TitleToOnlineItem.h" />
+    <ClInclude Include="Source\Title\Item\TitleToOnlineSettingItem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

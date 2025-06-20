@@ -5,6 +5,12 @@
 class SceneGame : public Scene
 {
 public:
+    // ネットワーク有効フラグ
+	static bool NetworkEnabled;
+    // ネットワークアドレス
+	static std::string NetworkAddress;
+
+public:
     SceneGame() {}
     ~SceneGame() override {}
     // 名前取得

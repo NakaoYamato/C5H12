@@ -35,8 +35,21 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 			_isConnecting = false; // フラグを下ろす
             if (_ipAddress.empty())
             {
-                _logs.push_back("IP address is empty.");
-                return;
+                // ステートをオフラインに変更
+                _state = NetworkMediator::State::NonServer;
+                _logs.push_back("NonServerMode");
+
+                // プレイヤーの生成
+                CreatePlayer(0, myPlayerId == -1);
+				// TODO : メタAIに任せる
+				// 敵の生成
+                CreateEnemy(
+                    0,
+                    0,
+                    Network::EnemyType::Wyvern,
+                    Vector3(0.0f, 10.0f, 10.0f),
+                    0.0f,
+                    100.0f);
             }
             else
             {
@@ -58,6 +71,7 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
         if (nextLeaderPlayerId != -1)
             ResetLeader();
 
+        // TODO : メタAIに任せる
         // 自身がリーダーで、敵が存在しない場合は敵を生成
         if (myPlayerId != -1 && myPlayerId == leaderPlayerId && _enemies.empty() && !_sendEnemyCreate)
         {
@@ -73,6 +87,9 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
             _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
         }
         break;
+	case NetworkMediator::State::NonServer:
+		// オフラインモードでは何もしない
+		break;
     }
 }
 

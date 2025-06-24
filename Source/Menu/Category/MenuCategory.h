@@ -7,14 +7,10 @@ class MenuCategory : public MenuCategoryBase
 public:
 	MenuCategory(MenuMediator* menuMediator, const std::string& categoryName);
 	~MenuCategory() override = default;
-	void Update(float elapsedTime) override {}
+	void Update(float elapsedTime) override;
 	void Render(Scene* scene, const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale) override;
 	void DrawGui() override;
-	void ExecuteCommand(const std::string& command) override
-	{
-		//if (_menuMediator)
-		//	_menuMediator->ExecuteCommand(command);
-	}
+	void ExecuteCommand(const MenuMediator::CommandData& command) override;
 
 	// テキストのオフセット位置を設定
 	void SetTextOffset(const Vector2& offset) { _textOffset = offset; }

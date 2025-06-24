@@ -38,12 +38,22 @@ public:
 #pragma region コマンド名
 	static const char* ActivateCommand;
 	static const char* DeactivateCommand;
+
+	static const char* ResetCommand;
+	static const char* SelectionCommand;
+	static const char* OpenCommand;
+	static const char* CloseCommand;
+	static const char* EscapeCommand;
 #pragma endregion
 
 #pragma region 対象
-	static const char* AllCategory;
-	static const char* AllItem;
+	static const char* ToAllObject;
 
+	static const char* ToNextCategory;
+	static const char* ToBackCategory;
+	static const char* ToItem;
+	static const char* ToNextItem;
+	static const char* ToBackItem;
 #pragma endregion
 
 public:
@@ -69,6 +79,10 @@ public:
 	void UnregisterMenuItemController(std::string categoryName, MenuItemRef controller);
 	// 入力コントローラー取得
 	std::shared_ptr<MenuInput> GetMenuInput() const { return _menuInput.lock(); }
+	// 名前から番号取得
+	int FindCategoryIndex(const std::string& target);
+	// 名前から番号取得
+	int FindItemIndex(const std::string& category, const std::string& target);
 private:
 	// コマンドを実行
 	void ExecuteCommand(const CommandData& command);
@@ -82,6 +96,11 @@ private:
 	std::unordered_map<std::string, std::vector<MenuItemRef>> _categoryItemsMap;
 	// コマンドリスト
 	std::vector<CommandData> _commandList;
+
+	// 現在選択されているカテゴリー番号
+	int _currentCategoryIndex = -1;
+	// 現在選択されているアイテム番号
+	int _currentItemIndex = -1;
 
 	// カテゴリーのオフセット
 	Vector2 _categoryOffset = Vector2(0.0f, 100.0f);
@@ -123,37 +142,20 @@ public:
 	/// GUI描画
 	/// </summary>
 	virtual void DrawGui() {};
+	/// <summary>
+	/// メニューアイテムのコマンドを実行
+	/// </summary>
+	/// <param name="command"></param>
+	virtual void ExecuteCommand(const MenuMediator::CommandData& command);
 
 	// メニュー名を設定
-	void SetMenuName(const std::string& menuName)
-	{
-		_menuName = menuName;
-	}
+	void SetMenuName(const std::string& menuName){ _menuName = menuName; }
 	// メニュー名を取得
-	const std::string& GetMenuName() const
-	{
-		return _menuName;
-	}
+	const std::string& GetName() const { return _menuName; }
 	// アクティブ状態を取得
-	bool IsActive() const
-	{
-		return _isActive;
-	}
+	bool IsActive() const { return _isActive; }
 	// アクティブ状態を設定
-	void SetActive(bool isActive)
-	{
-		_isActive = isActive;
-	}
-	// 選択状態を設定
-	void SetSelected(bool isSelected)
-	{
-		_isSelected = isSelected;
-	}
-	// 選択状態を取得
-	bool IsSelected() const
-	{
-		return _isSelected;
-	}
+	void SetActive(bool isActive) { _isActive = isActive; }
 protected:
 	// MenuMediatorへの参照
 	MenuMediator* _menuMediator;
@@ -163,10 +165,12 @@ protected:
 	std::unordered_map<std::string, Sprite> _sprites;
 	// アクティブかどうか
 	bool _isActive = true;
-	// 選択されているか
-	bool _isSelected = false;
 };
 
+/// <summary>
+/// アイテムをまとめるクラス
+/// IsActivateがtrueならそれを開いている
+/// </summary>
 class MenuCategoryBase : public MenuObjectBase
 {
 public:
@@ -174,11 +178,12 @@ public:
 		MenuObjectBase(menuMediator, menuName) {
 	}
 	virtual ~MenuCategoryBase() {}
-
-	// メニューアイテムのコマンドを実行
-	virtual void ExecuteCommand(const std::string& command) = 0;
 };
 
+/// <summary>
+/// 各アイテムのクラス
+/// IsActivateがtrueならそれを開いている
+/// </summary>
 class MenuItemBase : public MenuObjectBase
 {
 public:
@@ -187,9 +192,11 @@ public:
 	}
 	virtual ~MenuItemBase() {}
 
-	// メニューアイテムのコマンドを実行
-	virtual void ExecuteCommand(const std::string& command) = 0;
-
+	/// <summary>
+	/// メニューアイテムのコマンドを実行
+	/// </summary>
+	/// <param name="command"></param>
+	void ExecuteCommand(const MenuMediator::CommandData& command) override;
 	// アイテムが開いているかどうかを取得
 	bool IsOpen() const
 	{

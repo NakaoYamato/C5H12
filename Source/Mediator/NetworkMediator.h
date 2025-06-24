@@ -23,6 +23,7 @@ public:
     {
         Awaiting,
         Connecting,
+        NonServer,
 
 		StateMax,
     };

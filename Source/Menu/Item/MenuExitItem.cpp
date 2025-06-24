@@ -12,10 +12,22 @@ MenuExitItem::MenuExitItem(MenuMediator* menuMediator, const std::string& itemNa
 
 void MenuExitItem::Update(float elapsedTime)
 {
-	if (_menuMediator->GetMenuInput()->IsInput(MenuInput::InputType::Select))
+	auto menuInput = _menuMediator->GetMenuInput();
+	if (menuInput == nullptr || !menuInput->IsActive())
+		return;
+
+	if (menuInput->IsInput(MenuInput::InputType::Select))
 	{
 		// アプリ終了
 		PostMessage(Graphics::Instance().GetHwnd(), WM_CLOSE, 0, 0);
+	}
+	else if (menuInput->IsInput(MenuInput::InputType::Back))
+	{
+		_menuMediator->ReceiveCommand(
+			_menuName,
+			MenuMediator::ToItem,
+			MenuMediator::CloseCommand,
+			0.0f);
 	}
 }
 
@@ -30,7 +42,7 @@ void MenuExitItem::Render(Scene* scene, const RenderContext& rc, const Vector2& 
 		FontType::MSGothic,
 		_menuName.c_str(),
 		(*_sprites.begin()).second.GetPosition() + offset,
-		IsSelected() ? Vector4::Red : Vector4::White,
+		IsActive() ? IsOpen() ? Vector4::Green : Vector4::Red : Vector4::White,
 		0.0f,
 		_textOffset,
 		_textSize);
@@ -54,6 +66,3 @@ void MenuExitItem::DrawGui()
 	ImGui::DragFloat2(u8"テキストサイズ", &_textSize.x, 1.0f, -1000.0f, 1000.0f);
 }
 
-void MenuExitItem::ExecuteCommand(const std::string& command)
-{
-}

@@ -9,6 +9,22 @@ MenuItem::MenuItem(MenuMediator* menuMediator, const std::string& itemName)
 	_sprites["Base"].SetColor(Vector4(1.0f, 1.0f, 1.0f, 0.5f)); // ”¼“§–¾‚Éİ’è
 }
 
+void MenuItem::Update(float elapsedTime)
+{
+	auto menuInput = _menuMediator->GetMenuInput();
+	if (menuInput == nullptr || !menuInput->IsActive())
+		return;
+
+	if (menuInput->IsInput(MenuInput::InputType::Back))
+	{
+		_menuMediator->ReceiveCommand(
+			_menuName,
+			MenuMediator::ToItem,
+			MenuMediator::CloseCommand,
+			0.0f);
+	}
+}
+
 void MenuItem::Render(Scene* scene, const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale)
 {
 	// ƒAƒCƒeƒ€‚Ì•`‰æˆ—‚ğÀ‘•
@@ -20,7 +36,7 @@ void MenuItem::Render(Scene* scene, const RenderContext& rc, const Vector2& offs
 		FontType::MSGothic,
 		_menuName.c_str(),
 		(*_sprites.begin()).second.GetPosition() + offset,
-		IsSelected() ? IsOpen() ? Vector4::Green : Vector4::Red : Vector4::White,
+		IsActive() ? IsOpen() ? Vector4::Green : Vector4::Red : Vector4::White,
 		0.0f,
 		_textOffset,
 		_textSize);

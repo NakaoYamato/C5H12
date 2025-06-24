@@ -49,4 +49,10 @@ public:
 private:
 	// ターゲット可能なオブジェクトのリスト
 	std::vector<std::weak_ptr<Targetable>> _targetables;
+
+	// ゲームクリアフラグ
+	bool _gameClear = false;
+	float _clearMovieTimer = 0.0f;
+	float _clearMovieTime = 3.0f;
+
 };

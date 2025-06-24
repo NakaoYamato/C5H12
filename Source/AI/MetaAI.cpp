@@ -1,5 +1,8 @@
 #include "MetaAI.h"
 
+#include "../../Source/Common/Damageable.h"
+#include "../../Library/Scene/SceneManager.h"
+
 #include <imgui.h>
 
 // 開始処理
@@ -10,11 +13,40 @@ void MetaAI::Start()
 // 更新処理
 void MetaAI::Update(float elapsedTime)
 {
+	for (auto& target : _targetables)
+	{
+		// 無効なターゲットはスキップ
+		if (target.lock() == nullptr)
+			continue;
+
+		if (target.lock()->GetFaction() == Targetable::Faction::Enemy)
+		{
+			auto damageable = target.lock()->GetActor()->GetComponent<Damageable>();
+			if (damageable)
+			{
+				if (damageable->IsDead())
+				{
+					_gameClear = true;
+				}
+			}
+		}
+	}
+
+	if (_gameClear)
+	{
+		_clearMovieTimer += elapsedTime;
+		if (_clearMovieTimer > _clearMovieTime)
+		{
+			// シーン遷移
+			SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Result");
+		}
+	}
 }
 
 // GUI描画
 void MetaAI::DrawGui()
 {
+	ImGui::Checkbox(u8"ゲームクリアフラグ", &_gameClear);
 	for (const auto& targetable : _targetables)
 	{
 		if (auto target = targetable.lock())

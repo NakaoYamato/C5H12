@@ -279,7 +279,10 @@
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp" />
+    <ClCompile Include="Source\Result\ResultToExitUI.cpp" />
+    <ClCompile Include="Source\Result\ResultToTitleUI.cpp" />
     <ClCompile Include="Source\Scene\Game\SceneGame.cpp" />
+    <ClCompile Include="Source\Scene\Game\SceneResult.cpp" />
     <ClCompile Include="Source\Scene\Game\SceneTitle.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneTwoBoneIKDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneLookAtDebug.cpp" />
@@ -459,7 +462,10 @@
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h" />
     <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h" />
+    <ClInclude Include="Source\Result\ResultToExitUI.h" />
+    <ClInclude Include="Source\Result\ResultToTitleUI.h" />
     <ClInclude Include="Source\Scene\Game\SceneGame.h" />
+    <ClInclude Include="Source\Scene\Game\SceneResult.h" />
     <ClInclude Include="Source\Scene\Game\SceneTitle.h" />
     <ClInclude Include="Source\Scene\Test\SceneLookAtDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneTwoBoneIKDebug.h" />

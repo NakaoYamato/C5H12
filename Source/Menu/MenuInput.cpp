@@ -16,17 +16,17 @@ void MenuInput::Update(float elapsedTime)
 
 	// ì¸óÕèÛë‘ÇçXêV
 	_inputFlags = 0;
-	if (_INPUT_IS_TRIGGERD("Up"))
+	if (_INPUT_TRIGGERD("Up"))
 		_inputFlags |= static_cast<int>(InputType::Up);
-	if (_INPUT_IS_TRIGGERD("Down"))
+	if (_INPUT_TRIGGERD("Down"))
 		_inputFlags |= static_cast<int>(InputType::Down);
-	if (_INPUT_IS_TRIGGERD("Left"))
+	if (_INPUT_TRIGGERD("Left"))
 		_inputFlags |= static_cast<int>(InputType::Left);
-	if (_INPUT_IS_TRIGGERD("Right"))
+	if (_INPUT_TRIGGERD("Right"))
 		_inputFlags |= static_cast<int>(InputType::Right);
-	if (_INPUT_IS_TRIGGERD("Select"))
+	if (_INPUT_TRIGGERD("Select"))
 		_inputFlags |= static_cast<int>(InputType::Select);
-	if (_INPUT_IS_TRIGGERD("Back"))
+	if (_INPUT_TRIGGERD("Back"))
 		_inputFlags |= static_cast<int>(InputType::Back);
 }
 // GUIï`âÊ

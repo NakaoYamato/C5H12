@@ -30,7 +30,7 @@ void PlayerInput::Update(float elapsedTime)
 
 	// 入力処理
 	{
-		Vector2 lAxisValue = Vector2(_INPUT_IS_AXIS("AxisLX"), _INPUT_IS_AXIS("AxisLY"));
+		Vector2 lAxisValue = Vector2(_INPUT_VALUE("AxisLX"), _INPUT_VALUE("AxisLY"));
 
 		// カメラの正面方向と右方向を取得
 		Vector3 frontVec = GetActor()->GetScene()->GetMainCamera()->GetFront();
@@ -52,14 +52,14 @@ void PlayerInput::Update(float elapsedTime)
 		stateMachine->SetIsMoving(movement.LengthSq() > 0.0f);
 	}
 
-	stateMachine->SetIsDash(_INPUT_IS_PRESSED("Dash"));
-	stateMachine->SetIsGuard(_INPUT_IS_PRESSED("Guard") || _INPUT_IS_AXIS("Guard") > 0.0f);
+	stateMachine->SetIsDash(_INPUT_PRESSED("Dash"));
+	stateMachine->SetIsGuard(_INPUT_PRESSED("Guard") || _INPUT_VALUE("Guard") > 0.0f);
 
-	stateMachine->SetIsAttack(_INPUT_IS_TRIGGERD("Action1"));
-	stateMachine->SetIsEvade(_INPUT_IS_TRIGGERD("Evade"));
+	stateMachine->SetIsAttack(_INPUT_TRIGGERD("Action1"));
+	stateMachine->SetIsEvade(_INPUT_TRIGGERD("Evade"));
 
 	// メニュー画面起動入力
-	if (_INPUT_IS_TRIGGERD("Menu"))
+	if (_INPUT_TRIGGERD("Menu"))
 	{
 		if (_inputMediator.lock())
 		{

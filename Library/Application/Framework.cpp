@@ -9,8 +9,9 @@
 #include "../PostProcess/PostProcessManager.h"
 #include "../Renderer/PrimitiveRenderer.h"
 #include "../JobSystem/JobSystem.h"
-
 #include "../Scene/SceneManager.h"
+
+#include <Dbt.h>
 
 // 垂直同期間隔設定
 int Framework::syncInterval = 0;
@@ -152,6 +153,14 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 #endif
         break;
     }
+    case WM_DEVICECHANGE:
+		// USBデバイスの接続・切断時の処理
+        if (Input::Instance().GetDirectInput() != nullptr)
+        {
+            // DirectInputのゲームパッド検索
+            Input::Instance().GetDirectInput()->SearchGamepad();
+        }
+        break;
     default:
         return DefWindowProc(hwnd, msg, wparam, lparam);
     }
@@ -162,7 +171,7 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 bool Framework::Initialize() const
 {
     // Graphicsの初期化
-    Graphics::Instance().Initialize(_hwnd, FULLSCREEN);
+    Graphics::Instance().Initialize(_hwnd, _hInstance, FULLSCREEN);
 
     // レンダラー作成
     PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
@@ -173,7 +182,7 @@ bool Framework::Initialize() const
         static_cast<uint32_t>(Graphics::Instance().GetScreenHeight()));
 
     // 入力監視クラスの初期化
-    Input::Instance().Initialize(_hwnd);
+    Input::Instance().Initialize(_hwnd, _hInstance);
 
     // シーンの初期化
     SceneManager::Instance().Initialize();

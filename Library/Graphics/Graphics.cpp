@@ -10,10 +10,12 @@
 #include <imgui.h>
 
 // 初期化処理
-void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
+void Graphics::Initialize(HWND hwnd, HINSTANCE instance, const BOOL FULLSCREEN)
 {
 	// ハンドル設定
 	this->_hwnd = hwnd;
+	// インスタンス設定
+	this->_hInstance = instance;
 
 	// 初期状態のウィンドウのスタイル取得
 	_windowedStyle = static_cast<DWORD>(GetWindowLongPtrW(hwnd, GWL_STYLE));

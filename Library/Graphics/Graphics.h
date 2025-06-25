@@ -31,6 +31,7 @@ public:
 
 	// 初期化処理
 	void Initialize(HWND hwnd,
+		HINSTANCE instance,
 		CONST BOOL FULLSCREEN);
 
 	// フルスクリーンの切り替え
@@ -67,6 +68,9 @@ public:
 
 	// メインウィンドウのハンドル取得
 	[[nodiscard]] HWND& GetHwnd() { return _hwnd; }
+
+	// メインウィンドウのインスタンス取得
+	[[nodiscard]] HINSTANCE& GetHInstance() { return _hInstance; }
 
 	// フルスクリーンかどうか
 	[[nodiscard]] const BOOL& GetFullscreenMode() const { return _fullscreenMode; }
@@ -139,6 +143,8 @@ private:
 
 	// メインウィンドウのハンドル
 	HWND _hwnd{};
+	// メインウィンドウのインスタンス
+	HINSTANCE _hInstance = {};
 
 	// フルスクリーンのフラグ
 	BOOL _fullscreenMode = FALSE;

@@ -54,8 +54,8 @@ void DebugCamera::Update(float elapsedTime)
         DirectX::XMStoreFloat3(&up, Up);
 
         // マウスの移動距離算出
-        float moveX = _INPUT_IS_AXIS("MouseMoveX") * _movePower;
-        float moveY = _INPUT_IS_AXIS("MouseMoveY") * _movePower;
+        float moveX = _INPUT_VALUE("MouseMoveX") * _movePower;
+        float moveY = _INPUT_VALUE("MouseMoveY") * _movePower;
         if (::GetAsyncKeyState(VK_RBUTTON) & 0x8000)
         {
             // Y軸回転
@@ -79,7 +79,7 @@ void DebugCamera::Update(float elapsedTime)
         }
         {
             // ズーム
-            _eye += _zoomPower * front * _INPUT_IS_AXIS("MouseOldWheel") / 60.0f;
+            _eye += _zoomPower * front * _INPUT_VALUE("MouseOldWheel") / 60.0f;
         }
 
         // 視点から後ろベクトル方向に一定距離離れたカメラ視点を求める

@@ -57,7 +57,7 @@ void SceneLoading::Update(float elapsedTime)
 		);
 
 		// “ü—Í‚É‚æ‚Á‚ÄƒV[ƒ“‚ğØ‚è‘Ö‚¦‚é
-		if (_INPUT_IS_TRIGGERD("Evade"))
+		if (_INPUT_TRIGGERD("Evade"))
 		{
 			SceneManager::Instance().ChangeScene(_nextScene);
 		}

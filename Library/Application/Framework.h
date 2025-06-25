@@ -25,7 +25,7 @@ public:
 	static std::wstring filePath;
 
 	// コンストラクタ
-	Framework(HWND hwnd) : _hwnd(hwnd) {}
+	Framework(HWND hwnd, HINSTANCE instance) : _hwnd(hwnd), _hInstance(instance) {}
 	~Framework() {}
 
 	// Frameworkのコピーを防ぐ
@@ -97,4 +97,6 @@ private:
 private:
 	// メインウィンドウのハンドル
 	CONST HWND _hwnd = {};
+	// メインウィンドウのインスタンス
+	CONST HINSTANCE _hInstance = {};
 };

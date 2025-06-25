@@ -46,8 +46,8 @@ void PlayerCameraController::Update(float elapsedTime)
     DirectX::XMStoreFloat3(&up, Up);
 
     // “ü—Íî•ñ‚ğæ“¾
-    float moveX = _INPUT_IS_AXIS("AxisRX") * _horizontalMovePower * elapsedTime;
-    float moveY = _INPUT_IS_AXIS("AxisRY") * _verticalMovePower * elapsedTime;
+    float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
+    float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
 
     // Y²‰ñ“]
     angle.y += moveX * 0.5f;

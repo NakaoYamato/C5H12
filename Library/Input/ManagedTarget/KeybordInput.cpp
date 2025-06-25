@@ -1,24 +1,58 @@
 #include "KeybordInput.h"
 #include <string>
 
+KeybordInput::KeybordInput()
+{
+	// 使用するキーを設定
+	_states[VK_BACK] = FALSE;
+	_states[VK_TAB] = FALSE;
+	_states[VK_CLEAR] = FALSE;
+	_states[VK_RETURN] = FALSE;
+	_states[VK_SHIFT] = FALSE;
+	_states[VK_CONTROL] = FALSE;
+	_states[VK_MENU] = FALSE;
+	_states[VK_ESCAPE] = FALSE;
+	_states[VK_SPACE] = FALSE;
+
+	_states[VK_LEFT] = FALSE;
+	_states[VK_UP] = FALSE;
+	_states[VK_RIGHT] = FALSE;
+	_states[VK_DOWN] = FALSE;
+
+	// 数字
+	for (int s = '0'; s <= '9'; s++)
+		_states[s] = FALSE;
+
+	// ローマ字
+	for (int s = 'A'; s <= 'Z'; s++)
+		_states[s] = FALSE;
+
+	// 左軸移動量
+	_values[KEYBORD_AXIS_LX] = 0.0f;
+	_values[KEYBORD_AXIS_LY] = 0.0f;
+	// 右軸移動量
+	_values[KEYBORD_AXIS_RX] = 0.0f;
+	_values[KEYBORD_AXIS_RY] = 0.0f;
+}
+
 /// 入力情報更新
-void KeybordInputObserver::Update()
+void KeybordInput::Update()
 {
 	// 登録しているすべてのキー入力を確認
-	for (auto& keystate : keystates)
+	for (auto& keystate : _states)
 	{
 		keystate.second = GetAsyncKeyState(keystate.first) & 0x8000 ? TRUE : FALSE;
 	}
 
 	// 入力量がある情報の更新
-	keyparameters[KEYBORD_AXIS_LX] = static_cast<float>(-keystates['A'] + keystates['D']);
-	keyparameters[KEYBORD_AXIS_LY] = static_cast<float>(-keystates['S'] + keystates['W']);
-	keyparameters[KEYBORD_AXIS_RX] = static_cast<float>(-keystates[VK_LEFT] + keystates[VK_RIGHT]);
-	keyparameters[KEYBORD_AXIS_RY] = static_cast<float>(-keystates[VK_DOWN] + keystates[VK_UP]);
+	_values[KEYBORD_AXIS_LX] = static_cast<float>(-_states['A'] + _states['D']);
+	_values[KEYBORD_AXIS_LY] = static_cast<float>(-_states['S'] + _states['W']);
+	_values[KEYBORD_AXIS_RX] = static_cast<float>(-_states[VK_LEFT] + _states[VK_RIGHT]);
+	_values[KEYBORD_AXIS_RY] = static_cast<float>(-_states[VK_DOWN] + _states[VK_UP]);
 }
 
 /// キーボードのキー番号から文字列に変換
-const char* KeybordInputObserver::ToString(int vKey)
+const char* KeybordInput::ToString(int vKey)
 {
 	switch (vKey)
 	{

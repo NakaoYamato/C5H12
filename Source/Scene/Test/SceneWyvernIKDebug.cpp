@@ -96,7 +96,7 @@ void SceneWyvernIKDebug::UpdateTwoBoneIK(float elapsedTime)
 	auto& endNode = model->GetPoseNodes()[endNodeIndex];
 
 	// ポールターゲットをギズモで動かす
-	if (_INPUT_IS_PRESSED("Evade"))
+	if (_INPUT_PRESSED("Evade"))
 	{
 		const DirectX::XMFLOAT4X4& view = GetMainCamera()->GetView();
 		const DirectX::XMFLOAT4X4& projection = GetMainCamera()->GetProjection();

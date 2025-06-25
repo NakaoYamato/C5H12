@@ -14,14 +14,14 @@ TitleToHomeItem::TitleToHomeItem(TitleMediator* titleMediator, const std::string
 void TitleToHomeItem::Update(float elapsedTime)
 {
 	Vector2 mousePos{};
-	mousePos.x = _INPUT_IS_AXIS("MousePositionX");
-	mousePos.y = _INPUT_IS_AXIS("MousePositionY");
+	mousePos.x = _INPUT_VALUE("MousePositionX");
+	mousePos.y = _INPUT_VALUE("MousePositionY");
 	if (_sprites["StartButton"].IsHit(mousePos))
 	{
 		// スタートボタンにマウスカーソルが当たっている場合、拡大
 		_sprites["StartButton"].SetScale(Vector2(1.1f, 1.1f));
 		// 入力処理
-		if (_INPUT_IS_RELEASED("OK"))
+		if (_INPUT_RELEASED("OK"))
 		{
 			// 次へ移行
 			_titleMediator->ReceiveCommand(this->GetName(), TitleMediator::AllItem, TitleMediator::DeactivateCommand, 0.0f);

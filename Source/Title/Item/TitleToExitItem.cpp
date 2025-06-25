@@ -24,14 +24,14 @@ void TitleToExitItem::Update(float elapsedTime)
 		return;
 
 	Vector2 mousePos{};
-	mousePos.x = _INPUT_IS_AXIS("MousePositionX");
-	mousePos.y = _INPUT_IS_AXIS("MousePositionY");
+	mousePos.x = _INPUT_VALUE("MousePositionX");
+	mousePos.y = _INPUT_VALUE("MousePositionY");
 	if (_sprites["Button"].IsHit(mousePos))
 	{
 		// マウスカーソルが当たっている場合、拡大
 		_sprites["Button"].SetScale(Vector2(1.1f, 1.1f));
 		// 入力処理
-		if (_INPUT_IS_RELEASED("OK"))
+		if (_INPUT_RELEASED("OK"))
 		{
 			// アプリ終了
 			PostMessage(Graphics::Instance().GetHwnd(), WM_CLOSE, 0, 0);

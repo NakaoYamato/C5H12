@@ -233,13 +233,9 @@ void CollisionManager::Update()
 			bool isOldContact = std::find(
 				lastContactActors[data.myLayer].begin(), lastContactActors[data.myLayer].end(),
 				data.other) != lastContactActors[data.myLayer].end();
-			// 今回のフレームで接触していたか確認
-			bool isCurrentContact = std::find(
-				currentContactActors[data.myLayer].begin(), currentContactActors[data.myLayer].end(),
-				data.other) != currentContactActors[data.myLayer].end();
 
 			// 前フレームで接触していないなら
-			if (!isOldContact && !isCurrentContact)
+			if (!isOldContact)
 				actor->ContactEnter(data);
 			else
 				actor->Contact(data);
@@ -527,9 +523,6 @@ void CollisionManager::PushCollisionData(
 	const Vector3& hitNormal,
 	float penetration)
 {
-	// スレッドセーフ
-	std::lock_guard<std::mutex> lock(_mutex);
-
 	// 接触情報を保存
 	CollisionData dataA;
 	dataA.myLayer = layerA;
@@ -540,7 +533,6 @@ void CollisionManager::PushCollisionData(
 	dataA.hitPosition = hitPosition;
 	dataA.hitNormal = hitNormal;
 	dataA.penetration = penetration;
-	collisionDataMap[actorA].push_back(dataA);
 	CollisionData dataB;
 	dataB.myLayer = layerB;
 	dataB.isTrigger = isTriggerB;
@@ -550,7 +542,12 @@ void CollisionManager::PushCollisionData(
 	dataB.hitPosition = hitPosition;
 	dataB.hitNormal = -hitNormal;
 	dataB.penetration = penetration;
-	collisionDataMap[actorB].push_back(dataB);
+	{
+		// スレッドセーフ
+		std::lock_guard<std::mutex> lock(_mutex);
+		collisionDataMap[actorA].push_back(dataA);
+		collisionDataMap[actorB].push_back(dataB);
+	}
 }
 
 void CollisionManager::SphereVsSphere(

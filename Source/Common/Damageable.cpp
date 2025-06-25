@@ -24,6 +24,8 @@ bool Damageable::AddDamage(float damage, Vector3 hitPosition)
 {
 	// 無敵状態ならダメージを受けない
 	if (_invisibleTimer > 0.0f) return false;
+	// 今フレームでダメージを受けている場合はダメージを受けない
+	if (_lastDamage > 0.0f) return false;
 	// ダメージを受ける判定のコールバック関数がfalseを返した場合はダメージを受けない
 	if (_takeableDamageCallback)
 		if (_takeableDamageCallback(damage, hitPosition) == false) return false;

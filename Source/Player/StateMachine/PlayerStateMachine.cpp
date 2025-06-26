@@ -86,6 +86,11 @@ void PlayerStateMachine::Execute(float elapsedTime)
 // Gui描画
 void PlayerStateMachine::DrawGui()
 {
+    if (ImGui::Button(u8"死亡"))
+    {
+		SetIsDead(true);
+    }
+
     if (ImGui::TreeNode(u8"ステートマシン"))
     {
         std::string str = u8"現在のステート:";

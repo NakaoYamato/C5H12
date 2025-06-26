@@ -77,10 +77,6 @@ void PlayerController::DelayedRender(const RenderContext& rc)
 // GUI•`‰æ
 void PlayerController::DrawGui()
 {
-	if (ImGui::Button(u8"€–S"))
-	{
-		//_stateMachine->SetIsDead(true);
-	}
 	ImGui::DragFloat(u8"UŒ‚—Í",		&_ATK, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat(u8"Šî–{UŒ‚—Í", &_BaseATK, 0.1f, 0.0f, 100.0f);
 	ImGui::DragFloat(u8"UŒ‚”{—¦",	&_ATKFactor, 0.01f, 0.0f, 10.0f);

@@ -55,7 +55,6 @@ void EnemyController::OnContactEnter(CollisionData& collisionData)
 		}
 	}
 }
-
 // 指定位置との角度
 float EnemyController::GetAngleToTarget(const Vector3& target)
 {
@@ -65,7 +64,6 @@ float EnemyController::GetAngleToTarget(const Vector3& target)
 	auto front = GetActor()->GetTransform().GetAxisZ().Normalize();
 	return std::acosf(front.Dot(targetDirection));
 }
-
 // ターゲット方向を向く
 void EnemyController::LookAtTarget(const Vector3& target, float elapsedTime, float rotationSpeed)
 {

@@ -13,7 +13,7 @@ void PlayerInput::Start()
 		_inputMediator.lock()->ReceiveCommand(nullptr, InputMediator::CommandType::StartGame, "");
 	}
 
-    _playerController = GetActor()->GetComponent<PlayerController>();
+	_stateController = GetActor()->GetComponent<StateController>();
 }
 
 // XVˆ—
@@ -23,10 +23,11 @@ void PlayerInput::Update(float elapsedTime)
 	if (!IsActive())
 		return;
 
-    auto player = _playerController.lock();
-	if (player == nullptr)
+	if (_stateController.lock() == nullptr)
 		return;
-	auto stateMachine = player->GetPlayerStateMachine();
+	auto stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(_stateController.lock()->GetStateMachine());
+	if (stateMachine == nullptr)
+		return;
 
 	// “ü—Íˆ—
 	{

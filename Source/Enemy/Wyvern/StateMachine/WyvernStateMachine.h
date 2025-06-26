@@ -20,7 +20,7 @@ public:
 	void DrawGui();
 
 #pragma region アクセサ
-	StateMachine<WyvernStateMachine>& GetStateMachine() { return _stateMachine; }
+	StateMachineBase<WyvernStateMachine>& GetStateMachine() { return _stateMachine; }
 	WyvernEnemyController* GetWyvern() { return _wyvern; }
 	Animator* GetAnimator() { return _animator; }
 	Damageable* GetDamageable() { return _damageable; }
@@ -44,7 +44,7 @@ public:
 
 
 private:
-	StateMachine<WyvernStateMachine> _stateMachine;
+	StateMachineBase<WyvernStateMachine> _stateMachine;
 	WyvernEnemyController* _wyvern = nullptr;
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;

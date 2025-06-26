@@ -1,7 +1,7 @@
 #pragma once
 
 #include <variant>
-#include "../../Library/Algorithm/StateMachine/StateMachine.h"
+#include "../../Library/Component/StateController.h"
 #include "../../Library/Math/Vector.h"
 
 // 前方宣言
@@ -14,16 +14,18 @@ namespace Network
 }
 
 // プレイヤーの状態遷移を管理するクラス
-class PlayerStateMachine
+class PlayerStateMachine : public StateMachine
 {
 public:
     PlayerStateMachine(PlayerController* player, Animator* animator);
     ~PlayerStateMachine() {}
 
+	// 開始処理
+	void Start();
 	// 実行処理
-	void Execute(float elapsedTime);
+	void Execute(float elapsedTime) override;
 	// Gui描画
-	void DrawGui();
+	void DrawGui() override;
 
 	/// <summary>
 	/// 移動方向に向く
@@ -32,15 +34,16 @@ public:
 	/// <param name="rotationSpeed">回転速度</param>
 	void RotationMovement(float elapsedTime, float rotationSpeed = 1.0f);
 #pragma region アクセサ
-	StateMachine<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
+	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
 	PlayerController* GetPlayer() { return _player; }
 	Animator* GetAnimator() { return _animator; }
+	void ChangeState(const char* mainStateName, const char* subStateName) override {}
 	// ステート変更
 	void ChangeState(Network::PlayerMainStates mainStateName, Network::PlayerSubStates subStateName);
     // ステート名取得
-	const char* GetStateName();
+	const char* GetStateName() override;
     // サブステート名取得
-	const char* GetSubStateName();
+	const char* GetSubStateName() override;
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 	const Vector2& GetMovement() const { return _movement; }
@@ -60,7 +63,7 @@ public:
 	void SetIsDead(bool isDead)					{ _isDead = isDead; }
 #pragma endregion
 private:
-	StateMachine<PlayerStateMachine> _stateMachine;
+	StateMachineBase<PlayerStateMachine> _stateMachine;
 	PlayerController* _player = nullptr;
 	Animator* _animator = nullptr;
 

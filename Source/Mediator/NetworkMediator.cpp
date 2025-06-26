@@ -115,23 +115,20 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
 			_sendTimer -= _sendInterval; // タイマーリセット
 
             // プレイヤーの移動情報送信
-            auto playerActor = _players[myPlayerId].playerActor.lock();
+			auto& playerData = _players[myPlayerId];
+            auto playerActor = playerData.actor.lock();
             if (playerActor)
             {
                 Network::PlayerMove playerMove{};
                 playerMove.playerUniqueID = myPlayerId;
                 playerMove.position = playerActor->GetTransform().GetPosition();
-                auto playerController = _players[myPlayerId].playerController.lock();
-                if (playerController)
-                {
-                    auto stateMachine = playerController->GetPlayerStateMachine();
-                    if (stateMachine)
-                    {
-                        playerMove.movement = stateMachine->GetMovement();
-                        playerMove.state = Network::GetPlayerMainStateFromName(stateMachine->GetStateName());
-                        playerMove.subState = Network::GetPlayerSubStateFromName(stateMachine->GetSubStateName());
-                    }
-                }
+                auto state = playerData.state.lock();
+				if (state && state->IsSetup())
+				{
+                    playerMove.movement = state->GetMovement();
+                    playerMove.state = Network::GetPlayerMainStateFromName(state->GetStateName());
+                    playerMove.subState = Network::GetPlayerSubStateFromName(state->GetSubStateName());
+				}
                 // サーバーに送信
                 _client.WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
             }
@@ -188,8 +185,8 @@ void NetworkMediator::ExecuteServer(const std::string& ipAddress)
 std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControlled)
 {
     // 要素チェック
-    if (_players.find(id) != _players.end() && _players[id].playerActor.lock())
-        return _players[id].playerActor;
+    if (_players.find(id) != _players.end() && _players[id].actor.lock())
+        return _players[id].actor;
 
     auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
 
@@ -200,9 +197,10 @@ std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControll
     }
 
     // コンテナに登録
-    _players[id].playerActor = player;
-	_players[id].playerController = player->GetComponent<PlayerController>();
+    _players[id].actor = player;
 	_players[id].damageable = player->GetComponent<Damageable>();
+	auto stateController    = player->GetComponent<StateController>();
+	_players[id].state      = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
     return player;
 }
 
@@ -249,7 +247,7 @@ void NetworkMediator::SendMyPlayerDamage()
 	std::lock_guard<std::mutex> lock(_mutex);
 	// 自身のプレイヤーのダメージを送信
     auto myPlayer = _players[myPlayerId];
-	if (myPlayer.playerActor.lock())
+	if (myPlayer.actor.lock())
 	{
 		auto damageable = myPlayer.damageable.lock();
 		if (damageable && damageable->GetLastDamage() > 0.0f)
@@ -440,7 +438,7 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& sync : _playerSyncs)
     {
         // プレイヤー情報を更新
-		auto playerActor = _players[sync.playerUniqueID].playerActor.lock();
+		auto playerActor = _players[sync.playerUniqueID].actor.lock();
         if (!playerActor)
         {
             // プレイヤーが存在しないなら作成
@@ -457,7 +455,7 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& logout : _playerLogouts)
     {
         // プレイヤー情報を削除
-        auto playerActor = _players[logout.playerUniqueID].playerActor.lock();
+        auto playerActor = _players[logout.playerUniqueID].actor.lock();
         if (playerActor)
         {
             // プレイヤー削除
@@ -473,7 +471,8 @@ void NetworkMediator::ProcessNetworkData()
 	for (auto& move : _playerMoves)
 	{
 		// プレイヤー情報を更新
-        auto playerActor = _players[move.playerUniqueID].playerActor.lock();
+        auto& playerData = _players[move.playerUniqueID];
+        auto playerActor = playerData.actor.lock();
         if (playerActor == nullptr)
             continue;
 
@@ -483,15 +482,11 @@ void NetworkMediator::ProcessNetworkData()
 
         playerActor->GetTransform().SetPosition(move.position);
         // プレイヤーの状態を更新
-        auto playerController = _players[move.playerUniqueID].playerController.lock();
-        if (playerController != nullptr)
+        auto state = playerData.state.lock();
+        if (state && state->IsSetup())
         {
-            auto stateMachine = playerController->GetPlayerStateMachine();
-            if (stateMachine != nullptr)
-            {
-				stateMachine->SetMovement(move.movement);
-                stateMachine->ChangeState(move.state, move.subState);
-            }
+            state->SetMovement(move.movement);
+            state->ChangeState(move.state, move.subState);
         }
 	}
     _playerMoves.clear();
@@ -506,7 +501,7 @@ void NetworkMediator::ProcessNetworkData()
 			continue;
 
 		// プレイヤー情報を更新
-        auto playerActor = _players[playerApplyDamage.playerUniqueID].playerActor.lock();
+        auto playerActor = _players[playerApplyDamage.playerUniqueID].actor.lock();
 		if (playerActor)
 		{
             auto damageable = _players[playerApplyDamage.playerUniqueID].damageable.lock();

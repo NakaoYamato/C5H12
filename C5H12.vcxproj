@@ -162,6 +162,7 @@
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
+    <ClCompile Include="Library\Component\StateController.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
@@ -334,6 +335,7 @@
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
+    <ClInclude Include="Library\Component\StateController.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />

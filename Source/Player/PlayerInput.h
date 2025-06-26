@@ -2,6 +2,7 @@
 
 #include "../../Source/Mediator/InputMediator.h"
 #include "PlayerController.h"
+#include "StateMachine/PlayerStateMachine.h"
 
 class PlayerInput : public InputControllerBase
 {
@@ -21,5 +22,5 @@ public:
 	// ‘¼‚ÌInputController‚©‚ç–½—ß‚ğóM
 	void ReceiveCommandFromOther(InputMediator::CommandType commandType, const std::string& command) override;
 private:
-	std::weak_ptr<PlayerController> _playerController;
+	std::weak_ptr<StateController> _stateController;
 };

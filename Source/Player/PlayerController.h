@@ -32,8 +32,6 @@ public:
 	void OnContactEnter(CollisionData& collisionData) override;
 
 #pragma region アクセサ
-	// ステートマシン取得
-    PlayerStateMachine* GetPlayerStateMachine() { return _stateMachine.get(); }
 	// キャラクターコントローラー取得
 	std::shared_ptr<CharactorController> GetCharactorController()
 	{
@@ -52,11 +50,7 @@ public:
 #pragma endregion
 
 private:
-#pragma region ステート制御
-	// ステートマシン
-	std::unique_ptr<PlayerStateMachine> _stateMachine;
-#pragma endregion
-
+	std::weak_ptr<PlayerStateMachine> _stateMachine;
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<EffekseerEffectController> _hitEffectController;

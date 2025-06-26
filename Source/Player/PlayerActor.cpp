@@ -8,6 +8,7 @@
 
 #include "../../Source/Common/Targetable.h"
 #include "PlayerInput.h"
+#include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
 
 #include "Weapon/Warrior/PlayerShieldActor.h"
@@ -30,6 +31,7 @@ void PlayerActor::OnCreate()
 	auto animator				= this->AddComponent<Animator>();
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
+	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(playerController.get(), animator.get()));
 	auto effekseerController	= this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加

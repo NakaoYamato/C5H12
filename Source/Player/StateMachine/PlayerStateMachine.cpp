@@ -22,7 +22,11 @@ PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* anima
 	_stateMachine.RegisterState(std::make_shared<PlayerGuardHitState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerGuardBreakState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerDeathState>(this));
+}
 
+// 開始処理
+void PlayerStateMachine::Start()
+{
     // 初期ステート設定
     _stateMachine.ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
 }
@@ -245,6 +249,11 @@ namespace SprintSubState
             else if (!owner->GetAnimator()->IsPlayAnimation())
             {
                 owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::Sprinting));
+            }
+            // ダッシュ解除で移動に遷移
+            else if (!owner->IsDash())
+            {
+                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
             }
         }
         void OnExit() override

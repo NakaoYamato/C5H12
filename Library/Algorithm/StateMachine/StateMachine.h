@@ -3,15 +3,15 @@
 #include "StateBase.h"
 
 template<typename T>
-class StateMachine
+class StateMachineBase
 {
 public:
 	using HierarchicalStateMap = std::unordered_map<std::string, std::shared_ptr<HierarchicalStateBase<T>>>;
 public:
 	// コンストラクタ
-	StateMachine() {}
+	StateMachineBase() {}
 	// デストラクタ
-	virtual ~StateMachine()
+	virtual ~StateMachineBase()
 	{
 		stateMap.clear();
 	}

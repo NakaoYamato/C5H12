@@ -8,8 +8,9 @@
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Audio/VoiceRecorder/VoiceRecorder.h"
+#include "../../Library/Component/StateController.h"
+
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Player/PlayerController.h"
 #include "../../Source/Enemy/EnemyActor.h"
 #include "../../Source/Enemy/EnemyController.h"
 
@@ -33,9 +34,9 @@ public:
 	/// </summary>
 	struct PlayerData
 	{
-		std::weak_ptr<PlayerActor>      playerActor;
-		std::weak_ptr<PlayerController> playerController;
-        std::weak_ptr<Damageable>		damageable;
+		std::weak_ptr<PlayerActor>          actor;
+        std::weak_ptr<PlayerStateMachine>	state;
+        std::weak_ptr<Damageable>		    damageable;
 	};
 
     /// <summary>

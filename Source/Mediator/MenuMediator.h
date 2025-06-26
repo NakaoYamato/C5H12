@@ -87,6 +87,15 @@ private:
 	// コマンドを実行
 	void ExecuteCommand(const CommandData& command);
 
+#pragma region 各コマンド処理
+	// リセットコマンド
+	void ExecuteResetCommand(const CommandData& command);
+	// 選択コマンド
+	void ExecuteSelectionCommand(const CommandData& command);
+#pragma endregion
+	// 先頭のアイテムを選択
+	void ExecuteFirstItemSelection(const std::string& category);
+
 private:
 	// MenuInputへの参照
 	std::weak_ptr<MenuInput> _menuInput;

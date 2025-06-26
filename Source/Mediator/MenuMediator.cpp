@@ -279,57 +279,7 @@ void MenuMediator::ExecuteCommand(const CommandData& command)
 #pragma region リセットコマンド
 	if (command.command == ResetCommand)
 	{
-		// すべてのカテゴリーを非アクティブ化
-		for (auto& category : _categoryMap)
-		{
-			category->ExecuteCommand({
-				command.sender,
-				category->GetName(),
-				DeactivateCommand,
-				0.0f
-				});
-		}
-		// すべてのアイテムを非アクティブ化
-		for (auto& [categoryName, itemList] : _categoryItemsMap)
-		{
-			for (auto& item : itemList)
-			{
-				item->ExecuteCommand({
-					command.sender,
-					item->GetName(),
-					DeactivateCommand,
-					0.0f
-					});
-			}
-		}
-
-		// 先頭のカテゴリーをアクティブ化
-		_categoryMap[0]->ExecuteCommand({
-			command.sender,
-			_categoryMap[0]->GetName(),
-			ActivateCommand,
-			0.0f
-			});
-		// 起動しているカテゴリーを更新
-		_currentCategoryIndex = 0;
-
-		// 先頭のアイテムを選択
-		auto& itemMap = _categoryItemsMap[_categoryMap[0]->GetName()];
-		if (!itemMap.empty())
-		{
-			itemMap[0]->ExecuteCommand({
-				command.sender,
-				itemMap[0]->GetName(),
-				ActivateCommand,
-				0.0f
-				});
-			// 起動しているアイテムを更新
-			_currentItemIndex = 0;
-		}
-		else
-		{
-			_currentItemIndex = -1; // アイテムがない場合は-1に設定
-		}
+		ExecuteResetCommand(command);
 	}
 #pragma endregion
 
@@ -337,112 +287,7 @@ void MenuMediator::ExecuteCommand(const CommandData& command)
 #pragma region 選択コマンド
 	if (command.command == SelectionCommand)
 	{
-		// 次のカテゴリーを選択
-		if (command.target == ToNextCategory)
-		{
-			// 次のカテゴリーのインデックスを計算
-			int mapSize = static_cast<int>(_categoryMap.size());
-			int nextIndex = (_currentCategoryIndex + 1) % mapSize;
-			// 選択中のカテゴリーを非選択状態にする
-			_categoryMap[_currentCategoryIndex]->ExecuteCommand({
-				command.sender,
-				command.sender,
-				DeactivateCommand,
-				0.0f
-				});
-			// 次のカテゴリーを選択状態にする
-			_categoryMap[nextIndex]->ExecuteCommand({
-				command.sender,
-				_categoryMap[nextIndex]->GetName(),
-				ActivateCommand,
-				0.0f
-				});
-			// 起動しているカテゴリーを更新
-			_currentCategoryIndex = nextIndex;
-		}
-		// 前のカテゴリーを選択
-		else if (command.target == ToBackCategory)
-		{
-			// 前のカテゴリーのインデックスを計算
-			int mapSize = static_cast<int>(_categoryMap.size());
-			int nextIndex = (_currentCategoryIndex + mapSize - 1) % mapSize;
-			// 選択中のカテゴリーを非選択状態にする
-			_categoryMap[_currentCategoryIndex]->ExecuteCommand({
-				command.sender,
-				command.sender,
-				DeactivateCommand,
-				0.0f
-				});
-			// 前のカテゴリーを選択状態にする
-			_categoryMap[nextIndex]->ExecuteCommand({
-				command.sender,
-				_categoryMap[nextIndex]->GetName(),
-				ActivateCommand,
-				0.0f
-				});
-			// 起動しているカテゴリーを更新
-			_currentCategoryIndex = nextIndex;
-		}
-		// 次のアイテムを対象
-		else if (command.target == ToNextItem)
-		{
-			// 起動しているカテゴリーが空の場合は何もしない
-			if (_currentCategoryIndex == -1)
-				return;
-			// アイテムマップ取得
-			auto& category = _categoryMap.at(_currentCategoryIndex);
-			auto& itemMap = _categoryItemsMap[category->GetName()];
-
-			// 次のアイテムのインデックスを計算
-			int mapSize = static_cast<int>(itemMap.size());
-			int nextIndex = (_currentItemIndex + 1) % mapSize;
-			// 選択中のアイテムを非選択状態にする
-			itemMap.at(_currentItemIndex)->ExecuteCommand({
-				command.sender,
-				itemMap.at(_currentItemIndex)->GetName(),
-				DeactivateCommand,
-				0.0f
-				});
-			// 次のアイテムを選択状態にする
-			itemMap.at(nextIndex)->ExecuteCommand({
-				command.sender,
-				itemMap.at(nextIndex)->GetName(),
-				ActivateCommand,
-				0.0f
-				});
-			// 起動しているアイテムを更新
-			_currentItemIndex = nextIndex;
-		}
-		// 前のアイテムを対象
-		else if (command.target == ToBackItem)
-		{
-			// 起動しているカテゴリーが空の場合は何もしない
-			if (_currentCategoryIndex == -1)
-				return;
-			// アイテムマップ取得
-			auto& category = _categoryMap.at(_currentCategoryIndex);
-			auto& itemMap = _categoryItemsMap[category->GetName()];
-
-			// 前のアイテムのインデックスを計算
-			int mapSize = static_cast<int>(itemMap.size());
-			int nextIndex = (_currentItemIndex + mapSize - 1) % mapSize;
-			// 選択中のアイテムを非選択状態にする
-			itemMap.at(_currentItemIndex)->ExecuteCommand({
-				command.sender,
-				itemMap.at(_currentItemIndex)->GetName(),
-				DeactivateCommand,
-				0.0f
-				});
-			// 前のアイテムを選択状態にする
-			itemMap.at(nextIndex)->ExecuteCommand({
-				command.sender,
-				itemMap.at(nextIndex)->GetName(),
-				ActivateCommand,
-				0.0f
-				});
-			// 起動しているアイテムを更新
-			_currentItemIndex = nextIndex;
-		}
+		ExecuteSelectionCommand(command);
 	}
 #pragma endregion
 
@@ -484,6 +329,180 @@ void MenuMediator::ExecuteCommand(const CommandData& command)
 	}
 #pragma endregion
 
+}
+// リセットコマンド
+void MenuMediator::ExecuteResetCommand(const CommandData& command)
+{
+	// すべてのカテゴリーを非アクティブ化
+	for (auto& category : _categoryMap)
+	{
+		category->ExecuteCommand({
+			command.sender,
+			category->GetName(),
+			DeactivateCommand,
+			0.0f
+			});
+	}
+	// 先頭のカテゴリーをアクティブ化
+	_categoryMap[0]->ExecuteCommand({
+		command.sender,
+		_categoryMap[0]->GetName(),
+		ActivateCommand,
+		0.0f
+		});
+	// 起動しているカテゴリーを更新
+	_currentCategoryIndex = 0;
+
+	// 先頭のアイテムを選択
+	ExecuteFirstItemSelection(_categoryMap[0]->GetName());
+}
+// 選択コマンド
+void MenuMediator::ExecuteSelectionCommand(const CommandData& command)
+{
+	// 次のカテゴリーを選択
+	if (command.target == ToNextCategory)
+	{
+		// 次のカテゴリーのインデックスを計算
+		int mapSize = static_cast<int>(_categoryMap.size());
+		int nextIndex = (_currentCategoryIndex + 1) % mapSize;
+		// 選択中のカテゴリーを非選択状態にする
+		_categoryMap[_currentCategoryIndex]->ExecuteCommand({
+			command.sender,
+			command.sender,
+			DeactivateCommand,
+			0.0f
+			});
+		// 次のカテゴリーを選択状態にする
+		_categoryMap[nextIndex]->ExecuteCommand({
+			command.sender,
+			_categoryMap[nextIndex]->GetName(),
+			ActivateCommand,
+			0.0f
+			});
+		// 起動しているカテゴリーを更新
+		_currentCategoryIndex = nextIndex;
+		// 先頭のアイテムを選択
+		ExecuteFirstItemSelection(_categoryMap[nextIndex]->GetName());
+	}
+	// 前のカテゴリーを選択
+	else if (command.target == ToBackCategory)
+	{
+		// 前のカテゴリーのインデックスを計算
+		int mapSize = static_cast<int>(_categoryMap.size());
+		int nextIndex = (_currentCategoryIndex + mapSize - 1) % mapSize;
+		// 選択中のカテゴリーを非選択状態にする
+		_categoryMap[_currentCategoryIndex]->ExecuteCommand({
+			command.sender,
+			command.sender,
+			DeactivateCommand,
+			0.0f
+			});
+		// 前のカテゴリーを選択状態にする
+		_categoryMap[nextIndex]->ExecuteCommand({
+			command.sender,
+			_categoryMap[nextIndex]->GetName(),
+			ActivateCommand,
+			0.0f
+			});
+		// 起動しているカテゴリーを更新
+		_currentCategoryIndex = nextIndex;
+		// 先頭のアイテムを選択
+		ExecuteFirstItemSelection(_categoryMap[nextIndex]->GetName());
+	}
+	// 次のアイテムを対象
+	else if (command.target == ToNextItem)
+	{
+		// 起動しているカテゴリーが空の場合は何もしない
+		if (_currentCategoryIndex == -1)
+			return;
+		// アイテムマップ取得
+		auto& category = _categoryMap.at(_currentCategoryIndex);
+		auto& itemMap = _categoryItemsMap[category->GetName()];
+
+		// 次のアイテムのインデックスを計算
+		int mapSize = static_cast<int>(itemMap.size());
+		int nextIndex = (_currentItemIndex + 1) % mapSize;
+		// 選択中のアイテムを非選択状態にする
+		itemMap.at(_currentItemIndex)->ExecuteCommand({
+			command.sender,
+			itemMap.at(_currentItemIndex)->GetName(),
+			DeactivateCommand,
+			0.0f
+			});
+		// 次のアイテムを選択状態にする
+		itemMap.at(nextIndex)->ExecuteCommand({
+			command.sender,
+			itemMap.at(nextIndex)->GetName(),
+			ActivateCommand,
+			0.0f
+			});
+		// 起動しているアイテムを更新
+		_currentItemIndex = nextIndex;
+	}
+	// 前のアイテムを対象
+	else if (command.target == ToBackItem)
+	{
+		// 起動しているカテゴリーが空の場合は何もしない
+		if (_currentCategoryIndex == -1)
+			return;
+		// アイテムマップ取得
+		auto& category = _categoryMap.at(_currentCategoryIndex);
+		auto& itemMap = _categoryItemsMap[category->GetName()];
+
+		// 前のアイテムのインデックスを計算
+		int mapSize = static_cast<int>(itemMap.size());
+		int nextIndex = (_currentItemIndex + mapSize - 1) % mapSize;
+		// 選択中のアイテムを非選択状態にする
+		itemMap.at(_currentItemIndex)->ExecuteCommand({
+			command.sender,
+			itemMap.at(_currentItemIndex)->GetName(),
+			DeactivateCommand,
+			0.0f
+			});
+		// 前のアイテムを選択状態にする
+		itemMap.at(nextIndex)->ExecuteCommand({
+			command.sender,
+			itemMap.at(nextIndex)->GetName(),
+			ActivateCommand,
+			0.0f
+			});
+		// 起動しているアイテムを更新
+		_currentItemIndex = nextIndex;
+	}
+}
+// 先頭のアイテムを選択
+void MenuMediator::ExecuteFirstItemSelection(const std::string& category)
+{
+	// すべてのアイテムを非アクティブ化
+	for (auto& [categoryName, itemList] : _categoryItemsMap)
+	{
+		for (auto& item : itemList)
+		{
+			item->ExecuteCommand({
+				category,
+				item->GetName(),
+				DeactivateCommand,
+				0.0f
+				});
+		}
+	}
+	// 先頭のアイテムを選択
+	auto& itemMap = _categoryItemsMap[category];
+	if (!itemMap.empty())
+	{
+		itemMap[0]->ExecuteCommand({
+			category,
+			itemMap[0]->GetName(),
+			ActivateCommand,
+			0.0f
+			});
+		// 起動しているアイテムを更新
+		_currentItemIndex = 0;
+	}
+	else
+	{
+		_currentItemIndex = -1; // アイテムがない場合は-1に設定
+	}
 }
 /// メニューアイテムのコマンドを実行
 void MenuObjectBase::ExecuteCommand(const MenuMediator::CommandData& command)

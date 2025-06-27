@@ -13,6 +13,23 @@ void EnemyController::Start()
 	_animator = GetActor()->GetComponent<Animator>();
 	_hitEffectController = GetActor()->GetComponent<EffekseerEffectController>();
 	_damageable = GetActor()->GetComponent<Damageable>();
+
+	if (_damageable.lock())
+	{
+		// ダメージを受けた時の処理
+		_damageable.lock()->SetOnDamageCallback(
+			[&](float damage, Vector3 hitPosition) -> void
+			{
+				_damageCounter += damage;
+				if (_damageCounter >= _damageReactionRate)
+				{
+					// ダメージリアクションを行う
+					SetPerformDamageReaction(true);
+					_damageCounter = 0.0f;
+				}
+			}
+		);
+	}
 }
 // 更新処理
 void EnemyController::Update(float elapsedTime)
@@ -36,6 +53,8 @@ void EnemyController::DelayedRender(const RenderContext& rc)
 void EnemyController::DrawGui()
 {
 	ImGui::Text(u8"体力 : %f", _damageable.lock()->GetHealth());
+	ImGui::DragFloat(u8"ダメージリアクションの間隔", &_damageReactionRate, 0.1f, 0.0f, 10.0f, "%.1f s");
+	ImGui::Text(u8"ダメージカウンター: %.1f", _damageCounter);
 }
 // 接触時処理
 void EnemyController::OnContactEnter(CollisionData& collisionData)

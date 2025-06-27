@@ -1,36 +1,44 @@
 #pragma once
 
 #include <variant>
-#include "../../Library/Algorithm/StateMachine/StateMachine.h"
+#include "../../Library/Component/StateController.h"
 #include "../../Library/Math/Vector.h"
 #include "../../Source/Common/Damageable.h"
 
 // 前方宣言
-class WyvernEnemyController;
+class EnemyController;
+class WyvernController;
 class Animator;
 
-class WyvernStateMachine
+class WyvernStateMachine : public StateMachine
 {
 public:
-	WyvernStateMachine(WyvernEnemyController* wyvern, Animator* animator, Damageable* damageable);
+	WyvernStateMachine(
+		EnemyController* enemy,
+		WyvernController* wyvern,
+		Animator* animator,
+		Damageable* damageable);
 	~WyvernStateMachine() {}
+	// 開始処理
+	void Start() override;
 	// 実行処理
-	void Execute(float elapsedTime);
+	void Execute(float elapsedTime) override;
 	// Gui描画
-	void DrawGui();
+	void DrawGui() override;
 
 #pragma region アクセサ
-	StateMachineBase<WyvernStateMachine>& GetStateMachine() { return _stateMachine; }
-	WyvernEnemyController* GetWyvern() { return _wyvern; }
+	// ステート変更
+	void ChangeState(const char* mainStateName, const char* subStateName) override;
+	// ステート名取得
+	const char* GetStateName() override;
+	// サブステート名取得
+	const char* GetSubStateName() override;
+
+	StateMachineBase<WyvernStateMachine>& GetBase() { return _stateMachine; }
+	EnemyController* GetEnemy() { return _enemy; }
+	WyvernController* GetWyvern() { return _wyvern; }
 	Animator* GetAnimator() { return _animator; }
 	Damageable* GetDamageable() { return _damageable; }
-
-	// ステート変更
-	void ChangeState(const char* mainStateName, const char* subStateName);
-	// ステート名取得
-	const char* GetStateName();
-	// サブステート名取得
-	const char* GetSubStateName();
 
 	// ブレス攻撃のグローバル位置を設定
 	const Vector3& GetBreathGlobalPosition() const { return _breathGlobalPosition; }
@@ -45,7 +53,8 @@ public:
 
 private:
 	StateMachineBase<WyvernStateMachine> _stateMachine;
-	WyvernEnemyController* _wyvern = nullptr;
+	EnemyController* _enemy = nullptr;
+	WyvernController* _wyvern = nullptr;
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
 

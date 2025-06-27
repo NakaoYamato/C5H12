@@ -1,6 +1,6 @@
 #include "WyvernBehaviorTree.h"
 
-#include "../WyvernEnemyController.h"
+#include "../WyvernController.h"
 #include "WyvernActionDerived.h"
 #include "WyvernJudgmentDerived.h"
 
@@ -8,8 +8,10 @@
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 #include <imgui.h>
 
-WyvernBehaviorTree::WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* animator) :
-	_wyvern(wyvern),
+WyvernBehaviorTree::WyvernBehaviorTree(
+	WyvernStateMachine* stateMachine,
+	Animator* animator) :
+	_stateMachine(stateMachine),
 	_animator(animator)
 {
 	_behaviorData = std::make_unique<BehaviorData<WyvernBehaviorTree>>();

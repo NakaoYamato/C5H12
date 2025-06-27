@@ -298,7 +298,6 @@
     <ClCompile Include="Source\Camera\PlayerCameraController.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyEnemyController.cpp" />
     <ClCompile Include="Source\Enemy\EnemyController.cpp" />
-    <ClCompile Include="Source\Enemy\Wyvern\WyvernEnemyController.cpp" />
     <ClCompile Include="Source\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Stage\GrassController.cpp" />
@@ -484,7 +483,6 @@
     <ClInclude Include="Source\Camera\PlayerCameraController.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyEnemyController.h" />
     <ClInclude Include="Source\Enemy\EnemyController.h" />
-    <ClInclude Include="Source\Enemy\Wyvern\WyvernEnemyController.h" />
     <ClInclude Include="Source\Player\PlayerController.h" />
     <ClInclude Include="Source\Player\PlayerInput.h" />
     <ClInclude Include="Source\Stage\GrassController.h" />

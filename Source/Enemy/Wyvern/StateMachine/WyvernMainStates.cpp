@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Scene/Scene.h"
-#include "../WyvernEnemyController.h"
+#include "../WyvernController.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
@@ -23,7 +23,7 @@ void WyvernIdleState::OnExecute(float elapsedTime)
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 再び待機状態
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 
@@ -52,17 +52,17 @@ namespace WyvernToTargetSubStates
 		}
 		void OnExecute(float elapsedTime) override 
 		{
-			auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+			auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 			float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
 			// ターゲット方向に回転
-			owner->GetWyvern()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+			owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
 			// ターゲット方向に向いているか判定
-			float angleToTarget = owner->GetWyvern()->GetAngleToTarget(targetPosition);
+			float angleToTarget = owner->GetEnemy()->GetAngleToTarget(targetPosition);
 			if (angleToTarget < owner->GetWyvern()->GetLookAtRadian())
 			{
 				// ターゲットに到達したら待機状態へ遷移
-				owner->GetStateMachine().ChangeState("Idle");
+				owner->GetBase().ChangeState("Idle");
 			}
 		}
 		void OnExit() override {}
@@ -89,18 +89,18 @@ namespace WyvernToTargetSubStates
 			if (!owner->GetAnimator()->IsPlayAnimation())
 			{
 				// 歩行状態に移行
-				owner->GetStateMachine().ChangeSubState("WalkForward");
+				owner->GetBase().ChangeSubState("WalkForward");
 			}
 		}
 		void OnExit() override
 		{
 			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			int rootNodeIndex = owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 			// 回転量の差分を求める
 			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 
 			// 回転量をアクターに反映する
-			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
 			// ルートの行列の都合上z値をyに設定
 			angle.y = q.ToRollPitchYaw().z;
@@ -132,18 +132,18 @@ namespace WyvernToTargetSubStates
 			if (!owner->GetAnimator()->IsPlayAnimation())
 			{
 				// 歩行状態に移行
-				owner->GetStateMachine().ChangeSubState("WalkForward");
+				owner->GetBase().ChangeSubState("WalkForward");
 			}
 		}
 		void OnExit() override
 		{
 			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			int rootNodeIndex = owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 			// 回転量の差分を求める
 			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 
 			// 回転量をアクターに反映する
-			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
 			// ルートの行列の都合上z値をyに設定
 			angle.y = q.ToRollPitchYaw().z;
@@ -175,17 +175,17 @@ namespace WyvernToTargetSubStates
 			if (!owner->GetAnimator()->IsPlayAnimation())
 			{
 				// 歩行状態に移行
-				owner->GetStateMachine().ChangeSubState("WalkForward");
+				owner->GetBase().ChangeSubState("WalkForward");
 			}
 		}
 		void OnExit() override
 		{
 			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			int rootNodeIndex = owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 			// 回転量の差分を求める
 			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 			// 回転量をアクターに反映する
-			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
 			// ルートの行列の都合上z値をyに設定
 			angle.y = q.ToRollPitchYaw().z;
@@ -216,17 +216,17 @@ namespace WyvernToTargetSubStates
 			if (!owner->GetAnimator()->IsPlayAnimation())
 			{
 				// 歩行状態に移行
-				owner->GetStateMachine().ChangeSubState("WalkForward");
+				owner->GetBase().ChangeSubState("WalkForward");
 			}
 		}
 		void OnExit() override
 		{
 			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-			int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+			int rootNodeIndex = owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 			// 回転量の差分を求める
 			Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 			// 回転量をアクターに反映する
-			auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
 			// ルートの行列の都合上z値をyに設定
 			angle.y = q.ToRollPitchYaw().z;
@@ -248,10 +248,10 @@ WyvernToTargetState::WyvernToTargetState(WyvernStateMachine* owner) :
 }
 void WyvernToTargetState::OnEnter()
 {
-	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
-	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	auto front = owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	// ターゲット位置からどの方向に回転するか判定
 	float crossY = front.Cross(targetDirection).y;
 	float dot = front.Dot(targetDirection);
@@ -312,10 +312,10 @@ void WyvernToTargetState::OnExit()
 void WyvernBiteAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
-	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
-	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	auto front = owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	float crossY = front.Cross(targetDirection).y;
 	if (crossY > 0.0f)
 	{
@@ -345,7 +345,7 @@ void WyvernBiteAttackState::OnExecute(float elapsedTime)
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 void WyvernBiteAttackState::OnExit()
@@ -358,10 +358,10 @@ void WyvernBiteAttackState::OnExit()
 void WyvernClawAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
-	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
-	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	auto front = owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	float crossY = front.Cross(targetDirection).y;
 	if (crossY > 0.0f)
 	{
@@ -373,10 +373,10 @@ void WyvernClawAttackState::OnEnter()
 			0.5f);
 
 		// 手のノードインデックスを取得
-		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		auto model = owner->GetEnemy()->GetActor()->GetModel().lock();
 		_handNodeIndex = model->GetNodeIndex("R Hand");
 		// ターゲット位置設定
-		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&owner->GetWyvern()->GetActor()->GetTransform().GetMatrix());
+		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
 		Vector3 targetLocalPosition = targetPosition.TransformCoord(DirectX::XMMatrixInverse(nullptr, WyvernTransform));
 		targetLocalPosition = targetLocalPosition.ClampSphere(Vector3(
 			TargetLocalLimitPositionX,
@@ -396,10 +396,10 @@ void WyvernClawAttackState::OnEnter()
 			0.5f);
 
 		// 手のノードインデックスを取得
-		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		auto model = owner->GetEnemy()->GetActor()->GetModel().lock();
 		_handNodeIndex = model->GetNodeIndex("L Hand");
 		// ターゲット位置設定
-		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&owner->GetWyvern()->GetActor()->GetTransform().GetMatrix());
+		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
 		Vector3 targetLocalPosition = targetPosition.TransformCoord(DirectX::XMMatrixInverse(nullptr, WyvernTransform));
 		targetLocalPosition = targetLocalPosition.ClampSphere(Vector3(
 			-TargetLocalLimitPositionX,
@@ -430,7 +430,7 @@ void WyvernClawAttackState::OnExecute(float elapsedTime)
 	if (_lerpTimer > 0.0f)
 	{
 		// モデル情報、手のノード情報、手の親ノード情報を取得
-		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		auto model = owner->GetEnemy()->GetActor()->GetModel().lock();
 		auto& handNode = model->GetPoseNodes()[_handNodeIndex];
 		auto armNord = handNode.parent;
 
@@ -475,7 +475,7 @@ void WyvernClawAttackState::OnExecute(float elapsedTime)
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 void WyvernClawAttackState::OnExit()
@@ -487,10 +487,10 @@ void WyvernClawAttackState::OnExit()
 void WyvernTailAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
-	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
-	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	auto front = owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	float crossY = front.Cross(targetDirection).y;
 	if (crossY > 0.0f)
 	{
@@ -520,7 +520,7 @@ void WyvernTailAttackState::OnExecute(float elapsedTime)
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 void WyvernTailAttackState::OnExit()
@@ -542,16 +542,16 @@ void WyvernBackStepState::OnEnter()
 }
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
-	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
 	// ターゲット方向に回転
-	owner->GetWyvern()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+	owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
 	// アニメーションが終了しているとき
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 void WyvernBackStepState::OnExit()
@@ -577,7 +577,7 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 	if (owner->CallFireBreathEvent())
 	{
 		// ブレスの位置をモデルの頭に設定
-		auto model = owner->GetWyvern()->GetActor()->GetModel().lock();
+		auto model = owner->GetEnemy()->GetActor()->GetModel().lock();
 		int nodeIndex = model->GetNodeIndex("Head");
 		// ブレスの生成
 		if (!_fireBreathActor.lock())
@@ -585,15 +585,15 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 			// ブレスのグローバル座標取得
 			Vector3 breathGlobalPosition = owner->GetBreathGlobalPosition();
 			// ブレスを生成
-			_fireBreathActor = owner->GetWyvern()->GetActor()->GetScene()->RegisterActor<WyvernBreathActor>(
-				std::string(owner->GetWyvern()->GetActor()->GetName()) + "BreathEffect",
+			_fireBreathActor = owner->GetEnemy()->GetActor()->GetScene()->RegisterActor<WyvernBreathActor>(
+				std::string(owner->GetEnemy()->GetActor()->GetName()) + "BreathEffect",
 				ActorTag::Enemy);
 			// 親を設定
-			_fireBreathActor.lock()->GetBreathController()->SetBreathActor(owner->GetWyvern()->GetActor());
-			Vector3 position = Vector3::TransformCoord(breathGlobalPosition, owner->GetWyvern()->GetActor()->GetTransform().GetMatrix());
+			_fireBreathActor.lock()->GetBreathController()->SetBreathActor(owner->GetEnemy()->GetActor());
+			Vector3 position = Vector3::TransformCoord(breathGlobalPosition, owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
 			_fireBreathActor.lock()->GetTransform().SetPosition(position);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			_fireBreathActor.lock()->GetTransform().SetAngleY(owner->GetWyvern()->GetActor()->GetTransform().GetRotation().y);
+			_fireBreathActor.lock()->GetTransform().SetAngleY(owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
 		}
 	}
 	// ブレスの削除
@@ -606,7 +606,7 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 void WyvernBreathAttackState::OnExit()
@@ -634,12 +634,12 @@ void WyvernPursuitState::OnEnter()
 }
 void WyvernPursuitState::OnExecute(float elapsedTime)
 {
-	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = owner->GetWyvern()->GetTargetPosition();
+	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position);
 	float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
 	// ターゲット方向に回転
-	owner->GetWyvern()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+	owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 	
 	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
 	float nearAttackRange = owner->GetWyvern()->GetNearAttackRange();
@@ -647,7 +647,7 @@ void WyvernPursuitState::OnExecute(float elapsedTime)
 	{
 		// 攻撃範囲内なら完了
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 		return;
 	}
 }
@@ -660,10 +660,10 @@ void WyvernPursuitState::OnExit()
 #pragma region ダメージを受ける
 void WyvernDamageState::OnEnter()
 {
-	auto& position = owner->GetWyvern()->GetActor()->GetTransform().GetPosition();
+	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	auto hitPosition = owner->GetDamageable()->GetHitPosition();
 	auto targetDirection = (hitPosition - position).Normalize();
-	auto front = owner->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	auto front = owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	// 被弾位置から右前、右、右後ろ、左前、左、左後ろのどこに被弾するか判定
 	float crossY = front.Cross(targetDirection).y;
 	float dot = front.Dot(targetDirection);
@@ -754,7 +754,7 @@ void WyvernDamageState::OnExecute(float elapsedTime)
 	if (!owner->GetAnimator()->IsPlayAnimation())
 	{
 		// 待機状態へ遷移
-		owner->GetStateMachine().ChangeState("Idle");
+		owner->GetBase().ChangeState("Idle");
 	}
 }
 void WyvernDamageState::OnExit()
@@ -762,12 +762,12 @@ void WyvernDamageState::OnExit()
 	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
 	if (_applyRotation)
 	{
-		int rootNodeIndex = owner->GetWyvern()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+		int rootNodeIndex = owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 		// 回転量の差分を求める
 		Quaternion q = owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 
 		// 回転量をアクターに反映する
-		auto& transform = owner->GetWyvern()->GetActor()->GetTransform();
+		auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 		Vector3 angle{};
 		// ルートの行列の都合上z値をyに設定
 		angle.y = q.ToRollPitchYaw().z;

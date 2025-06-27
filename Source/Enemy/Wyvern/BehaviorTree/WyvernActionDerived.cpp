@@ -1,16 +1,15 @@
 #include "WyvernActionDerived.h"
 
 #include "WyvernBehaviorTree.h"
-#include "../WyvernEnemyController.h"
 
 void WyvernCompleteStateAction::Enter()
 {
-	_owner->GetWyvern()->GetState()->GetStateMachine().ChangeState(_startStateName);
+	_owner->GetStateMachine()->GetBase().ChangeState(_startStateName);
 }
 
 BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 {
-	std::string currentStateName = _owner->GetWyvern()->GetState()->GetStateName();
+	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
 
 	if (currentStateName == _endStateName)
 	{
@@ -23,14 +22,14 @@ BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 
 void WyvernOneAction::Enter()
 {
-	std::string currentStateName = _owner->GetWyvern()->GetState()->GetStateName();
+	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
 	// 現在のステートが実行するステートと同じなら何もしない
 	if (currentStateName == _stateName)
 	{
 		return;
 	}
 	// ステートを変更
-	_owner->GetWyvern()->GetState()->GetStateMachine().ChangeState(_stateName);
+	_owner->GetStateMachine()->GetBase().ChangeState(_stateName);
 }
 
 BehaviorActionState WyvernOneAction::Execute(float elapsedTime)

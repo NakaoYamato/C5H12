@@ -1,12 +1,17 @@
 #include "WyvernStateMachine.h"
 
 #include "../../Library/Component/Animator.h"
-#include "../WyvernEnemyController.h"
+#include "../WyvernController.h"
 #include "WyvernMainStates.h"
 
 #include <imgui.h>
 
-WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* animator, Damageable* damageable) :
+WyvernStateMachine::WyvernStateMachine(
+	EnemyController* enemy,
+	WyvernController* wyvern,
+	Animator* animator,
+	Damageable* damageable) :
+	_enemy(enemy),
 	_wyvern(wyvern),
 	_animator(animator),
 	_damageable(damageable)
@@ -26,7 +31,11 @@ WyvernStateMachine::WyvernStateMachine(WyvernEnemyController* wyvern, Animator* 
 
 	_stateMachine.RegisterState(std::make_unique<WyvernDamageState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernDeathState>(this));
+}
 
+// äJénèàóù
+void WyvernStateMachine::Start()
+{
 	// èâä˙ÉXÉeÅ[ÉgÇê›íË
 	_stateMachine.ChangeState("Idle");
 }
@@ -70,11 +79,11 @@ void WyvernStateMachine::Execute(float elapsedTime)
     }
 
     // îÌíeèàóù
-	if (_wyvern->IsPerformDamageReaction())
+	if (_enemy->IsPerformDamageReaction())
 	{
         // îÌíeëJà⁄
 		_stateMachine.ChangeState("Damage");
-        _wyvern->SetPerformDamageReaction(false);
+		_enemy->SetPerformDamageReaction(false);
 	}
 
     // éÄñSèàóù

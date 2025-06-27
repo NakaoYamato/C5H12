@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 
-#include "WyvernEnemyController.h"
+#include "../EnemyController.h"
 #include "BehaviorTree/WyvernBehaviorTree.h"
 #include "../../Source/AI/MetaAI.h"
 
@@ -23,7 +23,7 @@ public:
 	// ビヘイビアツリーを実行するかどうか
 	void SetIsExecuteBehaviorTree(bool execute) { _isExecuteBehavior = execute; }
 private:
-	std::weak_ptr<WyvernEnemyController> _wyvernEnemyController;
+	std::weak_ptr<EnemyController> _enemyController;
 	// ビヘイビアツリー
 	std::unique_ptr<WyvernBehaviorTree> _behaviorTree;
 	// ビヘイビアツリーを実行するかどうか

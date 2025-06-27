@@ -4,7 +4,6 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
-#include "WyvernEnemyController.h"
 #include "WyvernBehaviorController.h"
 
 class WyvernActor : public EnemyActor
@@ -60,7 +59,6 @@ private:
 private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
-	std::weak_ptr<WyvernEnemyController> _wyvernEnemyController;
 	std::weak_ptr<WyvernBehaviorController> _wyvernBehaviorController;
 
 	TextureType _textureType = TextureType::Lava;

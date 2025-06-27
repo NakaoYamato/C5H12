@@ -7,6 +7,9 @@
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
+#include "../EnemyController.h"
+#include "WyvernController.h"
+#include "StateMachine/WyvernStateMachine.h"
 #include "../../Source/Player/PlayerController.h"
 
 #include <imgui.h>
@@ -28,8 +31,15 @@ void WyvernActor::OnCreate()
 	// コンポーネント追加
 	_modelRenderer				= AddComponent<ModelRenderer>();
 	_animator					= AddComponent<Animator>();
-	_wyvernEnemyController		= AddComponent<WyvernEnemyController>();
 	_wyvernBehaviorController	= AddComponent<WyvernBehaviorController>();
+	auto enemyController		= AddComponent<EnemyController>();
+	auto wyvernController		= AddComponent<WyvernController>();
+	auto stateController		= AddComponent<StateController>(
+		std::make_shared<WyvernStateMachine>(
+			enemyController.get(),
+			wyvernController.get(),
+			_animator.lock().get(),
+			_damageable.lock().get()));
 	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加

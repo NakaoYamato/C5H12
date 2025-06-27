@@ -46,8 +46,9 @@ public:
     {
         // ŠÇ—‚µ‚Ä‚¢‚éƒvƒŒƒCƒ„[‚ÌID
         int                             controllerID = -1;
-        std::weak_ptr<EnemyActor>       enemyActor;
-        std::weak_ptr<EnemyController>  enemyController;
+        std::weak_ptr<EnemyActor>       actor;
+        std::weak_ptr<EnemyController>  controller;
+        std::weak_ptr<StateMachine>	    state;
         std::weak_ptr<Damageable>		damageable;
     };
 

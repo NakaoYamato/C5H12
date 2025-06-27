@@ -31,15 +31,6 @@ public:
 	virtual void LookAtTarget(const Vector3& target, float elapsedTime, float rotationSpeed);
 #pragma region アクセサ
 	std::shared_ptr<CharactorController> GetCharactorController() const { return _charactorController.lock(); }
-#pragma region ネットワーク用
-    // ステート変更
-    virtual void ChangeState(const char* mainStateName, const char* subStateName) {};
-    // ステート名取得
-    virtual const char* GetStateName() { return ""; }
-    // サブステート名取得
-    virtual const char* GetSubStateName() { return ""; }
-#pragma endregion
-
 	const Vector3& GetTargetPosition() const { return _targetPosition; }
 
 	float GetATK() const { return _ATK; }
@@ -67,4 +58,8 @@ protected:
 
     // ダメージリアクションを行うかどうか
 	bool _performDamageReaction = false;
+    // ダメージリアクションの間隔
+    float _damageReactionRate = 2.0f;
+    // ダメージカウンター
+    float _damageCounter = 0.0f;
 };

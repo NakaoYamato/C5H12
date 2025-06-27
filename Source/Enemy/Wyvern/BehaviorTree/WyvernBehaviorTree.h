@@ -2,15 +2,14 @@
 
 #include <memory>
 #include "../../Library/Algorithm/BehaviorTree/BehaviorTree.h"
-
-// 前方宣言
-class WyvernEnemyController;
-class Animator;
+#include "../StateMachine/WyvernStateMachine.h"
 
 class WyvernBehaviorTree
 {
 public:
-	WyvernBehaviorTree(WyvernEnemyController* wyvern, Animator* animator);
+	WyvernBehaviorTree(
+		WyvernStateMachine* stateMachine,
+		Animator* animator);
 
 	// ビヘイビアツリー実行
 	void Execute(float elapsedTime);
@@ -18,7 +17,8 @@ public:
 	void DrawGui();
 
 #pragma region アクセサ
-	WyvernEnemyController* GetWyvern() { return _wyvern; }
+	// ステートマシンを取得
+	WyvernStateMachine* GetStateMachine() { return _stateMachine; }
 	Animator* GetAnimator() { return _animator; }
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
@@ -36,7 +36,7 @@ private:
 	// 起動中のビヘイビアノード
 	BehaviorNodeBase<WyvernBehaviorTree>* _activeNode = nullptr;
 
-	WyvernEnemyController*	_wyvern = nullptr;
+	WyvernStateMachine* _stateMachine = nullptr;
 	Animator*				_animator = nullptr;
 	bool					_callCancelEvent = false;
 };

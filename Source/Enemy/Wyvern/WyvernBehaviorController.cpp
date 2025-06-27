@@ -2,19 +2,24 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Component/Animator.h"
+#include "StateMachine/WyvernStateMachine.h"
 
 #include <imgui.h>
 
 // 開始処理
 void WyvernBehaviorController::Start()
 {
-	_wyvernEnemyController = GetActor()->GetComponent<WyvernEnemyController>();
+	_enemyController = GetActor()->GetComponent<EnemyController>();
 	auto animator = GetActor()->GetComponent<Animator>();
-	assert(_wyvernEnemyController.lock());
+	auto stateController = GetActor()->GetComponent<StateController>();
+	assert(_enemyController.lock());
 	assert(animator);
+	assert(stateController);
+
+	auto wyvernStateMachine = std::dynamic_pointer_cast<WyvernStateMachine>(stateController->GetStateMachine());
 
 	// ビヘイビアツリー作成
-	_behaviorTree = std::make_unique<WyvernBehaviorTree>(_wyvernEnemyController.lock().get(), animator.get());
+	_behaviorTree = std::make_unique<WyvernBehaviorTree>(wyvernStateMachine.get(), animator.get());
 
 	// メタAIを取得
 	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
@@ -38,7 +43,7 @@ void WyvernBehaviorController::Update(float elapsedTime)
 				100.0f);
 			if (targetable)
 			{
-				_wyvernEnemyController.lock()->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
+				_enemyController.lock()->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
 			}
 		}
 

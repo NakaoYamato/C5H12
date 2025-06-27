@@ -140,17 +140,18 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
                 if (enemyData.controllerID != myPlayerId)
                     continue;
 
-                auto enemyActor = enemyData.enemyActor.lock();
-                auto enemyController = enemyData.enemyController.lock();
-                if (enemyActor && enemyController)
+                auto actor = enemyData.actor.lock();
+                auto controller = enemyData.controller.lock();
+				auto state = enemyData.state.lock();
+                if (actor && controller && state)
                 {
                     Network::EnemyMove enemyMove{};
                     enemyMove.uniqueID = uniqueID;
-                    enemyMove.position = enemyActor->GetTransform().GetPosition();
-                    enemyMove.angleY = enemyActor->GetTransform().GetRotation().y;
-                    enemyMove.target = enemyController->GetTargetPosition();
-                    strcpy_s(enemyMove.mainState, enemyController->GetStateName());
-                    strcpy_s(enemyMove.subState, enemyController->GetSubStateName());
+                    enemyMove.position = actor->GetTransform().GetPosition();
+                    enemyMove.angleY = actor->GetTransform().GetRotation().y;
+                    enemyMove.target = controller->GetTargetPosition();
+                    strcpy_s(enemyMove.mainState, state->GetStateName());
+                    strcpy_s(enemyMove.subState, state->GetSubStateName());
                     // サーバーに送信
                     _client.WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
                 }
@@ -223,9 +224,10 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
 
         EnemyData enemyData{};
         enemyData.controllerID = controllerID;
-        enemyData.enemyActor = enemy;
-        enemyData.enemyController = enemy->GetComponent<EnemyController>();
+        enemyData.actor = enemy;
+        enemyData.controller = enemy->GetComponent<EnemyController>();
         enemyData.damageable = enemy->GetComponent<Damageable>();
+		enemyData.state = enemy->GetComponent<StateController>()->GetStateMachine();
 
         enemy->GetTransform().SetPosition(position);
         enemy->GetTransform().SetAngleY(angleY);
@@ -235,7 +237,7 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
 
         // コンテナに登録
         _enemies[uniqueID] = enemyData;
-        return enemyData.enemyActor;
+        return enemyData.actor;
     }
     return std::weak_ptr<EnemyActor>();
 }
@@ -270,8 +272,8 @@ void NetworkMediator::SendEnemyDamage()
 	// 敵のダメージを送信
 	for (auto& [uniqueID, enemyData] : _enemies)
 	{
-		auto enemyActor = enemyData.enemyActor.lock();
-		if (enemyActor)
+		auto actor = enemyData.actor.lock();
+		if (actor)
 		{
 			auto damageable = enemyData.damageable.lock();
 			if (damageable && damageable->GetLastDamage() > 0.0f)
@@ -299,10 +301,10 @@ void NetworkMediator::ResetLeader()
 		// 敵の行動遷移処理を自身が行う
 		for (auto& [uniqueID, enemyData] : _enemies)
 		{
-			auto enemyActor = enemyData.enemyActor.lock();
-			if (enemyActor)
+			auto actor = enemyData.actor.lock();
+			if (actor)
 			{
-                enemyActor->SetIsExecuteBehaviorTree(true);
+                actor->SetIsExecuteBehaviorTree(true);
 			}
 		}
 	}
@@ -558,16 +560,17 @@ void NetworkMediator::ProcessNetworkData()
 
 		auto& enemyData = _enemies[enemyMove.uniqueID];
 		// 敵情報を更新
-		auto enemy = enemyData.enemyController.lock();
-		if (!enemy)
+		auto controller = enemyData.controller.lock();
+        auto state = enemyData.state.lock();
+		if (!controller || !state)
 			continue;
 		// 自身が管理している敵ならスキップ
         if (enemyData.controllerID == myPlayerId)
             continue;
-		enemy->GetActor()->GetTransform().SetPosition(enemyMove.position);
-		enemy->GetActor()->GetTransform().SetAngleY(enemyMove.angleY);
-		enemy->SetTargetPosition(enemyMove.target);
-		enemy->ChangeState(enemyMove.mainState, enemyMove.subState);
+		controller->GetActor()->GetTransform().SetPosition(enemyMove.position);
+		controller->GetActor()->GetTransform().SetAngleY(enemyMove.angleY);
+		controller->SetTargetPosition(enemyMove.target);
+        state->ChangeState(enemyMove.mainState, enemyMove.subState);
 	}
 	_enemyMoves.clear();
 	//===============================================================================
@@ -581,7 +584,7 @@ void NetworkMediator::ProcessNetworkData()
 			continue;
 
 		auto& enemyData = _enemies[enemyApplayDamage.uniqueID];
-		auto enemyActor = enemyData.enemyActor.lock();
+		auto enemyActor = enemyData.actor.lock();
 		if (enemyActor)
 		{
             auto damageable = enemyData.damageable.lock();

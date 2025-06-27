@@ -32,11 +32,11 @@ WyvernBehaviorTree::WyvernBehaviorTree(
 
 			auto attackNode = battleNode->AddNode("Attack", 1, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), nullptr);
 			{
-				auto nearAttack = attackNode->AddNode("NearAttack", 1, SelectRule::Random, std::make_shared<WyvernNearAttackJudgment>(this), nullptr);
+				auto nearAttack = attackNode->AddNode("NearAttack", 1, SelectRule::NoDuplicatesRandom, std::make_shared<WyvernNearAttackJudgment>(this), nullptr);
 				{
-					nearAttack->AddNode("Bite", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BiteAttack"));
-					nearAttack->AddNode("Claw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ClawAttack"));
-					nearAttack->AddNode("Tail", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "TailAttack"));
+					nearAttack->AddNode("Bite", 4, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BiteAttack"));
+					nearAttack->AddNode("Claw", 4, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ClawAttack"));
+					nearAttack->AddNode("Tail", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "TailAttack"));
 					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackStep"));
 				}
 				attackNode->AddNode("Breath", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BreathAttack"));

@@ -15,6 +15,7 @@ enum class SelectRule
 	Sequence,			// シーケンス
 	SequentialLooping,	// シーケンシャルルーピング
 	Random,				// ランダム
+	NoDuplicatesRandom,	// 重複なしランダム
 };
 
 template<class T>
@@ -174,6 +175,43 @@ public:
 		}
 		return nullptr;
 	}
+	// 重複なしランダム選択
+	NodeTempPtr SelectNoDuplicatesRandom(std::vector<NodeTempPtr>* list)
+	{
+		std::vector<NodeTempPtr> noDuplicateslist;
+		for (auto itr = list->begin(); itr != list->end(); itr++)
+		{
+			// 前回推論したノード名と同じノードは除外する
+			if (_lastInferenceNode != (*itr)->GetName())
+				noDuplicateslist.push_back(*itr);
+		}
+
+		// もし重複なしリストが空ならnullptrを返す
+		if (noDuplicateslist.size() == 0)
+			return nullptr;
+
+		// priorityに応じて抽選確率を変える
+		std::vector<unsigned int> priorityList;
+		unsigned int prioritySum = 0;
+		for (size_t i = 0; i < noDuplicateslist.size(); i++)
+		{
+			priorityList.push_back(noDuplicateslist.at(i)->_priority);
+			prioritySum += noDuplicateslist.at(i)->_priority;
+		}
+		
+		unsigned int randomNum = std::rand() % prioritySum;
+		for (size_t i = 0; i < noDuplicateslist.size(); i++)
+		{
+			if (randomNum < noDuplicateslist.at(i)->_priority)
+			{
+				// 最後に推論したノード名を更新
+				_lastInferenceNode = noDuplicateslist.at(i)->GetName();
+				return noDuplicateslist.at(i);
+			}
+			randomNum -= noDuplicateslist.at(i)->_priority;
+		}
+		return nullptr;
+	}
 	// シーケンス選択
 	NodeTempPtr SelectSequence(std::vector<NodeTempPtr>* list, BehaviorData<T>* data)
 	{
@@ -198,6 +236,8 @@ public:
 				step = 0;
 				break;
 			case SelectRule::Random:
+				break;
+			case SelectRule::NoDuplicatesRandom:
 				break;
 			default:
 				break;
@@ -277,6 +317,10 @@ public:
 		case SelectRule::Random:
 			result = SelectRandom(&list);
 			break;
+			// 重複なしランダム
+		case SelectRule::NoDuplicatesRandom:
+			result = SelectNoDuplicatesRandom(&list);
+			break;
 			// シーケンス
 		case SelectRule::Sequence:
 		case SelectRule::SequentialLooping:
@@ -329,4 +373,6 @@ protected:
 	NodeTempPtr		_sibling;		// 兄弟ノード
 	int				_hierarchyNo;	// 階層番号
 	std::vector<NodeTempPtr>		_children;		// 子ノード
+
+	std::string _lastInferenceNode = ""; // 最後に推論したノード名
 };

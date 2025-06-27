@@ -143,11 +143,10 @@ void ServerAssignment::Exit()
 
 /// データ送信
 #ifdef USE_MRS
-void ServerAssignment::WriteRecord(MrsConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength)
+void ServerAssignment::WriteRecord(MrsConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength) {
 #else
-void ServerAssignment::WriteRecord(ENLConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength)
+void ServerAssignment::WriteRecord(ENLConnection connection, Network::DataTag tag, const void* data, uint32_t dataLength) {
 #endif
-{
 #ifdef USE_MRS
 	mrs_write_record(
 		connection,					// 送信先コネクション
@@ -197,11 +196,10 @@ void ServerAssignment::SelectingLeader()
 #pragma region コールバック関数
 /// レコードが読み込み可能になった際に呼ばれるコールバック関数
 #ifdef USE_MRS
-void ServerAssignment::ReadRecord(MrsConnection connection, void* connectionData, uint32 seqnum, uint16 options, uint16 payloadType, const void* payload, uint32 payloadLen)
+void ServerAssignment::ReadRecord(MrsConnection connection, void* connectionData, uint32 seqnum, uint16 options, uint16 payloadType, const void* payload, uint32 payloadLen) {
 #else
-void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData, uint16_t payloadType, const void* payload, uint32_t payloadLen)
+void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData, uint16_t payloadType, const void* payload, uint32_t payloadLen) {
 #endif // USE_MRS
-{
 	ServerAssignment* self = reinterpret_cast<ServerAssignment*>(connectionData);
 #ifdef USE_MRS
 	mrs::Buffer buffer;
@@ -387,11 +385,10 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 
 // ユーザが切断したときに呼ばれるコールバック関数
 #ifdef USE_MRS
-void ServerAssignment::Disconnect(MrsConnection connection, void* connectionData)
+void ServerAssignment::Disconnect(MrsConnection connection, void* connectionData) {
 #else
-void ServerAssignment::Disconnect(ENLConnection connection, void* connectionData)
+void ServerAssignment::Disconnect(ENLConnection connection, void* connectionData) {
 #endif // USE_MRS
-{
 	ServerAssignment* self = reinterpret_cast<ServerAssignment*>(connectionData);
 	PlayerLogout logout{};
 
@@ -418,11 +415,10 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connectionData
 
 // 接続されたときのコールバック関数
 #ifdef USE_MRS
-void ServerAssignment::Accept(MrsServer server, void* serverData, MrsConnection connection)
+void ServerAssignment::Accept(MrsServer server, void* serverData, MrsConnection connection) {
 #else
-void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection connection)
+void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection connection) {
 #endif // USE_MRS
-{
 	// メンバ変数へアクセス
 	ServerAssignment* self = reinterpret_cast<ServerAssignment*>(serverData);
 
@@ -516,12 +512,11 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 
 #ifdef USE_MRS
 /// クライアント削除
-int ServerAssignment::EraseClient(MrsConnection connection)
+int ServerAssignment::EraseClient(MrsConnection connection) {
 #else
 /// クライアント削除
-int ServerAssignment::EraseClient(ENLConnection connection)
+int ServerAssignment::EraseClient(ENLConnection connection) {
 #endif // USE_MRS
-{
 	int i = 0;
 	for (Client& client : clients)
 	{

@@ -13,6 +13,7 @@ CEREAL_CLASS_VERSION(ModelCollision, 0)
 /// モデル情報読み込み
 void ModelCollision::Load(std::weak_ptr<Model> model)
 {
+	// モデルが設定されていなければエラー
     assert(model.lock() != nullptr);
 
     _model = model;

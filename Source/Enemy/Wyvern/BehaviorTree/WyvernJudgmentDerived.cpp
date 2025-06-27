@@ -7,6 +7,10 @@
 // BattleNode‘JˆÚ”»’è
 bool WyvernBattleJudgment::Judgment()
 {
+	// í“¬ó‘Ô‚Å‚È‚¯‚ê‚Î‘JˆÚ‚µ‚È‚¢
+	if (!_owner->GetStateMachine()->GetEnemy()->InFighting())
+		return false;
+
 	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
 	float searchRange = _owner->GetStateMachine()->GetEnemy()->GetSearchRange();
@@ -31,6 +35,11 @@ bool WyvernConfrontJudgment::Judgment()
 // AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 bool WyvernAttackJudgment::Judgment()
 {
+	// ˆê’èŠm—¦‚Å‘JˆÚ‚µ‚È‚¢
+	// TODO : ƒpƒ‰ƒ[ƒ^‰»
+	if (std::rand() % 10 == 0)
+		return false;
+
 	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
 	float attackRange = _owner->GetStateMachine()->GetEnemy()->GetAttackRange();

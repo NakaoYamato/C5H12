@@ -5,6 +5,7 @@
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+#include "../../Library/Component/Collider/ModelCollider.h"
 
 #include "../../Source/Common/Targetable.h"
 #include "PlayerInput.h"
@@ -39,7 +40,8 @@ void PlayerActor::OnCreate()
 		this->AddComponent<PlayerInput>();
 
 	// コライダー設定
-	auto collider = this->AddCollider<CapsuleCollider>();
+	auto capsuleCollider = this->AddCollider<CapsuleCollider>();
+	auto modelCollider = this->AddCollider<ModelCollider>();
 
 	// パラメータ設定
 	GetTransform().SetLengthScale(0.01f);
@@ -49,10 +51,10 @@ void PlayerActor::OnCreate()
 	if (!_isUserControlled)
 		playerController->SetATKFactor(0.0f);
 
-	collider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
-	collider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));
-	collider->SetRadius(0.5f);
-	collider->SetLayer(CollisionLayer::Hit);
+	capsuleCollider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
+	capsuleCollider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));
+	capsuleCollider->SetRadius(0.5f);
+	capsuleCollider->SetLayer(CollisionLayer::Hit);
 
 	// 剣生成
 	{

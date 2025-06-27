@@ -83,8 +83,6 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	std::vector<AnimationEvent::EventData> GetCurrentEvents();
-
-	void SetActiveAttackEvent(bool active) { _activeAttackEvent = active; }
 #pragma endregion
 
 
@@ -174,11 +172,6 @@ private:
     /// <param name="poseNodes"></param>
     void CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node>& poseNodes);
 
-    /// <summary>
-    /// アニメーションイベントの更新
-    /// </summary>
-    void UpdateAnimationEvent();
-
 	/// <summary>
 	/// アニメーションのデバッグ表示をフィルタ
 	/// </summary>
@@ -210,9 +203,6 @@ private:
 
 #pragma region イベント
 	AnimationEvent _animationEvent{};
-
-	// 攻撃イベントを発生させるか
-	bool _activeAttackEvent = false;
 #pragma endregion
 
 

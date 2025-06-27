@@ -33,6 +33,12 @@ void WyvernController::Update(float elapsedTime)
 			if (targetable)
 			{
 				_enemyController.lock()->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
+				_enemyController.lock()->SetInFighting(true);
+			}
+			else
+			{
+				// í“¬ó‘Ô‚ð‰ðœ
+				_enemyController.lock()->SetInFighting(false);
 			}
 		}
 	}

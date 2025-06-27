@@ -93,8 +93,6 @@ namespace Network
 		int playerUniqueID = 1;
 		char message[NETWORK_MAX_MESSAGE_SIZE] = { "\0" };
     };
-
-#pragma region プレイヤー情報
 	struct PlayerLogin
 	{
 		int playerUniqueID = -1;
@@ -103,6 +101,8 @@ namespace Network
 	{
 		int playerUniqueID = -1;
 	};
+
+#pragma region プレイヤー情報
 	struct PlayerSetLeader
 	{
 		int playerUniqueID = -1;

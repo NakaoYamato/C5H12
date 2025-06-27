@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/Mediator/CanvasMediator.h"
+#include "../../Source/InGame/CanvasMediator.h"
 #include "../../Source/Common/Damageable.h"
 
 class PlayerHealthUIController : public UIController

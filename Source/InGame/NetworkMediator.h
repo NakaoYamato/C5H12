@@ -15,6 +15,9 @@
 #include "../../Source/Enemy/EnemyActor.h"
 #include "../../Source/Enemy/EnemyController.h"
 
+// 通信を受信するクラスの前方宣言
+class NetworkReceiver;
+
 /// <summary>
 /// 通信を管理するメディエーター
 /// </summary>
@@ -188,4 +191,16 @@ private:
 
     // 敵生成のフラグ
 	bool _sendEnemyCreate = false;
+};
+
+class NetworkReceiver : public Component
+{
+public:
+	NetworkReceiver() {}
+	~NetworkReceiver() override {}
+	const char* GetName() const override { return "NetworkReceiver"; }
+	void Start() override;
+	void Update(float elapsedTime) override;
+	void DelayedRender(const RenderContext& rc) override;
+	void DrawGui() override;
 };

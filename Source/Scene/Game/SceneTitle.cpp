@@ -3,7 +3,7 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Component/SpriteRenderer.h"
 
-#include "../../Source/Mediator/TitleMediator.h"
+#include "../../Source/Title/TitleMediator.h"
 
 // ‰Šú‰»
 void SceneTitle::OnInitialize()

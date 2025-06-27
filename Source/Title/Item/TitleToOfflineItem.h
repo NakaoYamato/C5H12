@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/Mediator/TitleMediator.h"
+#include "../TitleMediator.h"
 
 class TitleToOfflineItem : public TitleItemBase
 {

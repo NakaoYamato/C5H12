@@ -1,5 +1,5 @@
 // Winsock2とWinsockの多重定義を避けるために、先にインクルード
-#include "../../Source/Mediator/NetworkMediator.h"
+#include "../../Source/InGame/NetworkMediator.h"
 
 #include "SceneGame.h"
 
@@ -12,9 +12,9 @@
 #include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
-#include "../../Mediator/InputMediator.h"
-#include "../../Mediator/CanvasMediator.h"
-#include "../../Mediator/MenuMediator.h"
+#include "../../InGame/InputMediator.h"
+#include "../../InGame/CanvasMediator.h"
+#include "../../Menu/MenuMediator.h"
 
 // ネットワーク有効フラグ
 bool SceneGame::NetworkEnabled = false;

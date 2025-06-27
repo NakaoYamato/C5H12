@@ -270,7 +270,7 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mediator\NetworkMediator.cpp">
+    <ClCompile Include="Source\InGame\NetworkMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\CharactorController.cpp">
@@ -366,7 +366,7 @@
     <ClCompile Include="Source\Enemy\EnemyActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mediator\CanvasMediator.cpp">
+    <ClCompile Include="Source\InGame\CanvasMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp">
@@ -450,10 +450,10 @@
     <ClCompile Include="Source\Menu\MenuInput.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mediator\InputMediator.cpp">
+    <ClCompile Include="Source\InGame\InputMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mediator\MenuMediator.cpp">
+    <ClCompile Include="Source\Menu\MenuMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Menu\Category\MenuCategory.cpp">
@@ -468,7 +468,7 @@
     <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mediator\TitleMediator.cpp">
+    <ClCompile Include="Source\Title\TitleMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Title\Item\TitleToHomeItem.cpp">
@@ -797,7 +797,7 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mediator\NetworkMediator.h">
+    <ClInclude Include="Source\InGame\NetworkMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\CharactorController.h">
@@ -914,7 +914,7 @@
     <ClInclude Include="Source\Enemy\EnemyActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mediator\CanvasMediator.h">
+    <ClInclude Include="Source\InGame\CanvasMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h">
@@ -1001,10 +1001,10 @@
     <ClInclude Include="Source\Menu\MenuInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mediator\InputMediator.h">
+    <ClInclude Include="Source\InGame\InputMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mediator\MenuMediator.h">
+    <ClInclude Include="Source\Menu\MenuMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Menu\Category\MenuCategory.h">
@@ -1019,7 +1019,7 @@
     <ClInclude Include="Source\Menu\Item\MenuExitItem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mediator\TitleMediator.h">
+    <ClInclude Include="Source\Title\TitleMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Title\Item\TitleToHomeItem.h">

@@ -270,10 +270,10 @@
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
-    <ClCompile Include="Source\Mediator\CanvasMediator.cpp" />
-    <ClCompile Include="Source\Mediator\InputMediator.cpp" />
-    <ClCompile Include="Source\Mediator\MenuMediator.cpp" />
-    <ClCompile Include="Source\Mediator\TitleMediator.cpp" />
+    <ClCompile Include="Source\InGame\CanvasMediator.cpp" />
+    <ClCompile Include="Source\InGame\InputMediator.cpp" />
+    <ClCompile Include="Source\Menu\MenuMediator.cpp" />
+    <ClCompile Include="Source\Title\TitleMediator.cpp" />
     <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
     <ClCompile Include="Source\Menu\Category\MenuCategory.cpp" />
     <ClCompile Include="Source\Menu\MenuInput.cpp" />
@@ -301,7 +301,7 @@
     <ClCompile Include="Source\Player\PlayerController.cpp" />
     <ClCompile Include="Source\Player\PlayerInput.cpp" />
     <ClCompile Include="Source\Stage\GrassController.cpp" />
-    <ClCompile Include="Source\Mediator\NetworkMediator.cpp" />
+    <ClCompile Include="Source\InGame\NetworkMediator.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneCollisionDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneDragonDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
@@ -455,10 +455,10 @@
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
-    <ClInclude Include="Source\Mediator\CanvasMediator.h" />
-    <ClInclude Include="Source\Mediator\InputMediator.h" />
-    <ClInclude Include="Source\Mediator\MenuMediator.h" />
-    <ClInclude Include="Source\Mediator\TitleMediator.h" />
+    <ClInclude Include="Source\InGame\CanvasMediator.h" />
+    <ClInclude Include="Source\InGame\InputMediator.h" />
+    <ClInclude Include="Source\Menu\MenuMediator.h" />
+    <ClInclude Include="Source\Title\TitleMediator.h" />
     <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />
     <ClInclude Include="Source\Menu\Category\MenuCategory.h" />
     <ClInclude Include="Source\Menu\MenuInput.h" />
@@ -486,7 +486,7 @@
     <ClInclude Include="Source\Player\PlayerController.h" />
     <ClInclude Include="Source\Player\PlayerInput.h" />
     <ClInclude Include="Source\Stage\GrassController.h" />
-    <ClInclude Include="Source\Mediator\NetworkMediator.h" />
+    <ClInclude Include="Source\InGame\NetworkMediator.h" />
     <ClInclude Include="Source\Scene\Test\SceneCollisionDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneDragonDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />

@@ -11,7 +11,7 @@
 
 #include "../../Mediator/InputMediator.h"
 #include "../../Mediator/CanvasMediator.h"
-#include "../../Mediator/MenuMediator.h"
+#include "../../Menu/MenuMediator.h"
 
 void ScenePlayerDebug::OnInitialize()
 {

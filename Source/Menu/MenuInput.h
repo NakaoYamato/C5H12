@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/Mediator/InputMediator.h"
+#include "../../Source/InGame/InputMediator.h"
 
 class MenuInput : public InputControllerBase
 {

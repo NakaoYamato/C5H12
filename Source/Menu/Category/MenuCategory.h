@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/Mediator/MenuMediator.h"
+#include "../MenuMediator.h"
 
 class MenuCategory : public MenuCategoryBase
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/Mediator/InputMediator.h"
+#include "../../Source/InGame/InputMediator.h"
 #include "PlayerController.h"
 #include "StateMachine/PlayerStateMachine.h"
 

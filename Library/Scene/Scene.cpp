@@ -9,6 +9,8 @@
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Actor/Camera/MainCamera.h"
 
+#include <imgui.h>
+
 // 初期化
 void Scene::Initialize()
 {
@@ -278,50 +280,125 @@ void Scene::Render()
     // フレームバッファ1番の処理終了
     //--------------------------------------------------------------------------------------
 
-    //--------------------------------------------------------------------------------------
-    // ポストエフェクトの処理
-    PostProcessManager::Instance().ApplyEffect(rc, 
-        modelAndShadowRenderFrame->GetColorSRV().Get(),
-        renderFrame->GetDepthSRV().Get());
-    // ポストエフェクトの処理終了
-    //--------------------------------------------------------------------------------------
-    
-    // サンプラーステート設定
+    // F1ボタンが有効ならImGuiのウィンドウに描画
+    if (Debug::Input::IsActive(DebugInput::BTN_F1))
     {
-        ID3D11SamplerState* samplerStates[] =
+        //--------------------------------------------------------------------------------------
+        // フレームバッファ2番にUIを含めたシーン画面を描画
+        FrameBuffer* sceneFrame = graphics.GetFrameBuffer(_SCENE_FRAME_INDEX);
+        sceneFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
         {
-            renderState->GetSamplerState(SamplerState::PointWrap),
-            renderState->GetSamplerState(SamplerState::PointClamp),
-            renderState->GetSamplerState(SamplerState::LinearWrap),
-            renderState->GetSamplerState(SamplerState::LinearClamp)
-        };
-        dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+            //--------------------------------------------------------------------------------------
+            // ポストエフェクトの処理
+            PostProcessManager::Instance().ApplyEffect(rc,
+                modelAndShadowRenderFrame->GetColorSRV().Get(),
+                renderFrame->GetDepthSRV().Get());
+            // ポストエフェクトの処理終了
+            //--------------------------------------------------------------------------------------
+
+            // サンプラーステート設定
+            {
+                ID3D11SamplerState* samplerStates[] =
+                {
+                    renderState->GetSamplerState(SamplerState::PointWrap),
+                    renderState->GetSamplerState(SamplerState::PointClamp),
+                    renderState->GetSamplerState(SamplerState::LinearWrap),
+                    renderState->GetSamplerState(SamplerState::LinearClamp)
+                };
+                dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+            }
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+            // バックバッファに描画
+            _textureRenderer.Blit(
+                dc,
+                PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
+                0, 1
+            );
+
+            // レンダーステート設定
+            dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+            dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+            dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+            // 3D描画後の描画処理
+            _actorManager.DelayedRender(rc);
+
+            // テキスト描画
+            _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+
+            OnRender();
+        }
+        sceneFrame->Deactivate(dc);
+        // フレームバッファ2番の処理終了
+        //--------------------------------------------------------------------------------------
     }
-    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-    // バックバッファに描画
-    _textureRenderer.Blit(
-        dc,
-        PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
-        0, 1
-    );
+    else
+    {
+        //--------------------------------------------------------------------------------------
+        // ポストエフェクトの処理
+        PostProcessManager::Instance().ApplyEffect(rc,
+            modelAndShadowRenderFrame->GetColorSRV().Get(),
+            renderFrame->GetDepthSRV().Get());
+        // ポストエフェクトの処理終了
+        //--------------------------------------------------------------------------------------
 
-    // レンダーステート設定
-    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        // サンプラーステート設定
+        {
+            ID3D11SamplerState* samplerStates[] =
+            {
+                renderState->GetSamplerState(SamplerState::PointWrap),
+                renderState->GetSamplerState(SamplerState::PointClamp),
+                renderState->GetSamplerState(SamplerState::LinearWrap),
+                renderState->GetSamplerState(SamplerState::LinearClamp)
+            };
+            dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+        }
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+        // バックバッファに描画
+        _textureRenderer.Blit(
+            dc,
+            PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
+            0, 1
+        );
 
-    // 3D描画後の描画処理
-    _actorManager.DelayedRender(rc);
+        // レンダーステート設定
+        dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+        dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
-    // テキスト描画
-	_textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+        // 3D描画後の描画処理
+        _actorManager.DelayedRender(rc);
 
-    OnRender();
+        // テキスト描画
+        _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+
+        OnRender();
+    }
 }
 
 // デバッグ用Gui描画
 void Scene::DrawGui()
 {
+    // F1ボタンが有効ならImGuiのウィンドウに描画
+    if (Debug::Input::IsActive(DebugInput::BTN_F1))
+    {
+        if (ImGui::Begin(u8"シーン", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
+        {
+            // ウィンドウ内の描画領域を取得
+            ImVec2 windowPos = ImGui::GetWindowPos();
+            ImVec2 windowSize = ImGui::GetWindowSize();
+            windowPos.y += ImGui::GetFrameHeight();
+            windowSize.y -= ImGui::GetFrameHeight();
+            // 描画
+            ImGui::GetWindowDrawList()->AddImage(
+                Graphics::Instance().GetFrameBuffer(_SCENE_FRAME_INDEX)->GetColorSRV().Get(),
+                windowPos,
+                ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y)
+            );
+        }
+        ImGui::End();
+    }
+
     //　ゲームオブジェクトのGui表示
     _actorManager.DrawGui();
 

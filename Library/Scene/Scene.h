@@ -21,6 +21,7 @@
 #pragma region ’è‹`
 #define _RENDER_FRAME_INDEX         0
 #define _APPLY_SHADOW_FRAME_INDEX   1
+#define _SCENE_FRAME_INDEX			2
 
 #define _SKYMAP_COLOR_SRV_SLOT_INDEX	10 
 #define _SKYMAP_DIFFUSE_SRV_SLOT_INDEX	11 

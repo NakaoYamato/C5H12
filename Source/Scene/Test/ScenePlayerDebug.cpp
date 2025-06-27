@@ -9,8 +9,8 @@
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
-#include "../../Mediator/InputMediator.h"
-#include "../../Mediator/CanvasMediator.h"
+#include "../../InGame/InputMediator.h"
+#include "../../InGame/CanvasMediator.h"
 #include "../../Menu/MenuMediator.h"
 
 void ScenePlayerDebug::OnInitialize()

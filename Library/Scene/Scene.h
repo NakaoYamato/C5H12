@@ -157,6 +157,10 @@ public:
 	{
 		_completionLoading = std::clamp(_completionLoading + completion, 0.0f, 1.0f);
 	}
+	// ImGuiに描画中か
+	bool IsImGuiRendering() const { return _isImGuiRendering; }
+	// ImGuiウィンドウが選択されているか
+	bool IsImGuiSceneWindowSelected() const { return _isImGuiSceneWindowSelected; }
 #pragma endregion
 private:
 	std::unique_ptr<SkyMap>			_skyMap;
@@ -181,4 +185,8 @@ private:
 	float							_completionLoading = 0.0f;
 	// グリッド表示フラグ
 	bool							_showGrid = false;
+	// ImGuiに描画中
+	bool							_isImGuiRendering = false;
+	// シーンを描画しているImGuiウィンドウを選択しているかどうか
+	bool							_isImGuiSceneWindowSelected = false;
 };

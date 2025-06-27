@@ -34,9 +34,13 @@ void DebugCamera::Update(float elapsedTime)
 
         // ImGuiのウィンドウを選択していたら処理しない
 #ifdef _DEBUG
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_AnyWindow) ||
-            ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow))
-            return;
+		// シーンを描画しているImGuiウィンドウが選択されていない場合
+        if (!SceneManager::Instance().GetCurrentScene()->IsImGuiSceneWindowSelected())
+        {
+            if (ImGui::IsWindowHovered(ImGuiHoveredFlags_::ImGuiHoveredFlags_AnyWindow) ||
+                ImGui::IsWindowFocused(ImGuiFocusedFlags_::ImGuiFocusedFlags_AnyWindow))
+                return;
+        }
 #endif // _DEBUG
 
 #ifdef _ROTATION_EYE

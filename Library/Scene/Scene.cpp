@@ -80,6 +80,12 @@ void Scene::Update(float elapsedTime)
     if (_showGrid)
         Debug::Renderer::DrawGrid(10);
 
+    // F1ボタンが有効ならImGuiのウィンドウに描画
+    _isImGuiRendering = Debug::Input::IsActive(DebugInput::BTN_F1);
+	// ImGuiのウィンドウに描画していないときはシーンImGuiウィンドウ選択フラグをオフにする
+    if (!_isImGuiRendering)
+        _isImGuiSceneWindowSelected = false;
+
 	// シーンの更新処理
 	OnUpdate(elapsedTime);
 }
@@ -280,59 +286,10 @@ void Scene::Render()
     // フレームバッファ1番の処理終了
     //--------------------------------------------------------------------------------------
 
-    // F1ボタンが有効ならImGuiのウィンドウに描画
-    if (Debug::Input::IsActive(DebugInput::BTN_F1))
-    {
-        //--------------------------------------------------------------------------------------
-        // フレームバッファ2番にUIを含めたシーン画面を描画
-        FrameBuffer* sceneFrame = graphics.GetFrameBuffer(_SCENE_FRAME_INDEX);
-        sceneFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
-        {
-            //--------------------------------------------------------------------------------------
-            // ポストエフェクトの処理
-            PostProcessManager::Instance().ApplyEffect(rc,
-                modelAndShadowRenderFrame->GetColorSRV().Get(),
-                renderFrame->GetDepthSRV().Get());
-            // ポストエフェクトの処理終了
-            //--------------------------------------------------------------------------------------
-
-            // サンプラーステート設定
-            {
-                ID3D11SamplerState* samplerStates[] =
-                {
-                    renderState->GetSamplerState(SamplerState::PointWrap),
-                    renderState->GetSamplerState(SamplerState::PointClamp),
-                    renderState->GetSamplerState(SamplerState::LinearWrap),
-                    renderState->GetSamplerState(SamplerState::LinearClamp)
-                };
-                dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-            }
-            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-            // バックバッファに描画
-            _textureRenderer.Blit(
-                dc,
-                PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
-                0, 1
-            );
-
-            // レンダーステート設定
-            dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-            dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-            dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-
-            // 3D描画後の描画処理
-            _actorManager.DelayedRender(rc);
-
-            // テキスト描画
-            _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
-
-            OnRender();
-        }
-        sceneFrame->Deactivate(dc);
-        // フレームバッファ2番の処理終了
-        //--------------------------------------------------------------------------------------
-    }
-    else
+    //--------------------------------------------------------------------------------------
+    // フレームバッファ2番にUIを含めたシーン画面を描画
+    FrameBuffer* sceneFrame = graphics.GetFrameBuffer(_SCENE_FRAME_INDEX);
+    sceneFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
         //--------------------------------------------------------------------------------------
         // ポストエフェクトの処理
@@ -374,14 +331,28 @@ void Scene::Render()
 
         OnRender();
     }
+    sceneFrame->Deactivate(dc);
+    // フレームバッファ2番の処理終了
+    //--------------------------------------------------------------------------------------
+    
+    // ImGuiに描画フラグが無効ならバックバッファに描画
+    if (!_isImGuiRendering)
+    {
+        _textureRenderer.Blit(
+            dc,
+            sceneFrame->GetColorSRV().GetAddressOf(),
+            0, 1
+        );
+    }
 }
 
 // デバッグ用Gui描画
 void Scene::DrawGui()
 {
-    // F1ボタンが有効ならImGuiのウィンドウに描画
-    if (Debug::Input::IsActive(DebugInput::BTN_F1))
+    // ImGuiに描画フラグが無効ならバックバッファに描画
+    if (_isImGuiRendering)
     {
+        _isImGuiSceneWindowSelected = false;
         if (ImGui::Begin(u8"シーン", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
         {
             // ウィンドウ内の描画領域を取得
@@ -395,6 +366,10 @@ void Scene::DrawGui()
                 windowPos,
                 ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y)
             );
+			// ImGuiのウィンドウが選択されているか
+            _isImGuiSceneWindowSelected = 
+                ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) ||
+                ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
         }
         ImGui::End();
     }

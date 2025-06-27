@@ -101,7 +101,18 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 		"./Data/Shader/FullscreenQuadVS.cso",
 		"./Data/Shader/CascadedShadowMapPS.cso");
 }
-
+// 更新処理
+void CascadedShadowMap::Update(float elapsedTime)
+{
+	_createShadow = false;
+	_createShadowTimer += elapsedTime;
+	if (_createShadowTimer >= _createShadowInterval)
+	{
+		_createShadowTimer = 0.0f;
+		_createShadow = true;
+	}
+}
+// 影の生成開始
 void CascadedShadowMap::Activate(const RenderContext& rc,
 	const UINT& cbSlot)
 {
@@ -222,25 +233,33 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 	immediateContext->OMSetRenderTargets(1, null_render_target_view.GetAddressOf(), _depthStencilView.Get());
 	immediateContext->RSSetViewports(1, &_viewport);
 }
-
+// 深度バッファのクリア
+void CascadedShadowMap::Clear(ID3D11DeviceContext* immediateContext)
+{
+	immediateContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
+}
+// 影の生成開始（クリアしてから）
 void CascadedShadowMap::ClearAndActivate(const RenderContext& rc)
 {
 	Clear(rc.deviceContext);
 	Activate(rc, _CASCADED_SHADOW_MAP_CB_SLOT_INDEX);
 }
-
+// 影の生成終了
 void CascadedShadowMap::Deactivate(const RenderContext& rc)
 {
 	rc.deviceContext->RSSetViewports(_viewportCount, _cachedViewports);
 	rc.deviceContext->OMSetRenderTargets(1, _cachedRTV.GetAddressOf(), _cachedDSV.Get());
 }
-
 // ImGui描画
 void CascadedShadowMap::DrawGui()
 {
 #if USE_IMGUI
 	if (ImGui::Begin(u8"カスケードシャドウマップ"))
 	{
+		ImGui::DragFloat(u8"影生成タイマー", &_createShadowTimer);
+		ImGui::DragFloat(u8"影生成間隔", &_createShadowInterval, 0.1f, 0.0f, 10.0f, "%.1f");
+
+		ImGui::Separator();
 		ImGui::SliderFloat("criticalDepthValue", &_criticalDepthValue, 0.0f, +1000.0f);
 		ImGui::SliderFloat("splitSchemeWeight", &_splitSchemeWeight, 0.0f, +1.0f);
 		ImGui::SliderFloat("zMult", &_zMult, 1.0f, +100.0f);
@@ -256,7 +275,7 @@ void CascadedShadowMap::DrawGui()
 	ImGui::End();
 #endif
 }
-
+// カスケードシャドウマップ描画のための定数バッファ更新
 void CascadedShadowMap::UpdateCSMConstants(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
@@ -273,7 +292,7 @@ void CascadedShadowMap::UpdateCSMConstants(const RenderContext& rc)
 	dc->VSSetConstantBuffers(3, 1, _constantBuffer.GetAddressOf());
 	dc->PSSetConstantBuffers(3, 1, _constantBuffer.GetAddressOf());
 }
-
+// 影の描画
 void CascadedShadowMap::Blit(ID3D11DeviceContext* immediateContext,
 	ID3D11ShaderResourceView** colorSRV, 
 	ID3D11ShaderResourceView** depthSRV)

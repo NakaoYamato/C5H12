@@ -229,6 +229,9 @@ void Framework::Update(float elapsedTime)
     // シーンの更新
     SceneManager::Instance().Update(elapsedTime);
 
+	// シャドウマップの更新
+	Graphics::Instance().GetCascadedShadowMap()->Update(elapsedTime);
+
     // ポストエフェクトの更新
     PostProcessManager::Instance().Update(elapsedTime);
 

@@ -78,6 +78,7 @@ void Scene::Update(float elapsedTime)
     if (_showGrid)
         Debug::Renderer::DrawGrid(10);
 
+	// シーンの更新処理
 	OnUpdate(elapsedTime);
 }
 
@@ -233,15 +234,18 @@ void Scene::Render()
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
-    cascadedShadowMap->ClearAndActivate(rc);
+    if (cascadedShadowMap->IsCreateShadow())
     {
-        // ゲームオブジェクトの影描画処理
-        _actorManager.CastShadow(rc);
+        cascadedShadowMap->ClearAndActivate(rc);
+        {
+            // ゲームオブジェクトの影描画処理
+            _actorManager.CastShadow(rc);
 
-        // モデルの影描画処理
-        _meshRenderer.CastShadow(rc);
+            // モデルの影描画処理
+            _meshRenderer.CastShadow(rc);
+        }
+        cascadedShadowMap->Deactivate(rc);
     }
-    cascadedShadowMap->Deactivate(rc);
     // カスケードシャドウマップの処理終了
     //--------------------------------------------------------------------------------------
 

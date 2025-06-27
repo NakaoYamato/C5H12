@@ -38,40 +38,30 @@ public:
     CascadedShadowMap(ID3D11Device* device, UINT width, UINT height, UINT cascadeCount = 4);
     ~CascadedShadowMap() {}
 public:
+    // 更新処理
+	void Update(float elapsedTime);
     // 影の生成開始
-    void Activate(const RenderContext& rc,
-        const UINT& cbSlot);
+    void Activate(const RenderContext& rc, const UINT& cbSlot);
+    // 深度バッファのクリア
+    void Clear(ID3D11DeviceContext* immediateContext);
+	// 影の生成開始（クリアしてから）
     void ClearAndActivate(const RenderContext& rc);
-
     // 影の生成終了
     void Deactivate(const RenderContext& rc);
-
     // ImGui描画
     void DrawGui();
-
-    void Clear(ID3D11DeviceContext* immediateContext)
-    {
-        immediateContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
-    }
-
     // カスケードシャドウマップ描画のための定数バッファ更新
     void UpdateCSMConstants(const RenderContext& rc);
-
-    /// <summary>
-    /// 影の描画
-    /// </summary>
-    /// <param name="immediateContext"></param>
-    /// <param name="colorSRV"></param>
-    /// <param name="depthSRV"></param>
+    // 影の描画
     void Blit(ID3D11DeviceContext* immediateContext,
         ID3D11ShaderResourceView** colorSRV,
         ID3D11ShaderResourceView** depthSRV);
-
+    // 深度値のSRV取得
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthMap()
     {
         return _shaderResourceView;
     }
-
+	bool IsCreateShadow() const{ return _createShadow; }
 public:
     const UINT _cascadeCount;
     float _splitSchemeWeight = 0.7f;// logarithmic_split_scheme * _split_scheme_weight + uniform_split_scheme * (1 - _split_scheme_weight)
@@ -113,4 +103,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _cachedDSV;
 
     std::unique_ptr<SpriteResource> _fullscreenQuad;
+
+	float _createShadowTimer = 0.0f;
+    // 影の更新間隔
+    float _createShadowInterval = 1.0f / 60.0f;
+    // 影を生成するかどうかのフラグ
+	bool _createShadow = true;
 };

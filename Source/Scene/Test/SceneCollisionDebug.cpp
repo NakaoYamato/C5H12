@@ -3,12 +3,12 @@
 #include "../../Library/Graphics/Graphics.h"
 
 // コンポーネント
-#include "../../Library/Component/Light/PointLightController.h"
-#include "../../Library/Component/ShapeController.h"
-
 #include "../../Library/Component/ModelRenderer.h"
-#include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Library/Component/ShapeController.h"
 #include "../../Library/Component/CharactorController.h"
+#include "../../Library/Component/Rigidbody.h"
+
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 void SceneCollisionDebug::OnInitialize()
 {
@@ -32,16 +32,16 @@ void SceneCollisionDebug::OnInitialize()
 
 		stage->AddCollider<MeshCollider>();
     }
-    for (float f = 0.0f; f <= 10.0f; ++f)
-    {
-        auto box = RegisterActor<Actor>("box" + std::to_string(f), ActorTag::Player);
-        auto boxC = box->AddComponent<ShapeController>();
-		box->AddCollider<BoxCollider>();
-		box->AddComponent<CharactorController>();
-		box->GetTransform().SetPositionX(2.0f * f);
-		box->GetTransform().SetPositionY(0.5f);
-		boxC->SetType(ShapeType::Box);
-	}
+ //   for (float f = 0.0f; f <= 10.0f; ++f)
+ //   {
+ //       auto box = RegisterActor<Actor>("box" + std::to_string(f), ActorTag::Player);
+ //       auto boxC = box->AddComponent<ShapeController>();
+	//	box->AddCollider<BoxCollider>();
+	//	box->AddComponent<CharactorController>();
+	//	box->GetTransform().SetPositionX(2.0f * f);
+	//	box->GetTransform().SetPositionY(0.5f);
+	//	boxC->SetType(ShapeType::Box);
+	//}
     for (float f = 0.0f; f <= 10.0f; ++f)
     {
         auto sphere = RegisterActor<Actor>("sphere" + std::to_string(f), ActorTag::Player);
@@ -50,7 +50,8 @@ void SceneCollisionDebug::OnInitialize()
         sphere->GetTransform().SetPositionZ(2.0f);
         sphere->GetTransform().SetPositionY(0.5f);
         sphere->AddCollider<SphereCollider>();
-        sphere->AddComponent<CharactorController>();
+        sphere->AddComponent<Rigidbody>();
+        //sphere->AddComponent<CharactorController>();
     }
     for (float f = 0.0f; f <= 10.0f; ++f)
     {
@@ -60,6 +61,7 @@ void SceneCollisionDebug::OnInitialize()
         capsule->GetTransform().SetPositionZ(-2.0f);
         capsule->GetTransform().SetPositionY(0.5f);
         capsule->AddCollider<CapsuleCollider>();
-        capsule->AddComponent<CharactorController>();
+        capsule->AddComponent<Rigidbody>();
+        //capsule->AddComponent<CharactorController>();
     }
 }

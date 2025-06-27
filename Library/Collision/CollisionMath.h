@@ -66,11 +66,45 @@ namespace Collision3D
         float& penetration);
 
     /// <summary>
+    /// 球VsAABB
+    /// </summary>
+    /// <param name="spherePos">球の位置</param>
+    /// <param name="sphereRadius">球の半径</param>
+    /// <param name="aabbCenter">AABBの中心座標</param>
+    /// <param name="aabbRadii">AABBの半辺長</param>
+    /// <returns></returns>
+    bool IntersectSphereVsAABB(
+        const Vector3& spherePos,
+        float sphereRadius,
+        const Vector3& aabbCenter,
+        const Vector3& aabbRadii);
+
+    /// <summary>
+    /// 球VsAABB
+    /// </summary>
+    /// <param name="spherePos">球の位置</param>
+    /// <param name="sphereRadius">球の半径</param>
+    /// <param name="aabbCenter">AABBの中心座標</param>
+    /// <param name="aabbRadii">AABBの半辺長</param>
+    /// <param name="hitPosition">衝突位置</param>
+    /// <param name="hitNormal">衝突位置の法線</param>
+    /// <param name="penetration">めり込み量</param>
+    /// <returns></returns>
+    bool IntersectSphereVsAABB(
+        const Vector3& spherePos,
+        float sphereRadius,
+        const Vector3& aabbCenter,
+        const Vector3& aabbRadii,
+        Vector3& hitPosition,
+        Vector3& hitNormal,
+        float& penetration);
+
+    /// <summary>
     /// 球Vsボックス
     /// </summary>
     /// <param name="spherePos">球の位置</param>
     /// <param name="sphereRadius">球の半径</param>
-    /// <param name="boxPos">ボックスの位置</param>
+    /// <param name="boxPos">ボックスの中心座標</param>
     /// <param name="boxRadii">ボックスの半辺長</param>
     /// <param name="boxAngle">ボックスの回転量</param>
     /// <param name="hitPosition">衝突位置</param>
@@ -83,6 +117,21 @@ namespace Collision3D
         const Vector3& boxPos,
         const Vector3& boxRadii,
         const Vector3& boxAngle,
+        Vector3& hitPosition,
+        Vector3& hitNormal,
+        float& penetration);
+
+    /// <summary>
+    /// 球Vs三角形
+    /// </summary>
+    /// <param name="spherePos">球の位置</param>
+    /// <param name="radius">球の半径</param>
+    /// <param name="trianglePos">三角形の各頂点</param>
+    /// <returns></returns>
+    bool IntersectSphereVsTriangle(
+        const DirectX::XMVECTOR& spherePos,
+        float radius,
+        const DirectX::XMVECTOR trianglePos[3],
         Vector3& hitPosition,
         Vector3& hitNormal,
         float& penetration);

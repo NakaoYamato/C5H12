@@ -10,14 +10,12 @@ void Rigidbody::Start()
 	_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
 	DirectX::XMStoreFloat4x4(&_inertiaTensor, DirectX::XMMatrixIdentity());
 }
-
 // XVˆ—
 void Rigidbody::Update(float elapsedTime)
 {
 	/// ‘¬“xXV
     UpdateVelocity(elapsedTime);
 }
-
 // ŒÅ’èŠÔŠuXVˆ—
 void Rigidbody::FixedUpdate()
 {
@@ -26,7 +24,6 @@ void Rigidbody::FixedUpdate()
 	/// ˆÊ’uXV
     UpdatePosition(deltaTime);
 }
-
 // GUI•`‰æ
 void Rigidbody::DrawGui()
 {
@@ -43,6 +40,15 @@ void Rigidbody::DrawGui()
 	ImGui::DragFloat(u8"R—ÍŒW”", &_dragCoefficient, 0.01f);
 	ImGui::DragFloat(u8"Ã~–€CŒW”", &_staticFriction, 0.01f);
 	ImGui::DragFloat(u8"“®–€CŒW”", &_dynamicFriction, 0.01f);
+}
+// ÚG‚Ì‰ğÁˆ—
+void Rigidbody::OnContact(CollisionData& collisionData)
+{
+	// ƒgƒŠƒK[‚Å‚È‚¯‚ê‚Î‰Ÿ‚µo‚µˆ—
+	if (!collisionData.isTrigger && !collisionData.otherIsTrigger)
+	{
+
+	}
 }
 
 void Rigidbody::AddForce(const DirectX::XMVECTOR& force)

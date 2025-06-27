@@ -162,6 +162,9 @@ void CollisionManager::Update()
 			{
 				SphereVsCapsule(sphereA, capsule, collisionDataMap);
 			}
+
+			// 球Vsメッシュ
+			SphereVsMesh(sphereA, collisionDataMap);
 		}
 
 		// ボックスの当たり判定
@@ -666,6 +669,61 @@ void CollisionManager::SphereVsCapsule(
 			hitPosition,
 			hitNormal,
 			penetration);
+	}
+}
+
+void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	DirectX::XMVECTOR spherePosition = DirectX::XMLoadFloat3(&sphere.position);
+	
+	// 各メッシュコライダーに対して判定
+	for (auto& meshCollider : _meshColliders)
+	{
+		// 同じ場合は処理しない
+		if (sphere.actor == meshCollider->GetActor().get())return;
+
+		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		{
+			DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
+			DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
+			// 球VsAABB
+			if (Collision3D::IntersectSphereVsAABB(sphere.position, sphere.radius,
+				area.boundingBox.Center, area.boundingBox.Extents))
+			{
+				// エリアに含まれている三角形と判定
+				for (const int& index : area.triangleIndices)
+				{
+					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
+					DirectX::XMVECTOR TrianglePos[3] = {
+						DirectX::XMLoadFloat3(&triangle.positions[0]),
+						DirectX::XMLoadFloat3(&triangle.positions[1]),
+						DirectX::XMLoadFloat3(&triangle.positions[2])
+					};
+
+					Vector3 hitPosition{};
+					Vector3 hitNormal{};
+					float distance = 0.0f;
+					// 球Vs三角形
+					if (Collision3D::IntersectSphereVsTriangle(
+						spherePosition, sphere.radius, 
+						TrianglePos,
+						hitPosition, hitNormal, distance))
+					{
+						PushCollisionData(
+							collisionDataMap,
+							sphere.actor,
+							sphere.layer,
+							sphere.isTrigger,
+							meshCollider->GetActor().get(),
+							meshCollider->GetLayer(),
+							meshCollider->IsTrigger(),
+							hitPosition,
+							hitNormal,
+							distance);
+					}
+				}
+			}
+		}
 	}
 }
 

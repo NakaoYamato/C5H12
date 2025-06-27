@@ -188,6 +188,9 @@ private:
 		const SphereData& sphere,
 		const CapsuleData& capsule,
 		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+	void SphereVsMesh(
+		const SphereData& sphere,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
 	void BoxVsBox(
 		const BoxData& boxA,
 		const BoxData& boxB,

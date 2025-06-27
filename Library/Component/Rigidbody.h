@@ -12,15 +12,14 @@ public:
 
 	// 開始処理
 	void Start() override;
-
 	// 更新処理
 	void Update(float elapsedTime) override;
-
 	// 固定間隔更新処理
 	void FixedUpdate() override;
-
 	// GUI描画
 	void DrawGui() override;
+	// 接触の解消処理
+	void OnContact(CollisionData& collisionData) override;
 
 	// 力を加える
 	// force	: 速度

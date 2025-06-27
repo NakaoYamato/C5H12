@@ -969,6 +969,41 @@ bool Collision3D::IntersectSphereVsSphere(
 	return true;
 }
 
+// 球VsAABB
+bool Collision3D::IntersectSphereVsAABB(const Vector3& spherePos, float sphereRadius, const Vector3& aabbCenter, const Vector3& aabbRadii)
+{
+	Vector3 hitPosition{}, hitNormal{};
+	float penetration = 0.0f;
+	return IntersectSphereVsAABB(spherePos, sphereRadius, aabbCenter, aabbRadii, hitPosition, hitNormal, penetration);
+}
+
+// 球VsAABB
+bool Collision3D::IntersectSphereVsAABB(
+	const Vector3& spherePos, float sphereRadius,
+	const Vector3& aabbCenter, const Vector3& aabbRadii,
+	Vector3& hitPosition, 
+	Vector3& hitNormal, 
+	float& penetration)
+{
+	// AABBの最近点を求める
+	Vector3 nearPos = Vector3::Clamp(spherePos, aabbCenter - aabbRadii, aabbCenter + aabbRadii);
+	// 最近点と球の中心のベクトルを求める
+	Vector3 vec = spherePos - nearPos;
+	// 長さを求める
+	float length = vec.Length();
+	// 衝突判定
+	if (length < sphereRadius)
+	{
+		// 衝突している
+		hitPosition = nearPos;
+		hitNormal = vec.Normalize();
+		penetration = sphereRadius - length;
+		return true;
+	}
+	// 衝突していない
+	return false;
+}
+
 /// 球Vsボックス
 bool Collision3D::IntersectSphereVsBox(
 	const Vector3& spherePos, float sphereRadius,
@@ -1021,15 +1056,38 @@ bool Collision3D::IntersectSphereVsBox(
 }
 
 // 球Vs三角形
-bool Collision3D::IntersectSphereVsTriangle(const DirectX::XMVECTOR& spherePos, float RADIUS, const DirectX::XMVECTOR trianglePos[3])
+bool Collision3D::IntersectSphereVsTriangle(
+	const DirectX::XMVECTOR& spherePos, float radius,
+	const DirectX::XMVECTOR trianglePos[3])
 {
 	DirectX::XMVECTOR tmpPos = {};
 	CollisionHelper::GetClosestPoint_PointTriangle(spherePos, trianglePos, tmpPos);
 	DirectX::XMVECTOR vec = DirectX::XMVectorSubtract(spherePos, tmpPos);
 	bool ret = false;
 	DirectX::XMVECTOR vecNorm = DirectX::XMVector3Normalize(vec);
-	ret = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(vec)) <= (RADIUS * RADIUS);
+	ret = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(vec)) <= (radius * radius);
 	return ret;
+}
+
+bool Collision3D::IntersectSphereVsTriangle(
+	const DirectX::XMVECTOR& spherePos, float radius,
+	const DirectX::XMVECTOR trianglePos[3],
+	Vector3& hitPosition,
+	Vector3& hitNormal, 
+	float& penetration)
+{
+	DirectX::XMVECTOR tmpPos = {};
+	CollisionHelper::GetClosestPoint_PointTriangle(spherePos, trianglePos, tmpPos);
+	DirectX::XMVECTOR vec = DirectX::XMVectorSubtract(spherePos, tmpPos);
+	penetration = DirectX::XMVectorGetX(DirectX::XMVector3Length(vec)) - radius;
+	if (penetration <= 0.0f)
+	{
+		DirectX::XMStoreFloat3(&hitPosition, tmpPos);
+		DirectX::XMStoreFloat3(&hitNormal, DirectX::XMVector3Normalize(vec));
+		penetration = -penetration;
+		return true;
+	}
+	return false;
 }
 
 /// 球Vsカプセル

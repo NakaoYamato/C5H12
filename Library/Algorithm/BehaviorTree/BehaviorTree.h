@@ -5,11 +5,11 @@
 #include "BehaviorNodeBase.h"
 
 template<class T>
-class BehaviorTree
+class BehaviorTreeBase
 {
 public:
-	BehaviorTree(T* owner) : _owner(owner) {}
-	~BehaviorTree() 
+	BehaviorTreeBase(T* owner) : _owner(owner) {}
+	~BehaviorTreeBase() 
 	{
 		NodeAllClear(_root.get());
 	}

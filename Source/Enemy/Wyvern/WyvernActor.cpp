@@ -3,13 +3,14 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
-#include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/Effekseer/EffekseerEffectController.h"
 
 #include "../EnemyController.h"
 #include "WyvernController.h"
 #include "StateMachine/WyvernStateMachine.h"
+#include "BehaviorTree/WyvernBehaviorTree.h"
 #include "../../Source/Player/PlayerController.h"
 
 #include <imgui.h>
@@ -31,22 +32,20 @@ void WyvernActor::OnCreate()
 	// コンポーネント追加
 	_modelRenderer				= AddComponent<ModelRenderer>();
 	_animator					= AddComponent<Animator>();
-	_wyvernBehaviorController	= AddComponent<WyvernBehaviorController>();
 	auto enemyController		= AddComponent<EnemyController>();
 	auto wyvernController		= AddComponent<WyvernController>();
-	auto stateController		= AddComponent<StateController>(
-		std::make_shared<WyvernStateMachine>(
-			enemyController.get(),
-			wyvernController.get(),
-			_animator.lock().get(),
-			_damageable.lock().get()));
+	auto stateMachine = std::make_shared<WyvernStateMachine>(
+		enemyController.get(),
+		wyvernController.get(),
+		_animator.lock().get(),
+		_damageable.lock().get());
+	auto stateController		= AddComponent<StateController>(stateMachine);
+	auto behaviorController		= AddComponent<BehaviorController>(std::make_shared<WyvernBehaviorTree>(stateMachine.get(), _animator.lock().get()));
 	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();
 	modelCollider->SetLayer(CollisionLayer::Hit);
-
-	_wyvernBehaviorController.lock()->SetIsExecuteBehaviorTree(_isExecuteBehavior);
 }
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)
@@ -84,9 +83,6 @@ void WyvernActor::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"ワイバーン"))
 		{
-			bool flag = _isExecuteBehavior;
-			ImGui::Checkbox(u8"ビヘイビアツリーを実行する", &flag);
-
 			int mt = static_cast<int>(_textureType);
 			if (ImGui::Combo(u8"使用するテクスチャ", &mt, modelTypeName, _countof(modelTypeName)))
 			{
@@ -107,15 +103,6 @@ void WyvernActor::OnDrawGui()
 
 		ImGui::EndTabBar();
 	}
-}
-
-// ビヘイビアツリーを実行するかどうか
-void WyvernActor::SetIsExecuteBehaviorTree(bool execute)
-{
-	EnemyActor::SetIsExecuteBehaviorTree(execute);
-
-	// ビヘイビアコントローラーの設定変更
-	_wyvernBehaviorController.lock()->SetIsExecuteBehaviorTree(execute);
 }
 
 // モデルのテクスチャを設定

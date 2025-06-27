@@ -19,7 +19,7 @@ public:
 	// HP初期化
 	void ResetHealth(float maxHealth);
 	// ダメージを与える
-	bool AddDamage(float damage, Vector3 hitPosition);
+	bool AddDamage(float damage, Vector3 hitPosition, bool networkData = false);
 
 #pragma region アクセサ
 	// ヘルス取得

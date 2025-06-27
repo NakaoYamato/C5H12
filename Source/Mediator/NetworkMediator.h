@@ -9,6 +9,7 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Audio/VoiceRecorder/VoiceRecorder.h"
 #include "../../Library/Component/StateController.h"
+#include "../../Library/Component/BehaviorController.h"
 
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/EnemyActor.h"
@@ -46,9 +47,9 @@ public:
     {
         // ä«óùÇµÇƒÇ¢ÇÈÉvÉåÉCÉÑÅ[ÇÃID
         int                             controllerID = -1;
-        std::weak_ptr<EnemyActor>       actor;
         std::weak_ptr<EnemyController>  controller;
         std::weak_ptr<StateMachine>	    state;
+		std::weak_ptr<BehaviorController> behavior;
         std::weak_ptr<Damageable>		damageable;
     };
 

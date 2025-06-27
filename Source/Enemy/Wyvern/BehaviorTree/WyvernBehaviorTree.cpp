@@ -1,5 +1,8 @@
 #include "WyvernBehaviorTree.h"
 
+#include "../../Library/Component/Animator.h"
+#include "../../Library/Scene/Scene.h"
+
 #include "../WyvernController.h"
 #include "WyvernActionDerived.h"
 #include "WyvernJudgmentDerived.h"
@@ -15,7 +18,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(
 	_animator(animator)
 {
 	_behaviorData = std::make_unique<BehaviorData<WyvernBehaviorTree>>();
-	_behaviorTree = std::make_unique<BehaviorTree<WyvernBehaviorTree>>(this);
+	_behaviorTree = std::make_unique<BehaviorTreeBase<WyvernBehaviorTree>>(this);
 
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
@@ -49,6 +52,11 @@ WyvernBehaviorTree::WyvernBehaviorTree(
 			scoutNode->AddNode("Idle", 2, SelectRule::Non, nullptr, nullptr);
 		}
 	}
+}
+
+// 開始処理
+void WyvernBehaviorTree::Start()
+{
 }
 
 void WyvernBehaviorTree::Execute(float elapsedTime)

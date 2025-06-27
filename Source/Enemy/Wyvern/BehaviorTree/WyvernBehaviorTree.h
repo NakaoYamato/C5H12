@@ -1,20 +1,22 @@
 #pragma once
 
 #include <memory>
-#include "../../Library/Algorithm/BehaviorTree/BehaviorTree.h"
+#include "../../Library/Component/BehaviorController.h"
 #include "../StateMachine/WyvernStateMachine.h"
 
-class WyvernBehaviorTree
+class WyvernBehaviorTree : public BehaviorTree
 {
 public:
 	WyvernBehaviorTree(
 		WyvernStateMachine* stateMachine,
 		Animator* animator);
 
+	// 開始処理
+	void Start() override;
 	// ビヘイビアツリー実行
-	void Execute(float elapsedTime);
+	void Execute(float elapsedTime) override;
 	// GUI描画
-	void DrawGui();
+	void DrawGui() override;
 
 #pragma region アクセサ
 	// ステートマシンを取得
@@ -30,7 +32,7 @@ private:
 
 private:
 	// ビヘイビアツリー
-	std::unique_ptr<BehaviorTree<WyvernBehaviorTree>> _behaviorTree;
+	std::unique_ptr<BehaviorTreeBase<WyvernBehaviorTree>> _behaviorTree;
 	// ビヘイビアデータ
 	std::unique_ptr<BehaviorData<WyvernBehaviorTree>> _behaviorData;
 	// 起動中のビヘイビアノード

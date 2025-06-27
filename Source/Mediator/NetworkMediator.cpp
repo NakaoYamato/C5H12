@@ -140,15 +140,14 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
                 if (enemyData.controllerID != myPlayerId)
                     continue;
 
-                auto actor = enemyData.actor.lock();
                 auto controller = enemyData.controller.lock();
 				auto state = enemyData.state.lock();
-                if (actor && controller && state)
+                if (controller && state)
                 {
                     Network::EnemyMove enemyMove{};
                     enemyMove.uniqueID = uniqueID;
-                    enemyMove.position = actor->GetTransform().GetPosition();
-                    enemyMove.angleY = actor->GetTransform().GetRotation().y;
+                    enemyMove.position = controller->GetActor()->GetTransform().GetPosition();
+                    enemyMove.angleY = controller->GetActor()->GetTransform().GetRotation().y;
                     enemyMove.target = controller->GetTargetPosition();
                     strcpy_s(enemyMove.mainState, state->GetStateName());
                     strcpy_s(enemyMove.subState, state->GetSubStateName());
@@ -224,20 +223,20 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
 
         EnemyData enemyData{};
         enemyData.controllerID = controllerID;
-        enemyData.actor = enemy;
-        enemyData.controller = enemy->GetComponent<EnemyController>();
-        enemyData.damageable = enemy->GetComponent<Damageable>();
-		enemyData.state = enemy->GetComponent<StateController>()->GetStateMachine();
+        enemyData.controller        = enemy->GetComponent<EnemyController>();
+		enemyData.state             = enemy->GetComponent<StateController>()->GetStateMachine();
+		enemyData.behavior = enemy->GetComponent<BehaviorController>();
+        enemyData.damageable        = enemy->GetComponent<Damageable>();
 
         enemy->GetTransform().SetPosition(position);
         enemy->GetTransform().SetAngleY(angleY);
-        enemy->SetIsExecuteBehaviorTree(controllerID == myPlayerId);
+        enemyData.behavior.lock()->SetIsExecute(controllerID == myPlayerId);
         enemyData.damageable.lock()->ResetHealth(health);
 
 
         // コンテナに登録
         _enemies[uniqueID] = enemyData;
-        return enemyData.actor;
+        return enemy;
     }
     return std::weak_ptr<EnemyActor>();
 }
@@ -272,21 +271,17 @@ void NetworkMediator::SendEnemyDamage()
 	// 敵のダメージを送信
 	for (auto& [uniqueID, enemyData] : _enemies)
 	{
-		auto actor = enemyData.actor.lock();
-		if (actor)
-		{
-			auto damageable = enemyData.damageable.lock();
-			if (damageable && damageable->GetLastDamage() > 0.0f)
-			{
-				Network::EnemyApplayDamage enemyApplayDamage{};
-				enemyApplayDamage.playerUniqueID = myPlayerId; // ダメージを与えたプレイヤーのユニークID
-                enemyApplayDamage.uniqueID = uniqueID;
-                enemyApplayDamage.damage = damageable->GetLastDamage();
-                enemyApplayDamage.hitPosition = damageable->GetHitPosition();
-				// サーバーに送信
-				_client.WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
-			}
-		}
+        auto damageable = enemyData.damageable.lock();
+        if (damageable && damageable->GetLastDamage() > 0.0f)
+        {
+            Network::EnemyApplayDamage enemyApplayDamage{};
+            enemyApplayDamage.playerUniqueID = myPlayerId; // ダメージを与えたプレイヤーのユニークID
+            enemyApplayDamage.uniqueID = uniqueID;
+            enemyApplayDamage.damage = damageable->GetLastDamage();
+            enemyApplayDamage.hitPosition = damageable->GetHitPosition();
+            // サーバーに送信
+            _client.WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
+        }
 	}
 }
 
@@ -301,10 +296,10 @@ void NetworkMediator::ResetLeader()
 		// 敵の行動遷移処理を自身が行う
 		for (auto& [uniqueID, enemyData] : _enemies)
 		{
-			auto actor = enemyData.actor.lock();
-			if (actor)
+			auto behavior = enemyData.behavior.lock();
+			if (behavior)
 			{
-                actor->SetIsExecuteBehaviorTree(true);
+                behavior->SetIsExecute(true);
 			}
 		}
 	}
@@ -584,16 +579,11 @@ void NetworkMediator::ProcessNetworkData()
 			continue;
 
 		auto& enemyData = _enemies[enemyApplayDamage.uniqueID];
-		auto enemyActor = enemyData.actor.lock();
-		if (enemyActor)
-		{
-            auto damageable = enemyData.damageable.lock();
-			if (damageable)
-			{
-				damageable->SetHelth(damageable->GetHealth() - enemyApplayDamage.damage);
-				damageable->SetHitPosition(enemyApplayDamage.hitPosition);
-			}
-		}
+        auto damageable = enemyData.damageable.lock();
+        if (damageable)
+        {
+			damageable->AddDamage(enemyApplayDamage.damage, enemyApplayDamage.hitPosition, true);
+        }
 	}
 	_enemyApplayDamages.clear();
     //===============================================================================

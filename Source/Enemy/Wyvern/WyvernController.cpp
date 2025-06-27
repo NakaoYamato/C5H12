@@ -1,5 +1,6 @@
 #include "WyvernController.h"
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Source/Common/Damageable.h"
 #include "../EnemyController.h"
 
@@ -8,6 +9,33 @@
 // 名前取得
 void WyvernController::Start()
 {
+	_enemyController = GetActor()->GetComponent<EnemyController>();
+	_behaviorController = GetActor()->GetComponent<BehaviorController>();
+	// メタAI取得
+	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
+	if (metaAIActor)
+	{
+		_metaAI = metaAIActor->GetComponent<MetaAI>();
+	}
+}
+// 更新処理
+void WyvernController::Update(float elapsedTime)
+{
+	if (_enemyController.lock() && _behaviorController.lock() && _behaviorController.lock()->IsExecute())
+	{
+		// メタAIからターゲット座標を取得
+		if (auto metaAI = _metaAI.lock())
+		{
+			auto targetable = metaAI->SearchTarget(
+				Targetable::Faction::Player,
+				GetActor()->GetTransform().GetWorldPosition(),
+				100.0f);
+			if (targetable)
+			{
+				_enemyController.lock()->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
+			}
+		}
+	}
 }
 // GUI描画
 void WyvernController::DrawGui()

@@ -4,8 +4,6 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
-#include "WyvernBehaviorController.h"
-
 class WyvernActor : public EnemyActor
 {
 public:
@@ -46,8 +44,6 @@ public:
 	void SetModelType(TextureType type) { this->_textureType = type; }
 	// 角を設定
 	void SetDrawHornType(DrawHornType type) { this->_drawHornType = type; }
-	// ビヘイビアツリーを実行するかどうか
-	void SetIsExecuteBehaviorTree(bool execute) override;
 #pragma endregion
 
 private:
@@ -59,7 +55,6 @@ private:
 private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<Animator> _animator;
-	std::weak_ptr<WyvernBehaviorController> _wyvernBehaviorController;
 
 	TextureType _textureType = TextureType::Lava;
 	DrawHornType _drawHornType = DrawHornType::Horn01;

@@ -158,6 +158,7 @@
     <ClCompile Include="Library\Audio\SourceVoice.cpp" />
     <ClCompile Include="Library\Audio\SubmixVoice.cpp" />
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
+    <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Component\ParticleController.cpp" />
@@ -268,7 +269,6 @@
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
     <ClCompile Include="Source\Common\Damageable.cpp" />
-    <ClCompile Include="Source\Enemy\Wyvern\WyvernBehaviorController.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
     <ClCompile Include="Source\Mediator\CanvasMediator.cpp" />
     <ClCompile Include="Source\Mediator\InputMediator.cpp" />
@@ -330,6 +330,7 @@
     <ClInclude Include="Library\Audio\SubmixVoice.h" />
     <ClInclude Include="Library\Audio\VoiceRecorder\VoiceRecorder.h" />
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
+    <ClInclude Include="Library\Component\BehaviorController.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Component\ParticleController.h" />
@@ -453,7 +454,6 @@
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />
     <ClInclude Include="Source\Common\Damageable.h" />
-    <ClInclude Include="Source\Enemy\Wyvern\WyvernBehaviorController.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
     <ClInclude Include="Source\Mediator\CanvasMediator.h" />
     <ClInclude Include="Source\Mediator\InputMediator.h" />

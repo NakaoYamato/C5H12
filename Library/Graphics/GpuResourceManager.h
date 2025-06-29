@@ -32,6 +32,16 @@ public:
 		const char* csoName, 
 		ID3D11GeometryShader** geometryShader);
 
+    // ジオメトリシェーダー作成
+    static void CreateGsWithStreamOutFromCso(ID3D11Device* device,
+        const char* csoName,
+        ID3D11GeometryShader** geometryShader,
+        const D3D11_SO_DECLARATION_ENTRY* declaration,
+        UINT numEntries,
+        const UINT* bufferStrides,
+        UINT numStrides,
+        UINT rasterizedStream);
+
 	// コンピュートシェーダー作成
 	static void CreateCsFromCso(ID3D11Device* device,
 		const char* csoName,
@@ -68,4 +78,10 @@ public:
 		ID3D11Device* device,
 		UINT bufferSize,
 		ID3D11Buffer** constantBuffer);
+
+	// 現在使用しているステートのキャッシュを保存
+    static void SaveStateCache(ID3D11DeviceContext* dc);
+
+    // 保存してあるステートのキャッシュを復元
+    static void RestoreStateCache(ID3D11DeviceContext* dc);
 };

@@ -369,6 +369,44 @@ Vector3 Vector3::ClampSphere(const Vector3& v, const Vector3& center, float radi
 	length = MathF::Clamp(length, 0.0f, radius);
     return center + diff.Normalize() * length;
 }
+// ワールド座標をスクリーン座標に変換
+Vector3 Vector3::Project(const Vector3& worldPos, float screenWidth, float screenHeight, const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
+{
+    Vector3 res{};
+    DirectX::XMStoreFloat3(
+        &res,
+        DirectX::XMVector3Project(
+            DirectX::XMLoadFloat3(&worldPos),
+            0.0f, 0.0f,
+            screenWidth, screenHeight,
+            0.0f, 1.0f,
+            DirectX::XMLoadFloat4x4(&projection),
+            DirectX::XMLoadFloat4x4(&view),
+            DirectX::XMMatrixIdentity()
+        )
+    );
+    return res;
+}
+// スクリーン画面をワールド空間に変換
+Vector3 Vector3::Unproject(const Vector3& screenPos, 
+    float screenWidth, float screenHeight,
+    const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
+{
+    Vector3 res{};
+    DirectX::XMStoreFloat3(
+        &res,
+        DirectX::XMVector3Unproject(
+            DirectX::XMLoadFloat3(&screenPos),
+            0.0f, 0.0f,
+            screenWidth, screenHeight,
+            0.0f, 1.0f,
+            DirectX::XMLoadFloat4x4(&projection),
+            DirectX::XMLoadFloat4x4(&view),
+            DirectX::XMMatrixIdentity()
+        )
+    );
+    return res;
+}
 #pragma endregion
 
 #pragma endregion

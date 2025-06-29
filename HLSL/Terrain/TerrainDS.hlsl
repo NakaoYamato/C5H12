@@ -3,7 +3,7 @@
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 // ハイトマップ
-Texture2D<float4> heightTextures : register(t5);
+Texture2D<float4> heightTextures : register(t6);
 
 [domain("tri")]
 DS_OUT main(HS_CONSTANT_OUT input, float3 UV : SV_DomainLocation,

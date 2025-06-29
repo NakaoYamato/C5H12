@@ -41,6 +41,16 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	const DirectX::XMFLOAT4X4& GetMatrix()const { return _transform; }
+    /// <summary>
+    /// 逆行列取得(ワールド)
+    /// </summary>
+    /// <returns></returns>
+    DirectX::XMFLOAT4X4 GetMatrixInverse()const
+    {
+        DirectX::XMFLOAT4X4 inverse;
+        DirectX::XMStoreFloat4x4(&inverse, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&_transform)));
+        return inverse;
+    }
 	/// <summary>
 	/// 単位取得
 	/// </summary>

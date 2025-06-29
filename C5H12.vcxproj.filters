@@ -510,7 +510,10 @@
     <ClCompile Include="Library\Scene\Editor\SceneTerrainEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Component\TerrainController.cpp">
+    <ClCompile Include="Library\Component\Terrain\TerrainController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1067,7 +1070,10 @@
     <ClInclude Include="Library\Scene\Editor\SceneTerrainEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Component\TerrainController.h">
+    <ClInclude Include="Library\Component\Terrain\TerrainController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1160,5 +1166,7 @@
     <FxCompile Include="HLSL\Terrain\TerrainHS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainGBPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainGS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainDeformPS.hlsl" />
   </ItemGroup>
 </Project>

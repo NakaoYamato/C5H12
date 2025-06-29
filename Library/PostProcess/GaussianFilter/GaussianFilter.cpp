@@ -86,15 +86,8 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 	ID3D11ShaderResourceView* nullSRV{};
 	ID3D11ShaderResourceView* cachedSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
 	immediateContext->PSGetShaderResources(0, DownSampledCount, cachedSRV);
-	// 現在設定しているステートを取得
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  cachedDSS;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>  cachedRS;
-	Microsoft::WRL::ComPtr<ID3D11BlendState>  cachedBS;
-	FLOAT blendFactor[4];
-	UINT sampleMask;
-	immediateContext->OMGetDepthStencilState(cachedDSS.GetAddressOf(), 0);
-	immediateContext->RSGetState(cachedRS.GetAddressOf());
-	immediateContext->OMGetBlendState(cachedBS.GetAddressOf(), blendFactor, &sampleMask);
+	// 現在使用しているステートのキャッシュを保存
+    GpuResourceManager::SaveStateCache(immediateContext);
 
 	// ブルーム用ステート設定
 	immediateContext->OMSetDepthStencilState(_depthStencilState.Get(), 0);
@@ -168,10 +161,8 @@ void GaussianFilter::Render(ID3D11DeviceContext* immediateContext,
 	PostProcessBase::Render(immediateContext, srvs.data(), 0, DownSampledCount);
 	immediateContext->PSSetShaderResources(0, 1, &nullSRV);
 
-	// 変更したステートを元に戻す
-	immediateContext->OMSetDepthStencilState(cachedDSS.Get(), 0);
-	immediateContext->RSSetState(cachedRS.Get());
-	immediateContext->OMSetBlendState(cachedBS.Get(), blendFactor, sampleMask);
+	// 保存してあるステートのキャッシュを復元
+    GpuResourceManager::RestoreStateCache(immediateContext);
 
 	immediateContext->PSSetShaderResources(0, DownSampledCount, cachedSRV);
 	for (ID3D11ShaderResourceView* cached_shader_resource_view : cachedSRV)

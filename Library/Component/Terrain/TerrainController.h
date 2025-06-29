@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "../Component.h"
 #include "../../Library/Terrain/Terrain.h"
 
 class TerrainController : public Component
@@ -16,6 +16,8 @@ public:
     void Update(float elapsedTime) override;
     // 描画処理
     void Render(const RenderContext& rc) override;
+    // デバッグ描画
+    void DebugRender(const RenderContext& rc) override;
     // GUI描画
     void DrawGui() override;
     // 地形取得

@@ -36,13 +36,18 @@ public:
 	void Deactivate(ID3D11DeviceContext* immediateContext,
 		const Vector4& high_luminance_color);
 
-	// アクセサ
+#pragma region アクセサ
+	uint32_t GetWidth() const { return _width; }
+    uint32_t GetHeight() const { return _height; }
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRTV() { return _rtv; }
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDSV() { return _dsv; }
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() { return _srvs[0]; }
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() { return _srvs[1]; }
+#pragma endregion
 
 private:
+	uint32_t _width{};
+	uint32_t _height{};
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _rtv;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _dsv;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _srvs[2];
@@ -51,6 +56,7 @@ private:
 
 	UINT _viewportCount{ D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE };
 	D3D11_VIEWPORT _cachedViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _cachedRTV;
+	ID3D11RenderTargetView* _cachedRTVs[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _cachedDSV;
+
 };

@@ -184,6 +184,16 @@ public:
     static Vector3 Clamp(const Vector3& v, const Vector3& min, const Vector3& max);
 	// Vector3の値を中心と半径で制限
     static Vector3 ClampSphere(const Vector3& v, const Vector3& center, float radius);
+    // ワールド座標をスクリーン座標に変換
+    static Vector3 Project(const Vector3& worldPos,
+        float screenWidth, float screenHeight,
+        const DirectX::XMFLOAT4X4& view,
+        const DirectX::XMFLOAT4X4& projection);
+    // スクリーン画面をワールド空間に変換
+    static Vector3 Unproject(const Vector3& screenPos, 
+        float screenWidth, float screenHeight,
+        const DirectX::XMFLOAT4X4& view, 
+        const DirectX::XMFLOAT4X4& projection);
 #pragma endregion
 
 #pragma region 関数
@@ -244,6 +254,18 @@ public:
     Vector3 ClampSphere(const Vector3& center, float radius) const
     {
 		return Vector3::ClampSphere(*this, center, radius);
+    }
+    // ワールド座標をスクリーン座標に変換
+    Vector3 Project(float screenWidth, float screenHeight,
+        const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection) const
+    {
+        return Vector3::Project(*this, screenWidth, screenHeight, view, projection);
+    }
+    // スクリーン画面をワールド空間に変換
+    Vector3 Unproject(float screenWidth, float screenHeight,
+        const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection) const
+    {
+        return Vector3::Unproject(*this, screenWidth, screenHeight, view, projection);
     }
 #pragma endregion
 };

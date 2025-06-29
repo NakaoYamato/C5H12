@@ -5,9 +5,12 @@ SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 #define ROCK_COLOR 0
 #define DIRT_COLOR 1
 #define GRASS_COLOR 2
-Texture2D terrainTextures[3] : register(t0);
+#define ROCK_NORMAL 3
+#define DIRT_NORMAL 4
+#define GRASS_NORMAL 5
+Texture2D terrainTextures[6] : register(t0);
 // ハイトマップ
-Texture2D<float4> heightTextures : register(t5);
+Texture2D<float4> heightTextures : register(t6);
 
 float4 main(PS_IN pin) : SV_TARGET
 {

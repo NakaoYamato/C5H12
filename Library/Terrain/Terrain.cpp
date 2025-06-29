@@ -54,30 +54,87 @@ Terrain::Terrain(ID3D11Device* device)
     // 地形用テクスチャの読み込み
     GpuResourceManager::LoadTextureFromFile(
         device,
-        L"./Data/Texture/Terrain/001.png",
-        _baseSRVs[0].ReleaseAndGetAddressOf(),
+        L"./Data/Texture/Terrain/001_COLOR.png",
+        _colorSRVs[0].ReleaseAndGetAddressOf(),
         nullptr);
     GpuResourceManager::LoadTextureFromFile(
         device,
-        L"./Data/Texture/Terrain/002.png",
-        _baseSRVs[1].ReleaseAndGetAddressOf(),
+        L"./Data/Texture/Terrain/002_COLOR.png",
+        _colorSRVs[1].ReleaseAndGetAddressOf(),
         nullptr);
     GpuResourceManager::LoadTextureFromFile(
         device,
-        L"./Data/Texture/Terrain/003.png",
-        _baseSRVs[2].ReleaseAndGetAddressOf(),
+        L"./Data/Texture/Terrain/003_COLOR.png",
+        _colorSRVs[2].ReleaseAndGetAddressOf(),
+        nullptr);
+    GpuResourceManager::LoadTextureFromFile(
+        device,
+        L"./Data/Texture/Terrain/001_NORMAL.png",
+        _normalSRVs[0].ReleaseAndGetAddressOf(),
+        nullptr);
+    GpuResourceManager::LoadTextureFromFile(
+        device,
+        L"./Data/Texture/Terrain/002_NORMAL.png",
+        _normalSRVs[1].ReleaseAndGetAddressOf(),
+        nullptr);
+    GpuResourceManager::LoadTextureFromFile(
+        device,
+        L"./Data/Texture/Terrain/003_NORMAL.png",
+        _normalSRVs[2].ReleaseAndGetAddressOf(),
         nullptr);
     // ハイトマップの読み込み
-    GpuResourceManager::MakeDummyTexture(
-        device,
-        _heightMapSRV.ReleaseAndGetAddressOf(),
-        0x00000000, 1
-    );
-    //GpuResourceManager::LoadTextureFromFile(
-    //    device,
-    //    L"./Data/Texture/TerrainHeightMap.png",
-    //    _heightMapSRV.ReleaseAndGetAddressOf(),
-    //    nullptr);
+    _heightMapFB = std::make_unique<FrameBuffer>(device, HEIGHT_MAP_SIZE, HEIGHT_MAP_SIZE);
+
+    // ストリームアウトを使用してプリミティブを取得するシェーダー
+    {
+        D3D11_SO_DECLARATION_ENTRY declaration[] =
+        {
+            {0,"SV_POSITION",	0,0,4,0},
+            {0,"WORLD_POSITION",0,0,3,0},
+            {0,"COLOR",			0,0,4,0},
+            {0,"NORMAL",		0,0,3,0},
+            {0,"TEXCOORD",		0,0,2,0},
+            {0,"GRASS_WEIGHT",		0,0,1,0},
+        };
+        UINT bufferStrides[] = { sizeof(StreamOutVertex) };
+        GpuResourceManager::CreateGsWithStreamOutFromCso(
+            device,
+            "./Data/Shader/TerrainGS.cso",
+            _streamOutGeometryShader.ReleaseAndGetAddressOf(),
+            declaration, _countof(declaration),
+            bufferStrides, _countof(bufferStrides),
+            0);
+    }
+
+    // ストリームアウトプットされた情報の受け取り用バッファ
+    {
+        D3D11_BUFFER_DESC vBufferDesc{};
+        vBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+        vBufferDesc.ByteWidth = sizeof(StreamOutVertex) * STREAM_OUT_MAX_VERTEX;
+        vBufferDesc.BindFlags = D3D11_BIND_STREAM_OUTPUT;
+        vBufferDesc.CPUAccessFlags = 0;
+        vBufferDesc.MiscFlags = 0;
+        vBufferDesc.StructureByteStride = 0;
+
+        HRESULT hr = device->CreateBuffer(&vBufferDesc, nullptr,
+            _streamOutVertexBuffer.ReleaseAndGetAddressOf());
+        _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+    }
+
+    // CPUからアクセサするためのバッファ
+    {
+        D3D11_BUFFER_DESC vBufferDesc{};
+        vBufferDesc.Usage = D3D11_USAGE_STAGING;
+        vBufferDesc.ByteWidth = sizeof(StreamOutVertex) * STREAM_OUT_MAX_VERTEX;
+        vBufferDesc.BindFlags = 0;
+        vBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        vBufferDesc.MiscFlags = 0;
+        vBufferDesc.StructureByteStride = 0;
+
+        HRESULT hr = device->CreateBuffer(&vBufferDesc, nullptr,
+            _streamOutCopyBuffer.ReleaseAndGetAddressOf());
+        _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+    }
 }
 
 void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool writeGBuffer)
@@ -105,17 +162,31 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
         dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
     else
         dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
+    if (_streamOut)
+    {
+        dc->GSSetShader(_streamOutGeometryShader.Get(), nullptr, 0);
+        //	ストリームアウト用の頂点バッファを設定
+        UINT streamoutOffsets[1] = { 0 };
+        dc->SOSetTargets(1, _streamOutVertexBuffer.GetAddressOf(), streamoutOffsets);
+    }
+    else
+    {
+        dc->GSSetShader(nullptr, nullptr, 0);
+    }
     // 地形用テクスチャ設定
     ID3D11ShaderResourceView* srvs[] =
     {
-        _baseSRVs[0].Get(),
-        _baseSRVs[1].Get(),
-        _baseSRVs[2].Get(),
+        _colorSRVs[0].Get(),
+        _colorSRVs[1].Get(),
+        _colorSRVs[2].Get(),
+        _normalSRVs[0].Get(),
+        _normalSRVs[1].Get(),
+        _normalSRVs[2].Get(),
     };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
     // ハイトマップ設定
-    dc->DSSetShaderResources(5, 1, _heightMapSRV.GetAddressOf());
-    dc->PSSetShaderResources(5, 1, _heightMapSRV.GetAddressOf());
+    dc->DSSetShaderResources(HeightMapIndex, 1, _heightMapFB->GetColorSRV().GetAddressOf());
+    dc->PSSetShaderResources(HeightMapIndex, 1, _heightMapFB->GetColorSRV().GetAddressOf());
     // 頂点バッファとインデックスバッファを設定
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
@@ -126,31 +197,64 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
     dc->DrawIndexed(static_cast<UINT>(_indices.size()), 0, 0);
 
     // シェーダーリソースビューを解除
-    ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr, nullptr };
+    ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
     dc->PSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
-    dc->DSSetShaderResources(5, 1, nullSRVs);
-    dc->PSSetShaderResources(5, 1, nullSRVs);
+    dc->DSSetShaderResources(HeightMapIndex, 1, nullSRVs);
+    dc->PSSetShaderResources(HeightMapIndex, 1, nullSRVs);
     // シェーダーを解除
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->HSSetShader(nullptr, nullptr, 0);
     dc->DSSetShader(nullptr, nullptr, 0);
     dc->GSSetShader(nullptr, nullptr, 0);
     dc->PSSetShader(nullptr, nullptr, 0);
+    if (_streamOut)
+    {
+        _streamOut = false;
+
+        // 受け取りバッファをクリア
+        ID3D11Buffer* clear_streamout_buffer[] = { nullptr };
+        UINT streamout_offsets[1] = { 0 };
+        dc->SOSetTargets(1, clear_streamout_buffer, streamout_offsets);
+
+        // CPUからアクセスするためのバッファにコピー
+        dc->CopyResource(_streamOutCopyBuffer.Get(),
+            _streamOutVertexBuffer.Get());
+
+        // 取得した頂点情報から草の生える位置を算出
+        D3D11_MAPPED_SUBRESOURCE mapped_resource;
+        dc->Map(_streamOutCopyBuffer.Get(), 0,
+            D3D11_MAP_READ, 0, &mapped_resource);
+        if (mapped_resource.pData)
+        {
+            // 頂点情報を受け取り
+            _streamOutData.clear();
+            UINT size = mapped_resource.RowPitch / sizeof(StreamOutVertex);
+            _streamOutData.resize(size);
+            CopyMemory(_streamOutData.data(), mapped_resource.pData, sizeof(StreamOutVertex) * size);
+
+            // マップ解除
+            dc->Unmap(_streamOutCopyBuffer.Get(), 0);
+        }
+    }
 }
 
 void Terrain::DrawGui()
 {
-    ImGui::SliderFloat("Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
-    ImGui::SliderFloat("Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
-    ImGui::SliderFloat("Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
-    ImGui::SliderFloat("Tilling Scale", &_data.tillingScale, 0.1f, 10.0f, "%.1f");
-    ImGui::SliderFloat("Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
-    ImGui::SliderFloat("Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
-    ImGui::SliderFloat("Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");
-    ImGui::Image(_baseSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_baseSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_baseSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_heightMapSRV.Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_heightMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
+    ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
+    ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
+    ImGui::SliderFloat(u8"Tilling Scale", &_data.tillingScale, 0.1f, 10.0f, "%.1f");
+    ImGui::SliderFloat(u8"Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
+    ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
+    ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");
+    ImGui::Checkbox(u8"頂点書き出し", &_streamOut);
+    ImGui::Image(_colorSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_normalSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_colorSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_normalSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_colorSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_normalSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 }
 // 地形メッシュの頂点とインデックスを生成
 void Terrain::CreateTerrainMesh(ID3D11Device* device)

@@ -1,6 +1,7 @@
 #include "SceneTerrainEditor.h"
 
-#include "../../Library/Component/TerrainController.h"
+#include "../../Library/Component/Terrain/TerrainController.h"
+#include "../../Library/Component/Terrain/TerrainDeformer.h"
 
 void SceneTerrainEditor::OnInitialize()
 {
@@ -9,5 +10,6 @@ void SceneTerrainEditor::OnInitialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
     auto terrainActor = RegisterActor<Actor>(u8"Terrain", ActorTag::Stage);
+    terrainActor->AddComponent<TerrainDeformer>();
     terrainActor->AddComponent<TerrainController>();
 }

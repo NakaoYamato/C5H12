@@ -6,6 +6,7 @@
 
 #include "../../Library/Math/Vector.h"
 #include "../Graphics/RenderContext.h"
+#include "../PostProcess/FrameBuffer.h"
 
 class Terrain
 {
@@ -32,11 +33,34 @@ public:
         float padding[1] = { 0.0f }; // パディング
     };
 
+    // ストリームアウト用
+    struct StreamOutVertex
+    {
+        DirectX::XMFLOAT4 position;
+        DirectX::XMFLOAT3 worldPosition;
+        DirectX::XMFLOAT4 color;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT2 texcoord;
+        float grassWeight;
+    };
+
+    static constexpr LONG STREAM_OUT_MAX_VERTEX = 3 * 3 * 64 * 64;
+    static constexpr LONG HEIGHT_MAP_SIZE = 1024;
+    static constexpr UINT HeightMapIndex = 6; // モデル用定数バッファのインデックス
 public:
     Terrain(ID3D11Device* device);
 	~Terrain() {}
     void Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool writeGBuffer);
     void DrawGui();
+
+#pragma region アクセサ
+    // ハイトマップのフレームバッファを取得
+    FrameBuffer* GetHeightMapFB() { return _heightMapFB.get(); }
+    // ストリームアウトデータを取得
+    const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
+
+    void SetStreamOut(bool streamOut) { _streamOut = streamOut; }
+#pragma endregion
 
 private:
     // 地形メッシュの頂点とインデックスを生成
@@ -57,7 +81,15 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
 	// 地形用テクスチャ
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _baseSRVs[3];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _colorSRVs[3];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _normalSRVs[3];
     // ハイトマップ
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _heightMapSRV;
+    std::unique_ptr<FrameBuffer> _heightMapFB;
+
+    // ストリームアウト用
+    bool _streamOut = false;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
+    std::vector<StreamOutVertex> _streamOutData;
 };

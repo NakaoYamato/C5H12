@@ -4,6 +4,9 @@
 
 FrameBuffer::FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, bool hasDepthstencil)
 {
+    _width = width;
+    _height = height;
+
 	HRESULT hr{ S_OK };
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> renderTargetBuffer;
 	D3D11_TEXTURE2D_DESC texture2dDesc{};
@@ -88,7 +91,7 @@ void FrameBuffer::Activate(ID3D11DeviceContext* immediateContext)
 {
 	_viewportCount = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
 	immediateContext->RSGetViewports(&_viewportCount, _cachedViewports);
-	immediateContext->OMGetRenderTargets(1, _cachedRTV.ReleaseAndGetAddressOf(),
+	immediateContext->OMGetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, _cachedRTVs,
 		_cachedDSV.ReleaseAndGetAddressOf());
 
 	immediateContext->RSSetViewports(1, &_viewport);
@@ -106,8 +109,13 @@ void FrameBuffer::ClearAndActivate(ID3D11DeviceContext* immediateContext,
 void FrameBuffer::Deactivate(ID3D11DeviceContext* immediateContext)
 {
 	immediateContext->RSSetViewports(_viewportCount, _cachedViewports);
-	immediateContext->OMSetRenderTargets(1, _cachedRTV.GetAddressOf(),
+	immediateContext->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, _cachedRTVs,
 		_cachedDSV.Get());
+	for (int i = 0; i < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
+	{
+        if (_cachedRTVs[i])
+			_cachedRTVs[i]->Release();
+	}
 }
 
 void FrameBuffer::Deactivate(ID3D11DeviceContext* immediateContext,

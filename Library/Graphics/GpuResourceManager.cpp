@@ -205,6 +205,41 @@ void GpuResourceManager::CreateGsFromCso(ID3D11Device* device,
 	}
 }
 
+// ジオメトリシェーダー作成
+void GpuResourceManager::CreateGsWithStreamOutFromCso(ID3D11Device* device, 
+	const char* csoName, 
+	ID3D11GeometryShader** geometryShader,
+	const D3D11_SO_DECLARATION_ENTRY* declaration,
+	UINT numEntries,
+	const UINT* bufferStrides, 
+	UINT numStrides,
+	UINT rasterizedStream)
+{
+	FILE* fp{ nullptr };
+	fopen_s(&fp, csoName, "rb");
+	_ASSERT_EXPR_A(fp, "CSO File not found");
+
+	fseek(fp, 0, SEEK_END);
+	long cso_sz{ ftell(fp) };
+	fseek(fp, 0, SEEK_SET);
+
+	std::unique_ptr<unsigned char[]> csoData{ std::make_unique<unsigned char[]>(cso_sz) };
+	fread(csoData.get(), cso_sz, 1, fp);
+	fclose(fp);
+
+	HRESULT hr{ S_OK };
+	hr = device->CreateGeometryShaderWithStreamOutput(csoData.get(),
+		cso_sz, 
+		declaration,
+		numEntries,
+		bufferStrides,
+		numStrides,
+		rasterizedStream,
+		nullptr, 
+		geometryShader);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+}
+
 // コンピュートシェーダー作成
 void GpuResourceManager::CreateCsFromCso(ID3D11Device* device,
 	const char* csoName,
@@ -488,4 +523,29 @@ HRESULT GpuResourceManager::CreateConstantBuffer(
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	return hr;
+}
+
+
+Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  cachedDSS;
+Microsoft::WRL::ComPtr<ID3D11RasterizerState>  cachedRS;
+Microsoft::WRL::ComPtr<ID3D11BlendState>  cachedBS;
+FLOAT blendFactor[4];
+UINT sampleMask;
+// 現在使用しているステートのキャッシュを保存
+void GpuResourceManager::SaveStateCache(ID3D11DeviceContext* dc)
+{
+	dc->OMGetDepthStencilState(cachedDSS.GetAddressOf(), 0);
+	dc->RSGetState(cachedRS.GetAddressOf());
+	dc->OMGetBlendState(cachedBS.GetAddressOf(), blendFactor, &sampleMask);
+}
+// 保存してあるステートのキャッシュを復元
+void GpuResourceManager::RestoreStateCache(ID3D11DeviceContext* dc)
+{
+	dc->OMSetDepthStencilState(cachedDSS.Get(), 0);
+	dc->RSSetState(cachedRS.Get());
+	dc->OMSetBlendState(cachedBS.Get(), blendFactor, sampleMask);
+
+    cachedDSS.Reset();
+    cachedRS.Reset();
+    cachedBS.Reset();
 }

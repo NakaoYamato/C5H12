@@ -164,7 +164,8 @@
     <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Component\StateController.cpp" />
-    <ClCompile Include="Library\Component\TerrainController.cpp" />
+    <ClCompile Include="Library\Component\Terrain\TerrainController.cpp" />
+    <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
@@ -338,7 +339,8 @@
     <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Component\StateController.h" />
-    <ClInclude Include="Library\Component\TerrainController.h" />
+    <ClInclude Include="Library\Component\Terrain\TerrainController.h" />
+    <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
@@ -760,6 +762,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainDeformPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="HLSL\Terrain\TerrainDS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Domain</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
@@ -775,6 +783,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainGS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="HLSL\Terrain\TerrainHS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Hull</ShaderType>

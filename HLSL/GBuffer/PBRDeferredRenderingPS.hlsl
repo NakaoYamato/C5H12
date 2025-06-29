@@ -36,7 +36,7 @@ PS_OUT main(VsOut pin)
     GBufferData decodeData = DecodeGBuffer(textureMaps, samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, invViewProjection);
     
     // decodeData.baseColorにアルファ値がないのでそのままだとskymapが埋もれてしまう
-    // 対策として深度値からクリップしている
+    // 対策として深度が限りなく1に近ければからクリップしている
     clip(0.999999f - decodeData.depth);
     
 	// ベースカラー取得

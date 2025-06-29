@@ -15,7 +15,7 @@ enum class ModelRenderType
 {
     Dynamic,   // 骨の影響度がある(アニメーション等)
     Static,    // 骨の影響度がない(ステージ等のボーンがないモデル用)
-    Instancing,    // GPUインスタンシング使用
+    Instancing,// GPUインスタンシング使用
 
     ModelRenderTypeMax
 };

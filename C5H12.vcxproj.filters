@@ -507,6 +507,12 @@
     <ClCompile Include="Library\Component\BehaviorController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Scene\Editor\SceneTerrainEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\TerrainController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1058,6 +1064,12 @@
     <ClInclude Include="Library\Component\BehaviorController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Scene\Editor\SceneTerrainEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\TerrainController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1083,6 +1095,7 @@
     <None Include="HLSL\PostProcess\FXAA\FXAA.hlsl" />
     <None Include="HLSL\Particle\ComputeParticle.hlsli" />
     <None Include="HLSL\Particle\Sort\ComputeParticleBitonicSort.hlsli" />
+    <None Include="HLSL\Terrain\Terrain.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -1142,5 +1155,10 @@
     <FxCompile Include="HLSL\Particle\Render\ComputeParticleRenderVS.hlsl" />
     <FxCompile Include="HLSL\Particle\Render\ComputeParticleRenderGS.hlsl" />
     <FxCompile Include="HLSL\Particle\Render\ComputeParticleRenderPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainVS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainDS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainHS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainGBPS.hlsl" />
   </ItemGroup>
 </Project>

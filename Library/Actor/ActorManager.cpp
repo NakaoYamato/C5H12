@@ -129,34 +129,6 @@ void ActorManager::FixedUpdate()
 // 描画処理
 void ActorManager::Render(const RenderContext& rc)
 {
-	ID3D11DeviceContext* dc = rc.deviceContext;
-	const RenderState* renderState = rc.renderState;
-
-	// レンダーステート設定
-	dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-	dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-
-	// サンプラーステート設定
-	{
-		ID3D11SamplerState* samplerStates[] =
-		{
-			renderState->GetSamplerState(SamplerState::PointWrap),
-			renderState->GetSamplerState(SamplerState::PointClamp),
-			renderState->GetSamplerState(SamplerState::LinearWrap),
-			renderState->GetSamplerState(SamplerState::LinearClamp)
-		};
-		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-	}
-
-	ConstantBufferManager* cbManager = Graphics::Instance().GetConstantBufferManager();
-	// シーン定数バッファ、ライト定数バッファの更新
-	cbManager->Update(rc);
-	// シーン定数バッファの設定
-	cbManager->SetCB(dc, 0, ConstantBufferType::SceneCB, ConstantUpdateTarget::ALL);
-	// ライト定数バッファの設定
-	cbManager->SetCB(dc, 3, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
-
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
 		for (auto& actor : _updateActors[i])
@@ -184,26 +156,6 @@ void ActorManager::CastShadow(const RenderContext& rc)
 // 3D描画後の描画処理
 void ActorManager::DelayedRender(RenderContext& rc)
 {
-	ID3D11DeviceContext* dc = rc.deviceContext;
-	const RenderState* renderState = rc.renderState;
-
-	// レンダーステート設定
-	dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-	dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-
-	// サンプラーステート設定
-	{
-		ID3D11SamplerState* samplerStates[] =
-		{
-			renderState->GetSamplerState(SamplerState::PointWrap),
-			renderState->GetSamplerState(SamplerState::PointClamp),
-			renderState->GetSamplerState(SamplerState::LinearWrap),
-			renderState->GetSamplerState(SamplerState::LinearClamp)
-		};
-		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-	}
-
 	for (size_t i = static_cast<size_t>(ActorTag::Stage); i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
 		for (auto& actor : _updateActors[i])

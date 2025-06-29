@@ -126,6 +126,7 @@ void Scene::Render()
         {
             samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
         }
+        dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
         dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
     }
 
@@ -154,11 +155,6 @@ void Scene::Render()
 		rc.lightAmbientColor = light->GetAmbientColor();
 	}
 
-    // レンダーステート設定
-    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-
     // シーン定数バッファ、ライト定数バッファの更新
     cbManager->Update(rc);
     // シーン定数バッファの設定
@@ -166,16 +162,21 @@ void Scene::Render()
     // ライト定数バッファの設定
     cbManager->SetCB(dc, _LIGHT_CB_SLOT_INDEX, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
 
-    // ゲームオブジェクトの描画
-    _actorManager.Render(rc);
-
     //--------------------------------------------------------------------------------------
     // GBuffer生成
     GBuffer* gBuffer = graphics.GetGBuffer();
     if (graphics.RenderingDeferred())
     {
+        // レンダーステート設定
+        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc->OMSetBlendState(renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
+
         gBuffer->ClearAndActivate(dc);
         {
+            // ゲームオブジェクトの描画
+            _actorManager.Render(rc);
+
             // モデルの描画
             _meshRenderer.RenderOpaque(rc, true);
         }
@@ -214,6 +215,14 @@ void Scene::Render()
         }
         else
         {
+            // レンダーステート設定
+            dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+            dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+            dc->OMSetBlendState(renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+
+            // ゲームオブジェクトの描画
+            _actorManager.Render(rc);
+
             // フォワードレンダリング
             _meshRenderer.RenderOpaque(rc, false);
         }

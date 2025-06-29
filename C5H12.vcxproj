@@ -164,6 +164,7 @@
     <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Component\StateController.cpp" />
+    <ClCompile Include="Library\Component\TerrainController.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
@@ -249,6 +250,7 @@
     <ClCompile Include="Library\Model\ModelResource.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneModelEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneParticleEditor.cpp" />
+    <ClCompile Include="Library\Scene\Editor\SceneTerrainEditor.cpp" />
     <ClCompile Include="Library\Scene\Scene.cpp" />
     <ClCompile Include="Library\Scene\SceneLoading.cpp" />
     <ClCompile Include="Library\Scene\SceneManager.cpp" />
@@ -336,6 +338,7 @@
     <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Component\StateController.h" />
+    <ClInclude Include="Library\Component\TerrainController.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
@@ -433,6 +436,7 @@
     <ClInclude Include="Library\Model\SerializeFunction.h" />
     <ClInclude Include="Library\Scene\Editor\SceneModelEditor.h" />
     <ClInclude Include="Library\Scene\Editor\SceneParticleEditor.h" />
+    <ClInclude Include="Library\Scene\Editor\SceneTerrainEditor.h" />
     <ClInclude Include="Library\Scene\Scene.h" />
     <ClInclude Include="Library\Scene\SceneLoading.h" />
     <ClInclude Include="Library\Scene\SceneManager.h" />
@@ -521,6 +525,7 @@
     <None Include="HLSL\Scene\SceneConstantBuffer.hlsli" />
     <None Include="HLSL\SkyMap\SkyMap.hlsli" />
     <None Include="HLSL\Sprite\Sprite.hlsli" />
+    <None Include="HLSL\Terrain\Terrain.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl">
@@ -754,6 +759,44 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainDS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Domain</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Domain</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Domain</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Domain</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainGBPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainHS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Hull</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Hull</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Hull</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Hull</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\TerrainVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <None Include="HLSL\PostProcess\FXAA\FXAA.hlsl">
       <FileType>Document</FileType>

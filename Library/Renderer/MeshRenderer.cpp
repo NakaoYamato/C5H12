@@ -263,11 +263,12 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// サンプラステート設定
-	ID3D11SamplerState* samplerStates[] =
+	std::vector<ID3D11SamplerState*> samplerStates;
+	for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
 	{
-		rc.renderState->GetSamplerState(SamplerState::LinearWrap)
-	};
-	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+		samplerStates.push_back(rc.renderState->GetSamplerState(static_cast<SamplerState>(index)));
+	}
+	dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
 
 	// レンダーステート設定
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -284,9 +285,9 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 	// ボーンの影響度があるモデルの描画
 	{
 		// 定数バッファ設定
-		dc->VSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
-		dc->GSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
-		dc->PSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+		dc->VSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
+		dc->GSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
+		dc->PSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 
 		// 不透明描画処理
 		for (auto& drawInfomap : _dynamicInfomap)
@@ -316,9 +317,9 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;
 		// 定数バッファ設定
-		dc->VSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
-		dc->GSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
-		dc->PSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+		dc->VSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
+		dc->GSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
+		dc->PSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 
 		// 不透明描画処理
 		for (auto& drawInfomap : _staticInfomap)
@@ -354,11 +355,12 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// サンプラステート設定
-	ID3D11SamplerState* samplerStates[] =
+	std::vector<ID3D11SamplerState*> samplerStates;
+	for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
 	{
-		rc.renderState->GetSamplerState(SamplerState::LinearWrap)
-	};
-	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+		samplerStates.push_back(rc.renderState->GetSamplerState(static_cast<SamplerState>(index)));
+	}
+	dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
 
 	// レンダーステート設定
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -397,9 +399,9 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 		case ModelRenderType::Dynamic:
 		{
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
-			dc->GSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+			dc->VSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
+			dc->GSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
+			dc->PSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 
 			ShaderBase* shader = shaders
 				[static_cast<int>(ModelRenderType::Dynamic)]
@@ -422,9 +424,9 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 		case ModelRenderType::Static:
 		{
 			// 定数バッファ設定
-			dc->VSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
-			dc->GSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
-			dc->PSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+			dc->VSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
+			dc->GSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
+			dc->PSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 
 			ShaderBase* shader = shaders
 				[static_cast<int>(ModelRenderType::Static)]
@@ -455,11 +457,12 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// サンプラステート設定
-	ID3D11SamplerState* samplerStates[] =
+	std::vector<ID3D11SamplerState*> samplerStates;
+	for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
 	{
-		rc.renderState->GetSamplerState(SamplerState::LinearWrap)
-	};
-	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+		samplerStates.push_back(rc.renderState->GetSamplerState(static_cast<SamplerState>(index)));
+	}
+	dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
 
 	// レンダーステート設定
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -470,8 +473,8 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 	// ボーンの影響度があるモデルの描画
 	{
 		// 定数バッファ設定
-		dc->VSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
-		dc->PSSetConstantBuffers(1, 1, _dynamicBoneCB.GetAddressOf());
+		dc->VSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
+		dc->PSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 
 		// 不透明描画処理
 		ShaderBase* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)].get();
@@ -528,8 +531,8 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 	{
 		ID3D11DeviceContext* dc = rc.deviceContext;
 		// 定数バッファ設定
-		dc->VSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
-		dc->PSSetConstantBuffers(1, 1, _staticBoneCB.GetAddressOf());
+		dc->VSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
+		dc->PSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 
 		// 不透明描画処理
 		ShaderBase* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Static)].get();
@@ -618,8 +621,8 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	// 定数バッファ設定
-	dc->VSSetConstantBuffers(1, 1, _instancingCB.GetAddressOf());
-	dc->PSSetConstantBuffers(1, 1, _instancingCB.GetAddressOf());
+	dc->VSSetConstantBuffers(ModelCBIndex, 1, _instancingCB.GetAddressOf());
+	dc->PSSetConstantBuffers(ModelCBIndex, 1, _instancingCB.GetAddressOf());
 
 	// モデルの描画関数
 	auto DrawModel = [&](Model* model, InstancingDrawInfo& drawInfo, ShaderBase* shader)->void

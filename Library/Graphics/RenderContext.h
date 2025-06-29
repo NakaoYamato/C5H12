@@ -7,6 +7,11 @@
 #include "../Math/Vector.h"
 #include "Light.h"
 
+#pragma region 描画関係の定義
+const UINT ModelCBIndex = 1; // モデル用定数バッファのインデックス
+#pragma endregion
+
+
 /// <summary>
 /// 描画用情報を格納する構造体
 /// </summary>

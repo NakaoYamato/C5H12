@@ -348,9 +348,9 @@ Vector3 Vector3::RandomBias()
 Vector3 Vector3::RandomNormal()
 {
     return Vector3(
-		Random::RandNormal(),
-		Random::RandNormal(),
-		Random::RandNormal()
+		Random::Rand01(),
+		Random::Rand01(),
+		Random::Rand01()
     );
 }
 // Vector3‚Ì’l‚ğmin‚Æmax‚Å§ŒÀ
@@ -405,10 +405,10 @@ Vector4 Vector4::RandomBias()
 Vector4 Vector4::RandomNormal()
 {
     return Vector4(
-        Random::RandNormal(),
-        Random::RandNormal(),
-        Random::RandNormal(),
-		Random::RandNormal()
+        Random::Rand01(),
+        Random::Rand01(),
+        Random::Rand01(),
+		Random::Rand01()
     );
 }
 #pragma endregion

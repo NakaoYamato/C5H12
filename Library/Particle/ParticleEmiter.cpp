@@ -23,7 +23,7 @@ int ParticleEmiter::ExtensionInt::Processing() const
 		return static_cast<int>(Random::RandBias() * value0) + base;
 		break;
 	case ParticleEmiter::ProcessType::RandomNormal:
-		return static_cast<int>(Random::RandNormal() * value0) + base;
+		return static_cast<int>(Random::Rand01() * value0) + base;
 		break;
 	default:
 		return base;
@@ -79,7 +79,7 @@ float ParticleEmiter::ExtensionFloat::Processing() const
 		return (Random::RandBias() * value0) + base;
 		break;
 	case ParticleEmiter::ProcessType::RandomNormal:
-		return (Random::RandNormal() * value0) + base;
+		return (Random::Rand01() * value0) + base;
 		break;
 	default:
 		return base;

@@ -47,7 +47,7 @@ void Rigidbody::OnContact(CollisionData& collisionData)
 	// トリガーでなければ押し出し処理
 	if (!collisionData.isTrigger && !collisionData.otherIsTrigger)
 	{
-
+		_pushOut += collisionData.penetration * collisionData.hitNormal;
 	}
 }
 
@@ -153,6 +153,7 @@ void Rigidbody::UpdatePosition(float deltaTime)
 	DirectX::XMStoreFloat3(&positon,
 		DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&positon),
 			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&_linearVelocity), deltaTime)));
+	positon += _pushOut; // 押し出し量を加算
 	this->GetActor()->GetTransform().SetPosition(positon);
 
 	//角速度による姿勢の更新
@@ -169,4 +170,6 @@ void Rigidbody::UpdatePosition(float deltaTime)
 		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
 		this->GetActor()->GetTransform().SetRotation(Quaternion::ToRollPitchYaw(_orientation));
 	}
+
+	_pushOut = {}; // 押し出し量をクリア
 }

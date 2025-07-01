@@ -160,6 +160,7 @@
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
+    <ClCompile Include="Library\Component\Collider\TerrainCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
@@ -335,6 +336,7 @@
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\BehaviorController.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
+    <ClInclude Include="Library\Component\Collider\TerrainCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
@@ -762,7 +764,19 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\Terrain\TerrainDeformPS.hlsl">
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformAddPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformHeightPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformSubtractPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

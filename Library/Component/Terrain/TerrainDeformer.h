@@ -5,6 +5,13 @@
 class TerrainDeformer : public Component
 {
 public:
+	enum class BrushMode
+	{
+		Add,        // 色加算
+		Subtract,   // 色減算
+		Height,     // 高さ変形
+	};
+
     struct ConstantBuffer
     {
         DirectX::XMFLOAT2 brushPosition = {}; // ブラシ位置
@@ -31,17 +38,27 @@ public:
 private:
     // 地形コントローラーへの参照
     std::weak_ptr<TerrainController> _terrainController;
+    // 使用するブラシ
+	BrushMode _brushMode = BrushMode::Add;
 
     Vector3 _intersectionWorldPoint = Vector3::Zero; // 交差点
+    float brushRadius = 0.1f; // ブラシ半径
     float brushStrength = 1.0f; // ブラシ強度
     bool _useBrush = false; // ブラシ使用フラグ
     bool _isIntersect = false; // 交差したかどうか
     bool _isDeforming = false; // 変形中フラグ
 
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> _deformPS; // 変形用ピクセルシェーダー
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer; // 定数バッファ
-    ConstantBuffer _constantBufferData{}; // 定数バッファデータ
+    // 加算ブラシピクセルシェーダ
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _addBrushPS;
+	// 減算ブラシピクセルシェーダ
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> _subtractBrushPS;
+	// 高さ変形ブラシピクセルシェーダ
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> _heightBrushPS;
+    // 定数バッファ
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
+    // 定数バッファデータ
+    ConstantBuffer _constantBufferData{};
 
-    // テレインのハイトマップを別枠で格納するフレームバッファ
-    std::unique_ptr<FrameBuffer> _heightMapFB;
+    // テレインのパラメータマップを別枠で格納するフレームバッファ
+    std::unique_ptr<FrameBuffer> _parameterMapFB;
 };

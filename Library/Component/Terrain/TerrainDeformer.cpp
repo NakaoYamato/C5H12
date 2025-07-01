@@ -15,11 +15,21 @@ void TerrainDeformer::Start()
     // 地形コントローラーを取得
     _terrainController = GetActor()->GetComponent<TerrainController>();
 
-    // 編集用ピクセルシェーダーの読み込み
+    // 加算ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformPS.cso",
-        _deformPS.ReleaseAndGetAddressOf());
+        "./Data/Shader/TerrainDeformAddPS.cso",
+        _addBrushPS.ReleaseAndGetAddressOf());
+	// 減算ブラシピクセルシェーダの読み込み
+	GpuResourceManager::CreatePsFromCso(
+		Graphics::Instance().GetDevice(),
+		"./Data/Shader/TerrainDeformSubtractPS.cso",
+		_subtractBrushPS.ReleaseAndGetAddressOf());
+	// 高さ変形ブラシピクセルシェーダの読み込み
+	GpuResourceManager::CreatePsFromCso(
+		Graphics::Instance().GetDevice(),
+		"./Data/Shader/TerrainDeformHeightPS.cso",
+		_heightBrushPS.ReleaseAndGetAddressOf());
 
     // 定数バッファの作成
     GpuResourceManager::CreateConstantBuffer(
@@ -28,9 +38,9 @@ void TerrainDeformer::Start()
         _constantBuffer.ReleaseAndGetAddressOf());
 
     // 地形のハイトマップを格納するフレームバッファを作成
-    _heightMapFB = std::make_unique<FrameBuffer>(
+    _parameterMapFB = std::make_unique<FrameBuffer>(
         Graphics::Instance().GetDevice(),
-        Terrain::HEIGHT_MAP_SIZE, Terrain::HEIGHT_MAP_SIZE, true);
+        Terrain::ParameterMapSize, Terrain::ParameterMapSize, true);
 }
 // 更新処理
 void TerrainDeformer::Update(float elapsedTime)
@@ -100,17 +110,20 @@ void TerrainDeformer::Update(float elapsedTime)
         }
     }
 
-    Debug::Renderer::DrawSphere(
-        _intersectionWorldPoint, _constantBufferData.brushRadius,
-        Vector4::Yellow);
-
     // 変形中フラグをオンにする
     if (_isIntersect)
         _isDeforming = _INPUT_PRESSED("OK");
 
-    // ブラシの強度は経過時間によって減衰させる
+    // ブラシ半径をトランスフォームのサイズに影響されるようにする
+    _constantBufferData.brushRadius = brushRadius;
 
+    // ブラシの強度は経過時間によって減衰させる
     _constantBufferData.brushStrength = brushStrength * elapsedTime;
+
+    // ブラシの表示
+    Debug::Renderer::DrawSphere(
+        _intersectionWorldPoint, _constantBufferData.brushRadius,
+        Vector4::GetOpaque(_constantBufferData.brushColor));
 }
 // 描画処理
 void TerrainDeformer::Render(const RenderContext& rc)
@@ -126,6 +139,9 @@ void TerrainDeformer::Render(const RenderContext& rc)
         return;
     // 変形中フラグがオフの場合は何もしない
     if (!_isDeforming)
+        return;
+    // 接触していなければ処理しない
+    if (!_isIntersect)
         return;
     auto& streamOutData = terrain->GetStreamOutData();
     if (streamOutData.empty())
@@ -147,25 +163,48 @@ void TerrainDeformer::Render(const RenderContext& rc)
     rc.deviceContext->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
     rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 1);
     rc.deviceContext->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-    
-    terrain->GetHeightMapFB()->Activate(rc.deviceContext);
-    ID3D11ShaderResourceView* nullSRV[] = { nullptr };
-    GetActor()->GetScene()->GetTextureRenderer().Blit(
-        rc.deviceContext,
-        _heightMapFB->GetColorSRV().GetAddressOf(),
-        0,1,
-        _deformPS.Get()
-    );
-    terrain->GetHeightMapFB()->Deactivate(rc.deviceContext);
-    terrain->SetStreamOut(true);
 
-    _heightMapFB->ClearAndActivate(rc.deviceContext, Vector4::Zero, 1.0f);
+	// 現在のパラメータマップフレームバッファの色情報を取得
+    _parameterMapFB->ClearAndActivate(rc.deviceContext, Vector4::Zero, 1.0f);
     GetActor()->GetScene()->GetTextureRenderer().Blit(
         rc.deviceContext,
-        terrain->GetHeightMapFB()->GetColorSRV().GetAddressOf(),
+        terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf(),
         0, 1
     );
-    _heightMapFB->Deactivate(rc.deviceContext);
+    _parameterMapFB->Deactivate(rc.deviceContext);
+
+    terrain->GetParameterMapFB()->Activate(rc.deviceContext);
+    ID3D11ShaderResourceView* nullSRV[] = { nullptr };
+	// ブラシの種類によってピクセルシェーダを切り替える
+    switch (_brushMode)
+    {
+    case BrushMode::Add:
+        GetActor()->GetScene()->GetTextureRenderer().Blit(
+            rc.deviceContext,
+            _parameterMapFB->GetColorSRV().GetAddressOf(),
+            0, 1,
+            _addBrushPS.Get()
+        );
+        break;
+    case BrushMode::Subtract:
+        GetActor()->GetScene()->GetTextureRenderer().Blit(
+            rc.deviceContext,
+            _parameterMapFB->GetColorSRV().GetAddressOf(),
+            0, 1,
+            _subtractBrushPS.Get()
+        );
+        break;
+    case BrushMode::Height:
+        GetActor()->GetScene()->GetTextureRenderer().Blit(
+            rc.deviceContext,
+            _parameterMapFB->GetColorSRV().GetAddressOf(),
+            0, 1,
+            _heightBrushPS.Get()
+        );
+        break;
+    }
+    terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
+    terrain->SetStreamOut(true);
 
     // キャッシュの復元
     GpuResourceManager::RestoreStateCache(rc.deviceContext);
@@ -174,10 +213,22 @@ void TerrainDeformer::Render(const RenderContext& rc)
 void TerrainDeformer::DrawGui()
 {
     ImGui::Checkbox(u8"ブラシ使用", &_useBrush);
-    ImGui::Checkbox(u8"変形中", &_isDeforming);
+
+	ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"加算\0減算\0高さ変形\0");
+
     ImGui::DragFloat3(u8"ブラシワールド位置", &_intersectionWorldPoint.x, 0.01f, -100.0f, 100.0f);
     ImGui::DragFloat2(u8"ブラシUV位置", &_constantBufferData.brushPosition.x, 0.01f, -100.0f, 100.0f);
-    ImGui::DragFloat(u8"ブラシ半径", &_constantBufferData.brushRadius, 0.01f, 0.0f, 100.0f);
-    ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, 0.0f, 100.0f);
-    ImGui::ColorEdit4(u8"ブラシ色", &_constantBufferData.brushColor.x);
+    ImGui::DragFloat(u8"ブラシ半径", &brushRadius, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
+    ImGui::ColorEdit3(u8"ブラシ色", &_constantBufferData.brushColor.x);
+	if (ImGui::Button(u8"パラメータマップ書き出し"))
+	{
+		if (_terrainController.lock()->GetTerrain().lock())
+		{
+            _terrainController.lock()->GetTerrain().lock()->SaveParameterMap(
+				Graphics::Instance().GetDevice(),
+				Graphics::Instance().GetDeviceContext(),
+				L"./Data/Texture/Terrain/ParameterMap.dds");
+		}
+	}
 }

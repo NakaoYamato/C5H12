@@ -60,8 +60,11 @@ void SceneCollisionDebug::OnInitialize()
         capsule->GetTransform().SetPositionX(2.0f * f);
         capsule->GetTransform().SetPositionZ(-2.0f);
         capsule->GetTransform().SetPositionY(0.5f);
-        capsule->AddCollider<CapsuleCollider>();
+        auto collider = capsule->AddCollider<CapsuleCollider>();
         capsule->AddComponent<Rigidbody>();
+
+        collider->SetStart(Vector3(0.0f, 0.8f, 0.0f));
+        collider->SetEnd(Vector3(0.0f, 3.2f, 0.0f));
         //capsule->AddComponent<CharactorController>();
     }
 }

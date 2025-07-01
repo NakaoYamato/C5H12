@@ -27,7 +27,7 @@ struct DS_OUT
     float4 color : COLOR;
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD;
-    float grassWeight : GRASS_WEIGHT;
+    float4 blendRate : BLEND_RATE; // ブレンド率（R:岩, G:土, B:草, A:基本色）
 };
 #define GS_IN DS_OUT
 #define GS_OUT DS_OUT
@@ -36,6 +36,8 @@ struct DS_OUT
 cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
 {
     row_major float4x4 world;
+    
+    float4 baseColor; // ベースカラー
     
     float edgeFactor; // エッジ分割数
     float innerFactor; // 内部分割数

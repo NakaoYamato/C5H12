@@ -306,6 +306,8 @@ public:
     static Vector4 RandomBias();
     // -1~1の範囲でランダムな値を取得
     static Vector4 RandomNormal();
+	// 不透明で取得
+	static Vector4 GetOpaque(const Vector4& v);
 #pragma endregion
 
 #pragma region 演算子オーバーロード

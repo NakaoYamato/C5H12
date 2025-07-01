@@ -2,6 +2,7 @@
 
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
+#include "../../Library/Exporter/Exporter.h"
 
 #include <imgui.h>
 
@@ -64,7 +65,7 @@ Terrain::Terrain(ID3D11Device* device)
         nullptr);
     GpuResourceManager::LoadTextureFromFile(
         device,
-        L"./Data/Texture/Terrain/003_COLOR.png",
+        L"./Data/Texture/Terrain/003_COLOR.jpg",
         _colorSRVs[2].ReleaseAndGetAddressOf(),
         nullptr);
     GpuResourceManager::LoadTextureFromFile(
@@ -82,8 +83,8 @@ Terrain::Terrain(ID3D11Device* device)
         L"./Data/Texture/Terrain/003_NORMAL.png",
         _normalSRVs[2].ReleaseAndGetAddressOf(),
         nullptr);
-    // ハイトマップの読み込み
-    _heightMapFB = std::make_unique<FrameBuffer>(device, HEIGHT_MAP_SIZE, HEIGHT_MAP_SIZE);
+    // パラメータマップの読み込み
+    _parameterMapFB = std::make_unique<FrameBuffer>(device, ParameterMapSize, ParameterMapSize, true);
 
     // ストリームアウトを使用してプリミティブを取得するシェーダー
     {
@@ -94,7 +95,7 @@ Terrain::Terrain(ID3D11Device* device)
             {0,"COLOR",			0,0,4,0},
             {0,"NORMAL",		0,0,3,0},
             {0,"TEXCOORD",		0,0,2,0},
-            {0,"GRASS_WEIGHT",		0,0,1,0},
+            {0,"BLEND_RATE",	0,0,4,0},
         };
         UINT bufferStrides[] = { sizeof(StreamOutVertex) };
         GpuResourceManager::CreateGsWithStreamOutFromCso(
@@ -110,7 +111,7 @@ Terrain::Terrain(ID3D11Device* device)
     {
         D3D11_BUFFER_DESC vBufferDesc{};
         vBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-        vBufferDesc.ByteWidth = sizeof(StreamOutVertex) * STREAM_OUT_MAX_VERTEX;
+        vBufferDesc.ByteWidth = sizeof(StreamOutVertex) * StreamOutMaxVertex;
         vBufferDesc.BindFlags = D3D11_BIND_STREAM_OUTPUT;
         vBufferDesc.CPUAccessFlags = 0;
         vBufferDesc.MiscFlags = 0;
@@ -125,7 +126,7 @@ Terrain::Terrain(ID3D11Device* device)
     {
         D3D11_BUFFER_DESC vBufferDesc{};
         vBufferDesc.Usage = D3D11_USAGE_STAGING;
-        vBufferDesc.ByteWidth = sizeof(StreamOutVertex) * STREAM_OUT_MAX_VERTEX;
+        vBufferDesc.ByteWidth = sizeof(StreamOutVertex) * StreamOutMaxVertex;
         vBufferDesc.BindFlags = 0;
         vBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
         vBufferDesc.MiscFlags = 0;
@@ -184,9 +185,9 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
         _normalSRVs[2].Get(),
     };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
-    // ハイトマップ設定
-    dc->DSSetShaderResources(HeightMapIndex, 1, _heightMapFB->GetColorSRV().GetAddressOf());
-    dc->PSSetShaderResources(HeightMapIndex, 1, _heightMapFB->GetColorSRV().GetAddressOf());
+    // パラメータマップ設定
+    dc->DSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
+    dc->PSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
     // 頂点バッファとインデックスバッファを設定
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
@@ -199,8 +200,8 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
     // シェーダーリソースビューを解除
     ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
     dc->PSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
-    dc->DSSetShaderResources(HeightMapIndex, 1, nullSRVs);
-    dc->PSSetShaderResources(HeightMapIndex, 1, nullSRVs);
+    dc->DSSetShaderResources(ParameterMapIndex, 1, nullSRVs);
+    dc->PSSetShaderResources(ParameterMapIndex, 1, nullSRVs);
     // シェーダーを解除
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->HSSetShader(nullptr, nullptr, 0);
@@ -240,7 +241,8 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
 
 void Terrain::DrawGui()
 {
-    ImGui::Image(_heightMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+	ImGui::ColorEdit4(u8"Color", &_data.baseColor.x, ImGuiColorEditFlags_NoInputs);
     ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
     ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
     ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
@@ -255,6 +257,15 @@ void Terrain::DrawGui()
     ImGui::Image(_normalSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Image(_colorSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Image(_normalSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+}
+// パラメータマップの書き出し
+void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)
+{
+    if (Exporter::SaveDDSFile(device, dc,
+        _parameterMapFB->GetColorSRV().Get(),
+        parameterMapPath))
+    {
+    }
 }
 // 地形メッシュの頂点とインデックスを生成
 void Terrain::CreateTerrainMesh(ID3D11Device* device)

@@ -14,7 +14,7 @@ FrameBuffer::FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, 
 	texture2dDesc.Height = height;
 	texture2dDesc.MipLevels = 1;
 	texture2dDesc.ArraySize = 1;
-	texture2dDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	texture2dDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT; // 通常の浮動小数点フォーマット
 	texture2dDesc.SampleDesc.Count = 1;
 	texture2dDesc.SampleDesc.Quality = 0;
 	texture2dDesc.Usage = D3D11_USAGE_DEFAULT;

@@ -22,6 +22,8 @@ public:
     {
         DirectX::XMFLOAT4X4 world = {};
 
+		DirectX::XMFLOAT4 baseColor{ 1.0f, 1.0f, 1.0f, 1.0f }; // ベースカラー
+
         float edgeFactor{ 64 };// エッジ分割数
         float innerFactor{ 64 };// 内部部分数
         float heightScaler{ +1.0f };// 高さ係数
@@ -41,21 +43,23 @@ public:
         DirectX::XMFLOAT4 color;
         DirectX::XMFLOAT3 normal;
         DirectX::XMFLOAT2 texcoord;
-        float grassWeight;
+        DirectX::XMFLOAT4 blendRate;
     };
 
-    static constexpr LONG STREAM_OUT_MAX_VERTEX = 3 * 3 * 64 * 64;
-    static constexpr LONG HEIGHT_MAP_SIZE = 1024;
-    static constexpr UINT HeightMapIndex = 6; // モデル用定数バッファのインデックス
+    static constexpr LONG StreamOutMaxVertex = 3 * 3 * 64 * 64;
+    static constexpr LONG ParameterMapSize = 1024;
+    static constexpr UINT ParameterMapIndex = 6;
 public:
     Terrain(ID3D11Device* device);
 	~Terrain() {}
     void Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool writeGBuffer);
     void DrawGui();
 
+    // パラメータマップの書き出し
+	void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
 #pragma region アクセサ
-    // ハイトマップのフレームバッファを取得
-    FrameBuffer* GetHeightMapFB() { return _heightMapFB.get(); }
+    // パラメータマップのフレームバッファを取得
+    FrameBuffer* GetParameterMapFB() { return _parameterMapFB.get(); }
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
 
@@ -83,8 +87,8 @@ private:
 	// 地形用テクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _colorSRVs[3];
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _normalSRVs[3];
-    // ハイトマップ
-    std::unique_ptr<FrameBuffer> _heightMapFB;
+    // パラメータマップ（R：テクスチャ０ブレンド率、G：テクスチャ１ブレンド率、B：テクスチャ２ブレンド率、A：高さ）
+    std::unique_ptr<FrameBuffer> _parameterMapFB;
 
     // ストリームアウト用
     bool _streamOut = false;

@@ -449,6 +449,11 @@ Vector4 Vector4::RandomNormal()
 		Random::Rand01()
     );
 }
+// •s“§–¾‚ÅŽæ“¾
+Vector4 Vector4::GetOpaque(const Vector4& v)
+{
+    return Vector4(v.x, v.y, v.z, 1.0f);
+}
 #pragma endregion
 Vector4 Vector4::operator+(const Vector4&) const
 {

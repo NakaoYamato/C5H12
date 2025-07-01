@@ -25,4 +25,9 @@ public:
 
 private:
     std::shared_ptr<Terrain> _terrain = nullptr;
+    // 読み込む用のパラメータマップ
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterMapSRV;
+
+    // ワイヤーフレーム描画フラグ
+	bool _drawWireframe = false;
 };

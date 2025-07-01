@@ -90,6 +90,61 @@ bool Exporter::SavePngFile(
     return SUCCEEDED(hr);
 }
 
+/// SRVをDDSファイルとして保存する
+bool Exporter::SaveDDSFile(ID3D11Device* device, 
+    ID3D11DeviceContext* dc,
+    ID3D11ShaderResourceView* srv,
+    const std::wstring& filePath)
+{
+    using Microsoft::WRL::ComPtr;
+
+    // SRVから元のテクスチャリソースを取得
+    ComPtr<ID3D11Resource> pSourceResource;
+    srv->GetResource(&pSourceResource);
+
+    ComPtr<ID3D11Texture2D> pSourceTexture;
+    HRESULT hr = pSourceResource.As(&pSourceTexture);
+    if (FAILED(hr)) return hr;
+
+    D3D11_TEXTURE2D_DESC srcDesc;
+    pSourceTexture->GetDesc(&srcDesc);
+
+    // CPUが読み取れるステージングテクスチャを作成
+    ComPtr<ID3D11Texture2D> pStagingTexture;
+    D3D11_TEXTURE2D_DESC stagingDesc = srcDesc;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.BindFlags = 0;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingDesc.MiscFlags = 0;
+
+    hr = device->CreateTexture2D(&stagingDesc, nullptr, &pStagingTexture);
+    if (FAILED(hr)) return hr;
+
+    // GPU上のテクスチャをステージングテクスチャにコピー
+    dc->CopyResource(pStagingTexture.Get(), pSourceTexture.Get());
+
+    // ステージングテクスチャをCPUにマップ
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    hr = dc->Map(pStagingTexture.Get(), 0, D3D11_MAP_READ, 0, &mappedResource);
+    if (FAILED(hr)) return hr;
+
+    // DirectX::Imageを構築してファイルに保存
+    DirectX::Image image{};
+    image.width = srcDesc.Width;
+    image.height = srcDesc.Height;
+    image.format = srcDesc.Format;
+    image.rowPitch = mappedResource.RowPitch;
+    image.slicePitch = mappedResource.DepthPitch;
+    image.pixels = reinterpret_cast<uint8_t*>(mappedResource.pData);
+
+    // DDSで保存
+    hr = DirectX::SaveToDDSFile(image, DirectX::DDS_FLAGS_NONE, filePath.c_str());
+
+    dc->Unmap(pStagingTexture.Get(), 0);
+
+    return hr;
+}
+
 bool Exporter::SaveJsonFile(const std::string& filename, const nlohmann::json& jsonData)
 {
     std::ofstream writing_file;

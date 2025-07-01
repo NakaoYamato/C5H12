@@ -15,7 +15,7 @@ void main(
         elemant.normal = gin[i].normal;
         elemant.color = gin[i].color;
         elemant.worldPosition = gin[i].worldPosition;
-        elemant.grassWeight = gin[i].grassWeight;
+        elemant.blendRate = gin[i].blendRate;
         gout.Append(elemant);
     }
     gout.RestartStrip();

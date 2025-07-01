@@ -121,6 +121,9 @@ private:
 	Vector3				_accumulatedForce = {};		//力のアキュムレータ
 	Vector3				_accumulatedTorque = {};	//トルクアキュムレータ
 
+	// 押し出し量
+	Vector3 _pushOut = {};
+
 	// 抗力係数
 	float _dragCoefficient = 0.5f;
 

@@ -18,7 +18,7 @@ public:
 	};
 
 public:
-	FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, bool hasDepthstencil = true/*BLOOM*/);
+	FrameBuffer(ID3D11Device* device, uint32_t width, uint32_t height, bool hasDepthstencil = true);
 	FrameBuffer() = delete;
 	virtual ~FrameBuffer() = default;
 

@@ -37,6 +37,20 @@ public:
         const std::wstring& filePath);
 
 	/// <summary>
+	/// SRVをDDSファイルとして保存する
+	/// </summary>
+	/// <param name="device"></param>
+	/// <param name="dc"></param>
+	/// <param name="srv"></param>
+	/// <param name="filePath"></param>
+	/// <returns></returns>
+	static bool SaveDDSFile(
+		ID3D11Device* device,
+		ID3D11DeviceContext* dc,
+		ID3D11ShaderResourceView* srv,
+		const std::wstring& filePath);
+
+	/// <summary>
 	/// JSONファイルを保存する
 	/// </summary>
 	/// <param name="filename"></param>

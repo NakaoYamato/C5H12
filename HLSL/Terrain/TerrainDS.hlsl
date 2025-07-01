@@ -2,8 +2,8 @@
 #include "../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
-// ハイトマップ
-Texture2D<float4> heightTextures : register(t6);
+// パラメータマップ
+Texture2D<float4> parameterTexture : register(t6);
 
 [domain("tri")]
 DS_OUT main(HS_CONSTANT_OUT input, float3 UV : SV_DomainLocation,
@@ -19,23 +19,26 @@ const OutputPatch<DS_IN, 3> patch)
     // 頂点法線
     float3 normal = normalize(patch[0].normal * UV.x + patch[1].normal * UV.y + patch[2].normal * UV.z);
     // ワールド法線
-    float3 world_normal = normalize(mul(normal, (float3x3) world));
-    // ハイトマップ
-    float4 weight_textures = heightTextures.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
-    float height = weight_textures.x * heightSclaer;
+    float3 worldNormal = normalize(mul(normal, (float3x3) world));
+    // パラメータマップから高さ方向取得
+    float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
+    float height = parameter.a * heightSclaer;
     // 頂点座標をハイトマップで取得した値分ずらす
     {
         position = mul(float4(position, 1.0f), world).xyz;
-        position += world_normal * height;
+        position += worldNormal * height;
     }
     // 情報設定
     dout.position = mul(float4(position, 1.0), viewProjection);
     dout.texcoord = texcoord;
-    dout.normal = world_normal;
+    dout.normal = worldNormal;
     dout.color = color;
     
     dout.worldPosition = position;
-    dout.grassWeight = weight_textures.b;
+    dout.blendRate.rgb = parameter.rgb;
+    dout.blendRate.a = saturate(1.0f - (parameter.r + parameter.g + parameter.b));
+    // ブレンド率を正規化
+    dout.blendRate = normalize(dout.blendRate);
     
     return dout;
 }

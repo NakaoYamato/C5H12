@@ -39,12 +39,12 @@ public:
 	// GUI描画
 	void DrawGui() override;
 	// コリジョンメッシュの再計算
-	void RecalculateCollisionMesh();
+	virtual void RecalculateCollisionMesh();
 #pragma region アクセサ
 	// コリジョンメッシュ取得
 	const CollisionMesh& GetCollisionMesh() const { return _collisionMesh; }
 #pragma endregion
-private:
+protected:
     /// <summary>
     /// 指定のAABBとコリジョンメッシュのAABBの交差判定
     /// </summary>
@@ -52,7 +52,7 @@ private:
     /// <returns>交差したAABBの番号</returns>
     std::vector<size_t> GetCollisionMeshIndex(
         const DirectX::BoundingBox& aabb);
-private:
+protected:
 	CollisionMesh	_collisionMesh;	// コリジョンメッシュ
 	bool _recalculate = true;	// 再計算フラグ
 	bool _isDebugDrawVertex = false; // 頂点描画フラグ

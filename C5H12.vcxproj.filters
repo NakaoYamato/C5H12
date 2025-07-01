@@ -516,7 +516,7 @@
     <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Component\Collider\TerrainCollider.cpp">
+    <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1079,7 +1079,7 @@
     <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Component\Collider\TerrainCollider.h">
+    <ClInclude Include="Library\Component\Terrain\TerrainCollider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1108,6 +1108,7 @@
     <None Include="HLSL\Particle\ComputeParticle.hlsli" />
     <None Include="HLSL\Particle\Sort\ComputeParticleBitonicSort.hlsli" />
     <None Include="HLSL\Terrain\Terrain.hlsli" />
+    <None Include="HLSL\Terrain\Deform\TerrainDeform.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -1176,5 +1177,6 @@
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformAddPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformSubtractPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformHeightPS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\FullscreenQuadPS.hlsl" />
   </ItemGroup>
 </Project>

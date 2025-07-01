@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
@@ -14,6 +15,8 @@
 // 初期化
 void Scene::Initialize()
 {
+    ProfileScopedSection_3(0, "Scene::Initialize", ImGuiControl::Profiler::Dark);
+
 	_primitive = std::make_unique<Primitive>(Graphics::Instance().GetDevice());
     // レンダラー作成
 	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
@@ -58,6 +61,8 @@ void Scene::Finalize()
 //更新処理
 void Scene::Update(float elapsedTime)
 {
+    ProfileScopedSection_3(0, "Scene::Update", ImGuiControl::Profiler::Dark);
+
     // RCのデータをクリア
 	GetRenderContext().pointLights.clear();
 
@@ -93,6 +98,8 @@ void Scene::Update(float elapsedTime)
 /// 一定間隔の更新処理
 void Scene::FixedUpdate()
 {
+    ProfileScopedSection_3(0, "Scene::FixedUpdate", ImGuiControl::Profiler::Dark);
+
     // ゲームオブジェクトの更新
     _actorManager.FixedUpdate();
 
@@ -102,6 +109,8 @@ void Scene::FixedUpdate()
 //描画処理
 void Scene::Render()
 {
+    ProfileScopedSection_3(0, "Scene::Render", ImGuiControl::Profiler::Dark);
+
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
     ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
@@ -358,6 +367,8 @@ void Scene::Render()
 // デバッグ用Gui描画
 void Scene::DrawGui()
 {
+    ProfileScopedSection_3(0, "Scene::DrawGui", ImGuiControl::Profiler::Dark);
+
     // ImGuiに描画フラグが無効ならバックバッファに描画
     if (_isImGuiRendering)
     {

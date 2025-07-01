@@ -10,8 +10,6 @@ DS_OUT main(HS_CONSTANT_OUT input, float3 UV : SV_DomainLocation,
 const OutputPatch<DS_IN, 3> patch)
 {
     DS_OUT dout = (DS_OUT) 0;
-    // 頂点色
-    float4 color = patch[0].color * UV.x + patch[1].color * UV.y + patch[2].color * UV.z;
     // 頂点UV座標
     float2 texcoord = patch[0].texcoord * UV.x + patch[1].texcoord * UV.y + patch[2].texcoord * UV.z;
     // 頂点座標
@@ -22,7 +20,7 @@ const OutputPatch<DS_IN, 3> patch)
     float3 worldNormal = normalize(mul(normal, (float3x3) world));
     // パラメータマップから高さ方向取得
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
-    float height = parameter.a * heightSclaer;
+    float height = parameter.w * heightSclaer;
     // 頂点座標をハイトマップで取得した値分ずらす
     {
         position = mul(float4(position, 1.0f), world).xyz;
@@ -32,11 +30,10 @@ const OutputPatch<DS_IN, 3> patch)
     dout.position = mul(float4(position, 1.0), viewProjection);
     dout.texcoord = texcoord;
     dout.normal = worldNormal;
-    dout.color = color;
     
     dout.worldPosition = position;
-    dout.blendRate.rgb = parameter.rgb;
-    dout.blendRate.a = saturate(1.0f - (parameter.r + parameter.g + parameter.b));
+    dout.blendRate.xyz = parameter.xyz;
+    dout.blendRate.w = saturate(1.0f - (parameter.x + parameter.y + parameter.z));
     // ブレンド率を正規化
     dout.blendRate = normalize(dout.blendRate);
     

@@ -128,6 +128,7 @@ public:
     static constexpr DirectX::XMFLOAT3 Zero     = { 0.0f,0.0f,0.0f };
     static constexpr DirectX::XMFLOAT3 One      = { 1.0f,1.0f,1.0f };
     static constexpr DirectX::XMFLOAT3 Max      = { FLT_MAX,FLT_MAX,FLT_MAX };
+    static constexpr DirectX::XMFLOAT3 Min      = { -FLT_MAX,-FLT_MAX,-FLT_MAX };
     static constexpr DirectX::XMFLOAT3 Right    = { 1.0f,0.0f,0.0f };
     static constexpr DirectX::XMFLOAT3 Up       = { 0.0f,1.0f,0.0f };
     static constexpr DirectX::XMFLOAT3 Front    = { 0.0f,0.0f,1.0f };
@@ -194,6 +195,10 @@ public:
         float screenWidth, float screenHeight,
         const DirectX::XMFLOAT4X4& view, 
         const DirectX::XMFLOAT4X4& projection);
+	// Vector3の最小値を取得
+    static Vector3 Minimum(const Vector3& src, const Vector3& dst);
+	// Vector3の最大値を取得
+	static Vector3 Maximum(const Vector3& src, const Vector3& dst);
 #pragma endregion
 
 #pragma region 関数
@@ -266,6 +271,16 @@ public:
         const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection) const
     {
         return Vector3::Unproject(*this, screenWidth, screenHeight, view, projection);
+    }
+    // Vector3の最小値を取得
+    Vector3 Minimum(const Vector3& dst)
+    {
+		return Vector3::Minimum(*this, dst);
+    }
+    // Vector3の最大値を取得
+    Vector3 Maximum(const Vector3& dst)
+    {
+		return Vector3::Maximum(*this, dst);
     }
 #pragma endregion
 };

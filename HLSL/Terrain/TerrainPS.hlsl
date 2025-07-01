@@ -20,8 +20,6 @@ cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
 #define DIRT_NORMAL 4
 #define GRASS_NORMAL 5
 Texture2D terrainTextures[6] : register(t0);
-// ハイトマップ
-Texture2D<float4> heightTextures : register(t6);
 
 float4 main(PS_IN pin) : SV_TARGET
 {
@@ -35,14 +33,15 @@ float4 main(PS_IN pin) : SV_TARGET
     float3 grassNormal = terrainTextures[GRASS_NORMAL].Sample(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], tillingCoord).rgb;
     
     // ブレンド率から最終的な色と法線を計算
-    float4 diffuseColor = rockColor * pin.blendRate.x +
-                   dirtColor * pin.blendRate.y +
-                   grassColor * pin.blendRate.z +
-                   pin.color * pin.blendRate.a;
-    float3 N = rockNormal * pin.blendRate.x +
-                    dirtNormal * pin.blendRate.y +
-                    grassNormal * pin.blendRate.z +
-                    float3(0, 1, 0) * pin.blendRate.a;
+    float4 blendRate = normalize(pin.blendRate);
+    float4 diffuseColor = rockColor * blendRate.x +
+                   dirtColor * blendRate.y +
+                   grassColor * blendRate.z +
+                   baseColor * blendRate.a;
+    float3 N = rockNormal * blendRate.x +
+                    dirtNormal * blendRate.y +
+                    grassNormal * blendRate.z +
+                    float3(0, 1, 0) * blendRate.a;
     N = normalize(N);
     
     // 法線計算

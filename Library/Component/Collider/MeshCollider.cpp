@@ -42,12 +42,15 @@ void MeshCollider::DebugRender(const RenderContext& rc)
 	if (!IsActive())
 		return;
 
-	for (const auto& area : _collisionMesh.areas)
+	if (_isDebugDrawArea)
 	{
-        Vector3 extents = area.boundingBox.Extents;
-        // extents.yが無限大で表示ができなくなるので適当に補正
-		extents.y = 10.0f;
-		Debug::Renderer::DrawBox(area.boundingBox.Center, Vector3::Zero, extents, Vector4::Yellow);
+		for (const auto& area : _collisionMesh.areas)
+		{
+			Vector3 extents = area.boundingBox.Extents;
+			// extents.yが無限大で表示ができなくなるので適当に補正
+			extents.y = 10.0f;
+			Debug::Renderer::DrawBox(area.boundingBox.Center, Vector3::Zero, extents, Vector4::Yellow);
+		}
 	}
 	if (_isDebugDrawVertex)
 	{
@@ -82,6 +85,7 @@ void MeshCollider::DrawGui()
 	ColliderBase::DrawGui();
 	ImGui::DragInt(u8"分割エリアサイズ", &_cellSize, 1.0f, 1, 32);
 	ImGui::Checkbox(u8"コリジョンメッシュ頂点表示", &_isDebugDrawVertex);
+	ImGui::Checkbox(u8"コリジョンメッシュエリア表示", &_isDebugDrawArea);
     ImGui::SliderInt(u8"描画エリアインデックス", &_drawCellIndex, -1, _cellSize * _cellSize - 1);
 	if (ImGui::Button(u8"コリジョンメッシュ再計算"))
 	{
@@ -115,6 +119,7 @@ void MeshCollider::RecalculateCollisionMesh()
 			//uint32_t a = mesh.indices.at(i + 0);
 			//uint32_t b = mesh.indices.at(i + 1);
 			//uint32_t c = mesh.indices.at(i + 2);
+			// TODO : なぜか逆向き
 			uint32_t a = mesh.indices.at(i + 2);
 			uint32_t b = mesh.indices.at(i + 1);
 			uint32_t c = mesh.indices.at(i + 0);

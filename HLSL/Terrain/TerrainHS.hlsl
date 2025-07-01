@@ -30,6 +30,5 @@ uint pid : SV_PrimitiveID)
     hout.position = input[cpid].position;
     hout.texcoord = input[cpid].texcoord;
     hout.normal = input[cpid].normal;
-    hout.color = input[cpid].color;
     return hout;
 }

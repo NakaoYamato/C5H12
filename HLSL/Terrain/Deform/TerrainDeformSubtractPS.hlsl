@@ -1,17 +1,4 @@
-#include "../../Sprite/Sprite.hlsli"
-
-Texture2D texture0 : register(t0);
-#include "../../Define/SamplerStateDefine.hlsli"
-SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
-
-cbuffer CONSTANT_BUFFER : register(b1)
-{
-    float2 brushUVPosition;
-    float brushRadius;
-    float brushStrength;
-
-    float4 brushColor;
-}
+#include "TerrainDeform.hlsli"
 
 float4 main(VsOut pin) : SV_TARGET
 {
@@ -24,7 +11,7 @@ float4 main(VsOut pin) : SV_TARGET
 
     float3 color = brushColor.rgb;
     float4 baseColor = texture0.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord);
-    color = lerp(color, baseColor.rgb, brushStrength * rate);
-    
+    color = baseColor.rgb - color * brushStrength * rate;
+    color = saturate(color);
     return float4(color, baseColor.a);
 }

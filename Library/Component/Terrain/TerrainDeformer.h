@@ -19,6 +19,9 @@ public:
         float brushStrength             = 1.0f; // ブラシ強度
 
         DirectX::XMFLOAT4 brushColor    = Vector4::White; // ブラシ色
+
+		DirectX::XMFLOAT2 heightScale = { -1.0f, 1.0f }; // 高さ変形スケール x : 最小値、 y : 最大値
+        float brushPadding[2]{};
     };
 
 public:

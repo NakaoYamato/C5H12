@@ -7,22 +7,25 @@
 
 #include <imgui.h>
 
-// 開始処理
-void TerrainController::Start()
+// 生成時処理
+void TerrainController::OnCreate()
 {
     // 地形オブジェクトを生成
     _terrain = std::make_shared<Terrain>(Graphics::Instance().GetDevice());
 
-    // テクスチャの読み込み
-    GpuResourceManager::LoadTextureFromFile(
-        Graphics::Instance().GetDevice(),
-        L"./Data/Texture/Terrain/ParameterMap.dds",
-        _loadParameterMapSRV.ReleaseAndGetAddressOf(),
-        nullptr);
+	// 地形の初期化
+    _terrain->SetStreamOut(true);
 }
-// 更新処理
-void TerrainController::Update(float elapsedTime)
+// 遅延更新処理
+void TerrainController::LateUpdate(float elapsedTime)
 {
+	// 編集フラグが立っている場合は地形の再計算を行う
+	if (_isEditing)
+	{
+        // 地形の初期化
+        _terrain->SetStreamOut(true);
+		_isEditing = false;
+	}
 }
 // 描画処理
 void TerrainController::Render(const RenderContext& rc)
@@ -41,6 +44,7 @@ void TerrainController::Render(const RenderContext& rc)
             _terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
 
             _loadParameterMapSRV.Reset();
+            _isEditing = true; // パラメータマップを読み込んだら地形編集フラグを立てる
         }
 
         // 地形の描画
@@ -79,8 +83,21 @@ void TerrainController::DrawGui()
 {
     if (_terrain)
     {
+		// 地形の編集フラグを切り替えるチェックボックス
+		ImGui::Checkbox(u8"地形編集", &_isEditing);
+		// ワイヤーフレーム描画フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"ワイヤーフレーム描画", &_drawWireframe);
         // 地形のGUI描画
         _terrain->DrawGui();
     }
+}
+// パラメータマップの読み込み
+void TerrainController::LoadParameterMap(const wchar_t* filePath)
+{
+    // テクスチャの読み込み
+    GpuResourceManager::LoadTextureFromFile(
+        Graphics::Instance().GetDevice(),
+        filePath,
+        _loadParameterMapSRV.ReleaseAndGetAddressOf(),
+        nullptr);
 }

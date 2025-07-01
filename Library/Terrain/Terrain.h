@@ -30,8 +30,8 @@ public:
         float tillingScale{ +1.0f }; // タイリング係数
 
         float emissive{ 0.0f }; // エミッシブ
-        float metalness{ 0.0f }; // メタリック
-        float roughness{ 0.5f }; // ラフネス
+        float metalness{ 0.63f }; // メタリック
+        float roughness{ 0.6f }; // ラフネス
         float padding[1] = { 0.0f }; // パディング
     };
 
@@ -40,7 +40,6 @@ public:
     {
         DirectX::XMFLOAT4 position;
         DirectX::XMFLOAT3 worldPosition;
-        DirectX::XMFLOAT4 color;
         DirectX::XMFLOAT3 normal;
         DirectX::XMFLOAT2 texcoord;
         DirectX::XMFLOAT4 blendRate;

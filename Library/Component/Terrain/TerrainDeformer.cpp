@@ -115,14 +115,14 @@ void TerrainDeformer::Update(float elapsedTime)
         _isDeforming = _INPUT_PRESSED("OK");
 
     // ブラシ半径をトランスフォームのサイズに影響されるようにする
-    _constantBufferData.brushRadius = brushRadius;
+    _constantBufferData.brushRadius = brushRadius / GetActor()->GetTransform().GetScale().x;
 
     // ブラシの強度は経過時間によって減衰させる
     _constantBufferData.brushStrength = brushStrength * elapsedTime;
 
     // ブラシの表示
     Debug::Renderer::DrawSphere(
-        _intersectionWorldPoint, _constantBufferData.brushRadius,
+        _intersectionWorldPoint, brushRadius,
         Vector4::GetOpaque(_constantBufferData.brushColor));
 }
 // 描画処理
@@ -149,9 +149,11 @@ void TerrainDeformer::Render(const RenderContext& rc)
     // ブラシ半径が0以下の場合は何もしない
     if (_constantBufferData.brushRadius <= 0.0f)
         return;
-    // ブラシ強度が0以下の場合は何もしない
-    if (_constantBufferData.brushStrength <= 0.0f)
+#ifdef USE_IMGUI
+    //	ウィンドウにフォーカス中の場合は何もしない
+    if (ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
         return;
+#endif
 
     // キャッシュの保存
     GpuResourceManager::SaveStateCache(rc.deviceContext);
@@ -204,7 +206,7 @@ void TerrainDeformer::Render(const RenderContext& rc)
         break;
     }
     terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
-    terrain->SetStreamOut(true);
+	terrain->SetStreamOut(true);
 
     // キャッシュの復元
     GpuResourceManager::RestoreStateCache(rc.deviceContext);
@@ -219,8 +221,17 @@ void TerrainDeformer::DrawGui()
     ImGui::DragFloat3(u8"ブラシワールド位置", &_intersectionWorldPoint.x, 0.01f, -100.0f, 100.0f);
     ImGui::DragFloat2(u8"ブラシUV位置", &_constantBufferData.brushPosition.x, 0.01f, -100.0f, 100.0f);
     ImGui::DragFloat(u8"ブラシ半径", &brushRadius, 0.01f, 0.0f, 100.0f);
-    ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
-    ImGui::ColorEdit3(u8"ブラシ色", &_constantBufferData.brushColor.x);
+    if (_brushMode == BrushMode::Height)
+    {
+        ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
+        ImGui::DragFloat(u8"高さ最小値", &_constantBufferData.heightScale.x, 0.01f, -100.0f, 0.0f);
+        ImGui::DragFloat(u8"高さ最大値", &_constantBufferData.heightScale.y, 0.01f, 0.0f, 100.0f);
+    }
+    else
+    {
+        ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
+        ImGui::ColorEdit3(u8"ブラシ色", &_constantBufferData.brushColor.x);
+    }
 	if (ImGui::Button(u8"パラメータマップ書き出し"))
 	{
 		if (_terrainController.lock()->GetTerrain().lock())

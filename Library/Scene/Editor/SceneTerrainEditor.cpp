@@ -2,6 +2,7 @@
 
 #include "../../Library/Component/Terrain/TerrainController.h"
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
+#include "../../Library/Component/Terrain/TerrainCollider.h"
 #include "../../DebugSupporter/DebugSupporter.h"
 
 void SceneTerrainEditor::OnInitialize()
@@ -14,6 +15,9 @@ void SceneTerrainEditor::OnInitialize()
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
 
     auto terrainActor = RegisterActor<Actor>(u8"Terrain", ActorTag::Stage);
+    terrainActor->GetTransform().SetScale(50.0f);
+    auto terrainController = terrainActor->AddComponent<TerrainController>();
     terrainActor->AddComponent<TerrainDeformer>();
-    terrainActor->AddComponent<TerrainController>();
+	terrainActor->AddCollider<TerrainCollider>();
+	terrainController->LoadParameterMap(L"./Data/Texture/Terrain/ParameterMap.dds");
 }

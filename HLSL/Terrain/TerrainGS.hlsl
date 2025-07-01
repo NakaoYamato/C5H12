@@ -13,7 +13,6 @@ void main(
         elemant.position = gin[i].position;
         elemant.texcoord = gin[i].texcoord;
         elemant.normal = gin[i].normal;
-        elemant.color = gin[i].color;
         elemant.worldPosition = gin[i].worldPosition;
         elemant.blendRate = gin[i].blendRate;
         gout.Append(elemant);

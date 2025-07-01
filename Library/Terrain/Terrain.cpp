@@ -92,7 +92,6 @@ Terrain::Terrain(ID3D11Device* device)
         {
             {0,"SV_POSITION",	0,0,4,0},
             {0,"WORLD_POSITION",0,0,3,0},
-            {0,"COLOR",			0,0,4,0},
             {0,"NORMAL",		0,0,3,0},
             {0,"TEXCOORD",		0,0,2,0},
             {0,"BLEND_RATE",	0,0,4,0},

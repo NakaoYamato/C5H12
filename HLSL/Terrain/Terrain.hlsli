@@ -4,7 +4,6 @@
 struct HS_IN
 {
     float4 position : SV_POSITION;
-    float4 color : COLOR;
     float3 normal : NORMAL;
     float2 texcoord : TECCOORD;
 };
@@ -24,7 +23,6 @@ struct DS_OUT
 {
     float4 position : SV_POSITION;
     float3 worldPosition : WORLD_POSITION;
-    float4 color : COLOR;
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD;
     float4 blendRate : BLEND_RATE; // ブレンド率（R:岩, G:土, B:草, A:基本色）

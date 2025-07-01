@@ -121,6 +121,7 @@ void ActorManager::FixedUpdate()
 	{
 		for (auto& actor : _updateActors[i])
 		{
+			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Red);
 			actor->FixedUpdate();
 		}
 	}
@@ -133,6 +134,7 @@ void ActorManager::Render(const RenderContext& rc)
 	{
 		for (auto& actor : _updateActors[i])
 		{
+			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Yellow);
 			actor->Render(rc);
 #ifdef _DEBUG
 			actor->DebugRender(rc);
@@ -148,6 +150,7 @@ void ActorManager::CastShadow(const RenderContext& rc)
 	{
 		for (auto& actor : _updateActors[i])
 		{
+			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Blue);
 			actor->CastShadow(rc);
 		}
 	}
@@ -160,6 +163,7 @@ void ActorManager::DelayedRender(RenderContext& rc)
 	{
 		for (auto& actor : _updateActors[i])
 		{
+			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Purple);
 			actor->DelayedRender(rc);
 		}
 	}

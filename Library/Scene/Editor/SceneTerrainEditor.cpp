@@ -19,5 +19,8 @@ void SceneTerrainEditor::OnInitialize()
     auto terrainController = terrainActor->AddComponent<TerrainController>();
     terrainActor->AddComponent<TerrainDeformer>();
 	terrainActor->AddCollider<TerrainCollider>();
-	terrainController->LoadParameterMap(L"./Data/Texture/Terrain/ParameterMap.dds");
+    // パラメータマップの読み込み
+    terrainController->LoadParameterMap(L"./Data/Texture/Terrain/ParameterMap.dds");
+    // データマップの読み込み
+    terrainController->LoadDataMap(L"./Data/Texture/Terrain/TerrainDataMap.dds");
 }

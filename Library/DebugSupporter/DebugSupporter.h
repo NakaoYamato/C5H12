@@ -151,7 +151,7 @@ namespace Debug
 		/// í∏ì_í«â¡
 		/// </summary>
 		/// <param name="position"></param>
-		void AddVertex(const Vector3& position);
+		void AddVertex(const Vector3& position, const Vector4& color = Vector4::White);
 
 		/// <summary>
 		/// ï`âÊé¿çs

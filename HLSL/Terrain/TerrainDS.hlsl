@@ -36,6 +36,8 @@ const OutputPatch<DS_IN, 3> patch)
     dout.blendRate.w = saturate(1.0f - (parameter.x + parameter.y + parameter.z));
     // ブレンド率を正規化
     dout.blendRate = normalize(dout.blendRate);
+    // コストはストリームアウト時に計算するので初期化
+    dout.cost = 0.0f;
     
     return dout;
 }

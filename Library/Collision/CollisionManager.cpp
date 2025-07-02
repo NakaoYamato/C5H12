@@ -284,47 +284,14 @@ bool CollisionManager::RayCast(
 	Vector3& hitNormal)
 {
 	bool hit = false;
-	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
-	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
-
 	// 各メッシュコライダーに対してレイキャストを行う
 	for (auto& meshCollider : _meshColliders)
 	{
-		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		if (meshCollider->RayCast(start, direction, &distance, &hitPosition, &hitNormal))
 		{
-			DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
-			DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
-			// レイVsAABB
-			if (Collision3D::IntersectRayVsAABB(Start, DirectionNorm, distance, aabbCenter, aabbRadii, nullptr, nullptr))
-			{
-				HitResult tmpResult;
-				// エリアに含まれている三角形と判定
-				for (const int& index : area.triangleIndices)
-				{
-					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
-					DirectX::XMVECTOR TrianglePos[3] = {
-						DirectX::XMLoadFloat3(&triangle.positions[0]),
-						DirectX::XMLoadFloat3(&triangle.positions[1]),
-						DirectX::XMLoadFloat3(&triangle.positions[2])
-					};
-
-					// レイVs三角形
-					if (Collision3D::IntersectRayVsTriangle(Start, DirectionNorm, distance, TrianglePos, tmpResult))
-					{
-						// 最近距離を更新
-						if (distance > tmpResult.distance)
-						{
-							hitPosition		= tmpResult.position;
-							hitNormal		= tmpResult.normal;
-							distance		= tmpResult.distance;
-						}
-						hit = true;
-					}
-				}
-			}
+			hit = true;
 		}
 	}
-
 	return hit;
 }
 
@@ -332,47 +299,14 @@ bool CollisionManager::RayCast(
 bool CollisionManager::SphereCast(const Vector3& origin, const Vector3& direction, float radius, float& distance, Vector3& hitPosition, Vector3& hitNormal)
 {
 	bool hit = false;
-	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&origin);
-	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
-
 	// 各メッシュコライダーに対してスフィアキャスト行う
 	for (auto& meshCollider : _meshColliders)
 	{
-		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		if (meshCollider->SphereCast(origin, direction, radius, &distance, &hitPosition, &hitNormal))
 		{
-			DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
-			DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
-			// スフィアキャストVSAABB
-			if (Collision3D::IntersectCapsuleVsAABB(Start, DirectionNorm, distance, radius, slubCenter, slubRadii))
-			{
-				HitResult tmpResult;
-				// エリアに含まれている三角形と判定
-				for (const int& index : area.triangleIndices)
-				{
-					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
-					DirectX::XMVECTOR TrianglePos[3] = {
-						DirectX::XMLoadFloat3(&triangle.positions[0]),
-						DirectX::XMLoadFloat3(&triangle.positions[1]),
-						DirectX::XMLoadFloat3(&triangle.positions[2])
-					};
-
-					// スフィアキャストVs三角形
-					if (Collision3D::IntersectSphereCastVsTriangle(Start, DirectionNorm, distance, radius, TrianglePos, &tmpResult, false))
-					{
-						// 最近距離を更新
-						if (distance > tmpResult.distance)
-						{
-							hitPosition = tmpResult.position;
-							hitNormal = tmpResult.normal;
-							distance = tmpResult.distance;
-						}
-						hit = true;
-					}
-				}
-			}
+			hit = true;
 		}
 	}
-
 	return hit;
 }
 #pragma endregion

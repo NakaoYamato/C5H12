@@ -5,8 +5,8 @@
 #include <wrl.h>
 
 #include "../../Library/Math/Vector.h"
-#include "../Graphics/RenderContext.h"
-#include "../PostProcess/FrameBuffer.h"
+#include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/PostProcess/FrameBuffer.h"
 
 class Terrain
 {
@@ -38,27 +38,37 @@ public:
     // ストリームアウト用
     struct StreamOutVertex
     {
-        DirectX::XMFLOAT4 position;
-        DirectX::XMFLOAT3 worldPosition;
-        DirectX::XMFLOAT3 normal;
-        DirectX::XMFLOAT2 texcoord;
-        DirectX::XMFLOAT4 blendRate;
+        DirectX::XMFLOAT4 position = {};
+        DirectX::XMFLOAT3 worldPosition = {};
+        DirectX::XMFLOAT3 normal = {};
+        DirectX::XMFLOAT2 texcoord = {};
+        DirectX::XMFLOAT4 blendRate = {};
+		float             cost = 0.0f;
     };
 
     static constexpr LONG StreamOutMaxVertex = 3 * 3 * 64 * 64;
     static constexpr LONG ParameterMapSize = 1024;
     static constexpr UINT ParameterMapIndex = 6;
+    static constexpr UINT DataMapIndex = 7;
 public:
     Terrain(ID3D11Device* device);
 	~Terrain() {}
-    void Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool writeGBuffer);
+    // 描画処理
+    void Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer);
+    // デバッグ描画
+	void DebugRender(const DirectX::XMFLOAT4X4& world);
+    // GUI描画
     void DrawGui();
 
     // パラメータマップの書き出し
 	void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
+	// データマップの書き出し
+	void SaveDataMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* dataMapPath);
 #pragma region アクセサ
     // パラメータマップのフレームバッファを取得
     FrameBuffer* GetParameterMapFB() { return _parameterMapFB.get(); }
+	// データマップのフレームバッファを取得
+	FrameBuffer* GetDataMapFB() { return _dataMapFB.get(); }
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
 
@@ -88,6 +98,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _normalSRVs[3];
     // パラメータマップ（R：テクスチャ０ブレンド率、G：テクスチャ１ブレンド率、B：テクスチャ２ブレンド率、A：高さ）
     std::unique_ptr<FrameBuffer> _parameterMapFB;
+    // データマップ(R：移動コスト)
+    std::unique_ptr<FrameBuffer> _dataMapFB;
 
     // ストリームアウト用
     bool _streamOut = false;
@@ -95,4 +107,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
     std::vector<StreamOutVertex> _streamOutData;
+
+    // ワイヤーフレーム描画フラグ
+    bool _drawWireframe = false;
 };

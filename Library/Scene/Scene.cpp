@@ -136,6 +136,7 @@ void Scene::Render()
             samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
         }
         dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
         dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
     }
 

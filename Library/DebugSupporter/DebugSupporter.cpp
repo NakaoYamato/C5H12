@@ -115,9 +115,9 @@ namespace Debug
         {
             _debugRenderer->DrawGrid(subdivisions, scale);
         }
-        void AddVertex(const Vector3& position)
+        void AddVertex(const Vector3& position, const Vector4& color)
         {
-            _debugRenderer->AddVertex(position);
+            _debugRenderer->AddVertex(position, color);
         }
         /// •`‰æÀs
         void Render(

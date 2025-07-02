@@ -2,6 +2,7 @@
 
 #include "../../Scene/Scene.h"
 #include "../../DebugSupporter/DebugSupporter.h"
+#include "../../Library/Collision/CollisionMath.h"
 
 #include <imgui.h>
 
@@ -12,14 +13,12 @@ void MeshCollider::Start()
 	GetActor()->GetScene()->GetCollisionManager().RegisterMeshCollider(this);
 	_recalculate = true;
 }
-
 // 削除時処理
 void MeshCollider::OnDelete()
 {
 	// コライダーの削除
 	GetActor()->GetScene()->GetCollisionManager().UnregisterMeshCollider(this);
 }
-
 // 更新処理
 void MeshCollider::Update(float elapsedTime)
 {
@@ -30,7 +29,6 @@ void MeshCollider::Update(float elapsedTime)
 		RecalculateCollisionMesh();
 	}
 }
-
 // デバッグ描画処理
 void MeshCollider::DebugRender(const RenderContext& rc)
 {
@@ -78,7 +76,6 @@ void MeshCollider::DebugRender(const RenderContext& rc)
         }
 	}
 }
-
 // GUI描画
 void MeshCollider::DrawGui()
 {
@@ -92,7 +89,6 @@ void MeshCollider::DrawGui()
 		_recalculate = true;
 	}
 }
-
 // コリジョンメッシュの再計算
 void MeshCollider::RecalculateCollisionMesh()
 {
@@ -189,7 +185,97 @@ void MeshCollider::RecalculateCollisionMesh()
 		}
 	}
 }
+/// レイキャスト
+bool MeshCollider::RayCast(
+	const Vector3& start,
+	const Vector3& direction, 
+	float* distance,
+	Vector3* hitPosition,
+	Vector3* hitNormal)
+{
+	bool hit = false;
+	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
+	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
 
+	for (auto& area : GetCollisionMesh().areas)
+	{
+		DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
+		DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
+		// レイVsAABB
+		if (Collision3D::IntersectRayVsAABB(Start, DirectionNorm, *distance, aabbCenter, aabbRadii, nullptr, nullptr))
+		{
+			HitResult tmpResult;
+			// エリアに含まれている三角形と判定
+			for (const int& index : area.triangleIndices)
+			{
+				const MeshCollider::CollisionMesh::Triangle& triangle = GetCollisionMesh().triangles[index];
+				DirectX::XMVECTOR TrianglePos[3] = {
+					DirectX::XMLoadFloat3(&triangle.positions[0]),
+					DirectX::XMLoadFloat3(&triangle.positions[1]),
+					DirectX::XMLoadFloat3(&triangle.positions[2])
+				};
+
+				// レイVs三角形
+				if (Collision3D::IntersectRayVsTriangle(Start, DirectionNorm, *distance, TrianglePos, tmpResult))
+				{
+					// 最近距離を更新
+					if (*distance > tmpResult.distance)
+					{
+						*hitPosition = tmpResult.position;
+						*hitNormal = tmpResult.normal;
+						*distance = tmpResult.distance;
+					}
+					hit = true;
+				}
+			}
+		}
+	}
+
+	return hit;
+}
+/// スフィアキャスト
+bool MeshCollider::SphereCast(const Vector3& origin, const Vector3& direction, float radius, float* distance, Vector3* hitPosition, Vector3* hitNormal)
+{
+	bool hit = false;
+	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&origin);
+	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
+
+	for (auto& area : GetCollisionMesh().areas)
+	{
+		DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
+		DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
+		// スフィアキャストVSAABB
+		if (Collision3D::IntersectCapsuleVsAABB(Start, DirectionNorm, *distance, radius, slubCenter, slubRadii))
+		{
+			HitResult tmpResult;
+			// エリアに含まれている三角形と判定
+			for (const int& index : area.triangleIndices)
+			{
+				const MeshCollider::CollisionMesh::Triangle& triangle = GetCollisionMesh().triangles[index];
+				DirectX::XMVECTOR TrianglePos[3] = {
+					DirectX::XMLoadFloat3(&triangle.positions[0]),
+					DirectX::XMLoadFloat3(&triangle.positions[1]),
+					DirectX::XMLoadFloat3(&triangle.positions[2])
+				};
+
+				// スフィアキャストVs三角形
+				if (Collision3D::IntersectSphereCastVsTriangle(Start, DirectionNorm, *distance, radius, TrianglePos, &tmpResult, false))
+				{
+					// 最近距離を更新
+					if (*distance > tmpResult.distance)
+					{
+						*hitPosition = tmpResult.position;
+						*hitNormal = tmpResult.normal;
+						*distance = tmpResult.distance;
+					}
+					hit = true;
+				}
+			}
+		}
+	}
+
+	return hit;
+}
 /// 指定のAABBとコリジョンメッシュのAABBの交差判定
 std::vector<size_t> MeshCollider::GetCollisionMeshIndex(const DirectX::BoundingBox& aabb)
 {

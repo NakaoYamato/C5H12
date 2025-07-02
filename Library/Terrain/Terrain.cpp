@@ -3,6 +3,7 @@
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Exporter/Exporter.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 
@@ -85,6 +86,8 @@ Terrain::Terrain(ID3D11Device* device)
         nullptr);
     // パラメータマップの読み込み
     _parameterMapFB = std::make_unique<FrameBuffer>(device, ParameterMapSize, ParameterMapSize, true);
+	// データマップのフレームバッファを作成
+	_dataMapFB = std::make_unique<FrameBuffer>(device, ParameterMapSize, ParameterMapSize, true);
 
     // ストリームアウトを使用してプリミティブを取得するシェーダー
     {
@@ -95,6 +98,7 @@ Terrain::Terrain(ID3D11Device* device)
             {0,"NORMAL",		0,0,3,0},
             {0,"TEXCOORD",		0,0,2,0},
             {0,"BLEND_RATE",	0,0,4,0},
+			{0,"COST",          0,0,1,0},
         };
         UINT bufferStrides[] = { sizeof(StreamOutVertex) };
         GpuResourceManager::CreateGsWithStreamOutFromCso(
@@ -136,8 +140,8 @@ Terrain::Terrain(ID3D11Device* device)
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 }
-
-void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool writeGBuffer)
+// 描画処理
+void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -187,6 +191,8 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
     // パラメータマップ設定
     dc->DSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
     dc->PSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
+	// データマップ設定
+    dc->GSSetShaderResources(DataMapIndex, 1, _dataMapFB->GetColorSRV().GetAddressOf());
     // 頂点バッファとインデックスバッファを設定
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
@@ -237,10 +243,45 @@ void Terrain::Render(const RenderContext& rc, DirectX::XMFLOAT4X4 world, bool wr
         }
     }
 }
+// デバッグ描画
+void Terrain::DebugRender(const DirectX::XMFLOAT4X4& world)
+{
+    auto& streamOutData = GetStreamOutData();
+    if (streamOutData.empty())
+        return;
 
+    if (!_drawWireframe)
+        return;
+
+    for (size_t i = 0; i < streamOutData.size(); i += 3)
+    {
+        const auto& v1 = streamOutData[i + 0];
+        const auto& v2 = streamOutData[i + 1];
+        const auto& v3 = streamOutData[i + 2];
+        Vector4 color = Vector4::Red;
+		color.x = Vector4::Red.x * v1.cost;
+        Debug::Renderer::AddVertex(v1.worldPosition, color);
+        color.x = Vector4::Red.x * v2.cost;
+        Debug::Renderer::AddVertex(v2.worldPosition, color);
+        color.x = Vector4::Red.x * v2.cost;
+        Debug::Renderer::AddVertex(v2.worldPosition, color);
+        color.x = Vector4::Red.x * v3.cost;
+        Debug::Renderer::AddVertex(v3.worldPosition, color);
+        color.x = Vector4::Red.x * v3.cost;
+        Debug::Renderer::AddVertex(v3.worldPosition, color);
+        color.x = Vector4::Red.x * v1.cost;
+        Debug::Renderer::AddVertex(v1.worldPosition, color);
+    }
+}
+// GUI描画
 void Terrain::DrawGui()
 {
+    // ワイヤーフレーム描画フラグを切り替えるチェックボックス
+    ImGui::Checkbox(u8"ワイヤーフレーム描画", &_drawWireframe);
+	ImGui::Text(u8"パラメータマップ");
     ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+	ImGui::Text(u8"データマップ");
+    ImGui::Image(_dataMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 	ImGui::ColorEdit4(u8"Color", &_data.baseColor.x, ImGuiColorEditFlags_NoInputs);
     ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
     ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
@@ -256,6 +297,7 @@ void Terrain::DrawGui()
     ImGui::Image(_normalSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Image(_colorSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Image(_normalSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Separator();
 }
 // パラメータマップの書き出し
 void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)
@@ -263,6 +305,15 @@ void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, co
     if (Exporter::SaveDDSFile(device, dc,
         _parameterMapFB->GetColorSRV().Get(),
         parameterMapPath))
+    {
+    }
+}
+// データマップの書き出し
+void Terrain::SaveDataMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* dataMapPath)
+{
+    if (Exporter::SaveDDSFile(device, dc,
+        _dataMapFB->GetColorSRV().Get(),
+        dataMapPath))
     {
     }
 }

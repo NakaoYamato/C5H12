@@ -14,6 +14,11 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
+	D3D11_INPUT_ELEMENT_DESC gridInputElementDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
 
 	// 頂点シェーダー
 	GpuResourceManager::CreateVsFromCso(
@@ -23,6 +28,15 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 		_inputLayout.ReleaseAndGetAddressOf(),
 		inputElementDesc,
 		_countof(inputElementDesc)
+	);
+	// グリッド描画用頂点シェーダー
+	GpuResourceManager::CreateVsFromCso(
+		device,
+		"./Data/Shader/DebugGridRendererVS.cso",
+		_gridVertexShader.ReleaseAndGetAddressOf(),
+		_gridInputLayout.ReleaseAndGetAddressOf(),
+		gridInputElementDesc,
+		_countof(gridInputElementDesc)
 	);
 
 	// ピクセルシェーダー
@@ -62,7 +76,7 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	// グリッド描画用頂点バッファ作成
 	{
 		D3D11_BUFFER_DESC desc{};
-		desc.ByteWidth = sizeof(Vector3) * VertexCapacity;
+		desc.ByteWidth = sizeof(GridVertex) * VertexCapacity;
 		desc.Usage = D3D11_USAGE_DYNAMIC;
 		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -284,8 +298,9 @@ void DebugRenderer::DrawGrid(int subdivisions, float scale)
 {
 	auto AddVertex = [&](const Vector3& position)
 		{
-			Vector3& v = _gridVertices.emplace_back();
-			v = position;
+			GridVertex& v = _gridVertices.emplace_back();
+			v.position = position;
+			v.color = Vector4::White;
 		};
 
 	int numLines = (subdivisions + 1) * 2;
@@ -345,10 +360,11 @@ void DebugRenderer::DrawGrid(int subdivisions, float scale)
 		});
 }
 
-void DebugRenderer::AddVertex(const Vector3& position)
+void DebugRenderer::AddVertex(const Vector3& position, const Vector4& color)
 {
-	Vector3& v = _gridVertices.emplace_back();
-	v = position;
+	GridVertex& v = _gridVertices.emplace_back();
+	v.position = position;
+	v.color = color;
 }
 
 // メッシュ生成
@@ -722,11 +738,6 @@ void DebugRenderer::Render(
 	const DirectX::XMFLOAT4X4& view,
 	const DirectX::XMFLOAT4X4& projection)
 {
-	// シェーダー設定
-	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
-	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
-	dc->IASetInputLayout(_inputLayout.Get());
-
 	// 定数バッファ設定
 	dc->VSSetConstantBuffers(0, 1, _constantBuffer.GetAddressOf());
 
@@ -744,6 +755,11 @@ void DebugRenderer::Render(
 #ifdef _DEBUG
 	if (!Debug::Input::IsActive(DebugInput::BTN_F7))
 	{
+		// シェーダー設定
+		dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
+		dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
+		dc->IASetInputLayout(_inputLayout.Get());
+
 		for (const Instance& instance : _instances)
 		{
 			// 頂点バッファ設定
@@ -765,6 +781,11 @@ void DebugRenderer::Render(
 		}
 
 		// グリッド描画
+		// シェーダー設定
+		dc->VSSetShader(_gridVertexShader.Get(), nullptr, 0);
+		dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
+		dc->IASetInputLayout(_gridInputLayout.Get());
+
 		{
 			DirectX::XMMATRIX WVP = VP;
 			// 定数バッファ更新
@@ -773,7 +794,7 @@ void DebugRenderer::Render(
 			cbMesh.color = Vector4::White;
 			dc->UpdateSubresource(_constantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 			// 頂点バッファ設定
-			stride = sizeof(Vector3);
+			stride = sizeof(GridVertex);
 			offset = 0;
 			dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 			dc->IASetVertexBuffers(0, 1, _gridVertexBuffer.GetAddressOf(), &stride, &offset);
@@ -788,7 +809,7 @@ void DebugRenderer::Render(
 				HRESULT hr = dc->Map(_gridVertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-				memcpy(mappedSubresource.pData, &_gridVertices[start], sizeof(Vector3) * count);
+				memcpy(mappedSubresource.pData, &_gridVertices[start], sizeof(GridVertex) * count);
 
 				dc->Unmap(_gridVertexBuffer.Get(), 0);
 

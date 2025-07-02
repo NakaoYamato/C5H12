@@ -26,6 +26,7 @@ struct DS_OUT
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD;
     float4 blendRate : BLEND_RATE; // ブレンド率（R:岩, G:土, B:草, A:基本色）
+    float  cost : COST;
 };
 #define GS_IN DS_OUT
 #define GS_OUT DS_OUT

@@ -62,7 +62,7 @@ public:
 	void DrawGrid(int subdivisions, float scale);
 
 	// 頂点追加
-	void AddVertex(const Vector3& position);
+	void AddVertex(const Vector3& position, const Vector4& color = Vector4::White);
 
 	// 描画実行
 	void Render(
@@ -76,18 +76,21 @@ private:
 		Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 		UINT									vertexCount{};
 	};
-
 	struct Instance
 	{
 		Mesh* mesh = nullptr;
 		DirectX::XMFLOAT4X4		worldTransform{};
-		Vector4		color{ 1,1,1,1 };
+		Vector4		color = Vector4::White;
 	};
-
 	struct CbMesh
 	{
 		DirectX::XMFLOAT4X4		worldViewProjection{};
-		Vector4		color{ 1,1,1,1 };
+		Vector4		color = Vector4::White;
+	};
+	struct GridVertex
+	{
+		Vector3 position = Vector3::Zero;
+		Vector4 color = Vector4::White;
 	};
 
 	// メッシュ生成
@@ -129,7 +132,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		_constantBuffer;
 
 	// グリッド描画用
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_gridVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>	_gridInputLayout;
 	static const UINT VertexCapacity = 3 * 1024;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	_gridVertexBuffer;
-	std::vector<Vector3> _gridVertices;
+	std::vector<GridVertex> _gridVertices;
 };

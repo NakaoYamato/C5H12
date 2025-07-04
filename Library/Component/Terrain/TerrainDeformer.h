@@ -49,6 +49,8 @@ public:
     ~TerrainDeformer() override = default;
     // 名前取得
     const char* GetName() const override { return "TerrainDeformer"; }
+    // 生成時処理
+    void OnCreate() override;
     // 開始処理
     void Start() override;
     // 更新処理

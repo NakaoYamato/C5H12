@@ -10,12 +10,9 @@
 #include <filesystem>
 #include <imgui.h>
 
-// 開始処理
-void TerrainDeformer::Start()
+// 生成時処理
+void TerrainDeformer::OnCreate()
 {
-    // 地形コントローラーを取得
-    _terrainController = GetActor()->GetComponent<TerrainController>();
-
     // マテリアルマップのコピーピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
@@ -26,21 +23,21 @@ void TerrainDeformer::Start()
         Graphics::Instance().GetDevice(),
         "./Data/Shader/TerrainDeformAddPS.cso",
         _addBrushPS.ReleaseAndGetAddressOf());
-	// 減算ブラシピクセルシェーダの読み込み
-	GpuResourceManager::CreatePsFromCso(
-		Graphics::Instance().GetDevice(),
-		"./Data/Shader/TerrainDeformSubtractPS.cso",
-		_subtractBrushPS.ReleaseAndGetAddressOf());
-	// 高さ変形ブラシピクセルシェーダの読み込み
-	GpuResourceManager::CreatePsFromCso(
-		Graphics::Instance().GetDevice(),
-		"./Data/Shader/TerrainDeformHeightPS.cso",
-		_heightBrushPS.ReleaseAndGetAddressOf());
+    // 減算ブラシピクセルシェーダの読み込み
+    GpuResourceManager::CreatePsFromCso(
+        Graphics::Instance().GetDevice(),
+        "./Data/Shader/TerrainDeformSubtractPS.cso",
+        _subtractBrushPS.ReleaseAndGetAddressOf());
+    // 高さ変形ブラシピクセルシェーダの読み込み
+    GpuResourceManager::CreatePsFromCso(
+        Graphics::Instance().GetDevice(),
+        "./Data/Shader/TerrainDeformHeightPS.cso",
+        _heightBrushPS.ReleaseAndGetAddressOf());
     // コスト変形ブラシピクセルシェーダの読み込み
-	GpuResourceManager::CreatePsFromCso(
-		Graphics::Instance().GetDevice(),
-		"./Data/Shader/TerrainDeformCostPS.cso",
-		_costBrushPS.ReleaseAndGetAddressOf());
+    GpuResourceManager::CreatePsFromCso(
+        Graphics::Instance().GetDevice(),
+        "./Data/Shader/TerrainDeformCostPS.cso",
+        _costBrushPS.ReleaseAndGetAddressOf());
 
     // 定数バッファの作成
     GpuResourceManager::CreateConstantBuffer(
@@ -49,25 +46,31 @@ void TerrainDeformer::Start()
         _constantBuffer.ReleaseAndGetAddressOf());
 
     // マテリアルマップのコピーバッファを作成
-	_copyMaterialMapFB = std::make_unique<FrameBuffer>(
-		Graphics::Instance().GetDevice(),
-		Terrain::MaterialMapSize, Terrain::MaterialMapSize, true,
-		std::vector<DXGI_FORMAT>({ DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT }));
+    _copyMaterialMapFB = std::make_unique<FrameBuffer>(
+        Graphics::Instance().GetDevice(),
+        Terrain::MaterialMapSize, Terrain::MaterialMapSize, true,
+        std::vector<DXGI_FORMAT>({ DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT }));
     // 地形のハイトマップを格納するフレームバッファを作成
     _copyParameterMapFB = std::make_unique<FrameBuffer>(
         Graphics::Instance().GetDevice(),
         Terrain::ParameterMapSize, Terrain::ParameterMapSize, true);
 
-	// テクスチャデータの読み込み
-	LoadTextureData(
+    // テクスチャデータの読み込み
+    LoadTextureData(
         L"./Data/Terrain/Texture/Material/001_COLOR.png",
-		L"./Data/Terrain/Texture/Material/001_NORMAL.png");
-	LoadTextureData(
+        L"./Data/Terrain/Texture/Material/001_NORMAL.png");
+    LoadTextureData(
         L"./Data/Terrain/Texture/Material/002_COLOR.png",
-		L"./Data/Terrain/Texture/Material/002_NORMAL.png");
-	LoadTextureData(
+        L"./Data/Terrain/Texture/Material/002_NORMAL.png");
+    LoadTextureData(
         L"./Data/Terrain/Texture/Material/003_COLOR.jpg",
-		L"./Data/Terrain/Texture/Material/003_NORMAL.png");
+        L"./Data/Terrain/Texture/Material/003_NORMAL.png");
+}
+// 開始処理
+void TerrainDeformer::Start()
+{
+    // 地形コントローラーを取得
+    _terrainController = GetActor()->GetComponent<TerrainController>();
 }
 // 更新処理
 void TerrainDeformer::Update(float elapsedTime)

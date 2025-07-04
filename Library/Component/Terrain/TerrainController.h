@@ -6,7 +6,7 @@
 class TerrainController : public Component
 {
 public:
-	TerrainController(const std::string& serializePath = "./Data/Terrain/TerrainData.json") :
+	TerrainController(const std::string& serializePath = "./Data/Terrain/Save/Test000.json") :
 		_serializePath(serializePath)
 	{
 	}

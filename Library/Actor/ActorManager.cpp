@@ -201,6 +201,8 @@ void ActorManager::DrawGui()
 				ImGui::TreePop();
 			}
 		}
+		// GUIが埋まってしまう問題を解決するためのスペース
+		ImGui::Dummy(ImVec2(0.0f, 100.0f));
 	}
 	ImGui::End();
 	ImGui::PopStyleColor();
@@ -217,6 +219,8 @@ void ActorManager::DrawGui()
 
 			object->DrawGui();
 		}
+		// GUIが埋まってしまう問題を解決するためのスペース
+		ImGui::Dummy(ImVec2(0.0f, 100.0f));
 	}
 	ImGui::End();
 }

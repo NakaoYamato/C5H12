@@ -1701,6 +1701,20 @@ bool Collision3D::IntersectRayVsSphere(const DirectX::XMVECTOR& rayStart, const 
 	return false;
 }
 
+bool Collision3D::IntersectRayVsSphere(
+	const Vector3& rayStart, 
+	const Vector3& rayDirection, 
+	float rayDist, 
+	const Vector3& spherePos,
+	float radius, 
+	HitResultVector* result)
+{
+	DirectX::XMVECTOR rayStartVec = DirectX::XMLoadFloat3(&rayStart);
+	DirectX::XMVECTOR rayDirectionVec = DirectX::XMLoadFloat3(&rayDirection);
+	DirectX::XMVECTOR spherePosVec = DirectX::XMLoadFloat3(&spherePos);
+	return IntersectRayVsSphere(rayStartVec, rayDirectionVec, rayDist, spherePosVec, radius, result);
+}
+
 // ƒŒƒCVsAABB
 bool Collision3D::IntersectRayVsAABB(const DirectX::XMVECTOR& rayStart, const DirectX::XMVECTOR& rayDirection, float rayDist, const DirectX::XMVECTOR& aabbPos, const DirectX::XMVECTOR& aabbRadii, HitResultVector* resultNear, HitResultVector* resultFar)
 {

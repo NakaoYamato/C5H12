@@ -69,7 +69,67 @@ void TerrainController::DebugRender(const RenderContext& rc)
 {
     if (_terrain)
     {
-		_terrain->DebugRender(GetActor()->GetTransform().GetMatrix());
+        // ストリームアウトデータの描画
+        if (_drawStreamOut)
+        {
+            auto& streamOutData = _terrain->GetStreamOutData();
+            if (streamOutData.empty())
+                return;
+
+            for (size_t i = 0; i < streamOutData.size(); i += 3)
+            {
+                const auto& v1 = streamOutData[i + 0];
+                const auto& v2 = streamOutData[i + 1];
+                const auto& v3 = streamOutData[i + 2];
+                Vector4 color = Vector4::Red;
+                color.x = Vector4::Red.x * v1.cost;
+                Debug::Renderer::AddVertex(v1.worldPosition, color);
+                color.x = Vector4::Red.x * v2.cost;
+                Debug::Renderer::AddVertex(v2.worldPosition, color);
+                color.x = Vector4::Red.x * v2.cost;
+                Debug::Renderer::AddVertex(v2.worldPosition, color);
+                color.x = Vector4::Red.x * v3.cost;
+                Debug::Renderer::AddVertex(v3.worldPosition, color);
+                color.x = Vector4::Red.x * v3.cost;
+                Debug::Renderer::AddVertex(v3.worldPosition, color);
+                color.x = Vector4::Red.x * v1.cost;
+                Debug::Renderer::AddVertex(v1.worldPosition, color);
+            }
+        }
+
+		// 透明壁の描画
+		if (_drawTransparentWall)
+		{
+			for (const auto& wall : _terrain->GetTransparentWalls())
+			{
+				size_t pointCount = wall.points.size();
+				if (pointCount <= 1)
+					continue;
+				Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
+				for (size_t i = 0; i < pointCount - 1; i++)
+				{
+					const Vector3& p1 = wall.points[i];
+					const Vector3& p2 = wall.points[i + 1];
+					const Vector3& p3 = wall.points[i] + heightOffset;
+					const Vector3& p4 = wall.points[i + 1] + heightOffset;
+					Vector4 color = Vector4::Green;
+					Debug::Renderer::AddVertex(p1, color);
+					Debug::Renderer::AddVertex(p2, color);
+					Debug::Renderer::AddVertex(p1, color);
+					Debug::Renderer::AddVertex(p3, color);
+					Debug::Renderer::AddVertex(p2, color);
+					Debug::Renderer::AddVertex(p4, color);
+					Debug::Renderer::AddVertex(p3, color);
+					Debug::Renderer::AddVertex(p4, color);
+					// 法線の描画
+					color = Vector4::Blue;
+					Vector3 center = (p1 + p2 + p3 + p4) / 4.0f;
+					Debug::Renderer::AddVertex(center, color);
+					Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();
+					Debug::Renderer::AddVertex(center + normal, color);
+				}
+			}
+		}
     }
 }
 // GUI描画
@@ -79,6 +139,11 @@ void TerrainController::DrawGui()
     {
 		// 地形の編集フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"地形編集", &_isEditing);
+		// ストリームアウトデータの描画フラグを切り替えるチェックボックス
+		ImGui::Checkbox(u8"ストリームアウトデータ描画", &_drawStreamOut);
+		// 透明壁の描画フラグを切り替えるチェックボックス
+		ImGui::Checkbox(u8"透明壁描画", &_drawTransparentWall);
+        ImGui::Separator();
         // 地形のGUI描画
         _terrain->DrawGui();
     }

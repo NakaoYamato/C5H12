@@ -33,6 +33,10 @@ Input::Input()
 	_valueActionMap["MouseWheel"] = { {InputType::Mouse,MOUSE_WHEEL} };
 	_valueActionMap["MouseOldWheel"] = { {InputType::Mouse,MOUSE_OLD_WHEEL} };
 	_valueActionMap["Guard"] = { {InputType::XboxPad,XBOXPAD_TRIGGER_R} };
+
+	_buttonActionMap["LeftClick"] = { {InputType::Mouse,VK_LBUTTON} };
+	_buttonActionMap["RightClick"] = { {InputType::Mouse,VK_RBUTTON} };
+	_buttonActionMap["MiddleClick"] = { {InputType::Mouse,VK_MBUTTON} };
 #pragma endregion
 
 	// “o˜^‚µ‚½ƒAƒNƒVƒ‡ƒ“‚Ì“ü—ÍŠÄ‹î•ñ‚ğŠi”[

@@ -1,7 +1,6 @@
 #include "TerrainDeformer.h"
 
 #include "../../Library/Input/Input.h"
-#include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Scene/Scene.h"
@@ -70,9 +69,6 @@ void TerrainDeformer::Update(float elapsedTime)
 	auto terrain = _terrainController.lock()->GetTerrain().lock();
     if (!terrain)
         return;
-    auto& streamOutData = terrain->GetStreamOutData();
-    if (streamOutData.empty())
-        return;
 
 	Vector3 mousePos{};
 	mousePos.x = _INPUT_VALUE("MousePositionX");
@@ -89,41 +85,18 @@ void TerrainDeformer::Update(float elapsedTime)
     Vector3 rayEnd = mousePos.Unproject(screenWidth, screenHeight, view, projection);
     Vector3 rayDir = (rayEnd - rayStart).Normalize();
 
-    // 交差したかどうか
-    bool isIntersect = false;
 	// UV座標を格納する変数
 	Vector2 intersectUVPosition = Vector2::Zero;
 
-    DirectX::XMVECTOR RayStart = DirectX::XMLoadFloat3(&rayStart);
-    DirectX::XMVECTOR RayDir = DirectX::XMLoadFloat3(&rayDir);
-    float rayLength = 1000.0f; // レイの長さ
     // 地形との交差判定
-    for (size_t i = 0; i < streamOutData.size(); i += 3)
-    {
-        const auto& v1 = streamOutData[i + 0];
-        const auto& v2 = streamOutData[i + 1];
-        const auto& v3 = streamOutData[i + 2];
-        DirectX::XMVECTOR triangleVerts[3] = {
-            DirectX::XMLoadFloat3(&v1.worldPosition),
-            DirectX::XMLoadFloat3(&v2.worldPosition),
-            DirectX::XMLoadFloat3(&v3.worldPosition)
-        };
-        HitResult hitResult;
-        if (Collision3D::IntersectRayVsTriangle(
-            RayStart, RayDir, rayLength,
-            triangleVerts,
-            hitResult))
-        {
-            // 交差点を記録
-            _intersectionWorldPoint = hitResult.position;
-            Vector3 uv = _intersectionWorldPoint.TransformCoord(
-                GetActor()->GetTransform().GetMatrixInverse());
-            intersectUVPosition.x = (uv.x + 1.0f) / 2.0f;
-            intersectUVPosition.y = (-uv.z + 1.0f) / 2.0f;
-            isIntersect = true;
-            break;
-        }
-    }
+    bool isIntersect = terrain->Raycast(
+        GetActor()->GetTransform().GetMatrix(),
+        rayStart,
+        rayDir,
+        1000.0f, // レイの長さ
+        &_intersectionWorldPoint,
+		nullptr, // 法線は不要
+        &intersectUVPosition);
 
 	// 交差していて、かつブラシの入力が押されている場合は変形タスクを追加
     if (isIntersect && _INPUT_PRESSED("OK"))
@@ -269,7 +242,8 @@ void TerrainDeformer::DrawGui()
     if (!_terrainController.lock()->GetTerrain().lock())
 		return;
 
-    ImGui::Checkbox(u8"ブラシ使用", &_useBrush);
+    if (ImGui::Checkbox(u8"ブラシ使用", &_useBrush))
+        GetActor()->SetUseGuizmoFlag(!_useBrush);
 
 	ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"加算\0減算\0高さ変形\0コスト変形\0");
 

@@ -11,13 +11,14 @@
 class Terrain
 {
 public:
+	// 頂点データ構造体
     struct Vertex
     {
         DirectX::XMFLOAT3 position;
         DirectX::XMFLOAT3 normal;
         DirectX::XMFLOAT2 texcoord;
     };
-
+	// 定数バッファのデータ構造体
     struct ConstantBuffer
     {
         DirectX::XMFLOAT4X4 world = {};
@@ -34,7 +35,6 @@ public:
         float roughness{ 0.6f }; // ラフネス
         float padding[1] = { 0.0f }; // パディング
     };
-
     // ストリームアウト用
     struct StreamOutVertex
     {
@@ -45,6 +45,14 @@ public:
         DirectX::XMFLOAT4 blendRate = {};
 		float             cost = 0.0f;
     };
+    // 透明壁構造体
+	struct TransparentWall
+	{
+		// 透明壁の下部分の頂点
+		std::vector<Vector3> points;
+		// 透明壁の高さ
+		float height = 5.0f;
+	};
 
     static constexpr LONG StreamOutMaxVertex = 3 * 3 * 64 * 64;
     static constexpr LONG ParameterMapSize = 1024;
@@ -55,24 +63,35 @@ public:
 	~Terrain() {}
     // 描画処理
     void Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer);
-    // デバッグ描画
-	void DebugRender(const DirectX::XMFLOAT4X4& world);
     // GUI描画
     void DrawGui();
 
-    // パラメータマップの書き出し
-	void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
-	// データマップの書き出し
-	void SaveDataMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* dataMapPath);
+    // レイキャスト
+	bool Raycast(
+        const DirectX::XMFLOAT4X4& world,
+        const Vector3& rayStart,
+		const Vector3& rayDirection,
+		float rayLength,
+		Vector3* intersectionWorldPoint = nullptr,
+		Vector3* intersectionWorldNormal = nullptr,
+		Vector2* intersectUVPosition = nullptr) const;
 #pragma region アクセサ
+    // パラメータマップの書き出し
+    void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
+    // データマップの書き出し
+    void SaveDataMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* dataMapPath);
     // パラメータマップのフレームバッファを取得
     FrameBuffer* GetParameterMapFB() { return _parameterMapFB.get(); }
 	// データマップのフレームバッファを取得
 	FrameBuffer* GetDataMapFB() { return _dataMapFB.get(); }
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
-
+    // ストリームアウトをするかどうか設定
     void SetStreamOut(bool streamOut) { _streamOut = streamOut; }
+    // 透明壁取得
+	std::vector<TransparentWall>& GetTransparentWalls() { return _transparentWalls; }
+    // 透明壁追加
+	void AddTransparentWall(const TransparentWall& wall) { _transparentWalls.push_back(wall); }
 #pragma endregion
 
 private:
@@ -108,6 +127,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
     std::vector<StreamOutVertex> _streamOutData;
 
-    // ワイヤーフレーム描画フラグ
-    bool _drawWireframe = false;
+	// 透明壁
+	std::vector<TransparentWall> _transparentWalls;
 };

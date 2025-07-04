@@ -221,11 +221,13 @@ public:
 	void SetActiveFlag(bool b) { this->_isActive = b; }
 	void SetShowFlag(bool b) { this->_isShowing = b; }
 	void SetDrawDebugFlag(bool b) { this->_drawDebug = b; }
+	void SetUseGuizmoFlag(bool b) { this->_useGuizmo = b; }
 	void SetDrawHierarchyFlag(bool b) { this->_drawHierarchy = b; }
 
 	bool IsActive()const { return _isActive; }
 	bool IsShowing()const { return _isShowing; }
 	bool IsDrawingDebug()const { return _drawDebug; }
+	bool IsUsingGuizmo()const { return _useGuizmo; }
 	bool IsDrawingHierarchy()const { return _drawHierarchy; }
 #pragma endregion
 #pragma endregion

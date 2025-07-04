@@ -3,6 +3,7 @@
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Exporter/Exporter.h"
+#include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
@@ -243,45 +244,10 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
         }
     }
 }
-// デバッグ描画
-void Terrain::DebugRender(const DirectX::XMFLOAT4X4& world)
-{
-    auto& streamOutData = GetStreamOutData();
-    if (streamOutData.empty())
-        return;
-
-    if (!_drawWireframe)
-        return;
-
-    for (size_t i = 0; i < streamOutData.size(); i += 3)
-    {
-        const auto& v1 = streamOutData[i + 0];
-        const auto& v2 = streamOutData[i + 1];
-        const auto& v3 = streamOutData[i + 2];
-        Vector4 color = Vector4::Red;
-		color.x = Vector4::Red.x * v1.cost;
-        Debug::Renderer::AddVertex(v1.worldPosition, color);
-        color.x = Vector4::Red.x * v2.cost;
-        Debug::Renderer::AddVertex(v2.worldPosition, color);
-        color.x = Vector4::Red.x * v2.cost;
-        Debug::Renderer::AddVertex(v2.worldPosition, color);
-        color.x = Vector4::Red.x * v3.cost;
-        Debug::Renderer::AddVertex(v3.worldPosition, color);
-        color.x = Vector4::Red.x * v3.cost;
-        Debug::Renderer::AddVertex(v3.worldPosition, color);
-        color.x = Vector4::Red.x * v1.cost;
-        Debug::Renderer::AddVertex(v1.worldPosition, color);
-    }
-}
 // GUI描画
 void Terrain::DrawGui()
 {
     // ワイヤーフレーム描画フラグを切り替えるチェックボックス
-    ImGui::Checkbox(u8"ワイヤーフレーム描画", &_drawWireframe);
-	ImGui::Text(u8"パラメータマップ");
-    ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-	ImGui::Text(u8"データマップ");
-    ImGui::Image(_dataMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 	ImGui::ColorEdit4(u8"Color", &_data.baseColor.x, ImGuiColorEditFlags_NoInputs);
     ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
     ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
@@ -291,13 +257,122 @@ void Terrain::DrawGui()
     ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
     ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");
     ImGui::Checkbox(u8"頂点書き出し", &_streamOut);
-    ImGui::Image(_colorSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_normalSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_colorSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_normalSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_colorSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-    ImGui::Image(_normalSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+    if (ImGui::TreeNode(u8"テクスチャ"))
+    {
+        ImGui::Text(u8"パラメータマップ");
+        ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Text(u8"データマップ");
+        ImGui::Image(_dataMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(_colorSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(_normalSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(_colorSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(_normalSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(_colorSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Image(_normalSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode(u8"透明壁"))
+    {
+        size_t wallIndex = 0;
+        for (auto& wall : _transparentWalls)
+        {
+            if (ImGui::TreeNode(("Wall:" + std::to_string(wallIndex)).c_str()))
+            {
+                ImGui::Text(u8"透明壁の頂点数: %zu", wall.points.size());
+                for (size_t i = 0; i < wall.points.size(); i++)
+                {
+                    ImGui::DragFloat3(std::to_string(i).c_str(), &wall.points[i].x, 0.1f);
+                    ImGui::SameLine();
+                    if (ImGui::Button(u8"削除"))
+                    {
+                        // 透明壁の頂点を削除
+						wall.points.erase(wall.points.begin() + i);
+						// 削除後はループを抜ける
+						break;
+                    }
+                }
+                ImGui::DragFloat(u8"透明壁の高さ", &wall.height, 0.1f, 0.0f, 100.0f);
+                if (ImGui::Button(u8"透明壁の頂点追加"))
+                {
+                    // 透明壁の頂点を追加
+                    wall.points.push_back(Vector3{});
+                }
+
+				ImGui::TreePop();
+            }
+            wallIndex++;
+        }
+        ImGui::Separator();
+		if (ImGui::Button(u8"透明壁の追加"))
+		{
+			// 透明壁を追加
+            _transparentWalls.push_back(TransparentWall{});
+		}
+
+        ImGui::TreePop();
+    }
     ImGui::Separator();
+}
+// レイキャスト
+bool Terrain::Raycast(
+    const DirectX::XMFLOAT4X4& world,
+    const Vector3& rayStart, 
+    const Vector3& rayDirection,
+    float rayLength,
+    Vector3* intersectionWorldPoint,
+    Vector3* intersectionWorldNormal,
+    Vector2* intersectUVPosition) const
+{
+    auto& streamOutData = GetStreamOutData();
+    if (streamOutData.empty())
+        return false;
+
+	DirectX::XMMATRIX InvWorld = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&world));
+
+	bool isHit = false;
+	Vector3 hitWPoint{};
+	Vector3 hitWNormal{};
+
+    DirectX::XMVECTOR RayStart = DirectX::XMLoadFloat3(&rayStart);
+    DirectX::XMVECTOR RayDir = DirectX::XMLoadFloat3(&rayDirection);
+    // 地形との交差判定
+    for (size_t i = 0; i < streamOutData.size(); i += 3)
+    {
+        const auto& v1 = streamOutData[i + 0];
+        const auto& v2 = streamOutData[i + 1];
+        const auto& v3 = streamOutData[i + 2];
+        DirectX::XMVECTOR triangleVerts[3] = {
+            DirectX::XMLoadFloat3(&v1.worldPosition),
+            DirectX::XMLoadFloat3(&v2.worldPosition),
+            DirectX::XMLoadFloat3(&v3.worldPosition)
+        };
+        HitResult hitResult;
+        if (Collision3D::IntersectRayVsTriangle(
+            RayStart, RayDir, rayLength,
+            triangleVerts,
+            hitResult))
+        {
+            // 交差点を記録
+            hitWPoint = hitResult.position;
+			hitWNormal = hitResult.normal;
+            isHit = true;
+        }
+    }
+
+    if (isHit)
+    {
+		if (intersectionWorldPoint)
+			*intersectionWorldPoint = hitWPoint;
+		if (intersectionWorldNormal)
+			*intersectionWorldNormal = hitWNormal;
+        if (intersectUVPosition)
+        {
+            Vector3 uv = hitWPoint.TransformCoord(InvWorld);
+			intersectUVPosition->x = (uv.x + 1.0f) / 2.0f;
+			intersectUVPosition->y = (-uv.z + 1.0f) / 2.0f;
+        }
+    }
+	return isHit;
 }
 // パラメータマップの書き出し
 void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)

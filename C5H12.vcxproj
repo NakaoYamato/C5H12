@@ -165,6 +165,7 @@
     <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Component\StateController.cpp" />
+    <ClCompile Include="Library\Component\Terrain\TerrainCollisionMaker.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainController.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
@@ -341,6 +342,7 @@
     <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Component\StateController.h" />
+    <ClInclude Include="Library\Component\Terrain\TerrainCollisionMaker.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainController.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />

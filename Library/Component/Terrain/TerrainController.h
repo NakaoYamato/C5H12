@@ -41,6 +41,10 @@ private:
 	// 読み込む用のデータマップ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadDataMapSRV;
 
+    // ストリームアウトデータ描画フラグ
+    bool _drawStreamOut = false;
+    // 透明壁描画フラグ
+    bool _drawTransparentWall = false;
     // 編集フラグ
 	bool _isEditing = false;
 };

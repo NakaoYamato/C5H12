@@ -294,7 +294,15 @@ namespace Collision3D
         const DirectX::XMVECTOR& rayDirection,		// 要正規化
         float rayDist,
         const DirectX::XMVECTOR& spherePos,
-        float RADIUS,
+        float radius,
+        HitResultVector* result = {});
+    // レイVs球
+    bool IntersectRayVsSphere(
+        const Vector3& rayStart,
+        const Vector3& rayDirection,		// 要正規化
+        float rayDist,
+        const Vector3& spherePos,
+        float radius,
         HitResultVector* result = {});
 
     // レイVsAABB

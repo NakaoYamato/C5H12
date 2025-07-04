@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <memory>
 #include <wrl.h>
+#include <string>
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Graphics/RenderContext.h"
@@ -23,17 +24,15 @@ public:
     {
         DirectX::XMFLOAT4X4 world = {};
 
-		DirectX::XMFLOAT4 baseColor{ 1.0f, 1.0f, 1.0f, 1.0f }; // ベースカラー
+        float edgeFactor    = 64.0f;    // エッジ分割数
+        float innerFactor   = 64.0f;    // 内部部分数
+        float heightScaler  = 1.0f;     // 高さ係数
+        float padding0      = 0.0f;     // パディング
 
-        float edgeFactor{ 64 };// エッジ分割数
-        float innerFactor{ 64 };// 内部部分数
-        float heightScaler{ +1.0f };// 高さ係数
-        float tillingScale{ +1.0f }; // タイリング係数
-
-        float emissive{ 0.0f }; // エミッシブ
-        float metalness{ 0.63f }; // メタリック
-        float roughness{ 0.6f }; // ラフネス
-        float padding[1] = { 0.0f }; // パディング
+        float emissive      = 0.0f;     // エミッシブ
+        float metalness     = 0.63f;    // メタリック
+        float roughness     = 0.6f;     // ラフネス
+        float padding1      = 0.0f;     // パディング
     };
     // ストリームアウト用
     struct StreamOutVertex
@@ -42,7 +41,6 @@ public:
         DirectX::XMFLOAT3 worldPosition = {};
         DirectX::XMFLOAT3 normal = {};
         DirectX::XMFLOAT2 texcoord = {};
-        DirectX::XMFLOAT4 blendRate = {};
 		float             cost = 0.0f;
     };
     // 透明壁構造体
@@ -54,10 +52,12 @@ public:
 		float height = 5.0f;
 	};
 
+	static constexpr size_t BaseColorTextureIndex = 0;
+	static constexpr size_t NormalTextureIndex = 1;
     static constexpr LONG StreamOutMaxVertex = 3 * 3 * 64 * 64;
+    static constexpr LONG MaterialMapSize = 2048;
     static constexpr LONG ParameterMapSize = 1024;
     static constexpr UINT ParameterMapIndex = 6;
-    static constexpr UINT DataMapIndex = 7;
 public:
     Terrain(ID3D11Device* device);
 	~Terrain() {}
@@ -76,14 +76,10 @@ public:
 		Vector3* intersectionWorldNormal = nullptr,
 		Vector2* intersectUVPosition = nullptr) const;
 #pragma region アクセサ
-    // パラメータマップの書き出し
-    void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
-    // データマップの書き出し
-    void SaveDataMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* dataMapPath);
+    // マテリアルマップのフレームバッファを取得
+	FrameBuffer* GetMaterialMapFB() { return _materialMapFB.get(); }
     // パラメータマップのフレームバッファを取得
     FrameBuffer* GetParameterMapFB() { return _parameterMapFB.get(); }
-	// データマップのフレームバッファを取得
-	FrameBuffer* GetDataMapFB() { return _dataMapFB.get(); }
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
     // ストリームアウトをするかどうか設定
@@ -92,33 +88,56 @@ public:
 	std::vector<TransparentWall>& GetTransparentWalls() { return _transparentWalls; }
     // 透明壁追加
 	void AddTransparentWall(const TransparentWall& wall) { _transparentWalls.push_back(wall); }
+
+	// 基本色テクスチャのパスを取得
+	const std::wstring& GetBaseColorTexturePath() const { return _baseColorTexturePath; }
+	// 法線テクスチャのパスを取得
+	const std::wstring& GetNormalTexturePath() const { return _normalTexturePath; }
+	// パラメータテクスチャのパスを取得
+	const std::wstring& GetParameterTexturePath() const { return _parameterTexturePath; }
+	// 基本色テクスチャのパスを設定
+	void SetBaseColorTexturePath(const std::wstring& path) { _baseColorTexturePath = path; }
+	// 法線テクスチャのパスを設定
+	void SetNormalTexturePath(const std::wstring& path) { _normalTexturePath = path; }
+	// パラメータテクスチャのパスを設定
+	void SetParameterTexturePath(const std::wstring& path) { _parameterTexturePath = path; }
+    // 基本色テクスチャのの書き出し
+	void SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath);
+	// 法線テクスチャの書き出し
+	void SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* normalPath);
+    // パラメータマップの書き出し
+    void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
+
+    // 書き出し
+    void SaveToFile(const std::string& path);
+    // 読み込み
+    void LoadFromFile(const std::string& path);
 #pragma endregion
 
 private:
     // 地形メッシュの頂点とインデックスを生成
     void CreateTerrainMesh(ID3D11Device* device);
-
 private:
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
-    std::vector<Vertex>                     _vertices;
-    std::vector<uint32_t>                   _indices;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>    _constantBuffer;
     ConstantBuffer                          _data;
+#pragma region 描画用COMオブジェクト
+    Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>    _constantBuffer;
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
-	Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
-	// 地形用テクスチャ
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _colorSRVs[3];
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _normalSRVs[3];
-    // パラメータマップ（R：テクスチャ０ブレンド率、G：テクスチャ１ブレンド率、B：テクスチャ２ブレンド率、A：高さ）
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
+    Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
+    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
+#pragma endregion
+
+    // マテリアルマップ(RT0:BaseColor,RT1:Normal)
+    std::unique_ptr<FrameBuffer> _materialMapFB;
+    // パラメータマップ（R：高さ、G：コスト、B：（空き）、A：（空き））
     std::unique_ptr<FrameBuffer> _parameterMapFB;
-    // データマップ(R：移動コスト)
-    std::unique_ptr<FrameBuffer> _dataMapFB;
+    // マテリアルのリセット
+    bool _resetMap = false;
 
     // ストリームアウト用
     bool _streamOut = false;
@@ -127,6 +146,13 @@ private:
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
     std::vector<StreamOutVertex> _streamOutData;
 
-	// 透明壁
-	std::vector<TransparentWall> _transparentWalls;
+	// 基本色テクスチャのパス
+    std::wstring _baseColorTexturePath = L"";
+	// 法線テクスチャのパス
+    std::wstring _normalTexturePath = L"";
+	// パラメータテクスチャのパス
+    std::wstring _parameterTexturePath = L"";
+
+    // 透明壁
+    std::vector<TransparentWall> _transparentWalls;
 };

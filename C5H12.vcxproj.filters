@@ -1186,5 +1186,6 @@
     <FxCompile Include="HLSL\Sprite\FullscreenQuadPS.hlsl" />
     <FxCompile Include="HLSL\DebugSupporter\DebugGridRendererVS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformCostPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainCopyMaterialPS.hlsl" />
   </ItemGroup>
 </Project>

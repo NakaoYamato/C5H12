@@ -313,14 +313,17 @@ RenderState::RenderState(ID3D11Device* device)
 		D3D11_BLEND_DESC desc{};
 		desc.AlphaToCoverageEnable = false;
 		desc.IndependentBlendEnable = false;
-		desc.RenderTarget[0].BlendEnable = false;
-		desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-		desc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-		desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		for (size_t i = 0; i < 8; ++i)
+		{
+			desc.RenderTarget[i].BlendEnable = false;
+			desc.RenderTarget[i].SrcBlend = D3D11_BLEND_ONE;
+			desc.RenderTarget[i].DestBlend = D3D11_BLEND_ZERO;
+			desc.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
+			desc.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
+			desc.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
+			desc.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			desc.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		}
 		HRESULT hr = device->CreateBlendState(&desc,
 			_blendStates[static_cast<int>(BlendState::None)].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));

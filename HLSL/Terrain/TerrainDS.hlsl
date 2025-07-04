@@ -20,7 +20,7 @@ const OutputPatch<DS_IN, 3> patch)
     float3 worldNormal = normalize(mul(normal, (float3x3) world));
     // パラメータマップから高さ方向取得
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
-    float height = parameter.w * heightSclaer;
+    float height = parameter.r * heightSclaer;
     // 頂点座標をハイトマップで取得した値分ずらす
     {
         position = mul(float4(position, 1.0f), world).xyz;
@@ -32,10 +32,6 @@ const OutputPatch<DS_IN, 3> patch)
     dout.normal = worldNormal;
     
     dout.worldPosition = position;
-    dout.blendRate.xyz = parameter.xyz;
-    dout.blendRate.w = saturate(1.0f - (parameter.x + parameter.y + parameter.z));
-    // ブレンド率を正規化
-    dout.blendRate = normalize(dout.blendRate);
     // コストはストリームアウト時に計算するので初期化
     dout.cost = 0.0f;
     

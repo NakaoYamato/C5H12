@@ -32,9 +32,5 @@ void StageActor::OnCreate()
     auto terrainController = this->AddComponent<TerrainController>();
     this->AddComponent<TerrainDeformer>();
     this->AddCollider<TerrainCollider>();
-	// パラメータマップの読み込み
-    terrainController->LoadParameterMap(L"./Data/Texture/Terrain/ParameterMap.dds");
-	// データマップの読み込み
-    terrainController->LoadDataMap(L"./Data/Texture/Terrain/TerrainDataMap.dds");
 #endif
 }

@@ -18,9 +18,8 @@ void main(
         elemant.texcoord = gin[i].texcoord;
         elemant.normal = gin[i].normal;
         elemant.worldPosition = gin[i].worldPosition;
-        elemant.blendRate = gin[i].blendRate;
         // コストをデータマップから取得
-        elemant.cost = dataTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], elemant.texcoord, 0).r;
+        elemant.cost = dataTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], elemant.texcoord, 0).g;
         
         gout.Append(elemant);
     }

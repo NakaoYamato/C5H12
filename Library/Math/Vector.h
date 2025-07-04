@@ -303,7 +303,7 @@ public:
     static constexpr DirectX::XMFLOAT4 Front    = { 0.0f, 0.0f, 1.0f, 0.0f };
     static constexpr DirectX::XMFLOAT4 Zero     = { 0.0f, 0.0f, 0.0f, 0.0f };
     static constexpr DirectX::XMFLOAT4 One      = { 1.0f, 1.0f, 1.0f, 1.0f };
-    static constexpr DirectX::XMFLOAT4 Black    = { 0.0f, 0.0f, 0.0f, 0.0f };
+    static constexpr DirectX::XMFLOAT4 Black    = { 0.0f, 0.0f, 0.0f, 1.0f };
     static constexpr DirectX::XMFLOAT4 White    = { 1.0f, 1.0f, 1.0f, 1.0f };
     static constexpr DirectX::XMFLOAT4 Gray     = { 0.2f, 0.2f, 0.2f, 1.0f };
     static constexpr DirectX::XMFLOAT4 Red      = { 1.0f, 0.0f, 0.0f, 1.0f };

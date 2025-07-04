@@ -1,5 +1,6 @@
 #include "TerrainDeform.hlsli"
 
+// パラメータマップに書き込むので出力先は1つ
 float4 main(VsOut pin) : SV_TARGET
 {
     // ブラシの影響度を受けるか判定
@@ -9,8 +10,7 @@ float4 main(VsOut pin) : SV_TARGET
     // 影響割合を計算
     float rate = 1.0f - saturate(len / brushRadius);
     
-    float4 baseColor = texture0.SampleLevel(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, 0);
-    baseColor.a = clamp(baseColor.a + brushStrength * rate, heightScale.x, heightScale.y);
-    baseColor.rgb = baseColor.rgb;
-    return baseColor;
+    float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, 0);
+    parameter.r = clamp(parameter.r + brushStrength * rate, heightScale.x, heightScale.y);
+    return parameter;
 }

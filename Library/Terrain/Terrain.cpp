@@ -5,6 +5,7 @@
 #include "../../Library/Exporter/Exporter.h"
 #include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
+#include "../../Library/Algorithm/Converter.h"
 
 #include <imgui.h>
 
@@ -54,41 +55,18 @@ Terrain::Terrain(ID3D11Device* device)
         "./Data/Shader/TerrainGBPS.cso",
         _gbPixelShader.ReleaseAndGetAddressOf());
 
-    // 地形用テクスチャの読み込み
-    GpuResourceManager::LoadTextureFromFile(
-        device,
-        L"./Data/Texture/Terrain/001_COLOR.png",
-        _colorSRVs[0].ReleaseAndGetAddressOf(),
-        nullptr);
-    GpuResourceManager::LoadTextureFromFile(
-        device,
-        L"./Data/Texture/Terrain/002_COLOR.png",
-        _colorSRVs[1].ReleaseAndGetAddressOf(),
-        nullptr);
-    GpuResourceManager::LoadTextureFromFile(
-        device,
-        L"./Data/Texture/Terrain/003_COLOR.jpg",
-        _colorSRVs[2].ReleaseAndGetAddressOf(),
-        nullptr);
-    GpuResourceManager::LoadTextureFromFile(
-        device,
-        L"./Data/Texture/Terrain/001_NORMAL.png",
-        _normalSRVs[0].ReleaseAndGetAddressOf(),
-        nullptr);
-    GpuResourceManager::LoadTextureFromFile(
-        device,
-        L"./Data/Texture/Terrain/002_NORMAL.png",
-        _normalSRVs[1].ReleaseAndGetAddressOf(),
-        nullptr);
-    GpuResourceManager::LoadTextureFromFile(
-        device,
-        L"./Data/Texture/Terrain/003_NORMAL.png",
-        _normalSRVs[2].ReleaseAndGetAddressOf(),
-        nullptr);
-    // パラメータマップの読み込み
-    _parameterMapFB = std::make_unique<FrameBuffer>(device, ParameterMapSize, ParameterMapSize, true);
-	// データマップのフレームバッファを作成
-	_dataMapFB = std::make_unique<FrameBuffer>(device, ParameterMapSize, ParameterMapSize, true);
+    // マテリアルマップ作成
+	_materialMapFB = std::make_unique<FrameBuffer>(
+		device,
+        MaterialMapSize, MaterialMapSize, true,
+		std::vector<DXGI_FORMAT>(
+            {   DXGI_FORMAT_R16G16B16A16_FLOAT, 
+                DXGI_FORMAT_R16G16B16A16_FLOAT })
+    );
+    // パラメータマップ作成
+    _parameterMapFB = std::make_unique<FrameBuffer>(
+        device, 
+        ParameterMapSize, ParameterMapSize, true);
 
     // ストリームアウトを使用してプリミティブを取得するシェーダー
     {
@@ -98,7 +76,6 @@ Terrain::Terrain(ID3D11Device* device)
             {0,"WORLD_POSITION",0,0,3,0},
             {0,"NORMAL",		0,0,3,0},
             {0,"TEXCOORD",		0,0,2,0},
-            {0,"BLEND_RATE",	0,0,4,0},
 			{0,"COST",          0,0,1,0},
         };
         UINT bufferStrides[] = { sizeof(StreamOutVertex) };
@@ -146,6 +123,15 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
+	// マテリアルマップ、パラメータマップのリセット
+    if (_resetMap)
+    {
+        _materialMapFB->Clear(BaseColorTextureIndex, dc, Vector4::White);
+        _materialMapFB->Clear(NormalTextureIndex, dc, Vector4::Blue);
+        _parameterMapFB->Clear(dc, Vector4::Black);
+        _resetMap = false;
+    }
+
     if (writeGBuffer)
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
     else
@@ -181,27 +167,21 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
     // 地形用テクスチャ設定
     ID3D11ShaderResourceView* srvs[] =
     {
-        _colorSRVs[0].Get(),
-        _colorSRVs[1].Get(),
-        _colorSRVs[2].Get(),
-        _normalSRVs[0].Get(),
-        _normalSRVs[1].Get(),
-        _normalSRVs[2].Get(),
+        _materialMapFB->GetColorSRV(0).Get(),
+        _materialMapFB->GetColorSRV(1).Get(),
     };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
     // パラメータマップ設定
     dc->DSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
     dc->PSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
-	// データマップ設定
-    dc->GSSetShaderResources(DataMapIndex, 1, _dataMapFB->GetColorSRV().GetAddressOf());
     // 頂点バッファとインデックスバッファを設定
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
     dc->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &stride, &offset);
     dc->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-    // 描画
-    dc->DrawIndexed(static_cast<UINT>(_indices.size()), 0, 0);
+    // 描画（平面描画で三角形が2枚あるためIndexCountが6）
+    dc->DrawIndexed(static_cast<UINT>(6), 0, 0);
 
     // シェーダーリソースビューを解除
     ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
@@ -247,28 +227,28 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
 // GUI描画
 void Terrain::DrawGui()
 {
-    // ワイヤーフレーム描画フラグを切り替えるチェックボックス
-	ImGui::ColorEdit4(u8"Color", &_data.baseColor.x, ImGuiColorEditFlags_NoInputs);
-    ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
-    ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
-    ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
-    ImGui::SliderFloat(u8"Tilling Scale", &_data.tillingScale, 0.1f, 10.0f, "%.1f");
-    ImGui::SliderFloat(u8"Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
-    ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
-    ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");
-    ImGui::Checkbox(u8"頂点書き出し", &_streamOut);
+    if (ImGui::Button(u8"頂点再計算"))
+        _streamOut = true;
+    if (ImGui::TreeNode(u8"定数バッファ"))
+    {
+        ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, 128.0f, "%.1f");
+        ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, 128.0f, "%.1f");
+        ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
+        ImGui::SliderFloat(u8"Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
+        ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
+        ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");
+        ImGui::TreePop();
+    }
     if (ImGui::TreeNode(u8"テクスチャ"))
     {
-        ImGui::Text(u8"パラメータマップ");
+		ImGui::Text(u8"基本色テクスチャ: %s", ToString(_baseColorTexturePath).c_str());
+		ImGui::Image(_materialMapFB->GetColorSRV(0).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+		ImGui::Text(u8"法線テクスチャ: %s", ToString(_normalTexturePath).c_str());
+		ImGui::Image(_materialMapFB->GetColorSRV(1).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        ImGui::Text(u8"パラメータマップ: %s", ToString(_parameterTexturePath).c_str());
         ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Text(u8"データマップ");
-        ImGui::Image(_dataMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Image(_colorSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Image(_normalSRVs[0].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Image(_colorSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Image(_normalSRVs[1].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Image(_colorSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Image(_normalSRVs[2].Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        if (ImGui::Button(u8"リセット"))
+            _resetMap = true;
         ImGui::TreePop();
     }
     if (ImGui::TreeNode(u8"透明壁"))
@@ -374,6 +354,28 @@ bool Terrain::Raycast(
     }
 	return isHit;
 }
+// 基本色テクスチャのの書き出し
+void Terrain::SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath)
+{
+    if (Exporter::SaveDDSFile(device, dc,
+        _materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(),
+        baseColorPath))
+    {
+        // 基本色テクスチャのパスを更新
+        _baseColorTexturePath = baseColorPath;
+    }
+}
+// 法線テクスチャの書き出し
+void Terrain::SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* normalPath)
+{
+    if (Exporter::SaveDDSFile(device, dc,
+        _materialMapFB->GetColorSRV(NormalTextureIndex).Get(),
+        normalPath))
+    {
+        // 基本色テクスチャのパスを更新
+        _normalTexturePath = normalPath;
+    }
+}
 // パラメータマップの書き出し
 void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)
 {
@@ -381,31 +383,48 @@ void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, co
         _parameterMapFB->GetColorSRV().Get(),
         parameterMapPath))
     {
+		// パラメータマップのパスを更新
+		_parameterTexturePath = parameterMapPath;
     }
 }
-// データマップの書き出し
-void Terrain::SaveDataMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* dataMapPath)
+// 書き出し
+void Terrain::SaveToFile(const std::string& path)
 {
-    if (Exporter::SaveDDSFile(device, dc,
-        _dataMapFB->GetColorSRV().Get(),
-        dataMapPath))
+    nlohmann::json jsonData;
     {
+        jsonData["baseColorTexturePath"] = _baseColorTexturePath;
+        jsonData["normalTexturePath"] = _normalTexturePath;
+        jsonData["parameterTexturePath"] = _parameterTexturePath;
     }
+    Exporter::SaveJsonFile(path, jsonData);
+}
+// 読み込み
+void Terrain::LoadFromFile(const std::string& path)
+{
+    nlohmann::json jsonData;
+    if (!Exporter::LoadJsonFile(path, &jsonData))
+        return;
+
+	// JSONからテクスチャパスを読み込み
+	if (jsonData.contains("baseColorTexturePath"))
+		_baseColorTexturePath = jsonData["baseColorTexturePath"].get<std::wstring>();
+	if (jsonData.contains("normalTexturePath"))
+		_normalTexturePath = jsonData["normalTexturePath"].get<std::wstring>();
+	if (jsonData.contains("parameterTexturePath"))
+		_parameterTexturePath = jsonData["parameterTexturePath"].get<std::wstring>();
 }
 // 地形メッシュの頂点とインデックスを生成
 void Terrain::CreateTerrainMesh(ID3D11Device* device)
 {
     // 地形メッシュの頂点とインデックスを生成
-    _vertices.clear();
-    _vertices =
+    std::vector<Vertex> vertices =
     {
         {{-1.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},// 左下
         {{-1.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},// 左上
         {{ 1.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},// 右下
         {{ 1.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},// 右上
     };
-    _indices.clear();
-    _indices = {
+    std::vector<uint32_t> indices = {
         0, 1, 2, // 左下, 左上, 右下
         1, 3, 2  // 左上, 右上, 右下
     };
@@ -414,23 +433,23 @@ void Terrain::CreateTerrainMesh(ID3D11Device* device)
     HRESULT hr{ S_OK };
     D3D11_BUFFER_DESC buffer_desc{};
     D3D11_SUBRESOURCE_DATA subresource_data{};
-    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * _vertices.size());
+    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(Vertex) * vertices.size());
     buffer_desc.Usage = D3D11_USAGE_DEFAULT;
     buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     buffer_desc.CPUAccessFlags = 0;
     buffer_desc.MiscFlags = 0;
     buffer_desc.StructureByteStride = 0;
-    subresource_data.pSysMem = _vertices.data();
+    subresource_data.pSysMem = vertices.data();
     subresource_data.SysMemPitch = 0;
     subresource_data.SysMemSlicePitch = 0;
     hr = device->CreateBuffer(&buffer_desc, &subresource_data,
         _vertexBuffer.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * _indices.size());
+    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices.size());
     buffer_desc.Usage = D3D11_USAGE_DEFAULT;
     buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    subresource_data.pSysMem = _indices.data();
+    subresource_data.pSysMem = indices.data();
     hr = device->CreateBuffer(&buffer_desc, &subresource_data,
         _indexBuffer.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));

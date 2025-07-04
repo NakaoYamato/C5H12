@@ -25,7 +25,6 @@ struct DS_OUT
     float3 worldPosition : WORLD_POSITION;
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD;
-    float4 blendRate : BLEND_RATE; // ブレンド率（R:岩, G:土, B:草, A:基本色）
     float  cost : COST;
 };
 #define GS_IN DS_OUT
@@ -36,15 +35,13 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
 {
     row_major float4x4 world;
     
-    float4 baseColor; // ベースカラー
-    
     float edgeFactor; // エッジ分割数
     float innerFactor; // 内部分割数
     float heightSclaer; // 高さ係数
-    float tillingScale; // タイリング係数
+    float padding0; // タイリング係数
     
     float emissive;
     float roughness;
     float metalness;
-    float padding;
+    float padding1;
 }

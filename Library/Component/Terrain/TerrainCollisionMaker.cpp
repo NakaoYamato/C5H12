@@ -189,15 +189,25 @@ void TerrainCollisionMaker::DrawGui()
         {
             for (size_t i = 0; i < walls.size(); i++)
             {
-				if (ImGui::Button((u8"壁：" + std::to_string(i)).c_str()))
+				if (ImGui::Button((std::to_string(i) + u8"先頭に追加").c_str()))
 				{
+                    _editingWallIndex = static_cast<int>(i);
+                    // ポイント追加
+                    walls[_editingWallIndex].points.insert(walls[_editingWallIndex].points.begin(), _intersectionWorldPoint);
+                    _editingPointIndex = static_cast<int>(walls[_editingWallIndex].points.size() - 1);
+                    // ポイント編集状態に移行
+                    ChangeState(State::EditPoint);
+				}
+                ImGui::SameLine();
+                if (ImGui::Button((std::to_string(i) + u8"末尾に追加").c_str()))
+                {
                     _editingWallIndex = static_cast<int>(i);
                     // ポイント追加
                     walls[_editingWallIndex].points.push_back(_intersectionWorldPoint);
                     _editingPointIndex = static_cast<int>(walls[_editingWallIndex].points.size() - 1);
                     // ポイント編集状態に移行
                     ChangeState(State::EditPoint);
-				}
+                }
             }
             ImGui::Separator();
 
@@ -296,6 +306,25 @@ void TerrainCollisionMaker::DebugRender(const RenderContext& rc)
 		}
         wallIndex++;
 	}
+
+    // 編集中の壁の番号描画
+    if (_editingWallIndex != -1 && _editingWallIndex < terrain->GetTransparentWalls().size())
+    {
+        int pointIndex = 0;
+        for (const auto& point : terrain->GetTransparentWalls()[_editingWallIndex].points)
+        {
+            GetActor()->GetScene()->GetTextRenderer().Draw3D(
+                FontType::MSGothic,
+                std::to_string(pointIndex).c_str(),
+                point,
+                Vector4::White,
+                0.0f,
+                Vector2::Zero,
+                Vector2(0.2f, 0.2f));
+
+            pointIndex++;
+        }
+    }
 }
 // 状態変更
 void TerrainCollisionMaker::ChangeState(State newState)

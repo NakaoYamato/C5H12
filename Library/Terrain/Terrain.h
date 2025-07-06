@@ -8,6 +8,7 @@
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/PostProcess/FrameBuffer.h"
+#include "../../Library/Exporter/Exporter.h"
 
 class Terrain
 {
@@ -50,6 +51,11 @@ public:
 		std::vector<Vector3> points;
 		// 透明壁の高さ
 		float height = 5.0f;
+
+        // 書き出し
+        void Export(const char* label, nlohmann::json* jsonData);
+        // 読み込み
+        void Inport(const char* label, nlohmann::json& jsonData);
 	};
 
 	static constexpr size_t BaseColorTextureIndex = 0;
@@ -130,6 +136,11 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
+
+    // ストリームアウト用
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
 #pragma endregion
 
     // マテリアルマップ(RT0:BaseColor,RT1:Normal)
@@ -141,9 +152,6 @@ private:
 
     // ストリームアウト用
     bool _streamOut = false;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
     std::vector<StreamOutVertex> _streamOutData;
 
 	// 基本色テクスチャのパス

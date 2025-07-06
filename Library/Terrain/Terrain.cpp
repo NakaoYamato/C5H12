@@ -2,7 +2,6 @@
 
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
-#include "../../Library/Exporter/Exporter.h"
 #include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
@@ -398,6 +397,11 @@ void Terrain::SaveToFile(const std::string& path)
         jsonData["normalTexturePath"] = _normalTexturePath;
         jsonData["parameterTexturePath"] = _parameterTexturePath;
     }
+    jsonData["transparentWallsSize"] = _transparentWalls.size();
+    for (size_t i = 0; i < _transparentWalls.size(); ++i)
+    {
+        _transparentWalls[i].Export(("transparentWall" + std::to_string(i)).c_str(), &jsonData);
+    }
     Exporter::SaveJsonFile(path, jsonData);
 }
 // 読み込み
@@ -414,6 +418,16 @@ void Terrain::LoadFromFile(const std::string& path)
 		_normalTexturePath = jsonData["normalTexturePath"].get<std::wstring>();
 	if (jsonData.contains("parameterTexturePath"))
 		_parameterTexturePath = jsonData["parameterTexturePath"].get<std::wstring>();
+    // 透明壁の読み込み
+    if (jsonData.contains("transparentWallsSize"))
+    {
+        size_t wallSize = jsonData["transparentWallsSize"].get<size_t>();
+        _transparentWalls.resize(wallSize);
+        for (size_t i = 0; i < wallSize; ++i)
+        {
+            _transparentWalls[i].Inport(("transparentWall" + std::to_string(i)).c_str(), jsonData);
+        }
+    }
 }
 // 地形メッシュの頂点とインデックスを生成
 void Terrain::CreateTerrainMesh(ID3D11Device* device)
@@ -455,4 +469,44 @@ void Terrain::CreateTerrainMesh(ID3D11Device* device)
     hr = device->CreateBuffer(&buffer_desc, &subresource_data,
         _indexBuffer.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+}
+// 書き出し
+void Terrain::TransparentWall::Export(const char* label, nlohmann::json* jsonData)
+{
+    (*jsonData)[label]["pointsSize"] = points.size();
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        // Vector3をJSONに変換
+        nlohmann::json pointJson = {
+            {"x", points[i].x},
+            {"y", points[i].y},
+            {"z", points[i].z}
+        };
+        // JSONに追加
+        (*jsonData)[label][std::to_string(i)] = pointJson;
+    }
+    (*jsonData)[label]["height"] = height;
+}
+// 読み込み
+void Terrain::TransparentWall::Inport(const char* label, nlohmann::json& jsonData)
+{
+    if (jsonData.contains(label))
+    {
+        if (jsonData[label].contains("pointsSize"))
+        {
+            size_t pointSize = jsonData[label]["pointsSize"].get<size_t>();
+            points.resize(pointSize);
+            for (size_t i = 0; i < pointSize; ++i)
+            {
+                if (jsonData[label].contains(std::to_string(i)))
+                {
+                    auto& pointData = jsonData[label][std::to_string(i)];
+                    points[i].x = pointData.value("x", points[i].x);
+                    points[i].y = pointData.value("y", points[i].y);
+                    points[i].z = pointData.value("z", points[i].z);
+                }
+            }
+        }
+        height = jsonData[label].value("height", height);
+    }
 }

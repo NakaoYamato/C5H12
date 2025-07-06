@@ -117,6 +117,10 @@ void TerrainCollisionMaker::Update(float elapsedTime)
 	}
     else if (_state == State::CreatePoint)
     {
+        if (_INPUT_RELEASED("LeftClick"))
+        {
+            ChangeState(State::None);
+        }
     }
     else if (_state == State::EditPoint)
     {

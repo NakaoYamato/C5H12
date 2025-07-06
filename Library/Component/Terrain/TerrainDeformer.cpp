@@ -23,11 +23,6 @@ void TerrainDeformer::OnCreate()
         Graphics::Instance().GetDevice(),
         "./Data/Shader/TerrainDeformAddPS.cso",
         _addBrushPS.ReleaseAndGetAddressOf());
-    // 減算ブラシピクセルシェーダの読み込み
-    GpuResourceManager::CreatePsFromCso(
-        Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformSubtractPS.cso",
-        _subtractBrushPS.ReleaseAndGetAddressOf());
     // 高さ変形ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
@@ -55,16 +50,20 @@ void TerrainDeformer::OnCreate()
         Graphics::Instance().GetDevice(),
         Terrain::ParameterMapSize, Terrain::ParameterMapSize, true);
 
-    // テクスチャデータの読み込み
-    LoadTextureData(
-        L"./Data/Terrain/Texture/Material/001_COLOR.png",
-        L"./Data/Terrain/Texture/Material/001_NORMAL.png");
-    LoadTextureData(
-        L"./Data/Terrain/Texture/Material/002_COLOR.png",
-        L"./Data/Terrain/Texture/Material/002_NORMAL.png");
-    LoadTextureData(
-        L"./Data/Terrain/Texture/Material/003_COLOR.jpg",
-        L"./Data/Terrain/Texture/Material/003_NORMAL.png");
+    // デフォルトテクスチャデータの読み込み
+    AddPaintTexture(
+        L"./Data/Terrain/Paint/001_COLOR.png",
+        L"./Data/Terrain/Paint/001_NORMAL.png");
+    AddPaintTexture(
+        L"./Data/Terrain/Paint/002_COLOR.png",
+        L"./Data/Terrain/Paint/002_NORMAL.png");
+    AddPaintTexture(
+        L"./Data/Terrain/Paint/003_COLOR.jpg",
+        L"./Data/Terrain/Paint/003_NORMAL.png");
+    // デフォルトブラシテクスチャの読み込み
+    AddBrushTexture(L"./Data/Terrain/Brush/Brush000.png");
+    AddBrushTexture(L"./Data/Terrain/Brush/Brush001.png");
+    AddBrushTexture(L"./Data/Terrain/Brush/Brush002.png");
 }
 // 開始処理
 void TerrainDeformer::Start()
@@ -82,12 +81,23 @@ void TerrainDeformer::Update(float elapsedTime)
     if (!_useBrush)
         return;
 	// テクスチャデータが空の場合は何もしない
-	if (_textureDatas.empty())
+	if (_paintTextures.empty())
 		return;
 #ifdef USE_IMGUI
-	//	ウィンドウにフォーカス中の場合は何もしない
-	if (ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
-		return;
+    //	ウィンドウにフォーカス中の場合は処理しない
+    if (ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
+    {
+        // 前フレームのGUI操作フラグをオンにする
+        _wasGuiActive = true;
+        return;
+    }
+    // 前フレームのGUI操作フラグがオンの場合は左クリックを押されるまで処理しない
+    if (_wasGuiActive)
+    {
+        if (_INPUT_RELEASED("LeftClick"))
+            _wasGuiActive = false;
+        return;
+    }
 #endif
 	auto terrain = _terrainController.lock()->GetTerrain().lock();
     if (!terrain)
@@ -126,12 +136,14 @@ void TerrainDeformer::Update(float elapsedTime)
     {
 		Task task;
 		task.mode = _brushMode;
-        task.textureIndex = _textureIndex;
+        task.paintTextureIndex = _paintTextureIndex;
+        task.brushTextureIndex = _brushTextureIndex;
 		task.brushUVPosition = intersectUVPosition;
         // ブラシ半径をトランスフォームのサイズに影響されるようにする
 		task.radius = brushRadius / GetActor()->GetTransform().GetScale().x;
         // ブラシの強度は経過時間によって減衰させる
 		task.strength = brushStrength * elapsedTime;
+        task.brushRotationY = _brushRotationY;
 		task.heightScale = _brushHeightScale;
 		AddTask(task);
     }
@@ -214,14 +226,19 @@ void TerrainDeformer::Render(const RenderContext& rc)
         constantBufferData.brushStrength = task.strength;
         // 高さ変形スケールを設定
         constantBufferData.heightScale = task.heightScale;
+        // ブラシのY軸回転を設定
+        constantBufferData.brushRotationY = task.brushRotationY;
 
         // 定数バッファ更新
         rc.deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &constantBufferData, 0, 0);
 
+		// ペイントテクスチャのSRVを設定
+		auto& textureData = _paintTextures[task.paintTextureIndex];
+		rc.deviceContext->PSSetShaderResources(PaintBaseColorTextureIndex, 1, textureData.baseColorSRV.GetAddressOf());
+		rc.deviceContext->PSSetShaderResources(PaintNormalTextureIndex, 1, textureData.normalSRV.GetAddressOf());
 		// ブラシのSRVを設定
-		auto& textureData = _textureDatas[task.textureIndex];
-		rc.deviceContext->PSSetShaderResources(_countof(materialSRVs) + 0, 1, textureData.baseColorSRV.GetAddressOf());
-		rc.deviceContext->PSSetShaderResources(_countof(materialSRVs) + 1, 1, textureData.normalSRV.GetAddressOf());
+        auto& brushTextureData = _brushTextures[task.brushTextureIndex];
+		rc.deviceContext->PSSetShaderResources(BrushTextureIndex, 1, brushTextureData.textureSRV.GetAddressOf());
 
         // ブラシの種類によって処理を切り替える
         switch (_brushMode)
@@ -233,16 +250,6 @@ void TerrainDeformer::Render(const RenderContext& rc)
                 materialSRVs,
                 0, _countof(materialSRVs),
                 _addBrushPS.Get()
-            );
-            terrain->GetMaterialMapFB()->Deactivate(rc.deviceContext);
-            break;
-        case BrushMode::Subtract:
-            terrain->GetMaterialMapFB()->Activate(rc.deviceContext);
-            GetActor()->GetScene()->GetTextureRenderer().Blit(
-                rc.deviceContext,
-                materialSRVs,
-                0, _countof(materialSRVs),
-                _subtractBrushPS.Get()
             );
             terrain->GetMaterialMapFB()->Deactivate(rc.deviceContext);
             break;
@@ -285,88 +292,161 @@ void TerrainDeformer::DrawGui()
     if (ImGui::Checkbox(u8"ブラシ使用", &_useBrush))
         GetActor()->SetUseGuizmoFlag(!_useBrush);
 
-	ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"加算\0減算\0高さ変形\0コスト変形\0");
-	for (size_t i = 0; i < _textureDatas.size(); ++i)
-	{
-		if (ImGui::RadioButton(ToString(_textureDatas[i].baseColorPath).c_str(), _textureIndex == i))
-            _textureIndex = i;
-        ImGui::Image(_textureDatas[i].baseColorSRV.Get(), ImVec2(128.0f, 128.0f));
-        ImGui::SameLine();
-        ImGui::Image(_textureDatas[i].normalSRV.Get(), ImVec2(128.0f, 128.0f));
-	}
-    ImGui::DragFloat3(u8"ブラシワールド位置", &_intersectionWorldPoint.x, 0.01f, -100.0f, 100.0f);
-    ImGui::DragFloat(u8"ブラシ半径", &brushRadius, 0.01f, 0.0f, 100.0f);
-    if (_brushMode == BrushMode::Height)
+    if (_useBrush)
     {
-        ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
-        ImGui::DragFloat(u8"高さ最小値", &_brushHeightScale.x, 0.01f, -100.0f, 0.0f);
-        ImGui::DragFloat(u8"高さ最大値", &_brushHeightScale.y, 0.01f, 0.0f, 100.0f);
-    }
-    else
-    {
-        ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
-    }
-	if (ImGui::Button(u8"パラメータマップ書き出し"))
-	{
-        // ダイアログを開く
-        char filename[256] = { 0 };
-        const char* filter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
-        Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(filename,
-            sizeof(filename),
-            filter,
-            nullptr,
-            "dds");
-        // ファイルを選択したら
-        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+        if (ImGui::Begin(u8"TerrainDeformer"))
         {
-            std::string path = filename;
-            _terrainController.lock()->GetTerrain().lock()->SaveParameterMap(
-                Graphics::Instance().GetDevice(),
-                Graphics::Instance().GetDeviceContext(),
-                ToWString(path).c_str());
-        }
-	}
-    if (ImGui::Button(u8"データマップ書き出し"))
-    {
-        // ダイアログを開く
-        char filename[256] = { 0 };
-        const char* filter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
-        Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(filename,
-            sizeof(filename),
-            filter,
-            nullptr,
-            "dds");
-        // ファイルを選択したら
-        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-        {
-            std::string path = filename;
-            //_terrainController.lock()->GetTerrain().lock()->SaveDataMap(
-            //    Graphics::Instance().GetDevice(),
-            //    Graphics::Instance().GetDeviceContext(),
-            //    ToWString(path).c_str());
-        }
-    }
+            // ペイントテクスチャのGUI表示
+            DrawPaintTextureGui();
+            ImGui::Separator();
 
-    ImGui::Image(_copyMaterialMapFB->GetColorSRV(0).Get(), ImVec2(128.0f, 128.0f));
-    ImGui::Image(_copyMaterialMapFB->GetColorSRV(1).Get(), ImVec2(128.0f, 128.0f));
+            // ブラシテクスチャのGUI表示
+            DrawBrushTextureGui();
+            ImGui::Separator();
+
+            ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"加算\0高さ\0コスト\0");
+            ImGui::DragFloat3(u8"ブラシワールド位置", &_intersectionWorldPoint.x, 0.01f, -100.0f, 100.0f);
+            ImGui::DragFloat(u8"ブラシ半径", &brushRadius, 0.01f, 0.0f, 100.0f);
+            ImGui::DragFloat(u8"ブラシY軸回転(ラジアン)", &_brushRotationY, 0.01f, -DirectX::XM_PI, DirectX::XM_PI);
+            if (_brushMode == BrushMode::Height)
+            {
+                ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
+                ImGui::DragFloat(u8"高さ最小値", &_brushHeightScale.x, 0.01f, -100.0f, 0.0f);
+                ImGui::DragFloat(u8"高さ最大値", &_brushHeightScale.y, 0.01f, 0.0f, 100.0f);
+            }
+            else
+            {
+                ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
+            }
+        }
+        ImGui::End();
+    }
 }
-// 書き込みテクスチャの読み込み
-void TerrainDeformer::LoadTextureData(const std::wstring& baseColorPath, const std::wstring& normalPath)
+// テクスチャ読み込み
+void TerrainDeformer::LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv)
 {
-	// ベースカラーのSRVを作成
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseColorSRV;
-	GpuResourceManager::LoadTextureFromFile(
-		Graphics::Instance().GetDevice(),
-		baseColorPath.c_str(),
-		baseColorSRV.ReleaseAndGetAddressOf(),
+    GpuResourceManager::LoadTextureFromFile(
+        Graphics::Instance().GetDevice(),
+        path.c_str(),
+        srv,
         nullptr);
-	// 法線マップのSRVを作成
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV;
-	GpuResourceManager::LoadTextureFromFile(
-		Graphics::Instance().GetDevice(),
-		normalPath.c_str(),
-		normalSRV.ReleaseAndGetAddressOf(),
-        nullptr);
-	// テクスチャデータを追加
-	_textureDatas.push_back({ baseColorPath, baseColorSRV, normalPath, normalSRV });
+}
+// ペイントテクスチャの追加
+void TerrainDeformer::AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath)
+{
+    PaintTexture& tex = _paintTextures.emplace_back();
+    tex.baseColorPath = baseColorPath;
+    tex.normalPath = normalPath;
+    LoadTexture(baseColorPath, tex.baseColorSRV.GetAddressOf());
+    LoadTexture(normalPath, tex.normalSRV.GetAddressOf());
+}
+// ブラシテクスチャの追加
+void TerrainDeformer::AddBrushTexture(const std::wstring& path)
+{
+    BrushTexture& tex = _brushTextures.emplace_back();
+    tex.path = path;
+    LoadTexture(path, tex.textureSRV.GetAddressOf());
+}
+// SRVを表示して、クリックされたらパスを更新するダイアログを開く
+bool TerrainDeformer::ShowAndEditImage(std::wstring* path, ID3D11ShaderResourceView* srv)
+{
+    if (ImGui::ImageButton(srv, ImVec2(128.0f, 128.0f)))
+    {
+        // ダイアログを開く
+        std::string filepath;
+        std::string currentDirectory;
+        const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
+        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+        // ファイルを選択したら
+        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+        {
+            // 相対パス取得
+            std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
+            // パスを更新
+            *path = relativePath.wstring();
+            return true; // 画像がクリックされた
+        }
+    }
+    return false; // 画像がクリックされなかった
+}
+// ペイントテクスチャのGUI描画
+void TerrainDeformer::DrawPaintTextureGui()
+{
+    for (size_t i = 0; i < _paintTextures.size(); ++i)
+    {
+        if (ImGui::RadioButton(ToString(_paintTextures[i].baseColorPath).c_str(), _paintTextureIndex == i))
+            _paintTextureIndex = i;
+
+        if (ShowAndEditImage(&_paintTextures[i].baseColorPath, _paintTextures[i].baseColorSRV.Get()))
+        {
+            // テクスチャの読み込み
+            GpuResourceManager::LoadTextureFromFile(
+                Graphics::Instance().GetDevice(),
+                _paintTextures[i].baseColorPath.c_str(),
+                _paintTextures[i].baseColorSRV.ReleaseAndGetAddressOf(),
+                nullptr);
+        }
+        ImGui::SameLine();
+        if (ShowAndEditImage(&_paintTextures[i].normalPath, _paintTextures[i].normalSRV.Get()))
+        {
+            // テクスチャの読み込み
+            GpuResourceManager::LoadTextureFromFile(
+                Graphics::Instance().GetDevice(),
+                _paintTextures[i].normalPath.c_str(),
+                _paintTextures[i].normalSRV.ReleaseAndGetAddressOf(),
+                nullptr);
+        }
+    }
+    if (ImGui::Button(u8"ペイントテクスチャ追加"))
+    {
+        const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
+        // ベースカラーのパスを取得するダイアログを開く
+        std::string filepath;
+        std::string currentDirectory;
+        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+        {
+            // 相対パス取得
+            std::filesystem::path baseColorRelativePath = std::filesystem::relative(filepath, currentDirectory);
+            // 法線マップのパスを取得するダイアログを開く
+            result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+            if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+            {
+                // 相対パス取得
+                std::filesystem::path normalRelativePath = std::filesystem::relative(filepath, currentDirectory);
+                AddPaintTexture(baseColorRelativePath.wstring(), normalRelativePath.wstring());
+            }
+        }
+    }
+}
+// ブラシテクスチャのGUI描画
+void TerrainDeformer::DrawBrushTextureGui()
+{
+    for (size_t i = 0; i < _brushTextures.size(); ++i)
+    {
+        if (ImGui::RadioButton(ToString(_brushTextures[i].path).c_str(), _brushTextureIndex == i))
+            _brushTextureIndex = i;
+        if (ShowAndEditImage(&_brushTextures[i].path, _brushTextures[i].textureSRV.Get()))
+        {
+            // テクスチャの読み込み
+            LoadTexture(_brushTextures[i].path, _brushTextures[i].textureSRV.ReleaseAndGetAddressOf());
+        }
+    }
+    if (ImGui::Button(u8"ブラシテクスチャ追加"))
+    {
+        const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
+        // ブラシテクスチャのパスを取得するダイアログを開く
+        std::string filepath;
+        std::string currentDirectory;
+        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+        {
+            // 相対パス取得
+            std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
+            BrushTexture& newBrushTexture = _brushTextures.emplace_back();
+            newBrushTexture.path = relativePath.wstring();
+            // テクスチャの読み込み
+            LoadTexture(newBrushTexture.path, newBrushTexture.textureSRV.ReleaseAndGetAddressOf());
+        }
+    }
 }

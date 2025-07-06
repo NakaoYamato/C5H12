@@ -174,6 +174,7 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
     // パラメータマップ設定
     dc->DSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
     dc->PSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
+    dc->GSSetShaderResources(ParameterMapIndex, 1, _parameterMapFB->GetColorSRV().GetAddressOf());
     // 頂点バッファとインデックスバッファを設定
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
@@ -188,6 +189,7 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
     dc->PSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
     dc->DSSetShaderResources(ParameterMapIndex, 1, nullSRVs);
     dc->PSSetShaderResources(ParameterMapIndex, 1, nullSRVs);
+    dc->GSSetShaderResources(ParameterMapIndex, 1, nullSRVs);
     // シェーダーを解除
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->HSSetShader(nullptr, nullptr, 0);

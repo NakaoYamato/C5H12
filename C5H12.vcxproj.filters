@@ -1181,7 +1181,6 @@
     <FxCompile Include="HLSL\Terrain\TerrainGBPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainGS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformAddPS.hlsl" />
-    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformSubtractPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformHeightPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\FullscreenQuadPS.hlsl" />
     <FxCompile Include="HLSL\DebugSupporter\DebugGridRendererVS.hlsl" />

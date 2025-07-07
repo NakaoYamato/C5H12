@@ -108,7 +108,7 @@ void TerrainCollisionMaker::Update(float elapsedTime)
 			// 透明壁のポイントと当たっていて左クリックが押されたら編集状態に移行
             if (_INPUT_RELEASED("LeftClick"))
             {
-                ChangeState(State::EditPoint);
+                ChangeState(State::MovePoint);
             }
             break;
         }
@@ -122,9 +122,27 @@ void TerrainCollisionMaker::Update(float elapsedTime)
             ChangeState(State::None);
         }
     }
-    else if (_state == State::EditPoint)
+    else if (_state == State::MovePoint)
     {
+		// ギズモでポイントを編集
 		Vector3& point = terrain->GetTransparentWalls()[_editingWallIndex].points[_editingPointIndex];
+
+        // 地面にスナップ
+        if (_snapToGround)
+        {
+            // 地形との交差判定
+            Vector3 hitPosition{};
+            if (terrain->Raycast(
+                GetActor()->GetTransform().GetMatrix(),
+                point,
+                Vector3::Down,
+                _rayLength,
+                &hitPosition))
+            {
+				point.y = hitPosition.y;
+            }
+        }
+
         DirectX::XMFLOAT4X4 transform{};
 		DirectX::XMStoreFloat4x4(&transform, 
             DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&point)));
@@ -156,11 +174,11 @@ void TerrainCollisionMaker::Update(float elapsedTime)
             if (_INPUT_RELEASED("RightClick"))
             {
                 // 削除状態へ遷移
-                ChangeState(State::RemovePoint);
+                ChangeState(State::EditPoint);
             }
         }
     }
-    else if (_state == State::RemovePoint)
+    else if (_state == State::EditPoint)
     {
     }
 }
@@ -168,6 +186,7 @@ void TerrainCollisionMaker::Update(float elapsedTime)
 void TerrainCollisionMaker::DrawGui()
 {
 	ImGui::Checkbox(u8"透明壁編集", &_isEditing);
+	ImGui::Checkbox(u8"頂点をスナップするか", &_snapToGround);
 	ImGui::DragFloat(u8"透明壁ポイントの描画半径", &_transparentWallPointRadius, 0.01f, 0.0f, 1.0f);
 	ImGui::DragFloat(u8"透明壁ポイントのヒット半径", &_transparentWallPointHitRadius, 0.01f, 0.0f, 1.0f);
 	ImGui::ColorEdit4(u8"透明壁ポイントの色", &_transparentWallPointColor.x);
@@ -194,9 +213,9 @@ void TerrainCollisionMaker::DrawGui()
                     _editingWallIndex = static_cast<int>(i);
                     // ポイント追加
                     walls[_editingWallIndex].points.insert(walls[_editingWallIndex].points.begin(), _intersectionWorldPoint);
-                    _editingPointIndex = static_cast<int>(walls[_editingWallIndex].points.size() - 1);
+                    _editingPointIndex = static_cast<int>(0);
                     // ポイント編集状態に移行
-                    ChangeState(State::EditPoint);
+                    ChangeState(State::MovePoint);
 				}
                 ImGui::SameLine();
                 if (ImGui::Button((std::to_string(i) + u8"末尾に追加").c_str()))
@@ -206,7 +225,7 @@ void TerrainCollisionMaker::DrawGui()
                     walls[_editingWallIndex].points.push_back(_intersectionWorldPoint);
                     _editingPointIndex = static_cast<int>(walls[_editingWallIndex].points.size() - 1);
                     // ポイント編集状態に移行
-                    ChangeState(State::EditPoint);
+                    ChangeState(State::MovePoint);
                 }
             }
             ImGui::Separator();
@@ -220,7 +239,7 @@ void TerrainCollisionMaker::DrawGui()
                 walls[_editingWallIndex].points.push_back(_intersectionWorldPoint);
                 _editingPointIndex = static_cast<int>(walls[_editingWallIndex].points.size() - 1);
                 // ポイント編集状態に移行
-                ChangeState(State::EditPoint);
+                ChangeState(State::MovePoint);
             }
             ImGui::Separator();
             if (ImGui::Button(u8"キャンセル"))
@@ -229,10 +248,43 @@ void TerrainCollisionMaker::DrawGui()
         }
         ImGui::End();
     }
-    if (_state == State::RemovePoint)
+    if (_state == State::EditPoint)
     {
-        if (ImGui::Begin(u8"頂点の削除"))
+        if (ImGui::Begin(u8"頂点編集"))
         {
+            auto& walls = terrain->GetTransparentWalls();
+            if (ImGui::Button(u8"一つ前に頂点追加"))
+            {
+				Vector3 pos = walls[_editingWallIndex].points[_editingPointIndex];
+                if (_editingPointIndex > 0)
+                {
+					// 編集中のポイントと前のポイントの間に交差点を挿入
+					int prevIndex = _editingPointIndex - 1;
+                    pos = (pos + walls[_editingWallIndex].points[prevIndex]) / 2.0f;
+                }
+                // ポイント追加
+                walls[_editingWallIndex].points.insert(walls[_editingWallIndex].points.begin() + _editingPointIndex, pos);
+                _editingPointIndex = _editingPointIndex;
+                // ポイント編集状態に移行
+                ChangeState(State::MovePoint);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(u8"一つ先に頂点追加"))
+            {
+                Vector3 pos = walls[_editingWallIndex].points[_editingPointIndex];
+                if (_editingPointIndex < walls[_editingWallIndex].points.size() - 1)
+                {
+                    // 編集中のポイントと次のポイントの間に交差点を挿入
+					int nextIndex = _editingPointIndex + 1;
+                    pos = (pos + walls[_editingWallIndex].points[nextIndex]) / 2.0f;
+                }
+                // ポイント追加
+                walls[_editingWallIndex].points.insert(walls[_editingWallIndex].points.begin() + _editingPointIndex + 1, pos);
+                _editingPointIndex = _editingPointIndex + 1;
+                // ポイント編集状態に移行
+                ChangeState(State::MovePoint);
+            }
+            ImGui::Separator();
             if (ImGui::Button(u8"削除"))
             {
                 terrain->GetTransparentWalls()[_editingWallIndex].points.erase(
@@ -283,9 +335,9 @@ void TerrainCollisionMaker::DebugRender(const RenderContext& rc)
         break;
     case TerrainCollisionMaker::State::CreatePoint:
         break;
-    case TerrainCollisionMaker::State::EditPoint:
+    case TerrainCollisionMaker::State::MovePoint:
         break;
-    case TerrainCollisionMaker::State::RemovePoint:
+    case TerrainCollisionMaker::State::EditPoint:
         break;
     default:
         break;
@@ -341,9 +393,9 @@ void TerrainCollisionMaker::ChangeState(State newState)
         _guiPosition.x = ImGui::GetMousePos().x;
         _guiPosition.y = ImGui::GetMousePos().y;
         break;
-    case TerrainCollisionMaker::State::EditPoint:
+    case TerrainCollisionMaker::State::MovePoint:
         break;
-    case TerrainCollisionMaker::State::RemovePoint:
+    case TerrainCollisionMaker::State::EditPoint:
         break;
     default:
         break;

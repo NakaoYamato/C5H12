@@ -9,8 +9,8 @@ public:
 	{
 		None,
 		CreatePoint,
+		MovePoint,
 		EditPoint,
-		RemovePoint,
 	};
 
 	enum class IntersectState
@@ -41,10 +41,6 @@ private:
 	// 地形コントローラーへの参照
 	std::weak_ptr<TerrainController> _terrainController;
 
-	// 前フレームのGUI操作フラグ
-	bool _wasGuiActive = false;
-	// 編集フラグ
-	bool _isEditing = false;
 	// 編集状態
 	State _state = State::None;
 	// 交差状態
@@ -71,4 +67,11 @@ private:
 	Vector4 _transparentWallPointColor = Vector4::Green;
 	// 透明壁のポイントの選択色
 	Vector4 _transparentWallPointSelectColor = Vector4::Red;
+
+	// 前フレームのGUI操作フラグ
+	bool _wasGuiActive = false;
+	// 編集フラグ
+	bool _isEditing = false;
+	// 編集中のポイントを地面にスナップするかどうか
+	bool _snapToGround = true;
 };

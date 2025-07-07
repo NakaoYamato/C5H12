@@ -190,6 +190,8 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				"./Data/Shader/CascadedShadowInstancedVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 	}
+
+	_testMaterial.SetShaderName("Test");
 }
 
 /// ƒƒbƒVƒ…•`‰æ

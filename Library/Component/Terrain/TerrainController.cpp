@@ -81,6 +81,26 @@ void TerrainController::Render(const RenderContext& rc)
 
         // 地形の描画
         _terrain->Render(rc, GetActor()->GetTransform().GetMatrix(), Graphics::Instance().RenderingDeferred());
+
+		// デバッグ描画
+        for (auto& [index, envObj] : _terrain->GetEnvironmentObjects())
+        {
+            Transform transform;
+            transform.SetPosition(envObj.position);
+            transform.SetRotation(envObj.rotation);
+            transform.SetScale(envObj.scale);
+            transform.UpdateTransform(nullptr);
+            envObj.model->UpdateTransform(envObj.model->GetPoseNodes(), transform.GetMatrix());
+            const ModelResource* resource = envObj.model->GetResource();
+            for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+            {
+                GetActor()->GetScene()->GetMeshRenderer().DrawTest(
+                    &mesh,
+                    envObj.model.get(),
+                    ModelRenderType::Static
+                );
+            }
+        }
     }
     //rc.deviceContext->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 }

@@ -62,6 +62,8 @@ public:
     // 環境オブジェクトデータ
 	struct EnvironmentObject
 	{
+        // モデル
+        std::unique_ptr<Model> model;
 		// モデルのパス
 		std::string modelPath = "";
         // 位置
@@ -110,7 +112,8 @@ public:
 	void AddTransparentWall(const TransparentWall& wall) { _transparentWalls.push_back(wall); }
 	// 環境オブジェクトの配置情報を取得
 	std::unordered_map<int, EnvironmentObject>& GetEnvironmentObjects() { return _environmentObjects; }
-
+    // 環境オブジェクトの配置情報を追加
+    void AddEnvironmentObject(ID3D11Device* device, const char* filename, Vector3 position, Vector3 rotation, Vector3 size);
 	// 基本色テクスチャのパスを取得
 	const std::wstring& GetBaseColorTexturePath() const { return _baseColorTexturePath; }
 	// 法線テクスチャのパスを取得

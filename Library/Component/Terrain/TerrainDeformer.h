@@ -8,9 +8,10 @@ public:
 	// ブラシの種類
 	enum class BrushMode
 	{
-		Add,        // 色加算
+		AddColor,   // 色加算
 		Height,     // 高さ変形
 		Cost,       // コスト変形
+		Placement,  // オブジェクト配置
 	};
     // ブラシの定数バッファ
     struct ConstantBuffer
@@ -26,7 +27,7 @@ public:
 	// 編集タスク
     struct Task
     {
-		BrushMode   mode            = BrushMode::Add;   // ブラシモード
+		BrushMode   mode            = BrushMode::AddColor;// ブラシモード
 		size_t      paintTextureIndex    = 0;           // 使用するテクスチャインデックス
         size_t      brushTextureIndex = 0;              // 使用するブラシテクスチャインデックス
 		Vector2     brushUVPosition = Vector2::Zero;    // ブラシUV位置
@@ -49,6 +50,11 @@ public:
         std::wstring path;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     };
+    // 環境オブジェクトデータ
+	struct EnvironmentObjectData
+	{
+		std::shared_ptr<Model> model; // モデル
+	};
 
     static constexpr size_t PaintBaseColorTextureIndex = 3;
     static constexpr size_t PaintNormalTextureIndex = 4;
@@ -88,6 +94,8 @@ private:
     void DrawPaintTextureGui();
     // ブラシテクスチャのGUI描画
     void DrawBrushTextureGui();
+    // モデルの選択GUI描画
+	void DrawModelSelectionGui();
 private:
     // 地形コントローラーへの参照
     std::weak_ptr<TerrainController> _terrainController;
@@ -112,9 +120,11 @@ private:
     std::vector<BrushTexture> _brushTextures;
     // 編集タスク群
     std::vector<Task> _tasks;
+	// 環境オブジェクトデータ
+	std::vector<EnvironmentObjectData> _environmentObjects;
 
     // 使用するブラシ
-	BrushMode _brushMode = BrushMode::Add;
+	BrushMode _brushMode = BrushMode::AddColor;
     // 使用するテクスチャインデックス
 	size_t _paintTextureIndex = 0;
     // 使用するブラシテクスチャインデックス
@@ -134,4 +144,7 @@ private:
     bool _useBrush = false;
     // 前フレームのGUI操作フラグ
     bool _wasGuiActive = false;
+
+    // 選択中のモデルファイルパス
+	std::string _selectedModelPath = "";
 };

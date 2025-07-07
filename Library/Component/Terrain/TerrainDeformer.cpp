@@ -134,18 +134,29 @@ void TerrainDeformer::Update(float elapsedTime)
 	// 交差していて、かつブラシの入力が押されている場合は変形タスクを追加
     if (isIntersect && _INPUT_PRESSED("OK"))
     {
-		Task task;
-		task.mode = _brushMode;
-        task.paintTextureIndex = _paintTextureIndex;
-        task.brushTextureIndex = _brushTextureIndex;
-		task.brushUVPosition = intersectUVPosition;
-        // ブラシ半径をトランスフォームのサイズに影響されるようにする
-		task.radius = brushRadius / GetActor()->GetTransform().GetScale().x;
-        // ブラシの強度は経過時間によって減衰させる
-		task.strength = brushStrength * elapsedTime;
-        task.brushRotationY = _brushRotationY;
-		task.heightScale = _brushHeightScale;
-		AddTask(task);
+        if (_brushMode != BrushMode::Placement)
+        {
+            Task task;
+            task.mode = _brushMode;
+            task.paintTextureIndex = _paintTextureIndex;
+            task.brushTextureIndex = _brushTextureIndex;
+            task.brushUVPosition = intersectUVPosition;
+            // ブラシ半径をトランスフォームのサイズに影響されるようにする
+            task.radius = brushRadius / GetActor()->GetTransform().GetScale().x;
+            // ブラシの強度は経過時間によって減衰させる
+            task.strength = brushStrength * elapsedTime;
+            task.brushRotationY = _brushRotationY;
+            task.heightScale = _brushHeightScale;
+            AddTask(task);
+        }
+    }
+    if (isIntersect && _INPUT_RELEASED("OK"))
+    {
+        // ブラシモードが配置の場合は環境オブジェクトを配置する
+        if (!_selectedModelPath.empty())
+        {
+            terrain->AddEnvironmentObject(Graphics::Instance().GetDevice(), _selectedModelPath.c_str(), _intersectionWorldPoint, Vector3::Zero, Vector3::One);
+        }
     }
 
     // ブラシの表示
@@ -243,7 +254,7 @@ void TerrainDeformer::Render(const RenderContext& rc)
         // ブラシの種類によって処理を切り替える
         switch (_brushMode)
         {
-        case BrushMode::Add:
+        case BrushMode::AddColor:
             terrain->GetMaterialMapFB()->Activate(rc.deviceContext);
             GetActor()->GetScene()->GetTextureRenderer().Blit(
                 rc.deviceContext,
@@ -304,7 +315,11 @@ void TerrainDeformer::DrawGui()
             DrawBrushTextureGui();
             ImGui::Separator();
 
-            ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"加算\0高さ\0コスト\0");
+			// モデル選択GUI表示
+			DrawModelSelectionGui();
+			ImGui::Separator();
+
+            ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"色加算\0高さ\0コスト\0オブジェクト配置\0");
             ImGui::DragFloat3(u8"ブラシワールド位置", &_intersectionWorldPoint.x, 0.01f, -100.0f, 100.0f);
             ImGui::DragFloat(u8"ブラシ半径", &brushRadius, 0.01f, 0.0f, 100.0f);
             ImGui::DragFloat(u8"ブラシY軸回転(ラジアン)", &_brushRotationY, 0.01f, -DirectX::XM_PI, DirectX::XM_PI);
@@ -449,4 +464,27 @@ void TerrainDeformer::DrawBrushTextureGui()
             LoadTexture(newBrushTexture.path, newBrushTexture.textureSRV.ReleaseAndGetAddressOf());
         }
     }
+}
+// モデルの選択GUI描画
+void TerrainDeformer::DrawModelSelectionGui()
+{
+	for (size_t i = 0; i < _environmentObjects.size(); ++i)
+	{
+		if (ImGui::RadioButton(_environmentObjects[i].model->GetFilename(), _selectedModelPath == _environmentObjects[i].model->GetFilename()))
+            _selectedModelPath = _environmentObjects[i].model->GetFilename();
+	}
+	if (ImGui::Button(u8"モデル追加"))
+	{
+		// モデルのパスを取得するダイアログを開く
+		std::string filepath;
+		std::string currentDirectory;
+		Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
+		if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+		{
+			// 相対パス取得
+			std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
+			auto model = std::make_shared<Model>(Graphics::Instance().GetDevice(), relativePath.string().c_str());
+			_environmentObjects.emplace_back(EnvironmentObjectData{ model });
+		}
+	}
 }

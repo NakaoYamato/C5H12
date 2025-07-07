@@ -92,6 +92,7 @@ public:
 	void DrawGui();
 #pragma endregion
 
+#pragma region 当たり判定
 	/// <summary>
 	/// 接触処理
 	/// </summary>
@@ -109,17 +110,8 @@ public:
 	{
 		_lastContactActors.clear();
 	}
-	/// <summary>
-	// 自身を削除処理
-	/// </summary>
-	void Remove();
+#pragma endregion
 
-	/// <summary>
-	/// モデルの読み込み
-	/// </summary>
-	/// <param name="filename"></param>
-	/// <returns></returns>
-	virtual std::weak_ptr<Model> LoadModel(const char* filename);
 #pragma region コンポーネント関係
 	/// <summary>
 	// コンポーネント追加
@@ -206,6 +198,17 @@ public:
 #pragma endregion
 
 #pragma region アクセサ
+	/// <summary>
+	// 自身を削除処理
+	/// </summary>
+	void Remove();
+	/// <summary>
+	/// モデルの読み込み
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns></returns>
+	virtual std::weak_ptr<Model> LoadModel(const char* filename);
+
 	ActorTag GetTag() const { return _tag; }
 	Scene* GetScene() { return _scene; }
 	const char* GetName() const { return _name.c_str(); }
@@ -251,10 +254,18 @@ protected:
 	/// <param name="elapsedTime"></param>
 	virtual void OnPreUpdate(float elapsedTime) {};
 	/// <summary>
+	/// モデルのトランスフォーム更新
+	/// </summary>
+	virtual void UpdateModelTransform();
+	/// <summary>
 	/// 更新時処理
 	/// </summary>
 	/// <param name="elapsedTime">前フレームからの更新時間</param>
 	virtual void OnUpdate(float elapsedTime) {};
+	/// <summary>
+	/// トランスフォーム更新
+	/// </summary>
+	virtual void UpdateTransform();
 	/// <summary> 
 	/// Updateのあとによばれる更新時処理
 	/// </summary>
@@ -281,10 +292,6 @@ protected:
 	/// </summary>
 	/// <param name="rc"></param>
 	virtual void OnDelayedRender(const RenderContext& rc) {};
-	/// <summary>
-	/// トランスフォーム更新
-	/// </summary>
-	virtual void UpdateTransform();
 	/// <summary>
 	/// ギズモ描画
 	/// </summary>

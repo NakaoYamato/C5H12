@@ -23,7 +23,6 @@ void Actor::Create(ActorTag tag)
 	// 生成時処理
 	OnCreate();
 }
-
 /// 削除時処理
 void Actor::Deleted()
 {
@@ -39,12 +38,15 @@ void Actor::Deleted()
 
 	OnDeleted();
 }
-
-// 開始処理
+/// 開始処理
 void Actor::Start()
 {
-	// 行列を更新
+	// Transform内のmatrixを生成するために行列を更新
 	UpdateTransform();
+
+	// モデルのトランスフォーム更新
+	UpdateModelTransform();
+
 	if (_model != nullptr)
 	{
 		// モデルの行列を更新
@@ -63,7 +65,6 @@ void Actor::Start()
 
 	OnStart();
 }
-
 ///	更新処理
 void Actor::Update(float elapsedTime)
 {
@@ -71,6 +72,9 @@ void Actor::Update(float elapsedTime)
 	if (!_isActive)return;
 
 	OnPreUpdate(elapsedTime);
+
+	// モデルのトランスフォーム更新
+	UpdateModelTransform();
 
 	// 各コンポーネントの更新処理
 	for (std::shared_ptr<Component>& component : _components)
@@ -87,7 +91,6 @@ void Actor::Update(float elapsedTime)
 	// トランスフォーム更新
 	UpdateTransform();
 }
-
 /// Update後更新処理
 void Actor::LateUpdate(float elapsedTime)
 {
@@ -101,7 +104,6 @@ void Actor::LateUpdate(float elapsedTime)
 	}
 	OnLateUpdate(elapsedTime);
 }
-
 /// 固定間隔更新処理
 void Actor::FixedUpdate()
 {
@@ -120,8 +122,7 @@ void Actor::FixedUpdate()
 
 	OnFixedUpdate();
 }
-
-// 描画処理
+/// 描画処理
 void Actor::Render(const RenderContext& rc)
 {
 	// 起動チェック
@@ -141,8 +142,7 @@ void Actor::Render(const RenderContext& rc)
 	// 描画時処理
 	OnRender(rc);
 }
-
-// デバッグ表示
+/// デバッグ表示
 void Actor::DebugRender(const RenderContext& rc)
 {
 	// 起動チェック
@@ -162,8 +162,7 @@ void Actor::DebugRender(const RenderContext& rc)
 	// デバッグ表示時処理
 	OnDebugRender(rc);
 }
-
-// 影描画
+/// 影描画
 void Actor::CastShadow(const RenderContext& rc)
 {
 	// 起動チェック
@@ -174,8 +173,7 @@ void Actor::CastShadow(const RenderContext& rc)
 		component->CastShadow(rc);
 	}
 }
-
-// 3D描画後の描画処理
+/// 3D描画後の描画処理
 void Actor::DelayedRender(const RenderContext& rc)
 {
 	// 起動チェック
@@ -189,8 +187,7 @@ void Actor::DelayedRender(const RenderContext& rc)
 	// 3D描画後の描画時処理
 	OnDelayedRender(rc);
 }
-
-// Gui描画
+/// Gui描画
 void Actor::DrawGui()
 {
 	if (ImGui::CollapsingHeader("Flags"))
@@ -260,7 +257,8 @@ void Actor::DrawGui()
 }
 #pragma endregion
 
-// 接触時の処理
+#pragma region 当たり判定
+/// 接触時の処理
 void Actor::Contact(CollisionData& collisionData)
 {
 	// 各コンポーネントの接触処理
@@ -275,7 +273,7 @@ void Actor::Contact(CollisionData& collisionData)
 
 	OnContact(collisionData);
 }
-
+/// 接触した瞬間の処理
 void Actor::ContactEnter(CollisionData& collisionData)
 {
 	// 各コンポーネントの接触処理
@@ -290,29 +288,35 @@ void Actor::ContactEnter(CollisionData& collisionData)
 
 	OnContactEnter(collisionData);
 }
-
-// 削除処理
+#pragma endregion
+/// 削除処理
 void Actor::Remove()
 {
 	_isActive = false;
     _scene->GetActorManager().Remove(shared_from_this());
 }
-
 /// モデルの読み込み
 std::weak_ptr<Model> Actor::LoadModel(const char* filename)
 {
 	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
 	return _model;
 }
-
 #pragma region 仮想関数
-// トランスフォーム更新
+/// モデルのトランスフォーム更新
+void Actor::UpdateModelTransform()
+{
+	if (_model != nullptr)
+	{
+		// モデルの行列を更新
+		_model->UpdateTransform(_model->GetPoseNodes(), _transform.GetMatrix());
+	}
+}
+/// トランスフォーム更新
 void Actor::UpdateTransform()
 {
 	_transform.UpdateTransform(nullptr);
 }
-
-// ギズモ描画
+/// ギズモ描画
 void Actor::DrawGuizmo()
 {
 	DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();

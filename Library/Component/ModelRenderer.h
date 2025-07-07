@@ -17,10 +17,6 @@ public:
 
 	// ¶¬ˆ—
 	void OnCreate()override;
-	// XVˆ—
-	void Update(float elapsedTime) override;
-	// 1•b‚²‚Æ‚ÌXVˆ—
-	void FixedUpdate() override {}
 	// •`‰æˆ—
 	void Render(const RenderContext& rc) override;
 	// ‰e•`‰æ

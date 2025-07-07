@@ -51,7 +51,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     float4 albedo = baseColor;
     
 	//	入射光のうち拡散反射になる割合
-    float3 diffuse_reflectance = lerp(albedo.rgb, 0.0f, metalness);
+    float3 diffuseReflectance = lerp(albedo.rgb, 0.0f, metalness);
     
 	//	垂直反射時のフレネル反射率(非金属でも最低4%は鏡面反射する)
     float3 F0 = lerp(0.04f, albedo.rgb, metalness);
@@ -60,18 +60,18 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 V = normalize(pin.world_position.xyz - cameraPosition.xyz);
     
 	//	直接光のシェーディング
-    float3 total_diffuse = 0, total_specular = 0;
+    float3 totalDiffuse = 0, totalSpecular = 0;
 	{
 		// 平行光源の処理
 		{
             float3 diffuse = (float3) 0, specular = (float3) 0;
             float3 L = normalize(directional_light_direction.xyz);
-            DirectBRDF(diffuse_reflectance, F0, N, V, L,
+            DirectBRDF(diffuseReflectance, F0, N, V, L,
 					   directional_light_color.rgb * directional_light_color.a, roughness,
 					   diffuse, specular);
             
-            total_diffuse += diffuse;
-            total_specular += specular;
+            totalDiffuse += diffuse;
+            totalSpecular += specular;
         }
 
 		//	点光源
@@ -85,19 +85,19 @@ float4 main(VS_OUT pin) : SV_TARGET
             float attenuation = attenuateLength * attenuateLength;
             L /= len;
             float3 diffuse = (float3) 0, specular = (float3) 0;
-            DirectBRDF(diffuse_reflectance, F0, N, V, L,
+            DirectBRDF(diffuseReflectance, F0, N, V, L,
 					   pointLights[i].color.rgb * pointLights[i].color.a, roughness,
 					   diffuse, specular);
-            total_diffuse += diffuse * attenuation;
-            total_specular += specular * attenuation;
+            totalDiffuse += diffuse * attenuation;
+            totalSpecular += specular * attenuation;
         }
     }
     
     // IBL処理
-    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0, diffuse_iem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
-    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
+    totalDiffuse += DiffuseIBL(N, V, roughness, diffuseReflectance, F0, diffuse_iem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
+    totalSpecular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
 
 	//	色生成
-    float3 color = total_diffuse + total_specular + emissiveColor;
+    float3 color = totalDiffuse + totalSpecular + emissiveColor;
     return float4(pow(color.rgb, 1.0f / _GAMMA_FACTOR), baseColor.a);
 }

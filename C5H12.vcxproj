@@ -168,6 +168,7 @@
     <ClCompile Include="Library\Component\Terrain\TerrainCollisionMaker.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainController.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp" />
+    <ClCompile Include="Library\Component\Terrain\TerrainEnvironmentController.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
@@ -263,6 +264,7 @@
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
+    <ClCompile Include="Library\Shader\Test\TestShader.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
     <ClCompile Include="Source\Common\Targetable.cpp" />
@@ -345,6 +347,7 @@
     <ClInclude Include="Library\Component\Terrain\TerrainCollisionMaker.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainController.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h" />
+    <ClInclude Include="Library\Component\Terrain\TerrainEnvironmentController.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
@@ -453,6 +456,7 @@
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
+    <ClInclude Include="Library\Shader\Test\TestShader.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
     <ClInclude Include="Source\Common\Targetable.h" />
@@ -660,6 +664,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Model\Ramp\RampPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\Test\TestGBPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\Test\TestPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

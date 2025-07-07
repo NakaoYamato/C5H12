@@ -292,6 +292,11 @@ void Terrain::DrawGui()
 
         ImGui::TreePop();
     }
+    if (ImGui::TreeNode(u8"環境オブジェクト"))
+    {
+
+        ImGui::TreePop();
+    }
     ImGui::Separator();
 }
 // レイキャスト

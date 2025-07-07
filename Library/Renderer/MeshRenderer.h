@@ -106,6 +106,14 @@ public:
         ShaderBase::Parameter* parameter);
 
 	/// <summary>
+	/// メッシュのテスト描画
+	/// </summary>
+	/// <param name="mesh"></param>
+	/// <param name="model"></param>
+	/// <param name="renderType"></param>
+	void DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType);
+
+	/// <summary>
 	/// 影描画
 	/// </summary>
 	/// <param name="mesh"></param>
@@ -206,4 +214,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_dynamicBoneCB;
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_staticBoneCB;
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_instancingCB;
+
+    // テスト描画用マテリアル
+    Material _testMaterial{};
 };

@@ -142,10 +142,18 @@ void TerrainController::DebugRender(const RenderContext& rc)
 					Debug::Renderer::AddVertex(p3, color);
 					Debug::Renderer::AddVertex(p4, color);
 					// 法線の描画
-					color = Vector4::Blue;
 					Vector3 center = (p1 + p2 + p3 + p4) / 4.0f;
-					Debug::Renderer::AddVertex(center, color);
 					Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();
+					// 法線の向きがカメラ方向なら青色、逆方向なら赤色
+					if (normal.Dot(rc.camera->GetEye() - center) < 0.0f)
+					{
+						color = Vector4::Red;
+					}
+					else
+					{
+						color = Vector4::Blue;
+					}
+					Debug::Renderer::AddVertex(center, color);
 					Debug::Renderer::AddVertex(center + normal, color);
 				}
 			}
@@ -166,136 +174,142 @@ void TerrainController::DrawGui()
         ImGui::Separator();
         // 地形のGUI描画
         _terrain->DrawGui();
-        std::wstring filepath;
-        auto OpenDialogGui = [&](const char* title, std::wstring* resultPath) -> bool
-            {
-                if (ImGui::Button(title))
+
+        if (ImGui::TreeNode(u8"外部データ"))
+        {
+            std::wstring filepath;
+            auto OpenDialogGui = [&](const char* title, std::wstring* resultPath) -> bool
                 {
-                    // ダイアログを開く
-                    std::string filepath;
-                    std::string currentDirectory;
-                    const char* filter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
-                    Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
-                    // ファイルを選択したら
-                    if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                    if (ImGui::Button(title))
                     {
-                        // 相対パス取得
-                        std::filesystem::path path =
-                            std::filesystem::relative(filepath, currentDirectory);
-						*resultPath = path.wstring();
-                        return true;
+                        // ダイアログを開く
+                        std::string filepath;
+                        std::string currentDirectory;
+                        const char* filter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
+                        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+                        // ファイルを選択したら
+                        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                        {
+                            // 相対パス取得
+                            std::filesystem::path path =
+                                std::filesystem::relative(filepath, currentDirectory);
+                            *resultPath = path.wstring();
+                            return true;
+                        }
                     }
-                }
-                return false;
-            };
-        if (OpenDialogGui(u8"基本色テクスチャ読み込み", &filepath))
-        {
-            GpuResourceManager::LoadTextureFromFile(
-                Graphics::Instance().GetDevice(),
-                filepath.c_str(),
-                _baseColorTextureSRV.ReleaseAndGetAddressOf(),
-                nullptr);
-            _terrain->SetBaseColorTexturePath(filepath.c_str());
-            _assignTextures = false; // テクスチャを再割り当てする
-        }
-        if (OpenDialogGui(u8"法線テクスチャ読み込み", &filepath))
-        {
-            GpuResourceManager::LoadTextureFromFile(
-                Graphics::Instance().GetDevice(),
-                filepath.c_str(),
-                _normalTextureSRV.ReleaseAndGetAddressOf(),
-                nullptr);
-            _terrain->SetNormalTexturePath(filepath.c_str());
-            _assignTextures = false; // テクスチャを再割り当てする
-        }
-        if (OpenDialogGui(u8"パラメータマップ読み込み", &filepath))
-        {
-            GpuResourceManager::LoadTextureFromFile(
-                Graphics::Instance().GetDevice(),
-                filepath.c_str(),
-                _parameterTextureSRV.ReleaseAndGetAddressOf(),
-                nullptr);
-            _terrain->SetParameterTexturePath(filepath.c_str());
-            _assignTextures = false; // テクスチャを再割り当てする
-        }
-        ImGui::Separator();
-        auto SaveDialogGui = [&](const char* title, std::string* result) -> bool
+                    return false;
+                };
+            if (OpenDialogGui(u8"基本色テクスチャ読み込み", &filepath))
             {
-                if (ImGui::Button(title))
-                {
-                    // ダイアログを開く
-                    char filename[256] = { 0 };
-                    const char* filter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
-                    Debug::Dialog::DialogResult resultDR = Debug::Dialog::SaveFileName(
-                        filename,
-                        sizeof(filename),
-                        filter,
-                        nullptr,
-                        "dds");
-                    if (resultDR == Debug::Dialog::DialogResult::OK)
-                    {
-                        *result = filename;
-                        return true;
-                    }
-                }
-                return false;
-            };
-        std::string dialogResult = {};
-        if (SaveDialogGui(u8"基本色テクスチャ書き出し", &dialogResult))
-        {
-            _terrain->SetBaseColorTexturePath(ToWString(dialogResult).c_str());
-            _terrain->SaveBaseColorTexture(Graphics::Instance().GetDevice(),
-                Graphics::Instance().GetDeviceContext(),
-                ToWString(dialogResult).c_str());
-        }
-        if (SaveDialogGui(u8"法線テクスチャ書き出し", &dialogResult))
-        {
-            _terrain->SetNormalTexturePath(ToWString(dialogResult).c_str());
-            _terrain->SaveNormalTexture(Graphics::Instance().GetDevice(),
-                Graphics::Instance().GetDeviceContext(),
-                ToWString(dialogResult).c_str());
-        }
-        if (SaveDialogGui(u8"パラメータマップ書き出し", &dialogResult))
-        {
-            _terrain->SetParameterTexturePath(ToWString(dialogResult).c_str());
-            _terrain->SaveParameterMap(Graphics::Instance().GetDevice(),
-                Graphics::Instance().GetDeviceContext(),
-                ToWString(dialogResult).c_str());
-        }
-        ImGui::Separator();
-        if (ImGui::Button(u8"シリアライズ"))
-        {
-            // ダイアログを開く
-            char filename[256] = { 0 };
-            const char* filter = "Texture Files(*.json)\0*.json;\0All Files(*.*)\0*.*;\0\0";
-            Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
-                filename,
-                sizeof(filename),
-                filter,
-                nullptr,
-                "json");
-            if (result == Debug::Dialog::DialogResult::OK)
-            {
-                _terrain->SaveToFile(filename);
+                GpuResourceManager::LoadTextureFromFile(
+                    Graphics::Instance().GetDevice(),
+                    filepath.c_str(),
+                    _baseColorTextureSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                _terrain->SetBaseColorTexturePath(filepath.c_str());
+                _assignTextures = false; // テクスチャを再割り当てする
             }
+            if (OpenDialogGui(u8"法線テクスチャ読み込み", &filepath))
+            {
+                GpuResourceManager::LoadTextureFromFile(
+                    Graphics::Instance().GetDevice(),
+                    filepath.c_str(),
+                    _normalTextureSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                _terrain->SetNormalTexturePath(filepath.c_str());
+                _assignTextures = false; // テクスチャを再割り当てする
+            }
+            if (OpenDialogGui(u8"パラメータマップ読み込み", &filepath))
+            {
+                GpuResourceManager::LoadTextureFromFile(
+                    Graphics::Instance().GetDevice(),
+                    filepath.c_str(),
+                    _parameterTextureSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                _terrain->SetParameterTexturePath(filepath.c_str());
+                _assignTextures = false; // テクスチャを再割り当てする
+            }
+            ImGui::Separator();
+            auto SaveDialogGui = [&](const char* title, std::string* result) -> bool
+                {
+                    if (ImGui::Button(title))
+                    {
+                        // ダイアログを開く
+                        char filename[256] = { 0 };
+                        const char* filter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
+                        Debug::Dialog::DialogResult resultDR = Debug::Dialog::SaveFileName(
+                            filename,
+                            sizeof(filename),
+                            filter,
+                            nullptr,
+                            "dds");
+                        if (resultDR == Debug::Dialog::DialogResult::OK)
+                        {
+                            *result = filename;
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+            std::string dialogResult = {};
+            if (SaveDialogGui(u8"基本色テクスチャ書き出し", &dialogResult))
+            {
+                _terrain->SetBaseColorTexturePath(ToWString(dialogResult).c_str());
+                _terrain->SaveBaseColorTexture(Graphics::Instance().GetDevice(),
+                    Graphics::Instance().GetDeviceContext(),
+                    ToWString(dialogResult).c_str());
+            }
+            if (SaveDialogGui(u8"法線テクスチャ書き出し", &dialogResult))
+            {
+                _terrain->SetNormalTexturePath(ToWString(dialogResult).c_str());
+                _terrain->SaveNormalTexture(Graphics::Instance().GetDevice(),
+                    Graphics::Instance().GetDeviceContext(),
+                    ToWString(dialogResult).c_str());
+            }
+            if (SaveDialogGui(u8"パラメータマップ書き出し", &dialogResult))
+            {
+                _terrain->SetParameterTexturePath(ToWString(dialogResult).c_str());
+                _terrain->SaveParameterMap(Graphics::Instance().GetDevice(),
+                    Graphics::Instance().GetDeviceContext(),
+                    ToWString(dialogResult).c_str());
+            }
+            ImGui::Separator();
+
+            if (ImGui::Button(u8"保存"))
+            {
+                // ダイアログを開く
+                char filename[256] = { 0 };
+                const char* filter = "Texture Files(*.json)\0*.json;\0All Files(*.*)\0*.*;\0\0";
+                Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
+                    filename,
+                    sizeof(filename),
+                    filter,
+                    nullptr,
+                    "json");
+                if (result == Debug::Dialog::DialogResult::OK)
+                {
+                    _terrain->SaveToFile(filename);
+                }
+            }
+            if (ImGui::Button(u8"読み込み"))
+            {
+                // ダイアログを開く
+                std::string filepath;
+                std::string currentDirectory;
+                const char* filter = "Texture Files(*.json)\0*.json;\0All Files(*.*)\0*.*;\0\0";
+                Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+                // ファイルを選択したら
+                if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                {
+                    // 相対パス取得
+                    std::filesystem::path path =
+                        std::filesystem::relative(filepath, currentDirectory);
+                    _terrain->LoadFromFile(path.string());
+                    LoadTerrainTextures();
+                }
+            }
+            ImGui::TreePop();
         }
-		if (ImGui::Button(u8"デシリアライズ"))
-		{
-            // ダイアログを開く
-            std::string filepath;
-            std::string currentDirectory;
-            const char* filter = "Texture Files(*.json)\0*.json;\0All Files(*.*)\0*.*;\0\0";
-            Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
-            // ファイルを選択したら
-            if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-			{
-                // 相対パス取得
-                std::filesystem::path path =
-                    std::filesystem::relative(filepath, currentDirectory);
-				_terrain->LoadFromFile(path.string());
-                LoadTerrainTextures();
-			}
-		}
     }
 }
 // Terrainからシリアライズデータを読み込む

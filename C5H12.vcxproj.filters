@@ -522,6 +522,12 @@
     <ClCompile Include="Library\Component\Terrain\TerrainCollisionMaker.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Component\Terrain\TerrainEnvironmentController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Test\TestShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1088,6 +1094,12 @@
     <ClInclude Include="Library\Component\Terrain\TerrainCollisionMaker.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Component\Terrain\TerrainEnvironmentController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Test\TestShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1186,5 +1198,7 @@
     <FxCompile Include="HLSL\DebugSupporter\DebugGridRendererVS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformCostPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainCopyMaterialPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Test\TestPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Test\TestGBPS.hlsl" />
   </ItemGroup>
 </Project>

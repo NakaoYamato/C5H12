@@ -5,6 +5,7 @@
 #include "../../Shader/Ramp/RampShader.h"
 #include "../../Shader/Grass/GrassShader.h"
 #include "../../Shader/PBR/PBRShader.h"
+#include "../../Shader/Test/TestShader.h"
 
 #include "../../Shader/CascadedShadowMap/CascadedShadowMapShader.h"
 
@@ -62,8 +63,13 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongVS.cso",
+					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
 					"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+				shaderMap["Test"] = std::make_unique<TestShader>(device,
+					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/TestGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -86,8 +92,13 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",
+					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 					"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+				shaderMap["Test"] = std::make_unique<TestShader>(device,
+					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/TestGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -117,9 +128,15 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					"./Data/Shader/PhongVS.cso",
 					"./Data/Shader/PhongPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
 					"./Data/Shader/PhongVS.cso",
 					"./Data/Shader/PhysicalBasedRenderingPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+				shaderMap["Test"] = std::make_unique<TestShader>(device,
+					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/TestPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -140,6 +157,11 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
 					"./Data/Shader/PhongBatchingVS.cso",
 					"./Data/Shader/PhysicalBasedRenderingPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
+				shaderMap["Test"] = std::make_unique<TestShader>(device,
+					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/TestPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -200,6 +222,12 @@ void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
 		assert(!"ModelRenderType Overflow");
 		break;
 	}
+}
+
+/// メッシュのテスト描画
+void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType)
+{
+	MeshRenderer::Draw(mesh, model, Vector4::White, &_testMaterial, renderType, nullptr);
 }
 
 /// 影描画

@@ -15,23 +15,6 @@ void ModelRenderer::OnCreate()
 		SetModel(GetActor()->GetModel());
 	}
 }
-
-// 更新処理
-void ModelRenderer::Update(float elapsedTime)
-{
-	if (_model.lock() == nullptr)
-	{
-		// モデルが存在しないならリターン
-		auto model = GetActor()->GetModel().lock();
-		if (model == nullptr) return;
-
-		// モデルが存在するならセット
-		SetModel(GetActor()->GetModel());
-	}
-
-	_model.lock()->UpdateTransform(_model.lock()->GetPoseNodes(), GetActor()->GetTransform().GetMatrix());
-}
-
 // 描画処理
 void ModelRenderer::Render(const RenderContext& rc)
 {
@@ -49,7 +32,6 @@ void ModelRenderer::Render(const RenderContext& rc)
 			&_shaderParameter);
 	}
 }
-
 // 影描画
 void ModelRenderer::CastShadow(const RenderContext& rc)
 {
@@ -67,7 +49,6 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 			&_shadowParameter);
 	}
 }
-
 // GUI描画
 void ModelRenderer::DrawGui()
 {
@@ -127,7 +108,6 @@ void ModelRenderer::DrawGui()
 	if (model == nullptr) return;
 	model->DrawGui();
 }
-
 // 指定のマテリアルのSRVを変更
 void ModelRenderer::ChangeMaterialSRV(
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
@@ -136,7 +116,6 @@ void ModelRenderer::ChangeMaterialSRV(
 {
 	_materialMap.at(materialIndex).ChangeTextureSRV(srv, textureKey);
 }
-
 // 指定のマテリアルのSRVを変更
 void ModelRenderer::ChangeMaterialSRV(
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, 
@@ -152,7 +131,6 @@ void ModelRenderer::ChangeMaterialSRV(
 		}
 	}
 }
-
 void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 {
 	_model = model;
@@ -161,46 +139,5 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 	// マテリアルの取得
 	_materialMap.clear();
 	_materialMap = _model.lock()->GetMaterials();
-	//std::string filename = model.lock()->GetFilename();
-	//for (ModelResource::Material& modelMaterial : resource->GetAddressMaterials())
-	//{
-	//	auto& material = _materialMap.emplace_back();
-	//	material.SetName(modelMaterial.name);
-	//	// テクスチャ情報の取得
-	//	for (auto& [key, textureData] : modelMaterial.textureDatas)
-	//	{
-	//		if (textureData.filename.size() > 0)
-	//		{
-	//			std::filesystem::path path(filename);
-	//			// textureData.filenameの先頭が"Texture"なら相対パス化
- //               if (textureData.filename.find("Texture") == 0)
- //               {
-	//				path.replace_filename(textureData.filename);
-	//				material.LoadTexture(key, path.c_str());
- //               }
-	//			else
-	//			{
- //                   // それ以外は絶対パスなのでそのまま読み込む
-	//				path = textureData.filename;
- //                   material.LoadTexture(key, path.c_str());
-	//			}
-	//		}
-	//		else
-	//		{
-	//			material.MakeDummyTexture(key,
-	//				textureData.dummyTextureValue,
-	//				textureData.dummyTextureDimension);
-	//		}
-	//	}
-
-	//	// カラー情報の取得
-	//	for (auto& [key, color] : modelMaterial.colors)
-	//	{
-	//		material.SetColor(key, color);
-	//	}
-
-	//	// シェーダーの初期設定
-	//	material.SetShaderName("PBR");
-	//}
 }
 

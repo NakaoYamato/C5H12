@@ -58,14 +58,17 @@ public:
 	float GetLengthScale()const { return _lengthScale; }
 
 	void SetPosition(const Vector3& v) { this->_position = v; }
-	void SetPosition(const float& v) { this->_position.x = v; this->_position.y = v; this->_position.z = v; }
+	void SetPosition(float v) { this->_position.x = v; this->_position.y = v; this->_position.z = v; }
+	void SetPosition(float x, float y, float z) { this->_position.x = x; this->_position.y = y; this->_position.z = z; }
 	void SetPositionX(float f) { this->_position.x = f; }
 	void SetPositionY(float f) { this->_position.y = f; }
 	void SetPositionZ(float f) { this->_position.z = f; }
 	void SetScale(const Vector3& v) { this->_scale = v; }
-	void SetScale(const float& v) { this->_scale.x = v; this->_scale.y = v; this->_scale.z = v; }
+	void SetScale(float v) { this->_scale.x = v; this->_scale.y = v; this->_scale.z = v; }
+	void SetScale(float x, float y, float z) { this->_scale.x = x; this->_scale.y = y; this->_scale.z = z; }
 	void SetRotation(const Vector3& v) { this->_angle = v; }
-	void SetRotation(const float& v) { this->_angle.x = v; this->_angle.y = v; this->_angle.z = v; }
+	void SetRotation(float v) { this->_angle.x = v; this->_angle.y = v; this->_angle.z = v; }
+	void SetRotation(float x, float y, float z) { this->_angle.x = x; this->_angle.y = y; this->_angle.z = z; }
 	void SetAngleX(float f) { this->_angle.x = f; }
 	void SetAngleY(float f) { this->_angle.y = f; }
 	void SetAngleZ(float f) { this->_angle.z = f; }

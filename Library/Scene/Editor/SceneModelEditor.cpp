@@ -177,6 +177,7 @@ void SceneModelEditor::DrawMenuBarGui()
                     // モデルの読み込み
                     auto model = _modelActor.lock()->LoadModel(_relativePath.size() != 0 ? _relativePath.c_str() : _filepath.c_str());
                     _animator.lock()->ResetModel(model.lock());
+					_modelRenderer.lock()->SetModel(model.lock());
 
 					// アニメーションイベントの読み込み
                     _animationEvent.Load(model.lock());
@@ -510,6 +511,8 @@ void SceneModelEditor::DrawAddAnimationGui()
 // テクスチャのGUI描画
 void SceneModelEditor::DrawTextureGui()
 {
+    if (_modelRenderer.lock()->GetMaterials().size() == 0)
+        return;
     if (ImGui::Begin(u8"テクスチャ編集"))
     {
         auto model = _modelActor.lock()->GetModel().lock();

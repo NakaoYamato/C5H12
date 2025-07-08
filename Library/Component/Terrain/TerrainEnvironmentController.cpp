@@ -12,20 +12,20 @@ void TerrainEnvironmentController::Update(float elapsedTime)
 		return;
 	}
 	// 自身のIDが地形の配置情報に存在しないなら自身を削除
-	auto iter = _terrain.lock()->GetEnvironmentObjects().find(_objectID);
-	if (iter == _terrain.lock()->GetEnvironmentObjects().end())
-	{
-		GetActor()->Remove();
-		return;
-	}
-	// 地形の配置情報からトランスフォーム情報更新
-	if (_overwrite)
-	{
-		Transform& transform = GetActor()->GetTransform();
-		transform.SetPosition(iter->second.position);
-		transform.SetRotation(iter->second.rotation);
-		transform.SetScale(iter->second.scale);
-	}
+	//auto iter = _terrain.lock()->GetEnvironmentObjects().find(_objectID);
+	//if (iter == _terrain.lock()->GetEnvironmentObjects().end())
+	//{
+	//	GetActor()->Remove();
+	//	return;
+	//}
+	//// 地形の配置情報からトランスフォーム情報更新
+	//if (_overwrite)
+	//{
+	//	Transform& transform = GetActor()->GetTransform();
+	//	transform.SetPosition(iter->second.position);
+	//	transform.SetRotation(iter->second.rotation);
+	//	transform.SetScale(iter->second.scale);
+	//}
 }
 // GUI描画
 void TerrainEnvironmentController::DrawGui()

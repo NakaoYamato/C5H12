@@ -103,17 +103,7 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 			}
 			{
 				// InstancingModel
-				const size_t type = static_cast<int>(ModelRenderType::Instancing);
-				ShaderMap& shaderMap = _deferredShaders[type];
-
-				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongInstancedVS.cso",
-					"./Data/Shader/PhongGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Ramp"] = std::make_unique<RampShader>(device,
-					"./Data/Shader/PhongInstancedVS.cso",// フォンシェーダーと同じ処理
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				// デファードでは描画しない
 			}
 		}
 
@@ -148,6 +138,10 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					"./Data/Shader/PhongBatchingVS.cso",
 					"./Data/Shader/PhongPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				shaderMap["PhongAlpha"] = std::make_unique<PhongShader>(device,
+					"./Data/Shader/PhongBatchingVS.cso",
+					"./Data/Shader/PhongAlphaPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Grass"] = std::make_unique<GrassShader>(device,
 					"./Data/Shader/GrassVS.cso",
@@ -157,6 +151,10 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
 					"./Data/Shader/PhongBatchingVS.cso",
 					"./Data/Shader/PhysicalBasedRenderingPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				shaderMap["PBRAlpha"] = std::make_unique<PBRShader>(device,
+					"./Data/Shader/PhongBatchingVS.cso",
+					"./Data/Shader/PhysicalBasedRenderingAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Test"] = std::make_unique<TestShader>(device,
@@ -172,6 +170,10 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
 					"./Data/Shader/PhongInstancedVS.cso",
 					"./Data/Shader/PhongPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				shaderMap["PhongAlpha"] = std::make_unique<PhongShader>(device,
+					"./Data/Shader/PhongInstancedVS.cso",
+					"./Data/Shader/PhongAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 		}
@@ -374,9 +376,6 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 		}
 		_staticInfomap.clear();
 	}
-
-	// インスタンシングモデルの描画
-	RenderInstancing(rc);
 }
 
 /// 半透明描画
@@ -414,6 +413,7 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 		DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
 		alphaDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
 	}
+	// 遠い順にソート
 	std::sort(_alphaDrawInfomap.begin(), _alphaDrawInfomap.end(),
 		[](const AlphaDrawInfo& lhs, const AlphaDrawInfo& rhs)
 		{
@@ -479,6 +479,9 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 		}
 	}
 	_alphaDrawInfomap.clear();
+
+	// インスタンシングモデルの描画
+	RenderInstancing(rc);
 }
 
 /// 影描画実行
@@ -661,8 +664,6 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 			const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 			for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 			{
-				// TODO : 透明度処理
-
 				uint32_t stride{ sizeof(ModelResource::Vertex) };
 				uint32_t offset{ 0 };
 				dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
@@ -694,7 +695,7 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 		Model* model = drawInfomap.first;
 		InstancingDrawInfo& drawInfo = drawInfomap.second;
 
-		ShaderBase* shader = _deferredShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderType].get();
+		ShaderBase* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderType].get();
 		shader->Begin(rc);
 
 		DrawModel(model, drawInfo, shader);

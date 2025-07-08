@@ -528,6 +528,18 @@
     <ClCompile Include="Library\Shader\Test\TestShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Component\InstancingModelRenderer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Scene\Test\SceneInstancingModelDebug.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1100,6 +1112,18 @@
     <ClInclude Include="Library\Shader\Test\TestShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Component\InstancingModelRenderer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Scene\Test\SceneInstancingModelDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Terrain\TerrainObjectLayout.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1200,5 +1224,7 @@
     <FxCompile Include="HLSL\Terrain\Deform\TerrainCopyMaterialPS.hlsl" />
     <FxCompile Include="HLSL\Model\Test\TestPS.hlsl" />
     <FxCompile Include="HLSL\Model\Test\TestGBPS.hlsl" />
+    <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingAlphaPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Phong\PhongAlphaPS.hlsl" />
   </ItemGroup>
 </Project>

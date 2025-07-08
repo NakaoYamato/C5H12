@@ -4,7 +4,7 @@
 static const int INSTANCED_MAX = 100;
 cbuffer CbSkeleton : register(b1)
 {
-    float4 materialColor;
+    float4 materialColor[INSTANCED_MAX];
     row_major float4x4 worldTransform[INSTANCED_MAX];
 }
 
@@ -25,7 +25,7 @@ VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 	
     vout.texcoord = vin.texcoord;
     
-    vout.materialColor = materialColor;
+    vout.materialColor = materialColor[instance_id];
     
     return vout;
 }

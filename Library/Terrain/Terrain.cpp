@@ -1,6 +1,7 @@
 #include "Terrain.h"
 
 #include "../HRTrace.h"
+#include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
@@ -294,27 +295,7 @@ void Terrain::DrawGui()
     }
     if (ImGui::TreeNode(u8"環境オブジェクト"))
     {
-        for (auto& [index, envObj] : _environmentObjects)
-        {
-			ImGui::Text(u8"%d", index);
-            if (ImGui::TreeNode(std::to_string(index).c_str()))
-            {
-                ImGui::Text(envObj.modelPath.c_str());
-                ImGui::DragFloat3(u8"位置", &envObj.position.x, 0.1f);
-                ImGui::DragFloat3(u8"回転", &envObj.rotation.x, 0.1f);
-                ImGui::DragFloat3(u8"スケール", &envObj.scale.x, 0.1f);
-                if (ImGui::Button(u8"削除"))
-                {
-                    // 環境オブジェクトを削除
-                    _environmentObjects.erase(index);
-                    // 削除後はループを抜ける
-                    ImGui::TreePop();
-                    break;
-                }
-                ImGui::TreePop();
-            }
-        }
-
+        _terrainObjectLayout.DrawGui();
         ImGui::TreePop();
     }
     ImGui::Separator();
@@ -379,17 +360,6 @@ bool Terrain::Raycast(
         }
     }
 	return isHit;
-}
-// 環境オブジェクトの配置情報を追加
-void Terrain::AddEnvironmentObject(ID3D11Device* device, const char* filename, Vector3 position, Vector3 rotation, Vector3 size)
-{
-	// 環境オブジェクトの配置情報を追加
-	_environmentObjects[_currentEnvironmentObjectIndex].model = std::make_unique<Model>(device, filename);
-	_environmentObjects[_currentEnvironmentObjectIndex].modelPath = filename;
-	_environmentObjects[_currentEnvironmentObjectIndex].position = position;
-	_environmentObjects[_currentEnvironmentObjectIndex].rotation = rotation;
-	_environmentObjects[_currentEnvironmentObjectIndex].scale = size;
-    _currentEnvironmentObjectIndex++;
 }
 // 基本色テクスチャのの書き出し
 void Terrain::SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath)

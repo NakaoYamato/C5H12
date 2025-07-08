@@ -12,6 +12,8 @@
 #include "../../Library/PostProcess/FrameBuffer.h"
 #include "../../Library/Exporter/Exporter.h"
 
+#include "TerrainObjectLayout.h"
+
 class Terrain
 {
 public:
@@ -59,20 +61,6 @@ public:
         // 読み込み
         void Inport(const char* label, nlohmann::json& jsonData);
 	};
-    // 環境オブジェクトデータ
-	struct EnvironmentObject
-	{
-        // モデル
-        std::unique_ptr<Model> model;
-		// モデルのパス
-		std::string modelPath = "";
-        // 位置
-		Vector3 position = Vector3::Zero;
-        // 回転
-		Vector3 rotation = Vector3::Zero;
-        // スケール
-		Vector3 scale = Vector3::One;
-	};
 
 	static constexpr size_t BaseColorTextureIndex = 0;
 	static constexpr size_t NormalTextureIndex = 1;
@@ -110,10 +98,8 @@ public:
 	std::vector<TransparentWall>& GetTransparentWalls() { return _transparentWalls; }
     // 透明壁追加
 	void AddTransparentWall(const TransparentWall& wall) { _transparentWalls.push_back(wall); }
-	// 環境オブジェクトの配置情報を取得
-	std::unordered_map<int, EnvironmentObject>& GetEnvironmentObjects() { return _environmentObjects; }
-    // 環境オブジェクトの配置情報を追加
-    void AddEnvironmentObject(ID3D11Device* device, const char* filename, Vector3 position, Vector3 rotation, Vector3 size);
+	// オブジェクトの配置情報を取得
+	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
 	// 基本色テクスチャのパスを取得
 	const std::wstring& GetBaseColorTexturePath() const { return _baseColorTexturePath; }
 	// 法線テクスチャのパスを取得
@@ -183,8 +169,6 @@ private:
     // 透明壁
     std::vector<TransparentWall> _transparentWalls;
 
-    // 環境オブジェクトの配置情報
-	std::unordered_map<int, EnvironmentObject> _environmentObjects;
-    // 現在の環境オブジェクトの配置番号
-	int _currentEnvironmentObjectIndex = 0;
+	// 環境オブジェクトの配置情報
+	TerrainObjectLayout _terrainObjectLayout;
 };

@@ -2,6 +2,9 @@
 
 #include "TerrainController.h"
 
+// 先行宣言
+class TerrainDeformerBrush;
+
 class TerrainDeformer : public Component
 {
 public:
@@ -27,6 +30,7 @@ public:
 	// 編集タスク
     struct Task
     {
+		std::string brushName       = ""; // ブラシ名
 		BrushMode   mode            = BrushMode::AddColor;// ブラシモード
 		size_t      paintTextureIndex    = 0;           // 使用するテクスチャインデックス
         size_t      brushTextureIndex = 0;              // 使用するブラシテクスチャインデックス
@@ -50,11 +54,6 @@ public:
         std::wstring path;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     };
-    // 環境オブジェクトデータ
-	struct EnvironmentObjectData
-	{
-		std::shared_ptr<Model> model; // モデル
-	};
 
     static constexpr size_t PaintBaseColorTextureIndex = 3;
     static constexpr size_t PaintNormalTextureIndex = 4;
@@ -80,6 +79,9 @@ public:
 	{
 		_tasks.push_back(task);
 	}
+
+	// ブラシの追加
+    void RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush);
 private:
     // テクスチャ読み込み
     void LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv);
@@ -120,8 +122,6 @@ private:
     std::vector<BrushTexture> _brushTextures;
     // 編集タスク群
     std::vector<Task> _tasks;
-	// 環境オブジェクトデータ
-	std::vector<EnvironmentObjectData> _environmentObjects;
 
     // 使用するブラシ
 	BrushMode _brushMode = BrushMode::AddColor;
@@ -147,4 +147,48 @@ private:
 
     // 選択中のモデルファイルパス
 	std::string _selectedModelPath = "";
+
+    // 登録しているブラシ
+	std::unordered_map<std::string, std::shared_ptr<TerrainDeformerBrush>> _brushes;
+	// 選択中のブラシ名
+	std::string _selectedBrushName = "";
+};
+
+class TerrainDeformerBrush
+{
+public:
+    TerrainDeformerBrush(TerrainDeformer* deformer) :
+        _deformer(deformer)
+    {
+    }
+    virtual ~TerrainDeformerBrush() {}
+
+	// 名前取得
+	virtual const char* GetName() const = 0;
+	// 更新処理
+    virtual void Update(float elapsedTime, Vector3* intersectWorldPosition) {};
+	// 描画処理
+    virtual void Render(std::shared_ptr<Terrain> terrain,
+        const RenderContext& rc,
+        ID3D11ShaderResourceView** srv,
+        uint32_t startSlot,
+        uint32_t numViews) {};
+	// GUI描画
+    virtual void DrawGui() {};
+
+protected:
+    // 地形変形者への参照
+    TerrainDeformer* _deformer;
+    // ピクセルシェーダ
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
+    // ブラシの位置
+    Vector2 _brushPosition = Vector2::Zero;
+    // ブラシの半径
+    float _brushRadius = 0.1f;
+    // ブラシの強度
+    float _brushStrength = 1.0f;
+    // ブラシのY軸回転(ラジアン)
+    float _brushRotationY = 0.0f;
+    // 高さ変形スケール x : 最小値、 y : 最大値
+    Vector2 _brushHeightScale = { -1.0f, 1.0f };
 };

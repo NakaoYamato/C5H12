@@ -7,6 +7,8 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 
+#include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
+
 #include <filesystem>
 #include <imgui.h>
 
@@ -64,6 +66,9 @@ void TerrainDeformer::OnCreate()
     AddBrushTexture(L"./Data/Terrain/Brush/Brush000.png");
     AddBrushTexture(L"./Data/Terrain/Brush/Brush001.png");
     AddBrushTexture(L"./Data/Terrain/Brush/Brush002.png");
+
+    // ブラシ設定
+	RegisterBrush(std::make_shared<ColorAdditionBrush>(this));
 }
 // 開始処理
 void TerrainDeformer::Start()
@@ -155,7 +160,7 @@ void TerrainDeformer::Update(float elapsedTime)
         // ブラシモードが配置の場合は環境オブジェクトを配置する
         if (!_selectedModelPath.empty())
         {
-            terrain->AddEnvironmentObject(Graphics::Instance().GetDevice(), _selectedModelPath.c_str(), _intersectionWorldPoint, Vector3::Zero, Vector3::One);
+            //terrain->AddEnvironmentObject(Graphics::Instance().GetDevice(), _selectedModelPath.c_str(), _intersectionWorldPoint, Vector3::Zero, Vector3::One);
         }
     }
 
@@ -337,6 +342,11 @@ void TerrainDeformer::DrawGui()
         ImGui::End();
     }
 }
+// ブラシの追加
+void TerrainDeformer::RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush)
+{
+    _brushes[brush->GetName()] = brush;
+}
 // テクスチャ読み込み
 void TerrainDeformer::LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv)
 {
@@ -468,23 +478,23 @@ void TerrainDeformer::DrawBrushTextureGui()
 // モデルの選択GUI描画
 void TerrainDeformer::DrawModelSelectionGui()
 {
-	for (size_t i = 0; i < _environmentObjects.size(); ++i)
-	{
-		if (ImGui::RadioButton(_environmentObjects[i].model->GetFilename(), _selectedModelPath == _environmentObjects[i].model->GetFilename()))
-            _selectedModelPath = _environmentObjects[i].model->GetFilename();
-	}
-	if (ImGui::Button(u8"モデル追加"))
-	{
-		// モデルのパスを取得するダイアログを開く
-		std::string filepath;
-		std::string currentDirectory;
-		Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
-		if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-		{
-			// 相対パス取得
-			std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
-			auto model = std::make_shared<Model>(Graphics::Instance().GetDevice(), relativePath.string().c_str());
-			_environmentObjects.emplace_back(EnvironmentObjectData{ model });
-		}
-	}
+	//for (size_t i = 0; i < _environmentObjects.size(); ++i)
+	//{
+	//	if (ImGui::RadioButton(_environmentObjects[i].model->GetFilename(), _selectedModelPath == _environmentObjects[i].model->GetFilename()))
+ //           _selectedModelPath = _environmentObjects[i].model->GetFilename();
+	//}
+	//if (ImGui::Button(u8"モデル追加"))
+	//{
+	//	// モデルのパスを取得するダイアログを開く
+	//	std::string filepath;
+	//	std::string currentDirectory;
+	//	Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
+	//	if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+	//	{
+	//		// 相対パス取得
+	//		std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
+	//		auto model = std::make_shared<Model>(Graphics::Instance().GetDevice(), relativePath.string().c_str());
+	//		_environmentObjects.emplace_back(EnvironmentObjectData{ model });
+	//	}
+	//}
 }

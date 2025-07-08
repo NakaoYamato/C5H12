@@ -52,15 +52,28 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 // GUI描画
 void ModelRenderer::DrawGui()
 {
+	static const char* renderTypeName[] =
+	{
+		u8"DynamicBoneModel",
+		u8"StaticBoneModel",
+	};
+
 	ImGui::ColorEdit4("color", &_color.x);
+	ImGui::Separator();
+	int rId = static_cast<int>(_renderType);
+	if (ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName)))
+	{
+		_renderType = static_cast<ModelRenderType>(rId);
+	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"マテリアル"))
 	{
-		// 使用可能なシェーダー取得
-		auto activeShaderTypes =
-			GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(_renderType, Graphics::Instance().RenderingDeferred());
 		for (auto& material : _materialMap)
 		{
+			// 使用可能なシェーダー取得
+			auto activeShaderTypes =
+				GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(_renderType,
+					Graphics::Instance().RenderingDeferred() && material.GetBlendType() != BlendType::Alpha);
 			if (ImGui::TreeNode(material.GetName().c_str()))
 			{
 				// シェーダー変更GUI
@@ -90,18 +103,6 @@ void ModelRenderer::DrawGui()
 	for (auto& [name, parameter] : _shaderParameter)
 	{
 		ImGui::DragFloat(name.c_str(), &parameter, 0.1f);
-	}
-	static const char* renderTypeName[] =
-	{
-		u8"DynamicBoneModel",
-		u8"StaticBoneModel",
-	};
-	int rId = static_cast<int>(_renderType);
-	if (ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName)))
-	{
-		_renderType = static_cast<ModelRenderType>(rId);
-		// エラー防止のためPhongに変更
-		//SetShader("Phong");
 	}
 
 	auto model = GetActor()->GetModel().lock();

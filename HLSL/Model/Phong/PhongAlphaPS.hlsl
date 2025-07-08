@@ -12,15 +12,19 @@ Texture2D environmentMap : register(t10);
 float4 main(VS_OUT pin) : SV_TARGET
 {
     float4 diffuseColor = diffuseMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Kd * pin.materialColor;
+    if (diffuseColor.a < 0.01f)
+        discard;
     float4 specularColor = specularMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Ks.rgba;
     
     // フォンシェーディング用変数
     float3 E = normalize(pin.world_position.xyz - cameraPosition.xyz);
     float3 L = normalize(directional_light_direction.xyz);
-    float3x3 mat = { 
-        normalize(pin.world_tangent.xyz), 
-        normalize(pin.binormal.xyz), 
-        normalize(pin.world_normal.xyz) };
+    float3x3 mat =
+    {
+        normalize(pin.world_tangent.xyz),
+        normalize(pin.binormal.xyz),
+        normalize(pin.world_normal.xyz)
+    };
     //float3 N = normalize(pin.world_normal.xyz);
     float3 N = normalMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
     // ノーマルテクスチャ法線をワールドへ変換

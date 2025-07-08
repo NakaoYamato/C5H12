@@ -160,6 +160,7 @@
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
+    <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Component\ParticleController.cpp" />
@@ -259,13 +260,16 @@
     <ClCompile Include="Library\Scene\SceneLoading.cpp" />
     <ClCompile Include="Library\Scene\SceneManager.cpp" />
     <ClCompile Include="Library\Scene\Test\SceneDebug.cpp" />
+    <ClCompile Include="Library\Scene\Test\SceneInstancingModelDebug.cpp" />
     <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp" />
     <ClCompile Include="Library\Shader\Grass\GrassShader.cpp" />
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
     <ClCompile Include="Library\Shader\Test\TestShader.cpp" />
+    <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
+    <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
     <ClCompile Include="Source\Common\Targetable.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
@@ -339,6 +343,7 @@
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\BehaviorController.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
+    <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Component\ParticleController.h" />
@@ -450,6 +455,7 @@
     <ClInclude Include="Library\Scene\SceneLoading.h" />
     <ClInclude Include="Library\Scene\SceneManager.h" />
     <ClInclude Include="Library\Scene\Test\SceneDebug.h" />
+    <ClInclude Include="Library\Scene\Test\SceneInstancingModelDebug.h" />
     <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h" />
     <ClInclude Include="Library\Shader\Grass\GrassShader.h" />
     <ClInclude Include="Library\Shader\PBR\PBRShader.h" />
@@ -457,7 +463,9 @@
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Library\Shader\Test\TestShader.h" />
+    <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
+    <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
     <ClInclude Include="Source\Common\Targetable.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
@@ -629,6 +637,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="HLSL\Model\Phong\PhongAlphaPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="HLSL\Model\Phong\PhongBatchingVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
@@ -650,6 +664,12 @@
     <FxCompile Include="HLSL\Model\Phong\PhongVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingAlphaPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingGBPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

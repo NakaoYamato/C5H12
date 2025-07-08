@@ -69,6 +69,7 @@ public:
 #pragma region アクセサ
 	const std::string& GetName() const { return _name; }
 	const Vector4& GetColor(const std::string& key) const { return _colors.at(key); }
+	const std::unordered_map<std::string, TextureData>& GetTextureDatas() const { return _textureDatas; }
 	const TextureData& GetTextureData(const std::string& key) const { return _textureDatas.at(key); }
 	ID3D11ShaderResourceView* const* GetAddressOfTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.GetAddressOf(); }
 	ID3D11ShaderResourceView* GetTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.Get(); }

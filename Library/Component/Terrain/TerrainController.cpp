@@ -102,18 +102,19 @@ void TerrainController::DebugRender(const RenderContext& rc)
 		// 透明壁の描画
 		if (_drawTransparentWall)
 		{
-			for (const auto& wall : _terrain->GetTransparentWalls())
+			const DirectX::XMFLOAT4X4& world = GetActor()->GetTransform().GetMatrix();
+			for (const auto& wall : _terrain->GetTransparentWall()->GetWalls())
 			{
-				size_t pointCount = wall.points.size();
+				size_t pointCount = wall.vertices.size();
 				if (pointCount <= 1)
 					continue;
 				Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
 				for (size_t i = 0; i < pointCount - 1; i++)
 				{
-					const Vector3& p1 = wall.points[i];
-					const Vector3& p2 = wall.points[i + 1];
-					const Vector3& p3 = wall.points[i] + heightOffset;
-					const Vector3& p4 = wall.points[i + 1] + heightOffset;
+                    const Vector3& p1 = wall.vertices[i].TransformCoord(world);
+                    const Vector3& p2 = wall.vertices[i + 1].TransformCoord(world);
+                    const Vector3& p3 = p1 + heightOffset;
+                    const Vector3& p4 = p2 + heightOffset;
 					Vector4 color = Vector4::Green;
 					Debug::Renderer::AddVertex(p1, color);
 					Debug::Renderer::AddVertex(p2, color);
@@ -128,13 +129,9 @@ void TerrainController::DebugRender(const RenderContext& rc)
 					Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();
 					// 法線の向きがカメラ方向なら青色、逆方向なら赤色
 					if (normal.Dot(rc.camera->GetEye() - center) < 0.0f)
-					{
-						color = Vector4::Red;
-					}
+                        color = Vector4::Red;
 					else
-					{
-						color = Vector4::Blue;
-					}
+                        color = Vector4::Blue;
 					Debug::Renderer::AddVertex(center, color);
 					Debug::Renderer::AddVertex(center + normal, color);
 				}

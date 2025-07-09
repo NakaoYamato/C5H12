@@ -155,7 +155,7 @@ public:
         uint32_t startSlot,
         uint32_t numViews) {};
 	// GUI描画
-    virtual void DrawGui();
+    virtual void DrawGui(std::shared_ptr<Terrain> terrain);
 
 	// タスクを登録
     virtual void RegisterTask(const Vector2& uvPosition, float radius, float strength);
@@ -172,6 +172,8 @@ public:
 	float GetBrushRotationY() const { return _brushRotationY; }
 	// 高さ変形スケール取得 x : 最小値、 y : 最大値
 	const Vector2& GetBrushHeightScale() const { return _brushHeightScale; }
+	// ブラシのデバッグ描画フラグ取得
+	bool IsDrawDebugBrush() const { return _drawDebugBrush; }
 #pragma endregion
 
 protected:
@@ -180,6 +182,8 @@ protected:
     // ピクセルシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
 
+    // レイキャストの長さ
+    float _rayLength = 1000.0f;
     // ブラシの位置(ワールド)
     Vector3 _brushWorldPosition = Vector3::Zero;
     // ブラシの位置
@@ -192,4 +196,6 @@ protected:
     float _brushRotationY = 0.0f;
     // 高さ変形スケール x : 最小値、 y : 最大値
     Vector2 _brushHeightScale = { -100.0f, 100.0f };
+    // ブラシのデバッグ描画フラグ
+	bool _drawDebugBrush = true;
 };

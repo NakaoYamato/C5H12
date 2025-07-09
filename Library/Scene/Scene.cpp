@@ -4,7 +4,7 @@
 #include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
-
+#include "../../Library/Exporter/Exporter.h"
 #include "../../Library/Renderer/PrimitiveRenderer.h"
 
 #include "../../Library/Component/Light/LightController.h"
@@ -93,6 +93,23 @@ void Scene::Update(float elapsedTime)
 
 	// シーンの更新処理
 	OnUpdate(elapsedTime);
+
+    // F2ボタンが有効ならスクリーンショット
+	if (Debug::Input::IsActive(DebugInput::BTN_F2))
+	{
+        // 画面キャプチャ
+        std::wstring filename = L"./Data/Debug/Capture/" + std::to_wstring(GetTickCount64()) + L".dds";
+
+        if (Exporter::SaveDDSFile(
+            Graphics::Instance().GetDevice(),
+            Graphics::Instance().GetDeviceContext(),
+            PostProcessManager::Instance().GetAppliedEffectSRV().Get(),
+            filename))
+        {
+            // F2ボタンを無効化
+            Debug::GetDebugInput()->buttonData ^= DebugInput::BTN_F2;
+        }
+	}
 }
 
 /// 一定間隔の更新処理

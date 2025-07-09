@@ -3,7 +3,6 @@
 #include "../../Library/Component/Terrain/TerrainController.h"
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "../../Library/Component/Terrain/TerrainCollider.h"
-#include "../../Library/Component/Terrain/TerrainCollisionMaker.h"
 #include "../../DebugSupporter/DebugSupporter.h"
 
 void SceneTerrainEditor::OnInitialize()
@@ -20,5 +19,4 @@ void SceneTerrainEditor::OnInitialize()
     auto terrainController = terrainActor->AddComponent<TerrainController>();
     terrainActor->AddComponent<TerrainDeformer>();
 	terrainActor->AddCollider<TerrainCollider>();
-	terrainActor->AddComponent<TerrainCollisionMaker>();
 }

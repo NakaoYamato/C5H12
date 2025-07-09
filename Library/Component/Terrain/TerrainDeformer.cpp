@@ -10,6 +10,7 @@
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
 #include "../../Library/Terrain/Brush/CostTransformingBrush.h"
+#include "../../Library/Terrain/Brush/TransparentWallBrush.h"
 
 #include <filesystem>
 #include <imgui.h>
@@ -58,6 +59,7 @@ void TerrainDeformer::OnCreate()
 	RegisterBrush(std::make_shared<ColorAdditionBrush>(this));
 	RegisterBrush(std::make_shared<HeightTransformingBrush>(this));
 	RegisterBrush(std::make_shared<CostTransformingBrush>(this));
+	RegisterBrush(std::make_shared<TransparentWallBrush>(this));
 
 	// 初期ブラシの選択
 	_selectedBrushName = _brushes.begin()->first;
@@ -109,9 +111,10 @@ void TerrainDeformer::Update(float elapsedTime)
     selectedBrush->second->Update(_terrainController.lock()->GetTerrain().lock(), elapsedTime);
 
     // ブラシの表示
-    Debug::Renderer::DrawSphere(
-        selectedBrush->second->GetBrushWorldPosition(), selectedBrush->second->GetBrushRadius(),
-        Vector4::White);
+    if (selectedBrush->second->IsDrawDebugBrush())
+        Debug::Renderer::DrawSphere(
+            selectedBrush->second->GetBrushWorldPosition(), selectedBrush->second->GetBrushRadius(),
+            Vector4::White);
 }
 // 描画処理
 void TerrainDeformer::Render(const RenderContext& rc)
@@ -249,15 +252,21 @@ void TerrainDeformer::DrawGui()
 
             // ブラシの選択GUI描画
             DrawBrushSelectionGui();
-			ImGui::Separator();
-
-            // ブラシ取得
-            auto brush = _brushes.find(_selectedBrushName);
-			// ブラシがあるならGUI描画
-            if (brush != _brushes.end())
-				brush->second->DrawGui();
         }
         ImGui::End();
+
+
+        // ブラシ取得
+        auto brush = _brushes.find(_selectedBrushName);
+        // ブラシがあるならGUI描画
+        if (brush != _brushes.end())
+        {
+            if (ImGui::Begin(u8"ブラシ"))
+            {
+                brush->second->DrawGui(_terrainController.lock()->GetTerrain().lock());
+            }
+            ImGui::End();
+        }
     }
 }
 // ブラシの追加
@@ -452,7 +461,7 @@ void TerrainDeformerBrush::Update(std::shared_ptr<Terrain> terrain, float elapse
         _deformer->GetActor()->GetTransform().GetMatrix(),
         rayStart,
         rayDir,
-        1000.0f, // レイの長さ
+        _rayLength,
         &intersectWorldPosition,
         nullptr, // 法線は不要
         &intersectUVPosition);
@@ -467,7 +476,7 @@ void TerrainDeformerBrush::Update(std::shared_ptr<Terrain> terrain, float elapse
     }
 }
 // GUI描画
-void TerrainDeformerBrush::DrawGui()
+void TerrainDeformerBrush::DrawGui(std::shared_ptr<Terrain> terrain)
 {
     ImGui::DragFloat3(u8"ブラシワールド位置", &_brushWorldPosition.x, 0.01f, -100.0f, 100.0f);
     ImGui::DragFloat(u8"ブラシ半径", &_brushRadius, 0.01f, 0.0f, 100.0f);

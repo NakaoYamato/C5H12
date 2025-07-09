@@ -166,7 +166,6 @@
     <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Component\StateController.cpp" />
-    <ClCompile Include="Library\Component\Terrain\TerrainCollisionMaker.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainController.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainEnvironmentController.cpp" />
@@ -270,8 +269,10 @@
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\HeightTransformingBrush.cpp" />
+    <ClCompile Include="Library\Terrain\Brush\TransparentWallBrush.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
+    <ClCompile Include="Library\Terrain\TerrainTransparentWall.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
     <ClCompile Include="Source\Common\Targetable.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
@@ -351,7 +352,6 @@
     <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Component\StateController.h" />
-    <ClInclude Include="Library\Component\Terrain\TerrainCollisionMaker.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainController.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainEnvironmentController.h" />
@@ -469,8 +469,10 @@
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\HeightTransformingBrush.h" />
+    <ClInclude Include="Library\Terrain\Brush\TransparentWallBrush.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />
+    <ClInclude Include="Library\Terrain\TerrainTransparentWall.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
     <ClInclude Include="Source\Common\Targetable.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />

@@ -14,5 +14,5 @@ public:
 		const RenderContext& rc,
 		ID3D11ShaderResourceView** srv,
 		uint32_t startSlot,
-		uint32_t numViews);
+		uint32_t numViews) override;
 };

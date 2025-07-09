@@ -120,31 +120,7 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
     }
 
     // データの読み込み
-	LoadFromFile(serializePath);
-	// 各テクスチャのパスが設定されている場合はテクスチャをロード
-	if (!_baseColorTexturePath.empty())
-	{
-        GpuResourceManager::LoadTextureFromFile(device,
-			_baseColorTexturePath.c_str(), 
-			_loadBaseColorSRV.ReleaseAndGetAddressOf(),
-            nullptr);
-	}
-	if (!_normalTexturePath.empty())
-	{
-		GpuResourceManager::LoadTextureFromFile(device,
-			_normalTexturePath.c_str(),
-			_loadNormalSRV.ReleaseAndGetAddressOf(),
-			nullptr);
-	}
-	if (!_parameterTexturePath.empty())
-	{
-		GpuResourceManager::LoadTextureFromFile(device,
-			_parameterTexturePath.c_str(),
-			_loadParameterSRV.ReleaseAndGetAddressOf(),
-			nullptr);
-	}
-	// テクスチャのロードフラグを立てる
-	_isLoadingTextures = true;
+	LoadFromFile(device, serializePath);
 }
 // 描画処理
 void Terrain::Render(TextureRenderer& textureRenderer, const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer)
@@ -310,41 +286,7 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
     }
     if (ImGui::TreeNode(u8"透明壁"))
     {
-        size_t wallIndex = 0;
-        for (auto& wall : _transparentWalls)
-        {
-            if (ImGui::TreeNode(("Wall:" + std::to_string(wallIndex)).c_str()))
-            {
-                ImGui::Text(u8"透明壁の頂点数: %zu", wall.points.size());
-                for (size_t i = 0; i < wall.points.size(); i++)
-                {
-                    ImGui::DragFloat3(std::to_string(i).c_str(), &wall.points[i].x, 0.1f);
-                    ImGui::SameLine();
-                    if (ImGui::Button(u8"削除"))
-                    {
-                        // 透明壁の頂点を削除
-						wall.points.erase(wall.points.begin() + i);
-						// 削除後はループを抜ける
-						break;
-                    }
-                }
-                ImGui::DragFloat(u8"透明壁の高さ", &wall.height, 0.1f, 0.0f, 100.0f);
-                if (ImGui::Button(u8"透明壁の頂点追加"))
-                {
-                    // 透明壁の頂点を追加
-                    wall.points.push_back(Vector3{});
-                }
-
-				ImGui::TreePop();
-            }
-            wallIndex++;
-        }
-        ImGui::Separator();
-		if (ImGui::Button(u8"透明壁の追加"))
-		{
-			// 透明壁を追加
-            _transparentWalls.push_back(TransparentWall{});
-		}
+        _transparentWall.DrawGui();
 
         ImGui::TreePop();
     }
@@ -435,7 +377,7 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 		if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::JsonFilter))
 		{
 			// 地形の情報をJSONファイルから読み込み
-			LoadFromFile(resultPath);
+			LoadFromFile(device, resultPath);
 		}
 		ImGui::Separator();
 
@@ -549,18 +491,13 @@ void Terrain::SaveToFile(const std::string& path)
         jsonData["normalTexturePath"] = _normalTexturePath;
         jsonData["parameterTexturePath"] = _parameterTexturePath;
     }
-    jsonData["transparentWallsSize"] = _transparentWalls.size();
-    for (size_t i = 0; i < _transparentWalls.size(); ++i)
-    {
-        _transparentWalls[i].Export(("transparentWall" + std::to_string(i)).c_str(), &jsonData);
-    }
-    Exporter::SaveJsonFile(path, jsonData);
+	_transparentWall.Export(&jsonData);
 
     // シリアライズパスを更新
     _serializePath = path;
 }
 // 読み込み
-void Terrain::LoadFromFile(const std::string& path)
+void Terrain::LoadFromFile(ID3D11Device* device, const std::string& path)
 {
     nlohmann::json jsonData;
     if (!Exporter::LoadJsonFile(path, &jsonData))
@@ -574,18 +511,33 @@ void Terrain::LoadFromFile(const std::string& path)
 	if (jsonData.contains("parameterTexturePath"))
 		_parameterTexturePath = jsonData["parameterTexturePath"].get<std::wstring>();
     // 透明壁の読み込み
-    if (jsonData.contains("transparentWallsSize"))
-    {
-        size_t wallSize = jsonData["transparentWallsSize"].get<size_t>();
-        _transparentWalls.resize(wallSize);
-        for (size_t i = 0; i < wallSize; ++i)
-        {
-            _transparentWalls[i].Inport(("transparentWall" + std::to_string(i)).c_str(), jsonData);
-        }
-    }
-
+    _transparentWall.Inport(jsonData);
     // シリアライズパスを更新
 	_serializePath = path;
+    // 各テクスチャのパスが設定されている場合はテクスチャをロード
+    if (!_baseColorTexturePath.empty())
+    {
+        GpuResourceManager::LoadTextureFromFile(device,
+            _baseColorTexturePath.c_str(),
+            _loadBaseColorSRV.ReleaseAndGetAddressOf(),
+            nullptr);
+    }
+    if (!_normalTexturePath.empty())
+    {
+        GpuResourceManager::LoadTextureFromFile(device,
+            _normalTexturePath.c_str(),
+            _loadNormalSRV.ReleaseAndGetAddressOf(),
+            nullptr);
+    }
+    if (!_parameterTexturePath.empty())
+    {
+        GpuResourceManager::LoadTextureFromFile(device,
+            _parameterTexturePath.c_str(),
+            _loadParameterSRV.ReleaseAndGetAddressOf(),
+            nullptr);
+    }
+    // テクスチャのロードフラグを立てる
+    _isLoadingTextures = true;
 }
 // 地形メッシュの頂点とインデックスを生成
 void Terrain::CreateTerrainMesh(ID3D11Device* device)
@@ -627,44 +579,4 @@ void Terrain::CreateTerrainMesh(ID3D11Device* device)
     hr = device->CreateBuffer(&buffer_desc, &subresource_data,
         _indexBuffer.ReleaseAndGetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-}
-// 書き出し
-void Terrain::TransparentWall::Export(const char* label, nlohmann::json* jsonData)
-{
-    (*jsonData)[label]["pointsSize"] = points.size();
-    for (size_t i = 0; i < points.size(); ++i)
-    {
-        // Vector3をJSONに変換
-        nlohmann::json pointJson = {
-            {"x", points[i].x},
-            {"y", points[i].y},
-            {"z", points[i].z}
-        };
-        // JSONに追加
-        (*jsonData)[label][std::to_string(i)] = pointJson;
-    }
-    (*jsonData)[label]["height"] = height;
-}
-// 読み込み
-void Terrain::TransparentWall::Inport(const char* label, nlohmann::json& jsonData)
-{
-    if (jsonData.contains(label))
-    {
-        if (jsonData[label].contains("pointsSize"))
-        {
-            size_t pointSize = jsonData[label]["pointsSize"].get<size_t>();
-            points.resize(pointSize);
-            for (size_t i = 0; i < pointSize; ++i)
-            {
-                if (jsonData[label].contains(std::to_string(i)))
-                {
-                    auto& pointData = jsonData[label][std::to_string(i)];
-                    points[i].x = pointData.value("x", points[i].x);
-                    points[i].y = pointData.value("y", points[i].y);
-                    points[i].z = pointData.value("z", points[i].z);
-                }
-            }
-        }
-        height = jsonData[label].value("height", height);
-    }
 }

@@ -104,7 +104,7 @@ bool Exporter::SaveDDSFile(ID3D11Device* device,
 
     ComPtr<ID3D11Texture2D> pSourceTexture;
     HRESULT hr = pSourceResource.As(&pSourceTexture);
-    if (FAILED(hr)) return hr;
+    if (FAILED(hr)) return false;
 
     D3D11_TEXTURE2D_DESC srcDesc;
     pSourceTexture->GetDesc(&srcDesc);
@@ -118,7 +118,7 @@ bool Exporter::SaveDDSFile(ID3D11Device* device,
     stagingDesc.MiscFlags = 0;
 
     hr = device->CreateTexture2D(&stagingDesc, nullptr, &pStagingTexture);
-    if (FAILED(hr)) return hr;
+    if (FAILED(hr)) return false;
 
     // GPU上のテクスチャをステージングテクスチャにコピー
     dc->CopyResource(pStagingTexture.Get(), pSourceTexture.Get());
@@ -126,7 +126,7 @@ bool Exporter::SaveDDSFile(ID3D11Device* device,
     // ステージングテクスチャをCPUにマップ
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     hr = dc->Map(pStagingTexture.Get(), 0, D3D11_MAP_READ, 0, &mappedResource);
-    if (FAILED(hr)) return hr;
+    if (FAILED(hr)) return false;
 
     // DirectX::Imageを構築してファイルに保存
     DirectX::Image image{};
@@ -142,7 +142,7 @@ bool Exporter::SaveDDSFile(ID3D11Device* device,
 
     dc->Unmap(pStagingTexture.Get(), 0);
 
-    return hr;
+    return true;
 }
 
 bool Exporter::SaveJsonFile(const std::string& filename, const nlohmann::json& jsonData)

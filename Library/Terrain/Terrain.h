@@ -13,6 +13,7 @@
 #include "../../Library/PostProcess/FrameBuffer.h"
 #include "../../Library/Exporter/Exporter.h"
 
+#include "TerrainTransparentWall.h"
 #include "TerrainObjectLayout.h"
 
 class Terrain
@@ -49,19 +50,6 @@ public:
         DirectX::XMFLOAT2 texcoord = {};
 		float             cost = 0.0f;
     };
-    // 透明壁構造体
-	struct TransparentWall
-	{
-		// 透明壁の下部分の頂点
-		std::vector<Vector3> points;
-		// 透明壁の高さ
-		float height = 5.0f;
-
-        // 書き出し
-        void Export(const char* label, nlohmann::json* jsonData);
-        // 読み込み
-        void Inport(const char* label, nlohmann::json& jsonData);
-	};
 
 	static constexpr size_t BaseColorTextureIndex = 0;
 	static constexpr size_t NormalTextureIndex = 1;
@@ -96,16 +84,14 @@ public:
     // ストリームアウトをするかどうか設定
     void SetStreamOut(bool streamOut) { _streamOut = streamOut; }
     // 透明壁取得
-	std::vector<TransparentWall>& GetTransparentWalls() { return _transparentWalls; }
-    // 透明壁追加
-	void AddTransparentWall(const TransparentWall& wall) { _transparentWalls.push_back(wall); }
+	 TerrainTransparentWall* GetTransparentWall() { return &_transparentWall; }
 	// オブジェクトの配置情報を取得
 	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
 
     // 書き出し
     void SaveToFile(const std::string& path);
     // 読み込み
-    void LoadFromFile(const std::string& path);
+    void LoadFromFile(ID3D11Device* device, const std::string& path);
 #pragma endregion
 
 private:
@@ -143,7 +129,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterSRV;
 #pragma endregion
     ConstantBuffer                          _data;
-
     // マテリアルマップ(RT0:BaseColor,RT1:Normal)
     std::unique_ptr<FrameBuffer> _materialMapFB;
     // パラメータマップ（R：高さ、G：コスト、B：（空き）、A：（空き））
@@ -165,7 +150,7 @@ private:
     std::wstring _parameterTexturePath = L"";
 
     // 透明壁
-    std::vector<TransparentWall> _transparentWalls;
+	TerrainTransparentWall _transparentWall;
 
 	// 環境オブジェクトの配置情報
 	TerrainObjectLayout _terrainObjectLayout;

@@ -65,19 +65,20 @@ void TerrainCollider::RecalculateCollisionMesh()
 		volumeMax = volumeMax.Maximum(v3);
     }
     // 透明壁のデータから三角形を生成
-    for (size_t i = 0; i < terrain->GetTransparentWalls().size(); i++)
+    for (size_t i = 0; i < terrain->GetTransparentWall()->GetWalls().size(); i++)
     {
-        auto& wall = terrain->GetTransparentWalls()[i];
-		size_t pointCount = wall.points.size();
+		const DirectX::XMFLOAT4X4& world = GetActor()->GetTransform().GetMatrix();
+        auto& wall = terrain->GetTransparentWall()->GetWalls()[i];
+		size_t pointCount = wall.vertices.size();
 		if (pointCount <= 1)
 			continue;
 		Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
 		for (size_t i = 0; i < pointCount - 1; i++)
 		{
-			const Vector3& p1 = wall.points[i];
-			const Vector3& p2 = wall.points[i + 1];
-			const Vector3& p3 = wall.points[i] + heightOffset;
-			const Vector3& p4 = wall.points[i + 1] + heightOffset;
+			const Vector3& p1 = wall.vertices[i].TransformCoord(world);
+			const Vector3& p2 = wall.vertices[i + 1].TransformCoord(world);
+			const Vector3& p3 = p1 + heightOffset;
+			const Vector3& p4 = p2 + heightOffset;
 
 			// 法線ベクトルを算出
 			Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();

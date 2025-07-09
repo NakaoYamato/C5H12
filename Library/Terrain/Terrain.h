@@ -9,6 +9,7 @@
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Model/Model.h"
 #include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/PostProcess/FrameBuffer.h"
 #include "../../Library/Exporter/Exporter.h"
 
@@ -69,12 +70,12 @@ public:
     static constexpr LONG ParameterMapSize = 1024;
     static constexpr UINT ParameterMapIndex = 6;
 public:
-    Terrain(ID3D11Device* device);
+    Terrain(ID3D11Device* device, const std::string& serializePath = "./Data/Terrain/Save/Test000.json");
 	~Terrain() {}
     // 描画処理
-    void Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer);
+    void Render(TextureRenderer& textureRenderer, const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer);
     // GUI描画
-    void DrawGui();
+    void DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc);
 
     // レイキャスト
 	bool Raycast(
@@ -100,24 +101,6 @@ public:
 	void AddTransparentWall(const TransparentWall& wall) { _transparentWalls.push_back(wall); }
 	// オブジェクトの配置情報を取得
 	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
-	// 基本色テクスチャのパスを取得
-	const std::wstring& GetBaseColorTexturePath() const { return _baseColorTexturePath; }
-	// 法線テクスチャのパスを取得
-	const std::wstring& GetNormalTexturePath() const { return _normalTexturePath; }
-	// パラメータテクスチャのパスを取得
-	const std::wstring& GetParameterTexturePath() const { return _parameterTexturePath; }
-	// 基本色テクスチャのパスを設定
-	void SetBaseColorTexturePath(const std::wstring& path) { _baseColorTexturePath = path; }
-	// 法線テクスチャのパスを設定
-	void SetNormalTexturePath(const std::wstring& path) { _normalTexturePath = path; }
-	// パラメータテクスチャのパスを設定
-	void SetParameterTexturePath(const std::wstring& path) { _parameterTexturePath = path; }
-    // 基本色テクスチャのの書き出し
-	void SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath);
-	// 法線テクスチャの書き出し
-	void SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* normalPath);
-    // パラメータマップの書き出し
-    void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
 
     // 書き出し
     void SaveToFile(const std::string& path);
@@ -128,8 +111,15 @@ public:
 private:
     // 地形メッシュの頂点とインデックスを生成
     void CreateTerrainMesh(ID3D11Device* device);
+
+    // 基本色テクスチャのの書き出し
+    void SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath);
+    // 法線テクスチャの書き出し
+    void SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* normalPath);
+    // パラメータマップの書き出し
+    void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
+
 private:
-    ConstantBuffer                          _data;
 #pragma region 描画用COMオブジェクト
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
@@ -146,7 +136,13 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
+
+    // ロード用SRV
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadBaseColorSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadNormalSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterSRV;
 #pragma endregion
+    ConstantBuffer                          _data;
 
     // マテリアルマップ(RT0:BaseColor,RT1:Normal)
     std::unique_ptr<FrameBuffer> _materialMapFB;
@@ -154,6 +150,8 @@ private:
     std::unique_ptr<FrameBuffer> _parameterMapFB;
     // マテリアルのリセット
     bool _resetMap = false;
+    // テクスチャをロードしたかどうか
+    bool _isLoadingTextures = false;
 
     // ストリームアウト用
     bool _streamOut = false;
@@ -171,4 +169,7 @@ private:
 
 	// 環境オブジェクトの配置情報
 	TerrainObjectLayout _terrainObjectLayout;
+
+    // シリアライズパス
+    std::string _serializePath;
 };

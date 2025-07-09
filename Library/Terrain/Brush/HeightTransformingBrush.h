@@ -2,13 +2,13 @@
 
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 
-class ColorAdditionBrush : public TerrainDeformerBrush
+class HeightTransformingBrush : public TerrainDeformerBrush
 {
 public:
-	ColorAdditionBrush(TerrainDeformer* deformer);
-	~ColorAdditionBrush() override = default;
+	HeightTransformingBrush(TerrainDeformer* deformer);
+	~HeightTransformingBrush() override = default;
 	// –¼‘Oæ“¾
-	const char* GetName() const override { return u8"F‰ÁZ"; }
+	const char* GetName() const override { return u8"‚‚³•ÏŒ`"; }
 	// •`‰æˆ—
 	void Render(std::shared_ptr<Terrain> terrain,
 		const RenderContext& rc,

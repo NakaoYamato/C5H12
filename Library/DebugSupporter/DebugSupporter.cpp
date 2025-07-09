@@ -284,6 +284,81 @@ namespace Debug
 
             return DialogResult::OK;
         }
+        DialogResult SaveFileName(
+            std::string* filepath,
+            const char* filter, 
+            const char* title,
+            const char* ext,
+            HWND hwnd)
+        {
+            char path[MAX_PATH]{};
+            // 初期パス設定
+            char dirname[MAX_PATH];
+            if ((*filepath)[0] != '0')
+            {
+                // ディレクトリパス取得
+                ::_splitpath_s(path, nullptr, 0, dirname, MAX_PATH, nullptr, 0, nullptr, 0);
+            }
+            else
+            {
+                path[0] = dirname[0] = '\0';
+            }
+            if ((dirname[0] == '\0'))
+            {
+                strcpy_s(dirname, MAX_PATH, s_path_buffer);
+            }
+            // lpstrInitialDir は \ でないと受け付けない
+            for (char* p = dirname; *p != '\0'; p++)
+            {
+                if (*p == '/')
+                    *p = '\\';
+            }
+
+            if (filter == nullptr)
+            {
+                filter = "All Files\0*.*\0\0";
+            }
+
+            // 構造体セット
+            OPENFILENAMEA	ofn;
+            memset(&ofn, 0, sizeof(OPENFILENAMEA));
+            ofn.lStructSize = sizeof(OPENFILENAMEA);
+            ofn.hwndOwner = hwnd;
+            ofn.lpstrFilter = filter;
+            ofn.nFilterIndex = 1;
+            ofn.lpstrFile = path;
+            ofn.nMaxFile = MAX_PATH;
+            ofn.lpstrTitle = title;
+            ofn.lpstrInitialDir = (dirname[0] != '\0') ? dirname : nullptr;
+            ofn.lpstrDefExt = ext;
+            ofn.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+
+            // カレントディレクトリ取得
+            char current_dir[MAX_PATH];
+            if (!::GetCurrentDirectoryA(MAX_PATH, current_dir))
+            {
+                current_dir[0] = '\0';
+            }
+
+            // ダイアログオープン
+            if (::GetSaveFileNameA(&ofn) == FALSE)
+            {
+                return DialogResult::Cancel;
+            }
+
+            // カレントディレクトリ復帰
+            if (current_dir[0] != '\0')
+            {
+                ::SetCurrentDirectoryA(current_dir);
+            }
+
+            // 最終パスを記憶
+            strcpy_s(s_path_buffer, MAX_PATH, path);
+
+            *filepath = path;
+
+            return DialogResult::OK;
+        }
     }
 
     void Initialize()

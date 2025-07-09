@@ -1,4 +1,4 @@
-#include "ColorAdditionBrush.h"
+#include "CostTransformingBrush.h"
 
 #include "../../Library/Input/Input.h"
 #include "../../Library/Graphics/Graphics.h"
@@ -8,28 +8,24 @@
 
 #include <imgui.h>
 
-ColorAdditionBrush::ColorAdditionBrush(TerrainDeformer* deformer) :
-	TerrainDeformerBrush(deformer)
+CostTransformingBrush::CostTransformingBrush(TerrainDeformer* deformer) :
+    TerrainDeformerBrush(deformer)
 {
-    // 加算ブラシピクセルシェーダの読み込み
+    // 高さ変形ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformAddPS.cso",
+        "./Data/Shader/TerrainDeformCostPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
 // 描画処理
-void ColorAdditionBrush::Render(std::shared_ptr<Terrain> terrain,
-    const RenderContext& rc,
-    ID3D11ShaderResourceView** srv,
-    uint32_t startSlot,
-    uint32_t numViews)
+void CostTransformingBrush::Render(std::shared_ptr<Terrain> terrain, const RenderContext& rc, ID3D11ShaderResourceView** srv, uint32_t startSlot, uint32_t numViews)
 {
-    terrain->GetMaterialMapFB()->Activate(rc.deviceContext);
+    terrain->GetParameterMapFB()->Activate(rc.deviceContext);
     _deformer->GetActor()->GetScene()->GetTextureRenderer().Blit(
         rc.deviceContext,
         srv,
         startSlot, numViews,
         _pixelShader.Get()
     );
-    terrain->GetMaterialMapFB()->Deactivate(rc.deviceContext);
+    terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
 }

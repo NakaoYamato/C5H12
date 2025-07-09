@@ -7,9 +7,10 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 
-#include <imgui.h>
+#include <Mygui.h>
 
-Terrain::Terrain(ID3D11Device* device)
+Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
+	_serializePath(serializePath)
 {
     // 地形メッシュの頂点とインデックスを生成
     CreateTerrainMesh(device);
@@ -117,9 +118,36 @@ Terrain::Terrain(ID3D11Device* device)
             _streamOutCopyBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
+
+    // データの読み込み
+	LoadFromFile(serializePath);
+	// 各テクスチャのパスが設定されている場合はテクスチャをロード
+	if (!_baseColorTexturePath.empty())
+	{
+        GpuResourceManager::LoadTextureFromFile(device,
+			_baseColorTexturePath.c_str(), 
+			_loadBaseColorSRV.ReleaseAndGetAddressOf(),
+            nullptr);
+	}
+	if (!_normalTexturePath.empty())
+	{
+		GpuResourceManager::LoadTextureFromFile(device,
+			_normalTexturePath.c_str(),
+			_loadNormalSRV.ReleaseAndGetAddressOf(),
+			nullptr);
+	}
+	if (!_parameterTexturePath.empty())
+	{
+		GpuResourceManager::LoadTextureFromFile(device,
+			_parameterTexturePath.c_str(),
+			_loadParameterSRV.ReleaseAndGetAddressOf(),
+			nullptr);
+	}
+	// テクスチャのロードフラグを立てる
+	_isLoadingTextures = true;
 }
 // 描画処理
-void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer)
+void Terrain::Render(TextureRenderer& textureRenderer, const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -130,6 +158,33 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
         _materialMapFB->Clear(NormalTextureIndex, dc, Vector4::Blue);
         _parameterMapFB->Clear(dc, Vector4::Black);
         _resetMap = false;
+    }
+
+	// テクスチャがロードされている場合は各マップに書き込む
+    if (_isLoadingTextures)
+    {
+		if (_loadBaseColorSRV)
+		{
+			_materialMapFB->ClearAndActivate(BaseColorTextureIndex, dc);
+			textureRenderer.Blit(dc, _loadBaseColorSRV.GetAddressOf(), 0, 1);
+			_materialMapFB->Deactivate(dc);
+			_loadBaseColorSRV.Reset();
+		}
+		if (_loadNormalSRV)
+		{
+			_materialMapFB->ClearAndActivate(NormalTextureIndex, dc);
+			textureRenderer.Blit(dc, _loadNormalSRV.GetAddressOf(), 0, 1);
+			_materialMapFB->Deactivate(dc);
+			_loadNormalSRV.Reset();
+		}
+		if (_loadParameterSRV)
+		{
+			_parameterMapFB->ClearAndActivate(dc);
+			textureRenderer.Blit(dc, _loadParameterSRV.GetAddressOf(), 0, 1);
+			_parameterMapFB->Deactivate(dc);
+			_loadParameterSRV.Reset();
+		}
+		_isLoadingTextures = false;
     }
 
     if (writeGBuffer)
@@ -167,8 +222,8 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
     // 地形用テクスチャ設定
     ID3D11ShaderResourceView* srvs[] =
     {
-        _materialMapFB->GetColorSRV(0).Get(),
-        _materialMapFB->GetColorSRV(1).Get(),
+        _materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(),
+        _materialMapFB->GetColorSRV(NormalTextureIndex).Get(),
     };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
     // パラメータマップ設定
@@ -227,7 +282,7 @@ void Terrain::Render(const RenderContext& rc, const DirectX::XMFLOAT4X4& world, 
     }
 }
 // GUI描画
-void Terrain::DrawGui()
+void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 {
     if (ImGui::Button(u8"頂点再計算"))
         _streamOut = true;
@@ -244,9 +299,9 @@ void Terrain::DrawGui()
     if (ImGui::TreeNode(u8"テクスチャ"))
     {
 		ImGui::Text(u8"基本色テクスチャ: %s", ToString(_baseColorTexturePath).c_str());
-		ImGui::Image(_materialMapFB->GetColorSRV(0).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+		ImGui::Image(_materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 		ImGui::Text(u8"法線テクスチャ: %s", ToString(_normalTexturePath).c_str());
-		ImGui::Image(_materialMapFB->GetColorSRV(1).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+		ImGui::Image(_materialMapFB->GetColorSRV(NormalTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
         ImGui::Text(u8"パラメータマップ: %s", ToString(_parameterTexturePath).c_str());
         ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
         if (ImGui::Button(u8"リセット"))
@@ -298,6 +353,94 @@ void Terrain::DrawGui()
         _terrainObjectLayout.DrawGui();
         ImGui::TreePop();
     }
+    if (ImGui::TreeNode(u8"入出力"))
+    {
+		std::string resultPath = "";
+
+		if (ImGui::OpenDialogBotton(u8"基本色テクスチャ読み込み", &resultPath, ImGui::DDSTextureFilter))
+		{
+            GpuResourceManager::LoadTextureFromFile(
+                device,
+                ToWString(resultPath).c_str(),
+                _loadBaseColorSRV.ReleaseAndGetAddressOf(),
+                nullptr);
+			// 基本色テクスチャのパスを更新
+			_baseColorTexturePath = ToWString(resultPath);
+			// テクスチャをロード
+            GpuResourceManager::LoadTextureFromFile(device,
+                _baseColorTexturePath.c_str(),
+                _loadBaseColorSRV.ReleaseAndGetAddressOf(),
+                nullptr);
+            // フラグをオンにする
+			_isLoadingTextures = true;
+		}
+        if (ImGui::OpenDialogBotton(u8"法線テクスチャ読み込み", &resultPath, ImGui::DDSTextureFilter))
+        {
+			GpuResourceManager::LoadTextureFromFile(
+                device,
+				ToWString(resultPath).c_str(),
+				_loadNormalSRV.ReleaseAndGetAddressOf(),
+				nullptr);
+			// 法線テクスチャのパスを更新
+			_normalTexturePath = ToWString(resultPath);
+			// テクスチャをロード
+			GpuResourceManager::LoadTextureFromFile(device,
+				_normalTexturePath.c_str(),
+				_loadNormalSRV.ReleaseAndGetAddressOf(),
+				nullptr);
+			// フラグをオンにする
+			_isLoadingTextures = true;
+        }
+		if (ImGui::OpenDialogBotton(u8"パラメータマップ読み込み", &resultPath, ImGui::DDSTextureFilter))
+		{
+			GpuResourceManager::LoadTextureFromFile(
+                device,
+				ToWString(resultPath).c_str(),
+				_loadParameterSRV.ReleaseAndGetAddressOf(),
+				nullptr);
+			// パラメータマップのパスを更新
+			_parameterTexturePath = ToWString(resultPath);
+			// テクスチャをロード
+			GpuResourceManager::LoadTextureFromFile(device,
+				_parameterTexturePath.c_str(),
+				_loadParameterSRV.ReleaseAndGetAddressOf(),
+				nullptr);
+			// フラグをオンにする
+			_isLoadingTextures = true;
+		}
+		ImGui::Separator();
+
+		if (ImGui::SaveDialogBotton(u8"基本色テクスチャ書き出し", &resultPath, ImGui::DDSTextureFilter))
+		{
+			SaveBaseColorTexture(device, dc,
+				ToWString(resultPath).c_str());
+		}
+		if (ImGui::SaveDialogBotton(u8"法線テクスチャ書き出し", &resultPath, ImGui::DDSTextureFilter))
+		{
+			SaveNormalTexture(device, dc,
+				ToWString(resultPath).c_str());
+		}
+		if (ImGui::SaveDialogBotton(u8"パラメータマップ書き出し", &resultPath, ImGui::DDSTextureFilter))
+		{
+			SaveParameterMap(device, dc,
+				ToWString(resultPath).c_str());
+		}
+		ImGui::Separator();
+
+		if (ImGui::SaveDialogBotton(u8"保存", &resultPath, ImGui::JsonFilter))
+		{
+			// 地形の情報をJSONファイルに保存
+			SaveToFile(resultPath);
+		}
+		if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::JsonFilter))
+		{
+			// 地形の情報をJSONファイルから読み込み
+			LoadFromFile(resultPath);
+		}
+		ImGui::Separator();
+
+        ImGui::TreePop();
+    }
     ImGui::Separator();
 }
 // レイキャスト
@@ -319,6 +462,7 @@ bool Terrain::Raycast(
 	bool isHit = false;
 	Vector3 hitWPoint{};
 	Vector3 hitWNormal{};
+	float length = rayLength;
 
     DirectX::XMVECTOR RayStart = DirectX::XMLoadFloat3(&rayStart);
     DirectX::XMVECTOR RayDir = DirectX::XMLoadFloat3(&rayDirection);
@@ -335,7 +479,7 @@ bool Terrain::Raycast(
         };
         HitResult hitResult;
         if (Collision3D::IntersectRayVsTriangle(
-            RayStart, RayDir, rayLength,
+            RayStart, RayDir, length,
             triangleVerts,
             hitResult))
         {
@@ -343,6 +487,8 @@ bool Terrain::Raycast(
             hitWPoint = hitResult.position;
 			hitWNormal = hitResult.normal;
             isHit = true;
+			// 交差点の長さを更新
+			length = hitResult.distance;
         }
     }
 
@@ -409,6 +555,9 @@ void Terrain::SaveToFile(const std::string& path)
         _transparentWalls[i].Export(("transparentWall" + std::to_string(i)).c_str(), &jsonData);
     }
     Exporter::SaveJsonFile(path, jsonData);
+
+    // シリアライズパスを更新
+    _serializePath = path;
 }
 // 読み込み
 void Terrain::LoadFromFile(const std::string& path)
@@ -434,6 +583,9 @@ void Terrain::LoadFromFile(const std::string& path)
             _transparentWalls[i].Inport(("transparentWall" + std::to_string(i)).c_str(), jsonData);
         }
     }
+
+    // シリアライズパスを更新
+	_serializePath = path;
 }
 // 地形メッシュの頂点とインデックスを生成
 void Terrain::CreateTerrainMesh(ID3D11Device* device)

@@ -190,6 +190,12 @@ namespace Debug
 			const char* title = nullptr,
 			const char* ext = nullptr,
 			HWND hwnd = NULL);
+		DialogResult SaveFileName(
+			std::string* filepath,
+			const char* filter = nullptr,
+			const char* title = nullptr,
+			const char* ext = nullptr,
+			HWND hwnd = NULL);
 	}
 
 	/// <summary>

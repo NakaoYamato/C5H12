@@ -8,14 +8,6 @@ class TerrainDeformerBrush;
 class TerrainDeformer : public Component
 {
 public:
-	// ブラシの種類
-	enum class BrushMode
-	{
-		AddColor,   // 色加算
-		Height,     // 高さ変形
-		Cost,       // コスト変形
-		Placement,  // オブジェクト配置
-	};
     // ブラシの定数バッファ
     struct ConstantBuffer
     {
@@ -31,7 +23,6 @@ public:
     struct Task
     {
 		std::string brushName       = ""; // ブラシ名
-		BrushMode   mode            = BrushMode::AddColor;// ブラシモード
 		size_t      paintTextureIndex    = 0;           // 使用するテクスチャインデックス
         size_t      brushTextureIndex = 0;              // 使用するブラシテクスチャインデックス
 		Vector2     brushUVPosition = Vector2::Zero;    // ブラシUV位置
@@ -82,6 +73,12 @@ public:
 
 	// ブラシの追加
     void RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush);
+
+	// 選択中のペイントテクスチャ番号取得
+	size_t GetPaintTextureIndex() const { return _paintTextureIndex; }
+    // 選択中のブラシテクスチャ番号取得
+	size_t GetBrushTextureIndex() const { return _brushTextureIndex; }
+
 private:
     // テクスチャ読み込み
     void LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv);
@@ -98,17 +95,13 @@ private:
     void DrawBrushTextureGui();
     // モデルの選択GUI描画
 	void DrawModelSelectionGui();
+	// ブラシの選択GUI描画
+	void DrawBrushSelectionGui();
 private:
     // 地形コントローラーへの参照
     std::weak_ptr<TerrainController> _terrainController;
     // マテリアルマップのコピーピクセルシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _copyMaterialPS;
-    // 加算ブラシピクセルシェーダ
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> _addBrushPS;
-    // 高さ変形ブラシピクセルシェーダ
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> _heightBrushPS;
-    // コスト変形ブラシピクセルシェーダ
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> _costBrushPS;
     // 定数バッファ
     Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
     // マテリアルマップのコピーバッファ
@@ -123,22 +116,10 @@ private:
     // 編集タスク群
     std::vector<Task> _tasks;
 
-    // 使用するブラシ
-	BrushMode _brushMode = BrushMode::AddColor;
     // 使用するテクスチャインデックス
 	size_t _paintTextureIndex = 0;
     // 使用するブラシテクスチャインデックス
     size_t _brushTextureIndex = 0;
-    // 交差点
-    Vector3 _intersectionWorldPoint = Vector3::Zero;
-    // ブラシの高さ変形スケール x : 最小値、 y : 最大値
-    Vector2     _brushHeightScale = { -1.0f, 1.0f };
-    // ブラシ半径
-    float brushRadius = 1.0f;
-    // ブラシ強度
-    float brushStrength = 5.0f;
-    // ブラシのY軸回転(ラジアン)
-    float _brushRotationY = 0.0f;
 
     // ブラシ使用フラグ
     bool _useBrush = false;
@@ -166,7 +147,7 @@ public:
 	// 名前取得
 	virtual const char* GetName() const = 0;
 	// 更新処理
-    virtual void Update(float elapsedTime, Vector3* intersectWorldPosition) {};
+    virtual void Update(std::shared_ptr<Terrain> terrain, float elapsedTime);
 	// 描画処理
     virtual void Render(std::shared_ptr<Terrain> terrain,
         const RenderContext& rc,
@@ -174,21 +155,41 @@ public:
         uint32_t startSlot,
         uint32_t numViews) {};
 	// GUI描画
-    virtual void DrawGui() {};
+    virtual void DrawGui();
+
+	// タスクを登録
+    virtual void RegisterTask(const Vector2& uvPosition, float radius, float strength);
+#pragma region アクセサ
+	// ブラシの位置(ワールド)取得
+	const Vector3& GetBrushWorldPosition() const { return _brushWorldPosition; }
+	// ブラシの位置取得
+	const Vector2& GetBrushPosition() const { return _brushPosition; }
+	// ブラシの半径取得
+	float GetBrushRadius() const { return _brushRadius; }
+	// ブラシの強度取得
+	float GetBrushStrength() const { return _brushStrength; }
+	// ブラシのY軸回転(ラジアン)取得
+	float GetBrushRotationY() const { return _brushRotationY; }
+	// 高さ変形スケール取得 x : 最小値、 y : 最大値
+	const Vector2& GetBrushHeightScale() const { return _brushHeightScale; }
+#pragma endregion
 
 protected:
     // 地形変形者への参照
     TerrainDeformer* _deformer;
     // ピクセルシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
+
+    // ブラシの位置(ワールド)
+    Vector3 _brushWorldPosition = Vector3::Zero;
     // ブラシの位置
     Vector2 _brushPosition = Vector2::Zero;
     // ブラシの半径
-    float _brushRadius = 0.1f;
+    float _brushRadius = 2.0f;
     // ブラシの強度
-    float _brushStrength = 1.0f;
+    float _brushStrength = 10.0f;
     // ブラシのY軸回転(ラジアン)
     float _brushRotationY = 0.0f;
     // 高さ変形スケール x : 最小値、 y : 最大値
-    Vector2 _brushHeightScale = { -1.0f, 1.0f };
+    Vector2 _brushHeightScale = { -100.0f, 100.0f };
 };

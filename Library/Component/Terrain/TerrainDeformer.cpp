@@ -8,6 +8,8 @@
 #include "../../Library/Algorithm/Converter.h"
 
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
+#include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
+#include "../../Library/Terrain/Brush/CostTransformingBrush.h"
 
 #include <filesystem>
 #include <imgui.h>
@@ -20,21 +22,6 @@ void TerrainDeformer::OnCreate()
         Graphics::Instance().GetDevice(),
         "./Data/Shader/TerrainCopyMaterialPS.cso",
         _copyMaterialPS.ReleaseAndGetAddressOf());
-    // 加算ブラシピクセルシェーダの読み込み
-    GpuResourceManager::CreatePsFromCso(
-        Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformAddPS.cso",
-        _addBrushPS.ReleaseAndGetAddressOf());
-    // 高さ変形ブラシピクセルシェーダの読み込み
-    GpuResourceManager::CreatePsFromCso(
-        Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformHeightPS.cso",
-        _heightBrushPS.ReleaseAndGetAddressOf());
-    // コスト変形ブラシピクセルシェーダの読み込み
-    GpuResourceManager::CreatePsFromCso(
-        Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformCostPS.cso",
-        _costBrushPS.ReleaseAndGetAddressOf());
 
     // 定数バッファの作成
     GpuResourceManager::CreateConstantBuffer(
@@ -69,6 +56,11 @@ void TerrainDeformer::OnCreate()
 
     // ブラシ設定
 	RegisterBrush(std::make_shared<ColorAdditionBrush>(this));
+	RegisterBrush(std::make_shared<HeightTransformingBrush>(this));
+	RegisterBrush(std::make_shared<CostTransformingBrush>(this));
+
+	// 初期ブラシの選択
+	_selectedBrushName = _brushes.begin()->first;
 }
 // 開始処理
 void TerrainDeformer::Start()
@@ -108,65 +100,17 @@ void TerrainDeformer::Update(float elapsedTime)
     if (!terrain)
         return;
 
-	Vector3 mousePos{};
-	mousePos.x = _INPUT_VALUE("MousePositionX");
-	mousePos.y = _INPUT_VALUE("MousePositionY");
-    float screenWidth = Graphics::Instance().GetScreenWidth();
-    float screenHeight = Graphics::Instance().GetScreenHeight();
-    auto& view = GetActor()->GetScene()->GetMainCamera()->GetView();
-    auto& projection = GetActor()->GetScene()->GetMainCamera()->GetProjection();
-
-    // マウス座標から地形との当たり判定
-    mousePos.z = 0.0f;
-    Vector3 rayStart = mousePos.Unproject(screenWidth, screenHeight, view, projection);
-    mousePos.z = 1.0f;
-    Vector3 rayEnd = mousePos.Unproject(screenWidth, screenHeight, view, projection);
-    Vector3 rayDir = (rayEnd - rayStart).Normalize();
-
-	// UV座標を格納する変数
-	Vector2 intersectUVPosition = Vector2::Zero;
-
-    // 地形との交差判定
-    bool isIntersect = terrain->Raycast(
-        GetActor()->GetTransform().GetMatrix(),
-        rayStart,
-        rayDir,
-        1000.0f, // レイの長さ
-        &_intersectionWorldPoint,
-		nullptr, // 法線は不要
-        &intersectUVPosition);
-
-	// 交差していて、かつブラシの入力が押されている場合は変形タスクを追加
-    if (isIntersect && _INPUT_PRESSED("OK"))
-    {
-        if (_brushMode != BrushMode::Placement)
-        {
-            Task task;
-            task.mode = _brushMode;
-            task.paintTextureIndex = _paintTextureIndex;
-            task.brushTextureIndex = _brushTextureIndex;
-            task.brushUVPosition = intersectUVPosition;
-            // ブラシ半径をトランスフォームのサイズに影響されるようにする
-            task.radius = brushRadius / GetActor()->GetTransform().GetScale().x;
-            // ブラシの強度は経過時間によって減衰させる
-            task.strength = brushStrength * elapsedTime;
-            task.brushRotationY = _brushRotationY;
-            task.heightScale = _brushHeightScale;
-            AddTask(task);
-        }
-    }
-    if (isIntersect && _INPUT_RELEASED("OK"))
-    {
-        // ブラシモードが配置の場合は環境オブジェクトを配置する
-        if (!_selectedModelPath.empty())
-        {
-            //terrain->AddEnvironmentObject(Graphics::Instance().GetDevice(), _selectedModelPath.c_str(), _intersectionWorldPoint, Vector3::Zero, Vector3::One);
-        }
-    }
+    // 選択中のブラシ取得
+    auto selectedBrush = _brushes.find(_selectedBrushName);
+    // 選択中のブラシが存在しない場合は何もしない
+    if (selectedBrush == _brushes.end())
+        return;
+    // 選択中のブラシを更新
+    selectedBrush->second->Update(_terrainController.lock()->GetTerrain().lock(), elapsedTime);
 
     // ブラシの表示
     Debug::Renderer::DrawSphere(
-        _intersectionWorldPoint, brushRadius,
+        selectedBrush->second->GetBrushWorldPosition(), selectedBrush->second->GetBrushRadius(),
         Vector4::White);
 }
 // 描画処理
@@ -234,6 +178,12 @@ void TerrainDeformer::Render(const RenderContext& rc)
     // Terrainのパラメータマップフレームバッファを編集
     for (auto& task : _tasks)
     {
+        // ブラシ取得
+		auto brush = _brushes.find(task.brushName);
+		// ブラシが見つからない場合はスキップ
+		if (brush == _brushes.end())
+			continue;
+
         // ブラシのUV位置を設定
         constantBufferData.brushPosition = task.brushUVPosition;
         // ブラシの半径を設定
@@ -256,40 +206,13 @@ void TerrainDeformer::Render(const RenderContext& rc)
         auto& brushTextureData = _brushTextures[task.brushTextureIndex];
 		rc.deviceContext->PSSetShaderResources(BrushTextureIndex, 1, brushTextureData.textureSRV.GetAddressOf());
 
-        // ブラシの種類によって処理を切り替える
-        switch (_brushMode)
-        {
-        case BrushMode::AddColor:
-            terrain->GetMaterialMapFB()->Activate(rc.deviceContext);
-            GetActor()->GetScene()->GetTextureRenderer().Blit(
-                rc.deviceContext,
-                materialSRVs,
-                0, _countof(materialSRVs),
-                _addBrushPS.Get()
-            );
-            terrain->GetMaterialMapFB()->Deactivate(rc.deviceContext);
-            break;
-        case BrushMode::Height:
-            terrain->GetParameterMapFB()->Activate(rc.deviceContext);
-            GetActor()->GetScene()->GetTextureRenderer().Blit(
-                rc.deviceContext,
-                materialSRVs,
-                0, _countof(materialSRVs),
-                _heightBrushPS.Get()
-            );
-            terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
-            break;
-        case BrushMode::Cost:
-            terrain->GetParameterMapFB()->Activate(rc.deviceContext);
-            GetActor()->GetScene()->GetTextureRenderer().Blit(
-                rc.deviceContext,
-                materialSRVs,
-                0, _countof(materialSRVs),
-                _costBrushPS.Get()
-            );
-            terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
-            break;
-        }
+        // ブラシの描画処理
+		brush->second->Render(
+			terrain,
+			rc,
+			materialSRVs,
+			0, _countof(materialSRVs)
+		);
     }
 	// 変形タスクをクリア
 	_tasks.clear();
@@ -324,20 +247,15 @@ void TerrainDeformer::DrawGui()
 			DrawModelSelectionGui();
 			ImGui::Separator();
 
-            ImGui::Combo(u8"ブラシモード", reinterpret_cast<int*>(&_brushMode), u8"色加算\0高さ\0コスト\0オブジェクト配置\0");
-            ImGui::DragFloat3(u8"ブラシワールド位置", &_intersectionWorldPoint.x, 0.01f, -100.0f, 100.0f);
-            ImGui::DragFloat(u8"ブラシ半径", &brushRadius, 0.01f, 0.0f, 100.0f);
-            ImGui::DragFloat(u8"ブラシY軸回転(ラジアン)", &_brushRotationY, 0.01f, -DirectX::XM_PI, DirectX::XM_PI);
-            if (_brushMode == BrushMode::Height)
-            {
-                ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
-                ImGui::DragFloat(u8"高さ最小値", &_brushHeightScale.x, 0.01f, -100.0f, 0.0f);
-                ImGui::DragFloat(u8"高さ最大値", &_brushHeightScale.y, 0.01f, 0.0f, 100.0f);
-            }
-            else
-            {
-                ImGui::DragFloat(u8"ブラシ強度", &brushStrength, 0.01f, -10.0f, 10.0f);
-            }
+            // ブラシの選択GUI描画
+            DrawBrushSelectionGui();
+			ImGui::Separator();
+
+            // ブラシ取得
+            auto brush = _brushes.find(_selectedBrushName);
+			// ブラシがあるならGUI描画
+            if (brush != _brushes.end())
+				brush->second->DrawGui();
         }
         ImGui::End();
     }
@@ -497,4 +415,78 @@ void TerrainDeformer::DrawModelSelectionGui()
 	//		_environmentObjects.emplace_back(EnvironmentObjectData{ model });
 	//	}
 	//}
+}
+// ブラシの選択GUI描画
+void TerrainDeformer::DrawBrushSelectionGui()
+{
+	for (const auto& [name, brush] : _brushes)
+	{
+		if (ImGui::RadioButton(name.c_str(), _selectedBrushName == name))
+			_selectedBrushName = name;
+	}
+}
+// 更新処理
+void TerrainDeformerBrush::Update(std::shared_ptr<Terrain> terrain, float elapsedTime)
+{
+    Vector3 mousePos{};
+    mousePos.x = _INPUT_VALUE("MousePositionX");
+    mousePos.y = _INPUT_VALUE("MousePositionY");
+    float screenWidth = Graphics::Instance().GetScreenWidth();
+    float screenHeight = Graphics::Instance().GetScreenHeight();
+    auto& view = _deformer->GetActor()->GetScene()->GetMainCamera()->GetView();
+    auto& projection = _deformer->GetActor()->GetScene()->GetMainCamera()->GetProjection();
+
+    // マウス座標から地形との当たり判定
+    mousePos.z = 0.0f;
+    Vector3 rayStart = mousePos.Unproject(screenWidth, screenHeight, view, projection);
+    mousePos.z = 1.0f;
+    Vector3 rayEnd = mousePos.Unproject(screenWidth, screenHeight, view, projection);
+    Vector3 rayDir = (rayEnd - rayStart).Normalize();
+
+    // 交差結果
+    Vector3 intersectWorldPosition = Vector3::Zero;
+    Vector2 intersectUVPosition = Vector2::Zero;
+
+    // 地形との交差判定
+    bool isIntersect = terrain->Raycast(
+        _deformer->GetActor()->GetTransform().GetMatrix(),
+        rayStart,
+        rayDir,
+        1000.0f, // レイの長さ
+        &intersectWorldPosition,
+        nullptr, // 法線は不要
+        &intersectUVPosition);
+
+    _brushWorldPosition = intersectWorldPosition;
+    // 地形に接触していて左クリックしたら編集
+    if (isIntersect && _INPUT_PRESSED("LeftClick"))
+    {
+        RegisterTask(intersectUVPosition,
+            _brushRadius / _deformer->GetActor()->GetTransform().GetScale().x,
+            _brushStrength * elapsedTime);
+    }
+}
+// GUI描画
+void TerrainDeformerBrush::DrawGui()
+{
+    ImGui::DragFloat3(u8"ブラシワールド位置", &_brushWorldPosition.x, 0.01f, -100.0f, 100.0f);
+    ImGui::DragFloat(u8"ブラシ半径", &_brushRadius, 0.01f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"ブラシY軸回転(ラジアン)", &_brushRotationY, 0.01f, -DirectX::XM_PI, DirectX::XM_PI);
+    ImGui::DragFloat(u8"ブラシ強度", &_brushStrength, 0.01f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"高さ最小値", &_brushHeightScale.x, 0.01f, -100.0f, 0.0f);
+    ImGui::DragFloat(u8"高さ最大値", &_brushHeightScale.y, 0.01f, 0.0f, 100.0f);
+}
+// タスクを登録
+void TerrainDeformerBrush::RegisterTask(const Vector2& uvPosition, float radius, float strength)
+{
+	TerrainDeformer::Task task;
+	task.brushName = GetName();
+	task.brushUVPosition = uvPosition;
+	task.paintTextureIndex = _deformer->GetPaintTextureIndex();
+    task.brushTextureIndex = _deformer->GetBrushTextureIndex();
+	task.radius = radius;
+	task.strength = strength;
+	task.brushRotationY = _brushRotationY;
+	task.heightScale = _brushHeightScale;
+	_deformer->AddTask(task);
 }

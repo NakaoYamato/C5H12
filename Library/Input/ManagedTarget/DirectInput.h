@@ -1,4 +1,6 @@
 #pragma once
+
+#define DIRECTINPUT_VERSION 0x0800// DirectInputのバージョンを指定
 #include <dinput.h>
 #include <tchar.h>
 #include <unordered_map>

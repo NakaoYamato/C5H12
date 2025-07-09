@@ -313,6 +313,20 @@ void TransparentWallBrush::DrawGuiEditPoint(std::shared_ptr<Terrain> terrain)
 	auto& vertices = terrain->GetTransparentWall()->GetVertices(_editingWallIndex);
     if (ImGui::Begin(u8"頂点編集"))
     {
+        if (ImGui::Button(u8"0番目の頂点座標へ移動"))
+        {
+            vertices[_editingPointIndex] = vertices[0];
+            // ポイント移動状態に移行
+            ChangeState(State::MovePoint);
+        }
+		ImGui::SameLine();
+		if (ImGui::Button(u8"最後の頂点座標へ移動"))
+		{
+			vertices[_editingPointIndex] = vertices[vertices.size() - 1];
+            // ポイント移動状態に移行
+            ChangeState(State::MovePoint);
+		}
+        ImGui::Separator();
         if (ImGui::Button(u8"一つ前に頂点追加"))
         {
             Vector3 pos = vertices[_editingPointIndex];

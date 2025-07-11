@@ -142,13 +142,6 @@ private:
     bool _streamOut = false;
     std::vector<StreamOutVertex> _streamOutData;
 
-	// 基本色テクスチャのパス
-    std::wstring _baseColorTexturePath = L"";
-	// 法線テクスチャのパス
-    std::wstring _normalTexturePath = L"";
-	// パラメータテクスチャのパス
-    std::wstring _parameterTexturePath = L"";
-
     // 透明壁
 	TerrainTransparentWall _transparentWall;
 
@@ -157,4 +150,10 @@ private:
 
     // シリアライズパス
     std::string _serializePath;
+    // 基本色テクスチャのパス
+    std::wstring _baseColorTexturePath = L"";
+    // 法線テクスチャのパス
+    std::wstring _normalTexturePath = L"";
+    // パラメータテクスチャのパス
+    std::wstring _parameterTexturePath = L"";
 };

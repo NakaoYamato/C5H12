@@ -178,7 +178,7 @@ void TransparentWallBrush::UpdateMovePoint(std::shared_ptr<Terrain> terrain, flo
     const DirectX::XMFLOAT4X4& view = _deformer->GetActor()->GetScene()->GetMainCamera()->GetView();
     const DirectX::XMFLOAT4X4& projection = _deformer->GetActor()->GetScene()->GetMainCamera()->GetProjection();
 
-    // ギズモでポイントを編集
+    // ギズモでポイントを移動
     Vector3& point = walls[_editingWallIndex].vertices[_editingPointIndex];
     Vector3 worldPosition = point.TransformCoord(world);
 
@@ -221,18 +221,16 @@ void TransparentWallBrush::UpdateMovePoint(std::shared_ptr<Terrain> terrain, flo
     {
         if (_INPUT_RELEASED("LeftClick"))
         {
-            // 編集状態を終了
+            // 移動状態を終了
             ChangeState(State::None);
+            return;
         }
     }
-    else
+    // 右クリックでポイントを編集
+    if (_INPUT_RELEASED("RightClick"))
     {
-        // 右クリックでポイントを削除
-        if (_INPUT_RELEASED("RightClick"))
-        {
-            // 削除状態へ遷移
-            ChangeState(State::EditPoint);
-        }
+        // 編集状態へ遷移
+        ChangeState(State::EditPoint);
     }
 }
 

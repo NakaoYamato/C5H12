@@ -175,6 +175,10 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					"./Data/Shader/PhongInstancedVS.cso",
 					"./Data/Shader/PhongAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				shaderMap["Test"] = std::make_unique<TestShader>(device,
+					"./Data/Shader/PhongInstancedVS.cso",
+					"./Data/Shader/TestPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 		}
 
@@ -232,6 +236,11 @@ void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
 void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType)
 {
 	MeshRenderer::Draw(mesh, model, Vector4::White, &_testMaterial, renderType, nullptr);
+}
+/// ÉÅÉbÉVÉÖÇÃÉeÉXÉgï`âÊ
+void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
+{
+	MeshRenderer::DrawInstancing(model, Vector4::White, &_testMaterial, "Test", world, nullptr);
 }
 
 /// âeï`âÊ

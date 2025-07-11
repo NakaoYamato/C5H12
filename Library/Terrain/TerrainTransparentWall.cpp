@@ -51,15 +51,15 @@ void TerrainTransparentWall::Export(nlohmann::json* jsonData)
     }
 }
 // ì«Ç›çûÇ›
-void TerrainTransparentWall::Inport(const nlohmann::json& jsonData)
+void TerrainTransparentWall::Import(const nlohmann::json& jsonData)
 {
     if (jsonData.contains("WallsSize"))
     {
         size_t wallSize = jsonData["WallsSize"].get<size_t>();
         _walls.resize(wallSize);
-        for (size_t i = 0; i < _walls.size(); ++i)
+        for (size_t i = 0; i < wallSize; ++i)
         {
-            _walls[i].Inport(("Wall" + std::to_string(i)).c_str(), jsonData);
+            _walls[i].Import(("Wall" + std::to_string(i)).c_str(), jsonData);
         }
     }
 }
@@ -163,7 +163,7 @@ void TerrainTransparentWall::Wall::Export(const char* label, nlohmann::json* jso
     (*jsonData)[label]["height"] = height;
 }
 // ì«Ç›çûÇ›
-void TerrainTransparentWall::Wall::Inport(const char* label, const nlohmann::json& jsonData)
+void TerrainTransparentWall::Wall::Import(const char* label, const nlohmann::json& jsonData)
 {
     if (jsonData.contains(label))
     {

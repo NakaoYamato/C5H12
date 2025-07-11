@@ -6,6 +6,8 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 
+#include "TerrainEnvironmentController.h"
+
 #include <filesystem>
 #include <imgui.h>
 
@@ -20,6 +22,13 @@ void TerrainController::OnCreate()
 {
 	// 地形の初期化
     _terrain->SetStreamOut(true);
+    // 地形の環境物配置情報からアクター生成
+	auto objectLayout = _terrain->GetTerrainObjectLayout();
+    for (const auto& [index, layout] : objectLayout->GetLayouts())
+    {
+		CreateEnvironment(index);
+    }
+	_isEditing = true;
 }
 // 遅延更新処理
 void TerrainController::LateUpdate(float elapsedTime)
@@ -150,8 +159,39 @@ void TerrainController::DrawGui()
 		ImGui::Checkbox(u8"ストリームアウトデータ描画", &_drawStreamOut);
 		// 透明壁の描画フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"透明壁描画", &_drawTransparentWall);
+        if (ImGui::Button(u8"環境物のリセット"))
+        {
+			for (auto& obj : _environmentObjects)
+			{
+                if (obj.lock())
+                {
+					obj.lock()->Remove();
+                }
+			}
+            _environmentObjects.clear();
+            // 地形の環境物配置情報からアクター生成
+            auto objectLayout = _terrain->GetTerrainObjectLayout();
+            for (const auto& [index, layout] : objectLayout->GetLayouts())
+            {
+                CreateEnvironment(index);
+            }
+        }
         ImGui::Separator();
         // 地形のGUI描画
         _terrain->DrawGui(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
     }
+}
+// 環境物の生成
+void TerrainController::CreateEnvironment(int layoutID)
+{
+	if (!_terrain)
+		return;
+	// 地形オブジェクトレイアウトからモデルを取得
+	auto terrainObjectLayout = _terrain->GetTerrainObjectLayout();
+	if (!terrainObjectLayout)
+		return;
+    // 描画用アクター生成
+    auto actor = GetActor()->GetScene()->RegisterActor<Actor>(("TerrainObj" + std::to_string(layoutID)), ActorTag::Stage);
+    actor->AddComponent<TerrainEnvironmentController>(_terrain, layoutID, GetActor()->GetTransform().GetMatrix());
+	_environmentObjects.push_back(actor);
 }

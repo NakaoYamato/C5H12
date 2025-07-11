@@ -20,6 +20,9 @@ public:
     void DebugRender(const RenderContext& rc) override;
     // GUI描画
     void DrawGui() override;
+
+    // 環境物の生成
+	void CreateEnvironment(int layoutID);
 #pragma region アクセサ
     // 地形取得
     std::weak_ptr<Terrain> GetTerrain() const { return _terrain; }
@@ -31,6 +34,7 @@ public:
 
 private:
     std::shared_ptr<Terrain> _terrain = nullptr;
+	std::vector<std::weak_ptr<Actor>> _environmentObjects;
 
     // ストリームアウトデータ描画フラグ
     bool _drawStreamOut = false;

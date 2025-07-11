@@ -269,6 +269,7 @@
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\HeightTransformingBrush.cpp" />
+    <ClCompile Include="Library\Terrain\Brush\ObjectLayoutBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\TransparentWallBrush.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
@@ -469,6 +470,7 @@
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\HeightTransformingBrush.h" />
+    <ClInclude Include="Library\Terrain\Brush\ObjectLayoutBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\TransparentWallBrush.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />

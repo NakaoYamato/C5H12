@@ -29,7 +29,9 @@ void StageActor::OnCreate()
     AddCollider<MeshCollider>();
 #else
     GetTransform().SetScale(50.0f);
-    auto terrainController = this->AddComponent<TerrainController>("./Data/Terrain/Save/001.json");
+    GetTransform().UpdateTransform(nullptr);
+
+    auto terrainController = this->AddComponent<TerrainController>("./Data/Terrain/Save/002.json");
     this->AddComponent<TerrainDeformer>();
     this->AddCollider<TerrainCollider>();
 #endif

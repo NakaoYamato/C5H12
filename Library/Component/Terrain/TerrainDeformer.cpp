@@ -6,14 +6,24 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Library/Exporter/Exporter.h"
 
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
 #include "../../Library/Terrain/Brush/CostTransformingBrush.h"
 #include "../../Library/Terrain/Brush/TransparentWallBrush.h"
+#include "../../Library/Terrain/Brush/ObjectLayoutBrush.h"
 
 #include <filesystem>
 #include <imgui.h>
+#include <Mygui.h>
+
+// ペイントテクスチャのデフォルトデータパス
+static const char* DEFAULT_PAINT_TEXTURE_PATH = "./Data/Terrain/Debug/DefaultPaintTexture.json";
+// ブラシテクスチャのデフォルトデータパス
+static const char* DEFAULT_BRUSH_TEXTURE_PATH = "./Data/Terrain/Debug/DefaultBrushTexture.json";
+// 配置するモデルデータのデフォルトデータパス
+static const char* DEFAULT_MODEL_DATA_PATH = "./Data/Terrain/Debug/DefaultModelData.json";
 
 // 生成時処理
 void TerrainDeformer::OnCreate()
@@ -40,27 +50,53 @@ void TerrainDeformer::OnCreate()
         Graphics::Instance().GetDevice(),
         Terrain::ParameterMapSize, Terrain::ParameterMapSize, true);
 
-    // デフォルトテクスチャデータの読み込み
-    AddPaintTexture(
-        L"./Data/Terrain/Paint/001_COLOR.png",
-        L"./Data/Terrain/Paint/001_NORMAL.png");
-    AddPaintTexture(
-        L"./Data/Terrain/Paint/002_COLOR.png",
-        L"./Data/Terrain/Paint/002_NORMAL.png");
-    AddPaintTexture(
-        L"./Data/Terrain/Paint/003_COLOR.jpg",
-        L"./Data/Terrain/Paint/003_NORMAL.png");
-    // デフォルトブラシテクスチャの読み込み
-    AddBrushTexture(L"./Data/Terrain/Brush/Brush000.png");
-    AddBrushTexture(L"./Data/Terrain/Brush/Brush001.png");
-    AddBrushTexture(L"./Data/Terrain/Brush/Brush002.png");
+    // デフォルトペイントテクスチャデータの読み込み
+    {
+        nlohmann::json jsonData;
+        if (Exporter::LoadJsonFile(DEFAULT_PAINT_TEXTURE_PATH, &jsonData))
+        {
+            size_t size = jsonData["Size"].get<std::size_t>();
+			for (size_t i = 0; i < size; ++i)
+			{
+				std::wstring colorPath = jsonData["ColorPath" + std::to_string(i)].get<std::wstring>();
+				std::wstring normalPath = jsonData["NormalPath" + std::to_string(i)].get<std::wstring>();
+                AddPaintTexture(colorPath, normalPath);
+			}
+        }
+    }
+	// デフォルトブラシテクスチャデータの読み込み
+	{
+		nlohmann::json jsonData;
+		if (Exporter::LoadJsonFile(DEFAULT_BRUSH_TEXTURE_PATH, &jsonData))
+		{
+			size_t size = jsonData["Size"].get<std::size_t>();
+			for (size_t i = 0; i < size; ++i)
+			{
+				std::wstring path = jsonData["Path" + std::to_string(i)].get<std::wstring>();
+				AddBrushTexture(path);
+			}
+		}
+	}
+	// デフォルトモデルデータの読み込み
+	{
+		nlohmann::json jsonData;
+		if (Exporter::LoadJsonFile(DEFAULT_MODEL_DATA_PATH, &jsonData))
+		{
+			size_t size = jsonData["Size"].get<std::size_t>();
+			for (size_t i = 0; i < size; ++i)
+			{
+				std::string modelPath = jsonData["ModelPath" + std::to_string(i)].get<std::string>();
+				AddModelData(modelPath);
+			}
+		}
+	}
 
     // ブラシ設定
 	RegisterBrush(std::make_shared<ColorAdditionBrush>(this));
 	RegisterBrush(std::make_shared<HeightTransformingBrush>(this));
 	RegisterBrush(std::make_shared<CostTransformingBrush>(this));
 	RegisterBrush(std::make_shared<TransparentWallBrush>(this));
-
+	RegisterBrush(std::make_shared<ObjectLayoutBrush>(this));
 	// 初期ブラシの選択
 	_selectedBrushName = _brushes.begin()->first;
 }
@@ -193,6 +229,8 @@ void TerrainDeformer::Render(const RenderContext& rc)
         constantBufferData.brushRadius = task.radius;
         // ブラシの強度を設定
         constantBufferData.brushStrength = task.strength;
+		// テクスチャタイリング係数を設定
+		constantBufferData.textureTillingScale = _textureTillingScale;
         // 高さ変形スケールを設定
         constantBufferData.heightScale = task.heightScale;
         // ブラシのY軸回転を設定
@@ -233,6 +271,40 @@ void TerrainDeformer::DrawGui()
 
     if (ImGui::Checkbox(u8"ブラシ使用", &_useBrush))
         GetActor()->SetUseGuizmoFlag(!_useBrush);
+	if (ImGui::Button(u8"現在のデータをデフォルトに設定"))
+	{
+        // デフォルトペイントテクスチャデータの書き込み
+        {
+            nlohmann::json jsonData;
+			jsonData["Size"] = _paintTextures.size();
+            for (size_t i = 0; i < _paintTextures.size(); ++i)
+            {
+				jsonData["ColorPath" + std::to_string(i)] = _paintTextures[i].baseColorPath;
+				jsonData["NormalPath" + std::to_string(i)] = _paintTextures[i].normalPath;
+            }
+			Exporter::SaveJsonFile(DEFAULT_PAINT_TEXTURE_PATH, jsonData);
+        }
+        // デフォルトブラシテクスチャデータの書き込み
+        {
+			nlohmann::json jsonData;
+			jsonData["Size"] = _brushTextures.size();
+			for (size_t i = 0; i < _brushTextures.size(); ++i)
+			{
+				jsonData["Path" + std::to_string(i)] = _brushTextures[i].path;
+			}
+			Exporter::SaveJsonFile(DEFAULT_BRUSH_TEXTURE_PATH, jsonData);
+        }
+        // デフォルトモデルデータの書き込み
+        {
+            nlohmann::json jsonData;
+			jsonData["Size"] = _environmentObjects.size();
+            for (size_t i = 0; i < _environmentObjects.size(); ++i)
+            {
+                jsonData["ModelPath" + std::to_string(i)] = _environmentObjects[i].path;
+            }
+			Exporter::SaveJsonFile(DEFAULT_MODEL_DATA_PATH, jsonData);
+        }
+	}
 
     if (_useBrush)
     {
@@ -240,6 +312,9 @@ void TerrainDeformer::DrawGui()
         {
             // ペイントテクスチャのGUI表示
             DrawPaintTextureGui();
+            ImGui::Separator();
+
+			ImGui::SliderFloat(u8"タイリング係数", &_textureTillingScale, 1.0f, 20.0f, "%.0f", 1.0f);
             ImGui::Separator();
 
             // ブラシテクスチャのGUI表示
@@ -252,6 +327,7 @@ void TerrainDeformer::DrawGui()
 
             // ブラシの選択GUI描画
             DrawBrushSelectionGui();
+            ImGui::Separator();
         }
         ImGui::End();
 
@@ -268,6 +344,33 @@ void TerrainDeformer::DrawGui()
             ImGui::End();
         }
     }
+}
+// 環境物を追加
+void TerrainDeformer::AddEnvironmentObject(const std::string& modelPath, 
+    TerrainObjectLayout::CollisionType collisionType,
+    const Vector3& position, const Vector3& rotation, const Vector3& size)
+{
+    // 地形コントローラーが取得できていない場合は何もしない
+    if (!_terrainController.lock())
+        return;
+    auto terrain = _terrainController.lock()->GetTerrain().lock();
+    if (!terrain)
+        return;
+    // 選択中のモデルが登録されているか確認
+    if (!terrain->GetTerrainObjectLayout()->HasModel(modelPath))
+    {
+        // モデルが登録されていない場合は登録
+        terrain->GetTerrainObjectLayout()->AddModel(Graphics::Instance().GetDevice(), modelPath);
+    }
+    // オブジェクトを配置
+    int layoutID = terrain->GetTerrainObjectLayout()->AddLayout(
+        modelPath, 
+        collisionType,
+        position.TransformCoord(GetActor()->GetTransform().GetMatrixInverse()), // 位置をローカル座標系で設定
+        rotation,
+        size);
+    // 描画用アクター生成
+	_terrainController.lock()->CreateEnvironment(layoutID);
 }
 // ブラシの追加
 void TerrainDeformer::RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush)
@@ -299,27 +402,12 @@ void TerrainDeformer::AddBrushTexture(const std::wstring& path)
     tex.path = path;
     LoadTexture(path, tex.textureSRV.GetAddressOf());
 }
-// SRVを表示して、クリックされたらパスを更新するダイアログを開く
-bool TerrainDeformer::ShowAndEditImage(std::wstring* path, ID3D11ShaderResourceView* srv)
+// 配置するモデルデータの追加
+void TerrainDeformer::AddModelData(const std::string& modelPath)
 {
-    if (ImGui::ImageButton(srv, ImVec2(128.0f, 128.0f)))
-    {
-        // ダイアログを開く
-        std::string filepath;
-        std::string currentDirectory;
-        const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
-        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
-        // ファイルを選択したら
-        if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-        {
-            // 相対パス取得
-            std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
-            // パスを更新
-            *path = relativePath.wstring();
-            return true; // 画像がクリックされた
-        }
-    }
-    return false; // 画像がクリックされなかった
+    ModelData modelData{};
+    modelData.path = modelPath;
+    _environmentObjects.push_back(modelData);
 }
 // ペイントテクスチャのGUI描画
 void TerrainDeformer::DrawPaintTextureGui()
@@ -329,7 +417,7 @@ void TerrainDeformer::DrawPaintTextureGui()
         if (ImGui::RadioButton(ToString(_paintTextures[i].baseColorPath).c_str(), _paintTextureIndex == i))
             _paintTextureIndex = i;
 
-        if (ShowAndEditImage(&_paintTextures[i].baseColorPath, _paintTextures[i].baseColorSRV.Get()))
+        if (ImGui::ImageEditButton(&_paintTextures[i].baseColorPath, _paintTextures[i].baseColorSRV.Get()))
         {
             // テクスチャの読み込み
             GpuResourceManager::LoadTextureFromFile(
@@ -339,7 +427,7 @@ void TerrainDeformer::DrawPaintTextureGui()
                 nullptr);
         }
         ImGui::SameLine();
-        if (ShowAndEditImage(&_paintTextures[i].normalPath, _paintTextures[i].normalSRV.Get()))
+        if (ImGui::ImageEditButton(&_paintTextures[i].normalPath, _paintTextures[i].normalSRV.Get()))
         {
             // テクスチャの読み込み
             GpuResourceManager::LoadTextureFromFile(
@@ -378,7 +466,7 @@ void TerrainDeformer::DrawBrushTextureGui()
     {
         if (ImGui::RadioButton(ToString(_brushTextures[i].path).c_str(), _brushTextureIndex == i))
             _brushTextureIndex = i;
-        if (ShowAndEditImage(&_brushTextures[i].path, _brushTextures[i].textureSRV.Get()))
+        if (ImGui::ImageEditButton(&_brushTextures[i].path, _brushTextures[i].textureSRV.Get()))
         {
             // テクスチャの読み込み
             LoadTexture(_brushTextures[i].path, _brushTextures[i].textureSRV.ReleaseAndGetAddressOf());
@@ -405,25 +493,20 @@ void TerrainDeformer::DrawBrushTextureGui()
 // モデルの選択GUI描画
 void TerrainDeformer::DrawModelSelectionGui()
 {
-	//for (size_t i = 0; i < _environmentObjects.size(); ++i)
-	//{
-	//	if (ImGui::RadioButton(_environmentObjects[i].model->GetFilename(), _selectedModelPath == _environmentObjects[i].model->GetFilename()))
- //           _selectedModelPath = _environmentObjects[i].model->GetFilename();
-	//}
-	//if (ImGui::Button(u8"モデル追加"))
-	//{
-	//	// モデルのパスを取得するダイアログを開く
-	//	std::string filepath;
-	//	std::string currentDirectory;
-	//	Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
-	//	if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-	//	{
-	//		// 相対パス取得
-	//		std::filesystem::path relativePath = std::filesystem::relative(filepath, currentDirectory);
-	//		auto model = std::make_shared<Model>(Graphics::Instance().GetDevice(), relativePath.string().c_str());
-	//		_environmentObjects.emplace_back(EnvironmentObjectData{ model });
-	//	}
-	//}
+	for (size_t i = 0; i < _environmentObjects.size(); ++i)
+	{
+		if (ImGui::RadioButton(_environmentObjects[i].path.c_str(), _selectedModelPath == _environmentObjects[i].path.c_str()))
+            _selectedModelPath = _environmentObjects[i].path.c_str();
+	}
+    std::string resultStr = "";
+    if (ImGui::OpenDialogBotton(u8"モデル追加", &resultStr, ImGui::ModelFilter))
+    {
+		AddModelData(resultStr);
+        // 相対パス取得
+		//_terrainController.lock()->GetTerrain().lock()->GetTerrainObjectLayout()->AddModel(
+		//	Graphics::Instance().GetDevice(),
+		//	resultStr);
+    }
 }
 // ブラシの選択GUI描画
 void TerrainDeformer::DrawBrushSelectionGui()

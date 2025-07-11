@@ -14,12 +14,12 @@ void TerrainCollider::Start()
 // 更新処理
 void TerrainCollider::Update(float elapsedTime)
 {
+	MeshCollider::Update(elapsedTime);
 	// 地形コントローラーが有効で、地形編集フラグが立っている場合は再計算
 	if (_terrainController.lock() && _terrainController.lock()->IsEditing())
 	{
 		_recalculate = true;
 	}
-	MeshCollider::Update(elapsedTime);
 }
 // コリジョンメッシュの再計算
 void TerrainCollider::RecalculateCollisionMesh()

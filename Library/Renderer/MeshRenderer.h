@@ -112,6 +112,12 @@ public:
 	/// <param name="model"></param>
 	/// <param name="renderType"></param>
 	void DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType);
+	/// <summary>
+	/// メッシュのテスト描画
+	/// </summary>
+	/// <param name="model"></param>
+	/// <param name="world"></param>
+	void DrawTest(Model* model, const DirectX::XMFLOAT4X4& world);
 
 	/// <summary>
 	/// 影描画

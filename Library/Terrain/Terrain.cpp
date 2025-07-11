@@ -378,6 +378,8 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 		{
 			// 地形の情報をJSONファイルから読み込み
 			LoadFromFile(device, resultPath);
+            // 再計算
+            _streamOut = true;
 		}
 		ImGui::Separator();
 
@@ -491,7 +493,12 @@ void Terrain::SaveToFile(const std::string& path)
         jsonData["normalTexturePath"] = _normalTexturePath;
         jsonData["parameterTexturePath"] = _parameterTexturePath;
     }
-	_transparentWall.Export(&jsonData);
+    // 透明壁の書き出し
+    _transparentWall.Export(&jsonData);
+	// 地形データの書き出し
+	_terrainObjectLayout.Export(&jsonData);
+
+    Exporter::SaveJsonFile(path, jsonData);
 
     // シリアライズパスを更新
     _serializePath = path;
@@ -511,7 +518,9 @@ void Terrain::LoadFromFile(ID3D11Device* device, const std::string& path)
 	if (jsonData.contains("parameterTexturePath"))
 		_parameterTexturePath = jsonData["parameterTexturePath"].get<std::wstring>();
     // 透明壁の読み込み
-    _transparentWall.Inport(jsonData);
+    _transparentWall.Import(jsonData);
+	// 地形データの読み込み
+	_terrainObjectLayout.Import(device, jsonData);
     // シリアライズパスを更新
 	_serializePath = path;
     // 各テクスチャのパスが設定されている場合はテクスチャをロード

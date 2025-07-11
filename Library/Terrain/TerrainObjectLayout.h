@@ -7,29 +7,36 @@
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Model/Model.h"
+#include "../../Library/Exporter/Exporter.h"
 
 class TerrainObjectLayout
 {
 public:
-	// 登録しているモデル情報
-	struct ModelData
+	enum class CollisionType
 	{
-		// モデル
-		std::unique_ptr<Model> model;
-		// モデルのパス
-		std::string filepath = "";
+		None,       // 衝突なし
+		Box,		// ボックス
+		Sphere,     // 球
+		Capsule,    // カプセル
+		Mesh,		// メッシュ
 	};
 	// 配置情報
 	struct LayoutData
 	{
-		// モデルの参照番号
-		int modelIndex = -1;
-		// 配置位置
-		Vector3 position = Vector3::Zero;
+		// モデルの参照パス
+		std::string modelPath = "";
+		// 衝突判定の種類
+		CollisionType collisionType = CollisionType::None;
+		// 配置位置(Terrainのローカル空間)
+		Vector3 localPosition = Vector3::Zero;
 		// 配置回転
 		Vector3 rotation = Vector3::Zero;
 		// 配置サイズ
 		Vector3 size = Vector3::One;
+		// 書き出し
+		void Export(const char* label, nlohmann::json* jsonData);
+		// 読み込み
+		void Import(const char* label, const nlohmann::json& jsonData);
 	};
 public:
 	TerrainObjectLayout() = default;
@@ -40,18 +47,31 @@ public:
 	// モデルを追加
 	void AddModel(ID3D11Device* device, const std::string& filepath);
 	// 配置情報を追加
-	void AddLayout(int modelIndex, const Vector3& position, const Vector3& rotation, const Vector3& size);
+	int AddLayout(const std::string& modelPath, CollisionType collisionType, const Vector3& position, const Vector3& rotation, const Vector3& size);
 	// モデルデータを取得
-	const std::unordered_map<int, std::unique_ptr<ModelData>>& GetModels() const { return _models; }
+	const std::unordered_map<std::string, std::shared_ptr<Model>>& GetModels() const { return _models; }
 	// モデルデータを取得
-	const ModelData* GetModels(int index) { return _models[index].get(); }
+	std::weak_ptr<Model> GetModel(const std::string& path) { return _models[path]; }
 	// 配置データを取得
-	const std::vector<LayoutData>& GetLayouts() const { return _layouts; }
+	const std::unordered_map<int, LayoutData>& GetLayouts() const { return _layouts; }
+	// モデルが登録されているか確認
+	bool HasModel(const std::string& path) const
+	{
+		return _models.find(path) != _models.end();
+	}
+	// 配置情報が登録されているか確認
+	const LayoutData* FindLayout(int index) const;
+	// モデルの削除
+	void RemoveModel(const std::string& path);
+	// 書き出し
+	void Export(nlohmann::json* jsonData);
+	// 読み込み
+	void Import(ID3D11Device* device, const nlohmann::json& jsonData);
 private:
 	// 登録しているモデルデータ
-	std::unordered_map<int, std::unique_ptr<ModelData>> _models;
+	std::unordered_map<std::string, std::shared_ptr<Model>> _models;
 	// モデルの配置情報
-	std::vector<LayoutData> _layouts;
+	std::unordered_map<int, LayoutData> _layouts;
 	// 現在のモデルのインデックス
 	int _currentModelIndex = 0;
 };

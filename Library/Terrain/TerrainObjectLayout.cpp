@@ -7,14 +7,21 @@ void TerrainObjectLayout::DrawGui()
 {
 	if (ImGui::TreeNode(u8"登録しているモデル"))
 	{
-		for (auto& [index, modelData] : _models)
+		for (auto& [path, model] : _models)
 		{
-			if (ImGui::TreeNode(("Model " + std::to_string(index)).c_str()))
+			if (ImGui::TreeNode(path.c_str()))
 			{
-				ImGui::Text("Filepath: %s", modelData->filepath.c_str());
-				if (modelData->model)
+				if (model)
 				{
-					modelData->model->DrawGui();
+					model->DrawGui();
+				}
+				ImGui::Separator();
+				if (ImGui::Button(u8"モデルの削除"))
+				{
+					// モデルを削除
+					RemoveModel(path);
+					ImGui::TreePop();
+					break; // 削除後はループを抜ける
 				}
 				ImGui::TreePop();
 			}
@@ -24,29 +31,24 @@ void TerrainObjectLayout::DrawGui()
 	}
 	if (ImGui::TreeNode(u8"配置情報"))
 	{
-		for (size_t i = 0; i < _layouts.size(); i++)
+		for (auto& [index, layout] : _layouts)
 		{
-			auto& layout = _layouts[i];
-			if (ImGui::TreeNode(("Layout " + std::to_string(i)).c_str()))
+			if (ImGui::TreeNode(("Layout " + std::to_string(index)).c_str()))
 			{
-				ImGui::Text("Model Index: %d", layout.modelIndex);
-				ImGui::DragFloat3("Position", &layout.position.x, 0.1f);
-				ImGui::DragFloat3("Rotation", &layout.rotation.x, 0.1f);
-				ImGui::DragFloat3("Size", &layout.size.x, 0.1f);
+				ImGui::Text(u8"参照モデルパス: %s", layout.modelPath.c_str());
+				ImGui::Combo("Collision Type", reinterpret_cast<int*>(&layout.collisionType), "None\0Box\0Sphere\0Capsule\0Mesh\0\0");
+				ImGui::DragFloat3("Position", &layout.localPosition.x, 0.01f);
+				ImGui::DragFloat3("Rotation", &layout.rotation.x, 0.01f);
+				ImGui::DragFloat3("Size", &layout.size.x, 0.01f);
 				if (ImGui::Button(u8"削除"))
 				{
 					// 配置情報を削除
-					_layouts.erase(_layouts.begin() + i);
+					_layouts.erase(index);
 					ImGui::TreePop();
 					break; // 削除後はループを抜ける
 				}
 				ImGui::TreePop();
 			}
-		}
-		if (ImGui::Button(u8"配置情報の追加"))
-		{
-			// 新しい配置情報を追加
-			AddLayout(0, Vector3::Zero, Vector3::Zero, Vector3::One);
 		}
 		ImGui::TreePop();
 	}
@@ -55,29 +57,134 @@ void TerrainObjectLayout::DrawGui()
 void TerrainObjectLayout::AddModel(ID3D11Device* device, const std::string& filepath)
 {
 	// 以前に同じモデルが登録されている場合は何もしない
-	for (auto& [index, modelData] : _models)
+	auto it = _models.find(filepath);
+	if (it != _models.end())
 	{
-		if (modelData->filepath == filepath)
-		{
-			return; // 既に登録されているモデル
-		}
+		return; // 既に登録されているモデル
 	}
 
 	// モデルを追加
-	_models[_currentModelIndex] = std::make_unique<ModelData>();
-	_models[_currentModelIndex]->model = std::make_unique<Model>(device, filepath.c_str());
-	_models[_currentModelIndex]->filepath = filepath;
+	_models[filepath] = std::make_shared<Model>(device, filepath.c_str());
+
 	// 現在のモデルインデックスを更新
 	_currentModelIndex++;
 }
 // 配置情報を追加
-void TerrainObjectLayout::AddLayout(int modelIndex, const Vector3& position, const Vector3& rotation, const Vector3& size)
+int TerrainObjectLayout::AddLayout(const std::string& modelPath, CollisionType collisionType, const Vector3& position, const Vector3& rotation, const Vector3& size)
 {
 	// 配置情報を追加
-	LayoutData layoutData;
-	layoutData.modelIndex = modelIndex;
-	layoutData.position = position;
-	layoutData.rotation = rotation;
-	layoutData.size = size;
-	_layouts.push_back(std::move(layoutData));
+	_layouts[_currentModelIndex].modelPath = modelPath;
+	_layouts[_currentModelIndex].collisionType = collisionType;
+	_layouts[_currentModelIndex].localPosition = position;
+	_layouts[_currentModelIndex].rotation = rotation;
+	_layouts[_currentModelIndex].size = size;
+	_currentModelIndex++;
+	return _currentModelIndex - 1; // 追加した配置情報のインデックスを返す
+}
+// 配置情報が登録されているか確認
+const TerrainObjectLayout::LayoutData* TerrainObjectLayout::FindLayout(int index) const
+{
+	auto it = _layouts.find(index);
+	if (it != _layouts.end())
+	{
+		return &_layouts.at(index); // 配置情報が存在する
+	}
+	return nullptr;
+}
+// モデルの削除
+void TerrainObjectLayout::RemoveModel(const std::string& path)
+{
+	// モデルを削除
+	_models.erase(path);
+
+	// 削除後、配置情報からも参照を削除
+	for (auto it = _layouts.begin(); it != _layouts.end();)
+	{
+		if (it->second.modelPath == path)
+		{
+			it = _layouts.erase(it); // 配置情報からも削除
+		}
+		else
+		{
+			++it; // 次の要素へ
+		}
+	}
+}
+// 書き出し
+void TerrainObjectLayout::Export(nlohmann::json* jsonData)
+{
+	(*jsonData)["ModelsSize"] = _models.size();
+	int modelIndex = 0;
+	for (const auto& [path, model] : _models)
+	{
+		(*jsonData)["Model" + std::to_string(modelIndex)] = path;
+		modelIndex++;
+	}
+
+	(*jsonData)["LayoutsSize"] = _layouts.size();
+	int number = 0;
+	for (auto& [index, layout] : _layouts)
+	{
+		// 書き出しの都合上、mapのキーとmapの順番の両方を保存する必要があるため
+		// numberがmapを順に登録する数値、indexをmapのキーとして使用する
+		(*jsonData)["Layout" + std::to_string(number)]["Key"] = index; // キーを保存
+		layout.Export(("Layout" + std::to_string(number)).c_str(), jsonData);
+		number++;
+	}
+}
+// 読み込み
+void TerrainObjectLayout::Import(ID3D11Device* device, const nlohmann::json& jsonData)
+{
+	if (jsonData.contains("ModelsSize"))
+	{
+		size_t modelSize = jsonData["ModelsSize"].get<size_t>();
+		for (size_t modelIndex = 0; modelIndex < modelSize; ++modelIndex)
+		{
+			std::string modelPath = jsonData["Model" + std::to_string(modelIndex)].get<std::string>();
+			_models[modelPath] = std::make_shared<Model>(device, modelPath.c_str());
+		}
+	}
+
+	if (jsonData.contains("LayoutsSize"))
+	{
+		size_t layoutSize = jsonData["LayoutsSize"].get<size_t>();
+		for (size_t number = 0; number < layoutSize; ++number)
+		{
+			int key = jsonData["Layout" + std::to_string(number)]["Key"].get<int>(); // キーを取得
+			_layouts[key].Import(("Layout" + std::to_string(number)).c_str(), jsonData);
+		}
+	}
+}
+// 書き出し
+void TerrainObjectLayout::LayoutData::Export(const char* label, nlohmann::json* jsonData)
+{
+	(*jsonData)[label]["modelPath"] = modelPath;
+	(*jsonData)[label]["collisionType"] = collisionType;
+	(*jsonData)[label]["localPosition.x"] = localPosition.x;
+	(*jsonData)[label]["localPosition.y"] = localPosition.y;
+	(*jsonData)[label]["localPosition.z"] = localPosition.z;
+	(*jsonData)[label]["rotation.x"] = rotation.x;
+	(*jsonData)[label]["rotation.y"] = rotation.y;
+	(*jsonData)[label]["rotation.z"] = rotation.z;
+	(*jsonData)[label]["size.x"] = size.x;
+	(*jsonData)[label]["size.y"] = size.y;
+	(*jsonData)[label]["size.z"] = size.z;
+}
+// 読み込み
+void TerrainObjectLayout::LayoutData::Import(const char* label, const nlohmann::json& jsonData)
+{
+	if (jsonData.contains(label))
+	{
+		modelPath = jsonData[label]["modelPath"].get<std::string>();
+		collisionType = static_cast<CollisionType>(jsonData[label]["collisionType"].get<int>());
+		localPosition.x = jsonData[label]["localPosition.x"].get<float>();
+		localPosition.y = jsonData[label]["localPosition.y"].get<float>();
+		localPosition.z = jsonData[label]["localPosition.z"].get<float>();
+		rotation.x = jsonData[label]["rotation.x"].get<float>();
+		rotation.y = jsonData[label]["rotation.y"].get<float>();
+		rotation.z = jsonData[label]["rotation.z"].get<float>();
+		size.x = jsonData[label]["size.x"].get<float>();
+		size.y = jsonData[label]["size.y"].get<float>();
+		size.z = jsonData[label]["size.z"].get<float>();
+	}
 }

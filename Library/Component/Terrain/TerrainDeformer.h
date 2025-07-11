@@ -15,7 +15,7 @@ public:
         float brushRadius               = 0.1f; // ブラシ半径
         float brushStrength             = 1.0f; // ブラシ強度
 
-        float textureTillingScale       = 3.0f; // タイリング係数(基本変えない)
+        float textureTillingScale       = 5.0f; // タイリング係数(基本変えない)
         float brushRotationY            = 0.0f; // ブラシのY軸回転(ラジアン)
 		DirectX::XMFLOAT2 heightScale = { -1.0f, 1.0f }; // 高さ変形スケール x : 最小値、 y : 最大値
     };
@@ -45,6 +45,11 @@ public:
         std::wstring path;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     };
+    // 配置するモデルデータ
+    struct ModelData
+    {
+        std::string path = ""; // モデルのパス
+    };
 
     static constexpr size_t PaintBaseColorTextureIndex = 3;
     static constexpr size_t PaintNormalTextureIndex = 4;
@@ -70,6 +75,12 @@ public:
 	{
 		_tasks.push_back(task);
 	}
+    // 環境物を追加
+    void AddEnvironmentObject(const std::string& modelPath, 
+        TerrainObjectLayout::CollisionType collisionType,
+        const Vector3& position, 
+        const Vector3& rotation, 
+        const Vector3& size);
 
 	// ブラシの追加
     void RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush);
@@ -78,6 +89,8 @@ public:
 	size_t GetPaintTextureIndex() const { return _paintTextureIndex; }
     // 選択中のブラシテクスチャ番号取得
 	size_t GetBrushTextureIndex() const { return _brushTextureIndex; }
+	// 選択中のモデルファイルパス取得
+	const std::string& GetSelectedModelPath() const { return _selectedModelPath; }
 
 private:
     // テクスチャ読み込み
@@ -86,8 +99,8 @@ private:
     void AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath);
     // ブラシテクスチャの追加
     void AddBrushTexture(const std::wstring& path);
-    // SRVを表示して、クリックされたらパスを更新するダイアログを開く
-    bool ShowAndEditImage(std::wstring* path, ID3D11ShaderResourceView* srv);
+    // 配置するモデルデータの追加
+	void AddModelData(const std::string& modelPath);
 
     // ペイントテクスチャのGUI描画
     void DrawPaintTextureGui();
@@ -109,10 +122,12 @@ private:
     // テレインのパラメータマップを別枠で格納するフレームバッファ
     std::unique_ptr<FrameBuffer> _copyParameterMapFB;
 
-    // 書き込むテクスチャデータ
+    // ペイントテクスチャデータ
 	std::vector<PaintTexture> _paintTextures;
     // ブラシのテクスチャデータ
     std::vector<BrushTexture> _brushTextures;
+	// 配置するモデルデータ
+	std::vector<ModelData> _environmentObjects;
     // 編集タスク群
     std::vector<Task> _tasks;
 
@@ -120,14 +135,15 @@ private:
 	size_t _paintTextureIndex = 0;
     // 使用するブラシテクスチャインデックス
     size_t _brushTextureIndex = 0;
+    // 選択中のモデルファイルパス
+    std::string _selectedModelPath = "";
 
     // ブラシ使用フラグ
     bool _useBrush = false;
     // 前フレームのGUI操作フラグ
     bool _wasGuiActive = false;
-
-    // 選択中のモデルファイルパス
-	std::string _selectedModelPath = "";
+	// タイリング係数
+	float _textureTillingScale = 5.0f;
 
     // 登録しているブラシ
 	std::unordered_map<std::string, std::shared_ptr<TerrainDeformerBrush>> _brushes;

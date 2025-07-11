@@ -17,7 +17,7 @@ public:
 		// ‘‚«o‚µ
 		void Export(const char* label, nlohmann::json* jsonData);
 		// “Ç‚İ‚İ
-		void Inport(const char* label, const nlohmann::json& jsonData);
+		void Import(const char* label, const nlohmann::json& jsonData);
 	};
 public:
 	TerrainTransparentWall() = default;
@@ -28,7 +28,7 @@ public:
 	// ‘‚«o‚µ
 	void Export(nlohmann::json* jsonData);
 	// “Ç‚İ‚İ
-	void Inport(const nlohmann::json& jsonData);
+	void Import(const nlohmann::json& jsonData);
 	// “§–¾•ÇŒQ‚ğæ“¾
 	std::vector<Wall>& GetWalls() { return _walls; }
 	// “§–¾•Ç‚Ì’¸“_‚ğæ“¾

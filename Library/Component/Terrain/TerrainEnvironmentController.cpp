@@ -1,7 +1,25 @@
 #include "TerrainEnvironmentController.h"
 
+#include "../InstancingModelRenderer.h"
+
 #include <imgui.h>
 
+// 生成時処理
+void TerrainEnvironmentController::OnCreate()
+{
+	auto objectLayout = _terrain.lock()->GetTerrainObjectLayout();
+	auto& myLayout = objectLayout->GetLayouts().at(_layoutID);
+
+	const std::string& modelPath = myLayout.modelPath;
+	
+	GetActor()->AddComponent<InstancingModelRenderer>(objectLayout->GetModel(modelPath).lock());
+
+	// トランスフォーム更新
+	GetActor()->GetTransform().SetPosition(myLayout.localPosition.TransformCoord(_terrainTransform));
+	GetActor()->GetTransform().SetRotation(myLayout.rotation);
+	GetActor()->GetTransform().SetScale(myLayout.size);
+	GetActor()->GetTransform().UpdateTransform(nullptr);
+}
 // 更新処理
 void TerrainEnvironmentController::Update(float elapsedTime)
 {
@@ -12,24 +30,30 @@ void TerrainEnvironmentController::Update(float elapsedTime)
 		return;
 	}
 	// 自身のIDが地形の配置情報に存在しないなら自身を削除
-	//auto iter = _terrain.lock()->GetEnvironmentObjects().find(_objectID);
-	//if (iter == _terrain.lock()->GetEnvironmentObjects().end())
-	//{
-	//	GetActor()->Remove();
-	//	return;
-	//}
-	//// 地形の配置情報からトランスフォーム情報更新
-	//if (_overwrite)
-	//{
-	//	Transform& transform = GetActor()->GetTransform();
-	//	transform.SetPosition(iter->second.position);
-	//	transform.SetRotation(iter->second.rotation);
-	//	transform.SetScale(iter->second.scale);
-	//}
+	auto myLayout = _terrain.lock()->GetTerrainObjectLayout()->FindLayout(_layoutID);
+	if (myLayout == nullptr)
+	{
+		GetActor()->Remove();
+		return;
+	}
+	// 地形の配置情報に参照されているモデルが存在しないなら自身を削除
+	if (!_terrain.lock()->GetTerrainObjectLayout()->HasModel(myLayout->modelPath))
+	{
+		GetActor()->Remove();
+		return;
+	}
+	// 地形の配置情報からトランスフォーム情報更新
+	if (_overwrite)
+	{
+		GetActor()->GetTransform().SetPosition(myLayout->localPosition.TransformCoord(_terrainTransform));
+		GetActor()->GetTransform().SetRotation(myLayout->rotation);
+		GetActor()->GetTransform().SetScale(myLayout->size);
+		GetActor()->GetTransform().UpdateTransform(nullptr);
+	}
 }
 // GUI描画
 void TerrainEnvironmentController::DrawGui()
 {
-	ImGui::Text(u8"配置番号: %d", _objectID);
+	ImGui::Text(u8"配置番号: %d", _layoutID);
 	ImGui::Checkbox(u8"地形の配置情報で上書きするか", &_overwrite);
 }

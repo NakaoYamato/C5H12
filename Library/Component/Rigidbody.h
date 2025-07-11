@@ -106,6 +106,12 @@ private:
     /// <param name="deltaTime"></param>
     void UpdatePosition(float deltaTime);
 
+	/// <summary>
+	/// 接触の解消処理
+	/// </summary>
+	/// <param name="collisionData"></param>
+	void ContactResolve(CollisionData& collisionData);
+
 private:
 	Quaternion			_orientation = {};			//姿勢(クォータニオン)
 	Vector3				_linearVelocity = {};		//並進速度
@@ -121,11 +127,9 @@ private:
 	Vector3				_accumulatedForce = {};		//力のアキュムレータ
 	Vector3				_accumulatedTorque = {};	//トルクアキュムレータ
 
-	// 押し出し量
-	Vector3 _pushOut = {};
-
 	// 抗力係数
 	float _dragCoefficient = 0.5f;
+	float _restitution		= 0.5f;//反発係数	
 
 	// 静止摩擦係数
 	float				_staticFriction = 0.5f;
@@ -136,5 +140,4 @@ private:
 	bool				_isMovable = true;			// 移動可能か
 	bool				_isRotatable = true;		// 回転可能か
 	bool				_isStandstill = false;		// 静止中か
-
 };

@@ -120,7 +120,7 @@ int main()
 	bool loop = true;
 	do
 	{
-		std::cout << "\"exit\"でサーバー終了" << std::endl;
+		std::cout << "\"exit\"でサーバー再起" << std::endl;
 
 		ServerAssignment server = ServerAssignment();
 		server.Execute();

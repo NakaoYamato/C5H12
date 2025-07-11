@@ -32,18 +32,20 @@ void SceneCollisionDebug::OnInitialize()
 
 		stage->AddCollider<MeshCollider>();
     }
+
+    static float Interval = 5.0f;
     for (float f = 0.0f; f <= 10.0f; ++f)
     {
         auto box = RegisterActor<Actor>("box" + std::to_string(f), ActorTag::Player);
 		box->AddCollider<BoxCollider>();
-		box->GetTransform().SetPositionX(2.0f * f);
+		box->GetTransform().SetPositionX(Interval * f);
 		box->GetTransform().SetPositionY(0.5f);
         box->AddComponent<Rigidbody>();
 	}
     for (float f = 0.0f; f <= 10.0f; ++f)
     {
         auto sphere = RegisterActor<Actor>("sphere" + std::to_string(f), ActorTag::Player);
-        sphere->GetTransform().SetPositionX(2.0f * f);
+        sphere->GetTransform().SetPositionX(Interval * f);
         sphere->GetTransform().SetPositionZ(2.0f);
         sphere->GetTransform().SetPositionY(0.5f);
         sphere->AddCollider<SphereCollider>();
@@ -52,7 +54,7 @@ void SceneCollisionDebug::OnInitialize()
     for (float f = 0.0f; f <= 10.0f; ++f)
     {
         auto capsule = RegisterActor<Actor>("capsule" + std::to_string(f), ActorTag::Player);
-        capsule->GetTransform().SetPositionX(2.0f * f);
+        capsule->GetTransform().SetPositionX(Interval * f);
         capsule->GetTransform().SetPositionZ(-2.0f);
         capsule->GetTransform().SetPositionY(0.5f);
         auto collider = capsule->AddCollider<CapsuleCollider>();

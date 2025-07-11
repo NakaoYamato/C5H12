@@ -38,7 +38,7 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
     float edgeFactor; // エッジ分割数
     float innerFactor; // 内部分割数
     float heightSclaer; // 高さ係数
-    float padding0; // タイリング係数
+    float lodDistanceMax; // LOD(Level Of Detail)距離
     
     float emissive;
     float roughness;

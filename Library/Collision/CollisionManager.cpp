@@ -81,32 +81,17 @@ void CollisionManager::Update()
 					}
 				}));
 
-			//      // ボックスVsカプセル
-				  //for (auto& capsule : _capsuleColliders)
-				  //{
-				  //	Transform& transformB = capsule->GetActor()->GetTransform();
-				  //	if (Collision3D::IntersectBoxVsCapsule(
-			//              boxA->GetPosition().TransformCoord(transformA.GetMatrix()),
-			//              boxA->GetHalfSize(),
-			//              transformA.GetRotation(),
-			//              capsule->GetStart().TransformCoord(transformB.GetMatrix()),
-			//              capsule->GetEnd().TransformCoord(transformB.GetMatrix()),
-			//              capsule->GetRadius(),
-			//              hitPosition,
-			//              hitNormal,
-			//              penetration))
-			//          {
-			//              // 接触解消
-			//              boxA->Resolve(capsule->GetActor().get(),
-			//                  hitPosition,
-			//                  hitNormal,
-			//                  penetration);
-			//              capsule->Resolve(boxA->GetActor().get(),
-			//                  hitPosition,
-			//                  -hitNormal,
-			//                  penetration);
-			//          }
-				  //}
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					// ボックスVsカプセル
+					for (auto& capsule : _capsuleDatas)
+					{
+						BoxVeCapsule(boxA, capsule, collisionDataMap);
+					}
+				}));
 		}
 
 		// カプセルの当たり判定
@@ -179,32 +164,11 @@ void CollisionManager::Update()
 				BoxVsBox(boxA, boxB, collisionDataMap);
 			}
 
-			//      // ボックスVsカプセル
-				  //for (auto& capsule : _capsuleColliders)
-				  //{
-				  //	Transform& transformB = capsule->GetActor()->GetTransform();
-				  //	if (Collision3D::IntersectBoxVsCapsule(
-			//              boxA->GetPosition().TransformCoord(transformA.GetMatrix()),
-			//              boxA->GetHalfSize(),
-			//              transformA.GetRotation(),
-			//              capsule->GetStart().TransformCoord(transformB.GetMatrix()),
-			//              capsule->GetEnd().TransformCoord(transformB.GetMatrix()),
-			//              capsule->GetRadius(),
-			//              hitPosition,
-			//              hitNormal,
-			//              penetration))
-			//          {
-			//              // 接触解消
-			//              boxA->Resolve(capsule->GetActor().get(),
-			//                  hitPosition,
-			//                  hitNormal,
-			//                  penetration);
-			//              capsule->Resolve(boxA->GetActor().get(),
-			//                  hitPosition,
-			//                  -hitNormal,
-			//                  penetration);
-			//          }
-				  //}
+			// ボックスVsカプセル
+			for (auto& capsule : _capsuleDatas)
+			{
+				BoxVeCapsule(boxA, capsule, collisionDataMap);
+			}
 		}
 
 		// カプセルの当たり判定
@@ -696,6 +660,44 @@ void CollisionManager::BoxVsBox(
 			boxB.actor,
 			boxB.layer,
 			boxB.isTrigger,
+			hitPosition,
+			hitNormal,
+			penetration);
+	}
+}
+
+void CollisionManager::BoxVeCapsule(const BoxData& box, const CapsuleData& capsule, std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap)
+{
+	// 同じ場合は処理しない
+	if (box.actor == capsule.actor)return;
+	// マスクチェック
+	if (!CheckCollisionLayer(
+		box.layer, box.mask,
+		capsule.layer, capsule.mask))
+		return;
+
+	Vector3 hitPosition{};
+	Vector3 hitNormal{};
+	float penetration = 0.0f;
+	if (Collision3D::IntersectBoxVsCapsule(
+		box.position,
+		box.halfSize,
+		box.rotation,
+		capsule.start,
+		capsule.end,
+		capsule.radius,
+		hitPosition,
+		hitNormal,
+		penetration))
+	{
+		PushCollisionData(
+			collisionDataMap,
+			box.actor,
+			box.layer,
+			box.isTrigger,
+			capsule.actor,
+			capsule.layer,
+			capsule.isTrigger,
 			hitPosition,
 			hitNormal,
 			penetration);

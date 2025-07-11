@@ -34,7 +34,7 @@ public:
         float edgeFactor    = 64.0f;    // エッジ分割数
         float innerFactor   = 64.0f;    // 内部部分数
         float heightScaler  = 1.0f;     // 高さ係数
-        float padding0      = 0.0f;     // パディング
+        float lodDistanceMax = 200.0f;    // LOD(Level Of Detail)距離
 
         float emissive      = 0.0f;     // エミッシブ
         float metalness     = 0.63f;    // メタリック

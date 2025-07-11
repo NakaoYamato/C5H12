@@ -75,6 +75,7 @@ private:
     // インスタンシング描画用情報
     struct InstancingDrawInfo
     {
+        Model*                      model = nullptr;
         std::string 				shaderType{};
         using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
         std::vector<ModelParameter> modelParameters;
@@ -210,7 +211,7 @@ private:
 
     // 各モデルタイプのInfo
     using DrawInfoMap = std::unordered_map<std::string, std::vector<DrawInfo>>;
-    using InstancingDrawInfoMap = std::unordered_map<Model*, InstancingDrawInfo>;
+    using InstancingDrawInfoMap = std::unordered_map<std::string, InstancingDrawInfo>;
     DrawInfoMap                 _dynamicInfomap;
     DrawInfoMap                 _staticInfomap;
     std::vector<AlphaDrawInfo>	_alphaDrawInfomap;

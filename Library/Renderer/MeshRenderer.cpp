@@ -215,7 +215,7 @@ void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
 		if (material->GetBlendType() == BlendType::Alpha)
 			_alphaDrawInfomap.push_back({ model, mesh, color, material, parameter, renderType, 0.0f });
 		else
-			_dynamicInfomap[material->GetShaderName()].push_back({model, mesh, color, material, parameter});
+			_dynamicInfomap[material->GetShaderName()].push_back({ model, mesh, color, material, parameter });
 		break;
 	case ModelRenderType::Static:
 		if (material->GetBlendType() == BlendType::Alpha)
@@ -240,7 +240,26 @@ void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh, Model* model, Model
 /// メッシュのテスト描画
 void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
 {
-	MeshRenderer::DrawInstancing(model, Vector4::White, &_testMaterial, "Test", world, nullptr);
+	std::string modelName = model->GetFilename();
+	modelName += "_Test";
+	// 過去に登録しているか確認
+	auto iter = _instancingInfoMap.find(modelName);
+
+	InstancingDrawInfo::ModelParameter modelParameter{ Vector4::White, world };
+	if (iter != _instancingInfoMap.end())
+	{
+		// 既に登録している場合はパラメータを追加
+		(*iter).second.modelParameters.push_back(modelParameter);
+	}
+	else
+	{
+		// ない場合は新規で登録
+		_instancingInfoMap[modelName].model = model;
+		_instancingInfoMap[modelName].parameter = nullptr;
+		_instancingInfoMap[modelName].shaderType = "Test";
+		_instancingInfoMap[modelName].modelParameters.push_back(modelParameter);
+		_instancingInfoMap[modelName].material = &_testMaterial;
+	}
 }
 
 /// 影描画
@@ -248,7 +267,7 @@ void MeshRenderer::DrawShadow(
 	const ModelResource::Mesh* mesh,
 	Model* model,
 	const Vector4& color,
-	Material* material, 
+	Material* material,
 	ModelRenderType renderType,
 	ShaderBase::Parameter* parameter)
 {
@@ -256,10 +275,10 @@ void MeshRenderer::DrawShadow(
 	switch (renderType)
 	{
 	case ModelRenderType::Dynamic:
-		_dynamicInfomap["CascadedShadowMap"].push_back({model, mesh, color, material, parameter});
+		_dynamicInfomap["CascadedShadowMap"].push_back({ model, mesh, color, material, parameter });
 		break;
 	case ModelRenderType::Static:
-		_staticInfomap["CascadedShadowMap"].push_back({model, mesh, color,  material, parameter});
+		_staticInfomap["CascadedShadowMap"].push_back({ model, mesh, color,  material, parameter });
 		break;
 	case ModelRenderType::Instancing:
 		// TODO
@@ -279,8 +298,9 @@ void MeshRenderer::DrawInstancing(Model* model,
 	const DirectX::XMFLOAT4X4& world,
 	ShaderBase::Parameter* parameter)
 {
+	const std::string& modelName = model->GetFilename();
 	// 過去に登録しているか確認
-	auto iter = _instancingInfoMap.find(model);
+	auto iter = _instancingInfoMap.find(modelName);
 
 	InstancingDrawInfo::ModelParameter modelParameter{ color, world };
 	if (iter != _instancingInfoMap.end())
@@ -291,10 +311,11 @@ void MeshRenderer::DrawInstancing(Model* model,
 	else
 	{
 		// ない場合は新規で登録
-		_instancingInfoMap[model].parameter = parameter;
-		_instancingInfoMap[model].shaderType = shaderType;
-		_instancingInfoMap[model].modelParameters.push_back(modelParameter);
-		_instancingInfoMap[model].material = material;
+		_instancingInfoMap[modelName].model = model;
+		_instancingInfoMap[modelName].parameter = parameter;
+		_instancingInfoMap[modelName].shaderType = shaderType;
+		_instancingInfoMap[modelName].modelParameters.push_back(modelParameter);
+		_instancingInfoMap[modelName].material = material;
 	}
 }
 
@@ -667,10 +688,54 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 	dc->PSSetConstantBuffers(ModelCBIndex, 1, _instancingCB.GetAddressOf());
 
 	// モデルの描画関数
-	auto DrawModel = [&](Model* model, InstancingDrawInfo& drawInfo, ShaderBase* shader)->void
+	auto DrawModel = [&](InstancingDrawInfo& drawInfo, ShaderBase* shader)->void
 		{
+			Model* model = drawInfo.model;
 			const ModelResource* resource = model->GetResource();
 			const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
+			// 定数バッファの設定
+			size_t modelCount = 0;
+			if (drawInfo.modelParameters.size() > INSTANCED_MAX)
+			{
+				// インスタンス数が多い場合はカメラの距離でソートして描画
+				// key : モデルのインデックス, value : カメラからの距離
+				std::vector<std::pair<size_t, float>> distanceMap;
+				DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
+				size_t index = 0;
+				for (auto& [color, world] : drawInfo.modelParameters)
+				{
+					DirectX::XMVECTOR Position = DirectX::XMVectorSet(world._41, world._42, world._43, 0.0f);
+					DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
+					distanceMap.push_back(std::make_pair(index, DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(Vec))));
+					index++;
+				}
+				// 近い順にソート
+				std::sort(distanceMap.begin(), distanceMap.end(),
+					[](const std::pair<size_t, float>& lhs, const std::pair<size_t, float>& rhs)
+					{
+						return lhs.second < rhs.second;
+					});
+				for (auto& [index, distance] : distanceMap)
+				{
+					auto& [modelColor, world] = drawInfo.modelParameters[index];
+					_cbInstancingSkeleton.materialColor[modelCount] = modelColor;
+					_cbInstancingSkeleton.world[modelCount] = world;
+					modelCount++;
+					if (modelCount >= INSTANCED_MAX)
+						break; // INSTANCED_MAXを超えたら終了
+				}
+			}
+			else
+			{
+				for (auto& [color, world] : drawInfo.modelParameters)
+				{
+					_cbInstancingSkeleton.materialColor[modelCount] = color;
+					_cbInstancingSkeleton.world[modelCount] = world;
+					modelCount++;
+				}
+			}
+			dc->UpdateSubresource(_instancingCB.Get(), 0, 0, &_cbInstancingSkeleton, 0, 0);
+
 			for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 			{
 				uint32_t stride{ sizeof(ModelResource::Vertex) };
@@ -679,18 +744,6 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 				dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 				dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-				// 定数バッファの設定
-				// TODO : INSTANCED_MAX以上のモデル描画
-				assert(drawInfo.modelParameters.size() < INSTANCED_MAX);
-				size_t modelCount = 0;
-				for (auto& [color, world] : drawInfo.modelParameters)
-				{
-					_cbInstancingSkeleton.materialColor[modelCount] = color;
-					_cbInstancingSkeleton.world[modelCount] = world;
-					modelCount++;
-				}
-				dc->UpdateSubresource(_instancingCB.Get(), 0, 0, &_cbInstancingSkeleton, 0, 0);
-
 				// シェーダーの更新処理
 				shader->Update(rc, drawInfo.material, drawInfo.parameter);
 
@@ -698,16 +751,15 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 			}
 		};
 
-	// 不透明描画処理
+	// 描画処理
 	for (auto& drawInfomap : _instancingInfoMap)
 	{
-		Model* model = drawInfomap.first;
 		InstancingDrawInfo& drawInfo = drawInfomap.second;
 
 		ShaderBase* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderType].get();
 		shader->Begin(rc);
 
-		DrawModel(model, drawInfo, shader);
+		DrawModel(drawInfo, shader);
 
 		shader->End(rc);
 	}
@@ -717,12 +769,12 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 // DynamicBoneModelのメッシュ描画
 void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ShaderBase* shader, DrawInfo& drawInfo)
 {
-	ID3D11DeviceContext*		dc = rc.deviceContext;
-	Model*						model = drawInfo.model;
-	const ModelResource::Mesh*	mesh = drawInfo.mesh;
-	const Vector4&				materialColor = drawInfo.color;
-	Material*					material = drawInfo.material;
-	ShaderBase::Parameter*		parameter = drawInfo.parameter;
+	ID3D11DeviceContext* dc = rc.deviceContext;
+	Model* model = drawInfo.model;
+	const ModelResource::Mesh* mesh = drawInfo.mesh;
+	const Vector4& materialColor = drawInfo.color;
+	Material* material = drawInfo.material;
+	ShaderBase::Parameter* parameter = drawInfo.parameter;
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 
 	uint32_t stride{ sizeof(ModelResource::Vertex) };
@@ -760,13 +812,13 @@ void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ShaderBase* shad
 // StaticBoneModelのメッシュ描画
 void MeshRenderer::DrawStaticBoneModel(const RenderContext& rc, ShaderBase* shader, DrawInfo& drawInfo)
 {
-	ID3D11DeviceContext*		dc = rc.deviceContext;
-	Model*						model = drawInfo.model;
-	const ModelResource::Mesh*	mesh = drawInfo.mesh;
-	const Vector4&				materialColor = drawInfo.color;
-	Material*					material = drawInfo.material;
-	ShaderBase::Parameter*		parameter = drawInfo.parameter;
-	const ModelResource*		resource = model->GetResource();
+	ID3D11DeviceContext* dc = rc.deviceContext;
+	Model* model = drawInfo.model;
+	const ModelResource::Mesh* mesh = drawInfo.mesh;
+	const Vector4& materialColor = drawInfo.color;
+	Material* material = drawInfo.material;
+	ShaderBase::Parameter* parameter = drawInfo.parameter;
+	const ModelResource* resource = model->GetResource();
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 
 	uint32_t stride{ sizeof(ModelResource::Vertex) };

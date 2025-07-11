@@ -195,6 +195,10 @@ private:
 		const BoxData& boxA,
 		const BoxData& boxB,
 		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
+	void BoxVeCapsule(
+		const BoxData& box,
+		const CapsuleData& capsule,
+		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
 	void CapsuleVsCapsule(
 		const CapsuleData& capsuleA,
 		const CapsuleData& capsuleB,

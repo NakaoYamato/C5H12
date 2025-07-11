@@ -1621,7 +1621,7 @@ bool Collision3D::IntersectBoxVsCapsule(
 	const Vector3& cStart, const Vector3& cEnd, float cRadius,
 	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
 {
-    // カプセルの始点、終点をローカル座標に変換
+    // カプセルの始点、終点、半径をボックスのローカル空間に変換
 	DirectX::XMMATRIX BoxM = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&boxAngle));
 	DirectX::XMMATRIX InvBoxM = DirectX::XMMatrixInverse(nullptr, BoxM);
     bool result = IntersectAABBVsCapsule(

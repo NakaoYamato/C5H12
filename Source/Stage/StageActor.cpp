@@ -31,7 +31,7 @@ void StageActor::OnCreate()
     GetTransform().SetScale(50.0f);
     GetTransform().UpdateTransform(nullptr);
 
-    auto terrainController = this->AddComponent<TerrainController>("./Data/Terrain/Save/002.json");
+    auto terrainController = this->AddComponent<TerrainController>(_terrainPath);
     this->AddComponent<TerrainDeformer>();
     this->AddCollider<TerrainCollider>();
 #endif

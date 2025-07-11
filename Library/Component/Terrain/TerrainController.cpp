@@ -40,6 +40,16 @@ void TerrainController::LateUpdate(float elapsedTime)
         _terrain->SetStreamOut(true);
 		_isEditing = false;
 	}
+    if (_recreateEnvironment)
+    {
+        // 地形の環境物配置情報からアクター生成
+        auto objectLayout = _terrain->GetTerrainObjectLayout();
+        for (const auto& [index, layout] : objectLayout->GetLayouts())
+        {
+            CreateEnvironment(index);
+        }
+		_recreateEnvironment = false;
+    }
 }
 // 描画処理
 void TerrainController::Render(const RenderContext& rc)
@@ -169,12 +179,7 @@ void TerrainController::DrawGui()
                 }
 			}
             _environmentObjects.clear();
-            // 地形の環境物配置情報からアクター生成
-            auto objectLayout = _terrain->GetTerrainObjectLayout();
-            for (const auto& [index, layout] : objectLayout->GetLayouts())
-            {
-                CreateEnvironment(index);
-            }
+			_recreateEnvironment = true;
         }
         ImGui::Separator();
         // 地形のGUI描画

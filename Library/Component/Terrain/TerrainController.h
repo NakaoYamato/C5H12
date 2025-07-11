@@ -42,4 +42,6 @@ private:
     bool _drawTransparentWall = false;
     // 編集フラグ
 	bool _isEditing = false;
+	// 環境物の再生成フラグ
+	bool _recreateEnvironment = false;
 };

@@ -331,6 +331,22 @@ void SceneModelEditor::DrawEditAnimationGui()
                 }
             }
         }
+        if (ImGui::Button(u8"すべてのアニメーションを180度回転"))
+        {
+            DirectX::XMVECTOR RotationY180 = DirectX::XMQuaternionRotationAxis(
+                DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),
+                DirectX::XMConvertToRadians(180.0f));
+            for (auto& animation : model->GetResource()->GetAddressAnimations())
+            {
+                auto& rootAnimNode = animation.nodeAnims[0];
+                for (auto& frame : rootAnimNode.rotationKeyframes)
+                {
+                    DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&frame.value);
+
+                    DirectX::XMStoreFloat4(&frame.value, DirectX::XMQuaternionMultiply(RotationY180, Q));
+                }
+            }
+        }
         ImGui::Separator();
         ImGui::InputText(u8"取り除く対象", &_filterAnimationName);
         if (ImGui::Button(u8"アニメーション名を取り除く"))
@@ -345,6 +361,11 @@ void SceneModelEditor::DrawEditAnimationGui()
                 }
             }
         }
+        ImGui::Separator();
+		for (size_t i = 0; i < model->GetResource()->GetAddressAnimations().size(); ++i)
+		{
+            ImGui::InputText(std::to_string(i).c_str(), &model->GetResource()->GetAddressAnimations()[i].name);
+		}
         ImGui::Separator();
         if (ImGui::Button(u8"アニメーションのソート"))
         {

@@ -8,6 +8,7 @@
 #include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Enemy/Weak/WeakActor.h"
 
 #include "../../InGame/InputMediator.h"
 #include "../../InGame/CanvasMediator.h"
@@ -58,10 +59,14 @@ void ScenePlayerDebug::OnInitialize()
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
+    {
+        auto weak0 = RegisterActor<WeakActor>("Weak", ActorTag::Enemy);
+    }
+    AddCompletionLoading(CompletionLoadingRate);
     // •‰‰×ƒeƒXƒg
     //for (int i = 0; i < 10; ++i)
     //{
     //    auto player = RegisterActor<PlayerActor>("Player" + std::to_string(i), ActorTag::Player, false);
     //}
-    AddCompletionLoading(CompletionLoadingRate);
+    //AddCompletionLoading(CompletionLoadingRate);
 }

@@ -13,7 +13,7 @@ void WyvernIdleState::OnEnter()
 	owner->GetAnimator()->PlayAnimation(
 		u8"Idle03Shake",
 		false,
-		1.5f);
+		0.5f);
 	owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 
@@ -45,10 +45,10 @@ namespace WyvernToTargetSubStates
 			owner->GetAnimator()->PlayAnimation(
 				u8"WalkForward",
 				true,
-				1.0f);
+				1.5f);
 			owner->GetAnimator()->SetRootNodeIndex("CG");
 			owner->GetAnimator()->SetIsUseRootMotion(true);
-			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 		}
 		void OnExecute(float elapsedTime) override 
 		{
@@ -80,7 +80,7 @@ namespace WyvernToTargetSubStates
 				0.2f);
 			owner->GetAnimator()->SetRootNodeIndex("CG");
 			owner->GetAnimator()->SetIsUseRootMotion(true);
-			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override 
@@ -102,10 +102,10 @@ namespace WyvernToTargetSubStates
 			// 回転量をアクターに反映する
 			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
-			// ルートの行列の都合上z値をyに設定
-			angle.y = q.ToRollPitchYaw().z;
+			// y値をyに設定
+			angle.y = -q.ToRollPitchYaw().y;
 			transform.AddRotation(angle);
-
+			transform.UpdateTransform(nullptr);
 			// フラグを下ろす
 			owner->GetAnimator()->SetIsRemoveRootMovement(false);
 		}
@@ -123,7 +123,7 @@ namespace WyvernToTargetSubStates
 				0.2f);
 			owner->GetAnimator()->SetRootNodeIndex("CG");
 			owner->GetAnimator()->SetIsUseRootMotion(true);
-			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override
@@ -145,10 +145,10 @@ namespace WyvernToTargetSubStates
 			// 回転量をアクターに反映する
 			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
-			// ルートの行列の都合上z値をyに設定
-			angle.y = q.ToRollPitchYaw().z;
+			// y値をyに設定
+			angle.y = -q.ToRollPitchYaw().y;
 			transform.AddRotation(angle);
-
+			transform.UpdateTransform(nullptr);
 			// フラグを下ろす
 			owner->GetAnimator()->SetIsRemoveRootMovement(false);
 		}
@@ -166,7 +166,7 @@ namespace WyvernToTargetSubStates
 				0.2f);
 			owner->GetAnimator()->SetRootNodeIndex("CG");
 			owner->GetAnimator()->SetIsUseRootMotion(true);
-			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override
@@ -187,9 +187,10 @@ namespace WyvernToTargetSubStates
 			// 回転量をアクターに反映する
 			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
-			// ルートの行列の都合上z値をyに設定
-			angle.y = q.ToRollPitchYaw().z;
+			// y値をyに設定
+			angle.y = -q.ToRollPitchYaw().y;
 			transform.AddRotation(angle);
+			transform.UpdateTransform(nullptr);
 			// フラグを下ろす
 			owner->GetAnimator()->SetIsRemoveRootMovement(false);
 		}
@@ -207,7 +208,7 @@ namespace WyvernToTargetSubStates
 				0.2f);
 			owner->GetAnimator()->SetRootNodeIndex("CG");
 			owner->GetAnimator()->SetIsUseRootMotion(true);
-			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+			owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override
@@ -228,9 +229,10 @@ namespace WyvernToTargetSubStates
 			// 回転量をアクターに反映する
 			auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 			Vector3 angle{};
-			// ルートの行列の都合上z値をyに設定
-			angle.y = q.ToRollPitchYaw().z;
+			// y値をyに設定
+			angle.y = -q.ToRollPitchYaw().y;
 			transform.AddRotation(angle);
+			transform.UpdateTransform(nullptr);
 			// フラグを下ろす
 			owner->GetAnimator()->SetIsRemoveRootMovement(false);
 		}
@@ -337,7 +339,7 @@ void WyvernBiteAttackState::OnEnter()
 	}
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernBiteAttackState::OnExecute(float elapsedTime)
 {
@@ -411,7 +413,7 @@ void WyvernClawAttackState::OnEnter()
 	}
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 
 	_lerpTimer = 0.0f;
 }
@@ -512,7 +514,7 @@ void WyvernTailAttackState::OnEnter()
 	}
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernTailAttackState::OnExecute(float elapsedTime)
 {
@@ -538,7 +540,7 @@ void WyvernBackStepState::OnEnter()
 		0.5f);
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
@@ -566,10 +568,10 @@ void WyvernBreathAttackState::OnEnter()
 	owner->GetAnimator()->PlayAnimation(
 		u8"AttackFireBreath",
 		false,
-		0.5f);
+		1.5f);
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernBreathAttackState::OnExecute(float elapsedTime)
 {
@@ -630,7 +632,7 @@ void WyvernPursuitState::OnEnter()
 		1.0f);
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernPursuitState::OnExecute(float elapsedTime)
 {
@@ -746,7 +748,7 @@ void WyvernDamageState::OnEnter()
 		}
 	}
 	owner->GetAnimator()->SetRootNodeIndex("CG");
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernDamageState::OnExecute(float elapsedTime)
 {
@@ -769,9 +771,10 @@ void WyvernDamageState::OnExit()
 		// 回転量をアクターに反映する
 		auto& transform = owner->GetEnemy()->GetActor()->GetTransform();
 		Vector3 angle{};
-		// ルートの行列の都合上z値をyに設定
-		angle.y = q.ToRollPitchYaw().z;
+		// y値をyに設定
+		angle.y = -q.ToRollPitchYaw().y;
 		transform.AddRotation(angle);
+		transform.UpdateTransform(nullptr);
 
 		// フラグを下ろす
 		_applyRotation = false;
@@ -790,7 +793,7 @@ void WyvernDeathState::OnEnter()
 		0.5f);
 	owner->GetAnimator()->SetRootNodeIndex("CG");
 	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernDeathState::OnExecute(float elapsedTime)
 {

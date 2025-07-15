@@ -221,27 +221,46 @@ void Framework::Update(float elapsedTime)
         elapsedTime = elapsedTime / 10.0f;
 
     // 入力監視クラスの更新
-    Input::Instance().Update();
+    {
+        ProfileScopedSection_3(0, "Input::Update", ImGuiControl::Profiler::Dark);
+        Input::Instance().Update();
+    }
 
     // デバッグの更新
-    Debug::Update(elapsedTime);
+    {
+        ProfileScopedSection_3(0, "Debug::Update", ImGuiControl::Profiler::Dark);
+        Debug::Update(elapsedTime);
+    }
 
     // シーンの更新
-    SceneManager::Instance().Update(elapsedTime);
+    {
+        ProfileScopedSection_3(0, "Scene::Update", ImGuiControl::Profiler::Dark);
+        SceneManager::Instance().Update(elapsedTime);
+    }
 
 	// シャドウマップの更新
-	Graphics::Instance().GetCascadedShadowMap()->Update(elapsedTime);
+    {
+		ProfileScopedSection_3(0, "ShadowMap::Update", ImGuiControl::Profiler::Dark);
+        Graphics::Instance().GetCascadedShadowMap()->Update(elapsedTime);
+    }
 
     // ポストエフェクトの更新
-    PostProcessManager::Instance().Update(elapsedTime);
+    {
+		ProfileScopedSection_3(0, "PostProcessManager::Update", ImGuiControl::Profiler::Dark);
+        PostProcessManager::Instance().Update(elapsedTime);
+    }
 
     // オーディオ更新
-    AudioSystem::Instance().Update();
+    {
+		ProfileScopedSection_3(0, "AudioSystem::Update", ImGuiControl::Profiler::Dark);
+        AudioSystem::Instance().Update();
+    }
 }
 
 /// 一定間隔の更新処理
 void Framework::FixedUpdate()
 {
+    ProfileScopedSection_3(0, "Scene::FixedUpdate", ImGuiControl::Profiler::Dark);
     // シーンの更新
     SceneManager::Instance().FixedUpdate();
 }
@@ -254,12 +273,17 @@ void Framework::Render()
     std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
 
     // シーンの描画
-    SceneManager::Instance().Render();
+    {
+		ProfileScopedSection_3(0, "Scene::Render", ImGuiControl::Profiler::Dark);
+		SceneManager::Instance().Render();
+    }
 
 #ifdef USE_IMGUI
     // F6キーでGUIを非表示
     if (!Debug::Input::IsActive(DebugInput::BTN_F6))
     {
+        ProfileScopedSection_3(0, "DrawGui", ImGuiControl::Profiler::Dark);
+
         // GUIのメニューバーでシーン変更
         SceneManager::Instance().SceneMenuGui();
 
@@ -290,7 +314,10 @@ void Framework::Render()
 #endif
 
     // バックバッファに描画した画を画面に表示する。
-    Graphics::Instance().Present(syncInterval);
+    {
+		ProfileScopedSection_3(0, "Graphics::Present", ImGuiControl::Profiler::Dark);
+        Graphics::Instance().Present(syncInterval);
+    }
 }
 
 bool Framework::Uninitialize()

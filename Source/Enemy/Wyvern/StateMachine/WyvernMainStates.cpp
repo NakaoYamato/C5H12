@@ -53,13 +53,13 @@ namespace WyvernToTargetSubStates
 		void OnExecute(float elapsedTime) override 
 		{
 			auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
-			float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
+			float rotationSpeed = owner->GetEnemy()->GetRotationSpeed();
 			// ターゲット方向に回転
 			owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
 			// ターゲット方向に向いているか判定
 			float angleToTarget = owner->GetEnemy()->GetAngleToTarget(targetPosition);
-			if (angleToTarget < owner->GetWyvern()->GetLookAtRadian())
+			if (angleToTarget < owner->GetEnemy()->GetLookAtRadian())
 			{
 				// ターゲットに到達したら待機状態へ遷移
 				owner->GetBase().ChangeState("Idle");
@@ -545,7 +545,7 @@ void WyvernBackStepState::OnEnter()
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
 	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
-	float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
+	float rotationSpeed = owner->GetEnemy()->GetRotationSpeed();
 	// ターゲット方向に回転
 	owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
@@ -639,12 +639,12 @@ void WyvernPursuitState::OnExecute(float elapsedTime)
 	auto& position = owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = owner->GetEnemy()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position);
-	float rotationSpeed = owner->GetWyvern()->GetRotationSpeed();
+	float rotationSpeed = owner->GetEnemy()->GetRotationSpeed();
 	// ターゲット方向に回転
 	owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 	
 	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
-	float nearAttackRange = owner->GetWyvern()->GetNearAttackRange();
+	float nearAttackRange = owner->GetEnemy()->GetNearAttackRange();
 	if (targetDirection.Length() < nearAttackRange)
 	{
 		// 攻撃範囲内なら完了

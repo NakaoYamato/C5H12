@@ -26,7 +26,7 @@ bool WyvernConfrontJudgment::Judgment()
 	// ターゲット方向に向いているか判定
 	float angle = _owner->GetStateMachine()->GetEnemy()->GetAngleToTarget(targetPosition);
 	// 向いてるならfalse
-	if (angle < _owner->GetStateMachine()->GetWyvern()->GetLookAtRadian())
+	if (angle < _owner->GetStateMachine()->GetEnemy()->GetLookAtRadian())
 		return false;
 
 	return true;
@@ -53,7 +53,7 @@ bool WyvernNearAttackJudgment::Judgment()
 {
 	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
-	float nearAttackRange = _owner->GetStateMachine()->GetWyvern()->GetNearAttackRange();
+	float nearAttackRange = _owner->GetStateMachine()->GetEnemy()->GetNearAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から近接攻撃できるか判定
 	if ((position - targetPosition).Length() < nearAttackRange)

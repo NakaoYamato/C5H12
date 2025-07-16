@@ -186,7 +186,7 @@ void ActorManager::DrawGui()
 					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
 					if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
 					{
-						actor->SetDrawHierarchyFlag(false);
+						actor->SetIsDrawingHierarchy(false);
 
 						// ダブルクリックで選択
 						if (ImGui::IsItemClicked())
@@ -215,7 +215,7 @@ void ActorManager::DrawGui()
 		{
 			ImGui::Text(_showGuiObj.c_str());
 
-			object->SetDrawHierarchyFlag(true);
+			object->SetIsDrawingHierarchy(true);
 
 			object->DrawGui();
 		}
@@ -240,30 +240,32 @@ ActorMap& ActorManager::FindByTagInStartActors(ActorTag tag)
 }
 std::shared_ptr<Actor> ActorManager::FindByName(const std::string& name, ActorTag tag)
 {
-	// スレッドセーフ
-	std::lock_guard<std::mutex> lock(_mutex);
-	if (tag != ActorTag::ActorTagMax)
 	{
-		for (auto& actor : _updateActors[static_cast<size_t>(tag)])
+		// スレッドセーフ
+		std::lock_guard<std::mutex> lock(_mutex);
+		if (tag != ActorTag::ActorTagMax)
 		{
-			if (name == actor->GetName())
-				return actor;
-		}
-	}
-	else
-	{
-		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
-		{
-			for (auto& actor : _updateActors[i])
+			for (auto& actor : _updateActors[static_cast<size_t>(tag)])
 			{
 				if (name == actor->GetName())
 					return actor;
 			}
 		}
+		else
+		{
+			for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+			{
+				for (auto& actor : _updateActors[i])
+				{
+					if (name == actor->GetName())
+						return actor;
+				}
+			}
+		}
 	}
 
-	// 要素がなければnullptr
-	return nullptr;
+	// 要素がなければstartActorsから検索
+	return FindByNameFromStartActor(name, tag);
 }
 std::shared_ptr<Actor> ActorManager::FindByNameFromStartActor(const std::string& name, ActorTag tag)
 {

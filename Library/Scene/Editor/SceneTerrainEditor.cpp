@@ -28,6 +28,6 @@ void SceneTerrainEditor::OnInitialize()
         testTerrain->AddComponent<TerrainController>();
         testTerrain->AddComponent<TerrainDeformer>();
         testTerrain->AddCollider<TerrainCollider>();
-		testTerrain->SetActiveFlag(false); // ”ñ•\Ž¦‚É‚·‚é
+		testTerrain->SetIsActive(false); // ”ñ•\Ž¦‚É‚·‚é
     }
 }

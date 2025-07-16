@@ -19,7 +19,7 @@ void ObjectLayoutBrush::Update(std::shared_ptr<Terrain> terrain, float elapsedTi
 {
 	_drawDebugBrush = false;
 	// アクターのギズモ使用フラグを常にオフ
-	_deformer->GetActor()->SetUseGuizmoFlag(false);
+	_deformer->GetActor()->SetIsUsingGuizmo(false);
 	switch (_state)
 	{
 	case State::None:          UpdateNone(terrain, elapsedTime);       break;

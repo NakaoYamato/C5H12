@@ -16,7 +16,7 @@
 
 void ScenePlayerDebug::OnInitialize()
 {
-	static const float CompletionLoadingRate = 0.1f;
+	static const float CompletionLoadingRate = 1.0f / 9.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -43,10 +43,6 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto enemy = RegisterActor<DummyActor>("Enemy", ActorTag::Enemy);
-    }
-    AddCompletionLoading(CompletionLoadingRate);
-    {
         auto wyvern = RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
         wyvern->GetTransform().SetPosition(Vector3(0.0f, 10.0f, -10.0f));
     }
@@ -60,7 +56,10 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto weak0 = RegisterActor<WeakActor>("Weak", ActorTag::Enemy);
+        auto weak0 = RegisterActor<WeakActor>("Weak0", ActorTag::Enemy);
+    }
+    {
+        auto weak1 = RegisterActor<WeakActor>("Weak1", ActorTag::Enemy);
     }
     AddCompletionLoading(CompletionLoadingRate);
     // •‰‰×ƒeƒXƒg

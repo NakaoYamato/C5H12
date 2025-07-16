@@ -94,6 +94,9 @@ void Actor::Update(float elapsedTime)
 /// Update後更新処理
 void Actor::LateUpdate(float elapsedTime)
 {
+	// 起動チェック
+	if (!_isActive)return;
+
 	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->LateUpdate(elapsedTime);
@@ -127,6 +130,7 @@ void Actor::Render(const RenderContext& rc)
 {
 	// 起動チェック
 	if (!_isActive)return;
+	// 表示チェック
 	if (!_isShowing)return;
 
 	// 各コンポーネントの描画処理
@@ -147,7 +151,8 @@ void Actor::DebugRender(const RenderContext& rc)
 {
 	// 起動チェック
 	if (!_isActive)return;
-	if (!_drawDebug)return;
+	// デバッグ表示チェック
+	if (!_isDrawingDebug)return;
 
 	// 各コンポーネントの描画処理
 	for (std::shared_ptr<Component>& component : _components)
@@ -194,8 +199,8 @@ void Actor::DrawGui()
 	{
 		ImGui::Checkbox(u8"Active", &_isActive);
 		ImGui::Checkbox(u8"Show", &_isShowing);
-		ImGui::Checkbox(u8"DrawDebug", &_drawDebug);
-		ImGui::Checkbox(u8"UseGuizmo", &_useGuizmo);
+		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
+		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
 	}
 
 	// トランスフォーム
@@ -248,7 +253,7 @@ void Actor::DrawGui()
 	}
 
 	// ギズモ表示
-	if (_useGuizmo)
+	if (_isUsingGuizmo)
 	{
 		DrawGuizmo();
 	}

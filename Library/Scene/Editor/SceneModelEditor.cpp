@@ -219,7 +219,7 @@ void SceneModelEditor::DrawModelGui()
         ImGui::Checkbox(u8"当たり判定表示", &_showCollision);
         if (ImGui::Button(u8"モデル表示"))
         {
-            _modelActor.lock()->SetShowFlag(!_modelActor.lock()->IsShowing());
+            _modelActor.lock()->SetIsShowing(!_modelActor.lock()->IsShowing());
         }
         ImGui::SliderInt(u8"選択中のメッシュ", &_selectingMeshIndex, -1, (int)_modelActor.lock()->GetModel().lock()->GetResource()->GetAddressMeshes().size() - 1);
         ImGui::DragFloat(u8"頂点の点の大きさ", &_vertexPointRadius, 0.01f);

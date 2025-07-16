@@ -64,6 +64,7 @@ public:
     void SetMass(float mass) { _mass = mass; }
 
     void SetVelocity(const Vector3& velocity) { _velocity = velocity; }
+    void SetVelocityXZ(float velocityX, float velocityZ) { _velocity.x = velocityX; _velocity.z = velocityZ; }
     void SetAcceleration(const Vector3& acceleration) { _acceleration = acceleration; }
     void SetMaxSpeedXZ(float maxSpeedXZ) { _maxSpeedXZ = maxSpeedXZ; }
     void SetCurrentSpeedXZ(float currentSpeedXZ) { _currentSpeedXZ = currentSpeedXZ; }

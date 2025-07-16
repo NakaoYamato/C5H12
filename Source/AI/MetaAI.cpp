@@ -2,6 +2,7 @@
 
 #include "../../Source/Common/Damageable.h"
 #include "../../Library/Scene/SceneManager.h"
+#include "../../Library/Math/Random.h"
 
 #include <imgui.h>
 
@@ -78,7 +79,7 @@ void MetaAI::RemoveTargetable(std::weak_ptr<Targetable> targetable)
 }
 
 /// ターゲット検索
-Targetable* MetaAI::SearchTarget(Targetable::Faction faction, const Vector3& searchPosition, float searchRadius, const std::function<bool(Targetable*)>& searchFaction) const
+Targetable* MetaAI::SearchTarget(Targetable::Faction faction, const Vector3& searchPosition, float searchRadius, const std::function<bool(Targetable*)>& searchFanction) const
 {
 	float searchRadiusSq = searchRadius * searchRadius;
 	Targetable* result = nullptr;
@@ -94,9 +95,9 @@ Targetable* MetaAI::SearchTarget(Targetable::Faction faction, const Vector3& sea
 					continue;
 
 				// サーチ関数が指定されている場合、条件を満たすかチェック
-				if (searchFaction)
+				if (searchFanction)
 				{
-					if (!searchFaction(target.get()))
+					if (!searchFanction(target.get()))
 						continue;
 				}
 
@@ -113,4 +114,14 @@ Targetable* MetaAI::SearchTarget(Targetable::Faction faction, const Vector3& sea
 		}
 	}
 	return result;
+}
+/// 特定の位置からランダムな位置を取得
+Vector3 MetaAI::GetRandomPositionInRange(const Vector3& center, float range) const
+{
+	Vector3 randomPosition = center;
+	randomPosition.x += Random::RandBias() * range;
+	randomPosition.z += Random::RandBias() * range;
+	// ランダムな位置が範囲内に収まるように調整
+	randomPosition = randomPosition.ClampSphere(center, range);
+	return randomPosition;
 }

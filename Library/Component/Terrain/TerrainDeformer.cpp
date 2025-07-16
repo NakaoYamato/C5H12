@@ -270,7 +270,7 @@ void TerrainDeformer::DrawGui()
 		return;
 
     if (ImGui::Checkbox(u8"ブラシ使用", &_useBrush))
-        GetActor()->SetUseGuizmoFlag(!_useBrush);
+        GetActor()->SetIsUsingGuizmo(!_useBrush);
 	if (ImGui::Button(u8"現在のデータをデフォルトに設定"))
 	{
         // デフォルトペイントテクスチャデータの書き込み

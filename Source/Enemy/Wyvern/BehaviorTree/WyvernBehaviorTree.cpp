@@ -53,12 +53,11 @@ WyvernBehaviorTree::WyvernBehaviorTree(
 		}
 	}
 }
-
 // 開始処理
 void WyvernBehaviorTree::Start()
 {
 }
-
+// ビヘイビアツリー実行
 void WyvernBehaviorTree::Execute(float elapsedTime)
 {
 	// 現在の実行ノードがなければ取得
@@ -73,7 +72,7 @@ void WyvernBehaviorTree::Execute(float elapsedTime)
 		_activeNode = _behaviorTree->Execute(_activeNode, _behaviorData.get(), elapsedTime);
 	}
 }
-
+// GUI描画
 void WyvernBehaviorTree::DrawGui()
 {
 	if (_activeNode != nullptr)
@@ -81,7 +80,6 @@ void WyvernBehaviorTree::DrawGui()
 	// ビヘイビアツリーのGUI描画
 	DrawBehaviorTreeGui(_behaviorTree->GetRoot().get());
 }
-
 // ビヘイビアツリーのGUI描画
 void WyvernBehaviorTree::DrawBehaviorTreeGui(BehaviorNodeBase<WyvernBehaviorTree>* node)
 {

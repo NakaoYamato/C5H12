@@ -39,12 +39,20 @@ public:
 	/// <param name="faction">検索する対象の陣営</param>
 	/// <param name="searchPosition">検索する場所</param>
 	/// <param name="searchRadius">検索する範囲</param>
-	/// <param name="searchFaction">検索関数　引数は検索対象</param>
+	/// <param name="searchFanction">検索関数　引数は検索対象</param>
 	/// <returns></returns>
 	Targetable* SearchTarget(Targetable::Faction faction,
 		const Vector3& searchPosition,
 		float searchRadius,
-		const std::function<bool(Targetable*)>& searchFaction = nullptr) const;
+		const std::function<bool(Targetable*)>& searchFanction = nullptr) const;
+
+	/// <summary>
+	/// 特定の位置からランダムな位置を取得
+	/// </summary>
+	/// <param name="center"></param>
+	/// <param name="range"></param>
+	/// <returns></returns>
+	Vector3 GetRandomPositionInRange(const Vector3& center, float range) const;
 
 private:
 	// ターゲット可能なオブジェクトのリスト

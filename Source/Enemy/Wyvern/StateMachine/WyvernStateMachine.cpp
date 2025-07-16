@@ -163,7 +163,6 @@ void WyvernStateMachine::DrawGui()
                 ImGui::TreePop();
             }
         }
-
         ImGui::TreePop();
     }
 }

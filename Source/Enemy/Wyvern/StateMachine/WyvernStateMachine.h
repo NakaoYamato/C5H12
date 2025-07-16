@@ -50,7 +50,6 @@ public:
 	bool CallLookAtTargetEvent() const { return _callLookAtTarget; }
 #pragma endregion
 
-
 private:
 	StateMachineBase<WyvernStateMachine> _stateMachine;
 	EnemyController* _enemy = nullptr;

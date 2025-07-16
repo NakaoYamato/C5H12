@@ -221,17 +221,17 @@ public:
 	void SetTransform(const Transform& t) { this->_transform = t; }
 	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
 #pragma region フラグ関係
-	void SetActiveFlag(bool b) { this->_isActive = b; }
-	void SetShowFlag(bool b) { this->_isShowing = b; }
-	void SetDrawDebugFlag(bool b) { this->_drawDebug = b; }
-	void SetUseGuizmoFlag(bool b) { this->_useGuizmo = b; }
-	void SetDrawHierarchyFlag(bool b) { this->_drawHierarchy = b; }
+	void SetIsActive(bool b) { this->_isActive = b; }
+	void SetIsShowing(bool b) { this->_isShowing = b; }
+	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
+	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
+	void SetIsDrawingHierarchy(bool b) { this->_isDrawingHierarchy = b; }
 
 	bool IsActive()const { return _isActive; }
 	bool IsShowing()const { return _isShowing; }
-	bool IsDrawingDebug()const { return _drawDebug; }
-	bool IsUsingGuizmo()const { return _useGuizmo; }
-	bool IsDrawingHierarchy()const { return _drawHierarchy; }
+	bool IsDrawingDebug()const { return _isDrawingDebug; }
+	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
+	bool IsDrawingHierarchy()const { return _isDrawingHierarchy; }
 #pragma endregion
 #pragma endregion
 protected:
@@ -332,10 +332,15 @@ protected:
 	std::unordered_map<CollisionLayer, std::vector<Actor*>> _lastContactActors;
 
 #pragma region 各種フラグ
+	// アクティブフラグ
 	bool				_isActive = true;
+	// 表示フラグ
 	bool				_isShowing = true;
-	bool				_drawDebug = true;
-	bool				_useGuizmo = true;
-	bool 				_drawHierarchy = false;
+	// デバッグ表示フラグ
+	bool				_isDrawingDebug = true;
+	// ギズモ使用フラグ
+	bool				_isUsingGuizmo = true;
+	// ヒエラルキー描画フラグ
+	bool 				_isDrawingHierarchy = false;
 #pragma endregion
 };

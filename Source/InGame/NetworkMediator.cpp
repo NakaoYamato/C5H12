@@ -1,6 +1,7 @@
 #include "NetworkMediator.h"
 
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Enemy/Weak/WeakActor.h"
 
 #include <string>
 #include <imgui.h>
@@ -47,9 +48,16 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
                     0,
                     0,
                     Network::EnemyType::Wyvern,
-                    Vector3(0.0f, 10.0f, 10.0f),
+                    Vector3(0.0f, 5.0f, 10.0f),
                     0.0f,
                     100.0f);
+                CreateEnemy(
+                    1,
+                    0,
+                    Network::EnemyType::Weak,
+                    Vector3(5.0f, 5.0f, -5.0f),
+                    0.0f,
+                    10.0f);
             }
             else
             {
@@ -82,8 +90,16 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
             enemyCreate.type = Network::EnemyType::Wyvern; // ここではワイバーンを生成する例
             enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
             enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
-            enemyCreate.position = Vector3(0.0f, 10.0f, 10.0f);
+            enemyCreate.position = Vector3(0.0f, 5.0f, 10.0f);
             enemyCreate.health = 100.0f; // 初期体力を設定
+            _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
+
+            enemyCreate = {};
+            enemyCreate.type = Network::EnemyType::Weak;
+            enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
+            enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
+            enemyCreate.position = Vector3(5.0f, 5.0f, -5.0f);
+            enemyCreate.health = 10.0f; // 初期体力を設定
             _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
         }
         break;
@@ -237,6 +253,29 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
         // コンテナに登録
         _enemies[uniqueID] = enemyData;
         return enemy;
+    }
+    else if (type == Network::EnemyType::Weak)
+    {
+        // 敵キャラクターの生成
+        auto enemy = _scene->RegisterActor<WeakActor>(
+            "Enemy" + std::to_string(uniqueID),
+            ActorTag::Enemy
+        );
+        EnemyData enemyData{};
+        enemyData.controllerID = controllerID;
+        enemyData.controller = enemy->GetComponent<EnemyController>();
+		enemyData.state = enemy->GetComponent<StateController>()->GetStateMachine();
+        enemyData.behavior = enemy->GetComponent<BehaviorController>();
+		enemyData.damageable = enemy->GetComponent<Damageable>();
+
+		enemy->GetTransform().SetPosition(position);
+		enemy->GetTransform().SetAngleY(angleY);
+        enemyData.behavior.lock()->SetIsExecute(controllerID == myPlayerId);
+		enemyData.damageable.lock()->ResetHealth(health);
+
+		// コンテナに登録
+		_enemies[uniqueID] = enemyData;
+		return enemy;
     }
     return std::weak_ptr<EnemyActor>();
 }

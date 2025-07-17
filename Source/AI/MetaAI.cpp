@@ -14,6 +14,7 @@ void MetaAI::Start()
 // 更新処理
 void MetaAI::Update(float elapsedTime)
 {
+	int deadCount = 0;
 	for (auto& target : _targetables)
 	{
 		// 無効なターゲットはスキップ
@@ -27,11 +28,14 @@ void MetaAI::Update(float elapsedTime)
 			{
 				if (damageable->IsDead())
 				{
-					_gameClear = true;
+					deadCount++;
 				}
 			}
 		}
 	}
+
+	if (deadCount == _targetables.size())
+		_gameClear = true;
 
 	if (_gameClear)
 	{

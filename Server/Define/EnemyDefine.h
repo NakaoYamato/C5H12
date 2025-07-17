@@ -10,6 +10,8 @@ namespace Network
 		None,
 		Wyvern,
 
+		Weak,
+
 		EnemyTypeMax,
 	};
 }

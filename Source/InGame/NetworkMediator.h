@@ -193,14 +193,14 @@ private:
 	bool _sendEnemyCreate = false;
 };
 
-class NetworkReceiver : public Component
-{
-public:
-	NetworkReceiver() {}
-	~NetworkReceiver() override {}
-	const char* GetName() const override { return "NetworkReceiver"; }
-	void Start() override;
-	void Update(float elapsedTime) override;
-	void DelayedRender(const RenderContext& rc) override;
-	void DrawGui() override;
-};
+//class NetworkReceiver : public Component
+//{
+//public:
+//	NetworkReceiver() {}
+//	~NetworkReceiver() override {}
+//	const char* GetName() const override { return "NetworkReceiver"; }
+//	void Start() override;
+//	void Update(float elapsedTime) override;
+//	void DelayedRender(const RenderContext& rc) override;
+//	void DrawGui() override;
+//};

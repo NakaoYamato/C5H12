@@ -43,7 +43,7 @@ void MetaAI::Update(float elapsedTime)
 		if (_clearMovieTimer > _clearMovieTime)
 		{
 			// ƒV[ƒ“‘JˆÚ
-			SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Result");
+			//SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Result");
 		}
 	}
 }

@@ -1,20 +1,20 @@
-#include "WeakController.h"
+#include "GryphusController.h"
 
 #include "../../Library/Scene/Scene.h"
 
 #include <imgui.h>
 
 // 開始処理
-void WeakController::Start()
+void GryphusController::Start()
 {
 	_enemyController = GetActor()->GetComponent<EnemyController>();
 }
 // 更新処理
-void WeakController::Update(float elapsedTime)
+void GryphusController::Update(float elapsedTime)
 {
 }
 // GUI描画
-void WeakController::DrawGui()
+void GryphusController::DrawGui()
 {
 	ImGui::DragFloat(u8"ジョグ移動速度", &_jogSpeed, 0.1f, 0.0f, 10.0f, "%.1f m/s");
 	ImGui::DragFloat(u8"ダッシュ移動速度", &_dashSpeed, 0.1f, 0.0f, 10.0f, "%.1f m/s");

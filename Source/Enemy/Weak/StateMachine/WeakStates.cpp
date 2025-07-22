@@ -256,7 +256,7 @@ void WeakJumpAttackState::OnExit()
 	owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
-#pragma region ƒ_ƒ[ƒW‚ğó‚¯‚é
+#pragma region ”í’e
 void WeakDamageState::OnEnter()
 {
 	// HitBack HitFront HitSide 

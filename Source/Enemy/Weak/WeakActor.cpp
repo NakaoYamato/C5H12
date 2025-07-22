@@ -27,17 +27,17 @@ void WeakActor::OnCreate()
 	_charactorController.lock()->SetMass(2.0f);
 
 	// コンポーネント追加
-	auto _modelRenderer = AddComponent<ModelRenderer>();
-	auto _animator = AddComponent<Animator>();
+	auto modelRenderer = AddComponent<ModelRenderer>();
+	auto animator = AddComponent<Animator>();
 	auto enemyController = AddComponent<EnemyController>();
 	auto weakController = AddComponent<WeakController>();
 	auto stateMachine = std::make_shared<WeakStateMachine>(
 		enemyController.get(),
 		weakController.get(),
-		_animator.get(),
+		animator.get(),
 		_damageable.lock().get());
 	auto stateController = AddComponent<StateController>(stateMachine);
-	auto behaviorController = AddComponent<BehaviorController>(std::make_shared<WeakBehaviorTree>(stateMachine.get(), _animator.get(), metaAI.get()));
+	auto behaviorController = AddComponent<BehaviorController>(std::make_shared<WeakBehaviorTree>(stateMachine.get(), animator.get(), metaAI.get()));
 	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加

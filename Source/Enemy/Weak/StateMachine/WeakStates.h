@@ -107,7 +107,7 @@ private:
 	float _waitTime = 1.5f;
 };
 #pragma endregion
-#pragma region ƒ_ƒ[ƒW
+#pragma region ”í’e
 class WeakDamageState : public HierarchicalStateBase<WeakStateMachine>
 {
 public:

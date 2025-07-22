@@ -526,6 +526,15 @@ void SceneModelEditor::DrawTextureGui()
         {
             if (ImGui::TreeNode(modelMaterial.name.c_str()))
             {
+                if (ImGui::TreeNode(u8"Color"))
+                {
+                    for (auto& [key, color] : modelMaterial.colors)
+                    {
+                        ImGui::ColorEdit4(key.c_str(), &color.x);
+                    }
+                    ImGui::TreePop();
+                }
+
                 for (auto& [key, textureData] : modelMaterial.textureDatas)
                 {
                     ImGui::Text("%s", key.c_str());

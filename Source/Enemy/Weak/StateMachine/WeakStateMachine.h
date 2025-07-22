@@ -1,6 +1,5 @@
 #pragma once
 
-#include <variant>
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Math/Vector.h"
 #include "../../Source/Common/Damageable.h"

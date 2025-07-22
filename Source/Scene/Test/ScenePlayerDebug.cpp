@@ -9,6 +9,7 @@
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Enemy/Weak/WeakActor.h"
+#include "../../Source/Enemy/Gryphus/GryphusActor.h"
 
 #include "../../InGame/InputMediator.h"
 #include "../../InGame/CanvasMediator.h"
@@ -60,6 +61,11 @@ void ScenePlayerDebug::OnInitialize()
     }
     {
         auto weak1 = RegisterActor<WeakActor>("Weak1", ActorTag::Enemy);
+        weak1->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -5.0f));
+    }
+    {
+        auto gryphus = RegisterActor<GryphusActor>("Gryphus", ActorTag::Enemy);
+        gryphus->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -40.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     // •‰‰×ƒeƒXƒg

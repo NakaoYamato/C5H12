@@ -2,6 +2,7 @@
 
 #include "Model.h"
 #include "../../Library/Math/Vector.h"
+#include "../../Library/Graphics/RenderContext.h"
 
 class ModelCollision
 {
@@ -40,7 +41,7 @@ public:
 	/// <summary>
 	/// デバッグ表示
 	/// </summary>
-	void DebugRender();
+	void DebugRender(const RenderContext& rc);
 	/// <summary>
 	/// GUI描画
 	/// </summary>
@@ -88,4 +89,8 @@ private:
 	std::vector<CapsuleData> _capsuleDatas; // カプセルデータ
 	// モデルのノード名
 	std::vector<const char*> _nodeNames;
+
+	bool _isUsingGuizmo = false; // GUIでGizmoを使用中か
+	Vector3* _gizmoPosition = nullptr; // Gizmoの位置
+	int _gizmoNodeIndex = -1; // Gizmoのノードインデックス
 };

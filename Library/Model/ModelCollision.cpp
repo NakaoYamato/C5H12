@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 #include "SerializeFunction.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
@@ -34,7 +35,7 @@ void ModelCollision::Load(std::weak_ptr<Model> model)
 }
 
 /// デバッグ表示
-void ModelCollision::DebugRender()
+void ModelCollision::DebugRender(const RenderContext& rc)
 {
     if (!_model.lock())
 		return;
@@ -65,6 +66,33 @@ void ModelCollision::DebugRender()
 			capsule.radius,
 			Vector4::White);
 	}
+
+    // ギズモ描画
+    if (_isUsingGuizmo && _gizmoPosition != nullptr && _gizmoNodeIndex != -1)
+    {
+		auto& node = _model.lock()->GetPoseNodes()[_gizmoNodeIndex];
+		Vector3 point = _gizmoPosition->TransformCoord(node.worldTransform);
+		DirectX::XMFLOAT4X4 transform = DirectX::XMFLOAT4X4(
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			point.x, point.y, point.z, 1);
+        if (Debug::Guizmo(
+            rc.camera->GetView(),
+            rc.camera->GetProjection(),
+            &transform,
+            ImGuizmo::TRANSLATE | ImGuizmo::LOCAL))
+        {
+			// ローカル座標を取得
+			Vector3 localPosition = Vector3::TransformCoord(
+				Vector3(transform._41, transform._42, transform._43),
+				DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&node.worldTransform)));
+			// 位置を更新
+			_gizmoPosition->x = localPosition.x;
+			_gizmoPosition->y = localPosition.y;
+			_gizmoPosition->z = localPosition.z;
+        }
+    }
 }
 
 /// GUI描画
@@ -78,7 +106,22 @@ void ModelCollision::DrawGui(bool canEdit)
         {
             _sphereDatas.push_back(SphereData());
         }
+        if (ImGui::Button(u8"カプセル追加"))
+        {
+            _capsuleDatas.push_back(CapsuleData());
+        }
+        if (_isUsingGuizmo)
+        {
+            if (ImGui::Button(u8"ギズモ削除"))
+            {
+				_isUsingGuizmo = false;
+				_gizmoPosition = nullptr;
+				_gizmoNodeIndex = -1;
+            }
+        }
     }
+    ImGui::Separator();
+
     int index = 0;
 	for (auto& sphere : _sphereDatas)
 	{
@@ -92,6 +135,13 @@ void ModelCollision::DrawGui(bool canEdit)
 
             if (canEdit)
             {
+				if (ImGui::Button(u8"ギズモ使用"))
+				{
+					_isUsingGuizmo = true;
+                    _gizmoPosition = &sphere.position;
+                    _gizmoNodeIndex = sphere.nodeIndex;
+				}
+
                 if (ImGui::Button(u8"削除"))
                 {
                     _sphereDatas.erase(_sphereDatas.begin() + index);
@@ -104,13 +154,6 @@ void ModelCollision::DrawGui(bool canEdit)
         index++;
 	}
     ImGui::Separator();
-    if (canEdit)
-    {
-        if (ImGui::Button(u8"カプセル追加"))
-        {
-            _capsuleDatas.push_back(CapsuleData());
-        }
-    }
     index = 0;
 	for (auto& capsule : _capsuleDatas)
 	{
@@ -126,6 +169,19 @@ void ModelCollision::DrawGui(bool canEdit)
 
             if (canEdit)
             {
+                if (ImGui::Button(u8"ギズモ使用：開始座標"))
+                {
+                    _isUsingGuizmo = true;
+                    _gizmoPosition = &capsule.start;
+                    _gizmoNodeIndex = capsule.startNodeIndex;
+                }
+				if (ImGui::Button(u8"ギズモ使用：終了座標"))
+				{
+					_isUsingGuizmo = true;
+					_gizmoPosition = &capsule.end;
+					_gizmoNodeIndex = capsule.endNodeIndex;
+				}
+
                 if (ImGui::Button(u8"削除"))
                 {
                     _capsuleDatas.erase(_capsuleDatas.begin() + index);

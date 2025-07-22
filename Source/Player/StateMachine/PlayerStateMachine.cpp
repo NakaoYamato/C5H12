@@ -164,22 +164,22 @@ const char* PlayerIdleState::GetName() const
 }
 void PlayerIdleState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(u8"Idle1", true, 0.2f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->PlayAnimation(u8"Idle1", true, 0.2f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 
 void PlayerIdleState::OnExecute(float elapsedTime)
 {
-    if (owner->IsAttack())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
-	else if (owner->IsMoving())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
+    if (_owner->IsAttack())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
+	else if (_owner->IsMoving())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
     // 回避移行
-    else if (owner->IsEvade())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+    else if (_owner->IsEvade())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
 	// ガード移行
-	else if (owner->IsGuard())
-		owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+	else if (_owner->IsGuard())
+		_owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
 }
 #pragma endregion
 
@@ -191,35 +191,35 @@ const char* PlayerRunState::GetName() const
 void PlayerRunState::OnEnter()
 {
     // フラグを立てる
-    owner->SetIsMoving(true);
+    _owner->SetIsMoving(true);
 
-    owner->GetAnimator()->SetRootNodeIndex("root");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    owner->GetAnimator()->PlayAnimation(u8"Run_Forward_Rootmotion", true, 0.2f);
+    _owner->GetAnimator()->SetRootNodeIndex("root");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->PlayAnimation(u8"Run_Forward_Rootmotion", true, 0.2f);
 }
 void PlayerRunState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
-    owner->RotationMovement(elapsedTime);
+    _owner->RotationMovement(elapsedTime);
 
-    if (owner->IsAttack())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
-    else if (owner->IsDash())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Sprint));
-    else if (!owner->IsMoving())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+    if (_owner->IsAttack())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
+    else if (_owner->IsDash())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Sprint));
+    else if (!_owner->IsMoving())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
     // 回避移行
-	else if (owner->IsEvade())
-		owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+	else if (_owner->IsEvade())
+		_owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
     // ガード移行
-    else if (owner->IsGuard())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+    else if (_owner->IsGuard())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
 }
 void PlayerRunState::OnExit()
 {
     // フラグを下ろす
-    owner->SetIsMoving(false);
+    _owner->SetIsMoving(false);
 }
 #pragma endregion
 
@@ -237,28 +237,28 @@ namespace SprintSubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->PlayAnimation(u8"Sprint_Start_no_weapon_Rootmotion", false, 0.2f);
+            _owner->GetAnimator()->PlayAnimation(u8"Sprint_Start_no_weapon_Rootmotion", false, 0.2f);
         }
         void OnExecute(float elapsedTime) override
         {
             // 攻撃移行
-            if (owner->IsAttack())
-                owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::SprintAttack));
+            if (_owner->IsAttack())
+                _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::SprintAttack));
             // 回避移行
-            else if (owner->IsEvade())
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+            else if (_owner->IsEvade())
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
             // ガード移行
-            else if (owner->IsGuard())
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+            else if (_owner->IsGuard())
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
             // アニメーションが終了していたら遷移
-            else if (!owner->GetAnimator()->IsPlayAnimation())
+            else if (!_owner->GetAnimator()->IsPlayAnimation())
             {
-                owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::Sprinting));
+                _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::Sprinting));
             }
             // ダッシュ解除で移動に遷移
-            else if (!owner->IsDash())
+            else if (!_owner->IsDash())
             {
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
             }
         }
         void OnExit() override
@@ -275,25 +275,25 @@ namespace SprintSubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->SetRootNodeIndex("root");
-            owner->GetAnimator()->SetIsUseRootMotion(true);
-            owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-            owner->GetAnimator()->PlayAnimation(u8"Sprint_no_weapon_Rootmotion", true, 0.2f);
+            _owner->GetAnimator()->SetRootNodeIndex("root");
+            _owner->GetAnimator()->SetIsUseRootMotion(true);
+            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+            _owner->GetAnimator()->PlayAnimation(u8"Sprint_no_weapon_Rootmotion", true, 0.2f);
         }
         void OnExecute(float elapsedTime) override
         {
 			// 攻撃移行
-            if (owner->IsAttack())
-                owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::SprintAttack));
+            if (_owner->IsAttack())
+                _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::SprintAttack));
             // 回避移行
-            else if (owner->IsEvade())
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+            else if (_owner->IsEvade())
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
             // ガード移行
-            else if (owner->IsGuard())
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+            else if (_owner->IsGuard())
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
             // ダッシュ解除で移動に遷移
-            else if (!owner->IsDash())
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
+            else if (!_owner->IsDash())
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
         }
         void OnExit() override
         {
@@ -311,30 +311,30 @@ namespace SprintSubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-            owner->GetAnimator()->SetIsUseRootMotion(true);
-            owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-            owner->GetAnimator()->PlayAnimation(u8"Attack_Sprint", false, 0.2f);
+            _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+            _owner->GetAnimator()->SetIsUseRootMotion(true);
+            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+            _owner->GetAnimator()->PlayAnimation(u8"Attack_Sprint", false, 0.2f);
 
 			// 攻撃フラグを立てる
-            owner->GetPlayer()->SetBaseATK(ATK);
+            _owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
             // アニメーションが終了していたら遷移
-            if (!owner->GetAnimator()->IsPlayAnimation())
-                owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
-            else if (owner->CallCancelEvent())
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+                _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+            else if (_owner->CallCancelEvent())
             {
                 // キャンセル攻撃
-                if (owner->IsAttack())
-                    owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
+                if (_owner->IsAttack())
+                    _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
                 // 回避移行
-                else if (owner->IsEvade())
-                    owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+                else if (_owner->IsEvade())
+                    _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
                 // ガード移行
-                else if (owner->IsGuard())
-                    owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+                else if (_owner->IsGuard())
+                    _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
             }
         }
         void OnExit() override
@@ -360,23 +360,23 @@ const char* PlayerSprintState::GetName() const
 void PlayerSprintState::OnEnter()
 {
     // フラグを立てる
-    owner->SetIsDash(true);
+    _owner->SetIsDash(true);
 
-    owner->GetAnimator()->SetRootNodeIndex("root");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootNodeIndex("root");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     // 初期サブステート設定
     ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::SprintStart));
 }
 void PlayerSprintState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
-    owner->RotationMovement(elapsedTime);
+    _owner->RotationMovement(elapsedTime);
 }
 void PlayerSprintState::OnExit()
 {
     // フラグを下ろす
-    owner->SetIsDash(false);
+    _owner->SetIsDash(false);
 }
 #pragma endregion
 
@@ -399,12 +399,12 @@ void PlayerEvadeState::OnEnter()
         u8"Evade_Forward_Left",
     };
 
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
 	// 入力方向から回避方向を決定
 	std::string evadeAnimationName = evadeAnimationNames[0];
-    Vector2 movement = owner->GetMovement();
+    Vector2 movement = _owner->GetMovement();
 
     // 入力方向が0なら前転
     if (movement.LengthSq() == 0.0f)
@@ -415,7 +415,7 @@ void PlayerEvadeState::OnEnter()
         float angle =
             DirectX::XMConvertToDegrees(
                 atan2f(movement.x, movement.y)
-                - owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+                - _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
             );
         // 角度を0~360度に正規化
         angle = fmodf(angle, 360.0f);
@@ -428,26 +428,26 @@ void PlayerEvadeState::OnEnter()
         evadeAnimationName = evadeAnimationNames[index];
     }
 
-	owner->GetAnimator()->PlayAnimation(evadeAnimationName, false, 0.2f);
+	_owner->GetAnimator()->PlayAnimation(evadeAnimationName, false, 0.2f);
 }
 void PlayerEvadeState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了していたら遷移
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
     }
-    else if (owner->CallCancelEvent())
+    else if (_owner->CallCancelEvent())
     {
 		// 攻撃移行
-		if (owner->IsAttack())
-			owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
+		if (_owner->IsAttack())
+			_owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
 		// 移動移行
-		else if (owner->IsMoving())
-			owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
+		else if (_owner->IsMoving())
+			_owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Run));
         // ガード移行
-        else if (owner->IsGuard())
-            owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+        else if (_owner->IsGuard())
+            _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
     }
 }
 #pragma endregion
@@ -468,16 +468,16 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
+            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
 			// 攻撃フラグを立てる
-			owner->GetPlayer()->SetBaseATK(ATK);
+			_owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
             // 攻撃キャンセル判定
-            if (owner->CallCancelEvent())
-                if (owner->IsAttack())
-                    owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack2));
+            if (_owner->CallCancelEvent())
+                if (_owner->IsAttack())
+                    _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack2));
         }
         void OnExit() override 
         {
@@ -495,16 +495,16 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo2", false, 0.3f);
+            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo2", false, 0.3f);
 			// 攻撃フラグを立てる
-			owner->GetPlayer()->SetBaseATK(ATK);
+			_owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
             // 攻撃キャンセル判定
-            if (owner->CallCancelEvent())
-                if (owner->IsAttack())
-                    owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack3));
+            if (_owner->CallCancelEvent())
+                if (_owner->IsAttack())
+                    _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack3));
         }
         void OnExit() override 
         {
@@ -522,16 +522,16 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo3", false, 0.3f);
+            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo3", false, 0.3f);
 			// 攻撃フラグを立てる
-			owner->GetPlayer()->SetBaseATK(ATK);
+			_owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
             // 攻撃キャンセル判定
-            if (owner->CallCancelEvent())
-                if (owner->IsAttack())
-                    owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack4));
+            if (_owner->CallCancelEvent())
+                if (_owner->IsAttack())
+                    _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack4));
         }
         void OnExit() override 
         {
@@ -549,9 +549,9 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            owner->GetAnimator()->PlayAnimation(u8"Attack_Combo4", false, 0.3f);
+            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo4", false, 0.3f);
 			// 攻撃フラグを立てる
-			owner->GetPlayer()->SetBaseATK(ATK);
+			_owner->GetPlayer()->SetBaseATK(ATK);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -579,9 +579,9 @@ const char* PlayerAttack1State::GetName() const
 
 void PlayerAttack1State::OnEnter()
 {
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     // 初期サブステート設定
 	ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::ComboAttack1));
 }
@@ -589,26 +589,26 @@ void PlayerAttack1State::OnEnter()
 void PlayerAttack1State::OnExecute(float elapsedTime)
 {
     // 攻撃キャンセル判定
-    if (owner->CallCancelEvent())
+    if (_owner->CallCancelEvent())
     {
         // 回避移行
-        if (owner->IsEvade())
-            owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+        if (_owner->IsEvade())
+            _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
         // ガード移行
-        else if (owner->IsGuard())
-            owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
+        else if (_owner->IsGuard())
+            _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard));
     }
     else
     {
         // キャンセルがかかるまでの間は移動方向に向く
-        owner->RotationMovement(elapsedTime);
+        _owner->RotationMovement(elapsedTime);
     }
 
     // アニメーションが終了していたら遷移
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 攻撃からIdleに遷移
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
     }
 }
 #pragma endregion
@@ -626,13 +626,13 @@ namespace GuardSubState
 		const char* GetName() const override { return Network::GetPlayerSubStateName(Network::PlayerSubStates::GuardStart); }
 		void OnEnter() override
 		{
-			owner->GetAnimator()->PlayAnimation(u8"Guard_Start", false, 2.0f);
+			_owner->GetAnimator()->PlayAnimation(u8"Guard_Start", false, 2.0f);
 		}
 		void OnExecute(float elapsedTime) override
 		{
             // アニメーションが終了していたら遷移
-            if (!owner->GetAnimator()->IsPlayAnimation())
-                owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::Guarding));
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+                _owner->GetStateMachine().ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::Guarding));
 		}
 		void OnExit() override
 		{
@@ -648,7 +648,7 @@ namespace GuardSubState
 		const char* GetName() const override { return Network::GetPlayerSubStateName(Network::PlayerSubStates::Guarding); }
 		void OnEnter() override
 		{
-			owner->GetAnimator()->PlayAnimation(u8"Guard", true, 0.2f);
+			_owner->GetAnimator()->PlayAnimation(u8"Guard", true, 0.2f);
 		}
 		void OnExecute(float elapsedTime) override
 		{
@@ -675,11 +675,11 @@ const char* PlayerGuardState::GetName() const
 void PlayerGuardState::OnEnter()
 {
     // フラグを立てる
-    owner->SetIsGuard(true);
+    _owner->SetIsGuard(true);
 
-	owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+	_owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+	_owner->GetAnimator()->SetIsUseRootMotion(true);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
 	// 初期サブステート設定
 	ChangeSubState(Network::GetPlayerSubStateName(Network::PlayerSubStates::GuardStart));
 }
@@ -687,23 +687,23 @@ void PlayerGuardState::OnEnter()
 void PlayerGuardState::OnExecute(float elapsedTime)
 {
     // 移動方向に向く
-    owner->RotationMovement(elapsedTime);
+    _owner->RotationMovement(elapsedTime);
 
     // 攻撃移行
-    if (owner->IsAttack())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
+    if (_owner->IsAttack())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Attack1));
     // 回避移行
-    else if (owner->IsEvade())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
+    else if (_owner->IsEvade())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Evade));
     // ガード解除
-    else if (!owner->IsGuard())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+    else if (!_owner->IsGuard())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
 }
 
 void PlayerGuardState::OnExit()
 {
     // フラグを下ろす
-    owner->SetIsGuard(false);
+    _owner->SetIsGuard(false);
 }
 
 #pragma endregion
@@ -724,13 +724,13 @@ void PlayerHitState::OnEnter()
 		u8"Hit5",
 	};
 
-	owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-	owner->GetAnimator()->SetIsUseRootMotion(true);
-	owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    owner->GetAnimator()->PlayAnimation(HitAnimationNames[std::rand() % _countof(HitAnimationNames)], false, 0.2f);
+	_owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+	_owner->GetAnimator()->SetIsUseRootMotion(true);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->PlayAnimation(HitAnimationNames[std::rand() % _countof(HitAnimationNames)], false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
 	if (charactorController != nullptr)
 	{
 		charactorController->SetIsPushable(false);
@@ -740,14 +740,14 @@ void PlayerHitState::OnEnter()
 void PlayerHitState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了していたら遷移
-    if (!owner->GetAnimator()->IsPlayAnimation())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
 }
 
 void PlayerHitState::OnExit()
 {
     // 押し出されれるようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(true);
@@ -761,13 +761,13 @@ const char* PlayerHitKnockDownState::GetName() const
 
 void PlayerHitKnockDownState::OnEnter()
 {
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    owner->GetAnimator()->PlayAnimation("Hit_knockdown", false, 0.2f);
+    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->PlayAnimation("Hit_knockdown", false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(false);
@@ -777,14 +777,14 @@ void PlayerHitKnockDownState::OnEnter()
 void PlayerHitKnockDownState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了していたら遷移
-    if (!owner->GetAnimator()->IsPlayAnimation())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
 }
 
 void PlayerHitKnockDownState::OnExit()
 {
     // 押し出されれるようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(true);
@@ -805,13 +805,13 @@ void PlayerGuardHitState::OnEnter()
         u8"Guard_Hit3",
     };
 
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    owner->GetAnimator()->PlayAnimation(GuardHitAnimationNames[std::rand() % _countof(GuardHitAnimationNames)], false, 0.2f);
+    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->PlayAnimation(GuardHitAnimationNames[std::rand() % _countof(GuardHitAnimationNames)], false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(false);
@@ -821,14 +821,14 @@ void PlayerGuardHitState::OnEnter()
 void PlayerGuardHitState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了していたら遷移
-    if (!owner->GetAnimator()->IsPlayAnimation())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
 }
 
 void PlayerGuardHitState::OnExit()
 {
     // 押し出されれるようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(true);
@@ -842,13 +842,13 @@ const char* PlayerGuardBreakState::GetName() const
 
 void PlayerGuardBreakState::OnEnter()
 {
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    owner->GetAnimator()->PlayAnimation("Guard_Break", false, 0.2f);
+    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->PlayAnimation("Guard_Break", false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(false);
@@ -858,14 +858,14 @@ void PlayerGuardBreakState::OnEnter()
 void PlayerGuardBreakState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了していたら遷移
-    if (!owner->GetAnimator()->IsPlayAnimation())
-        owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState(Network::GetPlayerMainStateName(Network::PlayerMainStates::Idle));
 }
 
 void PlayerGuardBreakState::OnExit()
 {
     // 押し出されれるようにする
-    auto charactorController = owner->GetPlayer()->GetCharactorController();
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
     if (charactorController != nullptr)
     {
         charactorController->SetIsPushable(true);
@@ -888,10 +888,10 @@ void PlayerDeathState::OnEnter()
         u8"Hit_knockdown_Death",
     };
 
-    owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-    owner->GetAnimator()->SetIsUseRootMotion(true);
-    owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    owner->GetAnimator()->PlayAnimation(DeathAnimationNames[std::rand() % _countof(DeathAnimationNames)], false, 0.2f);
+    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->PlayAnimation(DeathAnimationNames[std::rand() % _countof(DeathAnimationNames)], false, 0.2f);
 }
 
 void PlayerDeathState::OnExecute(float elapsedTime)

@@ -11,6 +11,8 @@
 #include "../../Source/Player/Weapon/Warrior/PlayerShieldActor.h"
 #include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Source/Enemy/Gryphus/GryphusActor.h"
+#include "../../Source/Enemy/Weak/WeakActor.h"
 
 #include "../../InGame/InputMediator.h"
 #include "../../InGame/CanvasMediator.h"
@@ -55,10 +57,16 @@ void SceneGame::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<StageActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+        auto stage0 = RegisterActor<StageActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(-50.0f, 0.0f, -50.0f));
     }
     {
-        auto stage1 = RegisterActor<StageActor>("Stage1", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 100.0f));
+        auto stage1 = RegisterActor<StageActor>("Stage1", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, -50.0f));
+    }
+    {
+        auto stage2 = RegisterActor<StageActor>("Stage2", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(-50.0f, 0.0f, 50.0f));
+    }
+    {
+        auto stage3 = RegisterActor<StageActor>("Stage3", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, 50.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
@@ -75,5 +83,7 @@ void SceneGame::OnInitialize()
     _preloadModels.push_back(std::make_shared<Model>(device, PlayerSwordActor::GetModelFilePath()));
     _preloadModels.push_back(std::make_shared<Model>(device, PlayerShieldActor::GetModelFilePath()));
     _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::GetModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, GryphusActor::GetModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, WeakActor::GetModelFilePath()));
     AddCompletionLoading(CompletionLoadingRate);
 }

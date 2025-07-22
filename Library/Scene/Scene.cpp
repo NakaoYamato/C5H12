@@ -35,6 +35,16 @@ void Scene::Initialize()
             Graphics::Instance().GetDeviceContext());
     }
 
+	// レンダーコンテキスト初期化
+	_renderContext.deviceContext = Graphics::Instance().GetDeviceContext();
+	_renderContext.renderState = Graphics::Instance().GetRenderState();
+	_renderContext.camera = GetMainCamera();
+	_renderContext.lightDirection = Vector4::Right;
+	_renderContext.lightColor = Vector4::White;
+	_renderContext.lightAmbientColor = Vector4::Black;
+	_renderContext.environmentMap = nullptr;
+	_renderContext.pointLights.clear();
+
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
     {

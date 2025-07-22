@@ -12,188 +12,184 @@
 #pragma region 待機
 void GryphusIdleState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(
+    _owner->GetAnimator()->PlayAnimation(
         u8"Idle",
         true,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusIdleState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 再び待機状態
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusIdleState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 休憩
 void GryphusRestState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(
+    _owner->GetAnimator()->PlayAnimation(
         u8"Idle",
-        true,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+        false,
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusRestState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 待機状態へ遷移
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusRestState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 威嚇
 void GryphusThreatState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(
-        u8"Idle",
-        true,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->PlayAnimation(
+        u8"Combat",
+        false,
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusThreatState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 待機状態へ遷移
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusThreatState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 移動
 void GryphusMoveState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(
-        u8"Run",
+    // Walk02
+    _owner->GetAnimator()->PlayAnimation(
+        u8"Walk",
         true,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusMoveState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 待機状態へ遷移
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusMoveState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region ダッシュ
 void GryphusDashState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(
+    // RunStart
+    _owner->GetAnimator()->PlayAnimation(
         u8"Run",
         true,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusDashState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 待機状態へ遷移
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusDashState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 攻撃
 void GryphusAttackState::OnEnter()
 {
-    owner->GetAnimator()->PlayAnimation(
-        u8"Attack",
+    _owner->GetAnimator()->PlayAnimation(
+        u8"AttackWing",
         false,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(true);
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
 }
 void GryphusAttackState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 待機状態へ遷移
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusAttackState::OnExit()
 {
     // 攻撃後の待機時間を設定
-    //owner->GetEnemy()->SetAttackCooldown(_waitTime);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    //_owner->GetEnemy()->SetAttackCooldown(_waitTime);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 被弾
 void GryphusDamageState::OnEnter()
 {
-    // HitBack HitFront HitSide 
-    owner->GetAnimator()->PlayAnimation(
-        u8"HitBack",
+    //  SlapFront SlapFrontStrong
+    _owner->GetAnimator()->PlayAnimation(
+        u8"SlapFront",
         false,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusDamageState::OnExecute(float elapsedTime)
 {
     // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
+    if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 待機状態へ遷移
-        owner->GetBase().ChangeState("Idle");
+        _owner->GetBase().ChangeState("Idle");
     }
 }
 void GryphusDamageState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 死亡
 void GryphusDeathState::OnEnter()
 {
-    // DeathL DeathR DeathFront
-    owner->GetAnimator()->PlayAnimation(
-        u8"DeathFront",
+    // DeathAir
+    _owner->GetAnimator()->PlayAnimation(
+        u8"Death",
         false,
-        0.0f);
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+        1.0f);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 void GryphusDeathState::OnExecute(float elapsedTime)
 {
-    // アニメーションが終了しているとき
-    if (!owner->GetAnimator()->IsPlayAnimation())
-    {
-        // 死亡状態へ遷移
-        owner->GetBase().ChangeState("Death");
-    }
 }
 void GryphusDeathState::OnExit()
 {
-    owner->GetAnimator()->SetIsUseRootMotion(false);
+    _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion

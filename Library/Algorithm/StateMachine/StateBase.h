@@ -7,7 +7,7 @@ template<class T>
 class StateBase
 {
 public:
-	StateBase(T* owner) :owner(owner) {}
+	StateBase(T* owner) :_owner(owner) {}
 	virtual ~StateBase() {}
 
 	// 名前の取得
@@ -23,7 +23,7 @@ public:
 	// GUi描画
 	virtual void DrawGui() {};
 protected:
-	T* owner;
+	T* _owner;
 };
 
 template<typename T>
@@ -46,8 +46,8 @@ public:
 	/// <param name="elapsedTime"></param>
 	void Execute(float elapsedTime)
 	{
-		if (subState)
-			subState->OnExecute(elapsedTime);
+		if (_subState)
+			_subState->OnExecute(elapsedTime);
 		OnExecute(elapsedTime);
 	}
 	/// <summary>
@@ -55,8 +55,8 @@ public:
 	/// </summary>
 	void Exit()
 	{
-		if (subState)
-			subState->OnExit();
+		if (_subState)
+			_subState->OnExit();
 		OnExit();
 	}
 
@@ -69,28 +69,28 @@ public:
 	virtual void SetSubState(std::string key)
 	{
 		// 2層目ステートセット
-		subState = stateMap.at(key).get();
-		subState->OnEnter();
+		_subState = _stateMap.at(key).get();
+		_subState->OnEnter();
 	}
 	// サブステート変更
 	virtual void ChangeSubState(std::string key)
 	{
 		// 2層目のステート切り替え
-		if (subState != nullptr)
-			subState->OnExit();
+		if (_subState != nullptr)
+			_subState->OnExit();
 		SetSubState(key);
 	}
 	// サブステート登録
 	virtual void RegisterSubState(std::shared_ptr<StateBase<T>> state)
 	{
-		stateMap.insert(std::make_pair(state->GetName(), state));
+		_stateMap.insert(std::make_pair(state->GetName(), state));
 	}
 	// サブステートの名前番号取得
 	virtual const char* GetSubStateName()
 	{
-		if (subState == nullptr)
+		if (_subState == nullptr)
 			return "";
-		return subState->GetName();
+		return _subState->GetName();
 	}
 #pragma endregion
 protected:
@@ -104,6 +104,6 @@ protected:
 #pragma endregion
 protected:
 	using StateMap = std::unordered_map<std::string, std::shared_ptr<StateBase<T>>>;
-	StateMap stateMap;
-	StateBase<T>* subState = nullptr;
+	StateMap _stateMap;
+	StateBase<T>* _subState = nullptr;
 };

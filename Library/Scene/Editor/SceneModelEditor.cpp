@@ -53,7 +53,7 @@ void SceneModelEditor::OnUpdate(float elapsedTime)
 
         // 当たり判定表示
         if (_showCollision)
-            _modelCollision.DebugRender();
+            _modelCollision.DebugRender(GetRenderContext());
 
         // ノード表示
         if (_showNode)

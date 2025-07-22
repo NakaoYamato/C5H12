@@ -83,7 +83,7 @@ void ModelCollider::Update(float elapsedTime)
 // デバッグ描画処理
 void ModelCollider::DebugRender(const RenderContext& rc)
 {
-	_modelCollision.DebugRender();
+	_modelCollision.DebugRender(rc);
 }
 // GUI描画
 void ModelCollider::DrawGui()

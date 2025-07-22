@@ -84,6 +84,7 @@ void CharactorController::OnContact(CollisionData& collisionData)
 	// トリガーでなければ押し出し処理
     if (!collisionData.isTrigger && !collisionData.otherIsTrigger)
     {
+		// 相手がキャラクターコントローラーを持っているか確認
 		auto otherCharactor = collisionData.other->GetComponent<CharactorController>();
 		if (otherCharactor)
 		{
@@ -166,8 +167,9 @@ void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 		DirectX::XMStoreFloat3(&origine, Origine);
 		DirectX::XMStoreFloat3(&direction, Direction);
 		Vector3 hitPosition{}, hitNormal{};
+		Actor* hitActor = nullptr;
 		// スフィアキャスト
-		if (collisionManager.SphereCast(origine, direction, _radius, distance, hitPosition, hitNormal))
+		if (collisionManager.SphereCast(origine, direction, _radius, &distance, &hitPosition, &hitNormal, &hitActor))
 		{
 			// 増やしたキャスト量を引く
 			distance -= _skinWidth;
@@ -188,6 +190,15 @@ void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 			{
 				// 速度を0にする
 				_velocity.y = 0.0f;
+				// 当たった床の情報をアクターに通知(レイヤーは無視)
+				CollisionData collisionData;
+				collisionData.other = hitActor;
+				collisionData.otherIsTrigger = false;
+				collisionData.isTrigger = false;
+				collisionData.hitPosition = hitPosition;
+				collisionData.hitNormal = hitNormal;
+				collisionData.penetration = distance;
+				GetActor()->Contact(collisionData);
 				// スロープの角度を計算
 				DirectX::XMVECTOR Up = DirectX::XMVectorSet(0, 1, 0, 0);
 				float angle = acosf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(Normal, Up)));

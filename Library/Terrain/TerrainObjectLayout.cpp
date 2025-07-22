@@ -52,6 +52,14 @@ void TerrainObjectLayout::DrawGui()
 		}
 		ImGui::TreePop();
 	}
+	ImGui::Separator();
+	if (ImGui::Button(u8"リセット"))
+	{
+		// モデルと配置情報をリセット
+		_models.clear();
+		_layouts.clear();
+		_currentModelIndex = 0; // モデルインデックスをリセット
+	}
 }
 // モデルを追加
 void TerrainObjectLayout::AddModel(ID3D11Device* device, const std::string& filepath)

@@ -188,7 +188,7 @@ void Graphics::Initialize(HWND hwnd, HINSTANCE instance, const BOOL FULLSCREEN)
 		}
 		// カスケードシャドウマップ管理者生成
 		_cascadedShadowMap = std::make_unique<CascadedShadowMap>(_device.Get(),
-			1024 * 4, 1024 * 4);
+			1024 * 6, 1024 * 6);
 		// GBuffer生成
 		_gBuffer = std::make_unique<GBuffer>(_device.Get(), width, height);
 	}

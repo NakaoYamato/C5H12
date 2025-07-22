@@ -243,32 +243,44 @@ void CollisionManager::DrawGui()
 bool CollisionManager::RayCast(
 	const Vector3& start,
 	const Vector3& direction,
-	float& distance,
-	Vector3& hitPosition,
-	Vector3& hitNormal)
+	float* distance,
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	Actor* hitActor)
 {
 	bool hit = false;
 	// 各メッシュコライダーに対してレイキャストを行う
 	for (auto& meshCollider : _meshColliders)
 	{
-		if (meshCollider->RayCast(start, direction, &distance, &hitPosition, &hitNormal))
+		if (meshCollider->RayCast(start, direction, distance, hitPosition, hitNormal))
 		{
 			hit = true;
+			// 衝突したアクターを設定
+			hitActor = meshCollider->GetActor().get();
 		}
 	}
 	return hit;
 }
 
 /// スフィアキャスト
-bool CollisionManager::SphereCast(const Vector3& origin, const Vector3& direction, float radius, float& distance, Vector3& hitPosition, Vector3& hitNormal)
+bool CollisionManager::SphereCast(
+	const Vector3& origin, 
+	const Vector3& direction, 
+	float radius,
+	float* distance,
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	Actor** hitActor)
 {
 	bool hit = false;
 	// 各メッシュコライダーに対してスフィアキャスト行う
 	for (auto& meshCollider : _meshColliders)
 	{
-		if (meshCollider->SphereCast(origin, direction, radius, &distance, &hitPosition, &hitNormal))
+		if (meshCollider->SphereCast(origin, direction, radius, distance, hitPosition, hitNormal))
 		{
 			hit = true;
+			// 衝突したアクターを設定
+			*hitActor = meshCollider->GetActor().get();
 		}
 	}
 	return hit;

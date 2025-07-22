@@ -61,15 +61,19 @@ public:
 	/// <param name="rc"></param>
 	/// <summary>
 	virtual void DelayedRender(const RenderContext& rc) {}
+	/// <summary>
 	/// オブジェクトとの接触時の処理
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	virtual void OnContact(CollisionData& collisionData) {}
+	/// <summary>
 	/// オブジェクトとの接触した瞬間時の処理
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	virtual void OnContactEnter(CollisionData& collisionData) {}
-	// GUI描画
+	/// <summary>
+	/// GUI描画
+	/// </summary>
 	virtual void DrawGui() {}
 
 	// アクター設定

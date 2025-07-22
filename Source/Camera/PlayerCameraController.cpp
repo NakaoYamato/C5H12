@@ -74,12 +74,14 @@ void PlayerCameraController::Update(float elapsedTime)
     // 新しい視点とステージの当たり判定
     float distance = _cameraDistance;
     Vector3 hitPosition{}, hitNormal{};
+    Actor* hitActor = nullptr;
 	if (GetActor()->GetScene()->GetCollisionManager().SphereCast(
         newFocus, -front.Normalize(),
         _cameraRadius, 
-        distance,
-        hitPosition,
-        hitNormal))
+        &distance,
+        &hitPosition,
+        &hitNormal,
+        &hitActor))
 	{
         // 密接していなければdistanceを使う
         if (distance > 0.0f)

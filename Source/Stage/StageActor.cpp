@@ -7,6 +7,8 @@
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "../../Library/Component/Terrain/TerrainCollider.h"
 
+#include "StageController.h"
+
 // ¶¬Žžˆ—
 void StageActor::OnCreate()
 {
@@ -33,6 +35,7 @@ void StageActor::OnCreate()
 
     auto terrainController = this->AddComponent<TerrainController>(_terrainPath);
     this->AddComponent<TerrainDeformer>();
+    this->AddComponent<StageController>(_areaNumber);
     this->AddCollider<TerrainCollider>();
 #endif
 }

@@ -23,6 +23,8 @@ public:
 	void Start() override;
 	// Gui描画処理
 	void DrawGui() override;
+	// オブジェクトとの接触時の処理
+	void OnContact(CollisionData& collisionData) override;
 
 #pragma region アクセサ
 	// 陣営取得
@@ -44,6 +46,10 @@ public:
 private:
 	// 陣営
 	Faction _faction = Faction::Neutral;
+	// エリア番号
+	int _areaNumber = -1;
+	// 半径
+	float _radius = 1.0f;
 	// ヘイト値
 	float _hateValue = 0.0f;
 	// ターゲット可能か

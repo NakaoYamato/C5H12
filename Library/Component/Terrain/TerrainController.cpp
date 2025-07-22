@@ -171,10 +171,6 @@ void TerrainController::CreateEnvironment(int layoutID)
 {
 	if (!_terrain)
 		return;
-	// 地形オブジェクトレイアウトからモデルを取得
-	auto terrainObjectLayout = _terrain->GetTerrainObjectLayout();
-	if (!terrainObjectLayout)
-		return;
     // 描画用アクター生成
     std::string name = GetActor()->GetName();
     name += "Obj" + std::to_string(layoutID);

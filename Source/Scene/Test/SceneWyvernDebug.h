@@ -2,14 +2,14 @@
 
 #include "../../Library/Scene/SceneManager.h"
 
-class SceneDragonDebug : public Scene
+class SceneWyvernDebug : public Scene
 {
 public:
-	SceneDragonDebug() {}
-	~SceneDragonDebug()override {}
+	SceneWyvernDebug() {}
+	~SceneWyvernDebug()override {}
 
 	// –¼‘Oæ“¾
-	const char* GetName()const { return u8"DragonDebug"; }
+	const char* GetName()const { return u8"WyvernDebug"; }
 	// ŠK‘wæ“¾
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Debug; }
 	//‰Šú‰»
@@ -17,9 +17,9 @@ public:
 	// ©g‚ğV‹K‚Ìƒ|ƒCƒ“ƒ^‚Å“n‚·
 	std::shared_ptr<Scene> GetNewShared() override
 	{
-		return std::make_shared<SceneDragonDebug>();
+		return std::make_shared<SceneWyvernDebug>();
 	}
 };
 
 // ƒƒjƒ…[ƒo[‚É“o˜^
-_REGISTER_SCENE(SceneDragonDebug)
+_REGISTER_SCENE(SceneWyvernDebug)

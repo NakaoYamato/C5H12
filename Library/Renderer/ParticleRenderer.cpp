@@ -179,6 +179,8 @@ void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount)
 	// 画像読み込み
 	RegisterTextureData("Breath", L"./Data/Texture/Particle/AdobeStock_255896219.png", { 3,2 });
 	RegisterTextureData("Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
+	RegisterTextureData("Breath2", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753233552.png", { 3,2 });
+	RegisterTextureData("Breath3", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753234506.png", { 3,2 });
 }
 
 /// パーティクル生成

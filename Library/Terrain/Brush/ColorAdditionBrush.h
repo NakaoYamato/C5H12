@@ -15,6 +15,4 @@ public:
 		ID3D11ShaderResourceView** srv,
 		uint32_t startSlot,
 		uint32_t numViews) override;
-	// GUI•`‰æ
-	void DrawGui(std::shared_ptr<Terrain> terrain)override;
 };

@@ -2,9 +2,6 @@
 #include "../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
-// テクスチャの高さマップ
-Texture2D terrainHeightTexture : register(t2);
-
 // パラメータマップ
 Texture2D<float4> parameterTexture : register(t6);
 
@@ -24,7 +21,6 @@ const OutputPatch<DS_IN, 3> patch)
     // パラメータマップから高さ方向取得
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
     float height = parameter.r * heightSclaer;
-    height += terrainHeightTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0).x;
     // 頂点座標をハイトマップで取得した値分ずらす
     {
         position = mul(float4(position, 1.0f), world).xyz;

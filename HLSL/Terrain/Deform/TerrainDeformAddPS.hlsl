@@ -4,6 +4,9 @@
 PS_OUT main(VsOut pin)
 {
     float rate = CalculateBrushRate(pin.texcoord);
+    
+    if (rate <= 0.0f)
+        discard;
 
     float2 paintTexcoord = pin.texcoord * textureTillingScale;
     float4 color = paintColorTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], paintTexcoord);
@@ -16,14 +19,8 @@ PS_OUT main(VsOut pin)
     normal = lerp(baseNormal, normal, brushStrength * rate);
     normal = normalize(normal);
     
-    float height = paintHeightTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], paintTexcoord).r;
-    float baseHeight = heightTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord).r;
-    height = height * brushPadding.x;
-    height = lerp(baseHeight, height, rate);
-    
     PS_OUT pout = (PS_OUT) 0;
     pout.color = color;
     pout.normal = normal;
-    pout.height = height;
     return pout;
 }

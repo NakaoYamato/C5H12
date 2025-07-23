@@ -18,8 +18,6 @@ public:
         float textureTillingScale       = 5.0f; // タイリング係数(基本変えない)
         float brushRotationY            = 0.0f; // ブラシのY軸回転(ラジアン)
         Vector2 heightScale = { -1.0f, 1.0f }; // 高さ変形スケール x : 最小値、 y : 最大値
-
-        Vector4 padding = Vector4::Zero; // パディング
     };
 	// 編集タスク
     struct Task
@@ -32,7 +30,6 @@ public:
 		float       strength        = 0.0f;             // ブラシ強度
         float       brushRotationY  = 0.0f;             // ブラシのY軸回転(ラジアン)
 		Vector2     heightScale     = { -1.0f, 1.0f };  // 高さ変形スケール x : 最小値、 y : 最大値
-        Vector4     padding         = Vector4::Zero;    // パディング
     };
     // 書き込むテクスチャデータ
 	struct PaintTexture
@@ -41,8 +38,6 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseColorSRV; // ベースカラーのSRV
 		std::wstring normalPath;     // 法線マップのパス
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV; // 法線マップのSRV
-		std::wstring heightMapPath; // 高さマップのパス
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> heightMapSRV; // 高さマップのSRV
 	};
     // ブラシテクスチャデータ
     struct BrushTexture
@@ -105,7 +100,7 @@ private:
     // テクスチャ読み込み
     void LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv);
     // ペイントテクスチャの追加
-    void AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath, const std::wstring& heightMapPath);
+    void AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath);
     // ブラシテクスチャの追加
     void AddBrushTexture(const std::wstring& path);
     // 配置するモデルデータの追加
@@ -221,8 +216,6 @@ protected:
     float _brushRotationY = 0.0f;
     // 高さ変形スケール x : 最小値、 y : 最大値
     Vector2 _brushHeightScale = { -100.0f, 100.0f };
-    // 定数バッファのパディング
-	Vector4 _padding = Vector4::Zero; // パディング
     // ブラシのデバッグ描画フラグ
 	bool _drawDebugBrush = true;
 };

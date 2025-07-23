@@ -31,8 +31,8 @@ public:
     {
         DirectX::XMFLOAT4X4 world = {};
 
-        float edgeFactor    = 128.0f;    // エッジ分割数
-        float innerFactor   = 128.0f;    // 内部部分数
+        float edgeFactor    = 64.0f;    // エッジ分割数
+        float innerFactor   = 64.0f;    // 内部部分数
         float heightScaler  = 1.0f;     // 高さ係数
         float lodDistanceMax = 200.0f;    // LOD(Level Of Detail)距離
 
@@ -53,10 +53,9 @@ public:
 
 	static constexpr size_t BaseColorTextureIndex = 0;
 	static constexpr size_t NormalTextureIndex = 1;
-	static constexpr size_t HeightTextureIndex = 2;
     static constexpr LONG StreamOutMaxVertex = 3 * 3 * 64 * 64;
-    static constexpr LONG MaterialMapSize = 1024 * 4;
-    static constexpr LONG ParameterMapSize = 1024 * 4;
+    static constexpr LONG MaterialMapSize = 1024 * 6;
+    static constexpr LONG ParameterMapSize = 1024 * 3;
     static constexpr UINT ParameterMapIndex = 6;
 public:
     Terrain(ID3D11Device* device, const std::string& serializePath = "./Data/Terrain/Save/Test000.json");
@@ -103,8 +102,6 @@ private:
     void SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath);
     // 法線テクスチャの書き出し
     void SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* normalPath);
-	// 高さテクスチャの書き出し
-	void SaveHeightTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
     // パラメータマップの書き出し
     void SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath);
 
@@ -129,7 +126,6 @@ private:
     // ロード用SRV
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadBaseColorSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadNormalSRV;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadHeightSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterSRV;
 #pragma endregion
     ConstantBuffer                          _data;
@@ -158,8 +154,6 @@ private:
     std::wstring _baseColorTexturePath = L"";
     // 法線テクスチャのパス
     std::wstring _normalTexturePath = L"";
-	// 高さテクスチャのパス
-    std::wstring _heightTexturePath = L"";
     // パラメータテクスチャのパス
     std::wstring _parameterTexturePath = L"";
 };

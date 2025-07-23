@@ -64,7 +64,6 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
 			{ 
                 DXGI_FORMAT_R16G16B16A16_FLOAT, // BaseColor 
 				DXGI_FORMAT_R16G16B16A16_FLOAT, // Normal
-                DXGI_FORMAT_R16G16B16A16_FLOAT  // Height
             })
     );
     // パラメータマップ作成
@@ -135,7 +134,6 @@ void Terrain::Render(TextureRenderer& textureRenderer, const RenderContext& rc, 
     {
         _materialMapFB->Clear(BaseColorTextureIndex, dc, Vector4::White);
         _materialMapFB->Clear(NormalTextureIndex, dc, Vector4::Blue);
-		_materialMapFB->Clear(HeightTextureIndex, dc, Vector4::Black);
         _parameterMapFB->Clear(dc, Vector4::Black);
         _resetMap = false;
     }
@@ -157,13 +155,6 @@ void Terrain::Render(TextureRenderer& textureRenderer, const RenderContext& rc, 
 			_materialMapFB->Deactivate(dc);
 			_loadNormalSRV.Reset();
 		}
-        if (_loadHeightSRV)
-        {
-            _materialMapFB->ClearAndActivate(HeightTextureIndex, dc);
-            textureRenderer.Blit(dc, _loadHeightSRV.GetAddressOf(), 0, 1);
-            _materialMapFB->Deactivate(dc);
-            _loadHeightSRV.Reset();
-        }
 		if (_loadParameterSRV)
 		{
 			_parameterMapFB->ClearAndActivate(dc);
@@ -211,7 +202,6 @@ void Terrain::Render(TextureRenderer& textureRenderer, const RenderContext& rc, 
     {
         _materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(),
         _materialMapFB->GetColorSRV(NormalTextureIndex).Get(),
-		_materialMapFB->GetColorSRV(HeightTextureIndex).Get(),
     };
     dc->PSSetShaderResources(0, _countof(srvs), srvs);
     // パラメータマップ設定
@@ -293,8 +283,6 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 		ImGui::Image(_materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 		ImGui::Text(u8"法線テクスチャ: %s", ToString(_normalTexturePath).c_str());
 		ImGui::Image(_materialMapFB->GetColorSRV(NormalTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-		ImGui::Text(u8"高さテクスチャ: %s", ToString(_heightTexturePath).c_str());
-		ImGui::Image(_materialMapFB->GetColorSRV(HeightTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
         ImGui::Text(u8"パラメータマップ: %s", ToString(_parameterTexturePath).c_str());
         ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
         if (ImGui::Button(u8"リセット"))
@@ -350,23 +338,6 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 			// フラグをオンにする
 			_isLoadingTextures = true;
         }
-		if (ImGui::OpenDialogBotton(u8"高さテクスチャ読み込み", &resultPath, ImGui::DDSTextureFilter))
-		{
-			GpuResourceManager::LoadTextureFromFile(
-				device,
-				ToWString(resultPath).c_str(),
-				_loadHeightSRV.ReleaseAndGetAddressOf(),
-				nullptr);
-			// 高さテクスチャのパスを更新
-			_heightTexturePath = ToWString(resultPath);
-			// テクスチャをロード
-			GpuResourceManager::LoadTextureFromFile(device,
-				_heightTexturePath.c_str(),
-				_loadHeightSRV.ReleaseAndGetAddressOf(),
-				nullptr);
-			// フラグをオンにする
-			_isLoadingTextures = true;
-		}
 		if (ImGui::OpenDialogBotton(u8"パラメータマップ読み込み", &resultPath, ImGui::DDSTextureFilter))
 		{
 			GpuResourceManager::LoadTextureFromFile(
@@ -394,11 +365,6 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 		if (ImGui::SaveDialogBotton(u8"法線テクスチャ書き出し", &resultPath, ImGui::DDSTextureFilter))
 		{
 			SaveNormalTexture(device, dc,
-				ToWString(resultPath).c_str());
-		}
-		if (ImGui::SaveDialogBotton(u8"高さテクスチャ書き出し", &resultPath, ImGui::DDSTextureFilter))
-		{
-			SaveHeightTexture(device, dc,
 				ToWString(resultPath).c_str());
 		}
 		if (ImGui::SaveDialogBotton(u8"パラメータマップ書き出し", &resultPath, ImGui::DDSTextureFilter))
@@ -511,17 +477,6 @@ void Terrain::SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, c
         // 基本色テクスチャのパスを更新
         _normalTexturePath = normalPath;
     }
-}
-// 高さテクスチャの書き出し
-void Terrain::SaveHeightTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* heightMapPath)
-{
-	if (Exporter::SaveDDSFile(device, dc,
-		_materialMapFB->GetColorSRV(HeightTextureIndex).Get(),
-		heightMapPath))
-	{
-		// 高さテクスチャのパスを更新
-		_heightTexturePath = heightMapPath;
-	}
 }
 // パラメータマップの書き出し
 void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)

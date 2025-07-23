@@ -61,8 +61,14 @@ private:
 	// GUIの表示位置
 	Vector2 _guiPosition = Vector2::Zero;
 
+	// 生成するオブジェクトの当たり判定属性
+	TerrainObjectLayout::CollisionType _objectCollisionType = TerrainObjectLayout::CollisionType::None;
 	// 生成するオブジェクトのスケール
 	Vector3 _objectScale = Vector3::One;
 	// 生成するオブジェクトの回転(ラジアン)
 	Vector3 _objectAngle = Vector3::Zero;
+	// 生成するオブジェクトの当たり判定オフセット
+	Vector3 _objectCollisionOffset = Vector3::Zero;
+	// 生成するオブジェクトの当たり判定パラメータ
+	Vector4 _objectCollisionParameter = Vector4::One;
 };

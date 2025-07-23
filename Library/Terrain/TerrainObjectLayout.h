@@ -16,9 +16,13 @@ public:
 	{
 		None,       // 衝突なし
 		Box,		// ボックス
+		BoxTrigger, // ボックストリガー
 		Sphere,     // 球
+		SphereTrigger, // 球トリガー
 		Capsule,    // カプセル
+		CapsuleTrigger, // カプストリガー
 		Mesh,		// メッシュ
+		MeshTrigger // メッシュトリガー
 	};
 	// 配置情報
 	struct LayoutData
@@ -33,6 +37,13 @@ public:
 		Vector3 rotation = Vector3::Zero;
 		// 配置サイズ
 		Vector3 size = Vector3::One;
+		// 衝突判定のオフセット値
+		Vector3 collisionOffset = Vector3::Zero;
+		// 衝突判定のパラメータ
+		// ボックスなら(x : 半辺長.x, y : 半辺長.y, z : 半辺長.z)
+		// 球なら(x : 半径)
+		// カプセルなら(x : 終点.x, y : 終点.y, z : 終点.z, w : 半径)
+		Vector4 collisionParameter = Vector4::One;
 		// 書き出し
 		void Export(const char* label, nlohmann::json* jsonData);
 		// 読み込み
@@ -47,7 +58,13 @@ public:
 	// モデルを追加
 	void AddModel(ID3D11Device* device, const std::string& filepath);
 	// 配置情報を追加
-	int AddLayout(const std::string& modelPath, CollisionType collisionType, const Vector3& position, const Vector3& rotation, const Vector3& size);
+	int AddLayout(const std::string& modelPath, 
+		CollisionType collisionType,
+		const Vector3& position,
+		const Vector3& rotation,
+		const Vector3& size,
+		const Vector3& collisionOffset,
+		const Vector4& collisionParameter);
 	// モデルデータを取得
 	const std::unordered_map<std::string, std::shared_ptr<Model>>& GetModels() const { return _models; }
 	// モデルデータを取得

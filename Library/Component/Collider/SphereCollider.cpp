@@ -14,9 +14,6 @@ void SphereCollider::Start()
 // デバッグ描画処理
 void SphereCollider::DebugRender(const RenderContext& rc)
 {
-	// デバッグ描画フラグがオフなら何もしない
-	if (!GetActor()->IsDrawingDebug())return;
-
 	// 有効でなければ描画しない
 	if (!IsActive())
 		return;

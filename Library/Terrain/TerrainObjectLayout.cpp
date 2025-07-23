@@ -78,7 +78,13 @@ void TerrainObjectLayout::AddModel(ID3D11Device* device, const std::string& file
 	_currentModelIndex++;
 }
 // 配置情報を追加
-int TerrainObjectLayout::AddLayout(const std::string& modelPath, CollisionType collisionType, const Vector3& position, const Vector3& rotation, const Vector3& size)
+int TerrainObjectLayout::AddLayout(const std::string& modelPath,
+	CollisionType collisionType,
+	const Vector3& position,
+	const Vector3& rotation,
+	const Vector3& size,
+	const Vector3& collisionOffset,
+	const Vector4& collisionParameter)
 {
 	// 配置情報を追加
 	_layouts[_currentModelIndex].modelPath = modelPath;
@@ -86,6 +92,8 @@ int TerrainObjectLayout::AddLayout(const std::string& modelPath, CollisionType c
 	_layouts[_currentModelIndex].localPosition = position;
 	_layouts[_currentModelIndex].rotation = rotation;
 	_layouts[_currentModelIndex].size = size;
+	_layouts[_currentModelIndex].collisionOffset = collisionOffset;
+	_layouts[_currentModelIndex].collisionParameter = collisionParameter;
 	_currentModelIndex++;
 	return _currentModelIndex - 1; // 追加した配置情報のインデックスを返す
 }
@@ -177,6 +185,13 @@ void TerrainObjectLayout::LayoutData::Export(const char* label, nlohmann::json* 
 	(*jsonData)[label]["size.x"] = size.x;
 	(*jsonData)[label]["size.y"] = size.y;
 	(*jsonData)[label]["size.z"] = size.z;
+	(*jsonData)[label]["collisionOffset.x"] = collisionOffset.x;
+	(*jsonData)[label]["collisionOffset.y"] = collisionOffset.y;
+	(*jsonData)[label]["collisionOffset.z"] = collisionOffset.z;
+	(*jsonData)[label]["collisionParameter.x"] = collisionParameter.x;
+	(*jsonData)[label]["collisionParameter.y"] = collisionParameter.y;
+	(*jsonData)[label]["collisionParameter.z"] = collisionParameter.z;
+	(*jsonData)[label]["collisionParameter.w"] = collisionParameter.w;
 }
 // 読み込み
 void TerrainObjectLayout::LayoutData::Import(const char* label, const nlohmann::json& jsonData)
@@ -194,5 +209,12 @@ void TerrainObjectLayout::LayoutData::Import(const char* label, const nlohmann::
 		size.x = jsonData[label]["size.x"].get<float>();
 		size.y = jsonData[label]["size.y"].get<float>();
 		size.z = jsonData[label]["size.z"].get<float>();
+		collisionOffset.x = jsonData[label]["collisionOffset.x"].get<float>();
+		collisionOffset.y = jsonData[label]["collisionOffset.y"].get<float>();
+		collisionOffset.z = jsonData[label]["collisionOffset.z"].get<float>();
+		collisionParameter.x = jsonData[label]["collisionParameter.x"].get<float>();
+		collisionParameter.y = jsonData[label]["collisionParameter.y"].get<float>();
+		collisionParameter.z = jsonData[label]["collisionParameter.z"].get<float>();
+		collisionParameter.w = jsonData[label]["collisionParameter.w"].get<float>();
 	}
 }

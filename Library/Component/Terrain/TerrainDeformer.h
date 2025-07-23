@@ -76,11 +76,13 @@ public:
 		_tasks.push_back(task);
 	}
     // ŠÂ‹«•¨‚ð’Ç‰Á
-    void AddEnvironmentObject(const std::string& modelPath, 
+    void AddEnvironmentObject(const std::string& modelPath,
         TerrainObjectLayout::CollisionType collisionType,
-        const Vector3& position, 
-        const Vector3& rotation, 
-        const Vector3& size);
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& size,
+        const Vector3& collisionOffset,
+        const Vector4& collisionParameter);
 
 	// ƒuƒ‰ƒV‚Ì’Ç‰Á
     void RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush);

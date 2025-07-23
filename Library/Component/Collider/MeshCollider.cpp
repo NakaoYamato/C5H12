@@ -32,8 +32,7 @@ void MeshCollider::Update(float elapsedTime)
 // デバッグ描画処理
 void MeshCollider::DebugRender(const RenderContext& rc)
 {
-	// デバッグ描画フラグがオフなら何もしない
-	if (!GetActor()->IsDrawingDebug())return;
+	// アクターが描画階層を描画していない場合は何もしない
 	if (!GetActor()->IsDrawingHierarchy())return;
 
 	// 有効でなければ描画しない

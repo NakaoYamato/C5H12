@@ -346,9 +346,13 @@ void TerrainDeformer::DrawGui()
     }
 }
 // 環境物を追加
-void TerrainDeformer::AddEnvironmentObject(const std::string& modelPath, 
+void TerrainDeformer::AddEnvironmentObject(const std::string& modelPath,
     TerrainObjectLayout::CollisionType collisionType,
-    const Vector3& position, const Vector3& rotation, const Vector3& size)
+    const Vector3& position,
+    const Vector3& rotation,
+    const Vector3& size,
+    const Vector3& collisionOffset,
+    const Vector4& collisionParameter)
 {
     // 地形コントローラーが取得できていない場合は何もしない
     if (!_terrainController.lock())
@@ -368,7 +372,9 @@ void TerrainDeformer::AddEnvironmentObject(const std::string& modelPath,
         collisionType,
         position.TransformCoord(GetActor()->GetTransform().GetMatrixInverse()), // 位置をローカル座標系で設定
         rotation,
-        size);
+        size,
+        collisionOffset,
+        collisionParameter);
     // 描画用アクター生成
 	_terrainController.lock()->CreateEnvironment(layoutID);
 }

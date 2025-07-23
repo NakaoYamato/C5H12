@@ -15,9 +15,6 @@ void CapsuleCollider::Start()
 // デバッグ描画処理
 void CapsuleCollider::DebugRender(const RenderContext& rc)
 {
-	// デバッグ描画フラグがオフなら何もしない
-	if (!GetActor()->IsDrawingDebug())return;
-
 	// 有効でなければ描画しない
 	if (!IsActive())
 		return;

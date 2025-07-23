@@ -94,6 +94,16 @@ void CharactorController::OnContact(CollisionData& collisionData)
 				_pushOut += (otherCharactor->GetMass() / sum) * collisionData.penetration * collisionData.hitNormal;
 			else	
 				_pushOut += collisionData.penetration * collisionData.hitNormal;
+
+			return;
+		}
+
+		// 相手がステージレイヤーなら押し出し量を計算
+		if (collisionData.otherLayer == CollisionLayer::Stage)
+		{
+			// 押し出し量を取得
+			_pushOut += collisionData.penetration * collisionData.hitNormal;
+			return;
 		}
     }
 }

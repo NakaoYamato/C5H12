@@ -12,7 +12,7 @@ Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 // GUI描画
 void Sprite::DrawGui()
 {
-	static const char* alignmentNames[] = {
+	static const char* AlignmentNames[] = {
 		"LEFT_UP",
 		"LEFT_CENTER",
 		"LEFT_DOWN",
@@ -24,7 +24,7 @@ void Sprite::DrawGui()
 		"RIGHT_DOWN"
 	};
 
-	if (ImGui::Combo(u8"中心位置", reinterpret_cast<int*>(&_centerAlignment), alignmentNames, IM_ARRAYSIZE(alignmentNames)))
+	if (ImGui::Combo(u8"中心位置", reinterpret_cast<int*>(&_centerAlignment), AlignmentNames, IM_ARRAYSIZE(AlignmentNames)))
 		RecalcCenter(_centerAlignment);
 
 	ImGui::DragFloat2(u8"位置", &_position.x, 0.1f, -1000.0f, 1000.0f);

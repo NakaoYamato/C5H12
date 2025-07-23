@@ -11,6 +11,13 @@ cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
     float4 directional_light_color;
     PointLight pointLights[8];
 };
+// フォグ定数バッファ
+cbuffer FOG_CONSTANT_BUFFER : register(b4)
+{
+    float4 fog_color;
+    float2 fog_range;
+    float2 fog_padding;
+};
 
 #include "../Function/ShadingFunctions.hlsli"
 
@@ -103,7 +110,10 @@ PS_OUT main(VsOut pin)
     total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx, specular_pmrem, samplerStates[_LINEAR_WRAP_SAMPLER_INDEX]);
 
 	//	色生成
-    float3 color = total_diffuse + total_specular + emissiveColor;    
+    float3 color = total_diffuse + total_specular + emissiveColor;
+    
+    color = CalcFog(float4(color, 1.0f), fog_color, fog_range, length(decodeData.worldPosition.xyz - cameraPosition.xyz)).rgb;
+    
     PS_OUT pout = (PS_OUT) 0;
     pout.color = float4(pow(color.rgb, 1.0f / _GAMMA_FACTOR), 1.0f);
     pout.depth = decodeData.depth;

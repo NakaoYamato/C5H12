@@ -44,7 +44,12 @@ void TerrainDeformer::OnCreate()
     _copyMaterialMapFB = std::make_unique<FrameBuffer>(
         Graphics::Instance().GetDevice(),
         Terrain::MaterialMapSize, Terrain::MaterialMapSize, true,
-        std::vector<DXGI_FORMAT>({ DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT }));
+        std::vector<DXGI_FORMAT>(
+            { 
+                DXGI_FORMAT_R16G16B16A16_FLOAT,
+                DXGI_FORMAT_R16G16B16A16_FLOAT,
+                DXGI_FORMAT_R16G16B16A16_FLOAT
+            }));
     // 地形のハイトマップを格納するフレームバッファを作成
     _copyParameterMapFB = std::make_unique<FrameBuffer>(
         Graphics::Instance().GetDevice(),
@@ -58,9 +63,19 @@ void TerrainDeformer::OnCreate()
             size_t size = jsonData["Size"].get<std::size_t>();
 			for (size_t i = 0; i < size; ++i)
 			{
-				std::wstring colorPath = jsonData["ColorPath" + std::to_string(i)].get<std::wstring>();
-				std::wstring normalPath = jsonData["NormalPath" + std::to_string(i)].get<std::wstring>();
-                AddPaintTexture(colorPath, normalPath);
+                std::string key{};
+				std::wstring colorPath{}, normalPath{}, heightMapPath{};
+
+                key = "ColorPath" + std::to_string(i);
+                if (jsonData.contains(key))
+                    colorPath = jsonData[key].get<std::wstring>();
+                key = "NormalPath" + std::to_string(i);
+                if (jsonData.contains(key))
+                    normalPath = jsonData[key].get<std::wstring>();
+                key = "HeightMapPath" + std::to_string(i);
+                if (jsonData.contains(key))
+                    heightMapPath = jsonData[key].get<std::wstring>();
+                AddPaintTexture(colorPath, normalPath, heightMapPath);
 			}
         }
     }
@@ -182,8 +197,9 @@ void TerrainDeformer::Render(const RenderContext& rc)
     // 現在のマテリアルマップのコピー
     _copyMaterialMapFB->ClearAndActivate(rc.deviceContext, Vector4::Zero, 1.0f);
 	ID3D11ShaderResourceView* copySRVs[] = {
-		terrain->GetMaterialMapFB()->GetColorSRV(0).Get(),
-		terrain->GetMaterialMapFB()->GetColorSRV(1).Get()
+		terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
+		terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+		terrain->GetMaterialMapFB()->GetColorSRV(Terrain::HeightTextureIndex).Get()
 	};
     GetActor()->GetScene()->GetTextureRenderer().Blit(
         rc.deviceContext,
@@ -208,8 +224,9 @@ void TerrainDeformer::Render(const RenderContext& rc)
     // 各マップのSRV設定
 	ID3D11ShaderResourceView* materialSRVs[] =
 	{
-		_copyMaterialMapFB->GetColorSRV(0).Get(),
-		_copyMaterialMapFB->GetColorSRV(1).Get(),
+        _copyMaterialMapFB->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
+        _copyMaterialMapFB->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+        _copyMaterialMapFB->GetColorSRV(Terrain::HeightTextureIndex).Get(),
 		_copyParameterMapFB->GetColorSRV().Get(),
 	};
     rc.deviceContext->PSSetShaderResources(0, _countof(materialSRVs), materialSRVs);
@@ -235,6 +252,8 @@ void TerrainDeformer::Render(const RenderContext& rc)
         constantBufferData.heightScale = task.heightScale;
         // ブラシのY軸回転を設定
         constantBufferData.brushRotationY = task.brushRotationY;
+		// パディングを設定
+		constantBufferData.padding = task.padding;
 
         // 定数バッファ更新
         rc.deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &constantBufferData, 0, 0);
@@ -243,6 +262,7 @@ void TerrainDeformer::Render(const RenderContext& rc)
 		auto& textureData = _paintTextures[task.paintTextureIndex];
 		rc.deviceContext->PSSetShaderResources(PaintBaseColorTextureIndex, 1, textureData.baseColorSRV.GetAddressOf());
 		rc.deviceContext->PSSetShaderResources(PaintNormalTextureIndex, 1, textureData.normalSRV.GetAddressOf());
+		rc.deviceContext->PSSetShaderResources(PaintHeightTextureIndex, 1, textureData.heightMapSRV.GetAddressOf());
 		// ブラシのSRVを設定
         auto& brushTextureData = _brushTextures[task.brushTextureIndex];
 		rc.deviceContext->PSSetShaderResources(BrushTextureIndex, 1, brushTextureData.textureSRV.GetAddressOf());
@@ -281,6 +301,7 @@ void TerrainDeformer::DrawGui()
             {
 				jsonData["ColorPath" + std::to_string(i)] = _paintTextures[i].baseColorPath;
 				jsonData["NormalPath" + std::to_string(i)] = _paintTextures[i].normalPath;
+				jsonData["HeightMapPath" + std::to_string(i)] = _paintTextures[i].heightMapPath;
             }
 			Exporter::SaveJsonFile(DEFAULT_PAINT_TEXTURE_PATH, jsonData);
         }
@@ -314,7 +335,7 @@ void TerrainDeformer::DrawGui()
             DrawPaintTextureGui();
             ImGui::Separator();
 
-			ImGui::SliderFloat(u8"タイリング係数", &_textureTillingScale, 1.0f, 20.0f, "%.0f", 1.0f);
+			ImGui::SliderFloat(u8"タイリング係数", &_textureTillingScale, 1.0f, 100.0f, "%.0f", 1.0f);
             ImGui::Separator();
 
             // ブラシテクスチャのGUI表示
@@ -347,6 +368,7 @@ void TerrainDeformer::DrawGui()
 }
 // 環境物を追加
 void TerrainDeformer::AddEnvironmentObject(const std::string& modelPath,
+    TerrainObjectLayout::UpdateType updateType,
     TerrainObjectLayout::CollisionType collisionType,
     const Vector3& position,
     const Vector3& rotation,
@@ -369,6 +391,7 @@ void TerrainDeformer::AddEnvironmentObject(const std::string& modelPath,
     // オブジェクトを配置
     int layoutID = terrain->GetTerrainObjectLayout()->AddLayout(
         modelPath, 
+		updateType,
         collisionType,
         position.TransformCoord(GetActor()->GetTransform().GetMatrixInverse()), // 位置をローカル座標系で設定
         rotation,
@@ -393,13 +416,25 @@ void TerrainDeformer::LoadTexture(const std::wstring& path, ID3D11ShaderResource
         nullptr);
 }
 // ペイントテクスチャの追加
-void TerrainDeformer::AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath)
+void TerrainDeformer::AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath, const std::wstring& heightMapPath)
 {
     PaintTexture& tex = _paintTextures.emplace_back();
     tex.baseColorPath = baseColorPath;
     tex.normalPath = normalPath;
+	tex.heightMapPath = heightMapPath;
     LoadTexture(baseColorPath, tex.baseColorSRV.GetAddressOf());
     LoadTexture(normalPath, tex.normalSRV.GetAddressOf());
+	if (!heightMapPath.empty())
+        LoadTexture(heightMapPath, tex.heightMapSRV.GetAddressOf());
+    else
+    {
+        D3D11_TEXTURE2D_DESC texture2dDesc{};
+        GpuResourceManager::MakeDummyTexture(
+            Graphics::Instance().GetDevice(),
+            tex.heightMapSRV.ReleaseAndGetAddressOf(),
+            &texture2dDesc,
+            0xFF000000, 16);
+    }
 }
 // ブラシテクスチャの追加
 void TerrainDeformer::AddBrushTexture(const std::wstring& path)
@@ -423,6 +458,7 @@ void TerrainDeformer::DrawPaintTextureGui()
         if (ImGui::RadioButton(ToString(_paintTextures[i].baseColorPath).c_str(), _paintTextureIndex == i))
             _paintTextureIndex = i;
 
+        // ベースカラーテクスチャの編集
         if (ImGui::ImageEditButton(&_paintTextures[i].baseColorPath, _paintTextures[i].baseColorSRV.Get()))
         {
             // テクスチャの読み込み
@@ -433,6 +469,7 @@ void TerrainDeformer::DrawPaintTextureGui()
                 nullptr);
         }
         ImGui::SameLine();
+		// 法線マップの編集
         if (ImGui::ImageEditButton(&_paintTextures[i].normalPath, _paintTextures[i].normalSRV.Get()))
         {
             // テクスチャの読み込み
@@ -442,6 +479,28 @@ void TerrainDeformer::DrawPaintTextureGui()
                 _paintTextures[i].normalSRV.ReleaseAndGetAddressOf(),
                 nullptr);
         }
+		ImGui::SameLine();
+		// 高さマップの編集
+		if (ImGui::ImageEditButton(&_paintTextures[i].heightMapPath, _paintTextures[i].heightMapSRV.Get()))
+		{
+			// テクスチャの読み込み
+			GpuResourceManager::LoadTextureFromFile(
+				Graphics::Instance().GetDevice(),
+				_paintTextures[i].heightMapPath.c_str(),
+				_paintTextures[i].heightMapSRV.ReleaseAndGetAddressOf(),
+				nullptr);
+		}
+		ImGui::SameLine();
+		// テクスチャの削除ボタン
+		if (ImGui::Button(u8"削除"))
+		{
+			// 選択中のペイントテクスチャを削除
+			_paintTextures.erase(_paintTextures.begin() + i);
+			// インデックスを調整
+			if (_paintTextureIndex >= _paintTextures.size())
+				_paintTextureIndex = _paintTextures.size() - 1;
+			break; // 削除後はループを抜ける
+		}
     }
     if (ImGui::Button(u8"ペイントテクスチャ追加"))
     {
@@ -460,7 +519,7 @@ void TerrainDeformer::DrawPaintTextureGui()
             {
                 // 相対パス取得
                 std::filesystem::path normalRelativePath = std::filesystem::relative(filepath, currentDirectory);
-                AddPaintTexture(baseColorRelativePath.wstring(), normalRelativePath.wstring());
+                AddPaintTexture(baseColorRelativePath.wstring(), normalRelativePath.wstring(), L"");
             }
         }
     }
@@ -586,5 +645,6 @@ void TerrainDeformerBrush::RegisterTask(const Vector2& uvPosition, float radius,
 	task.strength = strength;
 	task.brushRotationY = _brushRotationY;
 	task.heightScale = _brushHeightScale;
+	task.padding = _padding;
 	_deformer->AddTask(task);
 }

@@ -10,13 +10,20 @@ PS_OUT main(VsOut pin)
     float4 baseColor = colorTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord);
     color = lerp(baseColor, color, brushStrength * rate);
     color = saturate(color);
+    
     float4 normal = paintNormalTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], paintTexcoord);
     float4 baseNormal = normalTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord);
     normal = lerp(baseNormal, normal, brushStrength * rate);
     normal = normalize(normal);
     
+    float height = paintHeightTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], paintTexcoord).r;
+    float baseHeight = heightTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord).r;
+    height = height * brushPadding.x;
+    height = lerp(baseHeight, height, rate);
+    
     PS_OUT pout = (PS_OUT) 0;
     pout.color = color;
     pout.normal = normal;
+    pout.height = height;
     return pout;
 }

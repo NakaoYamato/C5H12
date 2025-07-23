@@ -111,6 +111,11 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
 	_frameBuffer = std::make_unique<FrameBuffer>(device,
 		width, height);
 
+	// フォグ定数バッファの作成
+	(void)GpuResourceManager::CreateConstantBuffer(device,
+		sizeof(CbFog),
+		_fogConstantBuffer.ReleaseAndGetAddressOf());
+
 	// SSR用変数初期化
 	_ssrFullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
@@ -190,6 +195,14 @@ void GBuffer::DrawGui()
 			u8"PBR",
 		}; 
 		ImGui::Combo(u8"描画タイプ", &_renderingType, renderTypeName, _countof(renderTypeName));
+		if (ImGui::TreeNode(u8"フォグ設定"))
+		{
+			ImGui::ColorEdit4(u8"FogColor", &_fogConstants.fogColor.x);
+			ImGui::DragFloat(u8"FogNear", &_fogConstants.fogRange.x, 0.1f, 0.1f, 500.0f);
+			ImGui::DragFloat(u8"FogFar", &_fogConstants.fogRange.y, 0.1f, 0.1f, 500.0f);
+			ImGui::TreePop();
+		}
+
 		ImGui::Checkbox(u8"SSR使用", &_useSSR);
 		if (_useSSR && ImGui::TreeNode(u8"SSRパラメータ"))
 		{
@@ -221,6 +234,9 @@ void GBuffer::Blit(TextureRenderer& textureRenderer, ID3D11DeviceContext* immedi
 {
 	_frameBuffer->ClearAndActivate(immediateContext);
 	{
+		// フォグ定数バッファの設定
+		immediateContext->UpdateSubresource(_fogConstantBuffer.Get(), 0, 0, &_fogConstants, 0, 0);
+		immediateContext->PSSetConstantBuffers(FOG_CONSTANT_BUFFER_INDEX, 1, _fogConstantBuffer.GetAddressOf());
 		std::vector<ID3D11ShaderResourceView*> tempSRVs;
 		for (UINT i = 0; i < GBUFFER_RTV_COUNT; ++i)
 		{

@@ -58,7 +58,7 @@ void TerrainObjectLayout::DrawGui()
 		// モデルと配置情報をリセット
 		_models.clear();
 		_layouts.clear();
-		_currentModelIndex = 0; // モデルインデックスをリセット
+		_currentObjectIndex = 0; // オブジェクトインデックスをリセット
 	}
 }
 // モデルを追加
@@ -73,12 +73,10 @@ void TerrainObjectLayout::AddModel(ID3D11Device* device, const std::string& file
 
 	// モデルを追加
 	_models[filepath] = std::make_shared<Model>(device, filepath.c_str());
-
-	// 現在のモデルインデックスを更新
-	_currentModelIndex++;
 }
 // 配置情報を追加
 int TerrainObjectLayout::AddLayout(const std::string& modelPath,
+	UpdateType updateType,
 	CollisionType collisionType,
 	const Vector3& position,
 	const Vector3& rotation,
@@ -87,15 +85,16 @@ int TerrainObjectLayout::AddLayout(const std::string& modelPath,
 	const Vector4& collisionParameter)
 {
 	// 配置情報を追加
-	_layouts[_currentModelIndex].modelPath = modelPath;
-	_layouts[_currentModelIndex].collisionType = collisionType;
-	_layouts[_currentModelIndex].localPosition = position;
-	_layouts[_currentModelIndex].rotation = rotation;
-	_layouts[_currentModelIndex].size = size;
-	_layouts[_currentModelIndex].collisionOffset = collisionOffset;
-	_layouts[_currentModelIndex].collisionParameter = collisionParameter;
-	_currentModelIndex++;
-	return _currentModelIndex - 1; // 追加した配置情報のインデックスを返す
+	_layouts[_currentObjectIndex].modelPath = modelPath;
+	_layouts[_currentObjectIndex].updateType = updateType;
+	_layouts[_currentObjectIndex].collisionType = collisionType;
+	_layouts[_currentObjectIndex].localPosition = position;
+	_layouts[_currentObjectIndex].rotation = rotation;
+	_layouts[_currentObjectIndex].size = size;
+	_layouts[_currentObjectIndex].collisionOffset = collisionOffset;
+	_layouts[_currentObjectIndex].collisionParameter = collisionParameter;
+	_currentObjectIndex++;
+	return _currentObjectIndex - 1; // 追加した配置情報のインデックスを返す
 }
 // 配置情報が登録されているか確認
 const TerrainObjectLayout::LayoutData* TerrainObjectLayout::FindLayout(int index) const
@@ -164,17 +163,22 @@ void TerrainObjectLayout::Import(ID3D11Device* device, const nlohmann::json& jso
 	if (jsonData.contains("LayoutsSize"))
 	{
 		size_t layoutSize = jsonData["LayoutsSize"].get<size_t>();
+		int maxKey = -1; // 最大キーを取得するための変数
 		for (size_t number = 0; number < layoutSize; ++number)
 		{
 			int key = jsonData["Layout" + std::to_string(number)]["Key"].get<int>(); // キーを取得
 			_layouts[key].Import(("Layout" + std::to_string(number)).c_str(), jsonData);
+			if (key > maxKey)
+				maxKey = key; // 最大キーを更新
 		}
+		_currentObjectIndex = maxKey + 1; // 現在のオブジェクトインデックスを更新
 	}
 }
 // 書き出し
 void TerrainObjectLayout::LayoutData::Export(const char* label, nlohmann::json* jsonData)
 {
 	(*jsonData)[label]["modelPath"] = modelPath;
+	(*jsonData)[label]["updateType"] = updateType;
 	(*jsonData)[label]["collisionType"] = collisionType;
 	(*jsonData)[label]["localPosition.x"] = localPosition.x;
 	(*jsonData)[label]["localPosition.y"] = localPosition.y;
@@ -199,6 +203,7 @@ void TerrainObjectLayout::LayoutData::Import(const char* label, const nlohmann::
 	if (jsonData.contains(label))
 	{
 		modelPath = jsonData[label]["modelPath"].get<std::string>();
+		//updateType = static_cast<UpdateType>(jsonData[label]["updateType"].get<int>());
 		collisionType = static_cast<CollisionType>(jsonData[label]["collisionType"].get<int>());
 		localPosition.x = jsonData[label]["localPosition.x"].get<float>();
 		localPosition.y = jsonData[label]["localPosition.y"].get<float>();

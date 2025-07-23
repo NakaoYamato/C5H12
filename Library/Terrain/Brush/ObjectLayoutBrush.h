@@ -61,6 +61,8 @@ private:
 	// GUIの表示位置
 	Vector2 _guiPosition = Vector2::Zero;
 
+	// 生成するオブジェクトの更新タイプ
+	TerrainObjectLayout::UpdateType _objectUpdateType = TerrainObjectLayout::UpdateType::None;
 	// 生成するオブジェクトの当たり判定属性
 	TerrainObjectLayout::CollisionType _objectCollisionType = TerrainObjectLayout::CollisionType::None;
 	// 生成するオブジェクトのスケール

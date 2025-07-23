@@ -16,6 +16,7 @@ static constexpr UINT MAX_GBUFFER_COUNT = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT
 static constexpr UINT GBUFFER_COLOR_MAP_INDEX = 0;
 static constexpr UINT GBUFFER_NORMAL_MAP_INDEX = 1;
 
+static constexpr UINT FOG_CONSTANT_BUFFER_INDEX = 4;
 static constexpr UINT SSR_CONSTANT_BUFFER_INDEX = 6;
 
 class GBuffer
@@ -30,6 +31,12 @@ public:
 		RenderingTypeMax,
 	};
 
+	struct CbFog
+	{
+		Vector4 fogColor = Vector4::Gray; // フォグの色
+		Vector2 fogRange = Vector2(0.1f, 300.0f); // フォグの開始距離と終了距離
+		Vector2 fogPadding{};
+	};
 	struct SSRConstants
 	{
 		DirectX::XMFLOAT4X4		view{};
@@ -88,6 +95,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> _gbufferPS[RenderingType::RenderingTypeMax];
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> _depthWritePS;
 	std::unique_ptr<FrameBuffer> _frameBuffer;
+
+	// フォグ
+	struct CbFog _fogConstants;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> _fogConstantBuffer;
 
 	int _renderingType = RenderingType::PBR;
 	bool _useSSR = false;

@@ -19,6 +19,7 @@ void TerrainEnvironmentController::OnCreate()
 	
 	GetActor()->AddComponent<InstancingModelRenderer>(objectLayout->GetModel(modelPath).lock());
 
+	_updateType = myLayout.updateType;
 	// トランスフォーム更新
 	GetActor()->GetTransform().SetPosition(myLayout.localPosition.TransformCoord(_terrainTransform));
 	GetActor()->GetTransform().SetRotation(myLayout.rotation);
@@ -72,6 +73,11 @@ void TerrainEnvironmentController::OnCreate()
 		break;
 	}
 }
+// 開始処理
+void TerrainEnvironmentController::Start()
+{
+	_renderer = GetActor()->GetComponent<InstancingModelRenderer>();
+}
 // 更新処理
 void TerrainEnvironmentController::Update(float elapsedTime)
 {
@@ -97,10 +103,35 @@ void TerrainEnvironmentController::Update(float elapsedTime)
 	// 地形の配置情報からトランスフォーム情報更新
 	if (_overwrite)
 	{
+		_updateType = myLayout->updateType;
 		GetActor()->GetTransform().SetPosition(myLayout->localPosition.TransformCoord(_terrainTransform));
 		GetActor()->GetTransform().SetRotation(myLayout->rotation);
 		GetActor()->GetTransform().SetScale(myLayout->size);
 		GetActor()->GetTransform().UpdateTransform(nullptr);
+	}
+
+	if (_updateType == TerrainObjectLayout::UpdateType::Grass)
+	{
+		if (_renderer.lock())
+		{
+			auto renderer = _renderer.lock();
+			auto iter = renderer->GetShaderParameter().end();
+			if (renderer->GetMaterial().GetShaderName() != "Grass")
+			{
+				renderer->ChangeShader("Grass");
+				iter = renderer->GetShaderParameter().find("shakeAxis");
+				if (iter != renderer->GetShaderParameter().end())
+				{
+					iter->second = 5.0f; // 草の揺れ軸を-Z軸に設定
+				}
+			}
+
+			iter = renderer->GetShaderParameter().find("totalTime");
+			if (iter != renderer->GetShaderParameter().end())
+			{
+				iter->second += elapsedTime;
+			}
+		}
 	}
 }
 // GUI描画

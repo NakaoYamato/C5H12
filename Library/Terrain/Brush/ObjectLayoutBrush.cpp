@@ -36,6 +36,14 @@ void ObjectLayoutBrush::Update(std::shared_ptr<Terrain> terrain, float elapsedTi
 // GUI描画
 void ObjectLayoutBrush::DrawGui(std::shared_ptr<Terrain> terrain)
 {
+	static std::vector<const char*> UpdateTypeNames;
+	if (UpdateTypeNames.size() == 0)
+	{
+		for (auto type : magic_enum::enum_values<TerrainObjectLayout::UpdateType>())
+		{
+			UpdateTypeNames.push_back(magic_enum::enum_name(type).data());
+		}
+	}
 	static std::vector<const char*> CollisionTypeNames;
 	if (CollisionTypeNames.size() == 0)
 	{
@@ -71,28 +79,31 @@ void ObjectLayoutBrush::DrawGui(std::shared_ptr<Terrain> terrain)
 		break;
 	}
 	ImGui::Separator(); 
-	ImGui::Combo(u8"オブジェクトの当たり判定属性", reinterpret_cast<int*>(&_objectCollisionType), CollisionTypeNames.data(), static_cast<int>(CollisionTypeNames.size()));
-	ImGui::DragFloat3(u8"オブジェクトのスケール", &_objectScale.x, 0.01f, 0.01f, 10.0f);
+	ImGui::Combo(u8"更新タイプ", reinterpret_cast<int*>(&_objectUpdateType), UpdateTypeNames.data(), static_cast<int>(UpdateTypeNames.size()));
+	ImGui::Combo(u8"当たり判定属性", reinterpret_cast<int*>(&_objectCollisionType), CollisionTypeNames.data(), static_cast<int>(CollisionTypeNames.size()));
+	ImGui::DragFloat3(u8"スケール", &_objectScale.x, 0.01f, 0.01f, 10.0f);
 	Vector3 deg = _objectAngle.ToDegrees();
-	if (ImGui::DragFloat3(u8"オブジェクトの角度", &deg.x, 0.1f))
+	if (ImGui::DragFloat3(u8"角度", &deg.x, 0.1f))
 		_objectAngle = deg.ToRadians();
-	ImGui::DragFloat3(u8"オブジェクトの衝突オフセット", &_objectCollisionOffset.x, 0.01f);
 	switch (_objectCollisionType)
 	{
 	case TerrainObjectLayout::CollisionType::None:
 		break;
 	case TerrainObjectLayout::CollisionType::Box:
 	case TerrainObjectLayout::CollisionType::BoxTrigger:
-		ImGui::DragFloat3(u8"オブジェクトの衝突半辺長", &_objectCollisionParameter.x, 0.01f);
+		ImGui::DragFloat3(u8"衝突オフセット", &_objectCollisionOffset.x, 0.01f);
+		ImGui::DragFloat3(u8"衝突半辺長", &_objectCollisionParameter.x, 0.01f);
 		break;
 	case TerrainObjectLayout::CollisionType::Sphere:
 	case TerrainObjectLayout::CollisionType::SphereTrigger:
-		ImGui::DragFloat(u8"オブジェクトの衝突半径", &_objectCollisionParameter.x, 0.01f);
+		ImGui::DragFloat3(u8"衝突オフセット", &_objectCollisionOffset.x, 0.01f);
+		ImGui::DragFloat(u8"衝突半径", &_objectCollisionParameter.x, 0.01f);
 		break;
 	case TerrainObjectLayout::CollisionType::Capsule:
 	case TerrainObjectLayout::CollisionType::CapsuleTrigger:
-		ImGui::DragFloat3(u8"オブジェクトの衝突終点", &_objectCollisionParameter.x, 0.01f);
-		ImGui::DragFloat(u8"オブジェクトの衝突半径", &_objectCollisionParameter.w, 0.01f);
+		ImGui::DragFloat3(u8"衝突オフセット", &_objectCollisionOffset.x, 0.01f);
+		ImGui::DragFloat3(u8"衝突終点", &_objectCollisionParameter.x, 0.01f);
+		ImGui::DragFloat(u8"衝突半径", &_objectCollisionParameter.w, 0.01f);
 		break;
 	case TerrainObjectLayout::CollisionType::Mesh:
 	case TerrainObjectLayout::CollisionType::MeshTrigger:
@@ -234,6 +245,7 @@ void ObjectLayoutBrush::UpdateNone(std::shared_ptr<Terrain> terrain, float elaps
 			// オブジェクトを配置
 			_deformer->AddEnvironmentObject(
 				_selectingModelPath,
+				_objectUpdateType,
 				_objectCollisionType,
 				_intersectionWorldPoint,
 				_objectAngle,

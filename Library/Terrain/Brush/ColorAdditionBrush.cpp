@@ -33,3 +33,9 @@ void ColorAdditionBrush::Render(std::shared_ptr<Terrain> terrain,
     );
     terrain->GetMaterialMapFB()->Deactivate(rc.deviceContext);
 }
+// GUI描画
+void ColorAdditionBrush::DrawGui(std::shared_ptr<Terrain> terrain)
+{
+	TerrainDeformerBrush::DrawGui(terrain);
+    ImGui::DragFloat(u8"高さテクスチャの影響度", &_padding.x, 0.01f, 0.0f);
+}

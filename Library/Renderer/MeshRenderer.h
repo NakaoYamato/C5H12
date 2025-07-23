@@ -76,7 +76,6 @@ private:
     struct InstancingDrawInfo
     {
         Model*                      model = nullptr;
-        std::string 				shaderType{};
         using ModelParameter = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
         std::vector<ModelParameter> modelParameters;
         Material*                   material = nullptr;
@@ -147,7 +146,6 @@ public:
     void DrawInstancing(Model* model,
         const Vector4& color,
         Material* material,
-        std::string shaderType,
         const DirectX::XMFLOAT4X4& world,
         ShaderBase::Parameter* parameter);
 
@@ -171,12 +169,27 @@ public:
     void CastShadow(const RenderContext& rc);
 
     /// <summary>
-    /// ModelRenderTypeの使用可能シェーダーを取得
+    /// デファードレンダリングで使用可能なシェーダーを取得
     /// </summary>
     /// <param name="type"></param>
     /// <param name="deferred"></param>
     /// <returns></returns>
-    std::vector<const char*> GetShaderNames(ModelRenderType type, bool deferred);
+    std::vector<const char*> GetDeferredShaderNames(ModelRenderType type);
+
+    /// <summary>
+    /// フォワードレンダリングで使用可能なシェーダーを取得
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="deferred"></param>
+    /// <returns></returns>
+    std::vector<const char*> GetForwardShaderNames(ModelRenderType type);
+
+    /// <summary>
+	/// インスタンシング描画で使用可能なシェーダーを取得
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    std::vector<const char*> GetInstancingShaderNames();
 
     /// <summary>
     /// typeとkeyからパラメータのkeyを取得

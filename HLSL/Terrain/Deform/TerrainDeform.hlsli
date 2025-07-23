@@ -2,11 +2,13 @@
 
 Texture2D<float4> colorTexture : register(t0);
 Texture2D<float4> normalTexture : register(t1);
-Texture2D<float4> parameterTexture : register(t2);
+Texture2D<float4> heightTexture : register(t2);
+Texture2D<float4> parameterTexture : register(t3);
 
-Texture2D<float4> paintColorTexture : register(t3);
-Texture2D<float4> paintNormalTexture : register(t4);
-Texture2D<float4> brushTexture : register(t5);
+Texture2D<float4> paintColorTexture : register(t4);
+Texture2D<float4> paintNormalTexture : register(t5);
+Texture2D<float4> paintHeightTexture : register(t6);
+Texture2D<float4> brushTexture : register(t7);
 #include "../../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
@@ -19,12 +21,15 @@ cbuffer CONSTANT_BUFFER : register(b1)
     float  textureTillingScale;
     float1 brushRotationY; // Y軸回転角度（ラジアン）
     float2 heightScale; // x : 最小値、 y : 最大値
+    
+    float4 brushPadding; // パディング用
 }
 
 struct PS_OUT
 {
     float4 color : SV_TARGET0;
     float4 normal : SV_TARGET1;
+    float4 height : SV_TARGET2;
 };
 
 // ブレンドレートの計算

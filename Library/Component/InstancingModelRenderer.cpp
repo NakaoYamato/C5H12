@@ -9,15 +9,20 @@
 void InstancingModelRenderer::OnCreate()
 {
 	_material = _model.lock()->GetMaterials().at(0);
+	_material.SetShaderName("PhongAlpha");
 }
 // 描画処理
 void InstancingModelRenderer::Render(const RenderContext& rc)
 {
+	if (_model.lock() == nullptr)
+	{
+		return;
+	}
+
 	GetActor()->GetScene()->GetMeshRenderer().DrawInstancing(
 		_model.lock().get(),
 		_color,
 		&_material,
-		_shaderType,
 		GetActor()->GetTransform().GetMatrix(),
 		&_shaderParameter);
 }
@@ -30,4 +35,44 @@ void InstancingModelRenderer::DrawGui()
 {
 	ImGui::ColorEdit4("color", &_color.x);
 	ImGui::Separator();
+	// 使用可能なシェーダー取得
+	auto activeShaderTypes = GetActor()->GetScene()->GetMeshRenderer().GetInstancingShaderNames();
+	if (ImGui::TreeNode(_material.GetName().c_str()))
+	{
+		// シェーダー変更GUI
+		if (ImGui::TreeNode(u8"シェーダー変更"))
+		{
+			auto shaderType = _material.GetShaderName();
+			for (auto& activeShaderType : activeShaderTypes)
+			{
+				bool active = activeShaderType == shaderType;
+				if (ImGui::RadioButton(activeShaderType, active))
+				{
+					// シェーダー変更
+					ChangeShader(activeShaderType);
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::Separator();
+
+		// マテリアルのGUI描画
+		_material.DrawGui();
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
+	for (auto& [name, parameter] : _shaderParameter)
+	{
+		ImGui::DragFloat(name.c_str(), &parameter, 0.1f);
+	}
+}
+// シェーダー変更
+void InstancingModelRenderer::ChangeShader(const std::string& shaderName)
+{
+	_material.SetShaderName(shaderName);
+	// シェーダー変更時はパラメータも初期化
+	_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+		ModelRenderType::Instancing,
+		shaderName,
+		false);
 }

@@ -86,11 +86,6 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-				shaderMap["Grass"] = std::make_unique<GrassShader>(device,
-					"./Data/Shader/GrassVS.cso",
-					"./Data/Shader/GrassGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
 					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 					"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
@@ -143,11 +138,6 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					"./Data/Shader/PhongAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
-				shaderMap["Grass"] = std::make_unique<GrassShader>(device,
-					"./Data/Shader/GrassVS.cso",
-					"./Data/Shader/GrassPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
 					"./Data/Shader/PhongBatchingVS.cso",
 					"./Data/Shader/PhysicalBasedRenderingPS.cso",
@@ -179,6 +169,11 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 					"./Data/Shader/PhongInstancedVS.cso",
 					"./Data/Shader/TestPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				shaderMap["Grass"] = std::make_unique<GrassShader>(device,
+					"./Data/Shader/GrassInstancedVS.cso",
+					"./Data/Shader/PhongAlphaPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+
 			}
 		}
 
@@ -256,7 +251,6 @@ void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
 		// ない場合は新規で登録
 		_instancingInfoMap[modelName].model = model;
 		_instancingInfoMap[modelName].parameter = nullptr;
-		_instancingInfoMap[modelName].shaderType = "Test";
 		_instancingInfoMap[modelName].modelParameters.push_back(modelParameter);
 		_instancingInfoMap[modelName].material = &_testMaterial;
 	}
@@ -294,7 +288,6 @@ void MeshRenderer::DrawShadow(
 void MeshRenderer::DrawInstancing(Model* model,
 	const Vector4& color,
 	Material* material,
-	std::string shaderType,
 	const DirectX::XMFLOAT4X4& world,
 	ShaderBase::Parameter* parameter)
 {
@@ -313,7 +306,6 @@ void MeshRenderer::DrawInstancing(Model* model,
 		// ない場合は新規で登録
 		_instancingInfoMap[modelName].model = model;
 		_instancingInfoMap[modelName].parameter = parameter;
-		_instancingInfoMap[modelName].shaderType = shaderType;
 		_instancingInfoMap[modelName].modelParameters.push_back(modelParameter);
 		_instancingInfoMap[modelName].material = material;
 	}
@@ -638,31 +630,45 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 }
 
 
-/// ModelRenderTypeのシェーダー名を取得
-std::vector<const char*> MeshRenderer::GetShaderNames(ModelRenderType type, bool deferred)
+/// デファードレンダリングで使用可能なシェーダーを取得
+std::vector<const char*> MeshRenderer::GetDeferredShaderNames(ModelRenderType type)
 {
 	std::vector<const char*> shaderTypes;
-	if (deferred)
+	for (auto& [name, shader] : _deferredShaders[static_cast<int>(type)])
 	{
-		for (auto& [name, shader] : _deferredShaders[static_cast<int>(type)])
-		{
-			// shaderがnullptrの時はスキップ
-			if (shader == nullptr)
-				continue;
-			shaderTypes.push_back(name.c_str());
-		}
+		// shaderがnullptrの時はスキップ
+		if (shader == nullptr)
+			continue;
+		shaderTypes.push_back(name.c_str());
 	}
-	else
-	{
-		for (auto& [name, shader] : _forwardShaders[static_cast<int>(type)])
-		{
-			// shaderがnullptrの時はスキップ
-			if (shader == nullptr)
-				continue;
-			shaderTypes.push_back(name.c_str());
-		}
-	}
+	return shaderTypes;
+}
 
+/// フォワードレンダリングで使用可能なシェーダーを取得
+std::vector<const char*> MeshRenderer::GetForwardShaderNames(ModelRenderType type)
+{
+	std::vector<const char*> shaderTypes;
+	for (auto& [name, shader] : _forwardShaders[static_cast<int>(type)])
+	{
+		// shaderがnullptrの時はスキップ
+		if (shader == nullptr)
+			continue;
+		shaderTypes.push_back(name.c_str());
+	}
+	return shaderTypes;
+}
+
+/// インスタンシング描画で使用可能なシェーダーを取得
+std::vector<const char*> MeshRenderer::GetInstancingShaderNames()
+{
+	std::vector<const char*> shaderTypes;
+	for (auto& [name, shader] : _forwardShaders[static_cast<int>(ModelRenderType::Instancing)])
+	{
+		// shaderがnullptrの時はスキップ
+		if (shader == nullptr)
+			continue;
+		shaderTypes.push_back(name.c_str());
+	}
 	return shaderTypes;
 }
 
@@ -756,7 +762,7 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 	{
 		InstancingDrawInfo& drawInfo = drawInfomap.second;
 
-		ShaderBase* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.shaderType].get();
+		ShaderBase* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.material->GetShaderName()].get();
 		shader->Begin(rc);
 
 		DrawModel(drawInfo, shader);

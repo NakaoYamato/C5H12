@@ -27,22 +27,26 @@ public:
 private:
 	struct CbMesh
 	{
-		float tesselationMaxSubdivision = 5.0f;
-		float bladeHeight = 3.0f;
-		float bladeWidth = 0.15f;
-		float seed = 0.165f;
+		DirectX::XMFLOAT4		Ka{};// アンビエント
+		DirectX::XMFLOAT4		Kd{};// ディフューズ
+		DirectX::XMFLOAT4		Ks{};// スペキュラー
+	};
+	struct CbGrass
+	{
+		// 0 : +X軸, 1 : +Y軸, 2 : +Z軸
+		// 3 : -X軸, 4 : -Y軸, 5 : -Z軸
+		int						shakeAxis = 0; // 揺らす軸
+		float					shakeAmplitude = 2.0f; // 揺らす振幅
+		float					windStrength = 0.1f; // 風の強さ
+		float					windSpeed = 1.5f; // 風の速度
 
-		float lodDistanceMax = 80.0f;
-		float totalElapsedTime = 0.0f;
-		float windDirectionX = 1.0f;
-		float windDirectionZ = 0.0f;
+		Vector3					windDirection = { 0.0f, 1.0f, 0.0f }; // 風の方向
+		float					totalTime = 0.0f; // 総経過時間
 	};
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		_vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11HullShader>		_hullShader;
-	Microsoft::WRL::ComPtr<ID3D11DomainShader>		_domainShader;
-	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_geometryShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>		_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		_inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			_meshConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>			_grassConstantBuffer;
 };

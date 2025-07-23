@@ -70,10 +70,12 @@ void ModelRenderer::DrawGui()
 	{
 		for (auto& material : _materialMap)
 		{
+			bool isDeferred = Graphics::Instance().RenderingDeferred() && material.GetBlendType() != BlendType::Alpha;
+
 			// 使用可能なシェーダー取得
-			auto activeShaderTypes =
-				GetActor()->GetScene()->GetMeshRenderer().GetShaderNames(_renderType,
-					Graphics::Instance().RenderingDeferred() && material.GetBlendType() != BlendType::Alpha);
+			auto activeShaderTypes = isDeferred ?
+				GetActor()->GetScene()->GetMeshRenderer().GetDeferredShaderNames(_renderType) :
+				GetActor()->GetScene()->GetMeshRenderer().GetForwardShaderNames(_renderType);
 			if (ImGui::TreeNode(material.GetName().c_str()))
 			{
 				// シェーダー変更GUI
@@ -86,6 +88,11 @@ void ModelRenderer::DrawGui()
 						if (ImGui::RadioButton(activeShaderType, active))
 						{
 							material.SetShaderName(activeShaderType);
+							// シェーダー変更時はパラメータも初期化
+							_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+								_renderType, 
+								activeShaderType,
+								isDeferred);
 						}
 					}
 					ImGui::TreePop();

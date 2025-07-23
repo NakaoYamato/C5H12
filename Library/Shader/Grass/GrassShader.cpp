@@ -13,15 +13,6 @@ GrassShader::GrassShader(ID3D11Device* device, const char* vsName, const char* p
 		inputDescs,
 		inputSize);
 
-	// ハルシェーダー作成
-	GpuResourceManager::CreateHsFromCso(device, "./Data/Shader/GrassHS.cso", _hullShader.ReleaseAndGetAddressOf());
-
-	// ドメインシェーダー作成
-	GpuResourceManager::CreateDsFromCso(device, "./Data/Shader/GrassDS.cso", _domainShader.ReleaseAndGetAddressOf());
-	
-	// ジオメトリシェーダー作成
-	GpuResourceManager::CreateGsFromCso(device, "./Data/Shader/GrassGS.cso", _geometryShader.ReleaseAndGetAddressOf());
-
 	// ピクセルシェーダ
 	GpuResourceManager::CreatePsFromCso(device, psName,	_pixelShader.ReleaseAndGetAddressOf());
 
@@ -29,6 +20,10 @@ GrassShader::GrassShader(ID3D11Device* device, const char* vsName, const char* p
 	(void)GpuResourceManager::CreateConstantBuffer(device,
 		sizeof(CbMesh),
 		_meshConstantBuffer.ReleaseAndGetAddressOf());
+	// グラス用定数バッファ
+	(void)GpuResourceManager::CreateConstantBuffer(device,
+		sizeof(CbGrass),
+		_grassConstantBuffer.ReleaseAndGetAddressOf());
 }
 
 void GrassShader::Begin(const RenderContext& rc)
@@ -38,9 +33,6 @@ void GrassShader::Begin(const RenderContext& rc)
 	// シェーダー設定
 	dc->IASetInputLayout(_inputLayout.Get());
 	dc->VSSetShader(_vertexShader.Get(),	nullptr, 0);
-	dc->HSSetShader(_hullShader.Get(),		nullptr, 0);
-	dc->DSSetShader(_domainShader.Get(),		nullptr, 0);
-	dc->GSSetShader(_geometryShader.Get(),	nullptr, 0);
 	dc->PSSetShader(_pixelShader.Get(),		nullptr, 0);
 
 	// 定数バッファ設定
@@ -48,8 +40,8 @@ void GrassShader::Begin(const RenderContext& rc)
 	{
 		_meshConstantBuffer.Get(),
 	};
-	dc->HSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
-	dc->GSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
+	dc->VSSetConstantBuffers(CBIndex + 2, 1, _grassConstantBuffer.GetAddressOf());
 }
 
 void GrassShader::Update(const RenderContext& rc, 
@@ -60,17 +52,32 @@ void GrassShader::Update(const RenderContext& rc,
 
 	// メッシュ用定数バッファ更新
 	CbMesh cbMesh{};
-	cbMesh.tesselationMaxSubdivision	= (*parameter)["tesselationMaxSubdivision"];
-	cbMesh.bladeHeight					= (*parameter)["bladeHeight"];
-	cbMesh.bladeWidth					= (*parameter)["bladeWidth"];
-	cbMesh.seed							= (*parameter)["seed"];
-	cbMesh.lodDistanceMax				= (*parameter)["lodDistanceMax"];
-	cbMesh.totalElapsedTime				= (*parameter)["totalElapsedTime"];
-	cbMesh.windDirectionX				= (*parameter)["windDirectionX"];
-	cbMesh.windDirectionZ				= (*parameter)["windDirectionZ"];
+	cbMesh.Ka = material->GetColor("Ambient");
+	cbMesh.Kd = material->GetColor("Diffuse");
+	cbMesh.Ks = material->GetColor("Specular");
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
+	// グラス用定数バッファ更新
+	CbGrass cbGrass{};
+	cbGrass.shakeAxis = static_cast<int>((*parameter)["shakeAxis"]);
+	cbGrass.shakeAmplitude = (*parameter)["shakeAmplitude"];
+	cbGrass.windStrength = (*parameter)["windStrength"];
+	cbGrass.windSpeed = (*parameter)["windSpeed"];
+	cbGrass.windDirection.x = (*parameter)["windDirection.x"];
+	cbGrass.windDirection.y = (*parameter)["windDirection.y"];
+	cbGrass.windDirection.z = (*parameter)["windDirection.z"];
+	cbGrass.totalTime = (*parameter)["totalTime"];
+	dc->UpdateSubresource(_grassConstantBuffer.Get(), 0, 0, &cbGrass, 0, 0);
 
-	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+	// シェーダーリソースビュー設定
+	ID3D11ShaderResourceView* srvs[] =
+	{
+		material->GetTextureSRV("Diffuse"),
+		material->GetTextureSRV("Normal"),
+		material->GetTextureSRV("Specular"),
+		material->GetTextureSRV("Roughness"),
+		material->GetTextureSRV("Emissive")
+	};
+	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
 void GrassShader::End(const RenderContext& rc)
@@ -79,29 +86,37 @@ void GrassShader::End(const RenderContext& rc)
 
 	// シェーダー設定解除
 	dc->VSSetShader(nullptr, nullptr, 0);
-	dc->HSSetShader(nullptr, nullptr, 0);
-	dc->DSSetShader(nullptr, nullptr, 0);
-	dc->GSSetShader(nullptr, nullptr, 0);
 	dc->PSSetShader(nullptr, nullptr, 0);
 	dc->IASetInputLayout(nullptr);
 
 	// 定数バッファ設定解除
 	ID3D11Buffer* cbs[] = { nullptr };
-	dc->HSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
-	dc->GSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
+	dc->PSSetConstantBuffers(CBIndex, _countof(cbs), cbs);
+	dc->VSSetConstantBuffers(CBIndex + 2, _countof(cbs), cbs);
+
+	// シェーダーリソースビュー設定解除
+	ID3D11ShaderResourceView* srvs[] =
+	{
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr
+	};
+	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
 ShaderBase::Parameter GrassShader::GetParameterKey() const
 {
-	CbMesh cb;
+	CbGrass cb;
     ShaderBase::Parameter p;
-    p["tesselationMaxSubdivision"] = cb.tesselationMaxSubdivision;
-    p["bladeHeight"] = cb.bladeHeight;
-    p["bladeWidth"] = cb.bladeWidth;
-    p["seed"] = cb.seed;
-    p["lodDistanceMax"] = cb.lodDistanceMax;
-    p["totalElapsedTime"] = cb.totalElapsedTime;
-    p["windDirectionX"] = cb.windDirectionX;
-    p["windDirectionZ"] = cb.windDirectionZ;
+    p["shakeAxis"] = static_cast<float>(cb.shakeAxis);
+    p["shakeAmplitude"] = cb.shakeAmplitude;
+    p["windStrength"] = cb.windStrength;
+    p["windSpeed"] = cb.windSpeed;
+    p["windDirection.x"] = cb.windDirection.x;
+    p["windDirection.y"] = cb.windDirection.y;
+    p["windDirection.z"] = cb.windDirection.z;
+    p["totalTime"] = cb.totalTime;
     return p;
 }

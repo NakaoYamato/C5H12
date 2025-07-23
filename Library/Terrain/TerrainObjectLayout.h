@@ -12,6 +12,11 @@
 class TerrainObjectLayout
 {
 public:
+	enum class UpdateType
+	{
+		None,
+		Grass,
+	};
 	enum class CollisionType
 	{
 		None,       // 衝突なし
@@ -24,11 +29,14 @@ public:
 		Mesh,		// メッシュ
 		MeshTrigger // メッシュトリガー
 	};
+
 	// 配置情報
 	struct LayoutData
 	{
 		// モデルの参照パス
 		std::string modelPath = "";
+		// 更新の種類
+		UpdateType updateType = UpdateType::None;
 		// 衝突判定の種類
 		CollisionType collisionType = CollisionType::None;
 		// 配置位置(Terrainのローカル空間)
@@ -59,6 +67,7 @@ public:
 	void AddModel(ID3D11Device* device, const std::string& filepath);
 	// 配置情報を追加
 	int AddLayout(const std::string& modelPath, 
+		UpdateType updateType,
 		CollisionType collisionType,
 		const Vector3& position,
 		const Vector3& rotation,
@@ -89,6 +98,6 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Model>> _models;
 	// モデルの配置情報
 	std::unordered_map<int, LayoutData> _layouts;
-	// 現在のモデルのインデックス
-	int _currentModelIndex = 0;
+	// 現在のオブジェクトのインデックス
+	int _currentObjectIndex = 0;
 };

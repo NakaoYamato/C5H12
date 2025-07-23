@@ -16,6 +16,7 @@ void SceneTerrainEditor::OnInitialize()
 
     auto terrainActor = RegisterActor<Actor>(u8"Terrain", ActorTag::Stage);
     terrainActor->GetTransform().SetScale(50.0f);
+    terrainActor->GetTransform().UpdateTransform(nullptr);
     terrainActor->AddComponent<TerrainController>();
     terrainActor->AddComponent<TerrainDeformer>();
 	terrainActor->AddCollider<TerrainCollider>();
@@ -25,6 +26,7 @@ void SceneTerrainEditor::OnInitialize()
         auto testTerrain = RegisterActor<Actor>(u8"TestTerrain", ActorTag::Stage);
         testTerrain->GetTransform().SetPositionZ(100.0f);
         testTerrain->GetTransform().SetScale(50.0f);
+        testTerrain->GetTransform().UpdateTransform(nullptr);
         testTerrain->AddComponent<TerrainController>();
         testTerrain->AddComponent<TerrainDeformer>();
         testTerrain->AddCollider<TerrainCollider>();

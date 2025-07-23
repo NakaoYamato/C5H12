@@ -1262,6 +1262,7 @@
     <None Include="HLSL\Particle\Sort\ComputeParticleBitonicSort.hlsli" />
     <None Include="HLSL\Terrain\Terrain.hlsli" />
     <None Include="HLSL\Terrain\Deform\TerrainDeform.hlsli" />
+    <None Include="HLSL\Model\Instancing.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -1297,13 +1298,7 @@
     <FxCompile Include="HLSL\PostProcess\RobertsCross\RobertsCrossPS.hlsl" />
     <FxCompile Include="HLSL\Model\Phong\PhongGBPS.hlsl" />
     <FxCompile Include="HLSL\GBuffer\DeferredRenderingPS.hlsl" />
-    <FxCompile Include="HLSL\Model\Grass\GrassDS.hlsl" />
-    <FxCompile Include="HLSL\Model\Grass\GrassGS.hlsl" />
-    <FxCompile Include="HLSL\Model\Grass\GrassHS.hlsl" />
-    <FxCompile Include="HLSL\Model\Grass\GrassPS.hlsl" />
-    <FxCompile Include="HLSL\Model\Grass\GrassVS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\FinalPass\FinalPassPS.hlsl" />
-    <FxCompile Include="HLSL\Model\Grass\GrassGBPS.hlsl" />
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingGBPS.hlsl" />
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingPS.hlsl" />
     <FxCompile Include="HLSL\GBuffer\PBRDeferredRenderingPS.hlsl" />
@@ -1337,5 +1332,6 @@
     <FxCompile Include="HLSL\Model\Test\TestGBPS.hlsl" />
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingAlphaPS.hlsl" />
     <FxCompile Include="HLSL\Model\Phong\PhongAlphaPS.hlsl" />
+    <FxCompile Include="HLSL\Model\Grass\GrassInstancedVS.hlsl" />
   </ItemGroup>
 </Project>

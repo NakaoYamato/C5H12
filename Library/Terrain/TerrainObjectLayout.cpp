@@ -203,7 +203,7 @@ void TerrainObjectLayout::LayoutData::Import(const char* label, const nlohmann::
 	if (jsonData.contains(label))
 	{
 		modelPath = jsonData[label]["modelPath"].get<std::string>();
-		//updateType = static_cast<UpdateType>(jsonData[label]["updateType"].get<int>());
+		updateType = static_cast<UpdateType>(jsonData[label]["updateType"].get<int>());
 		collisionType = static_cast<CollisionType>(jsonData[label]["collisionType"].get<int>());
 		localPosition.x = jsonData[label]["localPosition.x"].get<float>();
 		localPosition.y = jsonData[label]["localPosition.y"].get<float>();

@@ -12,6 +12,8 @@ public:
     const char* GetName() const override { return "TerrainController"; }
     // 生成時処理
     void OnCreate() override;
+	// 更新処理
+    void Update(float elapsedTime) override;
     // 遅延更新処理
     void LateUpdate(float elapsedTime) override;
     // 描画処理
@@ -26,6 +28,8 @@ public:
 #pragma region アクセサ
     // 地形取得
     std::weak_ptr<Terrain> GetTerrain() const { return _terrain; }
+	bool IsExportingVertices() const { return _isExportingVertices; }
+	void SetIsExportingVertices(bool exporting) { _isExportingVertices = exporting; }
     // 地形の編集フラグを取得
     bool IsEditing() const { return _isEditing; }
     // 地形の編集フラグを設定
@@ -36,6 +40,8 @@ private:
     std::shared_ptr<Terrain> _terrain = nullptr;
 	std::vector<std::weak_ptr<Actor>> _environmentObjects;
 
+    // 頂点情報を書き出すかどうか
+    bool _isExportingVertices = false;
     // ストリームアウトデータ描画フラグ
     bool _drawStreamOut = false;
     // 透明壁描画フラグ

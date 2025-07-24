@@ -6,10 +6,12 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 
+#include "TerrainCollider.h"
 #include "TerrainEnvironmentController.h"
 
 #include <filesystem>
 #include <imgui.h>
+#include <Mygui.h>
 
 TerrainController::TerrainController(const std::string& serializePath)
 {
@@ -21,7 +23,7 @@ TerrainController::TerrainController(const std::string& serializePath)
 void TerrainController::OnCreate()
 {
 	// 地形の初期化
-    _terrain->SetStreamOut(true);
+    _isExportingVertices = true;
     // 地形の環境物配置情報からアクター生成
 	auto objectLayout = _terrain->GetTerrainObjectLayout();
     for (const auto& [index, layout] : objectLayout->GetLayouts())
@@ -30,14 +32,36 @@ void TerrainController::OnCreate()
     }
 	_isEditing = true;
 }
+// 更新処理
+void TerrainController::Update(float elapsedTime)
+{
+}
 // 遅延更新処理
 void TerrainController::LateUpdate(float elapsedTime)
 {
+    // 地形の更新
+    if (_terrain)
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        bool result = _terrain->UpdateTextures(GetActor()->GetScene()->GetTextureRenderer(),
+            Graphics::Instance().GetDeviceContext());
+
+        // 編集が行われていた時
+        if (result)
+        {
+            // このアクターにコライダーがついているなら更新する
+            auto collider = GetActor()->GetCollider<TerrainCollider>();
+            if (collider)
+            {
+                collider->SetRecalculate(true);
+            }
+        }
+    }
 	// 編集フラグが立っている場合は地形の再計算を行う
 	if (_isEditing)
 	{
         // 地形の初期化
-        _terrain->SetStreamOut(true);
+        _isExportingVertices = true;
 		_isEditing = false;
 	}
     if (_recreateEnvironment)
@@ -54,16 +78,14 @@ void TerrainController::LateUpdate(float elapsedTime)
 // 描画処理
 void TerrainController::Render(const RenderContext& rc)
 {
-    //rc.deviceContext->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::WireCullBack));
     if (_terrain)
     {
-        // 地形の描画
-        _terrain->Render(GetActor()->GetScene()->GetTextureRenderer(),
-            rc,
+        GetActor()->GetScene()->GetTerrainRenderer().Draw(
+            _terrain.get(),
             GetActor()->GetTransform().GetMatrix(),
-            Graphics::Instance().RenderingDeferred());
+            _isExportingVertices);
+		_isExportingVertices = false;
     }
-    //rc.deviceContext->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 }
 // デバッグ描画
 void TerrainController::DebugRender(const RenderContext& rc)
@@ -143,6 +165,8 @@ void TerrainController::DrawGui()
 {
     if (_terrain)
     {
+        if (ImGui::Button(u8"頂点再計算"))
+            _isExportingVertices = true;
 		// 地形の編集フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"地形編集", &_isEditing);
 		// ストリームアウトデータの描画フラグを切り替えるチェックボックス
@@ -160,6 +184,20 @@ void TerrainController::DrawGui()
 			}
             _environmentObjects.clear();
 			_recreateEnvironment = true;
+        }
+        ImGui::Separator();
+        std::string resultPath = "";
+        if (ImGui::SaveDialogBotton(u8"保存", &resultPath, ImGui::JsonFilter))
+        {
+            // 地形の情報をJSONファイルに保存
+            _terrain->SaveToFile(resultPath);
+        }
+        if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::JsonFilter))
+        {
+            // 地形の情報をJSONファイルから読み込み
+            _terrain->LoadFromFile(Graphics::Instance().GetDevice(), resultPath);
+            // 再計算
+            _isExportingVertices = true;
         }
         ImGui::Separator();
         // 地形のGUI描画

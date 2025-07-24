@@ -9,6 +9,7 @@
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Renderer/TextRenderer.h"
+#include "../../Library/Renderer/TerrainRenderer.h"
 #include "../../Library/Renderer/ParticleRenderer.h"
 
 #include "../../Library/Actor/ActorManager.h"
@@ -123,6 +124,8 @@ public:
 	TextureRenderer&		GetTextureRenderer()		{ return _textureRenderer; }
 	// テキストレンダラー取得
 	TextRenderer&			GetTextRenderer()			{ return _textRenderer; }
+	// テレインレンダラー取得
+	TerrainRenderer&		GetTerrainRenderer()		{ return _terrainRenderer; }
 	// パーティクルレンダラー取得
 	ParticleRenderer&		GetParticleRenderer()		{ return _particleRenderer; }
 
@@ -175,6 +178,7 @@ private:
 	MeshRenderer					_meshRenderer;
 	TextureRenderer					_textureRenderer;
 	TextRenderer					_textRenderer;
+	TerrainRenderer					_terrainRenderer;
 	ParticleRenderer				_particleRenderer;
 
 	ActorManager					_actorManager;

@@ -23,16 +23,15 @@ void Scene::Initialize()
 	_textureRenderer.Initialize(Graphics::Instance().GetDevice());
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-		_textRenderer.Initialize(Graphics::Instance().GetDevice(),
-			Graphics::Instance().GetDeviceContext());
+		_textRenderer.Initialize(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
     }
+	_terrainRenderer.Initialize(Graphics::Instance().GetDevice());
 	_particleRenderer.Initialize(Graphics::Instance().GetDevice());
 
 	// Effekseerエフェクトマネージャー作成
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-        _effekseerEffectManager.Initialize(Graphics::Instance().GetDevice(),
-            Graphics::Instance().GetDeviceContext());
+        _effekseerEffectManager.Initialize(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
     }
 
 	// レンダーコンテキスト初期化
@@ -210,6 +209,9 @@ void Scene::Render()
 
             // モデルの描画
             _meshRenderer.RenderOpaque(rc, true);
+
+			// テレインの描画
+			_terrainRenderer.Render(rc, true);
         }
         gBuffer->Deactivate(dc);
     }
@@ -256,6 +258,9 @@ void Scene::Render()
 
             // フォワードレンダリング
             _meshRenderer.RenderOpaque(rc, false);
+
+            // テレインの描画
+            _terrainRenderer.Render(rc, true);
         }
 
         // モデルの描画
@@ -422,6 +427,9 @@ void Scene::DrawGui()
 
 	// パーティクルのGui表示
 	_particleRenderer.DrawGui();
+
+	// テレインレンダラーのGui表示
+	_terrainRenderer.DrawGui();
 
     if(_skyMap)
         _skyMap->DrawGui();

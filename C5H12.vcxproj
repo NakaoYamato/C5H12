@@ -247,6 +247,7 @@
     <ClCompile Include="Library\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Library\Renderer\ParticleRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
+    <ClCompile Include="Library\Renderer\TerrainRenderer.cpp" />
     <ClCompile Include="Library\Renderer\TextRenderer.cpp" />
     <ClCompile Include="Library\Renderer\TextureRenderer.cpp" />
     <ClCompile Include="Library\Graphics\GpuResourceManager.cpp" />
@@ -460,6 +461,7 @@
     <ClInclude Include="Library\Renderer\MeshRenderer.h" />
     <ClInclude Include="Library\Renderer\ParticleRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
+    <ClInclude Include="Library\Renderer\TerrainRenderer.h" />
     <ClInclude Include="Library\Renderer\TextRenderer.h" />
     <ClInclude Include="Library\Renderer\TextureRenderer.h" />
     <ClInclude Include="Library\Graphics\GpuResourceManager.h" />

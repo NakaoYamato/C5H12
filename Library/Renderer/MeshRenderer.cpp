@@ -235,25 +235,7 @@ void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh, Model* model, Model
 /// ƒƒbƒVƒ…‚ÌƒeƒXƒg•`‰æ
 void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
 {
-	std::string modelName = model->GetFilename();
-	modelName += "_Test";
-	// ‰ß‹‚É“o˜^‚µ‚Ä‚¢‚é‚©Šm”F
-	auto iter = _instancingInfoMap.find(modelName);
-
-	InstancingDrawInfo::ModelParameter modelParameter{ Vector4::White, world };
-	if (iter != _instancingInfoMap.end())
-	{
-		// Šù‚É“o˜^‚µ‚Ä‚¢‚éê‡‚Íƒpƒ‰ƒ[ƒ^‚ğ’Ç‰Á
-		(*iter).second.modelParameters.push_back(modelParameter);
-	}
-	else
-	{
-		// ‚È‚¢ê‡‚ÍV‹K‚Å“o˜^
-		_instancingInfoMap[modelName].model = model;
-		_instancingInfoMap[modelName].parameter = nullptr;
-		_instancingInfoMap[modelName].modelParameters.push_back(modelParameter);
-		_instancingInfoMap[modelName].material = &_testMaterial;
-	}
+	MeshRenderer::DrawInstancing(model, Vector4::White, &_testMaterial, world, nullptr);
 }
 
 /// ‰e•`‰æ
@@ -291,9 +273,9 @@ void MeshRenderer::DrawInstancing(Model* model,
 	const DirectX::XMFLOAT4X4& world,
 	ShaderBase::Parameter* parameter)
 {
-	const std::string& modelName = model->GetFilename();
+	std::string key = material->GetShaderName() + model->GetFilename();
 	// ‰ß‹‚É“o˜^‚µ‚Ä‚¢‚é‚©Šm”F
-	auto iter = _instancingInfoMap.find(modelName);
+	auto iter = _instancingInfoMap.find(key);
 
 	InstancingDrawInfo::ModelParameter modelParameter{ color, world };
 	if (iter != _instancingInfoMap.end())
@@ -304,10 +286,10 @@ void MeshRenderer::DrawInstancing(Model* model,
 	else
 	{
 		// ‚È‚¢ê‡‚ÍV‹K‚Å“o˜^
-		_instancingInfoMap[modelName].model = model;
-		_instancingInfoMap[modelName].parameter = parameter;
-		_instancingInfoMap[modelName].modelParameters.push_back(modelParameter);
-		_instancingInfoMap[modelName].material = material;
+		_instancingInfoMap[key].model = model;
+		_instancingInfoMap[key].parameter = parameter;
+		_instancingInfoMap[key].modelParameters.push_back(modelParameter);
+		_instancingInfoMap[key].material = material;
 	}
 }
 
@@ -758,10 +740,8 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 		};
 
 	// •`‰æˆ—
-	for (auto& drawInfomap : _instancingInfoMap)
+	for (auto& [shaderName, drawInfo] : _instancingInfoMap)
 	{
-		InstancingDrawInfo& drawInfo = drawInfomap.second;
-
 		ShaderBase* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.material->GetShaderName()].get();
 		shader->Begin(rc);
 

@@ -269,8 +269,8 @@ void TerrainDeformer::Render(const RenderContext& rc)
     }
 	// 変形タスクをクリア
 	_tasks.clear();
-    // 地形のストリームアウトを有効にする
-    terrain->SetStreamOut(true);
+    // 地形の頂点情報を書き出す
+	_terrainController.lock()->SetIsExportingVertices(true);
 
     // キャッシュの復元
     GpuResourceManager::RestoreStateCache(rc.deviceContext);

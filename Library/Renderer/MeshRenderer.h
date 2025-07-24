@@ -83,6 +83,9 @@ private:
     };
 #pragma endregion
 public:
+	MeshRenderer() = default;
+	~MeshRenderer() = default;
+
     /// <summary>
     /// 初期化
     /// </summary>
@@ -223,11 +226,13 @@ private:
     std::unique_ptr<ShaderBase> _cascadedSMShader[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
     // 各モデルタイプのInfo
+	// Key : シェーダー名
     using DrawInfoMap = std::unordered_map<std::string, std::vector<DrawInfo>>;
-    using InstancingDrawInfoMap = std::unordered_map<std::string, InstancingDrawInfo>;
     DrawInfoMap                 _dynamicInfomap;
     DrawInfoMap                 _staticInfomap;
     std::vector<AlphaDrawInfo>	_alphaDrawInfomap;
+    // Key : シェーダー名+モデルファイル名
+    using InstancingDrawInfoMap = std::unordered_map<std::string, InstancingDrawInfo>;
     InstancingDrawInfoMap       _instancingInfoMap;
 
     // 各定数バッファ

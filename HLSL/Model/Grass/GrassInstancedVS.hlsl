@@ -32,9 +32,12 @@ VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
     }
     rate = rate * shakeAmplitude;
     
+    // 風のシード値計算
+    float seed = worldTransform[instance_id]._41 + worldTransform[instance_id]._42 + worldTransform[instance_id]._43;
+    
     float4 position = vin.position;
     // 草の揺れを計算
-    position.xyz += windDirection * windStrength * sin(totalElapsedTime * windSpeed) * rate;
+    position.xyz += windDirection * windStrength * sin(seed + totalElapsedTime * windSpeed) * rate;
     
     VS_OUT vout = (VS_OUT) 0;
     vout.world_position = mul(position, worldTransform[instance_id]);

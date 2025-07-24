@@ -76,6 +76,8 @@ public:
 #pragma region アクセサ
 	// コリジョンメッシュ取得
 	const CollisionMesh& GetCollisionMesh() const { return _collisionMesh; }
+	// 再計算フラグのセット
+	void SetRecalculate(bool f) { _recalculate = f; }
 #pragma endregion
 protected:
     /// <summary>

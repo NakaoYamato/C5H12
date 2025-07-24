@@ -11,7 +11,6 @@
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/PostProcess/FrameBuffer.h"
-#include "../../Library/Exporter/Exporter.h"
 
 #include "TerrainTransparentWall.h"
 #include "TerrainObjectLayout.h"
@@ -19,28 +18,6 @@
 class Terrain
 {
 public:
-	// 頂点データ構造体
-    struct Vertex
-    {
-        DirectX::XMFLOAT3 position;
-        DirectX::XMFLOAT3 normal;
-        DirectX::XMFLOAT2 texcoord;
-    };
-	// 定数バッファのデータ構造体
-    struct ConstantBuffer
-    {
-        DirectX::XMFLOAT4X4 world = {};
-
-        float edgeFactor    = 64.0f;    // エッジ分割数
-        float innerFactor   = 64.0f;    // 内部部分数
-        float heightScaler  = 1.0f;     // 高さ係数
-        float lodDistanceMax = 200.0f;    // LOD(Level Of Detail)距離
-
-        float emissive      = 0.0f;     // エミッシブ
-        float metalness     = 0.63f;    // メタリック
-        float roughness     = 0.6f;     // ラフネス
-        float padding1      = 0.0f;     // パディング
-    };
     // ストリームアウト用
     struct StreamOutVertex
     {
@@ -53,15 +30,16 @@ public:
 
 	static constexpr size_t BaseColorTextureIndex = 0;
 	static constexpr size_t NormalTextureIndex = 1;
-    static constexpr LONG StreamOutMaxVertex = 3 * 3 * 64 * 64;
+    static constexpr LONG StreamOutMaxVertex = 3 * 3 * 128 * 128;
     static constexpr LONG MaterialMapSize = 1024 * 6;
     static constexpr LONG ParameterMapSize = 1024 * 3;
-    static constexpr UINT ParameterMapIndex = 6;
 public:
     Terrain(ID3D11Device* device, const std::string& serializePath = "./Data/Terrain/Save/Test000.json");
 	~Terrain() {}
-    // 描画処理
-    void Render(TextureRenderer& textureRenderer, const RenderContext& rc, const DirectX::XMFLOAT4X4& world, bool writeGBuffer);
+
+    // テクスチャ更新
+    // 編集を行うとtrueを返す
+	bool UpdateTextures(TextureRenderer& textureRenderer, ID3D11DeviceContext* dc);
     // GUI描画
     void DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc);
 
@@ -75,14 +53,18 @@ public:
 		Vector3* intersectionWorldNormal = nullptr,
 		Vector2* intersectUVPosition = nullptr) const;
 #pragma region アクセサ
+	// 頂点バッファを取得
+    ID3D11Buffer* const* GetAddressOfVertexBuffer() const { return _vertexBuffer.GetAddressOf(); }
+	// インデックスバッファを取得
+	ID3D11Buffer* GetIndexBuffer() const { return _indexBuffer.Get(); }
     // マテリアルマップのフレームバッファを取得
 	FrameBuffer* GetMaterialMapFB() { return _materialMapFB.get(); }
     // パラメータマップのフレームバッファを取得
     FrameBuffer* GetParameterMapFB() { return _parameterMapFB.get(); }
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
-    // ストリームアウトをするかどうか設定
-    void SetStreamOut(bool streamOut) { _streamOut = streamOut; }
+	// ストリームアウトデータを設定
+	void SetStreamOutData(const std::vector<StreamOutVertex>& data) { _streamOutData = data; }
     // 透明壁取得
 	 TerrainTransparentWall* GetTransparentWall() { return &_transparentWall; }
 	// オブジェクトの配置情報を取得
@@ -109,26 +91,12 @@ private:
 #pragma region 描画用COMオブジェクト
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>    _constantBuffer;
-
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
-    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
-
-    // ストリームアウト用
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
 
     // ロード用SRV
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadBaseColorSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadNormalSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterSRV;
 #pragma endregion
-    ConstantBuffer                          _data;
     // マテリアルマップ(RT0:BaseColor,RT1:Normal)
     std::unique_ptr<FrameBuffer> _materialMapFB;
     // パラメータマップ（R：高さ、G：コスト、B：（空き）、A：（空き））
@@ -139,7 +107,6 @@ private:
     bool _isLoadingTextures = false;
 
     // ストリームアウト用
-    bool _streamOut = false;
     std::vector<StreamOutVertex> _streamOutData;
 
     // 透明壁

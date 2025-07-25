@@ -26,8 +26,7 @@ float4x4 ToMatrixScaling(float3 scale)
     m._44 = 1.0f;
     return m;
 }
-
-//  回転行列生成
+//  回転行列生成(オイラー角)
 float4x4 ToMatrixRotationRollPitchYaw(float3 rotation)
 {
     float cp, sp;
@@ -59,7 +58,24 @@ float4x4 ToMatrixRotationRollPitchYaw(float3 rotation)
     m._44 = 1.0f;
     return m;
 }
+//  回転行列生成(クオータニオン)
+float4x4 ToMatrixRotation(float angle, float3 axis)
+{
+    float c, s;
+    sincos(angle, s, c);
 
+    float t = 1 - c;
+    float x = axis.x;
+    float y = axis.y;
+
+    float z = axis.z;
+    return float4x4(
+		t * x * x + c, t * x * y - s * z, t * x * z + s * y, 0,
+		t * x * y + s * z, t * y * y + c, t * y * z - s * x, 0,
+		t * x * z - s * y, t * y * z + s * x, t * z * z + c, 0,
+		0, 0, 0, 1
+		);
+}
 //  移動行列生成
 float4x4 ToMatrixTranslation(float3 translation)
 {

@@ -30,6 +30,20 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
     _parameterMapFB = std::make_unique<FrameBuffer>(
         device, 
         ParameterMapSize, ParameterMapSize, true);
+	// 頂点情報をGPUに送るためのバッファ、SRV作成
+	{
+		D3D11_BUFFER_DESC desc{};
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.ByteWidth = sizeof(StreamOutVertex) * TerrainRenderer::StreamOutMaxVertex;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		desc.StructureByteStride = sizeof(StreamOutVertex);
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		HRESULT hr = device->CreateBuffer(&desc, nullptr, _streamOutVertexBuffer.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		hr = device->CreateShaderResourceView(_streamOutVertexBuffer.Get(),
+            nullptr, _streamOutSRV.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
 
     // データの読み込み
 	LoadFromFile(device, serializePath);
@@ -281,6 +295,27 @@ void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, co
 		// パラメータマップのパスを更新
 		_parameterTexturePath = parameterMapPath;
     }
+}
+// ストリームアウトデータを設定
+void Terrain::SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<StreamOutVertex>& data)
+{
+    _streamOutData = data;
+    UINT size = static_cast<UINT>(_streamOutData.size() * sizeof(StreamOutVertex));
+    // バッファを更新
+    D3D11_BOX writeBox = {};
+    writeBox.left = 0;
+    writeBox.right = size;
+    writeBox.top = 0;
+    writeBox.bottom = 1;
+    writeBox.front = 0;
+    writeBox.back = 1;
+    dc->UpdateSubresource(
+        _streamOutVertexBuffer.Get(),
+        0,
+        &writeBox,
+        _streamOutData.data(),
+        size,
+        0);
 }
 // 書き出し
 void Terrain::SaveToFile(const std::string& path)

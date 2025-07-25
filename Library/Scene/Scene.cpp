@@ -16,33 +16,49 @@
 void Scene::Initialize()
 {
     ProfileScopedSection_3(0, "Scene::Initialize", ImGuiControl::Profiler::Dark);
+    Graphics& graphics = Graphics::Instance();
+	ID3D11Device* device = graphics.GetDevice();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
-	_primitive = std::make_unique<Primitive>(Graphics::Instance().GetDevice());
-    // レンダラー作成
-	_meshRenderer.Initialize(Graphics::Instance().GetDevice());
-	_textureRenderer.Initialize(Graphics::Instance().GetDevice());
+    // レンダーコンテキスト初期化
+    _renderContext.deviceContext = dc;
+    _renderContext.renderState = Graphics::Instance().GetRenderState();
+    _renderContext.camera = GetMainCamera();
+    _renderContext.lightDirection = Vector4::Right;
+    _renderContext.lightColor = Vector4::White;
+    _renderContext.lightAmbientColor = Vector4::Black;
+    _renderContext.environmentMap = nullptr;
+    _renderContext.pointLights.clear();
+    // サンプラーステート設定
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-		_textRenderer.Initialize(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
+        RenderState* renderState = graphics.GetRenderState();
+        std::vector<ID3D11SamplerState*> samplerStates;
+        for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
+        {
+            samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
+        }
+        dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
     }
-	_terrainRenderer.Initialize(Graphics::Instance().GetDevice());
-	_particleRenderer.Initialize(Graphics::Instance().GetDevice());
+
+	_primitive = std::make_unique<Primitive>(device);
+    // レンダラー作成
+	_meshRenderer.Initialize(device);
+	_textureRenderer.Initialize(device);
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		_textRenderer.Initialize(device, dc);
+    }
+	_terrainRenderer.Initialize(device);
+	_particleRenderer.Initialize(device);
 
 	// Effekseerエフェクトマネージャー作成
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-        _effekseerEffectManager.Initialize(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
+        _effekseerEffectManager.Initialize(device, dc);
     }
-
-	// レンダーコンテキスト初期化
-	_renderContext.deviceContext = Graphics::Instance().GetDeviceContext();
-	_renderContext.renderState = Graphics::Instance().GetRenderState();
-	_renderContext.camera = GetMainCamera();
-	_renderContext.lightDirection = Vector4::Right;
-	_renderContext.lightColor = Vector4::White;
-	_renderContext.lightAmbientColor = Vector4::Black;
-	_renderContext.environmentMap = nullptr;
-	_renderContext.pointLights.clear();
 
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
@@ -87,6 +103,14 @@ void Scene::Update(float elapsedTime)
 
 	// パーティクルの更新
 	_particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+
+	// 時間の更新
+	_time += elapsedTime;
+
+    // 定数バッファの更新
+    ConstantBufferManager* cbManager = Graphics::Instance().GetConstantBufferManager();
+	cbManager->GetSceneCB().totalElapsedTime = _time;
+	cbManager->GetSceneCB().deltaTime = elapsedTime;
 
     // グリッド表示
     if (_showGrid)

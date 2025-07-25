@@ -54,6 +54,11 @@ public:
 		DirectX::XMFLOAT4		lightDirection;
 		DirectX::XMFLOAT4		lightColor;
 		DirectX::XMFLOAT4		cameraPosition;
+
+		float					totalElapsedTime{};
+		float					deltaTime{};
+		float					windFrequency = 22.388f;
+		float					windStrength = 0.5f;
 	};
 	// ライト定数バッファ
 	struct LightConstantBuffer : public ConstantBufferBase
@@ -92,6 +97,9 @@ public:
 		UINT slot,
 		ConstantBufferType bufferType,
 		ConstantUpdateTarget updateTarget);
+
+	SceneConstantBuffer& GetSceneCB() { return _sceneCB; }
+	LightConstantBuffer& GetLightCB() { return _lightCB; }
 private:
 	// シーン定数バッファの更新
 	void UpdateSceneCB(SceneConstantBuffer* buffer);

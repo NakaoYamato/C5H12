@@ -36,6 +36,7 @@ void ConstantBufferManager::Update(const RenderContext& rc)
 		sceneCB.cameraPosition.x = eye.x;
 		sceneCB.cameraPosition.y = eye.y;
 		sceneCB.cameraPosition.z = eye.z;
+		sceneCB.cameraPosition.w = 0.0f; // w¬•ª‚ÍŽg—p‚µ‚È‚¢‚Ì‚Å0‚ÉÝ’è
 
 		UpdateSceneCB(&sceneCB);
 		dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::SceneCB)].Get(), 0, 0, &this->_sceneCB, 0, 0);

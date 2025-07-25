@@ -1269,6 +1269,8 @@
     <None Include="HLSL\Terrain\Terrain.hlsli" />
     <None Include="HLSL\Terrain\Deform\TerrainDeform.hlsli" />
     <None Include="HLSL\Model\Instancing.hlsli" />
+    <None Include="HLSL\Terrain\Grass\TerrainGrass.hlsli" />
+    <None Include="HLSL\Function\Noise.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -1339,5 +1341,11 @@
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingAlphaPS.hlsl" />
     <FxCompile Include="HLSL\Model\Phong\PhongAlphaPS.hlsl" />
     <FxCompile Include="HLSL\Model\Grass\GrassInstancedVS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassVS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassGS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassGBPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassHS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassDS.hlsl" />
   </ItemGroup>
 </Project>

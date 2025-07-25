@@ -24,14 +24,13 @@ float4 main(PS_IN pin) : SV_TARGET
     float3 N = normalize(normal);
     
     // 法線計算
-    float3 worldTangent = normalize(mul(float4(1.0f, 0.0f, 0.0f, 0.0f), world)).rgb;
-    float3 binormal = normalize(mul(float4(0.0f, 0.0f, -1.0f, 0.0f), world)).rgb;
+    float3 binormal = normalize(cross(pin.worldNormal.xyz, pin.worldTangent.xyz));
     // ノーマルテクスチャ法線をワールドへ変換
     float3x3 mat =
     {
-        normalize(worldTangent),
+        normalize(pin.worldTangent.xyz),
         normalize(binormal),
-        normalize(pin.normal)
+        normalize(pin.worldNormal.xyz)
     };
     N = normalize(mul(N * 2.0f - 1.0f, mat));
     

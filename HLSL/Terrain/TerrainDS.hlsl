@@ -28,10 +28,11 @@ const OutputPatch<DS_IN, 3> patch)
     }
     // 情報設定
     dout.position = mul(float4(position, 1.0), viewProjection);
-    dout.texcoord = texcoord;
-    dout.normal = worldNormal;
-    
     dout.worldPosition = position;
+    dout.worldNormal = worldNormal;
+    dout.worldTangent = float4(normalize(cross(worldNormal, float3(0.0f, 1.0f, 0.01f))), 1.0f);
+    dout.texcoord = texcoord;
+    
     // コストはストリームアウト時に計算するので初期化
     dout.cost = 0.0f;
     

@@ -2,14 +2,15 @@
 
 #include "../../Scene/Scene.h"
 #include "../../DebugSupporter/DebugSupporter.h"
+#include "../../Library/Collision/CollisionMath.h"
 
 #include <imgui.h>
 
 // 開始処理
 void TerrainCollider::Start()
 {
-	MeshCollider::Start();
 	_terrainController = GetActor()->GetComponent<TerrainController>();
+	MeshCollider::Start();
 }
 // 更新処理
 void TerrainCollider::Update(float elapsedTime)

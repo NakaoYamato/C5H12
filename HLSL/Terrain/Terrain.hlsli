@@ -1,5 +1,12 @@
 #include "../Scene/SceneConstantBuffer.hlsli"
 
+struct VS_IN
+{
+    float4 position : POSITION;
+    float4 normal : NORMAL;
+    float2 texcoord : TEXCOORD;
+};
+
 // éÛÇØìnÇµç\ë¢ëÃ
 struct HS_IN
 {
@@ -23,13 +30,15 @@ struct DS_OUT
 {
     float4 position : SV_POSITION;
     float3 worldPosition : WORLD_POSITION;
-    float3 normal : NORMAL;
+    float3 worldNormal : NORMAL;
+    float4 worldTangent : TANGENT;
     float2 texcoord : TEXCOORD;
     float  cost : COST;
 };
 #define GS_IN DS_OUT
 #define GS_OUT DS_OUT
 #define PS_IN DS_OUT
+#define StreamOutData DS_OUT
 
 cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
 {
@@ -43,5 +52,5 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
     float emissive;
     float roughness;
     float metalness;
-    float padding1;
+    float padding;
 }

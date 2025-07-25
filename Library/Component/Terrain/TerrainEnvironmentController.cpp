@@ -125,12 +125,6 @@ void TerrainEnvironmentController::Update(float elapsedTime)
 					iter->second = 5.0f; // ‘‚Ì—h‚êŽ²‚ð-ZŽ²‚ÉÝ’è
 				}
 			}
-
-			iter = renderer->GetShaderParameter().find("totalTime");
-			if (iter != renderer->GetShaderParameter().end())
-			{
-				iter->second += elapsedTime;
-			}
 		}
 	}
 }

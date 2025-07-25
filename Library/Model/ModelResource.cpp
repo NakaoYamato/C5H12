@@ -706,7 +706,7 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
             else
             {
                 // ƒ‚ƒfƒ‹‚É‚æ‚Á‚Ä‚ÍÚüî•ñ‚ª‚È‚¢‚Ì‚Åì‚é
-                // top‚ğ‚¿‚å‚Á‚Æ‚¾‚¯Z‚É‚¸‚ç‚·‚±‚Æ‚Åtop==N‚É‚È‚é‚±‚Æ‚ğ–h‚°‚Ä‚¢‚é‚Æ‚¢‚¢‚È‚Ÿ
+                // top‚ğ‚¿‚å‚Á‚Æ‚¾‚¯Z‚É‚¸‚ç‚·‚±‚Æ‚Åtop==N‚É‚È‚é‚±‚Æ‚ğ–h‚®
                 DirectX::XMVECTOR top = DirectX::XMVector3Normalize(DirectX::XMVectorSet(0.0f, 1.0f, 0.01f, 0.0f));
                 DirectX::XMVECTOR N = DirectX::XMLoadFloat3(&vertex.normal);
                 DirectX::XMFLOAT3 t{};

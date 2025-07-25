@@ -141,6 +141,9 @@ public:
 	// スカイマップ設定
 	void SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM);
 
+	// 経過時間取得
+	float GetTime() const { return _time; }
+
 	// グリッド表示フラグ取得
 	void SetShowGrid(bool show) { _showGrid = show; }
 	// 準備完了しているか
@@ -184,6 +187,9 @@ private:
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
 	EffekseerEffectManager			_effekseerEffectManager;
+
+	// 経過時間
+	float							_time = 0.0f;
 
 	// ロード進捗率
 	float							_completionLoading = 0.0f;

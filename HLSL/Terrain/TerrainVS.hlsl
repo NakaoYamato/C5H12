@@ -1,10 +1,10 @@
 #include "Terrain.hlsli"
 
-HS_IN main(float4 position : POSITION, float4 normal : NORMAL, float2 texcoord : TEXCOORD)
+HS_IN main(VS_IN vin)
 {
     HS_IN vout = (HS_IN) 0;
-    vout.position = position;
-    vout.normal = normal.xyz;
-    vout.texcoord = texcoord;
+    vout.position = vin.position;
+    vout.normal = vin.normal.xyz;
+    vout.texcoord = vin.texcoord;
     return vout;
 }

@@ -7,10 +7,9 @@ cbuffer GRASS_CONSTANT_BUFFER : register(b4)
     // 0 : +XŽ², 1 : +YŽ², 2 : +ZŽ²
     // 3 : -XŽ², 4 : -YŽ², 5 : -ZŽ²
     int shakeAxis;
-    float shakeAmplitude;
-    float windStrength;
-    float windSpeed;
-    
     float3 windDirection;
-    float totalElapsedTime;
+    
+    float windSpeed;
+    float shakeAmplitude;
+    float2 grassPadding;
 }

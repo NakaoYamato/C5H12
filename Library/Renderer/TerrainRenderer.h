@@ -27,8 +27,22 @@ public:
         float emissive = 0.0f;     // エミッシブ
         float metalness = 0.63f;    // メタリック
         float roughness = 0.6f;     // ラフネス
-        float padding1 = 0.0f;     // パディング
+		float padding = 0.0f; // パディング
     };
+	struct GrassConstantBuffer
+	{
+        float grassTessellation = 8.0f;     // 草の分割数
+        float height = 1.0f;
+        float width = 0.04f;
+        float witherdFactor = 0.194f;
+
+        float curvature = 0.6f;
+        float heightVariance = 0.165f;
+		float parlinNoiseDistribution = 0.178f;
+        float dummy{};
+
+		Vector4 specularColor{ 0.885f, 0.673f, 0.328f, 1.000f }; // 草のスペキュラカラー
+	};
     // 描画用情報
     struct DrawInfo
     {
@@ -36,7 +50,9 @@ public:
 		DirectX::XMFLOAT4X4 world = {}; // ワールド行列
 		bool isExportingVertices = false; // 頂点情報をエクスポートするかどうか
     };
-
+    
+	static constexpr float MaxTessellation = 256.0f;
+    static constexpr LONG StreamOutMaxVertex = 3 * 3 * static_cast<LONG>(MaxTessellation) * static_cast<LONG>(MaxTessellation);
     static constexpr UINT ParameterMapSRVIndex = 6;
 public:
 	TerrainRenderer() = default;
@@ -55,6 +71,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _constantBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _grassConstantBuffer;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
@@ -62,6 +79,18 @@ private:
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
+
+    // 草描画用シェーダー
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>	_grassVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11HullShader>	_grassHullShader;
+    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_grassDomainShader;
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader> _grassGeometryShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_grassPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_grassGBPixelShader;
+	// 風のゆがみテクスチャ
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _windDistortionSRV;
+    // 草のテクスチャ
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _grassColorSRV;
 
     // ストリームアウト用
     Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
@@ -72,6 +101,10 @@ private:
 	std::vector<DrawInfo> _drawInfos;
 	// 定数バッファのデータ
 	ConstantBuffer                          _data;
+	// 草の定数バッファ
+	GrassConstantBuffer _dataGrass;
+    // 草を描画するか
+	bool _isDrawingGrass = true;
     // GUI描画フラグ
 	bool _isDrawingGui = false;
 };

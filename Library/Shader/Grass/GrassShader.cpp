@@ -60,12 +60,10 @@ void GrassShader::Update(const RenderContext& rc,
 	CbGrass cbGrass{};
 	cbGrass.shakeAxis = static_cast<int>((*parameter)["shakeAxis"]);
 	cbGrass.shakeAmplitude = (*parameter)["shakeAmplitude"];
-	cbGrass.windStrength = (*parameter)["windStrength"];
 	cbGrass.windSpeed = (*parameter)["windSpeed"];
 	cbGrass.windDirection.x = (*parameter)["windDirection.x"];
 	cbGrass.windDirection.y = (*parameter)["windDirection.y"];
 	cbGrass.windDirection.z = (*parameter)["windDirection.z"];
-	cbGrass.totalTime = (*parameter)["totalTime"];
 	dc->UpdateSubresource(_grassConstantBuffer.Get(), 0, 0, &cbGrass, 0, 0);
 
 	// シェーダーリソースビュー設定
@@ -112,11 +110,9 @@ ShaderBase::Parameter GrassShader::GetParameterKey() const
     ShaderBase::Parameter p;
     p["shakeAxis"] = static_cast<float>(cb.shakeAxis);
     p["shakeAmplitude"] = cb.shakeAmplitude;
-    p["windStrength"] = cb.windStrength;
     p["windSpeed"] = cb.windSpeed;
     p["windDirection.x"] = cb.windDirection.x;
     p["windDirection.y"] = cb.windDirection.y;
     p["windDirection.z"] = cb.windDirection.z;
-    p["totalTime"] = cb.totalTime;
     return p;
 }

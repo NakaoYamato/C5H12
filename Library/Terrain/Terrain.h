@@ -23,14 +23,14 @@ public:
     {
         DirectX::XMFLOAT4 position = {};
         DirectX::XMFLOAT3 worldPosition = {};
-        DirectX::XMFLOAT3 normal = {};
+        DirectX::XMFLOAT3 worldNormal = {};
+        DirectX::XMFLOAT4 worldTangent = {};
         DirectX::XMFLOAT2 texcoord = {};
 		float             cost = 0.0f;
     };
 
 	static constexpr size_t BaseColorTextureIndex = 0;
 	static constexpr size_t NormalTextureIndex = 1;
-    static constexpr LONG StreamOutMaxVertex = 3 * 3 * 128 * 128;
     static constexpr LONG MaterialMapSize = 1024 * 6;
     static constexpr LONG ParameterMapSize = 1024 * 3;
 public:
@@ -54,9 +54,13 @@ public:
 		Vector2* intersectUVPosition = nullptr) const;
 #pragma region アクセサ
 	// 頂点バッファを取得
-    ID3D11Buffer* const* GetAddressOfVertexBuffer() const { return _vertexBuffer.GetAddressOf(); }
+    Microsoft::WRL::ComPtr<ID3D11Buffer>& GetVertexBuffer() { return _vertexBuffer; }
 	// インデックスバッファを取得
-	ID3D11Buffer* GetIndexBuffer() const { return _indexBuffer.Get(); }
+    Microsoft::WRL::ComPtr<ID3D11Buffer>& GetIndexBuffer() { return _indexBuffer; }
+	// 頂点情報をGPUに送るためのバッファを取得
+	Microsoft::WRL::ComPtr<ID3D11Buffer>& GetStreamOutVertexBuffer() { return _streamOutVertexBuffer; }
+	// 頂点情報をGPUに送るためのSRVを取得
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetStreamOutSRV() { return _streamOutSRV; }
     // マテリアルマップのフレームバッファを取得
 	FrameBuffer* GetMaterialMapFB() { return _materialMapFB.get(); }
     // パラメータマップのフレームバッファを取得
@@ -64,7 +68,7 @@ public:
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
 	// ストリームアウトデータを設定
-	void SetStreamOutData(const std::vector<StreamOutVertex>& data) { _streamOutData = data; }
+    void SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<StreamOutVertex>& data);
     // 透明壁取得
 	 TerrainTransparentWall* GetTransparentWall() { return &_transparentWall; }
 	// オブジェクトの配置情報を取得
@@ -91,6 +95,10 @@ private:
 #pragma region 描画用COMオブジェクト
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
+    // 頂点情報をGPUに送るためのバッファ
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
+    // 頂点情報をGPUに送るためのSRV
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _streamOutSRV;
 
     // ロード用SRV
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadBaseColorSRV;
@@ -106,7 +114,7 @@ private:
     // テクスチャをロードしたかどうか
     bool _isLoadingTextures = false;
 
-    // ストリームアウト用
+    // 頂点情報
     std::vector<StreamOutVertex> _streamOutData;
 
     // 透明壁

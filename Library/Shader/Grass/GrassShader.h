@@ -36,12 +36,11 @@ private:
 		// 0 : +X², 1 : +Y², 2 : +Z²
 		// 3 : -X², 4 : -Y², 5 : -Z²
 		int						shakeAxis = 0; // —h‚ç‚·²
-		float					shakeAmplitude = 2.0f; // —h‚ç‚·U•
-		float					windStrength = 0.1f; // •—‚Ì‹­‚³
-		float					windSpeed = 1.5f; // •—‚Ì‘¬“x
-
 		Vector3					windDirection = { 0.0f, 1.0f, 0.0f }; // •—‚Ì•ûŒü
-		float					totalTime = 0.0f; // ‘Œo‰ßŠÔ
+
+		float					windSpeed = 1.5f; // •—‚Ì‘¬“x
+		float					shakeAmplitude = 2.0f; // —h‚ç‚·U•
+		Vector2					padding{};
 	};
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>		_vertexShader;

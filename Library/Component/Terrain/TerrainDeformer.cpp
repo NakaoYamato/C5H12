@@ -13,6 +13,7 @@
 #include "../../Library/Terrain/Brush/CostTransformingBrush.h"
 #include "../../Library/Terrain/Brush/TransparentWallBrush.h"
 #include "../../Library/Terrain/Brush/ObjectLayoutBrush.h"
+#include "../../Library/Terrain/Brush/GrassTransformingBrush.h"
 
 #include <filesystem>
 #include <imgui.h>
@@ -109,6 +110,7 @@ void TerrainDeformer::OnCreate()
 	RegisterBrush(std::make_shared<CostTransformingBrush>(this));
 	RegisterBrush(std::make_shared<TransparentWallBrush>(this));
 	RegisterBrush(std::make_shared<ObjectLayoutBrush>(this));
+	RegisterBrush(std::make_shared<GrassTransformingBrush>(this));
 	// ‰Šúƒuƒ‰ƒV‚Ì‘I‘ð
 	_selectedBrushName = _brushes.begin()->first;
 }

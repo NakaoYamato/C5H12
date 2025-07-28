@@ -20,7 +20,8 @@ void main(
         elemant.worldTangent = gin[i].worldTangent;
         elemant.texcoord = gin[i].texcoord;
         // コストをデータマップから取得
-        elemant.cost = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], elemant.texcoord, 0).g;
+        float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], elemant.texcoord, 0);
+        elemant.parameter = parameter;
         
         gout.Append(elemant);
     }

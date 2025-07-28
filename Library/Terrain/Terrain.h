@@ -21,12 +21,12 @@ public:
     // ストリームアウト用
     struct StreamOutVertex
     {
-        DirectX::XMFLOAT4 position = {};
-        DirectX::XMFLOAT3 worldPosition = {};
-        DirectX::XMFLOAT3 worldNormal = {};
-        DirectX::XMFLOAT4 worldTangent = {};
-        DirectX::XMFLOAT2 texcoord = {};
-		float             cost = 0.0f;
+        Vector4 position = {};
+        Vector3 worldPosition = {};
+        Vector3 worldNormal = {};
+        Vector4 worldTangent = {};
+        Vector4 parameter = {};
+        Vector2 texcoord = {};
     };
 
 	static constexpr size_t BaseColorTextureIndex = 0;
@@ -107,7 +107,7 @@ private:
 #pragma endregion
     // マテリアルマップ(RT0:BaseColor,RT1:Normal)
     std::unique_ptr<FrameBuffer> _materialMapFB;
-    // パラメータマップ（R：高さ、G：コスト、B：（空き）、A：（空き））
+    // パラメータマップ（R：高さ、G：草、B：コスト、A：（空き））
     std::unique_ptr<FrameBuffer> _parameterMapFB;
     // マテリアルのリセット
     bool _resetMap = false;

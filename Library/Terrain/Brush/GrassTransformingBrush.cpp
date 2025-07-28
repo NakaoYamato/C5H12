@@ -1,4 +1,4 @@
-#include "CostTransformingBrush.h"
+#include "GrassTransformingBrush.h"
 
 #include "../../Library/Input/Input.h"
 #include "../../Library/Graphics/Graphics.h"
@@ -8,17 +8,17 @@
 
 #include <imgui.h>
 
-CostTransformingBrush::CostTransformingBrush(TerrainDeformer* deformer) :
+GrassTransformingBrush::GrassTransformingBrush(TerrainDeformer* deformer) :
     TerrainDeformerBrush(deformer)
 {
-    // コスト編集ブラシピクセルシェーダの読み込み
+    // 草編集ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformCostPS.cso",
+        "./Data/Shader/TerrainDeformGrassPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
-// 描画処理
-void CostTransformingBrush::Render(std::shared_ptr<Terrain> terrain, const RenderContext& rc, ID3D11ShaderResourceView** srv, uint32_t startSlot, uint32_t numViews)
+
+void GrassTransformingBrush::Render(std::shared_ptr<Terrain> terrain, const RenderContext & rc, ID3D11ShaderResourceView * *srv, uint32_t startSlot, uint32_t numViews)
 {
     terrain->GetParameterMapFB()->Activate(rc.deviceContext);
     _deformer->GetActor()->GetScene()->GetTextureRenderer().Blit(

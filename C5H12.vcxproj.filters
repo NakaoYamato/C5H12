@@ -597,6 +597,9 @@
     <ClCompile Include="Library\Renderer\TerrainRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Terrain\Brush\GrassTransformingBrush.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1241,6 +1244,9 @@
     <ClInclude Include="Library\Renderer\TerrainRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1347,5 +1353,6 @@
     <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassGBPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassHS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassDS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformGrassPS.hlsl" />
   </ItemGroup>
 </Project>

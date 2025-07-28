@@ -11,7 +11,7 @@ Texture2D distortion_texture : register(t5);
 [maxvertexcount(BLADE_SEGMENTS * 2 + 1)]
 void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
 {
-    if (gin[0].cost <= 0.0f)
+    if (gin[0].parameter.g <= 0.0f)
     {
         // コストがマイナスなら描画しない
         return;

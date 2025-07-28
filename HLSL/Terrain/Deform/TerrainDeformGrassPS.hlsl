@@ -6,6 +6,6 @@ float4 main(VsOut pin) : SV_TARGET
     float rate = CalculateBrushRate(pin.texcoord);
 
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord, 0);
-    parameter.b = parameter.b + brushStrength * rate;
+    parameter.g = parameter.g + brushStrength * rate;
     return parameter;
 }

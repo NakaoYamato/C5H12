@@ -105,17 +105,23 @@ void TerrainController::DebugRender(const RenderContext& rc)
                 const auto& v2 = streamOutData[i + 1];
                 const auto& v3 = streamOutData[i + 2];
                 Vector4 color = Vector4::Red;
-                color.x = Vector4::Red.x * v1.cost;
+                color.x = v1.parameter.z;
+                color.y = v1.parameter.y;
                 Debug::Renderer::AddVertex(v1.worldPosition, color);
-                color.x = Vector4::Red.x * v2.cost;
+                color.x = v2.parameter.z;
+                color.y = v2.parameter.y;
                 Debug::Renderer::AddVertex(v2.worldPosition, color);
-                color.x = Vector4::Red.x * v2.cost;
+                color.x = v2.parameter.z;
+                color.y = v2.parameter.y;
                 Debug::Renderer::AddVertex(v2.worldPosition, color);
-                color.x = Vector4::Red.x * v3.cost;
+                color.x = v3.parameter.z;
+                color.y = v3.parameter.y;
                 Debug::Renderer::AddVertex(v3.worldPosition, color);
-                color.x = Vector4::Red.x * v3.cost;
+                color.x = v3.parameter.z;
+                color.y = v3.parameter.y;
                 Debug::Renderer::AddVertex(v3.worldPosition, color);
-                color.x = Vector4::Red.x * v1.cost;
+                color.x = v1.parameter.z;
+                color.y = v1.parameter.y;
                 Debug::Renderer::AddVertex(v1.worldPosition, color);
             }
         }

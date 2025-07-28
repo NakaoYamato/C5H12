@@ -101,8 +101,8 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             {0,"WORLD_POSITION",0,0,3,0},
             {0,"NORMAL",		0,0,3,0},
             {0,"TANGENT",		0,0,4,0},
+            {0,"PARAMETER",     0,0,4,0},
             {0,"TEXCOORD",		0,0,2,0},
-            {0,"COST",          0,0,1,0},
         };
         UINT bufferStrides[] = { sizeof(Terrain::StreamOutVertex) };
         GpuResourceManager::CreateGsWithStreamOutFromCso(

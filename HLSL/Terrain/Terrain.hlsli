@@ -32,8 +32,8 @@ struct DS_OUT
     float3 worldPosition : WORLD_POSITION;
     float3 worldNormal : NORMAL;
     float4 worldTangent : TANGENT;
+    float4 parameter : PARAMETER;// (R：高さ、G：草、B：コスト)
     float2 texcoord : TEXCOORD;
-    float  cost : COST;
 };
 #define GS_IN DS_OUT
 #define GS_OUT DS_OUT

@@ -269,6 +269,7 @@
     <ClCompile Include="Library\Shader\Test\TestShader.cpp" />
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
+    <ClCompile Include="Library\Terrain\Brush\GrassTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\HeightTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\ObjectLayoutBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\TransparentWallBrush.cpp" />
@@ -485,6 +486,7 @@
     <ClInclude Include="Library\Shader\Test\TestShader.h" />
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
+    <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\HeightTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\ObjectLayoutBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\TransparentWallBrush.h" />
@@ -833,6 +835,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformGrassPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformHeightPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -886,6 +894,8 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AssemblerOutput>
     </FxCompile>
     <FxCompile Include="HLSL\Terrain\TerrainDS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Domain</ShaderType>

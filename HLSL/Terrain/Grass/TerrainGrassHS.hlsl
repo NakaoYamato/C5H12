@@ -30,6 +30,6 @@ uint pid : SV_PrimitiveID)
     hout.worldNormal = input[cpid].worldNormal;
     hout.worldTangent = input[cpid].worldTangent;
     hout.texcoord = input[cpid].texcoord;
-    hout.cost = input[cpid].cost;
+    hout.parameter = input[cpid].parameter;
     return hout;
 }

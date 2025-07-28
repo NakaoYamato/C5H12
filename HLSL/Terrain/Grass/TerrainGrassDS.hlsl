@@ -37,14 +37,14 @@ const OutputPatch<GRASS_DS_IN, 3> patch)
     // í∏ì_UVç¿ïW
     float2 texcoord = patch[0].texcoord * UV.x + patch[1].texcoord * UV.y + patch[2].texcoord * UV.z;
     
-    float cost = patch[0].cost * UV.x + patch[1].cost * UV.y + patch[2].cost * UV.z;
+    float4 parameter = patch[0].parameter * UV.x + patch[1].parameter * UV.y + patch[2].parameter * UV.z;
     // èÓïÒê›íË
     dout.position = float4(position, 1.0);
     dout.worldPosition = worldPosition;
     dout.worldNormal = worldNormal;
     dout.worldTangent = worldTangent;
     dout.texcoord = texcoord;
-    dout.cost = cost;
+    dout.parameter = parameter;
     
     return dout;
 }

@@ -14,11 +14,13 @@ void SceneTerrainEditor::OnInitialize()
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
 
+	auto deformerActor = RegisterActor<Actor>(u8"TerrainDeformer", ActorTag::DrawContextParameter);
+    deformerActor->AddComponent<TerrainDeformer>();
+
     auto terrainActor = RegisterActor<Actor>(u8"Terrain", ActorTag::Stage);
     terrainActor->GetTransform().SetScale(50.0f);
     terrainActor->GetTransform().UpdateTransform(nullptr);
     terrainActor->AddComponent<TerrainController>();
-    terrainActor->AddComponent<TerrainDeformer>();
 	terrainActor->AddCollider<TerrainCollider>();
 
     // 境目を合わせるために見る用
@@ -28,8 +30,6 @@ void SceneTerrainEditor::OnInitialize()
         testTerrain->GetTransform().SetScale(50.0f);
         testTerrain->GetTransform().UpdateTransform(nullptr);
         testTerrain->AddComponent<TerrainController>();
-        testTerrain->AddComponent<TerrainDeformer>();
         testTerrain->AddCollider<TerrainCollider>();
-		testTerrain->SetIsActive(false); // 非表示にする
     }
 }

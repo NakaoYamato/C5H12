@@ -6,7 +6,6 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 
-#include "TerrainCollider.h"
 #include "TerrainEnvironmentController.h"
 
 #include <filesystem>
@@ -23,14 +22,13 @@ TerrainController::TerrainController(const std::string& serializePath)
 void TerrainController::OnCreate()
 {
 	// 地形の初期化
-    _isExportingVertices = true;
     // 地形の環境物配置情報からアクター生成
 	auto objectLayout = _terrain->GetTerrainObjectLayout();
     for (const auto& [index, layout] : objectLayout->GetLayouts())
     {
 		CreateEnvironment(index);
     }
-	_isEditing = true;
+	_editState = EditState::Editing;
 }
 // 更新処理
 void TerrainController::Update(float elapsedTime)
@@ -49,21 +47,9 @@ void TerrainController::LateUpdate(float elapsedTime)
         // 編集が行われていた時
         if (result)
         {
-            // このアクターにコライダーがついているなら更新する
-            auto collider = GetActor()->GetCollider<TerrainCollider>();
-            if (collider)
-            {
-                collider->SetRecalculate(true);
-            }
+            _editState = EditState::Editing;
         }
     }
-	// 編集フラグが立っている場合は地形の再計算を行う
-	if (_isEditing)
-	{
-        // 地形の初期化
-        _isExportingVertices = true;
-		_isEditing = false;
-	}
     if (_recreateEnvironment)
     {
         // 地形の環境物配置情報からアクター生成
@@ -74,6 +60,9 @@ void TerrainController::LateUpdate(float elapsedTime)
         }
 		_recreateEnvironment = false;
     }
+    // 編集状態がCompleteの場合は、未編集状態に変更
+    if (_editState == EditState::Complete)
+        _editState = EditState::None;
 }
 // 描画処理
 void TerrainController::Render(const RenderContext& rc)
@@ -83,8 +72,11 @@ void TerrainController::Render(const RenderContext& rc)
         GetActor()->GetScene()->GetTerrainRenderer().Draw(
             _terrain.get(),
             GetActor()->GetTransform().GetMatrix(),
-            _isExportingVertices);
-		_isExportingVertices = false;
+            _editState == EditState::Editing);
+
+		// 編集状態がEditingの場合は、編集完了状態に変更
+        if (_editState == EditState::Editing)
+            _editState = EditState::Complete;
     }
 }
 // デバッグ描画
@@ -172,9 +164,7 @@ void TerrainController::DrawGui()
     if (_terrain)
     {
         if (ImGui::Button(u8"頂点再計算"))
-            _isExportingVertices = true;
-		// 地形の編集フラグを切り替えるチェックボックス
-		ImGui::Checkbox(u8"地形編集", &_isEditing);
+            _editState = EditState::Editing;
 		// ストリームアウトデータの描画フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"ストリームアウトデータ描画", &_drawStreamOut);
 		// 透明壁の描画フラグを切り替えるチェックボックス
@@ -203,7 +193,7 @@ void TerrainController::DrawGui()
             // 地形の情報をJSONファイルから読み込み
             _terrain->LoadFromFile(Graphics::Instance().GetDevice(), resultPath);
             // 再計算
-            _isExportingVertices = true;
+            _editState = EditState::Editing;
         }
         ImGui::Separator();
         // 地形のGUI描画

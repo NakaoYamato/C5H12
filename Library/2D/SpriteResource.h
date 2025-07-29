@@ -75,6 +75,11 @@ public:
 	{
 		return Vector2(static_cast<float>(_texture2dDesc.Width), static_cast<float>(_texture2dDesc.Height));
 	}
+	/// <summary>
+	/// SRV�̎擾
+	/// </summary>
+	/// <returns></returns>
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetSRV() { return _srv; }
 private:
 	bool _isLoadFile = true;
 

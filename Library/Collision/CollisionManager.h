@@ -107,8 +107,22 @@ public:
 		float* distance,
 		Vector3* hitPosition,
 		Vector3* hitNormal,
-		Actor* hitActor);
-
+		Actor** hitActor);
+	/// <summary>
+	/// レイキャスト（接触したアクターすべての情報を取得）
+	/// </summary>
+	/// <param name="start"></param>
+	/// <param name="direction"></param>
+	/// <param name="distance"></param>
+	/// <param name="hitPosition"></param>
+	/// <param name="hitNormal"></param>
+	/// <returns></returns>
+	std::vector<Actor*> RayCast(
+		const Vector3& start,
+		const Vector3& direction,
+		float* distance,
+		Vector3* hitPosition,
+		Vector3* hitNormal);
 	/// <summary>
 	/// スフィアキャスト
 	/// </summary>
@@ -128,9 +142,30 @@ public:
 		Vector3* hitPosition,
 		Vector3* hitNormal,
 		Actor** hitActor);
+	/// <summary>
+	/// スフィアキャスト（接触したアクターすべての情報を取得）
+	/// </summary>
+	/// <param name="origin"></param>
+	/// <param name="direction"></param>
+	/// <param name="radius"></param>
+	/// <param name="distance"></param>
+	/// <param name="hitPosition"></param>
+	/// <param name="hitNormal"></param>
+	/// <returns></returns>
+	std::vector<Actor*> SphereCast(
+		const Vector3& origin,
+		const Vector3& direction/*must normal*/,
+		float radius,
+		float* distance,
+		Vector3* hitPosition,
+		Vector3* hitNormal);
 #pragma endregion
+	
+	// TODO : 各コライダーのOverlapSphereを実装する
+	std::vector<Actor*> OverlapSphere(
+		const Vector3& position,
+		float radius);
 
-public:
 #pragma region 登録
 	// 球コライダー登録
 	void RegisterSphereCollider(SphereCollider* sphereCollider);

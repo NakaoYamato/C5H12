@@ -10,7 +10,8 @@ public:
 	// –¼‘Oæ“¾
 	const char* GetName() const override { return u8"‚‚³•ÏŒ`"; }
 	// •`‰æˆ—
-	void Render(std::shared_ptr<Terrain> terrain,
+	void Render(SpriteResource* fullscreenQuad, 
+		std::shared_ptr<Terrain> terrain,
 		const RenderContext& rc,
 		ID3D11ShaderResourceView** srv,
 		uint32_t startSlot,

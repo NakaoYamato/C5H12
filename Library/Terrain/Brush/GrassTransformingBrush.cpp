@@ -18,10 +18,15 @@ GrassTransformingBrush::GrassTransformingBrush(TerrainDeformer* deformer) :
         _pixelShader.ReleaseAndGetAddressOf());
 }
 
-void GrassTransformingBrush::Render(std::shared_ptr<Terrain> terrain, const RenderContext & rc, ID3D11ShaderResourceView * *srv, uint32_t startSlot, uint32_t numViews)
+void GrassTransformingBrush::Render(SpriteResource* fullscreenQuad,
+    std::shared_ptr<Terrain> terrain,
+    const RenderContext & rc,
+    ID3D11ShaderResourceView * *srv,
+    uint32_t startSlot,
+    uint32_t numViews)
 {
     terrain->GetParameterMapFB()->Activate(rc.deviceContext);
-    _deformer->GetActor()->GetScene()->GetTextureRenderer().Blit(
+    fullscreenQuad->Blit(
         rc.deviceContext,
         srv,
         startSlot, numViews,

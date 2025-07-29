@@ -246,7 +246,7 @@ bool CollisionManager::RayCast(
 	float* distance,
 	Vector3* hitPosition,
 	Vector3* hitNormal,
-	Actor* hitActor)
+	Actor** hitActor)
 {
 	bool hit = false;
 	// 各メッシュコライダーに対してレイキャストを行う
@@ -256,12 +256,48 @@ bool CollisionManager::RayCast(
 		{
 			hit = true;
 			// 衝突したアクターを設定
-			hitActor = meshCollider->GetActor().get();
+			*hitActor = meshCollider->GetActor().get();
 		}
 	}
 	return hit;
 }
+/// レイキャスト（接触したアクターすべての情報を取得）
+std::vector<Actor*> CollisionManager::RayCast(
+	const Vector3& start,
+	const Vector3& direction, 
+	float* distance,
+	Vector3* hitPosition,
+	Vector3* hitNormal)
+{
+	float tmpDist = *distance;
+	std::vector<Actor*> hitActors;
 
+	// 各メッシュコライダーに対してレイキャストを行う
+	for (auto& meshCollider : _meshColliders)
+	{
+		float dist = tmpDist;
+		Vector3 hitPos{}, hitNorm{};
+		if (meshCollider->RayCast(start, direction, &dist, &hitPos, &hitNorm))
+		{
+			hitActors.push_back(meshCollider->GetActor().get());
+
+			// 接触情報を更新
+			if (dist < *distance)
+			{
+				*distance = dist;
+				if (hitPosition)
+				{
+					*hitPosition = hitPos;
+				}
+				if (hitNormal)
+				{
+					*hitNormal = hitNorm;
+				}
+			}
+		}
+	}
+	return hitActors;
+}
 /// スフィアキャスト
 bool CollisionManager::SphereCast(
 	const Vector3& origin, 
@@ -285,7 +321,86 @@ bool CollisionManager::SphereCast(
 	}
 	return hit;
 }
+/// スフィアキャスト（接触したアクターすべての情報を取得）
+std::vector<Actor*> CollisionManager::SphereCast(
+	const Vector3& origin,
+	const Vector3& direction, 
+	float radius,
+	float* distance,
+	Vector3* hitPosition,
+	Vector3* hitNormal)
+{
+	float tmpDist = *distance;
+	std::vector<Actor*> hitActors;
+
+	// 各メッシュコライダーに対してスフィアキャスト行う
+	for (auto& meshCollider : _meshColliders)
+	{
+		float dist = tmpDist;
+		Vector3 hitPos{}, hitNorm{};
+		if (meshCollider->SphereCast(origin, direction, radius, &dist, &hitPos, &hitNorm))
+		{
+			hitActors.push_back(meshCollider->GetActor().get());
+
+			// 接触情報を更新
+			if (dist < *distance)
+			{
+				*distance = dist;
+				if (hitPosition)
+				{
+					*hitPosition = hitPos;
+				}
+				if (hitNormal)
+				{
+					*hitNormal = hitNorm;
+				}
+			}
+		}
+	}
+	return hitActors;
+}
 #pragma endregion
+
+std::vector<Actor*> CollisionManager::OverlapSphere(const Vector3& position, float radius)
+{
+	std::vector<Actor*> hitActors;
+	DirectX::XMVECTOR SpherePos = DirectX::XMLoadFloat3(&position);
+	// 各メッシュコライダーに対して行う
+	for (auto& meshCollider : _meshColliders)
+	{
+		bool resutl = false;
+		auto& collisionMesh = meshCollider->GetCollisionMesh();
+
+		for (auto& area : collisionMesh.areas)
+		{
+			if (Collision3D::IntersectSphereVsAABB(position, radius, area.boundingBox.Center, area.boundingBox.Extents))
+			{
+				// AABBと衝突しているので、エリア内の三角形と判定
+				for (const int& index : area.triangleIndices)
+				{
+					const MeshCollider::CollisionMesh::Triangle& triangle = collisionMesh.triangles[index];
+					DirectX::XMVECTOR TrianglePos[3] = {
+						DirectX::XMLoadFloat3(&triangle.positions[0]),
+						DirectX::XMLoadFloat3(&triangle.positions[1]),
+						DirectX::XMLoadFloat3(&triangle.positions[2])
+					};
+					if (Collision3D::IntersectSphereVsTriangle(SpherePos, radius, TrianglePos))
+					{
+						resutl = true; // 一つでも衝突したらヒット
+						break; // 一つでも衝突したらこのメッシュコライダーはヒット
+					}
+				}
+			}
+
+			if (resutl)
+			{
+				hitActors.push_back(meshCollider->GetActor().get());
+				break; // 一つでも衝突したらこのメッシュコライダーはヒット
+			}
+		}
+	}
+	return hitActors;
+}
 
 #pragma region 登録
 // 球コライダー登録

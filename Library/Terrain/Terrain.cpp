@@ -22,8 +22,8 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
         MaterialMapSize, MaterialMapSize, true,
 		std::vector<DXGI_FORMAT>(
 			{ 
-                DXGI_FORMAT_R16G16B16A16_FLOAT, // BaseColor 
-				DXGI_FORMAT_R16G16B16A16_FLOAT, // Normal
+                DXGI_FORMAT_R8G8B8A8_UNORM, // BaseColor 
+                DXGI_FORMAT_R8G8B8A8_UNORM, // Normal
             })
     );
     // パラメータマップ作成

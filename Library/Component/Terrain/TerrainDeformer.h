@@ -1,6 +1,9 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "TerrainController.h"
+#include "../../Library/2D/SpriteResource.h"
 
 // 先行宣言
 class TerrainDeformerBrush;
@@ -62,8 +65,6 @@ public:
     const char* GetName() const override { return "TerrainDeformer"; }
     // 生成時処理
     void OnCreate() override;
-    // 開始処理
-    void Start() override;
     // 更新処理
     void Update(float elapsedTime) override;
     // 描画処理
@@ -72,12 +73,13 @@ public:
     void DrawGui() override;
 
     // 編集タスクの追加
-	void AddTask(const Task& task)
+	void AddTask(TerrainController* controller, const Task& task)
 	{
-		_tasks.push_back(task);
+		_taskMap[controller].push_back(task);
 	}
     // 環境物を追加
-    void AddEnvironmentObject(const std::string& modelPath,
+    void AddEnvironmentObject(TerrainController* controller,
+        const std::string& modelPath,
         TerrainObjectLayout::UpdateType updateType,
         TerrainObjectLayout::CollisionType collisionType,
         const Vector3& position,
@@ -115,8 +117,6 @@ private:
 	// ブラシの選択GUI描画
 	void DrawBrushSelectionGui();
 private:
-    // 地形コントローラーへの参照
-    std::weak_ptr<TerrainController> _terrainController;
     // マテリアルマップのコピーピクセルシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _copyMaterialPS;
     // 定数バッファ
@@ -125,6 +125,8 @@ private:
     std::unique_ptr<FrameBuffer> _copyMaterialMapFB;
     // テレインのパラメータマップを別枠で格納するフレームバッファ
     std::unique_ptr<FrameBuffer> _copyParameterMapFB;
+	// フルスクリーンクアッドのスプライトリソース
+    std::unique_ptr<SpriteResource>		_fullscreenQuad;
 
     // ペイントテクスチャデータ
 	std::vector<PaintTexture> _paintTextures;
@@ -133,7 +135,7 @@ private:
 	// 配置するモデルデータ
 	std::vector<ModelData> _environmentObjects;
     // 編集タスク群
-    std::vector<Task> _tasks;
+	std::unordered_map<TerrainController*, std::vector<Task>> _taskMap;
 
     // 使用するテクスチャインデックス
 	size_t _paintTextureIndex = 0;
@@ -142,6 +144,8 @@ private:
     // 選択中のモデルファイルパス
     std::string _selectedModelPath = "";
 
+    // レイキャストの長さ
+    float _rayLength = 1000.0f;
     // ブラシ使用フラグ
     bool _useBrush = false;
     // 前フレームのGUI操作フラグ
@@ -167,21 +171,25 @@ public:
 	// 名前取得
 	virtual const char* GetName() const = 0;
 	// 更新処理
-    virtual void Update(std::shared_ptr<Terrain> terrain, float elapsedTime);
+    virtual void Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
+        float elapsedTime,
+        Vector3* intersectWorldPosition);
 	// 描画処理
-    virtual void Render(std::shared_ptr<Terrain> terrain,
+	virtual void Render(SpriteResource* fullscreenQuad,
+        std::shared_ptr<Terrain> terrain,
         const RenderContext& rc,
         ID3D11ShaderResourceView** srv,
         uint32_t startSlot,
         uint32_t numViews) {};
 	// GUI描画
-    virtual void DrawGui(std::shared_ptr<Terrain> terrain);
+    virtual void DrawGui();
 
 	// タスクを登録
-    virtual void RegisterTask(const Vector2& uvPosition, float radius, float strength);
+    virtual void RegisterTask(std::weak_ptr<TerrainController> terrainController,
+        const Vector2& uvPosition, 
+        float radius,
+        float strength);
 #pragma region アクセサ
-	// ブラシの位置(ワールド)取得
-	const Vector3& GetBrushWorldPosition() const { return _brushWorldPosition; }
 	// ブラシの位置取得
 	const Vector2& GetBrushPosition() const { return _brushPosition; }
 	// ブラシの半径取得
@@ -202,10 +210,6 @@ protected:
     // ピクセルシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
 
-    // レイキャストの長さ
-    float _rayLength = 1000.0f;
-    // ブラシの位置(ワールド)
-    Vector3 _brushWorldPosition = Vector3::Zero;
     // ブラシの位置
     Vector2 _brushPosition = Vector2::Zero;
     // ブラシの半径

@@ -18,14 +18,24 @@ ObjectLayoutBrush::ObjectLayoutBrush(TerrainDeformer* deformer) :
 {
 }
 // 更新処理
-void ObjectLayoutBrush::Update(std::shared_ptr<Terrain> terrain, float elapsedTime)
+void ObjectLayoutBrush::Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
+	float elapsedTime,
+	Vector3* intersectWorldPosition)
 {
+	if (terrainControllers.empty())
+		return;
+
+	// 地形の取得
+	auto terrain = terrainControllers[0]->GetTerrain().lock();
+	if (!terrain)
+		return;
+
 	_drawDebugBrush = false;
 	// アクターのギズモ使用フラグを常にオフ
 	_deformer->GetActor()->SetIsUsingGuizmo(false);
 	switch (_state)
 	{
-	case State::None:          UpdateNone(terrain, elapsedTime);       break;
+	case State::None:          UpdateNone(terrainControllers[0], elapsedTime);       break;
 	case State::CreateObject:  UpdateCreateObject(terrain, elapsedTime); break;
 	case State::MoveObject:    UpdateMoveObject(terrain, elapsedTime);   break;
 	case State::EditObject:    UpdateEditObject(terrain, elapsedTime);   break;
@@ -34,7 +44,7 @@ void ObjectLayoutBrush::Update(std::shared_ptr<Terrain> terrain, float elapsedTi
 	}
 }
 // GUI描画
-void ObjectLayoutBrush::DrawGui(std::shared_ptr<Terrain> terrain)
+void ObjectLayoutBrush::DrawGui()
 {
 	static std::vector<const char*> UpdateTypeNames;
 	if (UpdateTypeNames.size() == 0)
@@ -113,10 +123,6 @@ void ObjectLayoutBrush::DrawGui(std::shared_ptr<Terrain> terrain)
 	}
 
 }
-// 描画処理
-void ObjectLayoutBrush::Render(std::shared_ptr<Terrain> terrain, const RenderContext& rc, ID3D11ShaderResourceView** srv, uint32_t startSlot, uint32_t numViews)
-{
-}
 // 状態変更
 void ObjectLayoutBrush::ChangeState(State newState)
 {
@@ -142,8 +148,13 @@ void ObjectLayoutBrush::ChangeState(State newState)
 	}
 }
 #pragma region 各状態の更新処理
-void ObjectLayoutBrush::UpdateNone(std::shared_ptr<Terrain> terrain, float elapsedTime)
+void ObjectLayoutBrush::UpdateNone(std::shared_ptr<TerrainController> terrainController, float elapsedTime)
 {
+	// 地形の取得
+	auto terrain = terrainController->GetTerrain().lock();
+	if (!terrain)
+		return;
+
 	auto& walls = terrain->GetTransparentWall()->GetWalls();
 	float screenWidth = Graphics::Instance().GetScreenWidth();
 	float screenHeight = Graphics::Instance().GetScreenHeight();
@@ -244,6 +255,7 @@ void ObjectLayoutBrush::UpdateNone(std::shared_ptr<Terrain> terrain, float elaps
 		{
 			// オブジェクトを配置
 			_deformer->AddEnvironmentObject(
+				terrainController.get(),
 				_selectingModelPath,
 				_objectUpdateType,
 				_objectCollisionType,

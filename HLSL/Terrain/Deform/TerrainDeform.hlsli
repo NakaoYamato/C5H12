@@ -30,10 +30,6 @@ struct PS_OUT
 // ブレンドレートの計算
 float CalculateBrushRate(float2 texcoord)
 {
-    // ブラシの影響度を受けるか判定
-    float len = length(texcoord - brushUVPosition);
-    //clip(brushRadius - len);
-
     // 影響割合を計算
     float2 vec = texcoord - brushUVPosition;
     // ブラシの回転を適用してブラシのUV座標を計算

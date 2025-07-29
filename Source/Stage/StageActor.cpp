@@ -4,7 +4,6 @@
 #include "../../Library/Component/ModelRenderer.h"
 
 #include "../../Library/Component/Terrain/TerrainController.h"
-#include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "../../Library/Component/Terrain/TerrainCollider.h"
 
 #include "StageController.h"
@@ -34,7 +33,6 @@ void StageActor::OnCreate()
     GetTransform().UpdateTransform(nullptr);
 
     auto terrainController = this->AddComponent<TerrainController>(_terrainPath);
-    this->AddComponent<TerrainDeformer>();
     this->AddComponent<StageController>(_areaNumber);
     this->AddCollider<TerrainCollider>();
 #endif

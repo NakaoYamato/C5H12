@@ -25,21 +25,25 @@ public:
 	// 名前取得
 	const char* GetName() const override { return u8"環境物設置"; }
 	// 更新処理
-	void Update(std::shared_ptr<Terrain> terrain, float elapsedTime) override;
+	void Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
+		float elapsedTime,
+		Vector3* intersectWorldPosition) override;
 	// GUI描画
-	void DrawGui(std::shared_ptr<Terrain> terrain) override;
+	void DrawGui() override;
 	// 描画処理
-	void Render(std::shared_ptr<Terrain> terrain,
+	void Render(SpriteResource* fullscreenQuad,
+		std::shared_ptr<Terrain> terrain,
 		const RenderContext& rc,
 		ID3D11ShaderResourceView** srv,
 		uint32_t startSlot,
-		uint32_t numViews) override;
+		uint32_t numViews) override {
+	}
 private:
 	// 状態変更
 	void ChangeState(State newState);
 
 #pragma region 各状態の更新処理
-	void UpdateNone(std::shared_ptr<Terrain> terrain, float elapsedTime);
+	void UpdateNone(std::shared_ptr<TerrainController> terrainController, float elapsedTime);
 	void UpdateCreateObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
 	void UpdateMoveObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
 	void UpdateEditObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
@@ -73,4 +77,6 @@ private:
 	Vector3 _objectCollisionOffset = Vector3::Zero;
 	// 生成するオブジェクトの当たり判定パラメータ
 	Vector4 _objectCollisionParameter = Vector4::One;
+	// レイキャストの長さ
+	float _rayLength = 1000.0f;
 };

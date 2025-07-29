@@ -25,12 +25,15 @@ public:
 	// 名前取得
 	const char* GetName() const override { return u8"透明壁編集"; }
 	// 更新処理
-	void Update(std::shared_ptr<Terrain> terrain, float elapsedTime) override;
+	void Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
+		float elapsedTime,
+		Vector3* intersectWorldPosition) override;
 	// GUI描画
-	void DrawGui(std::shared_ptr<Terrain> terrain) override;
+	void DrawGui() override;
 	// 描画処理
 	// 行わない
-	void Render(std::shared_ptr<Terrain> terrain,
+	void Render(SpriteResource* fullscreenQuad, 
+		std::shared_ptr<Terrain> terrain,
 		const RenderContext& rc,
 		ID3D11ShaderResourceView** srv,
 		uint32_t startSlot,
@@ -56,6 +59,8 @@ private:
 	// デバッグ描画
 	void DebugRender(std::shared_ptr<Terrain> terrain);
 private:
+	std::shared_ptr<Terrain> _terrain = nullptr;
+
 	// 編集状態
 	State _state = State::None;
 	// 交差状態
@@ -71,6 +76,8 @@ private:
 	// 編集中の透明壁ポイント番号
 	int _editingPointIndex = -1;
 
+	// レイキャストの長さ
+	float _rayLength = 1000.0f;
 	// 透明壁頂点の描画半径
 	float _vertexRadius = 0.3f;
 	// 透明壁頂点の当たり判定半径

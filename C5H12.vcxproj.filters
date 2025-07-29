@@ -1354,5 +1354,6 @@
     <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassHS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Grass\TerrainGrassDS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformGrassPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformerVS.hlsl" />
   </ItemGroup>
 </Project>

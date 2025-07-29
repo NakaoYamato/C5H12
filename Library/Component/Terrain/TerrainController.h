@@ -6,6 +6,14 @@
 class TerrainController : public Component
 {
 public:
+    enum class EditState
+    {
+        None,
+		Editing,
+        Complete,
+    };
+
+public:
     TerrainController(const std::string& serializePath = "./Data/Terrain/Save/Test000.json");
     ~TerrainController() override = default;
     // 名前取得
@@ -28,26 +36,22 @@ public:
 #pragma region アクセサ
     // 地形取得
     std::weak_ptr<Terrain> GetTerrain() const { return _terrain; }
-	bool IsExportingVertices() const { return _isExportingVertices; }
-	void SetIsExportingVertices(bool exporting) { _isExportingVertices = exporting; }
-    // 地形の編集フラグを取得
-    bool IsEditing() const { return _isEditing; }
-    // 地形の編集フラグを設定
-    void SetEditing(bool editing) { _isEditing = editing; }
+	// 編集状態取得
+	EditState GetEditState() const { return _editState; }
+	// 編集状態設定
+	void SetEditState(EditState state) { _editState = state; }
 #pragma endregion
 
 private:
     std::shared_ptr<Terrain> _terrain = nullptr;
 	std::vector<std::weak_ptr<Actor>> _environmentObjects;
 
-    // 頂点情報を書き出すかどうか
-    bool _isExportingVertices = false;
+	// 編集状態
+	EditState _editState = EditState::None;
     // ストリームアウトデータ描画フラグ
     bool _drawStreamOut = false;
     // 透明壁描画フラグ
     bool _drawTransparentWall = false;
-    // 編集フラグ
-	bool _isEditing = false;
 	// 環境物の再生成フラグ
 	bool _recreateEnvironment = false;
 };

@@ -14,8 +14,18 @@ TransparentWallBrush::TransparentWallBrush(TerrainDeformer* deformer) :
 {
 }
 
-void TransparentWallBrush::Update(std::shared_ptr<Terrain> terrain, float elapsedTime)
+void TransparentWallBrush::Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
+    float elapsedTime,
+    Vector3* intersectWorldPosition)
 {
+    if (terrainControllers.empty())
+		return;
+
+    // 地形の取得
+    _terrain = terrainControllers[0]->GetTerrain().lock();
+    if (!_terrain)
+        return;
+
     _brushRadius = _vertexRadius;
     _drawDebugBrush = false;
 
@@ -24,28 +34,31 @@ void TransparentWallBrush::Update(std::shared_ptr<Terrain> terrain, float elapse
 
     switch (_state)
     {
-    case State::None:       UpdateNone(terrain, elapsedTime);   break;
-    case State::CreatePoint:UpdateCreatePoint(terrain, elapsedTime);   break;
-    case State::MovePoint:  UpdateMovePoint(terrain, elapsedTime);   break;
-    case State::EditPoint:  UpdateEditPoint(terrain, elapsedTime);   break;
+    case State::None:       UpdateNone(_terrain, elapsedTime);   break;
+    case State::CreatePoint:UpdateCreatePoint(_terrain, elapsedTime);   break;
+    case State::MovePoint:  UpdateMovePoint(_terrain, elapsedTime);   break;
+    case State::EditPoint:  UpdateEditPoint(_terrain, elapsedTime);   break;
     default:
         break;
     }
 }
 // GUI描画
-void TransparentWallBrush::DrawGui(std::shared_ptr<Terrain> terrain)
+void TransparentWallBrush::DrawGui()
 {
+	if (!_terrain)
+		return;
+
     ImGui::Checkbox(u8"頂点をスナップするか", &_snapToGround);
     if (_editingWallIndex != -1)
     {
-        auto& walls = terrain->GetTransparentWall()->GetWalls();
+        auto& walls = _terrain->GetTransparentWall()->GetWalls();
 		auto& wall = walls[_editingWallIndex];
         wall.DrawGui();
         ImGui::Separator();
 		if (ImGui::Button(u8"選択中の透明壁を削除"))
 		{
 			// 選択中の透明壁を削除
-			terrain->GetTransparentWall()->RemoveWall(_editingWallIndex);
+            _terrain->GetTransparentWall()->RemoveWall(_editingWallIndex);
 			// 編集状態を解除
 			ChangeState(State::None);
 		}
@@ -54,14 +67,14 @@ void TransparentWallBrush::DrawGui(std::shared_ptr<Terrain> terrain)
     switch (_state)
     {
     case State::None:       break;
-    case State::CreatePoint:DrawGuiCreatePoint(terrain);   break;
+    case State::CreatePoint:DrawGuiCreatePoint(_terrain);   break;
     case State::MovePoint:  break;
-    case State::EditPoint:  DrawGuiEditPoint(terrain);     break;
+    case State::EditPoint:  DrawGuiEditPoint(_terrain);     break;
     default:
         break;
     }
     // デバッグ描画
-    DebugRender(terrain);
+    DebugRender(_terrain);
 }
 
 void TransparentWallBrush::ChangeState(State newState)

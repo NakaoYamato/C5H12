@@ -241,7 +241,11 @@ void WyvernActor::SetUseHorn()
 	for (int i : hornIncludeIndices)
 	{
 		if (nodes[i].name == HornNames[static_cast<int>(_drawHornType)])
+		{
+			// äpÇÃà íuÇê›íË
+			nodes[i].position.z = 25.0f;
 			nodes[i].scale = Vector3::One;
+		}
 		else
 			nodes[i].scale = Vector3::Zero;
 	}

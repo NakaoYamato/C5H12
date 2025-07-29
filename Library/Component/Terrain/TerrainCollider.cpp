@@ -16,8 +16,9 @@ void TerrainCollider::Start()
 void TerrainCollider::Update(float elapsedTime)
 {
 	MeshCollider::Update(elapsedTime);
-	// 地形コントローラーが有効で、地形編集フラグが立っている場合は再計算
-	if (_terrainController.lock() && _terrainController.lock()->IsEditing())
+	// 地形コントローラーが有効で、地形編集が完了している場合は再計算
+	if (_terrainController.lock() && 
+		_terrainController.lock()->GetEditState() == TerrainController::EditState::Complete)
 	{
 		_recalculate = true;
 	}

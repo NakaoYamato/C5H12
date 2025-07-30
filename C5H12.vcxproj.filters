@@ -1277,6 +1277,7 @@
     <None Include="HLSL\Model\Instancing.hlsli" />
     <None Include="HLSL\Terrain\Grass\TerrainGrass.hlsli" />
     <None Include="HLSL\Function\Noise.hlsli" />
+    <None Include="HLSL\Function\Tessellation.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />

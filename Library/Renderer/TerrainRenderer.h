@@ -32,14 +32,14 @@ public:
 	struct GrassConstantBuffer
 	{
         float grassTessellation = 8.0f;     // 草の分割数
+        float lodDistanceMax = 100.0f;    // LOD(Level Of Detail)距離
         float height = 1.0f;
         float width = 0.04f;
-        float witherdFactor = 0.194f;
 
+        float witherdFactor = 0.194f;
         float curvature = 0.6f;
         float heightVariance = 0.165f;
 		float parlinNoiseDistribution = 0.178f;
-        float dummy{};
 
 		Vector4 specularColor{ 0.885f, 0.673f, 0.328f, 1.000f }; // 草のスペキュラカラー
 	};

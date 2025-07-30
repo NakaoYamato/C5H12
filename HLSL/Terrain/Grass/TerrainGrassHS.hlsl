@@ -1,4 +1,5 @@
 #include "TerrainGrass.hlsli"
+#include "../../Function/Tessellation.hlsli"
 
 // パッチ毎に適用される関数
 HS_CONSTANT_OUT HSConstant(
@@ -6,11 +7,15 @@ InputPatch<GRASS_HS_IN, 3> ip,
 uint pid : SV_PrimitiveID)
 {
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
-    hout.factor[0] = grassTessellation;
-    hout.factor[1] = grassTessellation;
-    hout.factor[2] = grassTessellation;
+    float4 v0 = float4(ip[0].worldPosition.xyz, 1);
+    float4 v1 = float4(ip[1].worldPosition.xyz, 1);
+    float4 v2 = float4(ip[2].worldPosition.xyz, 1);
+    float4 f = DistanceBasedTess(v0, v1, v2, cameraPosition.xyz, 0.0, grassLODDistanceMax, grassTessellation);
+    hout.factor[0] = f.x;
+    hout.factor[1] = f.y;
+    hout.factor[2] = f.z;
     // 内部部分の分割数を指定
-    hout.innerFactor = grassTessellation;
+    hout.innerFactor = f.w;
     
     return hout;
 }

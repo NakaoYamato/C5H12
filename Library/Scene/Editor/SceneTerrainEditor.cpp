@@ -25,7 +25,24 @@ void SceneTerrainEditor::OnInitialize()
 
     // ‹«–Ú‚ğ‡‚í‚¹‚é‚½‚ß‚ÉŒ©‚é—p
     {
-        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain", ActorTag::Stage);
+        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain0", ActorTag::Stage);
+        testTerrain->GetTransform().SetPositionZ(100.0f);
+        testTerrain->GetTransform().SetScale(50.0f);
+        testTerrain->GetTransform().UpdateTransform(nullptr);
+        testTerrain->AddComponent<TerrainController>();
+        testTerrain->AddCollider<TerrainCollider>();
+    }
+    {
+        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain1", ActorTag::Stage);
+        testTerrain->GetTransform().SetPositionX(100.0f);
+        testTerrain->GetTransform().SetScale(50.0f);
+        testTerrain->GetTransform().UpdateTransform(nullptr);
+        testTerrain->AddComponent<TerrainController>();
+        testTerrain->AddCollider<TerrainCollider>();
+    }
+    {
+        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain2", ActorTag::Stage);
+        testTerrain->GetTransform().SetPositionX(100.0f);
         testTerrain->GetTransform().SetPositionZ(100.0f);
         testTerrain->GetTransform().SetScale(50.0f);
         testTerrain->GetTransform().UpdateTransform(nullptr);

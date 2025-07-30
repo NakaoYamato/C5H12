@@ -369,6 +369,7 @@ void TerrainRenderer::DrawGui()
             if (ImGui::TreeNode(u8"草の定数バッファ"))
             {
                 ImGui::SliderFloat(u8"分割数", &_dataGrass.grassTessellation, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat(u8"LOD", &_dataGrass.lodDistanceMax, 1.0f, 200.0f, "%.1f");
                 ImGui::DragFloat(u8"高さ", &_dataGrass.height, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"幅", &_dataGrass.width, 0.001f, 0.001f, 10.0f, "%.2f");
 				ImGui::DragFloat(u8"枯れ具合", &_dataGrass.witherdFactor, 0.01f, 0.01f, 1.0f, "%.2f");

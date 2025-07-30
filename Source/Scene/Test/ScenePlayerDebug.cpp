@@ -36,17 +36,26 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
+        auto stage0 = RegisterActor<StageActor>("Stage0", ActorTag::Stage, 0, "./Data/Terrain/Save/002.json", Vector3(-50.0f, 0.0f, -50.0f));
+    }
+    {
+        auto stage1 = RegisterActor<StageActor>("Stage1", ActorTag::Stage, 1, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, -50.0f));
+    }
+    {
+        auto stage2 = RegisterActor<StageActor>("Stage2", ActorTag::Stage, 2, "./Data/Terrain/Save/002.json", Vector3(-50.0f, 0.0f, 50.0f));
+    }
+    {
+        auto stage3 = RegisterActor<StageActor>("Stage3", ActorTag::Stage, 3, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, 50.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
     }
-    AddCompletionLoading(CompletionLoadingRate);
-    {
-        auto wyvern = RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
-        wyvern->GetTransform().SetPosition(Vector3(0.0f, 10.0f, -10.0f));
-    }
+    //AddCompletionLoading(CompletionLoadingRate);
+    //{
+    //    auto wyvern = RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
+    //    wyvern->GetTransform().SetPosition(Vector3(0.0f, 10.0f, -10.0f));
+    //}
     AddCompletionLoading(CompletionLoadingRate);
     {
 		auto menu = RegisterActor<MenuMediator>("MenuMediator", ActorTag::UI);
@@ -56,18 +65,18 @@ void ScenePlayerDebug::OnInitialize()
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
-    {
-        auto weak0 = RegisterActor<WeakActor>("Weak0", ActorTag::Enemy);
-    }
-    {
-        auto weak1 = RegisterActor<WeakActor>("Weak1", ActorTag::Enemy);
-        weak1->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -5.0f));
-    }
-    {
-        auto gryphus = RegisterActor<GryphusActor>("Gryphus", ActorTag::Enemy);
-        gryphus->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -40.0f));
-    }
-    AddCompletionLoading(CompletionLoadingRate);
+    //{
+    //    auto weak0 = RegisterActor<WeakActor>("Weak0", ActorTag::Enemy);
+    //}
+    //{
+    //    auto weak1 = RegisterActor<WeakActor>("Weak1", ActorTag::Enemy);
+    //    weak1->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -5.0f));
+    //}
+    //{
+    //    auto gryphus = RegisterActor<GryphusActor>("Gryphus", ActorTag::Enemy);
+    //    gryphus->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -40.0f));
+    //}
+    //AddCompletionLoading(CompletionLoadingRate);
     // •‰‰×ƒeƒXƒg
     //for (int i = 0; i < 10; ++i)
     //{

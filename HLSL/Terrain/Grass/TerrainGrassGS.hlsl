@@ -13,7 +13,7 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
 {
     if (gin[0].parameter.g <= 0.0f)
     {
-        // コストがマイナスなら描画しない
+        // マイナスなら描画しない
         return;
     }
         
@@ -23,7 +23,7 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     const float randomZX = Random(gin[0].worldPosition.zx);
     
     const float perlinNoise = Noise(gin[0].worldPosition.xyz * perlin_noise_distribution_factor);
-    const float grassBladeHeight = grass_height_factor + (perlinNoise * 2.0 - 1.0) * grass_height_variance;
+    const float grassBladeHeight = gin[0].parameter.g + (perlinNoise * 2.0 - 1.0) * grass_height_variance;
     const float grassBladeWidth = grass_width_factor;
     const float4 witheredColor = float4(perlinNoise * grass_withered_factor, 0.0, 0.0, 1.0);
     

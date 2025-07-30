@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DirectXCollision.h>
+#include <mutex>
 #include "ColliderBase.h"
 
 class MeshCollider : public ColliderBase
@@ -39,7 +40,7 @@ public:
 	// GUI描画
 	void DrawGui() override;
 	// コリジョンメッシュの再計算
-	virtual void RecalculateCollisionMesh();
+	virtual CollisionMesh RecalculateCollisionMesh(Model* model) const;
 
 	/// <summary>
 	/// レイキャスト
@@ -75,7 +76,10 @@ public:
 		Vector3* hitNormal/*out*/);
 #pragma region アクセサ
 	// コリジョンメッシュ取得
-	const CollisionMesh& GetCollisionMesh() const { return _collisionMesh; }
+	const CollisionMesh& GetCollisionMesh() {
+		std::lock_guard<std::mutex> lock(_collisionMeshMutex); 
+		return _collisionMesh;
+	}
 	// 再計算フラグのセット
 	void SetRecalculate(bool f) { _recalculate = f; }
 #pragma endregion
@@ -85,8 +89,7 @@ protected:
     /// </summary>
     /// <param name="aabb"></param>
     /// <returns>交差したAABBの番号</returns>
-    std::vector<size_t> GetCollisionMeshIndex(
-        const DirectX::BoundingBox& aabb);
+    std::vector<size_t> GetCollisionMeshIndex(const CollisionMesh& collisionMesh, const DirectX::BoundingBox& aabb) const;
 protected:
 	CollisionMesh	_collisionMesh;	// コリジョンメッシュ
 	bool _recalculate = true;	// 再計算フラグ
@@ -94,4 +97,6 @@ protected:
 	bool _isDebugDrawArea = false; // 頂点描画フラグ
 	int _cellSize = 16; // 分割エリアのサイズ
     int _drawCellIndex = -1; // 描画エリアのインデックス
+
+	std::mutex _collisionMeshMutex; // マルチスレッド用のミューテックス
 };

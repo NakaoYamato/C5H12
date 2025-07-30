@@ -15,7 +15,8 @@ public:
 	// 更新処理
 	void Update(float elapsedTime) override;
 	// コリジョンメッシュの再計算
-	void RecalculateCollisionMesh() override;
+	CollisionMesh RecalculateCollisionMesh(Model* model) const override;
 private:
 	std::weak_ptr<TerrainController> _terrainController; // 地形コントローラーへの参照
+	const DirectX::XMFLOAT4X4* _worldMatrix = nullptr; // ワールド行列への参照
 };

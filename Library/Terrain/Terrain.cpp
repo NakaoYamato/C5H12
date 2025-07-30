@@ -100,14 +100,106 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 {
     if (ImGui::TreeNode(u8"テクスチャ"))
     {
-		ImGui::Text(u8"基本色テクスチャ: %s", ToString(_baseColorTexturePath).c_str());
-		ImGui::Image(_materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-		ImGui::Text(u8"法線テクスチャ: %s", ToString(_normalTexturePath).c_str());
-		ImGui::Image(_materialMapFB->GetColorSRV(NormalTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
-        ImGui::Text(u8"パラメータマップ: %s", ToString(_parameterTexturePath).c_str());
-        ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+        if (ImGui::TreeNode(u8"基本色"))
+        {
+            ImGui::Text(ToString(_baseColorTexturePath).c_str());
+            ImGui::Image(_materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+
+            std::string resultPath = "";
+            if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
+            {
+                GpuResourceManager::LoadTextureFromFile(
+                    device,
+                    ToWString(resultPath).c_str(),
+                    _loadBaseColorSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                // 基本色テクスチャのパスを更新
+                _baseColorTexturePath = ToWString(resultPath);
+                // テクスチャをロード
+                GpuResourceManager::LoadTextureFromFile(device,
+                    _baseColorTexturePath.c_str(),
+                    _loadBaseColorSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                // フラグをオンにする
+                _isLoadingTextures = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::SaveDialogBotton(u8"書き出し", &resultPath, ImGui::DDSTextureFilter))
+            {
+                SaveBaseColorTexture(device, dc,
+                    ToWString(resultPath).c_str());
+            }
+
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode(u8"法線"))
+        {
+            ImGui::Text(ToString(_normalTexturePath).c_str());
+            ImGui::Image(_materialMapFB->GetColorSRV(NormalTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+
+            std::string resultPath = "";
+            if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
+            {
+                GpuResourceManager::LoadTextureFromFile(
+                    device,
+                    ToWString(resultPath).c_str(),
+                    _loadNormalSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                // 法線テクスチャのパスを更新
+                _normalTexturePath = ToWString(resultPath);
+                // テクスチャをロード
+                GpuResourceManager::LoadTextureFromFile(device,
+                    _normalTexturePath.c_str(),
+                    _loadNormalSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                // フラグをオンにする
+                _isLoadingTextures = true;
+            }
+			ImGui::SameLine();
+			if (ImGui::SaveDialogBotton(u8"書き出し", &resultPath, ImGui::DDSTextureFilter))
+			{
+				SaveNormalTexture(device, dc,
+					ToWString(resultPath).c_str());
+			}
+
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode(u8"パラメータ"))
+        {
+            ImGui::Text(ToString(_parameterTexturePath).c_str());
+            ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+
+            std::string resultPath = "";
+            if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
+            {
+                GpuResourceManager::LoadTextureFromFile(
+                    device,
+                    ToWString(resultPath).c_str(),
+                    _loadParameterSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                // パラメータマップのパスを更新
+                _parameterTexturePath = ToWString(resultPath);
+                // テクスチャをロード
+                GpuResourceManager::LoadTextureFromFile(device,
+                    _parameterTexturePath.c_str(),
+                    _loadParameterSRV.ReleaseAndGetAddressOf(),
+                    nullptr);
+                // フラグをオンにする
+                _isLoadingTextures = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::SaveDialogBotton(u8"書き出し", &resultPath, ImGui::DDSTextureFilter))
+            {
+                SaveParameterMap(device, dc,
+                    ToWString(resultPath).c_str());
+            }
+
+            ImGui::TreePop();
+        }
+
         if (ImGui::Button(u8"リセット"))
             _resetMap = true;
+
         ImGui::TreePop();
     }
     if (ImGui::TreeNode(u8"透明壁"))
@@ -121,83 +213,6 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
         _terrainObjectLayout.DrawGui();
         ImGui::TreePop();
     }
-    if (ImGui::TreeNode(u8"入出力"))
-    {
-		std::string resultPath = "";
-
-		if (ImGui::OpenDialogBotton(u8"基本色テクスチャ読み込み", &resultPath, ImGui::DDSTextureFilter))
-		{
-            GpuResourceManager::LoadTextureFromFile(
-                device,
-                ToWString(resultPath).c_str(),
-                _loadBaseColorSRV.ReleaseAndGetAddressOf(),
-                nullptr);
-			// 基本色テクスチャのパスを更新
-			_baseColorTexturePath = ToWString(resultPath);
-			// テクスチャをロード
-            GpuResourceManager::LoadTextureFromFile(device,
-                _baseColorTexturePath.c_str(),
-                _loadBaseColorSRV.ReleaseAndGetAddressOf(),
-                nullptr);
-            // フラグをオンにする
-			_isLoadingTextures = true;
-		}
-        if (ImGui::OpenDialogBotton(u8"法線テクスチャ読み込み", &resultPath, ImGui::DDSTextureFilter))
-        {
-			GpuResourceManager::LoadTextureFromFile(
-                device,
-				ToWString(resultPath).c_str(),
-				_loadNormalSRV.ReleaseAndGetAddressOf(),
-				nullptr);
-			// 法線テクスチャのパスを更新
-			_normalTexturePath = ToWString(resultPath);
-			// テクスチャをロード
-			GpuResourceManager::LoadTextureFromFile(device,
-				_normalTexturePath.c_str(),
-				_loadNormalSRV.ReleaseAndGetAddressOf(),
-				nullptr);
-			// フラグをオンにする
-			_isLoadingTextures = true;
-        }
-		if (ImGui::OpenDialogBotton(u8"パラメータマップ読み込み", &resultPath, ImGui::DDSTextureFilter))
-		{
-			GpuResourceManager::LoadTextureFromFile(
-                device,
-				ToWString(resultPath).c_str(),
-				_loadParameterSRV.ReleaseAndGetAddressOf(),
-				nullptr);
-			// パラメータマップのパスを更新
-			_parameterTexturePath = ToWString(resultPath);
-			// テクスチャをロード
-			GpuResourceManager::LoadTextureFromFile(device,
-				_parameterTexturePath.c_str(),
-				_loadParameterSRV.ReleaseAndGetAddressOf(),
-				nullptr);
-			// フラグをオンにする
-			_isLoadingTextures = true;
-		}
-		ImGui::Separator();
-
-		if (ImGui::SaveDialogBotton(u8"基本色テクスチャ書き出し", &resultPath, ImGui::DDSTextureFilter))
-		{
-			SaveBaseColorTexture(device, dc,
-				ToWString(resultPath).c_str());
-		}
-		if (ImGui::SaveDialogBotton(u8"法線テクスチャ書き出し", &resultPath, ImGui::DDSTextureFilter))
-		{
-			SaveNormalTexture(device, dc,
-				ToWString(resultPath).c_str());
-		}
-		if (ImGui::SaveDialogBotton(u8"パラメータマップ書き出し", &resultPath, ImGui::DDSTextureFilter))
-		{
-			SaveParameterMap(device, dc,
-				ToWString(resultPath).c_str());
-		}
-		ImGui::Separator();
-
-        ImGui::TreePop();
-    }
-    ImGui::Separator();
 }
 // レイキャスト
 bool Terrain::Raycast(

@@ -43,10 +43,11 @@ private:
 	void ChangeState(State newState);
 
 #pragma region 各状態の更新処理
-	void UpdateNone(std::shared_ptr<TerrainController> terrainController, float elapsedTime);
-	void UpdateCreateObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
-	void UpdateMoveObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
-	void UpdateEditObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
+	void UpdateNone(std::shared_ptr<TerrainController> terrainController, float elapsedTime, Vector3* intersectWorldPosition);
+	// TODO
+	//void UpdateCreateObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
+	//void UpdateMoveObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
+	//void UpdateEditObject(std::shared_ptr<Terrain> terrain, float elapsedTime);
 #pragma endregion
 private:
 	// 選択中のモデル

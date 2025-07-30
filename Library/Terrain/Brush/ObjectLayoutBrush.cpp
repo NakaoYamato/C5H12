@@ -35,10 +35,11 @@ void ObjectLayoutBrush::Update(std::vector<std::shared_ptr<TerrainController>>& 
 	_deformer->GetActor()->SetIsUsingGuizmo(false);
 	switch (_state)
 	{
-	case State::None:          UpdateNone(terrainControllers[0], elapsedTime);       break;
-	case State::CreateObject:  UpdateCreateObject(terrain, elapsedTime); break;
-	case State::MoveObject:    UpdateMoveObject(terrain, elapsedTime);   break;
-	case State::EditObject:    UpdateEditObject(terrain, elapsedTime);   break;
+	case State::None:          UpdateNone(terrainControllers[0], elapsedTime, intersectWorldPosition);       break;
+		// TODO
+	//case State::CreateObject:  UpdateCreateObject(terrain, elapsedTime); break;
+	//case State::MoveObject:    UpdateMoveObject(terrain, elapsedTime);   break;
+	//case State::EditObject:    UpdateEditObject(terrain, elapsedTime);   break;
 	default:
 		break;
 	}
@@ -148,32 +149,21 @@ void ObjectLayoutBrush::ChangeState(State newState)
 	}
 }
 #pragma region 各状態の更新処理
-void ObjectLayoutBrush::UpdateNone(std::shared_ptr<TerrainController> terrainController, float elapsedTime)
+void ObjectLayoutBrush::UpdateNone(std::shared_ptr<TerrainController> terrainController, float elapsedTime, Vector3* intersectWorldPosition)
 {
 	// 地形の取得
 	auto terrain = terrainController->GetTerrain().lock();
 	if (!terrain)
 		return;
 
-	auto& walls = terrain->GetTransparentWall()->GetWalls();
-	float screenWidth = Graphics::Instance().GetScreenWidth();
-	float screenHeight = Graphics::Instance().GetScreenHeight();
-	const DirectX::XMFLOAT4X4& view = _deformer->GetActor()->GetScene()->GetMainCamera()->GetView();
-	const DirectX::XMFLOAT4X4& projection = _deformer->GetActor()->GetScene()->GetMainCamera()->GetProjection();
 	const DirectX::XMFLOAT4X4& world = _deformer->GetActor()->GetTransform().GetMatrix();
 
-	_clickScreenPoint.x = _INPUT_VALUE("MousePositionX");
-	_clickScreenPoint.y = _INPUT_VALUE("MousePositionY");
 	_intersectState = IntersectState::None;
-	// マウス座標から地形との当たり判定
-	Vector3 rayStart = Vector3::Unproject(Vector3(_clickScreenPoint.x, _clickScreenPoint.y, 0.0f), screenWidth, screenHeight, view, projection);
-	Vector3 rayEnd = Vector3::Unproject(Vector3(_clickScreenPoint.x, _clickScreenPoint.y, 1.0f), screenWidth, screenHeight, view, projection);
-	Vector3 rayDir = (rayEnd - rayStart).Normalize();
-	// 地形との交差判定
-	if (terrain->Raycast(world,
-		rayStart, rayDir, _rayLength,
-		&_intersectionWorldPoint))
+	if (intersectWorldPosition)
+	{
 		_intersectState = IntersectState::Terrain;
+		_intersectionWorldPoint = *intersectWorldPosition;
+	}
 
 	// 選択中のモデルの変更
 	if (!_selectingModel && !_deformer->GetSelectedModelPath().empty())
@@ -268,14 +258,5 @@ void ObjectLayoutBrush::UpdateNone(std::shared_ptr<TerrainController> terrainCon
 		break;
 	}
 
-}
-void ObjectLayoutBrush::UpdateCreateObject(std::shared_ptr<Terrain> terrain, float elapsedTime)
-{
-}
-void ObjectLayoutBrush::UpdateMoveObject(std::shared_ptr<Terrain> terrain, float elapsedTime)
-{
-}
-void ObjectLayoutBrush::UpdateEditObject(std::shared_ptr<Terrain> terrain, float elapsedTime)
-{
 }
 #pragma endregion

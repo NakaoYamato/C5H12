@@ -429,7 +429,7 @@ void TerrainDeformer::AddEnvironmentObject(TerrainController* controller,
         modelPath, 
 		updateType,
         collisionType,
-        position.TransformCoord(GetActor()->GetTransform().GetMatrixInverse()), // 位置をローカル座標系で設定
+        position.TransformCoord(controller->GetActor()->GetTransform().GetMatrixInverse()), // 位置をローカル座標系で設定
         rotation,
         size,
         collisionOffset,
@@ -635,6 +635,4 @@ void TerrainDeformerBrush::RegisterTask(std::weak_ptr<TerrainController> terrain
 	task.brushRotationY = _brushRotationY;
 	task.heightScale = _brushHeightScale;
 	_deformer->AddTask(terrainController.lock().get(), task);
-    // 地形に編集を適用
-    terrainController.lock()->SetEditState(TerrainController::EditState::Editing);
 }

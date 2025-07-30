@@ -192,8 +192,8 @@ bool Framework::Initialize() const
 
 	// ジョブシステム初期化
     // サーバーのスレッドで最大２個必要なのでその分減らしている
-    //JobSystem::Instance().Initialize(std::max<size_t>(std::thread::hardware_concurrency() - 2, 1));
-    JobSystem::Instance().Initialize(std::max<size_t>(4, 1));
+    JobSystem::Instance().Initialize(std::max<size_t>(std::thread::hardware_concurrency() - 2, 1));
+    //JobSystem::Instance().Initialize(std::max<size_t>(6, 1));
 
     // ImGui初期化
     ImGuiManager::Initialize(_hwnd,

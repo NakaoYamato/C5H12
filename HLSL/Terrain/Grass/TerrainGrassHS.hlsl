@@ -1,5 +1,6 @@
 #include "TerrainGrass.hlsli"
 #include "../../Function/Tessellation.hlsli"
+#include "../../Function/Noise.hlsli"
 
 // パッチ毎に適用される関数
 HS_CONSTANT_OUT HSConstant(
@@ -15,7 +16,7 @@ uint pid : SV_PrimitiveID)
     hout.factor[1] = f.y;
     hout.factor[2] = f.z;
     // 内部部分の分割数を指定
-    hout.innerFactor = f.w;
+    hout.innerFactor = /*Random(ip[0].worldPosition.xz) **/ f.w;
     
     return hout;
 }

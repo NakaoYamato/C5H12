@@ -11,6 +11,7 @@ void TerrainCollider::Start()
 {
 	_terrainController = GetActor()->GetComponent<TerrainController>();
 	MeshCollider::Start();
+	_worldMatrix = &GetActor()->GetTransform().GetMatrix();
 }
 // 更新処理
 void TerrainCollider::Update(float elapsedTime)
@@ -24,20 +25,20 @@ void TerrainCollider::Update(float elapsedTime)
 	}
 }
 // コリジョンメッシュの再計算
-void TerrainCollider::RecalculateCollisionMesh()
+MeshCollider::CollisionMesh TerrainCollider::RecalculateCollisionMesh(Model* model) const
 {
 	if (!_terrainController.lock())
-		return;
+		return CollisionMesh();
+	if (!_worldMatrix)
+		return CollisionMesh();
 	auto terrain = _terrainController.lock()->GetTerrain().lock();
     if (!terrain)
-        return;
+		return CollisionMesh();
 	auto& streamOutData = terrain->GetStreamOutData();
 	if (streamOutData.empty())
-		return;
+		return CollisionMesh();
 
-	_collisionMesh.areas.clear();
-	_collisionMesh.triangles.clear();
-
+	CollisionMesh collisionMesh;
 	Vector3 volumeMin = Vector3::Max;
 	Vector3 volumeMax = Vector3::Min;
 
@@ -52,7 +53,7 @@ void TerrainCollider::RecalculateCollisionMesh()
 		Vector3 n = Vector3::Cross(v2 - v1, v3 - v1);
 
 		// 三角形データを格納
-		CollisionMesh::Triangle& triangle = _collisionMesh.triangles.emplace_back();
+		CollisionMesh::Triangle& triangle = collisionMesh.triangles.emplace_back();
 		triangle.positions[0] = v1;
 		triangle.positions[1] = v2;
 		triangle.positions[2] = v3;
@@ -69,7 +70,6 @@ void TerrainCollider::RecalculateCollisionMesh()
     // 透明壁のデータから三角形を生成
     for (size_t i = 0; i < terrain->GetTransparentWall()->GetWalls().size(); i++)
     {
-		const DirectX::XMFLOAT4X4& world = GetActor()->GetTransform().GetMatrix();
         auto& wall = terrain->GetTransparentWall()->GetWalls()[i];
 		size_t pointCount = wall.vertices.size();
 		if (pointCount <= 1)
@@ -77,20 +77,20 @@ void TerrainCollider::RecalculateCollisionMesh()
 		Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
 		for (size_t i = 0; i < pointCount - 1; i++)
 		{
-			const Vector3& p1 = wall.vertices[i].TransformCoord(world);
-			const Vector3& p2 = wall.vertices[i + 1].TransformCoord(world);
+			const Vector3& p1 = wall.vertices[i].TransformCoord(*_worldMatrix);
+			const Vector3& p2 = wall.vertices[i + 1].TransformCoord(*_worldMatrix);
 			const Vector3& p3 = p1 + heightOffset;
 			const Vector3& p4 = p2 + heightOffset;
 
 			// 法線ベクトルを算出
 			Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();
 			// 三角形データを格納
-			CollisionMesh::Triangle& triangle0 = _collisionMesh.triangles.emplace_back();
+			CollisionMesh::Triangle& triangle0 = collisionMesh.triangles.emplace_back();
 			triangle0.positions[0] = p1;
 			triangle0.positions[1] = p2;
 			triangle0.positions[2] = p3;
 			triangle0.normal = normal;
-			CollisionMesh::Triangle& triangle1 = _collisionMesh.triangles.emplace_back();
+			CollisionMesh::Triangle& triangle1 = collisionMesh.triangles.emplace_back();
 			triangle1.positions[0] = p2;
 			triangle1.positions[1] = p4;
 			triangle1.positions[2] = p3;
@@ -100,31 +100,33 @@ void TerrainCollider::RecalculateCollisionMesh()
 
 
 	// モデル全体のAABB
-	_collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
+	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
 	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
 	float sizeZ = (volumeMax.z - volumeMin.z) / _cellSize;
 	for (int i = 0; i < _cellSize * _cellSize; ++i)
 	{
-		_collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % _cellSize) + 0.5f * sizeX;
-		_collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
-		_collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
-		_collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
-		_collisionMesh.areas[i].boundingBox.Extents.y = FLT_MAX; // 無限
-		_collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
+		collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % _cellSize) + 0.5f * sizeX;
+		collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
+		collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
+		collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
+		collisionMesh.areas[i].boundingBox.Extents.y = FLT_MAX; // 無限
+		collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
 	}
-	for (int i = 0; i < _collisionMesh.triangles.size(); ++i)
+	for (int i = 0; i < collisionMesh.triangles.size(); ++i)
 	{
-		const CollisionMesh::Triangle& triangle = _collisionMesh.triangles[i];
+		const CollisionMesh::Triangle& triangle = collisionMesh.triangles[i];
 		std::vector<size_t> indexMap;
 		// 各頂点がどのエリアに属するかを調べる
 		// 三角形からAABBを算出し、各エリアのAABBと衝突しているか調べる
 		const Vector3 points[3] = { triangle.positions[0], triangle.positions[1], triangle.positions[2] };
 		DirectX::BoundingBox triangleBox;
 		DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, points, sizeof(Vector3));
-		indexMap = GetCollisionMeshIndex(triangleBox);
+		indexMap = GetCollisionMeshIndex(collisionMesh, triangleBox);
 		for (auto& index : indexMap)
 		{
-			_collisionMesh.areas[index].triangleIndices.push_back(i);
+			collisionMesh.areas[index].triangleIndices.push_back(i);
 		}
 	}
+
+	return collisionMesh;
 }

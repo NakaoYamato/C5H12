@@ -32,7 +32,8 @@ float maxDist,
 float tess)
 {
     float3 f;    
-#if 1
+#if 0
+    // 中心のみでテッセレーション係数を計算
     float4 center = (v0 + v1 + v2) / 3.0f;
     float factor = CalcDistanceTessFactor(center, cameraPosition, minDist, maxDist, tess);
     f.x = factor;

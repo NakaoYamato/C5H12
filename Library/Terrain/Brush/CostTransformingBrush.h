@@ -16,4 +16,9 @@ public:
 		ID3D11ShaderResourceView** srv,
 		uint32_t startSlot,
 		uint32_t numViews) override;
+	// ƒ^ƒXƒN‚ğ“o˜^
+	void RegisterTask(std::weak_ptr<TerrainController> terrainController,
+		const Vector2& uvPosition,
+		float radius,
+		float strength) override;
 };

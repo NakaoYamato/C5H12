@@ -22,6 +22,6 @@ void WeaponActor::DrawGuizmo()
 		r = Quaternion::ToRollPitchYaw(R);
 		_transform.SetPosition(t);
 		_transform.SetScale(s);
-		_transform.SetRotation(r);
+		_transform.SetAngle(r);
 	}
 }

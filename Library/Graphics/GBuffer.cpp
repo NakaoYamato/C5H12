@@ -7,7 +7,9 @@
 #include "../../Graphics/GpuResourceManager.h"
 #include "../../Algorithm/Converter.h"
 
-GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height)
+GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height) :
+	_width(width),
+	_height(height)
 {
 	HRESULT hr = S_OK;
 

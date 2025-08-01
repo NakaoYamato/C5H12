@@ -45,14 +45,15 @@ void Scene::Initialize()
 
 	_primitive = std::make_unique<Primitive>(device);
     // レンダラー作成
-	_meshRenderer.Initialize(device);
-	_textureRenderer.Initialize(device);
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _meshRenderer.Initialize(device);
+        _textureRenderer.Initialize(device);
 		_textRenderer.Initialize(device, dc);
+        _terrainRenderer.Initialize(device);
+        _particleRenderer.Initialize(device, dc);
+        _decalRenderer.Initialize(device, static_cast<UINT>(graphics.GetScreenWidth()), static_cast<UINT>(graphics.GetScreenHeight()));
     }
-	_terrainRenderer.Initialize(device);
-	_particleRenderer.Initialize(device);
 
 	// Effekseerエフェクトマネージャー作成
     {
@@ -172,6 +173,16 @@ void Scene::Render()
     dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     dc->OMSetRenderTargets(1, &rtv, dsv);
 
+	// ビューポート設定
+	D3D11_VIEWPORT viewport{};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = screenWidth;
+	viewport.Height = screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	dc->RSSetViewports(1, &viewport);
+
     // サンプラーステート設定
     {
         std::vector<ID3D11SamplerState*> samplerStates;
@@ -238,6 +249,9 @@ void Scene::Render()
 			_terrainRenderer.Render(rc, true);
         }
         gBuffer->Deactivate(dc);
+
+        // デカール描画
+		_decalRenderer.Render(gBuffer, Graphics::Instance().GetDevice(), rc);
     }
     // GBuffer生成終了
     //--------------------------------------------------------------------------------------
@@ -403,7 +417,10 @@ void Scene::Render()
     sceneFrame->Deactivate(dc);
     // フレームバッファ2番の処理終了
     //--------------------------------------------------------------------------------------
-    
+
+	// 描画先をバックバッファに戻す
+    dc->OMSetRenderTargets(1, &rtv, dsv);
+    dc->RSSetViewports(1, &viewport);
     // ImGuiに描画フラグが無効ならバックバッファに描画
     if (!_isImGuiRendering)
     {

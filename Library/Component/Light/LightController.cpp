@@ -22,7 +22,7 @@ void LightController::DebugRender(const RenderContext& rc)
             DirectX::XMMatrixDecompose(&S, &R, &T, M);
             Vector3 s, r, t;
             r = Quaternion::ToRollPitchYaw(R);
-            GetActor()->GetTransform().SetRotation(r);
+            GetActor()->GetTransform().SetAngle(r);
         }
 
     }

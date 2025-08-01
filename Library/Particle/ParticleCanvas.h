@@ -28,10 +28,11 @@ public:
 	/// <summary>
 	/// テクスチャのロード
 	/// </summary>
+	/// <param name="dc"></param>
 	/// <param name="filename"></param>
 	/// <param name="split"></param>
 	/// <returns></returns>
-	TextureData Load(const wchar_t* filename, DirectX::XMUINT2	split);
+	TextureData Load(ID3D11DeviceContext* dc, const wchar_t* filename, DirectX::XMUINT2	split);
 	/// <summary>
 	/// GUI描画
 	/// </summary>

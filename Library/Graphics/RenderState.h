@@ -14,6 +14,8 @@ enum class SamplerState
 	BorderPoint,
 	Comparison,		// カスケードシャドウマップ
 	Anisotropic,
+	LinearBorderBlack,
+	LinearBorderWhite,
 
 	EnumCount
 };
@@ -53,6 +55,7 @@ enum class RasterizerState
 {
 	SolidCullNone,
 	SolidCullBack,
+	SolidCullFront,
 	WireCullNone,
 	WireCullBack,
 

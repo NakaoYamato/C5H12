@@ -22,7 +22,7 @@ void TerrainEnvironmentController::OnCreate()
 	_updateType = myLayout.updateType;
 	// トランスフォーム更新
 	GetActor()->GetTransform().SetPosition(myLayout.localPosition.TransformCoord(_terrainTransform));
-	GetActor()->GetTransform().SetRotation(myLayout.rotation);
+	GetActor()->GetTransform().SetAngle(myLayout.rotation);
 	GetActor()->GetTransform().SetScale(myLayout.size);
 	GetActor()->GetTransform().UpdateTransform(nullptr);
 
@@ -105,7 +105,7 @@ void TerrainEnvironmentController::Update(float elapsedTime)
 	{
 		_updateType = myLayout->updateType;
 		GetActor()->GetTransform().SetPosition(myLayout->localPosition.TransformCoord(_terrainTransform));
-		GetActor()->GetTransform().SetRotation(myLayout->rotation);
+		GetActor()->GetTransform().SetAngle(myLayout->rotation);
 		GetActor()->GetTransform().SetScale(myLayout->size);
 		GetActor()->GetTransform().UpdateTransform(nullptr);
 	}

@@ -6,7 +6,7 @@
 #include <imgui.h>
 
 /// 初期化
-void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount)
+void ParticleRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc, UINT particlesCount)
 {
 	HRESULT hr = S_OK;
 
@@ -177,10 +177,10 @@ void ParticleRenderer::Initialize(ID3D11Device* device, UINT particlesCount)
 	_particleCanvas = std::make_unique<ParticleCanvas>();
 
 	// 画像読み込み
-	RegisterTextureData("Breath", L"./Data/Texture/Particle/AdobeStock_255896219.png", { 3,2 });
-	RegisterTextureData("Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
-	RegisterTextureData("Breath2", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753233552.png", { 3,2 });
-	RegisterTextureData("Breath3", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753234506.png", { 3,2 });
+	RegisterTextureData(dc, "Breath", L"./Data/Texture/Particle/AdobeStock_255896219.png", { 3,2 });
+	RegisterTextureData(dc, "Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
+	RegisterTextureData(dc, "Breath2", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753233552.png", { 3,2 });
+	RegisterTextureData(dc, "Breath3", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753234506.png", { 3,2 });
 }
 
 /// パーティクル生成
@@ -390,7 +390,9 @@ void ParticleRenderer::DrawGui()
 }
 
 /// テクスチャの登録
-ParticleCanvas::TextureData ParticleRenderer::RegisterTextureData(const std::string& key, 
+ParticleCanvas::TextureData ParticleRenderer::RegisterTextureData(
+	ID3D11DeviceContext* dc,
+	const std::string& key, 
 	const std::wstring& filepath,
 	DirectX::XMUINT2	split)
 {
@@ -401,7 +403,7 @@ ParticleCanvas::TextureData ParticleRenderer::RegisterTextureData(const std::str
 		return it->second;
 	}
 	// テクスチャのロード
-	_textureDatas[key] = _particleCanvas->Load(filepath.c_str(), split);
+	_textureDatas[key] = _particleCanvas->Load(dc, filepath.c_str(), split);
 	// ロードしたテクスチャ情報を返す
 	return _textureDatas[key];
 }

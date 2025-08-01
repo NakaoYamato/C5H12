@@ -22,11 +22,11 @@ float roughness)
 {
     PS_GB_OUT output = (PS_GB_OUT) 0;
     output.baseColor.rgb = baseColor;
-    output.baseColor.a = specular;
+    output.baseColor.a = roughness;
     output.worldNormal.xyz = worldNormal;
     output.worldNormal.a = metallic;
     output.emissiveColor.rgb = emissiveColor;
-    output.emissiveColor.a = roughness;
+    output.emissiveColor.a = specular;
     return output;
 }
 
@@ -100,9 +100,9 @@ GBufferData DecodeGBuffer(Texture2D textures[_TEXTURE_MAX], SamplerState state, 
     ret.worldPosition = position.xyz / position.w;
     ret.worldNormal = normalMapData.xyz;
     ret.emissiveColor = emissiveMapData.rgb;
-    ret.specular = baseMapData.a;
+    ret.roughness = baseMapData.a;
     ret.metallic = normalMapData.a;
-    ret.roughness = emissiveMapData.a;
+    ret.specular = emissiveMapData.a;
     ret.depth = depth;
     return ret;
 }

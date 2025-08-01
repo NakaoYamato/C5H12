@@ -165,7 +165,7 @@ void Rigidbody::UpdatePosition(float deltaTime)
 
 		_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
 		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
-		this->GetActor()->GetTransform().SetRotation(Quaternion::ToRollPitchYaw(_orientation));
+		this->GetActor()->GetTransform().SetAngle(Quaternion::ToRollPitchYaw(_orientation));
 	}
 }
 /// ÚG‚Ì‰ğÁˆ—

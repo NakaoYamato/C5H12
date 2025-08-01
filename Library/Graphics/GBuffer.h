@@ -72,11 +72,23 @@ public:
 	void Blit(TextureRenderer& textureRenderer, ID3D11DeviceContext* immediateContext);
 
 #pragma region アクセサ
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& GetRenderTargetView(UINT index) {
+		return _rtvs[index];
+	}
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetRenderTargetSRV(UINT index) {
 		return _renderTargetSRVs[index];
 	}
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& GetDepthStencilView() {
+		return _dsv;
+	}
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthSRV() {
 		return _depthStencilSRV;
+	}
+	UINT GetWidth() const {
+		return _width;
+	}
+	UINT GetHeight() const {
+		return _height;
 	}
 #pragma endregion
 private:
@@ -85,6 +97,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _dsv;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _depthStencilSRV;
 	D3D11_VIEWPORT _viewports[MAX_GBUFFER_COUNT];
+	UINT _width = 0;
+	UINT _height = 0;
 
 	UINT _viewportCount = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
 	D3D11_VIEWPORT _cachedViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE]{};

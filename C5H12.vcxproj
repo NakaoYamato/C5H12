@@ -160,6 +160,7 @@
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
+    <ClCompile Include="Library\Component\DecalController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Library\Component\Terrain\TerrainController.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainDeformer.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainEnvironmentController.cpp" />
+    <ClCompile Include="Library\Decal\Decal.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
@@ -244,6 +246,7 @@
     <ClCompile Include="Library\PostProcess\PostProcessManager.cpp" />
     <ClCompile Include="Library\PostProcess\RadialBlur\RadialBlur.cpp" />
     <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp" />
+    <ClCompile Include="Library\Renderer\DecalRenderer.cpp" />
     <ClCompile Include="Library\Renderer\MeshRenderer.cpp" />
     <ClCompile Include="Library\Renderer\ParticleRenderer.cpp" />
     <ClCompile Include="Library\Renderer\PrimitiveRenderer.cpp" />
@@ -253,6 +256,7 @@
     <ClCompile Include="Library\Graphics\GpuResourceManager.cpp" />
     <ClCompile Include="Library\Model\ModelResourceManager.cpp" />
     <ClCompile Include="Library\Model\ModelResource.cpp" />
+    <ClCompile Include="Library\Scene\Editor\SceneDecalEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneModelEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneParticleEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneTerrainEditor.cpp" />
@@ -363,6 +367,7 @@
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\BehaviorController.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
+    <ClInclude Include="Library\Component\DecalController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
@@ -372,6 +377,7 @@
     <ClInclude Include="Library\Component\Terrain\TerrainController.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainDeformer.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainEnvironmentController.h" />
+    <ClInclude Include="Library\Decal\Decal.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
     <ClInclude Include="Library\ImGui\imgui-docking\Mygui.h" />
@@ -459,6 +465,7 @@
     <ClInclude Include="Library\PostProcess\PostProcessManager.h" />
     <ClInclude Include="Library\PostProcess\RadialBlur\RadialBlur.h" />
     <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h" />
+    <ClInclude Include="Library\Renderer\DecalRenderer.h" />
     <ClInclude Include="Library\Renderer\MeshRenderer.h" />
     <ClInclude Include="Library\Renderer\ParticleRenderer.h" />
     <ClInclude Include="Library\Renderer\PrimitiveRenderer.h" />
@@ -469,6 +476,7 @@
     <ClInclude Include="Library\Model\ModelResourceManager.h" />
     <ClInclude Include="Library\Model\ModelResource.h" />
     <ClInclude Include="Library\Model\SerializeFunction.h" />
+    <ClInclude Include="Library\Scene\Editor\SceneDecalEditor.h" />
     <ClInclude Include="Library\Scene\Editor\SceneModelEditor.h" />
     <ClInclude Include="Library\Scene\Editor\SceneParticleEditor.h" />
     <ClInclude Include="Library\Scene\Editor\SceneTerrainEditor.h" />
@@ -563,6 +571,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
+    <None Include="HLSL\Decal\Decal.hlsli" />
+    <None Include="HLSL\Decal\DecalGeometry.hlsli" />
     <None Include="HLSL\Define\SamplerStateDefine.hlsli" />
     <None Include="HLSL\Function\Noise.hlsli" />
     <None Include="HLSL\Function\ShadingFunctions.hlsli" />
@@ -605,6 +615,22 @@
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Decal\DecalGeometryPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Decal\DecalGeometryVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Decal\DecalSpritePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\GBuffer\DeferredRenderingPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

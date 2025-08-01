@@ -128,7 +128,7 @@ public:
     /// </summary>
     /// <param name="device"></param>
     /// <param name="particlesCount"></param>
-    void Initialize(ID3D11Device* device, UINT particlesCount = 100000);
+    void Initialize(ID3D11Device* device, ID3D11DeviceContext* dc, UINT particlesCount = 100000);
 	/// <summary>
 	/// パーティクル生成
 	/// </summary>
@@ -153,11 +153,13 @@ public:
 	/// <summary>
 	/// テクスチャデータの登録
 	/// </summary>
+	/// <param name="dc"></param>
 	/// <param name="key"></param>
 	/// <param name="filepath"></param>
 	/// <param name="split"></param>
 	/// <returns></returns>
-	ParticleCanvas::TextureData RegisterTextureData(const std::string& key, 
+	ParticleCanvas::TextureData RegisterTextureData(ID3D11DeviceContext* dc, 
+		const std::string& key,
 		const std::wstring& filepath,
 		DirectX::XMUINT2 split = DirectX::XMUINT2(1, 1));
 	/// <summary>

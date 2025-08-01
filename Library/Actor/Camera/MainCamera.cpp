@@ -49,7 +49,7 @@ void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vecto
     DirectX::XMMatrixDecompose(&S, &R, &T, World);
     Vector3 s, r, t;
     r = Quaternion::ToRollPitchYaw(R);
-    _transform.SetRotation(r);
+    _transform.SetAngle(r);
 }
 
 void MainCamera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ)

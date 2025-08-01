@@ -118,6 +118,8 @@ void ConstantBufferManager::UpdateSceneCB(SceneConstantBuffer* buffer)
 {
 	if (buffer != nullptr)
 	{
+		this->_sceneCB.view = buffer->view;
+		this->_sceneCB.projection = buffer->projection;
 		this->_sceneCB.viewProjection = buffer->viewProjection;
 		this->_sceneCB.lightDirection = buffer->lightDirection;
 		this->_sceneCB.lightColor = buffer->lightColor;

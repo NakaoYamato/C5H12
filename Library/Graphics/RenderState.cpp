@@ -142,6 +142,44 @@ RenderState::RenderState(ID3D11Device* device)
 			_samplerStates[static_cast<int>(SamplerState::Anisotropic)].ReleaseAndGetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
+	{
+		D3D11_SAMPLER_DESC samplerDesc{};
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+		samplerDesc.MipLODBias = 0;
+		samplerDesc.MaxAnisotropy = 16;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		samplerDesc.BorderColor[0] = 0;
+		samplerDesc.BorderColor[1] = 0;
+		samplerDesc.BorderColor[2] = 0;
+		samplerDesc.BorderColor[3] = 0;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		HRESULT hr = device->CreateSamplerState(&samplerDesc,
+			_samplerStates[static_cast<int>(SamplerState::LinearBorderBlack)].ReleaseAndGetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+	{
+		D3D11_SAMPLER_DESC samplerDesc{};
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+		samplerDesc.MipLODBias = 0;
+		samplerDesc.MaxAnisotropy = 16;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		samplerDesc.BorderColor[0] = 1;
+		samplerDesc.BorderColor[1] = 1;
+		samplerDesc.BorderColor[2] = 1;
+		samplerDesc.BorderColor[3] = 1;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		HRESULT hr = device->CreateSamplerState(&samplerDesc,
+			_samplerStates[static_cast<int>(SamplerState::LinearBorderWhite)].ReleaseAndGetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
 
 	// 深度テストあり＆深度書き込みあり
 	{
@@ -372,16 +410,16 @@ RenderState::RenderState(ID3D11Device* device)
 	// ベタ塗り＆カリングなし
 	{
 		D3D11_RASTERIZER_DESC desc{};
-		desc.FrontCounterClockwise = false;
+		desc.FrontCounterClockwise = TRUE;
 		desc.DepthBias = 0;
 		desc.DepthBiasClamp = 0;
 		desc.SlopeScaledDepthBias = 0;
-		desc.DepthClipEnable = true;
-		desc.ScissorEnable = false;
-		desc.MultisampleEnable = true;
+		desc.DepthClipEnable = TRUE;
+		desc.ScissorEnable = FALSE;
+		desc.MultisampleEnable = FALSE;
 		desc.FillMode = D3D11_FILL_SOLID;
 		desc.CullMode = D3D11_CULL_NONE;
-		desc.AntialiasedLineEnable = false;
+		desc.AntialiasedLineEnable = FALSE;
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			_rasterizerStates[static_cast<int>(RasterizerState::SolidCullNone)].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
@@ -389,33 +427,50 @@ RenderState::RenderState(ID3D11Device* device)
 	// ベタ塗り＆裏面カリング
 	{
 		D3D11_RASTERIZER_DESC desc{};
-		desc.FrontCounterClockwise = false;
+		desc.FrontCounterClockwise = TRUE;
 		desc.DepthBias = 0;
 		desc.DepthBiasClamp = 0;
 		desc.SlopeScaledDepthBias = 0;
-		desc.DepthClipEnable = true;
-		desc.ScissorEnable = false;
-		desc.MultisampleEnable = true;
+		desc.DepthClipEnable = TRUE;
+		desc.ScissorEnable = FALSE;
+		desc.MultisampleEnable = FALSE;
 		desc.FillMode = D3D11_FILL_SOLID;
 		desc.CullMode = D3D11_CULL_BACK;
-		desc.AntialiasedLineEnable = false;
+		desc.AntialiasedLineEnable = FALSE;
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			_rasterizerStates[static_cast<int>(RasterizerState::SolidCullBack)].GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+	// ベタ塗り＆表面カリング
+	{
+		D3D11_RASTERIZER_DESC desc{};
+		desc.FrontCounterClockwise = TRUE;
+		desc.DepthBias = 0;
+		desc.DepthBiasClamp = 0;
+		desc.SlopeScaledDepthBias = 0;
+		desc.DepthClipEnable = TRUE;
+		desc.ScissorEnable = FALSE;
+		desc.MultisampleEnable = FALSE;
+		desc.FillMode = D3D11_FILL_SOLID;
+		desc.CullMode = D3D11_CULL_FRONT;
+		desc.AntialiasedLineEnable = TRUE;
+		HRESULT hr = device->CreateRasterizerState(&desc,
+			_rasterizerStates[static_cast<int>(RasterizerState::SolidCullFront)].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 	// ワイヤーフレーム＆カリングなし
 	{
 		D3D11_RASTERIZER_DESC desc{};
-		desc.FrontCounterClockwise = false;
+		desc.FrontCounterClockwise = TRUE;
 		desc.DepthBias = 0;
 		desc.DepthBiasClamp = 0;
 		desc.SlopeScaledDepthBias = 0;
-		desc.DepthClipEnable = true;
-		desc.ScissorEnable = false;
-		desc.MultisampleEnable = true;
+		desc.DepthClipEnable = TRUE;
+		desc.ScissorEnable = FALSE;
+		desc.MultisampleEnable = FALSE;
 		desc.FillMode = D3D11_FILL_WIREFRAME;
 		desc.CullMode = D3D11_CULL_NONE;
-		desc.AntialiasedLineEnable = true;
+		desc.AntialiasedLineEnable = TRUE;
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			_rasterizerStates[static_cast<int>(RasterizerState::WireCullNone)].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
@@ -423,16 +478,16 @@ RenderState::RenderState(ID3D11Device* device)
 	// ワイヤーフレーム＆裏面カリング
 	{
 		D3D11_RASTERIZER_DESC desc{};
-		desc.FrontCounterClockwise = false;
+		desc.FrontCounterClockwise = TRUE;
 		desc.DepthBias = 0;
 		desc.DepthBiasClamp = 0;
 		desc.SlopeScaledDepthBias = 0;
-		desc.DepthClipEnable = true;
-		desc.ScissorEnable = false;
-		desc.MultisampleEnable = true;
+		desc.DepthClipEnable = TRUE;
+		desc.ScissorEnable = FALSE;
+		desc.MultisampleEnable = FALSE;
 		desc.FillMode = D3D11_FILL_WIREFRAME;
 		desc.CullMode = D3D11_CULL_BACK;
-		desc.AntialiasedLineEnable = true;
+		desc.AntialiasedLineEnable = TRUE;
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			_rasterizerStates[static_cast<int>(RasterizerState::WireCullBack)].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));

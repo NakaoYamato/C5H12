@@ -1,6 +1,7 @@
 #pragma once
 
 #include <imgui.h>
+#include <filesystem>
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 namespace ImGui

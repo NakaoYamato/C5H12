@@ -13,7 +13,7 @@ ParticleCanvas::ParticleCanvas()
 		CanvasWidth, CanvasHeight);
 }
 
-ParticleCanvas::TextureData ParticleCanvas::Load(const wchar_t* filename, DirectX::XMUINT2	split)
+ParticleCanvas::TextureData ParticleCanvas::Load(ID3D11DeviceContext* dc, const wchar_t* filename, DirectX::XMUINT2	split)
 {
 	// テクスチャがすでにロードされているか確認
 	auto it = _textureMap.find(filename);
@@ -25,24 +25,19 @@ ParticleCanvas::TextureData ParticleCanvas::Load(const wchar_t* filename, Direct
 	// テクスチャのロード
 	SpriteResource sprite(Graphics::Instance().GetDevice(), filename);
 
+	// フレームバッファ開始
+	if (_textureMap.empty())
 	{
-		// スレッドセーフ
-		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-
-		// フレームバッファ開始
-		if (_textureMap.empty())
-		{
-			// 最初のテクスチャなら透過処理
-			_canvasBuffer->Clear(Graphics::Instance().GetDeviceContext(), Vector4::Zero);
-		}
-		_canvasBuffer->Activate(Graphics::Instance().GetDeviceContext());
-
-		// テクスチャ描画
-		sprite.Render(Graphics::Instance().GetDeviceContext(), _nextTexPos);
-
-		//　フレームバッファ停止
-		_canvasBuffer->Deactivate(Graphics::Instance().GetDeviceContext());
+		// 最初のテクスチャなら透過処理
+		_canvasBuffer->Clear(dc, Vector4::Zero);
 	}
+	_canvasBuffer->Activate(dc);
+
+	// テクスチャ描画
+	sprite.Render(dc, _nextTexPos);
+
+	//　フレームバッファ停止
+	_canvasBuffer->Deactivate(dc);
 
 	TextureData textureData;
 	// テクスチャの位置とサイズを設定

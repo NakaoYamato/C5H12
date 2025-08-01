@@ -169,6 +169,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 	// ƒTƒ“ƒvƒ‰[‚ðÝ’è
     if (writeGBuffer)
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);

@@ -11,6 +11,7 @@
 #include "../../Library/Renderer/TextRenderer.h"
 #include "../../Library/Renderer/TerrainRenderer.h"
 #include "../../Library/Renderer/ParticleRenderer.h"
+#include "../../Library/Renderer/DecalRenderer.h"
 
 #include "../../Library/Actor/ActorManager.h"
 #include "../../Library/Collision/CollisionManager.h"
@@ -128,6 +129,8 @@ public:
 	TerrainRenderer&		GetTerrainRenderer()		{ return _terrainRenderer; }
 	// パーティクルレンダラー取得
 	ParticleRenderer&		GetParticleRenderer()		{ return _particleRenderer; }
+	// デカールレンダラー取得
+	DecalRenderer&			GetDecalRenderer()			{ return _decalRenderer; }
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
@@ -183,6 +186,7 @@ private:
 	TextRenderer					_textRenderer;
 	TerrainRenderer					_terrainRenderer;
 	ParticleRenderer				_particleRenderer;
+	DecalRenderer					_decalRenderer;
 
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;

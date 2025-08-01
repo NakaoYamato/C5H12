@@ -61,7 +61,7 @@ void PlayerCameraController::Update(float elapsedTime)
         angle.x = DirectX::XMConvertToRadians(89.9f);
     else if (angle.x < -DirectX::XMConvertToRadians(89.9f))
         angle.x = -DirectX::XMConvertToRadians(89.9f);
-    GetActor()->GetTransform().SetRotation(angle);
+    GetActor()->GetTransform().SetAngle(angle);
 
     //Vector3 newFocus = _playerActor->GetTransform().GetPosition();
     auto& focusNode = _playerActor->GetModel().lock()->GetPoseNodes().at(_focusNodeIndex);

@@ -707,7 +707,9 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 		// 同じ場合は処理しない
 		if (sphere.actor == meshCollider->GetActor().get())return;
 
-		for (auto& area : meshCollider->GetCollisionMesh().areas)
+		auto& collisionMesh = meshCollider->GetCollisionMesh();
+
+		for (auto& area : collisionMesh.areas)
 		{
 			DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
 			DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
@@ -718,7 +720,7 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 				// エリアに含まれている三角形と判定
 				for (const int& index : area.triangleIndices)
 				{
-					const MeshCollider::CollisionMesh::Triangle& triangle = meshCollider->GetCollisionMesh().triangles[index];
+					const MeshCollider::CollisionMesh::Triangle& triangle = collisionMesh.triangles[index];
 					DirectX::XMVECTOR TrianglePos[3] = {
 						DirectX::XMLoadFloat3(&triangle.positions[0]),
 						DirectX::XMLoadFloat3(&triangle.positions[1]),

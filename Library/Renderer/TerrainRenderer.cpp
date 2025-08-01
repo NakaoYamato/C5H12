@@ -229,8 +229,10 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
         UINT offset = 0;
         dc->IASetVertexBuffers(0, 1, drawInfo.terrain->GetVertexBuffer().GetAddressOf(), &stride, &offset);
         dc->IASetIndexBuffer(drawInfo.terrain->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
-		// 描画（平面描画で三角形が2枚あるためIndexCountが6）
-		dc->DrawIndexed(static_cast<UINT>(6), 0, 0);
+		// 描画
+        D3D11_BUFFER_DESC bufferDesc{};
+        drawInfo.terrain->GetIndexBuffer()->GetDesc(&bufferDesc);
+        dc->DrawIndexed(bufferDesc.ByteWidth / sizeof(uint32_t), 0, 0);
 
         // 書き出した頂点情報をTerrainに送る
         if (drawInfo.isExportingVertices)
@@ -253,7 +255,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 				// 頂点情報を受け取り
                 std::vector<Terrain::StreamOutVertex> streamOut;
 				// 頂点数を計算
-				UINT size = 3 * 3 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
+				UINT size = 3 * 3 * 4 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
                 streamOut.resize(size);
 				CopyMemory(streamOut.data(), mapped_resource.pData, sizeof(Terrain::StreamOutVertex) * size);
 				// マップ解除

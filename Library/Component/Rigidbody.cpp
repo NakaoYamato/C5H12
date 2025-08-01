@@ -177,7 +177,10 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 	// 衝突しているオブジェクトのRigidbodyを取得
 	auto body1 = collisionData.other->GetComponent<Rigidbody>();
 	if (body1 == nullptr)
+	{
+		// TODO : 衝突しているオブジェクトにRigidbodyがない場合の処理
 		return;
+	}
 
 	float vrel = 0;
 	DirectX::XMVECTOR normalVec = DirectX::XMLoadFloat3(&collisionData.hitNormal);

@@ -108,6 +108,9 @@ private:
     // 配置するモデルデータの追加
 	void AddModelData(const std::string& modelPath);
 
+    // ブラシの描画
+    void DrawBrush();
+
     // ペイントテクスチャのGUI描画
     void DrawPaintTextureGui();
     // ブラシテクスチャのGUI描画
@@ -144,6 +147,8 @@ private:
     // 選択中のモデルファイルパス
     std::string _selectedModelPath = "";
 
+    // ブラシの行列
+    DirectX::XMFLOAT4X4 _brushMatrix = {};
     // レイキャストの長さ
     float _rayLength = 1000.0f;
     // ブラシ使用フラグ

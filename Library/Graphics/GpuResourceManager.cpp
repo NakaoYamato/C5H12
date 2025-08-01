@@ -505,6 +505,34 @@ void GpuResourceManager::MakeDummyTexture(ID3D11Device* device,
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }
 
+// SRVのコピーを作成
+void GpuResourceManager::CreateShaderResourceViewCopy(
+	ID3D11Device* device,
+	ID3D11DeviceContext* dc, 
+	ID3D11ShaderResourceView* sourceSRV, 
+	D3D11_SHADER_RESOURCE_VIEW_DESC* srvDesc, 
+	ID3D11ShaderResourceView** destSRV)
+{
+	HRESULT hr;
+	Microsoft::WRL::ComPtr<ID3D11Resource> pSourceResource;
+	sourceSRV->GetResource(pSourceResource.GetAddressOf());
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pSourceTexture;
+	hr = pSourceResource.As(&pSourceTexture);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	D3D11_TEXTURE2D_DESC desc;
+	pSourceTexture->GetDesc(&desc);
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pDestTexture;
+	hr = device->CreateTexture2D(&desc, nullptr, pDestTexture.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	dc->CopyResource(pDestTexture.Get(), pSourceTexture.Get());
+	hr = device->CreateShaderResourceView(pDestTexture.Get(),
+		srvDesc, destSRV);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+}
+
 // 定数バッファ作成
 HRESULT GpuResourceManager::CreateConstantBuffer(
 	ID3D11Device* device,

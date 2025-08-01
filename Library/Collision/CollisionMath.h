@@ -122,6 +122,26 @@ namespace Collision3D
         float& penetration);
 
     /// <summary>
+    /// 球Vsボックス
+    /// </summary>
+    /// <param name="spherePos">球の位置</param>
+    /// <param name="sphereRadius">球の半径</param>
+    /// <param name="boxMatrix">ボックスのトランスフォーム行列</param>
+    /// <param name="boxLocalRadii">ボックスのローカル半辺長</param>
+    /// <param name="hitPosition">衝突位置</param>
+    /// <param name="hitNormal">衝突位置の法線</param>
+    /// <param name="penetration">めり込み量</param>
+    /// <returns></returns>
+    bool IntersectSphereVsBox(
+        const Vector3& spherePos,
+        float sphereRadius,
+        const DirectX::XMFLOAT4X4& boxMatrix,
+        const Vector3& boxLocalRadii,
+        Vector3* hitPosition,
+        Vector3* hitNormal,
+        float* penetration);
+
+    /// <summary>
     /// 球Vs三角形
     /// </summary>
     /// <param name="spherePos">球の位置</param>
@@ -271,18 +291,12 @@ namespace Collision3D
     /// <param name="boxRadii">ボックスの半辺長</param>
     /// <param name="boxAngle">ボックスの回転量</param>
 	/// <param name="pointPos">点</param>
-    /// <param name="hitPosition">衝突位置</param>
-    /// <param name="hitNormal">衝突位置の法線</param>
-    /// <param name="penetration">めり込み量</param>
 	/// <returns></returns>
 	bool IntersectBoxVsPoint(
         const Vector3& boxPos,
         const Vector3& boxRadii,
         const Vector3& boxAngle,
-		const Vector3& pointPos,
-		Vector3& hitPosition,
-		Vector3& hitNormal,
-		float& penetration);
+		const Vector3& pointPos);
 
     /// <summary>
 	/// ボックスVs点
@@ -290,9 +304,6 @@ namespace Collision3D
     /// <param name="boxMatrix">ボックスのトランスフォーム行列</param>
     /// <param name="boxLocalRadii">ボックスのローカル半辺長</param>
     /// <param name="pointPos">点</param>
-    /// <param name="hitPosition">衝突位置</param>
-    /// <param name="hitNormal">衝突位置の法線</param>
-    /// <param name="penetration">めり込み量</param>
     /// <returns></returns>
     bool IntersectBoxVsPoint(
         const DirectX::XMFLOAT4X4& boxMatrix,

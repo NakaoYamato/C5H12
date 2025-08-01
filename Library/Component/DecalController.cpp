@@ -4,6 +4,8 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
+#include <imgui.h>
+
 // 開始処理
 void DecalController::Start()
 {
@@ -17,9 +19,9 @@ void DecalController::Render(const RenderContext& rc)
 	if (_decal)
 	{
 		GetActor()->GetScene()->GetDecalRenderer().Draw(
+			_shaderName,
 			_decal.get(),
-			GetActor()->GetTransform().GetMatrix(),
-			_color);
+			GetActor()->GetTransform().GetMatrix());
 	}
 }
 // デバッグ表示
@@ -30,8 +32,23 @@ void DecalController::DebugRender(const RenderContext& rc)
 // GUI描画
 void DecalController::DrawGui()
 {
+	static std::vector<const char*> ShaderNames;
+	if (ShaderNames.empty())
+	{
+		ShaderNames = GetActor()->GetScene()->GetDecalRenderer().GetShaderNames();
+	}
+
 	if (_decal)
 	{
+		for (auto& shaderName : ShaderNames)
+		{
+			if (ImGui::RadioButton(shaderName, _shaderName == shaderName))
+			{
+				_shaderName = shaderName;
+			}
+		}
+
+		ImGui::Separator();
 		_decal->DrawGui(Graphics::Instance().GetDevice());
 	}
 }

@@ -67,11 +67,20 @@ public:
 		ID3D11Device* device,
 		ID3D11ShaderResourceView** shaderResourceView,
 		DWORD value/*0xAABBFFRR*/, UINT dimension);
+	// ダミーテクスチャ作成
 	static void MakeDummyTexture(
 		ID3D11Device* device,
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc,
 		DWORD value/*0xAABBFFRR*/, UINT dimension);
+
+	// SRVのコピーを作成
+	static void CreateShaderResourceViewCopy(
+		ID3D11Device* device,
+		ID3D11DeviceContext* dc,
+		ID3D11ShaderResourceView* sourceSRV,
+		D3D11_SHADER_RESOURCE_VIEW_DESC* srvDesc,
+		ID3D11ShaderResourceView** destSRV);
 
 	// 定数バッファ作成
 	static HRESULT CreateConstantBuffer(

@@ -209,11 +209,28 @@ void TerrainDeformer::Update(float elapsedTime)
     // 選択中のブラシを更新
     selectedBrush->second->Update(terrainControllers, elapsedTime, &intersectWorldPosition);
 
-    // ブラシの表示
+	// ブラシの行列を更新    
     if (selectedBrush->second->IsDrawDebugBrush())
-        Debug::Renderer::DrawSphere(
-            intersectWorldPosition, selectedBrush->second->GetBrushRadius(),
-            Vector4::White);
+    {
+        DirectX::XMMATRIX M{}, S{}, R{}, T{};
+        S = DirectX::XMMatrixScaling(
+            selectedBrush->second->GetBrushRadius() * 4.0f,
+            selectedBrush->second->GetBrushRadius() * 4.0f,
+            selectedBrush->second->GetBrushRadius() * 4.0f);
+        R = DirectX::XMMatrixRotationX(DirectX::XM_PIDIV2) *
+            DirectX::XMMatrixRotationY(-selectedBrush->second->GetBrushRotationY());
+        T = DirectX::XMMatrixTranslation(
+            intersectWorldPosition.x,
+            intersectWorldPosition.y,
+            intersectWorldPosition.z);
+        M = S * R * T;
+        DirectX::XMStoreFloat4x4(&_brushMatrix, M);
+    }
+    else
+    {
+		// ブラシの行列をリセット
+        _brushMatrix = {};
+    }
 }
 // 描画処理
 void TerrainDeformer::Render(const RenderContext& rc)
@@ -221,6 +238,8 @@ void TerrainDeformer::Render(const RenderContext& rc)
     // ブラシ使用フラグがオフの場合は何もしない
     if (!_useBrush)
         return;
+    // ブラシの描画
+    DrawBrush();
 	// タスクがなければ何もしない
 	if (_taskMap.empty())
 		return;
@@ -473,6 +492,19 @@ void TerrainDeformer::AddModelData(const std::string& modelPath)
     ModelData modelData{};
     modelData.path = modelPath;
     _environmentObjects.push_back(modelData);
+}
+// ブラシの描画
+void TerrainDeformer::DrawBrush()
+{
+	if (!_useBrush || _brushTextures.empty() || _brushTextureIndex >= _brushTextures.size())
+		return;
+    ID3D11ShaderResourceView* nullsrvs[] = { nullptr };
+    GetActor()->GetScene()->GetDecalRenderer().Draw(
+		"TerrainBrush",
+        _brushTextures[_brushTextureIndex].textureSRV.GetAddressOf(),
+        nullptr,
+        _brushMatrix,
+        Vector4(1.0f, 1.0f, 1.0f, 0.1f));
 }
 // ペイントテクスチャのGUI描画
 void TerrainDeformer::DrawPaintTextureGui()

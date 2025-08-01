@@ -1385,5 +1385,7 @@
     <FxCompile Include="HLSL\Decal\DecalGeometryVS.hlsl" />
     <FxCompile Include="HLSL\Decal\DecalGeometryPS.hlsl" />
     <FxCompile Include="HLSL\Decal\DecalSpritePS.hlsl" />
+    <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalGPS.hlsl" />
+    <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalSPS.hlsl" />
   </ItemGroup>
 </Project>

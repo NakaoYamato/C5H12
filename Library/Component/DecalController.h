@@ -26,5 +26,5 @@ private:
 	std::wstring _colorTextureFilename;
 	std::wstring _normalTextureFilename;
 	std::unique_ptr<Decal> _decal;
-	Vector4 _color = Vector4::White; // デカールの色
+	std::string _shaderName = "Default"; // シェーダ名
 };

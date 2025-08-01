@@ -41,4 +41,5 @@ void Decal::DrawGui(ID3D11Device* device)
 			_normalSRV.ReleaseAndGetAddressOf(),
 			nullptr);
 	}
+	ImGui::ColorEdit4("Color", &_color.x);
 }

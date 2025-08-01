@@ -1020,23 +1020,7 @@ bool Collision3D::IntersectSphereVsBox(
 
 	Vector3 localSpherePos = Vector3::TransformCoord(spherePos, InvBoxM);
 
-	Vector3 nearPos = localSpherePos;
-	{
-		if (-boxRadii.x > nearPos.x)
-			nearPos.x = -boxRadii.x;
-		else if (boxRadii.x < nearPos.x)
-			nearPos.x = boxRadii.x;
-
-		if (-boxRadii.y > nearPos.y)
-			nearPos.y = -boxRadii.y;
-		else if (boxRadii.y < nearPos.y)
-			nearPos.y = boxRadii.y;
-
-		if (-boxRadii.z > nearPos.z)
-			nearPos.z = -boxRadii.z;
-		else if (boxRadii.z < nearPos.z)
-			nearPos.z = boxRadii.z;
-	}
+	Vector3 nearPos = localSpherePos.Clamp(-boxRadii, +boxRadii);
 	// グローバル空間に変換
 	DirectX::XMStoreFloat3(&nearPos,
 		DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&nearPos), BoxM));
@@ -1052,6 +1036,38 @@ bool Collision3D::IntersectSphereVsBox(
 		penetration = sphereRadius - length;
         return true;
 	}
+	return false;
+}
+
+/// 球Vsボックス
+bool Collision3D::IntersectSphereVsBox(
+	const Vector3& spherePos, float sphereRadius, 
+	const DirectX::XMFLOAT4X4& boxMatrix, const Vector3& boxLocalRadii,
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
+{
+	// 球の中心位置をボックスのローカル空間に変換
+	Vector3 localSpherePos = Vector3::TransformCoord(spherePos, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&boxMatrix)));
+	// ボックスとの最近点を求める
+	Vector3 nearPos = localSpherePos.Clamp(-boxLocalRadii, +boxLocalRadii);
+	// 最近点と球の中心のベクトルを求める
+	Vector3 vec = localSpherePos - nearPos;
+	// 長さを求める
+	float length = vec.Length();
+	// 衝突判定
+	if (length < sphereRadius)
+	{
+		// 衝突している
+		if (hitPosition)
+			*hitPosition = nearPos;
+		if (hitNormal)
+			*hitNormal = vec.Normalize();
+		if (penetration)
+			*penetration = sphereRadius - length;
+		return true;
+	}
+	// 衝突していない
 	return false;
 }
 
@@ -1618,10 +1634,7 @@ bool Collision3D::IntersectBoxVsPoint(
 	const Vector3& boxPos,
 	const Vector3& boxRadii,
 	const Vector3& boxAngle,
-	const Vector3& pointPos,
-	Vector3& hitPosition, 
-	Vector3& hitNormal,
-	float& penetration)
+	const Vector3& pointPos)
 {
 	DirectX::XMMATRIX BoxM = {}, InvBoxM = {};
 	{
@@ -1633,23 +1646,7 @@ bool Collision3D::IntersectBoxVsPoint(
 
 	Vector3 localPoint = Vector3::TransformCoord(pointPos, InvBoxM);
 
-	Vector3 nearPos = localPoint;
-	{
-		if (-boxRadii.x > nearPos.x)
-			nearPos.x = -boxRadii.x;
-		else if (boxRadii.x < nearPos.x)
-			nearPos.x = boxRadii.x;
-
-		if (-boxRadii.y > nearPos.y)
-			nearPos.y = -boxRadii.y;
-		else if (boxRadii.y < nearPos.y)
-			nearPos.y = boxRadii.y;
-
-		if (-boxRadii.z > nearPos.z)
-			nearPos.z = -boxRadii.z;
-		else if (boxRadii.z < nearPos.z)
-			nearPos.z = boxRadii.z;
-	}
+	Vector3 nearPos = localPoint.Clamp(-boxRadii, +boxRadii);
 	// グローバル空間に変換
 	DirectX::XMStoreFloat3(&nearPos,
 		DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&nearPos), BoxM));
@@ -1660,9 +1657,6 @@ bool Collision3D::IntersectBoxVsPoint(
 	// 衝突判定
 	if (length <= 0.0f)
 	{
-		hitPosition = nearPos;
-		hitNormal = vec.Normalize();
-		// TODO : penetrationの計算
 		return true;
 	}
 	return false;

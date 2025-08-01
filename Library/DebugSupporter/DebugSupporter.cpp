@@ -71,14 +71,25 @@ namespace Debug
 
     namespace Renderer
     {
-        /// ” •`‰æ
+        /// ” (”¼Œa1m)•`‰æ
         void DrawBox(const Vector3& position, const Vector3& angle, const Vector3& size, const Vector4& color)
         {
             _debugRenderer->DrawBox(position, angle, size, color);
         }
+        /// ” (”¼Œa1m)•`‰æ
         void DrawBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
         {
             _debugRenderer->DrawBox(transform, color);
+        }
+        /// ” (”¼Œa0.5m)•`‰æ
+        void DrawHalfBox(const Vector3& position, const Vector3& angle, const Vector3& size, const Vector4& color)
+        {
+            _debugRenderer->DrawHalfBox(position, angle, size, color);
+        }
+        /// ” (”¼Œa0.5m)•`‰æ
+        void DrawHalfBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
+        {
+            _debugRenderer->DrawHalfBox(transform, color);
         }
         /// ‹…•`‰æ
         void DrawSphere(const Vector3& position, float radius, const Vector4& color)

@@ -22,7 +22,7 @@ PS_OUT main(VS_OUT pin)
     float3 worldPosition = position.xyz / position.w;
     
     // キューブ基準の空間の座標に変換してデカールのUV座標に変換
-    float4 cubeTexturePosition = mul(float4(worldPosition, 1), decal_inverse_transform);
+    float4 cubeTexturePosition = mul(float4(worldPosition, 1), invWorld);
     cubeTexturePosition /= cubeTexturePosition.w;
     cubeTexturePosition.x = cubeTexturePosition.x * 0.5f + 0.5f;
     cubeTexturePosition.y = cubeTexturePosition.y * -0.5f + 0.5f;

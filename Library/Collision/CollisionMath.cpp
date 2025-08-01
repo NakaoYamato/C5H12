@@ -1613,6 +1613,77 @@ bool Collision3D::IntersectBoxVsCapsule(
 	return false;
 }
 
+/// ボックスVs点
+bool Collision3D::IntersectBoxVsPoint(
+	const Vector3& boxPos,
+	const Vector3& boxRadii,
+	const Vector3& boxAngle,
+	const Vector3& pointPos,
+	Vector3& hitPosition, 
+	Vector3& hitNormal,
+	float& penetration)
+{
+	DirectX::XMMATRIX BoxM = {}, InvBoxM = {};
+	{
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&boxAngle));
+		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&boxPos));
+		BoxM = R * T;
+	}
+	InvBoxM = DirectX::XMMatrixInverse(nullptr, BoxM);
+
+	Vector3 localPoint = Vector3::TransformCoord(pointPos, InvBoxM);
+
+	Vector3 nearPos = localPoint;
+	{
+		if (-boxRadii.x > nearPos.x)
+			nearPos.x = -boxRadii.x;
+		else if (boxRadii.x < nearPos.x)
+			nearPos.x = boxRadii.x;
+
+		if (-boxRadii.y > nearPos.y)
+			nearPos.y = -boxRadii.y;
+		else if (boxRadii.y < nearPos.y)
+			nearPos.y = boxRadii.y;
+
+		if (-boxRadii.z > nearPos.z)
+			nearPos.z = -boxRadii.z;
+		else if (boxRadii.z < nearPos.z)
+			nearPos.z = boxRadii.z;
+	}
+	// グローバル空間に変換
+	DirectX::XMStoreFloat3(&nearPos,
+		DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&nearPos), BoxM));
+
+	Vector3 vec = localPoint - nearPos;
+	float length = vec.Length();
+
+	// 衝突判定
+	if (length <= 0.0f)
+	{
+		hitPosition = nearPos;
+		hitNormal = vec.Normalize();
+		// TODO : penetrationの計算
+		return true;
+	}
+	return false;
+}
+
+/// ボックスVs点
+bool Collision3D::IntersectBoxVsPoint(const DirectX::XMFLOAT4X4& boxMatrix, const Vector3& boxLocalRadii, const Vector3& pointPos)
+{
+	// 点をボックスのローカル空間に変換
+	Vector3 localPoint = Vector3::TransformCoord(pointPos, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&boxMatrix)));
+	if (localPoint.x < -boxLocalRadii.x || localPoint.x > boxLocalRadii.x ||
+		localPoint.y < -boxLocalRadii.y || localPoint.y > boxLocalRadii.y ||
+		localPoint.z < -boxLocalRadii.z || localPoint.z > boxLocalRadii.z)
+	{
+		// ボックスのローカル空間の半径を超えている場合は衝突していない
+		return false;
+	}
+
+	return true;
+}
+
 /// カプセルVsカプセル
 bool Collision3D::IntersectCapsuleVsCapsule(
 	const Vector3& c0Start, const Vector3& c0End,

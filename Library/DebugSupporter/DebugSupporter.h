@@ -53,7 +53,7 @@ namespace Debug
 	namespace Renderer
 	{
 		/// <summary>
-		/// ” •`‰æ
+		/// ” (”¼Œa1m)•`‰æ
 		/// </summary>
 		/// <param name="position"></param>
 		/// <param name="angle"></param>
@@ -66,13 +66,35 @@ namespace Debug
 			const Vector4& color = { 1,1,1,1 });
 
 		/// <summary>
-		/// ” •`‰æ
+		/// ” (”¼Œa1m)•`‰æ
 		/// </summary>
 		/// <param name="transform"></param>
 		/// <param name="color"></param>
 		void DrawBox(
 			const DirectX::XMFLOAT4X4& transform,
 			const Vector4& color);
+
+		/// <summary>
+		/// ” (”¼Œa0.5m)•`‰æ
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="angle"></param>
+		/// <param name="size"></param>
+		/// <param name="color"></param>
+		void DrawHalfBox(
+			const Vector3& position,
+			const Vector3& angle,
+			const Vector3& size,
+			const Vector4& color = { 1,1,1,1 });
+
+		/// <summary>
+		/// ” (”¼Œa0.5m)•`‰æ
+		/// </summary>
+		/// <param name="transform"></param>
+		/// <param name="color"></param>
+		void DrawHalfBox(
+			const DirectX::XMFLOAT4X4& transform,
+			const Vector4& color = { 1,1,1,1 });
 
 		/// <summary>
 		/// ‹…•`‰æ

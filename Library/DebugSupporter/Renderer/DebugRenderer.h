@@ -13,13 +13,24 @@ public:
 	DebugRenderer(ID3D11Device* device);
 	~DebugRenderer() {}
 
-	// ” •`‰æ
+	// ” (”¼•Ó’·‚Pm)•`‰æ
 	void DrawBox(
 		const Vector3& position,
 		const Vector3& angle,
 		const Vector3& size,
 		const Vector4& color);
+	// ” (”¼•Ó’·‚Pm)•`‰æ
 	void DrawBox(
+		const DirectX::XMFLOAT4X4& transform,
+		const Vector4& color);
+	// ” (”¼•Ó’·0.5m)•`‰æ
+	void DrawHalfBox(
+		const Vector3& position,
+		const Vector3& angle,
+		const Vector3& size,
+		const Vector4& color);
+	// ” (”¼•Ó’·0.5m)•`‰æ
+	void DrawHalfBox(
 		const DirectX::XMFLOAT4X4& transform,
 		const Vector4& color);
 
@@ -97,28 +108,29 @@ private:
 	void CreateMesh(ID3D11Device* device, const std::vector<Vector3>& vertices, Mesh& mesh);
 
 	// ” ƒƒbƒVƒ…ì¬
-	void CreateBoxMesh(ID3D11Device* device, float width, float height, float depth);
+	void CreateBoxMesh(ID3D11Device* device, Mesh& mesh, float width, float height, float depth);
 
 	// ‹…ƒƒbƒVƒ…ì¬
-	void CreateSphereMesh(ID3D11Device* device, float radius, int subdivisions);
+	void CreateSphereMesh(ID3D11Device* device, Mesh& mesh, float radius, int subdivisions);
 
 	// ”¼‹…ƒƒbƒVƒ…ì¬
-	void CreateHalfSphereMesh(ID3D11Device* device, float radius, int subdivisions);
+	void CreateHalfSphereMesh(ID3D11Device* device, Mesh& mesh, float radius, int subdivisions);
 
 	// ‰~’Œ
-	void CreateCylinderMesh(ID3D11Device* device, float radius1, float radius2, float start, float height, int subdivisions);
+	void CreateCylinderMesh(ID3D11Device* device, Mesh& mesh, float radius1, float radius2, float start, float height, int subdivisions);
 
 	// œƒƒbƒVƒ…ì¬
-	void CreateBoneMesh(ID3D11Device* device, float length);
+	void CreateBoneMesh(ID3D11Device* device, Mesh& mesh, float length);
 
 	// –îˆóƒƒbƒVƒ…ì¬
-	void CreateArrowMesh(ID3D11Device* device);
+	void CreateArrowMesh(ID3D11Device* device, Mesh& mesh);
 
 	// ²ƒƒbƒVƒ…ì¬
-	void CreateAxis(ID3D11Device* device);
+	void CreateAxis(ID3D11Device* device, Mesh& mesh0, Mesh& mesh1, Mesh& mesh2);
 
 private:
 	Mesh										_boxMesh;
+	Mesh										_halfBoxMesh;
 	Mesh										_sphereMesh;
 	Mesh										_halfSphereMesh;
 	Mesh										_cylinderMesh;

@@ -264,6 +264,41 @@ namespace Collision3D
         Vector3& hitNormal,
         float& penetration);
 
+	/// <summary>
+	/// ボックスVs点
+	/// </summary>
+    /// <param name="boxPos">ボックスの位置</param>
+    /// <param name="boxRadii">ボックスの半辺長</param>
+    /// <param name="boxAngle">ボックスの回転量</param>
+	/// <param name="pointPos">点</param>
+    /// <param name="hitPosition">衝突位置</param>
+    /// <param name="hitNormal">衝突位置の法線</param>
+    /// <param name="penetration">めり込み量</param>
+	/// <returns></returns>
+	bool IntersectBoxVsPoint(
+        const Vector3& boxPos,
+        const Vector3& boxRadii,
+        const Vector3& boxAngle,
+		const Vector3& pointPos,
+		Vector3& hitPosition,
+		Vector3& hitNormal,
+		float& penetration);
+
+    /// <summary>
+	/// ボックスVs点
+    /// </summary>
+    /// <param name="boxMatrix">ボックスのトランスフォーム行列</param>
+    /// <param name="boxLocalRadii">ボックスのローカル半辺長</param>
+    /// <param name="pointPos">点</param>
+    /// <param name="hitPosition">衝突位置</param>
+    /// <param name="hitNormal">衝突位置の法線</param>
+    /// <param name="penetration">めり込み量</param>
+    /// <returns></returns>
+    bool IntersectBoxVsPoint(
+        const DirectX::XMFLOAT4X4& boxMatrix,
+        const Vector3& boxLocalRadii,
+        const Vector3& pointPos);
+
     /// <summary>
     /// カプセルVsカプセル
     /// </summary>

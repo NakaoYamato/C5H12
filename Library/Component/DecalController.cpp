@@ -2,6 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Scene/Scene.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 // 開始処理
 void DecalController::Start()
@@ -20,6 +21,11 @@ void DecalController::Render(const RenderContext& rc)
 			GetActor()->GetTransform().GetMatrix(),
 			_color);
 	}
+}
+// デバッグ表示
+void DecalController::DebugRender(const RenderContext& rc)
+{
+	Debug::Renderer::DrawHalfBox(GetActor()->GetTransform().GetMatrix(), Vector4::Green);
 }
 // GUI描画
 void DecalController::DrawGui()

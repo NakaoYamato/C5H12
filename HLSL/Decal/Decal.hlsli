@@ -8,6 +8,8 @@ struct PS_OUT
 
 cbuffer GBUFFER_DECAL_CONSTANT_BUFFER : register(b2)
 {
-    row_major float4x4 decal_inverse_transform;
-    float4 decal_direction;
+    row_major float4x4 world;
+    row_major float4x4 invWorld;
+    float4 materialColor;
+    float4 decalDirection;
 };

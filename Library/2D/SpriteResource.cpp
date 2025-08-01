@@ -245,7 +245,8 @@ void SpriteResource::Blit(ID3D11DeviceContext* immediateContext,
 		immediateContext->PSSetShader(this->_pixelShader.Get(), nullptr, 0);
 
 	// シェーダーリソースビューの設定
-	immediateContext->PSSetShaderResources(startSlot, numViews, shaderResourceView);
+	if (numViews != 0)
+		immediateContext->PSSetShaderResources(startSlot, numViews, shaderResourceView);
 
 	immediateContext->Draw(4, 0);
 

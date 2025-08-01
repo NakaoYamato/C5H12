@@ -2,37 +2,12 @@
 
 #include "../../Library/HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
+#include "../../Library/Collision/CollisionMath.h"
 
 // 初期設定
 void DecalRenderer::Initialize(ID3D11Device* device, UINT width, UINT height)
 {
 	HRESULT hr{ S_OK };
-
-	// デプスステンシルビューの生成
-	{
-		Microsoft::WRL::ComPtr<ID3D11Texture2D> depth_stencil_buffer{};
-		D3D11_TEXTURE2D_DESC texture2d_desc{};
-		texture2d_desc.Width = width;
-		texture2d_desc.Height = height;
-		texture2d_desc.MipLevels = 1;
-		texture2d_desc.ArraySize = 1;
-		texture2d_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		texture2d_desc.SampleDesc.Count = 1;
-		texture2d_desc.SampleDesc.Quality = 0;
-		texture2d_desc.Usage = D3D11_USAGE_DEFAULT;
-		texture2d_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		texture2d_desc.CPUAccessFlags = 0;
-		texture2d_desc.MiscFlags = 0;
-		hr = device->CreateTexture2D(&texture2d_desc, NULL, depth_stencil_buffer.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-		D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc{};
-		depth_stencil_view_desc.Format = texture2d_desc.Format;
-		depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		depth_stencil_view_desc.Texture2D.MipSlice = 0;
-		hr = device->CreateDepthStencilView(depth_stencil_buffer.Get(), &depth_stencil_view_desc, _depthStencilView.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-	}
 
 	// 制限用深度ステンシルステート生成
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
@@ -68,11 +43,6 @@ void DecalRenderer::Initialize(ID3D11Device* device, UINT width, UINT height)
 		device,
 		sizeof(DecalConstants),
 		_decalConstantBuffer.ReleaseAndGetAddressOf());
-	// ジオメトリ定数バッファの作成
-	GpuResourceManager::CreateConstantBuffer(
-		device,
-		sizeof(GeometryConstants),
-		_geometryConstantBuffer.ReleaseAndGetAddressOf());
 
 	// ジオメトリ頂点シェーダーの読み込み
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[]
@@ -92,11 +62,12 @@ void DecalRenderer::Initialize(ID3D11Device* device, UINT width, UINT height)
 	GpuResourceManager::CreatePsFromCso(
 		device,
 		"./Data/Shader/DecalGeometryPS.cso",
-		_geometrypixelShader.ReleaseAndGetAddressOf());
-	GpuResourceManager::CreatePsFromCso(
-		device,
-		"./Data/Shader/DecalSpritePS.cso",
-		_spritePixelShader.ReleaseAndGetAddressOf());
+		_geometryPixelShader.ReleaseAndGetAddressOf());
+
+	_fullscreenQuad = std::make_unique<SpriteResource>(device,
+		L"",
+		"./Data/Shader/FullscreenQuadVS.cso",
+		"./Data/Shader/DecalSpritePS.cso");
 }
 // 描画申請
 void DecalRenderer::Draw(Decal* decal, const DirectX::XMFLOAT4X4& world, const Vector4& color)
@@ -108,6 +79,16 @@ void DecalRenderer::Draw(Decal* decal, const DirectX::XMFLOAT4X4& world, const V
 void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
+
+	// 出力先を設定
+	{
+		std::vector<ID3D11RenderTargetView*> tempRTVs;
+		tempRTVs.push_back(gbuffer->GetRenderTargetView(GBUFFER_COLOR_MAP_INDEX).Get());
+		tempRTVs.push_back(gbuffer->GetRenderTargetView(GBUFFER_NORMAL_MAP_INDEX).Get());
+		dc->OMSetRenderTargets(2, tempRTVs.data(), gbuffer->GetDepthStencilView().Get());
+		// ステンシルをクリア
+		dc->ClearDepthStencilView(gbuffer->GetDepthStencilView().Get(), D3D11_CLEAR_STENCIL, 0.0f, 0);
+	}
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyDepthStencilSRV;
 	{
@@ -145,16 +126,6 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 		}
 	}
 
-	// 出力先を設定
-	{
-		std::vector<ID3D11RenderTargetView*> tempRTVs;
-		tempRTVs.push_back(gbuffer->GetRenderTargetView(GBUFFER_COLOR_MAP_INDEX).Get());
-		tempRTVs.push_back(gbuffer->GetRenderTargetView(GBUFFER_NORMAL_MAP_INDEX).Get());
-		dc->OMSetRenderTargets(2, tempRTVs.data(), gbuffer->GetDepthStencilView().Get());
-		// ステンシルをクリア
-		dc->ClearDepthStencilView(gbuffer->GetDepthStencilView().Get(), D3D11_CLEAR_STENCIL, 0.0f, 0);
-	}
-
 	// ビューポート設定
 	{
 		D3D11_VIEWPORT viewport{};
@@ -188,16 +159,19 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 
 			DecalConstants decalConstant{};
 			{
-				// ボックスの向きを保存
-				decalConstant.direction = Vector3(Vector3::Up).TransformNormal(World).Normalize();
-				decalConstant.direction.w = 0;
+				decalConstant.world = *drawInfo.world;
 				// ボックスの空間に変換するための行列
 				DirectX::XMMATRIX V = DirectX::XMMatrixInverse(nullptr, World);
 				DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicLH(1, 1, 0, 1);
 				DirectX::XMStoreFloat4x4(&decalConstant.inverseTransform, V * P);
+				decalConstant.color = *drawInfo.color;
+				// ボックスの向きを保存
+				decalConstant.direction = Vector3(Vector3::Up).TransformNormal(World).Normalize();
+				decalConstant.direction.w = 0;
 			}
 
 			dc->UpdateSubresource(_decalConstantBuffer.Get(), 0, 0, &decalConstant, 0, 0);
+			dc->VSSetConstantBuffers(DECAL_CONSTANT_INDEX, 1, _decalConstantBuffer.GetAddressOf());
 			dc->PSSetConstantBuffers(DECAL_CONSTANT_INDEX, 1, _decalConstantBuffer.GetAddressOf());
 		}
 
@@ -215,37 +189,20 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 				DrawGeometry(dc, *drawInfo.world, { 1, 1, 1, 1 });
 			}
 
+			dc->OMSetDepthStencilState(_depthStencilState.Get(), 0);
 			// ボックスの内部判定を行う
-			//OBB obb;
-			//obb.position.x = decal.translation.x;
-			//obb.position.y = decal.translation.y;
-			//obb.position.z = decal.translation.z;
-			//obb.position.w = 1;
-			//obb.length.x = decal.scaling.x;
-			//obb.length.y = decal.scaling.y;
-			//obb.length.z = decal.scaling.z;
-			//obb.length.w = 0;
-			//DirectX::XMStoreFloat4(&obb.axis[0], DirectX::XMVector3Normalize(World.r[0]));
-			//DirectX::XMStoreFloat4(&obb.axis[1], DirectX::XMVector3Normalize(World.r[1]));
-			//DirectX::XMStoreFloat4(&obb.axis[2], DirectX::XMVector3Normalize(World.r[2]));
-			//float length = length_point_to_obb(obb, get_camera_position());
-			//if (length < FLT_EPSILON)
-			//{
-			//	// フルスクリーン描画
-			//	dc->OMSetDepthStencilState(decal_depth_stencil_state.Get(), 0);
-			//	dc->RSSetState(get_renderdata()->rasterizer_states[static_cast<size_t>(render_data::RASTER_STATE::CULL_NONE)].Get());
-
-			//	dc->VSSetShader(sprite_vertex_shader.Get(), nullptr, 0);
-			//	dc->IASetInputLayout(sprite_input_layout.Get());
-			//	dc->PSSetShader(gbuffer_decal_sprite_pixel_shader.Get(), nullptr, 0);
-			//	gbuffer_decal_sprite->render(dc.Get(), 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-			//}
-			//else
+			if (Collision3D::IntersectBoxVsPoint(*drawInfo.world, Vector3(0.5f, 0.5f, 0.5f), rc.camera->GetEye()))
+			{
+				// フルスクリーン描画
+				dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+				ID3D11ShaderResourceView* nullsrvs[] = { nullptr };
+				_fullscreenQuad->Blit(dc, nullsrvs, 0, 0);
+			}
+			else
 			{
 				//	表面描画してステンシル値1と比較
 				dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-				dc->OMSetDepthStencilState(_depthStencilState.Get(), 0);
-				dc->PSSetShader(_geometrypixelShader.Get(), nullptr, 0);
+				dc->PSSetShader(_geometryPixelShader.Get(), nullptr, 0);
 				DrawGeometry(dc, *drawInfo.world, *drawInfo.color);
 			}
 		}
@@ -420,11 +377,6 @@ void DecalRenderer::DrawGeometry(ID3D11DeviceContext* dc, const DirectX::XMFLOAT
 	uint32_t offset{ 0 };
 	dc->IASetVertexBuffers(0, 1, _geometryVertexBuffer.GetAddressOf(), &stride, &offset);
 	dc->IASetIndexBuffer(_geometryIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-	GeometryConstants data{ world, color };
-	dc->UpdateSubresource(_geometryConstantBuffer.Get(), 0, 0, &data, 0, 0);
-	dc->VSSetConstantBuffers(GEOMETRY_CONSTANT_INDEX, 1, _geometryConstantBuffer.GetAddressOf());
-	dc->PSSetConstantBuffers(GEOMETRY_CONSTANT_INDEX, 1, _geometryConstantBuffer.GetAddressOf());
 
 	D3D11_BUFFER_DESC bufferDesc{};
 	_geometryIndexBuffer->GetDesc(&bufferDesc);

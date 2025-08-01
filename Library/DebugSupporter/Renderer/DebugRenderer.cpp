@@ -53,25 +53,28 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 		_constantBuffer.GetAddressOf());
 
 	// 箱メッシュ生成
-	CreateBoxMesh(device, 1.0f, 1.0f, 1.0f);
+	CreateBoxMesh(device, _boxMesh, 1.0f, 1.0f, 1.0f);
+
+	// 半箱メッシュ生成
+	CreateBoxMesh(device, _halfBoxMesh, 0.5f, 0.5f, 0.5f);
 
 	// 球メッシュ生成
-	CreateSphereMesh(device, 1.0f, 32);
+	CreateSphereMesh(device, _sphereMesh, 1.0f, 32);
 
 	// 半球メッシュ生成
-	CreateHalfSphereMesh(device, 1.0f, 32);
+	CreateHalfSphereMesh(device, _halfSphereMesh, 1.0f, 32);
 
 	// 円柱メッシュ生成
-	CreateCylinderMesh(device, 1.0f, 1.0f, 0.0f, 1.0f, 32);
+	CreateCylinderMesh(device, _cylinderMesh, 1.0f, 1.0f, 0.0f, 1.0f, 32);
 
 	// 骨メッシュ生成
-	CreateBoneMesh(device, 1.0f);
+	CreateBoneMesh(device, _boneMesh, 1.0f);
 
 	// 矢印メッシュ作成
-	CreateArrowMesh(device);
+	CreateArrowMesh(device, _arrowMesh);
 
 	// 軸メッシュ作成
-	CreateAxis(device);
+	CreateAxis(device, _axisMesh[0], _axisMesh[1], _axisMesh[2]);
 
 	// グリッド描画用頂点バッファ作成
 	{
@@ -87,7 +90,7 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	}
 }
 
-// 箱描画
+// 箱(半辺長１m)描画
 void DebugRenderer::DrawBox(
 	const Vector3& position,
 	const Vector3& angle,
@@ -104,11 +107,33 @@ void DebugRenderer::DrawBox(
 	DirectX::XMStoreFloat4x4(&instance.worldTransform, S * R * T);
 }
 
-// 箱描画
+// 箱(半辺長１m)描画
 void DebugRenderer::DrawBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
 {
 	Instance& instance = _instances.emplace_back();
 	instance.mesh = &_boxMesh;
+	instance.color = color;
+	instance.worldTransform = transform;
+}
+
+// 箱(半辺長0.5m)描画
+void DebugRenderer::DrawHalfBox(const Vector3& position, const Vector3& angle, const Vector3& size, const Vector4& color)
+{
+	Instance& instance = _instances.emplace_back();
+	instance.mesh = &_halfBoxMesh;
+	instance.color = color;
+
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(size.x, size.y, size.z);
+	DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+	DirectX::XMStoreFloat4x4(&instance.worldTransform, S * R * T);
+}
+
+// 箱(半辺長0.5m)描画
+void DebugRenderer::DrawHalfBox(const DirectX::XMFLOAT4X4& transform, const Vector4& color)
+{
+	Instance& instance = _instances.emplace_back();
+	instance.mesh = &_halfBoxMesh;
 	instance.color = color;
 	instance.worldTransform = transform;
 }
@@ -391,6 +416,7 @@ void DebugRenderer::CreateMesh(ID3D11Device* device,
 
 // 箱メッシュ作成
 void DebugRenderer::CreateBoxMesh(ID3D11Device* device,
+	Mesh& mesh,
 	float width, float height, float depth)
 {
 	DirectX::XMFLOAT3 positions[8] =
@@ -439,11 +465,13 @@ void DebugRenderer::CreateBoxMesh(ID3D11Device* device,
 	vertices.emplace_back(positions[7]);
 
 	// メッシュ生成
-	CreateMesh(device, vertices, _boxMesh);
+	CreateMesh(device, vertices, mesh);
 }
 
 // 球メッシュ作成
-void DebugRenderer::CreateSphereMesh(ID3D11Device* device, float radius, int subdivisions)
+void DebugRenderer::CreateSphereMesh(ID3D11Device* device,
+	Mesh& mesh, 
+	float radius, int subdivisions)
 {
 	float step = DirectX::XM_2PI / subdivisions;
 
@@ -490,11 +518,13 @@ void DebugRenderer::CreateSphereMesh(ID3D11Device* device, float radius, int sub
 	}
 
 	// メッシュ生成
-	CreateMesh(device, vertices, _sphereMesh);
+	CreateMesh(device, vertices, mesh);
 }
 
 // 半球メッシュ作成
-void DebugRenderer::CreateHalfSphereMesh(ID3D11Device* device, float radius, int subdivisions)
+void DebugRenderer::CreateHalfSphereMesh(ID3D11Device* device,
+	Mesh& mesh,
+	float radius, int subdivisions)
 {
 	std::vector<Vector3> vertices;
 
@@ -544,11 +574,12 @@ void DebugRenderer::CreateHalfSphereMesh(ID3D11Device* device, float radius, int
 	}
 
 	// メッシュ生成
-	CreateMesh(device, vertices, _halfSphereMesh);
+	CreateMesh(device, vertices, mesh);
 }
 
 // 円柱
 void DebugRenderer::CreateCylinderMesh(ID3D11Device* device,
+	Mesh& mesh,
 	float radius1, float radius2, float start, float height, int subdivisions)
 {
 	std::vector<Vector3> vertices;
@@ -598,11 +629,13 @@ void DebugRenderer::CreateCylinderMesh(ID3D11Device* device,
 	}
 
 	// メッシュ生成
-	CreateMesh(device, vertices, _cylinderMesh);
+	CreateMesh(device, vertices, mesh);
 }
 
 // 骨メッシュ作成
-void DebugRenderer::CreateBoneMesh(ID3D11Device* device, float length)
+void DebugRenderer::CreateBoneMesh(ID3D11Device* device,
+	Mesh& mesh, 
+	float length)
 {
 	float width = length * 0.25f;
 	Vector3 positions[8] =
@@ -647,11 +680,12 @@ void DebugRenderer::CreateBoneMesh(ID3D11Device* device, float length)
 	vertices.emplace_back(positions[1]);
 
 	// メッシュ生成
-	CreateMesh(device, vertices, _boneMesh);
+	CreateMesh(device, vertices, mesh);
 }
 
 // 矢印メッシュ作成
-void DebugRenderer::CreateArrowMesh(ID3D11Device* device)
+void DebugRenderer::CreateArrowMesh(ID3D11Device* device,
+	Mesh& mesh)
 {
 	//		   1
 	//			^
@@ -700,11 +734,12 @@ void DebugRenderer::CreateArrowMesh(ID3D11Device* device)
 
 
 	// メッシュ生成
-	CreateMesh(device, vertices, _arrowMesh);
+	CreateMesh(device, vertices, mesh);
 }
 
 // 軸メッシュ作成
-void DebugRenderer::CreateAxis(ID3D11Device* device)
+void DebugRenderer::CreateAxis(ID3D11Device* device,
+	Mesh& mesh0, Mesh& mesh1, Mesh& mesh2)
 {
 	// X軸
 	{
@@ -712,7 +747,7 @@ void DebugRenderer::CreateAxis(ID3D11Device* device)
 		vertices.push_back({ 0,0,0 });
 		vertices.push_back({ 1,0,0 });
 		// メッシュ生成
-		CreateMesh(device, vertices, _axisMesh[0]);
+		CreateMesh(device, vertices, mesh0);
 	}
 	// Y軸
 	{
@@ -720,7 +755,7 @@ void DebugRenderer::CreateAxis(ID3D11Device* device)
 		vertices.push_back({ 0,0,0 });
 		vertices.push_back({ 0,1,0 });
 		// メッシュ生成
-		CreateMesh(device, vertices, _axisMesh[1]);
+		CreateMesh(device, vertices, mesh1);
 	}
 	// Z軸
 	{
@@ -728,7 +763,7 @@ void DebugRenderer::CreateAxis(ID3D11Device* device)
 		vertices.push_back({ 0,0,0 });
 		vertices.push_back({ 0,0,1 });
 		// メッシュ生成
-		CreateMesh(device, vertices, _axisMesh[2]);
+		CreateMesh(device, vertices, mesh2);
 	}
 }
 

@@ -17,6 +17,8 @@ public:
 	void Start() override;
 	// 描画処理
 	void Render(const RenderContext& rc) override;
+	// デバッグ表示
+	void DebugRender(const RenderContext& rc) override;
 	// GUI描画
 	void DrawGui() override;
 

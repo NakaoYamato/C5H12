@@ -267,7 +267,7 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\InGame\NetworkMediator.cpp">
+    <ClCompile Include="Source\Network\NetworkMediator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\CharactorController.cpp">
@@ -612,6 +612,9 @@
     <ClCompile Include="Library\Scene\Editor\SceneDecalEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Network\NetworkSender.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -899,7 +902,7 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\InGame\NetworkMediator.h">
+    <ClInclude Include="Source\Network\NetworkMediator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\CharactorController.h">
@@ -1269,6 +1272,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Scene\Editor\SceneDecalEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Network\NetworkReceiver.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Algorithm\EventBus\EventBus.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Network\NetworkSender.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

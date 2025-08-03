@@ -1,5 +1,5 @@
 // Winsock2とWinsockの多重定義を避けるために、先にインクルード
-#include "../../Source/InGame/NetworkMediator.h"
+#include "../../Source/Network/NetworkMediator.h"
 
 #include "SceneGame.h"
 

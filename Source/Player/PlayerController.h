@@ -9,8 +9,6 @@
 #include "../../Source/Common/Targetable.h"
 #include "StateMachine/PlayerStateMachine.h"
 
-#include <PlayerDefine.h>
-
 class PlayerController : public Component
 {
 public:

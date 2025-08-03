@@ -29,10 +29,7 @@
     <ClInclude Include="Define\NetworkDefine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Define\PlayerDefine.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Define\EnemyDefine.h">
+    <ClInclude Include="Define\NetworkStructDefine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

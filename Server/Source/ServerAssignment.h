@@ -44,26 +44,31 @@ private:
 	/// </summary>
 	void SelectingLeader();
 	/// <summary>
-	/// すべてのクライアント取得
+	/// すべてのキャラクター取得
 	/// </summary>
 	/// <returns></returns>
-	std::vector<Network::Client> GetClients() { return clients; }
+	std::unordered_map<int, Network::Character> GetCharacters() { return charactersMap; }
 	/// <summary>
-    /// idからクライアントを取得
+    /// uniqueIDからキャラクター取得
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns>失敗でnullptr</returns>
-	Network::Client* GetClientFromID(int id)
-	{
-		for (Network::Client& client : clients)
-		{
-			if (client.player.uniqueID == id)
-			{
-				return &client;
-			}
-		}
-		return nullptr;
-	}
+	Network::Character* GetCharacterFromID(int uniqueID);
+
+    /// <summary>
+    /// キャラクター作成
+    /// </summary>
+    /// <param name="leaderID"></param>
+    /// <param name="type"></param>
+    /// <param name="position"></param>
+    /// <param name="angleY"></param>
+    /// <param name="health"></param>
+	Network::Character* CreateCharacter(
+		int leaderID,
+		Network::CharacterType type, 
+		const DirectX::XMFLOAT3& position, 
+		float angleY, 
+		float health);
 
 #ifdef USE_MRS
 	/// <summary>
@@ -173,10 +178,8 @@ private:
 #pragma endregion
 
 private:
-	// プレイヤーの次のユニークID
-	int playerNextUniqueID = 0;
-	// 敵の次のユニークID
-	int enemyNextUniqueID = 0;
+    // キャラクターの次のユニークID
+    int characterNextUniqueID = 0;
 
 	// リーダーのユニークID
 	int playerLeaderID = -1;
@@ -189,7 +192,8 @@ private:
 
 	// クライアントのリスト
 	std::vector<Network::Client> clients;
-	// 敵のリスト
-	std::unordered_map<int, Network::Enemy> enemiesMap;
+	// キャラクターのリスト
+	std::unordered_map<int, Network::Character> charactersMap;
+
 	bool loop = true;
 };

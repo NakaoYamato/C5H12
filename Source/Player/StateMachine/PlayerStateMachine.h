@@ -7,11 +7,6 @@
 // 前方宣言
 class PlayerController;
 class Animator;
-namespace Network
-{
-	enum class PlayerMainStates;
-	enum class PlayerSubStates;
-}
 
 // プレイヤーの状態遷移を管理するクラス
 class PlayerStateMachine : public StateMachine
@@ -37,9 +32,8 @@ public:
 	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
 	PlayerController* GetPlayer() { return _player; }
 	Animator* GetAnimator() { return _animator; }
-	void ChangeState(const char* mainStateName, const char* subStateName) override {}
 	// ステート変更
-	void ChangeState(Network::PlayerMainStates mainStateName, Network::PlayerSubStates subStateName);
+	void ChangeState(const char* mainStateName, const char* subStateName) override;
     // ステート名取得
 	const char* GetStateName() override;
     // サブステート名取得
@@ -91,7 +85,7 @@ public:
 	~PlayerIdleState() override {}
 
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Idle"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -106,7 +100,7 @@ public:
 	~PlayerRunState() override {}
 
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Run"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -121,7 +115,7 @@ public:
 	~PlayerSprintState() override {}
 
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Sprint"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -136,7 +130,7 @@ public:
 	~PlayerEvadeState() override {}
 
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Evade"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -151,7 +145,7 @@ public:
 	~PlayerAttack1State() override {}
 
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Attack1"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -166,7 +160,7 @@ public:
 	~PlayerGuardState() override {}
 
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Guard"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -180,7 +174,7 @@ public:
 	PlayerHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerHitState() override {}
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Hit"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -191,7 +185,7 @@ public:
 	PlayerHitKnockDownState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerHitKnockDownState() override {}
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "HitKnockDown"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -202,7 +196,7 @@ public:
 	PlayerGuardHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerGuardHitState() override {}
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "GuardHit"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -213,7 +207,7 @@ public:
 	PlayerGuardBreakState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerGuardBreakState() override {}
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "GuardBreak"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -227,7 +221,7 @@ public:
 	PlayerDeathState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
 	~PlayerDeathState() override {}
 	// ステート名取得
-	const char* GetName() const override;
+	const char* GetName() const override { return "Death"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}

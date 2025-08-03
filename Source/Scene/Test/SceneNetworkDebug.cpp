@@ -1,5 +1,5 @@
 // Winsock2とWinsockの多重定義を避けるために、先にインクルード
-#include "../../Source/InGame/NetworkMediator.h"
+#include "../../Source/Network/NetworkMediator.h"
 
 #include "SceneNetworkDebug.h"
 
@@ -8,6 +8,8 @@
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Stage/StageActor.h"
 #include "../../InGame/CanvasMediator.h"
+
+#include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 //初期化

@@ -6,7 +6,6 @@
 #include "../../Source/Enemy/EnemyController.h" 
 #include "../../Source/Common/Damageable.h"
 
-#include <PlayerDefine.h>
 #include <imgui.h>
 
 void PlayerController::Start()
@@ -26,11 +25,11 @@ void PlayerController::Start()
 			Vector3 vec = hitPosition - GetActor()->GetTransform().GetPosition();
 			Vector3 front = GetActor()->GetTransform().GetAxisZ();
 			// プレイヤーがガード状態ならダメージを受けない
-			if (_stateMachine.lock()->GetStateName() == Network::GetPlayerMainStateName(Network::PlayerMainStates::Guard) &&
+			if (_stateMachine.lock()->GetStateName() == "Guard" &&
 				vec.Dot(front) > 0.0f)
 			{
 				// ガード成功
-				_stateMachine.lock()->ChangeState(Network::PlayerMainStates::GuardHit, Network::PlayerSubStates::None);
+				_stateMachine.lock()->ChangeState("GuardHit", "None");
 				return false;
 			}
 			return true;
@@ -42,12 +41,12 @@ void PlayerController::Start()
 			if (damage >= 2.0f)
 			{
 				// 大きくのけぞる
-				_stateMachine.lock()->ChangeState(Network::PlayerMainStates::HitKnockDown, Network::PlayerSubStates::None);
+				_stateMachine.lock()->ChangeState("HitKnockDown", "None");
 			}
 			else
 			{
 				// 軽くのけぞる
-				_stateMachine.lock()->ChangeState(Network::PlayerMainStates::Hit, Network::PlayerSubStates::None);
+				_stateMachine.lock()->ChangeState("Hit", "None");
 			}
 		}
 	);

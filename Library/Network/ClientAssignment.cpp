@@ -194,40 +194,40 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			self->_playerSetLeaderCallback(playerSetLeader);
 	}
 	break;
-	case Network::DataTag::PlayerSync:
+	case Network::DataTag::CharacterSync:
 	{
-		Network::PlayerSync playerSync;
-		if (!buffer.Read(&playerSync, payloadLen))
+		Network::CharacterSync characterSync;
+		if (!buffer.Read(&characterSync, payloadLen))
 		{
 			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:Sync");
 			return;
 		}
-		if (self->_playerSyncCallback)
-			self->_playerSyncCallback(playerSync);
+		if (self->_characterSyncCallback)
+			self->_characterSyncCallback(characterSync);
 	}
     break;
-	case Network::DataTag::PlayerMove:
+	case Network::DataTag::CharacterMove:
 	{
-		Network::PlayerMove playerMove;
-		if (!buffer.Read(&playerMove, payloadLen))
+		Network::CharacterMove characterMove;
+		if (!buffer.Read(&characterMove, payloadLen))
 		{
 			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:Move");
 			return;
 		}
-		if (self->_playerMoveCallback)
-			self->_playerMoveCallback(playerMove);
+		if (self->_characterMoveCallback)
+			self->_characterMoveCallback(characterMove);
 	}
 	break;
-	case Network::DataTag::PlayerApplyDamage:
+	case Network::DataTag::CharacterApplyDamage:
 	{
-		Network::PlayerApplyDamage playerApplyDamage;
-		if (!buffer.Read(&playerApplyDamage, payloadLen))
+		Network::CharacterApplyDamage characterApplyDamage;
+		if (!buffer.Read(&characterApplyDamage, payloadLen))
 		{
 			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:ApplyDamage");
 			return;
 		}
-		if (self->_playerApplyDamageCallback)
-			self->_playerApplyDamageCallback(playerApplyDamage);
+		if (self->_characterApplyDamageCallback)
+			self->_characterApplyDamageCallback(characterApplyDamage);
 	}
 	break;
 	case Network::DataTag::EnemyCreate:
@@ -240,42 +240,6 @@ void ClientAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		}
 		if (self->_enemyCreateCallback)
 			self->_enemyCreateCallback(enemyCreate);
-	}
-	break;
-	case Network::DataTag::EnemySync:
-	{
-		Network::EnemySync enemySync;
-		if (!buffer.Read(&enemySync, payloadLen))
-		{
-			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemySync");
-			return;
-		}
-		if (self->_enemySyncCallback)
-			self->_enemySyncCallback(enemySync);
-	}
-	break;
-	case Network::DataTag::EnemyMove:
-	{
-		Network::EnemyMove enemyMove;
-		if (!buffer.Read(&enemyMove, payloadLen))
-		{
-			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemyMove");
-			return;
-		}
-		if (self->_enemyMoveCallback)
-			self->_enemyMoveCallback(enemyMove);
-	}
-	break;
-	case Network::DataTag::EnemyApplayDamage:
-	{
-		Network::EnemyApplayDamage enemyApplayDamage;
-		if (!buffer.Read(&enemyApplayDamage, payloadLen))
-		{
-			self->_logs.push_back(u8"\t“Ç‚ÝŽæ‚èŽ¸”s:EnemyApplayDamage");
-			return;
-		}
-		if (self->_enemyApplayDamageCallback)
-			self->_enemyApplayDamageCallback(enemyApplayDamage);
 	}
 	break;
 	}

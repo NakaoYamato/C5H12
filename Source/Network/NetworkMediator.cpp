@@ -1,5 +1,8 @@
 #include "NetworkMediator.h"
 
+#include "../../Library/Component/BehaviorController.h"
+#include "../../Source/Player/PlayerActor.h"
+
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Enemy/Weak/WeakActor.h"
 
@@ -47,14 +50,14 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
                 CreateEnemy(
                     0,
                     0,
-                    Network::EnemyType::Wyvern,
+                    Network::CharacterType::Wyvern,
                     Vector3(0.0f, 5.0f, 10.0f),
                     0.0f,
                     100.0f);
                 CreateEnemy(
                     1,
                     0,
-                    Network::EnemyType::Weak,
+                    Network::CharacterType::Weak,
                     Vector3(5.0f, 5.0f, -5.0f),
                     0.0f,
                     10.0f);
@@ -81,13 +84,13 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
 
         // TODO : メタAIに任せる
         // 自身がリーダーで、敵が存在しない場合は敵を生成
-        if (myPlayerId != -1 && myPlayerId == leaderPlayerId && _enemies.empty() && !_sendEnemyCreate)
+        if (myPlayerId != -1 && myPlayerId == leaderPlayerId && !_sendEnemyCreate)
         {
             _sendEnemyCreate = true; // 敵生成フラグを立てる
 
             // 敵の生成命令を送る
             Network::EnemyCreate enemyCreate{};
-            enemyCreate.type = Network::EnemyType::Wyvern; // ここではワイバーンを生成する例
+            enemyCreate.type = Network::CharacterType::Wyvern; // ここではワイバーンを生成する例
             enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
             enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
             enemyCreate.position = Vector3(0.0f, 5.0f, 10.0f);
@@ -95,7 +98,7 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
             _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
 
             enemyCreate = {};
-            enemyCreate.type = Network::EnemyType::Weak;
+            enemyCreate.type = Network::CharacterType::Weak;
             enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
             enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
             enemyCreate.position = Vector3(5.0f, 5.0f, -5.0f);
@@ -130,47 +133,48 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
 		{
 			_sendTimer -= _sendInterval; // タイマーリセット
 
-            // プレイヤーの移動情報送信
-			auto& playerData = _players[myPlayerId];
-            auto playerActor = playerData.actor.lock();
-            if (playerActor)
-            {
-                Network::PlayerMove playerMove{};
-                playerMove.playerUniqueID = myPlayerId;
-                playerMove.position = playerActor->GetTransform().GetPosition();
-                auto state = playerData.state.lock();
-				if (state && state->IsSetup())
-				{
-                    playerMove.movement = state->GetMovement();
-                    playerMove.state = Network::GetPlayerMainStateFromName(state->GetStateName());
-                    playerMove.subState = Network::GetPlayerSubStateFromName(state->GetSubStateName());
-				}
-                // サーバーに送信
-                _client.WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
-            }
+            // TODO : 各コンポーネントで情報を処理
+   //         // プレイヤーの移動情報送信
+			//auto& playerData = _players[myPlayerId];
+   //         auto playerActor = playerData.actor.lock();
+   //         if (playerActor)
+   //         {
+   //             Network::CharacterMove characterMove{};
+   //             characterMove.playerUniqueID = myPlayerId;
+   //             characterMove.position = playerActor->GetTransform().GetPosition();
+   //             auto state = playerData.state.lock();
+			//	if (state && state->IsSetup())
+			//	{
+   //                 playerMove.movement = state->GetMovement();
+   //                 playerMove.state = Network::GetPlayerMainStateFromName(state->GetStateName());
+   //                 playerMove.subState = Network::GetPlayerSubStateFromName(state->GetSubStateName());
+			//	}
+   //             // サーバーに送信
+   //             _client.WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
+   //         }
 
-            // 敵の移動情報送信
-            for (auto& [uniqueID, enemyData] : _enemies)
-            {
-                // 自身が管理していない敵ならスキップ
-                if (enemyData.controllerID != myPlayerId)
-                    continue;
+   //         // 敵の移動情報送信
+   //         for (auto& [uniqueID, enemyData] : _enemies)
+   //         {
+   //             // 自身が管理していない敵ならスキップ
+   //             if (enemyData.controllerID != myPlayerId)
+   //                 continue;
 
-                auto controller = enemyData.controller.lock();
-				auto state = enemyData.state.lock();
-                if (controller && state)
-                {
-                    Network::EnemyMove enemyMove{};
-                    enemyMove.uniqueID = uniqueID;
-                    enemyMove.position = controller->GetActor()->GetTransform().GetPosition();
-                    enemyMove.angleY = controller->GetActor()->GetTransform().GetRotation().y;
-                    enemyMove.target = controller->GetTargetPosition();
-                    strcpy_s(enemyMove.mainState, state->GetStateName());
-                    strcpy_s(enemyMove.subState, state->GetSubStateName());
-                    // サーバーに送信
-                    _client.WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
-                }
-            }
+   //             auto controller = enemyData.controller.lock();
+			//	auto state = enemyData.state.lock();
+   //             if (controller && state)
+   //             {
+   //                 Network::EnemyMove enemyMove{};
+   //                 enemyMove.uniqueID = uniqueID;
+   //                 enemyMove.position = controller->GetActor()->GetTransform().GetPosition();
+   //                 enemyMove.angleY = controller->GetActor()->GetTransform().GetRotation().y;
+   //                 enemyMove.target = controller->GetTargetPosition();
+   //                 strcpy_s(enemyMove.mainState, state->GetStateName());
+   //                 strcpy_s(enemyMove.subState, state->GetSubStateName());
+   //                 // サーバーに送信
+   //                 _client.WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
+   //             }
+   //         }
         }
         break;
     }
@@ -198,13 +202,14 @@ void NetworkMediator::ExecuteServer(const std::string& ipAddress)
 }
 
 /// プレイヤー作成
-std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControlled)
+std::weak_ptr<Actor> NetworkMediator::CreatePlayer(int id, bool isControlled)
 {
     // 要素チェック
-    if (_players.find(id) != _players.end() && _players[id].actor.lock())
-        return _players[id].actor;
+    if (_characters[id].actor.lock())
+        return _characters[id].actor;
 
     auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
+    auto receiver = player->GetComponent<NetworkReceiver>();
 
     // ユーザーが操作するプレイヤーか
     if (isControlled)
@@ -213,69 +218,52 @@ std::weak_ptr<PlayerActor> NetworkMediator::CreatePlayer(int id, bool isControll
     }
 
     // コンテナに登録
-    _players[id].actor = player;
-	_players[id].damageable = player->GetComponent<Damageable>();
-	auto stateController    = player->GetComponent<StateController>();
-	_players[id].state      = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
+    _characters[id].uniqueID = id;
+    _characters[id].actor = player;
+    _characters[id].receiver = receiver;
     return player;
 }
 
 /// 敵の生成
-std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
+std::weak_ptr<Actor> NetworkMediator::CreateEnemy(
     int uniqueID,
     int controllerID, 
-    Network::EnemyType type, 
+    Network::CharacterType type,
     const Vector3& position,
     float angleY,
     float health)
 {
-    if (type == Network::EnemyType::Wyvern)
+    if (type == Network::CharacterType::Wyvern)
     {
         // 敵キャラクターの生成
         auto enemy = _scene->RegisterActor<WyvernActor>(
             "Enemy" + std::to_string(uniqueID),
             ActorTag::Enemy
         );
-
-        EnemyData enemyData{};
-        enemyData.controllerID = controllerID;
-        enemyData.controller        = enemy->GetComponent<EnemyController>();
-		enemyData.state             = enemy->GetComponent<StateController>()->GetStateMachine();
-		enemyData.behavior = enemy->GetComponent<BehaviorController>();
-        enemyData.damageable        = enemy->GetComponent<Damageable>();
-
-        enemy->GetTransform().SetPosition(position);
-        enemy->GetTransform().SetAngleY(angleY);
-        enemyData.behavior.lock()->SetIsExecute(controllerID == myPlayerId);
-        enemyData.damageable.lock()->ResetHealth(health);
-
-
+        auto receiver = enemy->GetComponent<NetworkReceiver>();
+        // 管理者のIDを設定
+        receiver->SetManagerId(controllerID);
         // コンテナに登録
-        _enemies[uniqueID] = enemyData;
+        _characters[uniqueID].uniqueID = uniqueID;
+        _characters[uniqueID].actor = enemy;
+        _characters[uniqueID].receiver = receiver;
         return enemy;
     }
-    else if (type == Network::EnemyType::Weak)
+    else if (type == Network::CharacterType::Weak)
     {
         // 敵キャラクターの生成
         auto enemy = _scene->RegisterActor<WeakActor>(
             "Enemy" + std::to_string(uniqueID),
             ActorTag::Enemy
         );
-        EnemyData enemyData{};
-        enemyData.controllerID = controllerID;
-        enemyData.controller = enemy->GetComponent<EnemyController>();
-		enemyData.state = enemy->GetComponent<StateController>()->GetStateMachine();
-        enemyData.behavior = enemy->GetComponent<BehaviorController>();
-		enemyData.damageable = enemy->GetComponent<Damageable>();
-
-		enemy->GetTransform().SetPosition(position);
-		enemy->GetTransform().SetAngleY(angleY);
-        enemyData.behavior.lock()->SetIsExecute(controllerID == myPlayerId);
-		enemyData.damageable.lock()->ResetHealth(health);
-
-		// コンテナに登録
-		_enemies[uniqueID] = enemyData;
-		return enemy;
+        auto receiver = enemy->GetComponent<NetworkReceiver>();
+        // 管理者のIDを設定
+        receiver->SetManagerId(controllerID);
+        // コンテナに登録
+        _characters[uniqueID].uniqueID = uniqueID;
+        _characters[uniqueID].actor = enemy;
+        _characters[uniqueID].receiver = receiver;
+        return enemy;
     }
     return std::weak_ptr<EnemyActor>();
 }
@@ -283,45 +271,45 @@ std::weak_ptr<EnemyActor> NetworkMediator::CreateEnemy(
 /// 自身のプレイヤーのダメージ送信
 void NetworkMediator::SendMyPlayerDamage()
 {
-	// スレッドセーフ
-	std::lock_guard<std::mutex> lock(_mutex);
-	// 自身のプレイヤーのダメージを送信
-    auto myPlayer = _players[myPlayerId];
-	if (myPlayer.actor.lock())
-	{
-		auto damageable = myPlayer.damageable.lock();
-		if (damageable && damageable->GetLastDamage() > 0.0f)
-		{
-			Network::PlayerApplyDamage playerApplyDamage{};
-			playerApplyDamage.playerUniqueID = myPlayerId; // ダメージを受けたプレイヤーのユニークID
-			playerApplyDamage.damage = damageable->GetLastDamage();
-			playerApplyDamage.hitPosition = damageable->GetHitPosition();
-			// サーバーに送信
-			_client.WriteRecord(Network::DataTag::PlayerApplyDamage, &playerApplyDamage, sizeof(playerApplyDamage));
-		}
-	}
+	//// スレッドセーフ
+	//std::lock_guard<std::mutex> lock(_mutex);
+	//// 自身のプレイヤーのダメージを送信
+ //   auto myPlayer = _players[myPlayerId];
+	//if (myPlayer.actor.lock())
+	//{
+	//	auto damageable = myPlayer.damageable.lock();
+	//	if (damageable && damageable->GetLastDamage() > 0.0f)
+	//	{
+	//		Network::PlayerApplyDamage playerApplyDamage{};
+	//		playerApplyDamage.playerUniqueID = myPlayerId; // ダメージを受けたプレイヤーのユニークID
+	//		playerApplyDamage.damage = damageable->GetLastDamage();
+	//		playerApplyDamage.hitPosition = damageable->GetHitPosition();
+	//		// サーバーに送信
+	//		_client.WriteRecord(Network::DataTag::PlayerApplyDamage, &playerApplyDamage, sizeof(playerApplyDamage));
+	//	}
+	//}
 }
 
 /// 敵のダメージ送信
 void NetworkMediator::SendEnemyDamage()
 {
-	// スレッドセーフ
-	std::lock_guard<std::mutex> lock(_mutex);
-	// 敵のダメージを送信
-	for (auto& [uniqueID, enemyData] : _enemies)
-	{
-        auto damageable = enemyData.damageable.lock();
-        if (damageable && damageable->GetLastDamage() > 0.0f)
-        {
-            Network::EnemyApplayDamage enemyApplayDamage{};
-            enemyApplayDamage.playerUniqueID = myPlayerId; // ダメージを与えたプレイヤーのユニークID
-            enemyApplayDamage.uniqueID = uniqueID;
-            enemyApplayDamage.damage = damageable->GetLastDamage();
-            enemyApplayDamage.hitPosition = damageable->GetHitPosition();
-            // サーバーに送信
-            _client.WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
-        }
-	}
+	//// スレッドセーフ
+	//std::lock_guard<std::mutex> lock(_mutex);
+	//// 敵のダメージを送信
+	//for (auto& [uniqueID, enemyData] : _enemies)
+	//{
+ //       auto damageable = enemyData.damageable.lock();
+ //       if (damageable && damageable->GetLastDamage() > 0.0f)
+ //       {
+ //           Network::EnemyApplayDamage enemyApplayDamage{};
+ //           enemyApplayDamage.playerUniqueID = myPlayerId; // ダメージを与えたプレイヤーのユニークID
+ //           enemyApplayDamage.uniqueID = uniqueID;
+ //           enemyApplayDamage.damage = damageable->GetLastDamage();
+ //           enemyApplayDamage.hitPosition = damageable->GetHitPosition();
+ //           // サーバーに送信
+ //           _client.WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
+ //       }
+	//}
 }
 
 /// リーダーの再設定
@@ -333,14 +321,14 @@ void NetworkMediator::ResetLeader()
 	if (myPlayerId == leaderPlayerId)
 	{
 		// 敵の行動遷移処理を自身が行う
-		for (auto& [uniqueID, enemyData] : _enemies)
-		{
-			auto behavior = enemyData.behavior.lock();
-			if (behavior)
-			{
+        for (auto& [id, character] : _characters)
+        {
+            auto behavior = character.actor.lock()->GetComponent<BehaviorController>();
+            if (behavior)
+            {
                 behavior->SetIsExecute(true);
-			}
-		}
+            }
+        }
 	}
 	// 次のリーダーのユニークIDをリセット
 	nextLeaderPlayerId = -1;
@@ -356,16 +344,6 @@ void NetworkMediator::SetClientCollback()
             std::lock_guard<std::mutex> lock(_mutex);
 
 			_messageDatas.push_back(messageData);
-        });
-    _client.SetPlayerSyncCallback(
-        [this](const Network::PlayerSync& playerSync)
-        {
-            // スレッドセーフ
-            std::lock_guard<std::mutex> lock(_mutex);
-
-            _logs.push_back("PlayerSync" + std::to_string(playerSync.playerUniqueID));
-
-            _playerSyncs.push_back(playerSync);
         });
     _client.SetPlayerLoginCallback(
         [this](const Network::PlayerLogin& playerLogin)
@@ -397,23 +375,33 @@ void NetworkMediator::SetClientCollback()
 			// 次のリーダーのユニークIDを設定
 			nextLeaderPlayerId = playerSetLeader.playerUniqueID;
 		});
-    _client.SetPlayerMoveCallback(
-        [this](const Network::PlayerMove& playerMove)
+    _client.SetCharacterSyncCallback(
+        [this](const Network::CharacterSync& characterSync)
         {
             // スレッドセーフ
             std::lock_guard<std::mutex> lock(_mutex);
 
-            _logs.push_back("PlayerMove" + std::to_string(playerMove.playerUniqueID));
+            _logs.push_back("CharacterSync" + std::to_string(characterSync.uniqueID));
 
-            _playerMoves.push_back(playerMove);
+            _characterSyncs.push_back(characterSync);
         });
-	_client.SetPlayerApplyDamageCallback(
-		[this](const Network::PlayerApplyDamage& playerApplyDamage)
+    _client.SetCharacterMoveCallback(
+        [this](const Network::CharacterMove& characterMove)
+        {
+            // スレッドセーフ
+            std::lock_guard<std::mutex> lock(_mutex);
+
+            _logs.push_back("CharacterMove" + std::to_string(characterMove.uniqueID));
+
+            _characterMoves.push_back(characterMove);
+        });
+	_client.SetCharacterApplyDamageCallback(
+		[this](const Network::CharacterApplyDamage& characterApplyDamage)
 		{
 			// スレッドセーフ
 			std::lock_guard<std::mutex> lock(_mutex);
-			_logs.push_back("PlayerApplyDamage" + std::to_string(playerApplyDamage.playerUniqueID));
-			_playerApplyDamages.push_back(playerApplyDamage);
+			_logs.push_back("CharacterApplyDamage" + std::to_string(characterApplyDamage.uniqueID));
+            _characterApplyDamages.push_back(characterApplyDamage);
 		});
 	_client.SetEnemyCreateCallback(
 		[this](const Network::EnemyCreate& enemyCreate)
@@ -423,33 +411,6 @@ void NetworkMediator::SetClientCollback()
 			_logs.push_back("EnemyCreate" + std::to_string(enemyCreate.uniqueID));
 
             _enemyCreates.push_back(enemyCreate);
-		});
-	_client.SetEnemySyncCallback(
-		[this](const Network::EnemySync& enemySync)
-		{
-			// スレッドセーフ
-			std::lock_guard<std::mutex> lock(_mutex);
-			_logs.push_back("EnemySync" + std::to_string(enemySync.uniqueID));
-
-            _enemySyncs.push_back(enemySync);
-		});
-	_client.SetEnemyMoveCallback(
-		[this](const Network::EnemyMove& enemyMove)
-		{
-			// スレッドセーフ
-			std::lock_guard<std::mutex> lock(_mutex);
-			_logs.push_back("EnemyMove" + std::to_string(enemyMove.uniqueID));
-
-			_enemyMoves.push_back(enemyMove);
-		});
-	_client.SetEnemyApplayDamageCallback(
-		[this](const Network::EnemyApplayDamage& enemyApplayDamage)
-		{
-			// スレッドセーフ
-			std::lock_guard<std::mutex> lock(_mutex);
-			_logs.push_back("EnemyApplayDamage" + std::to_string(enemyApplayDamage.uniqueID));
-
-            _enemyApplayDamages.push_back(enemyApplayDamage);
 		});
 }
 
@@ -471,19 +432,39 @@ void NetworkMediator::ProcessNetworkData()
 
     //===============================================================================
     // 同期データの処理
-    for (auto& sync : _playerSyncs)
+    for (auto& sync : _characterSyncs)
     {
-        // プレイヤー情報を更新
-		auto playerActor = _players[sync.playerUniqueID].actor.lock();
-        if (!playerActor)
+        auto& character = _characters[sync.uniqueID];
+        // キャラクターが存在しない場合は生成
+        if (character.actor.lock() == nullptr)
         {
-            // プレイヤーが存在しないなら作成
-            playerActor = CreatePlayer(sync.playerUniqueID, false).lock();
+            // キャラクターの生成
+            switch (sync.type)
+            {
+            case Network::CharacterType::Player :
+                // プレイヤーキャラクターの生成
+                character.actor = CreatePlayer(sync.uniqueID, myPlayerId == -1);
+                break;
+            default:
+                // 敵キャラクターの生成
+                character.actor = CreateEnemy(
+                    sync.uniqueID,
+                    sync.senderID, // リーダーのユニークIDを設定
+                    sync.type,
+                    sync.position,
+                    sync.angleY,
+                    sync.health);
+                break;
+            }
         }
-        playerActor->GetTransform().SetPosition(sync.position);
-        playerActor->GetTransform().SetAngleY(sync.angleY);
+        // キャラクター情報を更新
+        auto receiver = character.receiver.lock();
+        if (receiver)
+        {
+            receiver->GetEventBus().Publish<Network::CharacterSync>(sync);
+        }
     }
-    _playerSyncs.clear();
+    _characterSyncs.clear();
     //===============================================================================
 
     //===============================================================================
@@ -491,12 +472,12 @@ void NetworkMediator::ProcessNetworkData()
     for (auto& logout : _playerLogouts)
     {
         // プレイヤー情報を削除
-        auto playerActor = _players[logout.playerUniqueID].actor.lock();
+        auto playerActor = _characters[logout.playerUniqueID].actor.lock();
         if (playerActor)
         {
             // プレイヤー削除
             playerActor->Remove();
-            _players.erase(logout.playerUniqueID);
+            _characters.erase(logout.playerUniqueID);
         }
     }
     _playerLogouts.clear();
@@ -504,51 +485,30 @@ void NetworkMediator::ProcessNetworkData()
 
 	//===============================================================================
 	// 移動データの処理
-	for (auto& move : _playerMoves)
+	for (auto& move : _characterMoves)
 	{
-		// プレイヤー情報を更新
-        auto& playerData = _players[move.playerUniqueID];
-        auto playerActor = playerData.actor.lock();
-        if (playerActor == nullptr)
-            continue;
-
-		// 自身の場合はスキップ
-		if (move.playerUniqueID == myPlayerId)
-			continue;
-
-        playerActor->GetTransform().SetPosition(move.position);
-        // プレイヤーの状態を更新
-        auto state = playerData.state.lock();
-        if (state && state->IsSetup())
+        auto& character = _characters[move.uniqueID];
+        auto receiver = character.receiver.lock();
+        if (receiver)
         {
-            state->SetMovement(move.movement);
-            state->ChangeState(move.state, move.subState);
+            receiver->GetEventBus().Publish<Network::CharacterMove>(move);
         }
 	}
-    _playerMoves.clear();
+    _characterMoves.clear();
 	//===============================================================================
 
     //===============================================================================
 	// プレイヤーのダメージデータの処理
-	for (auto& playerApplyDamage : _playerApplyDamages)
-	{
-		// 自身が送信したダメージならスキップ
-		if (playerApplyDamage.playerUniqueID == myPlayerId)
-			continue;
-
-		// プレイヤー情報を更新
-        auto playerActor = _players[playerApplyDamage.playerUniqueID].actor.lock();
-		if (playerActor)
-		{
-            auto damageable = _players[playerApplyDamage.playerUniqueID].damageable.lock();
-			if (damageable)
-			{
-				damageable->SetHelth(damageable->GetHealth() - playerApplyDamage.damage);
-				damageable->SetHitPosition(playerApplyDamage.hitPosition);
-			}
-		}
-	}
-	_playerApplyDamages.clear();
+    for (auto& applyDamage : _characterApplyDamages)
+    {
+        auto& character = _characters[applyDamage.uniqueID];
+        auto receiver = character.receiver.lock();
+        if (receiver)
+        {
+            receiver->GetEventBus().Publish<Network::CharacterApplyDamage>(applyDamage);
+        }
+    }
+    _characterApplyDamages.clear();
     //===============================================================================
 
 	//===============================================================================
@@ -565,67 +525,6 @@ void NetworkMediator::ProcessNetworkData()
 	}
 	_enemyCreates.clear();
 	//===============================================================================
-
-    //===============================================================================
-	// 敵同期データの処理
-	for (auto& enemySync : _enemySyncs)
-	{
-        if (_enemies.find(enemySync.uniqueID) == _enemies.end())
-        {
-			// 敵が存在しない場合は生成
-            CreateEnemy(
-                enemySync.uniqueID,
-                enemySync.leaderID,
-                enemySync.type,
-                enemySync.position,
-                enemySync.angleY,
-                enemySync.health);
-        }
-	}
-	_enemySyncs.clear();
-    //===============================================================================
-
-	//===============================================================================
-	// 敵の移動データの処理
-	for (auto& enemyMove : _enemyMoves)
-	{
-        if (_enemies.find(enemyMove.uniqueID) == _enemies.end())
-			continue; // 敵が存在しない場合はスキップ
-
-		auto& enemyData = _enemies[enemyMove.uniqueID];
-		// 敵情報を更新
-		auto controller = enemyData.controller.lock();
-        auto state = enemyData.state.lock();
-		if (!controller || !state)
-			continue;
-		// 自身が管理している敵ならスキップ
-        if (enemyData.controllerID == myPlayerId)
-            continue;
-		controller->GetActor()->GetTransform().SetPosition(enemyMove.position);
-		controller->GetActor()->GetTransform().SetAngleY(enemyMove.angleY);
-		controller->SetTargetPosition(enemyMove.target);
-        state->ChangeState(enemyMove.mainState, enemyMove.subState);
-	}
-	_enemyMoves.clear();
-	//===============================================================================
-
-	//===============================================================================
-	// 敵のダメージデータの処理
-	for (auto& enemyApplayDamage : _enemyApplayDamages)
-	{
-		// 自身が送信したダメージならスキップ
-		if (enemyApplayDamage.playerUniqueID == myPlayerId)
-			continue;
-
-		auto& enemyData = _enemies[enemyApplayDamage.uniqueID];
-        auto damageable = enemyData.damageable.lock();
-        if (damageable)
-        {
-			damageable->AddDamage(enemyApplayDamage.damage, enemyApplayDamage.hitPosition, true);
-        }
-	}
-	_enemyApplayDamages.clear();
-    //===============================================================================
 }
 
 /// ネットワークGUIの表示
@@ -661,7 +560,7 @@ void NetworkMediator::DrawNetworkGui()
 
                     // 敵の生成命令を送る
                     Network::EnemyCreate enemyCreate{};
-                    enemyCreate.type = Network::EnemyType::Wyvern; // ここではワイバーンを生成する例
+                    enemyCreate.type = Network::CharacterType::Wyvern; // ここではワイバーンを生成する例
                     enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
                     enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
                     enemyCreate.position = Vector3(0.0f, 10.0f, 10.0f);

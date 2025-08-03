@@ -50,14 +50,6 @@ public:
     {
         _playerMessageDataCallback = callback;
     }
-	/// <summary>
-	/// PlayerSyncを受け取ったときのコールバック関数を設定する
-	/// </summary>
-	/// <param name="callback"></param>
-	void SetPlayerSyncCallback(std::function<void(const Network::PlayerSync&)> callback)
-	{
-		_playerSyncCallback = callback;
-	}
     /// <summary>
     /// PlayerLoginを受け取ったときのコールバック関数を設定する
     /// </summary>
@@ -83,21 +75,29 @@ public:
 		_playerSetLeaderCallback = callback;
 	}
 	/// <summary>
-	/// PlayerMoveを受け取ったときのコールバック関数を設定する
+	/// CharacterSyncを受け取ったときのコールバック関数を設定する
 	/// </summary>
 	/// <param name="callback"></param>
-    void SetPlayerMoveCallback(std::function<void(const Network::PlayerMove&)> callback)
+    void SetCharacterSyncCallback(std::function<void(const Network::CharacterSync&)> callback)
     {
-        _playerMoveCallback = callback;
+        _characterSyncCallback = callback;
     }
 	/// <summary>
-	/// PlayerApplyDamageを受け取ったときのコールバック関数を設定する
+	/// CharacterMoveを受け取ったときのコールバック関数を設定する
 	/// </summary>
 	/// <param name="callback"></param>
-	void SetPlayerApplyDamageCallback(std::function<void(const Network::PlayerApplyDamage&)> callback)
-	{
-		_playerApplyDamageCallback = callback;
-	}
+    void SetCharacterMoveCallback(std::function<void(const Network::CharacterMove&)> callback)
+    {
+        _characterMoveCallback = callback;
+    }
+	/// <summary>
+	/// CharacterApplyDamageを受け取ったときのコールバック関数を設定する
+	/// </summary>
+	/// <param name="callback"></param>
+    void SetCharacterApplyDamageCallback(std::function<void(const Network::CharacterApplyDamage&)> callback)
+    {
+        _characterApplyDamageCallback = callback;
+    }
 	/// <summary>
 	/// EnemyCreateを受け取ったときのコールバック関数を設定する
 	/// </summary>
@@ -105,30 +105,6 @@ public:
 	void SetEnemyCreateCallback(std::function<void(const Network::EnemyCreate&)> callback)
 	{
 		_enemyCreateCallback = callback;
-	}
-	/// <summary>
-	/// EnemySyncを受け取ったときのコールバック関数を設定する
-	/// </summary>
-	/// <param name="callback"></param>
-	void SetEnemySyncCallback(std::function<void(const Network::EnemySync&)> callback)
-	{
-		_enemySyncCallback = callback;
-	}
-	/// <summary>
-	/// EnemyMoveを受け取ったときのコールバック関数を設定する
-	/// </summary>
-	/// <param name="callback"></param>
-	void SetEnemyMoveCallback(std::function<void(const Network::EnemyMove&)> callback)
-	{
-		_enemyMoveCallback = callback;
-	}
-	/// <summary>
-	/// EnemyApplayDamageを受け取ったときのコールバック関数を設定する
-	/// </summary>
-	/// <param name="callback"></param>
-	void SetEnemyApplayDamageCallback(std::function<void(const Network::EnemyApplayDamage&)> callback)
-	{
-		_enemyApplayDamageCallback = callback;
 	}
 	/// <summary>
 	/// 接続が切れたかどうか
@@ -202,14 +178,11 @@ private:
 	std::function<void(const Network::PlayerLogin&)>		_playerLoginCallback;
 	std::function<void(const Network::PlayerLogout&)>		_playerLogoutCallback;
 	std::function<void(const Network::PlayerSetLeader&)>	_playerSetLeaderCallback;
-	std::function<void(const Network::PlayerSync&)>			_playerSyncCallback;
-	std::function<void(const Network::PlayerMove&)>			_playerMoveCallback;
-	std::function<void(const Network::PlayerApplyDamage&)>	_playerApplyDamageCallback;
+	std::function<void(const Network::CharacterSync&)>			_characterSyncCallback;
+	std::function<void(const Network::CharacterMove&)>			_characterMoveCallback;
+	std::function<void(const Network::CharacterApplyDamage&)>	_characterApplyDamageCallback;
 
 	std::function<void(const Network::EnemyCreate&)>		_enemyCreateCallback;
-	std::function<void(const Network::EnemySync&)>			_enemySyncCallback;
-	std::function<void(const Network::EnemyMove&)>			_enemyMoveCallback;
-	std::function<void(const Network::EnemyApplayDamage&)>	_enemyApplayDamageCallback;
 #pragma endregion
 
 	// 接続が切れたフラグ

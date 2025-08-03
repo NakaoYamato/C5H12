@@ -2,11 +2,62 @@
 
 #include "../../Library/Scene/Scene.h"
 
+#include "EnemyController.h"
+#include "../../Library/Component/StateController.h"
+#include "../../Source/Network/NetworkReceiver.h"
+
 void EnemyActor::OnCreate()
 {
 	_charactorController = this->AddComponent<CharactorController>();
 	_damageable = this->AddComponent<Damageable>();
-	_targetable = this->AddComponent<Targetable>();
+	_targetable = this->AddComponent<Targetable>(); 
+	auto networkReceiver = this->AddComponent<NetworkReceiver>();
+	// ネットワーク受信イベントの設定
+	if (networkReceiver)
+	{
+		networkReceiver->GetEventBus().Subscribe<Network::CharacterSync>([this](const Network::CharacterSync& sync)
+			{
+				this->GetTransform().SetPosition(sync.position);
+				this->GetTransform().SetAngleY(sync.angleY);
+				auto damageable = this->GetComponent<Damageable>();
+				if (damageable)
+				{
+					damageable->ResetHealth(sync.health);
+				}
+			});
+		networkReceiver->GetEventBus().Subscribe<Network::CharacterMove>([this](const Network::CharacterMove& move)
+			{
+				auto networkReceiver = this->AddComponent<NetworkReceiver>();
+				// クライアントが管理している敵ならスキップ
+                if (move.senderID == networkReceiver->GetManagerId())
+                    return;
+				this->GetTransform().SetPosition(move.position);
+				this->GetTransform().SetAngleY(move.angleY);
+                auto enemyController = this->GetComponent<EnemyController>();
+				if (enemyController)
+				{
+					enemyController->SetTargetPosition(move.target);
+				}
+                auto stateController = this->GetComponent<StateController>();
+                if (stateController)
+                {
+                    // 敵の状態を更新
+                    stateController->ChangeState(move.mainState, move.subState);
+                }
+			});
+		networkReceiver->GetEventBus().Subscribe<Network::CharacterApplyDamage>([this](const Network::CharacterApplyDamage& applyDamage)
+			{
+				auto networkReceiver = this->AddComponent<NetworkReceiver>();
+				// クライアントが管理している敵ならスキップ
+				if (applyDamage.senderID == networkReceiver->GetManagerId())
+					return;
+				auto damageable = this->GetComponent<Damageable>();
+				if (damageable)
+				{
+					damageable->AddDamage(applyDamage.damage, applyDamage.hitPosition, true);
+				}
+			});
+	}
 
 	_targetable.lock()->SetFaction(Targetable::Faction::Enemy);
 }

@@ -8,15 +8,8 @@
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Audio/VoiceRecorder/VoiceRecorder.h"
-#include "../../Library/Component/StateController.h"
-#include "../../Library/Component/BehaviorController.h"
 
-#include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Enemy/EnemyActor.h"
-#include "../../Source/Enemy/EnemyController.h"
-
-// 通信を受信するクラスの前方宣言
-class NetworkReceiver;
+#include "../../Source/Network/NetworkReceiver.h"
 
 /// <summary>
 /// 通信を管理するメディエーター
@@ -33,27 +26,14 @@ public:
 		StateMax,
     };
 
-	/// <summary>
-	/// プレイヤー情報
-	/// </summary>
-	struct PlayerData
-	{
-		std::weak_ptr<PlayerActor>          actor;
-        std::weak_ptr<PlayerStateMachine>	state;
-        std::weak_ptr<Damageable>		    damageable;
-	};
-
     /// <summary>
-    /// エネミー情報
+    /// キャラクターの情報
     /// </summary>
-    struct EnemyData
+    struct CharacterData
     {
-        // 管理しているプレイヤーのID
-        int                             controllerID = -1;
-        std::weak_ptr<EnemyController>  controller;
-        std::weak_ptr<StateMachine>	    state;
-		std::weak_ptr<BehaviorController> behavior;
-        std::weak_ptr<Damageable>		damageable;
+        int uniqueID = -1;
+        std::weak_ptr<Actor> actor;
+        std::weak_ptr<NetworkReceiver>		receiver;
     };
 
 public:
@@ -84,17 +64,17 @@ private:
     /// </summary>
     /// <param name="id"></param>
     /// <param name="isControlled"></param>
-    std::weak_ptr<PlayerActor> CreatePlayer(int id, bool isControlled);
+    std::weak_ptr<Actor> CreatePlayer(int id, bool isControlled);
 	/// <summary>
 	/// 敵の生成
 	/// </summary>
 	/// <param name="uniqueId"></param>
 	/// <param name="type"></param>
 	/// <returns></returns>
-	std::weak_ptr<EnemyActor> CreateEnemy(
+	std::weak_ptr<Actor> CreateEnemy(
         int uniqueID,
 		int controllerID,
-        Network::EnemyType type,
+        Network::CharacterType type,
         const Vector3& position,
         float angleY,
         float health);
@@ -147,14 +127,11 @@ private:
     // サーバー通信
     ClientAssignment _client;
 
-    // 各プレイヤー情報
-    // key : ネットワークID
-    // value : プレイヤーのポインタ
-    std::unordered_map<int, PlayerData> _players;
-	// 各敵キャラクター情報
-	// key : ユニークID
-	// value : 敵のポインタ
-	std::unordered_map<int, EnemyData> _enemies;
+    // 各キャラクター情報
+    // key : ユニークID
+    // value : ネットワーク受信クラスのポインタ
+    std::unordered_map<int, CharacterData> _characters;
+
     // ユーザーが操作するプレイヤー
     int myPlayerId = -1;
 	// リーダーのユニークID
@@ -172,14 +149,11 @@ private:
     std::vector<Network::MessageData>       _messageDatas;
     std::vector<Network::PlayerLogin>       _playerLogins;
     std::vector<Network::PlayerLogout>      _playerLogouts;
-    std::vector<Network::PlayerSync>        _playerSyncs;
-    std::vector<Network::PlayerMove>        _playerMoves;
-    std::vector<Network::PlayerApplyDamage> _playerApplyDamages;
+    std::vector<Network::CharacterSync>        _characterSyncs;
+    std::vector<Network::CharacterMove>        _characterMoves;
+    std::vector<Network::CharacterApplyDamage> _characterApplyDamages;
 
     std::vector<Network::EnemyCreate>       _enemyCreates;
-	std::vector<Network::EnemySync>         _enemySyncs;
-	std::vector<Network::EnemyMove>         _enemyMoves;
-	std::vector<Network::EnemyApplayDamage> _enemyApplayDamages;
 #pragma endregion
 
     std::string _message;
@@ -192,15 +166,3 @@ private:
     // 敵生成のフラグ
 	bool _sendEnemyCreate = false;
 };
-
-//class NetworkReceiver : public Component
-//{
-//public:
-//	NetworkReceiver() {}
-//	~NetworkReceiver() override {}
-//	const char* GetName() const override { return "NetworkReceiver"; }
-//	void Start() override;
-//	void Update(float elapsedTime) override;
-//	void DelayedRender(const RenderContext& rc) override;
-//	void DrawGui() override;
-//};

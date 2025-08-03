@@ -17,6 +17,8 @@
 
 #include "../../Source/Camera/PlayerCameraController.h"
 
+#include "../../Source/Network/NetworkReceiver.h"
+
 // 生成時処理
 void PlayerActor::OnCreate()
 {
@@ -34,10 +36,51 @@ void PlayerActor::OnCreate()
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(playerController.get(), animator.get()));
 	auto effekseerController	= this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
-	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
+	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);    
+	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
 	if (_isUserControlled)
 		this->AddComponent<PlayerInput>();
+    // ネットワーク受信イベントの設定
+	if (networkReceiver)
+	{
+		networkReceiver->GetEventBus().Subscribe<Network::CharacterSync>([this](const Network::CharacterSync& sync)
+			{
+				this->GetTransform().SetPosition(sync.position);
+				this->GetTransform().SetAngleY(sync.angleY);
+				auto damageable = this->GetComponent<Damageable>();
+				if (damageable)
+				{
+					damageable->ResetHealth(sync.health);
+				}
+			});
+        networkReceiver->GetEventBus().Subscribe<Network::CharacterMove>([this](const Network::CharacterMove& move)
+            {
+                this->GetTransform().SetPosition(move.position);
+                this->GetTransform().SetAngleY(move.angleY);
+                auto stateController = this->GetComponent<StateController>();
+                if (stateController)
+                { 
+					// プレイヤーの状態を更新
+                    auto playerStateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
+                    if (playerStateMachine)
+                    {
+                        Vector2 movement = Vector2(move.target.x, move.target.z);
+                        playerStateMachine->SetMovement(movement);
+                        playerStateMachine->ChangeState(move.mainState, move.subState);
+                    }
+                }
+            });
+		networkReceiver->GetEventBus().Subscribe<Network::CharacterApplyDamage>([this](const Network::CharacterApplyDamage& applyDamage)
+			{
+				auto damageable = this->GetComponent<Damageable>();
+				if (damageable)
+				{
+					damageable->SetHelth(damageable->GetHealth() - applyDamage.damage);
+					damageable->SetHitPosition(applyDamage.hitPosition);
+				}
+			});
+	}
 
 	// コライダー設定
 	auto capsuleCollider = this->AddCollider<CapsuleCollider>();

@@ -128,15 +128,15 @@ void ServerAssignment::Exit()
 			std::cout << "============================================" << std::endl;
 			// プレイヤー情報を表示
 			int index = 0;
-			for (const Client& client : clients)
-			{
-				std::cout << "id : " << index << std::endl;
-				std::cout << "position : " << client.player.position.x << client.player.position.y << client.player.position.z << std::endl;
-				std::cout << "angle Y: " << client.player.angleY << std::endl;
-				std::cout << "============================================" << std::endl;
+			//for (const Client& client : clients)
+			//{
+			//	std::cout << "id : " << index << std::endl;
+			//	std::cout << "position : " << client.player.position.x << client.player.position.y << client.player.position.z << std::endl;
+			//	std::cout << "angle Y: " << client.player.angleY << std::endl;
+			//	std::cout << "============================================" << std::endl;
 
-				index++;
-			}
+			//	index++;
+			//}
 		}
 	}
 }
@@ -166,7 +166,7 @@ void ServerAssignment::SelectingLeader()
 	// リーダーがいるか確認
 	for (const Client& client : clients)
 	{
-		if (client.player.isLeader)
+		if (client.isLeader)
 		{
 			// リーダーがいる場合は処理しない
 			return;
@@ -177,8 +177,8 @@ void ServerAssignment::SelectingLeader()
 	// 最初のプレイヤーをリーダーにする
 	if (!clients.empty())
 	{
-		playerLeaderID = clients[0].player.uniqueID;
-		clients[0].player.isLeader = true;
+		playerLeaderID = clients[0].characterID;
+		clients[0].isLeader = true;
 		std::cout << "リーダー選定: " << playerLeaderID << std::endl;
 	}
 	// リーダーがいる場合は、リーダーの情報を全クライアントに送信
@@ -191,6 +191,38 @@ void ServerAssignment::SelectingLeader()
 			WriteRecord(client.connection, Network::DataTag::PlayerSetLeader, &setLeader, sizeof(setLeader));
 		}
 	}
+}
+
+/// uniqueIDからキャラクター取得
+Network::Character* ServerAssignment::GetCharacterFromID(int id)
+{
+    for (auto& character : charactersMap)
+    {
+        if (character.second.uniqueID == id)
+        {
+            return &character.second;
+        }
+    }
+	return nullptr;
+}
+
+/// キャラクター作成
+Network::Character* ServerAssignment::CreateCharacter(
+	int leaderID,
+	Network::CharacterType type,
+	const DirectX::XMFLOAT3& position,
+	float angleY, 
+	float health)
+{
+	Character& character = charactersMap[characterNextUniqueID];
+	character.leaderID = leaderID;
+	character.uniqueID = characterNextUniqueID;
+	character.type = type;
+	character.position = position;
+	character.angleY = angleY;
+	character.health = health;
+	characterNextUniqueID++;
+    return &character;
 }
 
 #pragma region コールバック関数
@@ -239,65 +271,55 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 		std::cout << eraseId << ":" << "Logout" << std::endl;
 	}
 	break;
-	case DataTag::PlayerSetLeader:
-	{
-		// PlayerSetLeaderはクライアントが受け取るだけなので処理することはない
-		return;
-	}
-	break;
-	case DataTag::PlayerSync:
+	case DataTag::CharacterSync:
 	{
 		// Syncはクライアントが受け取るだけなので処理することはない
 		return;
 	}
 	break;
-	case DataTag::PlayerMove:
+	case DataTag::CharacterMove:
 	{
-		PlayerMove playerMove;
+		CharacterMove characterMove;
 		// バッファデータからpayLoadStrにデータに読み込み
-		if (!buffer.Read(&playerMove, payloadLen)) {
+		if (!buffer.Read(&characterMove, payloadLen)) {
 			std::cout << "Read Error" << std::endl;
 			return;
 		}
 
-		//std::cout << "RECV Move" << std::endl;
-		//std::cout << playerMove.id << std::endl;
-		//std::cout << "position x:" << playerMove.position.x;
-		//std::cout << "y:" << playerMove.position.y;
-		//std::cout << "z:" << playerMove.position.z << std::endl;
-		//std::cout << "velocity x:" << playerMove.velocity.x;
-		//std::cout << "y:" << playerMove.velocity.y;
-		//std::cout << "z:" << playerMove.velocity.z << std::endl;
-		//std::cout << "state :" << playerMove.state;
-
-		// 送信元のプレイヤー情報を保存
-		auto client = self->GetClientFromID(playerMove.playerUniqueID);
-		if (client != nullptr)
+        // キャラクターの移動情報を保存
+        auto character = self->GetCharacterFromID(characterMove.uniqueID);
+		if (character)
 		{
-			client->player.position = playerMove.position;
-			client->player.movement = playerMove.movement;
-			client->player.angleY = playerMove.angleY;
-			client->player.state = playerMove.state;
-			client->player.subState = playerMove.subState;
+			character->position = characterMove.position;
+			character->target = characterMove.target;
+			character->angleY = characterMove.angleY;
+			strcpy_s(character->mainState, characterMove.mainState);
+			strcpy_s(character->subState, characterMove.subState);
 		}
 	}
 	break;
-	case DataTag::PlayerApplyDamage:
+	case DataTag::CharacterApplyDamage:
 	{
 		// プレイヤーにダメージを適用する場合の処理
-		PlayerApplyDamage playerDamage;
+		CharacterApplyDamage characterApplayDamage;
 		// バッファデータからpayLoadStrにデータに読み込み
-		if (!buffer.Read(&playerDamage, payloadLen)) {
+		if (!buffer.Read(&characterApplayDamage, payloadLen)) {
 			std::cout << "Read Error" << std::endl;
 			return;
 		}
 		std::cout << "RECV PlayerApplyDamage" << std::endl;
-		// プレイヤー情報を更新
-		auto client = self->GetClientFromID(playerDamage.playerUniqueID);
-		if (client != nullptr)
+		// キャラクター情報を更新
+		auto character = self->GetCharacterFromID(characterApplayDamage.uniqueID);
+		if (character)
 		{
-			client->player.health -= playerDamage.damage; // ダメージを適用
+			character->health -= characterApplayDamage.damage;
 		}
+	}
+	break;
+	case DataTag::PlayerSetLeader:
+	{
+		// PlayerSetLeaderはクライアントが受け取るだけなので処理することはない
+		return;
 	}
 	break;
 	case DataTag::EnemyCreate:
@@ -310,63 +332,19 @@ void ServerAssignment::ReadRecord(ENLConnection connection, void* connectionData
 			return;
 		}
 
+		// 敵を生成
+		Character* enemy = self->CreateCharacter(
+			enemyCreate.leaderID,
+			enemyCreate.type,
+			enemyCreate.position,
+			enemyCreate.angleY,
+			enemyCreate.health);
+
 		// 敵のユニークIDを設定
-		enemyCreate.uniqueID = self->enemyNextUniqueID++;
+		enemyCreate.uniqueID = enemy->uniqueID;
 		std::cout << "RECV EnemyCreate" << std::endl;
 
-		// 敵情報を保存
-		Enemy enemy;
-		enemy.type = enemyCreate.type;
-		enemy.uniqueID = enemyCreate.uniqueID;
-		enemy.leaderID = enemyCreate.leaderID; // リーダーIDを設定
-		enemy.position = enemyCreate.position;
-		enemy.angleY = enemyCreate.angleY;
-		enemy.health = enemyCreate.health;
-		self->enemiesMap[enemyCreate.uniqueID] = enemy;
-
 		payload = &enemyCreate; // 送信データを再設定
-	}
-	break;
-	case DataTag::EnemySync:
-	{
-		// EnemySyncはクライアントが受け取るだけなので処理することはない
-		return;
-	}
-	break;
-	case DataTag::EnemyMove:
-	{
-		// クライアントからサーバに敵移動要求が来た場合の処理
-		EnemyMove enemyMove;
-		// バッファデータからpayLoadStrにデータに読み込み
-		if (!buffer.Read(&enemyMove, payloadLen)) {
-			std::cout << "Read Error" << std::endl;
-			return;
-		}
-		std::cout << "RECV EnemyMove" << std::endl;
-
-		//　送信元の敵情報を保存
-		auto& enemy = self->enemiesMap[enemyMove.uniqueID];
-		enemy.position = enemyMove.position;
-		enemy.angleY = enemyMove.angleY;
-		enemy.target = enemyMove.target;
-		strcpy_s(enemy.mainState, enemyMove.mainState);
-		strcpy_s(enemy.subState, enemyMove.subState);
-	}
-	break;
-	case DataTag::EnemyApplayDamage:
-	{
-		// 敵にダメージを適用する場合の処理
-		EnemyApplayDamage enemyDamage;
-		// バッファデータからpayLoadStrにデータに読み込み
-		if (!buffer.Read(&enemyDamage, payloadLen)) {
-			std::cout << "Read Error" << std::endl;
-			return;
-		}
-		std::cout << "RECV EnemyApplayDamage" << std::endl;
-
-		// 敵情報を更新
-		auto& enemy = self->enemiesMap[enemyDamage.uniqueID];
-		enemy.health -= enemyDamage.damage; // ダメージを適用
 	}
 	break;
 	}
@@ -396,7 +374,7 @@ void ServerAssignment::Disconnect(ENLConnection connection, void* connectionData
 	for (const Client& client : self->clients)
 	{
 		if (client.connection != connection)continue;// 切断されたクライアントとコネクションが違う場合continue
-		logout.playerUniqueID = client.player.uniqueID;
+		logout.playerUniqueID = client.characterID;
 	}
 	for (const Client& client : self->clients)
 	{
@@ -454,55 +432,45 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 	SetClientData(connection, self);
 #endif // USE_MRS
 
-	// サーバにプレイヤー追加
-	Player player = Player();
-	player.uniqueID = self->playerNextUniqueID;
-	player.position = DirectX::XMFLOAT3(0, 0, 0);
-	player.angleY = 0.0f;
+	// サーバにプレイヤーキャラクター追加
+    Character* player = self->CreateCharacter(
+		self->playerLeaderID,
+		CharacterType::Player,
+		DirectX::XMFLOAT3(0, 0, 0), 
+		0.0f, 
+		100.0f);
 
 	Client newClient;
 	newClient.connection = connection;
-	newClient.player = player;
+	newClient.characterID = player->uniqueID;
 
-	// ユニークIDをインクリメント
-	self->playerNextUniqueID++;
 	self->clients.emplace_back(newClient);
 	std::cout << "新規接続\t" << newClient.connection << std::endl;
 
 	// ID送信
 	PlayerLogin playerLogin{};
-	playerLogin.playerUniqueID = player.uniqueID;
+	playerLogin.playerUniqueID = player->uniqueID;
 
 	// クライアントに接続者送信(接続者含む)
 	for (const Client& client : self->clients)
 	{
 		self->WriteRecord(client.connection, Network::DataTag::PlayerLogin, &playerLogin, sizeof(playerLogin));
 	}
-	// "接続者"に既存ログインユーザ送信
-	for (const Client& client : self->clients)
+    // 接続者にすべてのキャラクター情報送信
+	for (const auto& characterPair : self->GetCharacters())
 	{
-        // 送信者には送らない
-		if (client.player.uniqueID == playerLogin.playerUniqueID)continue;
+		// 送信者に自身のデータは送らない
+		if (characterPair.first == playerLogin.playerUniqueID)continue;
 
-		PlayerSync player{};
-		player.playerUniqueID = client.player.uniqueID;
-		player.position = client.player.position;
-		player.angleY = client.player.angleY;
-
-		self->WriteRecord(connection, Network::DataTag::PlayerSync, &player, sizeof(player));
-	}
-	// "接続者"に既存敵送信
-	for (const auto& enemyPair : self->enemiesMap)
-	{
-		const Enemy& enemy = enemyPair.second;
-		EnemySync enemySync{};
-		enemySync.type = enemy.type;
-		enemySync.uniqueID = enemy.uniqueID;
-		enemySync.leaderID = enemy.leaderID; // リーダーIDを設定
-		enemySync.position = enemy.position;
-		enemySync.angleY = enemy.angleY;
-		enemySync.health = enemy.health;
-		self->WriteRecord(connection, Network::DataTag::EnemySync, &enemySync, sizeof(enemySync));
+		const Character& character = characterPair.second;
+		CharacterSync characterSync{};
+		characterSync.senderID = character.leaderID;
+		characterSync.uniqueID = character.uniqueID;
+		characterSync.type = character.type;
+		characterSync.angleY = character.angleY;
+		characterSync.position = character.position;
+		characterSync.health = character.health;
+		self->WriteRecord(connection, Network::DataTag::CharacterSync, &characterSync, sizeof(characterSync));
 	}
 
 	// リーダー選定

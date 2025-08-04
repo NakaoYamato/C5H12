@@ -216,7 +216,7 @@ void TerrainDeformer::Update(float elapsedTime)
         S = DirectX::XMMatrixScaling(
             selectedBrush->second->GetBrushRadius() * 4.0f,
             selectedBrush->second->GetBrushRadius() * 4.0f,
-            selectedBrush->second->GetBrushRadius() * 4.0f);
+            selectedBrush->second->GetBrushRadius() * 40.0f);
         R = DirectX::XMMatrixRotationX(DirectX::XM_PIDIV2) *
             DirectX::XMMatrixRotationY(-selectedBrush->second->GetBrushRotationY());
         T = DirectX::XMMatrixTranslation(

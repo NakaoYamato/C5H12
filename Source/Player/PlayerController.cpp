@@ -29,7 +29,7 @@ void PlayerController::Start()
 				vec.Dot(front) > 0.0f)
 			{
 				// ƒK[ƒh¬Œ÷
-				_stateMachine.lock()->ChangeState("GuardHit", "None");
+				_stateMachine.lock()->ChangeState("GuardHit", nullptr);
 				return false;
 			}
 			return true;
@@ -41,12 +41,12 @@ void PlayerController::Start()
 			if (damage >= 2.0f)
 			{
 				// ‘å‚«‚­‚Ì‚¯‚¼‚é
-				_stateMachine.lock()->ChangeState("HitKnockDown", "None");
+				_stateMachine.lock()->ChangeState("HitKnockDown", nullptr);
 			}
 			else
 			{
 				// Œy‚­‚Ì‚¯‚¼‚é
-				_stateMachine.lock()->ChangeState("Hit", "None");
+				_stateMachine.lock()->ChangeState("Hit", nullptr);
 			}
 		}
 	);

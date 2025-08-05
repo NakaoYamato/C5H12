@@ -23,6 +23,7 @@ public:
 
 	// モデル当たり判定情報取得
 	const ModelCollision& GetModelCollision() const { return _modelCollision; }
+	bool IsCollAttackEvent() const { return _collAttackEvent; }
 private:
 	// アニメーションイベントの当たり判定更新
 	// sphereDatas : アニメーションイベントの球体当たり判定データ
@@ -49,4 +50,6 @@ private:
 	ModelCollision _modelCollision;
 	// アニメータ
 	std::weak_ptr<Animator> _animator;
+	// 攻撃判定が出たかどうか
+	bool _collAttackEvent = false;
 };

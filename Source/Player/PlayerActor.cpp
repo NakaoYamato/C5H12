@@ -38,7 +38,7 @@ void PlayerActor::OnCreate()
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(playerController.get(), animator.get()));
 	auto effekseerController	= this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
-	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);    
+	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加

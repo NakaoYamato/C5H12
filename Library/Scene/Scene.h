@@ -11,6 +11,7 @@
 #include "../../Library/Renderer/TextRenderer.h"
 #include "../../Library/Renderer/TerrainRenderer.h"
 #include "../../Library/Renderer/ParticleRenderer.h"
+#include "../../Library/Renderer/PrimitiveRenderer.h"
 #include "../../Library/Renderer/DecalRenderer.h"
 
 #include "../../Library/Actor/ActorManager.h"
@@ -129,6 +130,8 @@ public:
 	TerrainRenderer&		GetTerrainRenderer()		{ return _terrainRenderer; }
 	// パーティクルレンダラー取得
 	ParticleRenderer&		GetParticleRenderer()		{ return _particleRenderer; }
+	// プリミティブレンダラー取得	
+	PrimitiveRenderer&		GetPrimitiveRenderer()		{ return _primitiveRenderer; }
 	// デカールレンダラー取得
 	DecalRenderer&			GetDecalRenderer()			{ return _decalRenderer; }
 
@@ -186,6 +189,7 @@ private:
 	TextRenderer					_textRenderer;
 	TerrainRenderer					_terrainRenderer;
 	ParticleRenderer				_particleRenderer;
+	PrimitiveRenderer				_primitiveRenderer;
 	DecalRenderer					_decalRenderer;
 
 	ActorManager					_actorManager;

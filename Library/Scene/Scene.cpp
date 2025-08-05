@@ -5,7 +5,6 @@
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Exporter/Exporter.h"
-#include "../../Library/Renderer/PrimitiveRenderer.h"
 
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Actor/Camera/MainCamera.h"
@@ -52,6 +51,7 @@ void Scene::Initialize()
 		_textRenderer.Initialize(device, dc);
         _terrainRenderer.Initialize(device);
         _particleRenderer.Initialize(device, dc);
+		_primitiveRenderer.Initialize(device);
         _decalRenderer.Initialize(device, static_cast<UINT>(graphics.GetScreenWidth()), static_cast<UINT>(graphics.GetScreenHeight()));
     }
 
@@ -313,7 +313,7 @@ void Scene::Render()
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
         // プリミティブ描画
-        PrimitiveRenderer::Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
+		_primitiveRenderer.Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
 
         // デバッグ描画
         Debug::Renderer::Render(rc.camera->GetView(), rc.camera->GetProjection());

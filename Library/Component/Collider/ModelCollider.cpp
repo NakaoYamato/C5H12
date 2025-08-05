@@ -15,7 +15,10 @@ void ModelCollider::Start()
 }
 // 更新処理
 void ModelCollider::Update(float elapsedTime)
-{
+{ 
+	// 攻撃判定が出たかどうかを初期化
+	_collAttackEvent = false;
+
 	CollisionManager& collisionManager = GetActor()->GetScene()->GetCollisionManager();
 	auto& poseNodes = GetActor()->GetModel().lock()->GetPoseNodes();
 	auto& sphereDatas = _modelCollision.GetSphereDatas();
@@ -126,6 +129,8 @@ void ModelCollider::UpdateAnimationEventCollision(float elapsedTime,
 			layer = CollisionLayer::Attack;
 			// 被弾レイヤー以外に当たらないようにする
 			layerMask = GetCollisionLayerMask(CollisionLayer::Hit);
+			// 攻撃判定が出た
+			_collAttackEvent = true;
 		}
 		else if (event.eventType == AnimationEvent::EventType::Hit)
 		{

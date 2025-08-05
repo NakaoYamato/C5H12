@@ -162,6 +162,7 @@
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
+    <ClCompile Include="Library\Component\LocusRenderer.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp" />
     <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
     <ClCompile Include="Library\Component\ParticleController.cpp" />
@@ -373,6 +374,7 @@
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\DecalController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
+    <ClInclude Include="Library\Component\LocusRenderer.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainCollider.h" />
     <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
     <ClInclude Include="Library\Component\ParticleController.h" />

@@ -7,7 +7,6 @@
 #include "../DebugSupporter/DebugSupporter.h"
 #include "../Model/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
-#include "../Renderer/PrimitiveRenderer.h"
 #include "../JobSystem/JobSystem.h"
 #include "../Scene/SceneManager.h"
 
@@ -172,9 +171,6 @@ bool Framework::Initialize() const
 {
     // Graphicsの初期化
     Graphics::Instance().Initialize(_hwnd, _hInstance, FULLSCREEN);
-
-    // レンダラー作成
-    PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
 
     // ポストプロセス管理者初期化
     PostProcessManager::Instance().Initialize(Graphics::Instance().GetDevice(),

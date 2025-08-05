@@ -18,6 +18,7 @@
 #include "../../Source/Camera/PlayerCameraController.h"
 
 #include "../../Source/Network/NetworkReceiver.h"
+#include "PlayerNetworkSender.h"
 
 // 生成時処理
 void PlayerActor::OnCreate()
@@ -38,6 +39,7 @@ void PlayerActor::OnCreate()
 	auto effekseerController	= this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);    
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
+	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
 	if (_isUserControlled)
 		this->AddComponent<PlayerInput>();
@@ -58,6 +60,12 @@ void PlayerActor::OnCreate()
             {
                 this->GetTransform().SetPosition(move.position);
                 this->GetTransform().SetAngleY(move.angleY);
+				auto playerController = this->GetComponent<PlayerController>();
+				if (playerController)
+				{
+					Vector2 movement = Vector2(move.target.x, move.target.z);
+					playerController->SetMovement(movement);
+				}
                 auto stateController = this->GetComponent<StateController>();
                 if (stateController)
                 { 
@@ -65,8 +73,6 @@ void PlayerActor::OnCreate()
                     auto playerStateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
                     if (playerStateMachine)
                     {
-                        Vector2 movement = Vector2(move.target.x, move.target.z);
-                        playerStateMachine->SetMovement(movement);
                         playerStateMachine->ChangeState(move.mainState, move.subState);
                     }
                 }

@@ -284,6 +284,7 @@
     <ClCompile Include="Source\Common\Targetable.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
     <ClCompile Include="Source\Enemy\EnemyActor.cpp" />
+    <ClCompile Include="Source\Enemy\EnemyNetworkSender.cpp" />
     <ClCompile Include="Source\Enemy\Gryphus\BehaviorTree\GryphusBehaviorTree.cpp" />
     <ClCompile Include="Source\Enemy\Gryphus\GryphusActor.cpp" />
     <ClCompile Include="Source\Enemy\Gryphus\GryphusController.cpp" />
@@ -306,7 +307,7 @@
     <ClCompile Include="Source\InGame\CanvasMediator.cpp" />
     <ClCompile Include="Source\InGame\InputMediator.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
-    <ClCompile Include="Source\Network\NetworkSender.cpp" />
+    <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneGryphusDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
@@ -507,6 +508,7 @@
     <ClInclude Include="Source\Common\Targetable.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
     <ClInclude Include="Source\Enemy\EnemyActor.h" />
+    <ClInclude Include="Source\Enemy\EnemyNetworkSender.h" />
     <ClInclude Include="Source\Enemy\Gryphus\BehaviorTree\GryphusBehaviorTree.h" />
     <ClInclude Include="Source\Enemy\Gryphus\GryphusActor.h" />
     <ClInclude Include="Source\Enemy\Gryphus\GryphusController.h" />
@@ -531,6 +533,7 @@
     <ClInclude Include="Source\Menu\MenuMediator.h" />
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />
+    <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Scene\Test\SceneGryphusDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />
     <ClInclude Include="Source\Stage\StageController.h" />

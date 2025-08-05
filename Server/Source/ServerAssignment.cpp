@@ -450,12 +450,15 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 	// ID送信
 	PlayerLogin playerLogin{};
 	playerLogin.playerUniqueID = player->uniqueID;
-
 	// クライアントに接続者送信(接続者含む)
 	for (const Client& client : self->clients)
 	{
 		self->WriteRecord(client.connection, Network::DataTag::PlayerLogin, &playerLogin, sizeof(playerLogin));
 	}
+
+	// リーダー選定
+	self->SelectingLeader();
+
     // 接続者にすべてのキャラクター情報送信
 	for (const auto& characterPair : self->GetCharacters())
 	{
@@ -472,9 +475,6 @@ void ServerAssignment::Accept(ENLServer server, void* serverData, ENLConnection 
 		characterSync.health = character.health;
 		self->WriteRecord(connection, Network::DataTag::CharacterSync, &characterSync, sizeof(characterSync));
 	}
-
-	// リーダー選定
-	self->SelectingLeader();
 }
 #pragma endregion
 

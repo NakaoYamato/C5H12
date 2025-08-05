@@ -10,6 +10,7 @@
 #include "../../Library/Audio/VoiceRecorder/VoiceRecorder.h"
 
 #include "../../Source/Network/NetworkReceiver.h"
+#include "../../Source/Network/NetworkSender.h"
 
 /// <summary>
 /// 通信を管理するメディエーター
@@ -34,6 +35,7 @@ public:
         int uniqueID = -1;
         std::weak_ptr<Actor> actor;
         std::weak_ptr<NetworkReceiver>		receiver;
+		std::weak_ptr<NetworkSender>		sender;
     };
 
 public:
@@ -78,14 +80,6 @@ private:
         const Vector3& position,
         float angleY,
         float health);
-    /// <summary>
-	/// 自身のプレイヤーのダメージ送信
-    /// </summary>
-    void SendMyPlayerDamage();
-    /// <summary>
-	/// 敵のダメージ送信
-    /// </summary>
-    void SendEnemyDamage();
     /// <summary>
     /// リーダーの再設定
     /// </summary>

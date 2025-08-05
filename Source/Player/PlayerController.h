@@ -47,6 +47,28 @@ public:
 	void SetATKFactor(float atkFactor) { _ATKFactor = atkFactor; }
 #pragma endregion
 
+#pragma region アクセサ
+	// キャンセルイベントを取得
+	bool CallCancelEvent() const { return _callCancelEvent; }
+	bool CallInvisivleEvent() const { return _callInvisivleEvent; }
+	bool OldInvisibleEvent() const { return _oldInvisibleEvent; }
+	const Vector2& GetMovement() const { return _movement; }
+	bool IsMoving()	const { return _isMoving; }
+	bool IsDash()	const { return _isDash; }
+	bool IsEvade()	const { return _isEvade; }
+	bool IsAttack() const { return _isAttack; }
+	bool IsGuard()	const { return _isGuard; }
+	bool IsDead()	const { return _isDead; }
+
+	void SetMovement(const Vector2& movement) { _movement = movement; }
+	void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
+	void SetIsDash(bool isDush) { _isDash = isDush; }
+	void SetIsEvade(bool isEvade) { _isEvade = isEvade; }
+	void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
+	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
+	void SetIsDead(bool isDead) { _isDead = isDead; }
+#pragma endregion
+
 private:
 	std::weak_ptr<PlayerStateMachine> _stateMachine;
 	std::weak_ptr<CharactorController> _charactorController;
@@ -54,6 +76,20 @@ private:
 	std::weak_ptr<EffekseerEffectController> _hitEffectController;
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<Targetable> _targetable;
+
+#pragma region 各種フラグ
+	bool _callCancelEvent = false;
+	bool _callInvisivleEvent = false;
+	bool _oldInvisibleEvent = false;
+	// 入力方向をワールド空間に変換したもの
+	Vector2 _movement = { 0.0f, 0.0f };
+	bool _isMoving = false;
+	bool _isDash = false;
+	bool _isEvade = false;
+	bool _isAttack = false;
+	bool _isGuard = false;
+	bool _isDead = false;
+#pragma endregion
 
 #pragma region 攻撃関係
 	// 最終攻撃力

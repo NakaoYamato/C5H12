@@ -57,8 +57,39 @@ void PlayerController::Start()
 // 更新処理
 void PlayerController::Update(float elapsedTime)
 {
+	auto animator = _animator.lock();
+
 	// 攻撃力の更新
 	_ATK = _BaseATK * _ATKFactor;
+
+	_callCancelEvent = false;
+	_oldInvisibleEvent = _callInvisivleEvent;
+	_callInvisivleEvent = false;
+
+	// アニメーションイベント取得
+	if (animator->IsPlayAnimation())
+	{
+		auto& animationEvent = animator->GetAnimationEvent();
+		int massageListSize = (int)animationEvent.GetMessageList().size();
+		auto events = animator->GetCurrentEvents();
+		for (auto& event : events)
+		{
+			// メッセージインデックスが範囲外ならcontinue
+			if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
+				continue;
+
+			// 攻撃キャンセル判定
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
+			{
+				_callCancelEvent = true;
+			}
+			// 無敵判定
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "Invisible")
+			{
+				_callInvisivleEvent = true;
+			}
+		}
+	}
 }
 
 // 3D描画後の描画処理

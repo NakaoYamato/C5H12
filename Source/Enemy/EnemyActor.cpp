@@ -5,13 +5,15 @@
 #include "EnemyController.h"
 #include "../../Library/Component/StateController.h"
 #include "../../Source/Network/NetworkReceiver.h"
+#include "EnemyNetworkSender.h"
 
 void EnemyActor::OnCreate()
 {
-	_charactorController = this->AddComponent<CharactorController>();
-	_damageable = this->AddComponent<Damageable>();
-	_targetable = this->AddComponent<Targetable>(); 
-	auto networkReceiver = this->AddComponent<NetworkReceiver>();
+	_charactorController	= this->AddComponent<CharactorController>();
+	_damageable				= this->AddComponent<Damageable>();
+	_targetable				= this->AddComponent<Targetable>(); 
+	auto networkReceiver	= this->AddComponent<NetworkReceiver>();
+	auto networkSender		= this->AddComponent<EnemyNetworkSender>();
 	// ネットワーク受信イベントの設定
 	if (networkReceiver)
 	{

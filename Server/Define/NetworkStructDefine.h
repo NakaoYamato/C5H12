@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DirectXMath.h>
+
 #define NETWORK_MAX_MESSAGE_SIZE 512
 #define NETWORK_MAX_STATE_NAME_SIZE 32
 

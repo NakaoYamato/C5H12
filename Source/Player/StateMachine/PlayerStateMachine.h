@@ -38,42 +38,11 @@ public:
 	const char* GetStateName() override;
     // サブステート名取得
 	const char* GetSubStateName() override;
-	// キャンセルイベントを取得
-	bool CallCancelEvent() const { return _callCancelEvent; }
-	const Vector2& GetMovement() const { return _movement; }
-	bool IsMoving()	const { return _isMoving; }
-	bool IsDash()	const { return _isDash; }
-	bool IsEvade()	const { return _isEvade; }
-	bool IsAttack() const { return _isAttack; }
-	bool IsGuard()	const { return _isGuard; }
-	bool IsDead()	const { return _isDead; }
-
-	void SetMovement(const Vector2& movement)	{ _movement = movement; }
-	void SetIsMoving(bool isMoving)				{ _isMoving = isMoving; }
-	void SetIsDash(bool isDush)					{ _isDash = isDush; }
-	void SetIsEvade(bool isEvade)				{ _isEvade = isEvade; }
-	void SetIsAttack(bool isAttack)				{ _isAttack = isAttack; }
-	void SetIsGuard(bool isGuard)				{ _isGuard = isGuard; }
-	void SetIsDead(bool isDead)					{ _isDead = isDead; }
 #pragma endregion
 private:
 	StateMachineBase<PlayerStateMachine> _stateMachine;
 	PlayerController* _player = nullptr;
 	Animator* _animator = nullptr;
-
-#pragma region 各種フラグ
-	bool _callCancelEvent = false;
-	bool _callInvisivleEvent = false;
-	// 入力方向をワールド空間に変換したもの
-	Vector2 _movement	= { 0.0f, 0.0f };
-	bool _isMoving		= false;
-	bool _isDash		= false;
-	bool _isEvade		= false;
-	bool _isAttack		= false;
-	bool _isGuard		= false;
-	bool _isDead		= false;
-#pragma endregion
-
 };
 
 #pragma region 各ステート

@@ -13,7 +13,7 @@ void PlayerInput::Start()
 		_inputMediator.lock()->ReceiveCommand(nullptr, InputMediator::CommandType::StartGame, "");
 	}
 
-	_stateController = GetActor()->GetComponent<StateController>();
+	_playerController = GetActor()->GetComponent<PlayerController>();
 }
 
 // 更新処理
@@ -23,10 +23,8 @@ void PlayerInput::Update(float elapsedTime)
 	if (!IsActive())
 		return;
 
-	if (_stateController.lock() == nullptr)
-		return;
-	auto stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(_stateController.lock()->GetStateMachine());
-	if (stateMachine == nullptr)
+	auto playerController = _playerController.lock();
+	if (playerController == nullptr)
 		return;
 
 	// 入力処理
@@ -47,17 +45,17 @@ void PlayerInput::Update(float elapsedTime)
 		Vector2 movement = {};
 		movement.x = frontVec.x * lAxisValue.y + rightVec.x * lAxisValue.x;
 		movement.y = frontVec.z * lAxisValue.y + rightVec.z * lAxisValue.x;
-		stateMachine->SetMovement(movement);
+		playerController->SetMovement(movement);
 
         // 移動量があれば移動中とする
-		stateMachine->SetIsMoving(movement.LengthSq() > 0.0f);
+		playerController->SetIsMoving(movement.LengthSq() > 0.0f);
 	}
 
-	stateMachine->SetIsDash(_INPUT_PRESSED("Dash"));
-	stateMachine->SetIsGuard(_INPUT_PRESSED("Guard") || _INPUT_VALUE("Guard") > 0.0f);
+	playerController->SetIsDash(_INPUT_PRESSED("Dash"));
+	playerController->SetIsGuard(_INPUT_PRESSED("Guard") || _INPUT_VALUE("Guard") > 0.0f);
 
-	stateMachine->SetIsAttack(_INPUT_TRIGGERD("Action1"));
-	stateMachine->SetIsEvade(_INPUT_TRIGGERD("Evade"));
+	playerController->SetIsAttack(_INPUT_TRIGGERD("Action1"));
+	playerController->SetIsEvade(_INPUT_TRIGGERD("Evade"));
 
 	// メニュー画面起動入力
 	if (_INPUT_TRIGGERD("Menu"))

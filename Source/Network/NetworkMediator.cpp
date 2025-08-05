@@ -97,13 +97,13 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
             enemyCreate.health = 100.0f; // 初期体力を設定
             _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
 
-            enemyCreate = {};
-            enemyCreate.type = Network::CharacterType::Weak;
-            enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
-            enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
-            enemyCreate.position = Vector3(5.0f, 5.0f, -5.0f);
-            enemyCreate.health = 10.0f; // 初期体力を設定
-            _client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
+            //enemyCreate = {};
+            //enemyCreate.type = Network::CharacterType::Weak;
+            //enemyCreate.uniqueID = -1; // ユニークIDは適宜設定
+            //enemyCreate.leaderID = myPlayerId; // リーダーのユニークIDを設定
+            //enemyCreate.position = Vector3(5.0f, 5.0f, -5.0f);
+            //enemyCreate.health = 10.0f; // 初期体力を設定
+            //_client.WriteRecord(Network::DataTag::EnemyCreate, &enemyCreate, sizeof(enemyCreate));
         }
         break;
 	case NetworkMediator::State::NonServer:
@@ -121,10 +121,28 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
     case NetworkMediator::State::Awaiting:
         break;
     case NetworkMediator::State::Connecting:
-        /// 自身のプレイヤーのダメージ送信
-        SendMyPlayerDamage();
-        /// 敵のダメージ送信
-        SendEnemyDamage();
+		// キャラクターのダメージ送信
+        for (auto& [id, character] : _characters)
+        {
+            auto receiver = character.receiver.lock();
+            if (!receiver)
+                continue; // 受信者が無効ならスキップ
+            // 自身が管理しているキャラクターか確認
+            if (receiver->GetManagerId() != myPlayerId)
+                continue;
+
+            auto sender = character.sender.lock();
+            if (sender)
+            {
+				Network::CharacterApplyDamage characterApplyDamage = sender->GetApplyDamageData();
+                if (characterApplyDamage.uniqueID == -1)
+                    continue; // 無効なユニークIDならスキップ
+                characterApplyDamage.uniqueID = id; // ユニークIDを設定
+                characterApplyDamage.senderID = myPlayerId; // 送信者のIDを設定
+                // サーバーに送信
+				_client.WriteRecord(Network::DataTag::CharacterApplyDamage, &characterApplyDamage, sizeof(characterApplyDamage));
+            }
+        }
 
         // 送信タイマー更新
 		_sendTimer += elapsedTime;
@@ -133,48 +151,29 @@ void NetworkMediator::OnLateUpdate(float elapsedTime)
 		{
 			_sendTimer -= _sendInterval; // タイマーリセット
 
-            // TODO : 各コンポーネントで情報を処理
-   //         // プレイヤーの移動情報送信
-			//auto& playerData = _players[myPlayerId];
-   //         auto playerActor = playerData.actor.lock();
-   //         if (playerActor)
-   //         {
-   //             Network::CharacterMove characterMove{};
-   //             characterMove.playerUniqueID = myPlayerId;
-   //             characterMove.position = playerActor->GetTransform().GetPosition();
-   //             auto state = playerData.state.lock();
-			//	if (state && state->IsSetup())
-			//	{
-   //                 playerMove.movement = state->GetMovement();
-   //                 playerMove.state = Network::GetPlayerMainStateFromName(state->GetStateName());
-   //                 playerMove.subState = Network::GetPlayerSubStateFromName(state->GetSubStateName());
-			//	}
-   //             // サーバーに送信
-   //             _client.WriteRecord(Network::DataTag::PlayerMove, &playerMove, sizeof(playerMove));
-   //         }
+            // スレッドセーフ
+            std::lock_guard<std::mutex> lock(_mutex);
+			for (auto& [id, character] : _characters)
+			{
+				auto receiver = character.receiver.lock();
+				if (!receiver)
+					continue; // 受信者が無効ならスキップ
+                // 自身が管理しているキャラクターか確認
+				if (receiver->GetManagerId() != myPlayerId)
+					continue;
 
-   //         // 敵の移動情報送信
-   //         for (auto& [uniqueID, enemyData] : _enemies)
-   //         {
-   //             // 自身が管理していない敵ならスキップ
-   //             if (enemyData.controllerID != myPlayerId)
-   //                 continue;
-
-   //             auto controller = enemyData.controller.lock();
-			//	auto state = enemyData.state.lock();
-   //             if (controller && state)
-   //             {
-   //                 Network::EnemyMove enemyMove{};
-   //                 enemyMove.uniqueID = uniqueID;
-   //                 enemyMove.position = controller->GetActor()->GetTransform().GetPosition();
-   //                 enemyMove.angleY = controller->GetActor()->GetTransform().GetRotation().y;
-   //                 enemyMove.target = controller->GetTargetPosition();
-   //                 strcpy_s(enemyMove.mainState, state->GetStateName());
-   //                 strcpy_s(enemyMove.subState, state->GetSubStateName());
-   //                 // サーバーに送信
-   //                 _client.WriteRecord(Network::DataTag::EnemyMove, &enemyMove, sizeof(enemyMove));
-   //             }
-   //         }
+                auto sender = character.sender.lock();
+                if (sender)
+                {
+					Network::CharacterMove characterMove = sender->GetMoveData();
+					if (characterMove.uniqueID == -1)
+						continue; // 無効なユニークIDならスキップ
+					characterMove.uniqueID = id; // ユニークIDを設定
+					characterMove.senderID = myPlayerId; // 送信者のIDを設定
+					// サーバーに送信
+					_client.WriteRecord(Network::DataTag::CharacterMove, &characterMove, sizeof(characterMove));
+                }
+			}
         }
         break;
     }
@@ -210,17 +209,23 @@ std::weak_ptr<Actor> NetworkMediator::CreatePlayer(int id, bool isControlled)
 
     auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
     auto receiver = player->GetComponent<NetworkReceiver>();
+	auto sender     = player->GetComponent<NetworkSender>();
 
+    // 管理者のIDを設定
+    receiver->SetManagerId(id);
     // ユーザーが操作するプレイヤーか
     if (isControlled)
     {
         myPlayerId = id;
-    }
+		// ユーザーが操作するプレイヤーの場合レシーバーは起動しない
+		receiver->SetActive(false);
+	}
 
     // コンテナに登録
     _characters[id].uniqueID = id;
     _characters[id].actor = player;
     _characters[id].receiver = receiver;
+	_characters[id].sender = sender;
     return player;
 }
 
@@ -241,12 +246,17 @@ std::weak_ptr<Actor> NetworkMediator::CreateEnemy(
             ActorTag::Enemy
         );
         auto receiver = enemy->GetComponent<NetworkReceiver>();
+		auto sender = enemy->GetComponent<NetworkSender>();
         // 管理者のIDを設定
         receiver->SetManagerId(controllerID);
+        // ユーザーが操作するプレイヤーの場合レシーバーは起動しない
+		if (myPlayerId == controllerID)
+            receiver->SetActive(false);
         // コンテナに登録
         _characters[uniqueID].uniqueID = uniqueID;
         _characters[uniqueID].actor = enemy;
         _characters[uniqueID].receiver = receiver;
+		_characters[uniqueID].sender = sender;
         return enemy;
     }
     else if (type == Network::CharacterType::Weak)
@@ -257,59 +267,20 @@ std::weak_ptr<Actor> NetworkMediator::CreateEnemy(
             ActorTag::Enemy
         );
         auto receiver = enemy->GetComponent<NetworkReceiver>();
+        auto sender = enemy->GetComponent<NetworkSender>();
         // 管理者のIDを設定
         receiver->SetManagerId(controllerID);
+        // ユーザーが操作するプレイヤーの場合レシーバーは起動しない
+        if (myPlayerId == controllerID)
+            receiver->SetActive(false);
         // コンテナに登録
         _characters[uniqueID].uniqueID = uniqueID;
         _characters[uniqueID].actor = enemy;
         _characters[uniqueID].receiver = receiver;
+        _characters[uniqueID].sender = sender;
         return enemy;
     }
     return std::weak_ptr<EnemyActor>();
-}
-
-/// 自身のプレイヤーのダメージ送信
-void NetworkMediator::SendMyPlayerDamage()
-{
-	//// スレッドセーフ
-	//std::lock_guard<std::mutex> lock(_mutex);
-	//// 自身のプレイヤーのダメージを送信
- //   auto myPlayer = _players[myPlayerId];
-	//if (myPlayer.actor.lock())
-	//{
-	//	auto damageable = myPlayer.damageable.lock();
-	//	if (damageable && damageable->GetLastDamage() > 0.0f)
-	//	{
-	//		Network::PlayerApplyDamage playerApplyDamage{};
-	//		playerApplyDamage.playerUniqueID = myPlayerId; // ダメージを受けたプレイヤーのユニークID
-	//		playerApplyDamage.damage = damageable->GetLastDamage();
-	//		playerApplyDamage.hitPosition = damageable->GetHitPosition();
-	//		// サーバーに送信
-	//		_client.WriteRecord(Network::DataTag::PlayerApplyDamage, &playerApplyDamage, sizeof(playerApplyDamage));
-	//	}
-	//}
-}
-
-/// 敵のダメージ送信
-void NetworkMediator::SendEnemyDamage()
-{
-	//// スレッドセーフ
-	//std::lock_guard<std::mutex> lock(_mutex);
-	//// 敵のダメージを送信
-	//for (auto& [uniqueID, enemyData] : _enemies)
-	//{
- //       auto damageable = enemyData.damageable.lock();
- //       if (damageable && damageable->GetLastDamage() > 0.0f)
- //       {
- //           Network::EnemyApplayDamage enemyApplayDamage{};
- //           enemyApplayDamage.playerUniqueID = myPlayerId; // ダメージを与えたプレイヤーのユニークID
- //           enemyApplayDamage.uniqueID = uniqueID;
- //           enemyApplayDamage.damage = damageable->GetLastDamage();
- //           enemyApplayDamage.hitPosition = damageable->GetHitPosition();
- //           // サーバーに送信
- //           _client.WriteRecord(Network::DataTag::EnemyApplayDamage, &enemyApplayDamage, sizeof(enemyApplayDamage));
- //       }
-	//}
 }
 
 /// リーダーの再設定
@@ -461,7 +432,8 @@ void NetworkMediator::ProcessNetworkData()
         auto receiver = character.receiver.lock();
         if (receiver)
         {
-            receiver->GetEventBus().Publish<Network::CharacterSync>(sync);
+            if (receiver->IsActive())
+                receiver->GetEventBus().Publish<Network::CharacterSync>(sync);
         }
     }
     _characterSyncs.clear();
@@ -491,7 +463,8 @@ void NetworkMediator::ProcessNetworkData()
         auto receiver = character.receiver.lock();
         if (receiver)
         {
-            receiver->GetEventBus().Publish<Network::CharacterMove>(move);
+            if (receiver->IsActive())
+                receiver->GetEventBus().Publish<Network::CharacterMove>(move);
         }
 	}
     _characterMoves.clear();
@@ -505,7 +478,8 @@ void NetworkMediator::ProcessNetworkData()
         auto receiver = character.receiver.lock();
         if (receiver)
         {
-            receiver->GetEventBus().Publish<Network::CharacterApplyDamage>(applyDamage);
+            if (receiver->IsActive())
+                receiver->GetEventBus().Publish<Network::CharacterApplyDamage>(applyDamage);
         }
     }
     _characterApplyDamages.clear();

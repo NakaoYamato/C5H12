@@ -9,7 +9,7 @@ class PlayerActor : public Actor
 public:
 	static const char* GetModelFilePath()
 	{
-		return "./Data/Model/Player/ARPG_Warrior.fbx";
+		return "./Data/Model/Player/GreatSword/Seq1.fbx";
 	}
 public:
     PlayerActor(bool isUserControlled = true) : _isUserControlled(isUserControlled) {}

@@ -135,7 +135,8 @@ const char* PlayerStateMachine::GetSubStateName()
 #pragma region 待機
 void PlayerIdleState::OnEnter()
 {
-    _owner->GetAnimator()->PlayAnimation(u8"Idle1", true, 0.2f);
+    //_owner->GetAnimator()->PlayAnimation(u8"Idle1", true, 0.2f);
+    _owner->GetAnimator()->PlayAnimation(u8"IdleCombat", true, 0.2f);
     _owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 
@@ -162,8 +163,10 @@ void PlayerRunState::OnEnter()
 
     _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    _owner->GetAnimator()->PlayAnimation(u8"Run_Forward_Rootmotion", true, 0.2f);
+    //_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
+    //_owner->GetAnimator()->PlayAnimation(u8"Run_Forward_Rootmotion", true, 0.2f);
+    _owner->GetAnimator()->PlayAnimation(u8"WalkCombatLoopF0", true, 0.2f);
 }
 void PlayerRunState::OnExecute(float elapsedTime)
 {
@@ -204,7 +207,10 @@ namespace SprintSubState
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"Sprint_Start_no_weapon_Rootmotion", false, 0.2f);
+            _owner->GetAnimator()->SetRootNodeIndex("root");
+            _owner->GetAnimator()->SetIsUseRootMotion(true);
+            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
+            _owner->GetAnimator()->PlayAnimation(u8"RunCombatStartF0", false, 0.2f);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -244,8 +250,8 @@ namespace SprintSubState
         {
             _owner->GetAnimator()->SetRootNodeIndex("root");
             _owner->GetAnimator()->SetIsUseRootMotion(true);
-            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-            _owner->GetAnimator()->PlayAnimation(u8"Sprint_no_weapon_Rootmotion", true, 0.2f);
+            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
+            _owner->GetAnimator()->PlayAnimation(u8"RunCombatLoopF0", true, 0.2f);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -278,10 +284,10 @@ namespace SprintSubState
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+            _owner->GetAnimator()->SetRootNodeIndex("root");
             _owner->GetAnimator()->SetIsUseRootMotion(true);
-            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-            _owner->GetAnimator()->PlayAnimation(u8"Attack_Sprint", false, 0.2f);
+            _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
+            _owner->GetAnimator()->PlayAnimation(u8"RunAttack01", false, 0.2f);
 
 			// 攻撃フラグを立てる
             _owner->GetPlayer()->SetBaseATK(ATK);
@@ -324,9 +330,6 @@ void PlayerSprintState::OnEnter()
     // フラグを立てる
     _owner->GetPlayer()->SetIsDash(true);
 
-    _owner->GetAnimator()->SetRootNodeIndex("root");
-    _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
     // 初期サブステート設定
     ChangeSubState("SprintStart");
 }
@@ -347,19 +350,27 @@ void PlayerEvadeState::OnEnter()
 {
     static const std::string evadeAnimationNames[] =
     {
-        u8"Evade_Forward",
-		u8"Evade_Forward_Right",
-		u8"Evade_Right",
-		u8"Evade_Backward_Right",
-		u8"Evade_Backward",
-		u8"Evade_Backward_Left",
-        u8"Evade_Left",
-        u8"Evade_Forward_Left",
+  //      u8"Evade_Forward",
+		//u8"Evade_Forward_Right",
+		//u8"Evade_Right",
+		//u8"Evade_Backward_Right",
+		//u8"Evade_Backward",
+		//u8"Evade_Backward_Left",
+  //      u8"Evade_Left",
+  //      u8"Evade_Forward_Left",
+        u8"RollCombatF0",
+		u8"RollCombatFR45",
+		u8"RollCombatR90",
+		u8"RollCombatBR45",
+		u8"RollCombatB180",
+		u8"RollCombatBL45",
+        u8"RollCombatL90",
+        u8"RollCombatFL45",
     };
 
-    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
 	// 入力方向から回避方向を決定
 	std::string evadeAnimationName = evadeAnimationNames[0];
     Vector2 movement = _owner->GetPlayer()->GetMovement();
@@ -426,7 +437,7 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo1", false, 0.2f);
+            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_01", false, 0.2f);
 			// 攻撃フラグを立てる
 			_owner->GetPlayer()->SetBaseATK(ATK);
         }
@@ -453,7 +464,7 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo2", false, 0.3f);
+            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_02", false, 0.3f);
 			// 攻撃フラグを立てる
 			_owner->GetPlayer()->SetBaseATK(ATK);
         }
@@ -480,7 +491,7 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo3", false, 0.3f);
+            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_03", false, 0.3f);
 			// 攻撃フラグを立てる
 			_owner->GetPlayer()->SetBaseATK(ATK);
         }
@@ -507,7 +518,7 @@ namespace Attack1SubState
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"Attack_Combo4", false, 0.3f);
+            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_04", false, 0.3f);
 			// 攻撃フラグを立てる
 			_owner->GetPlayer()->SetBaseATK(ATK);
         }
@@ -532,9 +543,9 @@ PlayerAttack1State::PlayerAttack1State(PlayerStateMachine* stateMachine) :
 
 void PlayerAttack1State::OnEnter()
 {
-    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
     // 初期サブステート設定
 	ChangeSubState("ComboAttack1");
 }
@@ -579,7 +590,7 @@ namespace GuardSubState
 		const char* GetName() const override { return "GuardStart"; }
 		void OnEnter() override
 		{
-			_owner->GetAnimator()->PlayAnimation(u8"Guard_Start", false, 2.0f);
+			_owner->GetAnimator()->PlayAnimation(u8"BlockStart", false, 2.0f);
 		}
 		void OnExecute(float elapsedTime) override
 		{
@@ -601,7 +612,7 @@ namespace GuardSubState
 		const char* GetName() const override { return "Guarding"; }
 		void OnEnter() override
 		{
-			_owner->GetAnimator()->PlayAnimation(u8"Guard", true, 0.2f);
+			_owner->GetAnimator()->PlayAnimation(u8"BlockLoop", true, 0.2f);
 		}
 		void OnExecute(float elapsedTime) override
 		{
@@ -625,9 +636,9 @@ void PlayerGuardState::OnEnter()
     // フラグを立てる
     _owner->GetPlayer()->SetIsGuard(true);
 
-	_owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootNodeIndex("root");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
 	// 初期サブステート設定
 	ChangeSubState("GuardStart");
 }
@@ -661,16 +672,16 @@ void PlayerHitState::OnEnter()
 {
 	static const std::string HitAnimationNames[] =
 	{
-		u8"Hit1",
-		u8"Hit2",
-		u8"Hit3",
-		u8"Hit4",
-		u8"Hit5",
+		u8"HitCombatF",
+		//u8"Hit2",
+		//u8"Hit3",
+		//u8"Hit4",
+		//u8"Hit5",
 	};
 
-	_owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootNodeIndex("root");
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
     _owner->GetAnimator()->PlayAnimation(HitAnimationNames[std::rand() % _countof(HitAnimationNames)], false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
@@ -700,10 +711,10 @@ void PlayerHitState::OnExit()
 
 void PlayerHitKnockDownState::OnEnter()
 {
-    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    _owner->GetAnimator()->PlayAnimation("Hit_knockdown", false, 0.2f);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
+    _owner->GetAnimator()->PlayAnimation("HitCombatLargeF", false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
     auto charactorController = _owner->GetPlayer()->GetCharactorController();
@@ -734,14 +745,14 @@ void PlayerGuardHitState::OnEnter()
 {
     static const std::string GuardHitAnimationNames[] =
     {
-        u8"Guard_Hit1",
-        u8"Guard_Hit2",
-        u8"Guard_Hit3",
+        u8"BlockHit",
+        //u8"Guard_Hit2",
+        //u8"Guard_Hit3",
     };
 
-    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
     _owner->GetAnimator()->PlayAnimation(GuardHitAnimationNames[std::rand() % _countof(GuardHitAnimationNames)], false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
@@ -771,10 +782,10 @@ void PlayerGuardHitState::OnExit()
 
 void PlayerGuardBreakState::OnEnter()
 {
-    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
-    _owner->GetAnimator()->PlayAnimation("Guard_Break", false, 0.2f);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
+    _owner->GetAnimator()->PlayAnimation("BlockHitBreak", false, 0.2f);
 
     // 被弾モーション中は押し出されないようにする
     auto charactorController = _owner->GetPlayer()->GetCharactorController();
@@ -808,14 +819,14 @@ void PlayerDeathState::OnEnter()
 {
     static const std::string DeathAnimationNames[] =
     {
-        u8"Death",
-        u8"Death2",
-        u8"Hit_knockdown_Death",
+        u8"HitCombatDeath",
+        //u8"Death2",
+        //u8"Hit_knockdown_Death",
     };
 
-    _owner->GetAnimator()->SetRootNodeIndex("ORG-hips");
+    _owner->GetAnimator()->SetRootNodeIndex("root");
     _owner->GetAnimator()->SetIsUseRootMotion(true);
-    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionXY);
+    _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
     _owner->GetAnimator()->PlayAnimation(DeathAnimationNames[std::rand() % _countof(DeathAnimationNames)], false, 0.2f);
 }
 

@@ -22,7 +22,7 @@ void PlayerCameraController::Start()
     _currentFocus.y += _cameraOffsetY;
     GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
 
-	_focusNodeIndex = _playerActor->GetModel().lock()->GetNodeIndex("ORG-hips");
+	_focusNodeIndex = _playerActor->GetModel().lock()->GetNodeIndex("pelvis");
 }
 
 void PlayerCameraController::Update(float elapsedTime)

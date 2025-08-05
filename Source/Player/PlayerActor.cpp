@@ -14,6 +14,7 @@
 
 #include "Weapon/Warrior/PlayerShieldActor.h"
 #include "Weapon/Warrior/PlayerSwordActor.h"
+#include "Weapon/GreatSword/PlayerGreatSwordActor.h"
 
 #include "../../Source/Camera/PlayerCameraController.h"
 
@@ -93,34 +94,42 @@ void PlayerActor::OnCreate()
 	auto modelCollider = this->AddCollider<ModelCollider>();
 
 	// パラメータ設定
-	GetTransform().SetLengthScale(0.01f);
+	GetTransform().SetLengthScale(1.0f);
+	GetTransform().SetPositionY(1.0f);
 	damageable->SetMaxHealth(10.0f);
 	targetable->SetFaction(Targetable::Faction::Player);
 	// 操作対象でなければ攻撃力の倍率を0にしてダメージを与えられないようにする
 	if (!_isUserControlled)
 		playerController->SetATKFactor(0.0f);
 
-	capsuleCollider->SetStart(Vector3(0.0f, 50.0f, 0.0f));
-	capsuleCollider->SetEnd(Vector3(0.0f, 130.0f, 0.0f));
+	capsuleCollider->SetStart(Vector3(0.0f, 0.0f, 0.0f));
+	capsuleCollider->SetEnd(Vector3(0.0f, 1.2f, 0.0f));
 	capsuleCollider->SetRadius(0.5f);
 	capsuleCollider->SetLayer(CollisionLayer::Hit);
 
+	//// 剣生成
+	//{
+	//	auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);
+	//	//const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("RightHand")));
+	//	const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("ORG-hand.R")));
+	//	sword->Initialize(this, rightHandNode);
+	//	_swordActor = sword;
+	//}
+
+	//// 盾生成
+	//{
+	//	auto shield = this->_scene->RegisterActor<PlayerShieldActor>(GetName() + std::string(u8"Shield"), ActorTag::Player);
+	//	//const ModelResource::Node* leftForeArmNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("LeftForeArm")));
+	//	const ModelResource::Node* leftForeArmNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("ORG-hand.L")));
+	//	shield->Initialize(this, leftForeArmNode);
+	//	_shieldActor = shield;
+	//}
 	// 剣生成
 	{
-		auto sword = this->_scene->RegisterActor<PlayerSwordActor>(GetName() + std::string(u8"Sword"), ActorTag::Player);
-		//const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("RightHand")));
-		const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("ORG-hand.R")));
+		auto sword = this->_scene->RegisterActor<PlayerGreatSwordActor>(GetName() + std::string(u8"GreatSword"), ActorTag::Player);
+		const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("weapon_r")));
 		sword->Initialize(this, rightHandNode);
 		_swordActor = sword;
-	}
-
-	// 盾生成
-	{
-		auto shield = this->_scene->RegisterActor<PlayerShieldActor>(GetName() + std::string(u8"Shield"), ActorTag::Player);
-		//const ModelResource::Node* leftForeArmNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("LeftForeArm")));
-		const ModelResource::Node* leftForeArmNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("ORG-hand.L")));
-		shield->Initialize(this, leftForeArmNode);
-		_shieldActor = shield;
 	}
 
 	// カメラ作成

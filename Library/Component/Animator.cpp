@@ -211,7 +211,7 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
     _animationTimer += elapsedTime;
     // 再生時間が終端時間を超えた時
     const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(_animationIndex);
-    if (_animationTimer > animation.secondsLength)
+    if (_animationTimer >= animation.secondsLength)
     {
         if (_isLoop)
         {
@@ -473,20 +473,51 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         // poseNodesの行列を使いたいためpositionのみ取得
         currentRootNode.position = node.position;
     }
-
-    // 前フレームのルートノード取得
-    float oldTimer = std::max<float>(_animationTimer - elapsedTime, 0.0f);
-    ModelResource::Node oldRootNode{};
-    ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
-
-    // ノードのワールド座標を取得
     Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
-    Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
 
-    // 移動量取得
-    // デバッグでF5を押しているときは移動量を取得しない
-    if (!Debug::Input::IsActive(DebugInput::BTN_F5))
-        _rootMovement = currentPosition - oldPosition;
+    // 前フレームのアニメーションタイマーを取得
+    float oldTimer = _animationTimer - elapsedTime;
+    if (oldTimer >= 0.0f)
+    {
+        ModelResource::Node oldRootNode{};
+        ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
+
+        // ノードのワールド座標を取得
+        Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
+
+        // 移動量取得
+        // デバッグでF5を押しているときは移動量を取得しない
+        if (!Debug::Input::IsActive(DebugInput::BTN_F5))
+            _rootMovement = currentPosition - oldPosition;
+    }
+    else
+    {
+        // アニメーションがループ再生されているとoldTimerが0.0f未満になるときがある
+        // その場合は前フレームの姿勢、アニメーション終了時の姿勢、アニメーション開始時の姿勢、現在時の姿勢を使って
+        // 移動量を取得する
+        float animationLength = GetAnimationEndTime();
+        oldTimer = animationLength - oldTimer;
+        float endTimer = _animationTimer;
+        float startTimer = 0.0f;
+
+        ModelResource::Node oldRootNode{};
+        ModelResource::Node endRootNode{};
+        ModelResource::Node startRootNode{};
+        ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
+        ComputeAnimation(_animationIndex, _rootNodeIndex, endTimer, endRootNode);
+        ComputeAnimation(_animationIndex, _rootNodeIndex, startTimer, startRootNode);
+
+        // ノードのワールド座標を取得
+        Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
+        Vector3 endPosition = Vector3::TransformCoord(endRootNode.position, currentRootNode.parent->worldTransform);
+        Vector3 startPosition = Vector3::TransformCoord(startRootNode.position, currentRootNode.parent->worldTransform);
+
+        // 移動量取得
+        // デバッグでF5を押しているときは移動量を取得しない
+        if (!Debug::Input::IsActive(DebugInput::BTN_F5))
+            _rootMovement = (currentPosition - startPosition) + (endPosition - oldPosition);
+    }
+
     // ポーズノードの移動量を取り除く
     poseNodes[_rootNodeIndex].position = {};
     ModelResource::Node startRootNode{};

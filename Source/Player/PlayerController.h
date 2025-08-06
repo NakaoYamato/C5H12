@@ -48,6 +48,10 @@ public:
 #pragma endregion
 
 #pragma region アクセサ
+	// 先行入力イベントを取得
+	bool CallInputBufferingEvent() const { return _callInputBufferingEvent; }
+	// 攻撃キャンセルイベントを取得
+	bool CallCancelAttackEvent() const { return _callCancelAttackEvent; }
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 	bool CallInvisivleEvent() const { return _callInvisivleEvent; }
@@ -78,6 +82,8 @@ private:
 	std::weak_ptr<Targetable> _targetable;
 
 #pragma region 各種フラグ
+	bool _callInputBufferingEvent = false;
+	bool _callCancelAttackEvent = false;
 	bool _callCancelEvent = false;
 	bool _callInvisivleEvent = false;
 	bool _oldInvisibleEvent = false;

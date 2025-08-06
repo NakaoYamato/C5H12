@@ -136,54 +136,44 @@ void AnimationEvent::DebugRender(const std::string& animName, float animElapsedT
         if (animElapsedTime > event.startSeconds &&
             animElapsedTime < event.endSeconds)
         {
+            // フラグイベントは無視
             if (event.eventType == AnimationEvent::EventType::Flag)
-            {
-                DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
-                DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-                DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&Vector3::One));
-                DirectX::XMFLOAT4X4 transform = {};
-                DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&world));
+                continue;
 
-                Vector4 color = Vector4::Green;
-                Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), event.scale.x, color);
+            auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
+            DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
+            DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
+            DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
+            DirectX::XMFLOAT4X4 transform = {};
+            DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
+
+            Vector4 color = Vector4::White;
+            // イベントタイプによって色を変える
+            switch (event.eventType)
+            {
+            case AnimationEvent::EventType::Hit:
+                color = Vector4::Blue;
+                break;
+            case AnimationEvent::EventType::Attack:
+                color = Vector4::Red;
+                break;
             }
-            else
+
+            switch (event.shapeType)
             {
-                auto& node = _model.lock()->GetPoseNodes()[event.nodeIndex];
-                DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&event.position));
-                DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(event.angle.x, event.angle.y, event.angle.z);
-                DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&event.scale));
-                DirectX::XMFLOAT4X4 transform = {};
-                DirectX::XMStoreFloat4x4(&transform, S * R * T * DirectX::XMLoadFloat4x4(&node.worldTransform));
-
-                Vector4 color = Vector4::White;
-                // イベントタイプによって色を変える
-                switch (event.eventType)
-                {
-                case AnimationEvent::EventType::Hit:
-                    color = Vector4::Blue;
-                    break;
-                case AnimationEvent::EventType::Attack:
-                    color = Vector4::Red;
-                    break;
-                }
-
-                switch (event.shapeType)
-                {
-                case AnimationEvent::ShapeType::Box:
-                    Debug::Renderer::DrawBox(transform, color);
-                    break;
-                case AnimationEvent::ShapeType::Sphere:
-                    Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), event.scale.x, color);
-                    break;
-                case AnimationEvent::ShapeType::Capsule:
-                    Debug::Renderer::DrawCapsule(
-                        event.position.TransformCoord(node.worldTransform),
-                        event.angle.TransformCoord(node.worldTransform),
-                        event.scale.x,
-                        color);
-                    break;
-                }
+            case AnimationEvent::ShapeType::Box:
+                Debug::Renderer::DrawBox(transform, color);
+                break;
+            case AnimationEvent::ShapeType::Sphere:
+                Debug::Renderer::DrawSphere(Vector3(transform._41, transform._42, transform._43), event.scale.x, color);
+                break;
+            case AnimationEvent::ShapeType::Capsule:
+                Debug::Renderer::DrawCapsule(
+                    event.position.TransformCoord(node.worldTransform),
+                    event.angle.TransformCoord(node.worldTransform),
+                    event.scale.x,
+                    color);
+                break;
             }
         }
     }

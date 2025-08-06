@@ -118,6 +118,9 @@ public:
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
+private:
+    // æs“ü—Í‘JˆÚæ
+	std::string _nextStateName = "";
 };
 #pragma endregion
 

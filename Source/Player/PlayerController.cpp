@@ -62,6 +62,8 @@ void PlayerController::Update(float elapsedTime)
 	// 攻撃力の更新
 	_ATK = _BaseATK * _ATKFactor;
 
+	_callInputBufferingEvent = false;
+	_callCancelAttackEvent = false;
 	_callCancelEvent = false;
 	_oldInvisibleEvent = _callInvisivleEvent;
 	_callInvisivleEvent = false;
@@ -78,7 +80,17 @@ void PlayerController::Update(float elapsedTime)
 			if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
 				continue;
 
+            // 先行入力判定
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "InputBuffering")
+			{
+				_callInputBufferingEvent = true;
+			}
 			// 攻撃キャンセル判定
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "CancelAttack")
+			{
+				_callCancelAttackEvent = true;
+			}
+			// キャンセル判定
 			if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
 			{
 				_callCancelEvent = true;

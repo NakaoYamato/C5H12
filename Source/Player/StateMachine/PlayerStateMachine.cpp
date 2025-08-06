@@ -291,28 +291,42 @@ namespace SprintSubState
 
 			// 攻撃フラグを立てる
             _owner->GetPlayer()->SetBaseATK(ATK);
+
+            // 先行入力遷移先をクリア
+            _nextStateName = "";
         }
         void OnExecute(float elapsedTime) override
         {
+            // 先行入力受付時
+            if (_owner->GetPlayer()->CallInputBufferingEvent())
+            {
+                // 先行入力遷移先を設定
+                // 攻撃
+                if (_owner->GetPlayer()->IsAttack())
+                    _nextStateName = "Attack1";
+                // 回避移行
+                else if (_owner->GetPlayer()->IsEvade())
+                    _nextStateName = "Evade";
+                // ガード移行
+                else if (_owner->GetPlayer()->IsGuard())
+                    _nextStateName = "Guard";
+            }
+
             // アニメーションが終了していたら遷移
             if (!_owner->GetAnimator()->IsPlayAnimation())
                 _owner->GetStateMachine().ChangeState("Idle");
             else if (_owner->GetPlayer()->CallCancelEvent())
             {
-                // キャンセル攻撃
-                if (_owner->GetPlayer()->IsAttack())
-                    _owner->GetStateMachine().ChangeState("Attack1");
-                // 回避移行
-                else if (_owner->GetPlayer()->IsEvade())
-                    _owner->GetStateMachine().ChangeState("Evade");
-                // ガード移行
-                else if (_owner->GetPlayer()->IsGuard())
-                    _owner->GetStateMachine().ChangeState("Guard");
+                // キャンセル待機中に入力があった場合は先行入力遷移
+                if (!_nextStateName.empty())
+                    _owner->GetStateMachine().ChangeState(_nextStateName);
             }
         }
         void OnExit() override
         {
         }
+    private:
+        std::string _nextStateName = "";
     };
 }
 
@@ -425,109 +439,48 @@ void PlayerEvadeState::OnExecute(float elapsedTime)
 // 攻撃1サブステート
 namespace Attack1SubState
 {
-    class Combo1SubState : public StateBase<PlayerStateMachine>
+    class ComboSubState : public StateBase<PlayerStateMachine>
     {
     public:
         static constexpr float ATK = 1.0f;
     public:
-        Combo1SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        ComboSubState(PlayerStateMachine* stateMachine, 
+            const std::string& name, 
+            const std::string& animationName,
+            const std::string& nextSubStateName,
+            float animationBlendTime,
+            float ATK)
+            : StateBase(stateMachine), 
+            _name(name),
+            _animationName(animationName), 
+            _nextSubStateName(nextSubStateName),
+            _animationBlendTime(animationBlendTime),
+            _ATK(ATK)
         {
         }
-        const char* GetName() const override { return "ComboAttack1"; }
+
+        const char* GetName() const override { return _name.c_str(); }
+        const char* GetNextStateName() const { return _nextSubStateName.c_str(); }
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_01", false, 0.2f);
-			// 攻撃フラグを立てる
-			_owner->GetPlayer()->SetBaseATK(ATK);
-        }
-        void OnExecute(float elapsedTime) override
-        {
-            // 攻撃キャンセル判定
-            if (_owner->GetPlayer()->CallCancelEvent())
-                if (_owner->GetPlayer()->IsAttack())
-                    _owner->GetStateMachine().ChangeSubState("ComboAttack2");
-        }
-        void OnExit() override 
-        {
-        }
-    };
-    class Combo2SubState : public StateBase<PlayerStateMachine>
-    {
-    public:
-        static constexpr float ATK = 1.0f;
-    public:
-        Combo2SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
-        {
-        }
-        const char* GetName() const override { return "ComboAttack2"; }
-
-        void OnEnter() override
-        {
-            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_02", false, 0.3f);
-			// 攻撃フラグを立てる
-			_owner->GetPlayer()->SetBaseATK(ATK);
-        }
-        void OnExecute(float elapsedTime) override
-        {
-            // 攻撃キャンセル判定
-            if (_owner->GetPlayer()->CallCancelEvent())
-                if (_owner->GetPlayer()->IsAttack())
-                    _owner->GetStateMachine().ChangeSubState("ComboAttack3");
-        }
-        void OnExit() override 
-        {
-        }
-    };
-    class Combo3SubState : public StateBase<PlayerStateMachine>
-    {
-    public:
-        static constexpr float ATK = 1.0f;
-    public:
-        Combo3SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
-        {
-        }
-        const char* GetName() const override { return "ComboAttack3"; }
-
-        void OnEnter() override
-        {
-            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_03", false, 0.3f);
-			// 攻撃フラグを立てる
-			_owner->GetPlayer()->SetBaseATK(ATK);
-        }
-        void OnExecute(float elapsedTime) override
-        {
-            // 攻撃キャンセル判定
-            if (_owner->GetPlayer()->CallCancelEvent())
-                if (_owner->GetPlayer()->IsAttack())
-                    _owner->GetStateMachine().ChangeSubState("ComboAttack4");
-        }
-        void OnExit() override 
-        {
-        }
-    };
-    class Combo4SubState : public StateBase<PlayerStateMachine>
-    {
-    public:
-        static constexpr float ATK = 1.0f;
-    public:
-        Combo4SubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
-        {
-        }
-        const char* GetName() const override { return "ComboAttack4"; }
-
-        void OnEnter() override
-        {
-            _owner->GetAnimator()->PlayAnimation(u8"ComboAttack01_04", false, 0.3f);
-			// 攻撃フラグを立てる
-			_owner->GetPlayer()->SetBaseATK(ATK);
+            _owner->GetAnimator()->PlayAnimation(_animationName, false, _animationBlendTime);
+            // 攻撃フラグを立てる
+            _owner->GetPlayer()->SetBaseATK(_ATK);
         }
         void OnExecute(float elapsedTime) override
         {
         }
-        void OnExit() override 
+        void OnExit() override
         {
         }
+    private:
+        std::string _name;
+        std::string _animationName;
+        std::string _nextSubStateName;
+
+        float _animationBlendTime = 0.2f;
+        float _ATK = 1.0f;
     };
 }
 
@@ -535,10 +488,30 @@ PlayerAttack1State::PlayerAttack1State(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
 {
 	// サブステート登録
-    RegisterSubState(std::make_shared<Attack1SubState::Combo1SubState>(stateMachine));
-    RegisterSubState(std::make_shared<Attack1SubState::Combo2SubState>(stateMachine));
-    RegisterSubState(std::make_shared<Attack1SubState::Combo3SubState>(stateMachine));
-    RegisterSubState(std::make_shared<Attack1SubState::Combo4SubState>(stateMachine));
+    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine, 
+        "ComboAttack1",
+        "ComboAttack01_01",
+        "ComboAttack2",
+        0.3f,
+        1.0f));
+    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine, 
+        "ComboAttack2",
+        "ComboAttack01_02",
+        "ComboAttack3",
+        0.3f,
+        1.0f));
+    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine, 
+        "ComboAttack3",
+        "ComboAttack01_03",
+        "ComboAttack4",
+        0.3f,
+        1.0f));
+    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine, 
+        "ComboAttack4",
+        "ComboAttack01_04",
+        "",
+        0.3f,
+        1.0f));
 }
 
 void PlayerAttack1State::OnEnter()
@@ -548,19 +521,52 @@ void PlayerAttack1State::OnEnter()
     _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
     // 初期サブステート設定
 	ChangeSubState("ComboAttack1");
+
+    // 先行入力遷移先をクリア
+    _nextStateName = "";
 }
 
 void PlayerAttack1State::OnExecute(float elapsedTime)
 {
-    // 攻撃キャンセル判定
-    if (_owner->GetPlayer()->CallCancelEvent())
+    // 先行入力受付時
+    if (_owner->GetPlayer()->CallInputBufferingEvent())
     {
+        // 先行入力遷移先を設定
+        // 攻撃
+        if (_owner->GetPlayer()->IsAttack())
+            _nextStateName = "Attack";
         // 回避移行
-        if (_owner->GetPlayer()->IsEvade())
-            _owner->GetStateMachine().ChangeState("Evade");
+        else if (_owner->GetPlayer()->IsEvade())
+            _nextStateName = "Evade";
         // ガード移行
         else if (_owner->GetPlayer()->IsGuard())
-            _owner->GetStateMachine().ChangeState("Guard");
+            _nextStateName = "Guard";
+    }
+
+    // 攻撃キャンセル判定
+    if (_owner->GetPlayer()->CallCancelAttackEvent())
+    {
+        if (_nextStateName == "Attack")
+        {
+            auto subState = dynamic_cast<Attack1SubState::ComboSubState*>(this->_subState);
+            if (subState)
+            {
+                if (subState->GetNextStateName() != "")
+                {
+                    // キャンセル待機中に入力があった場合は先行入力遷移
+                    _owner->GetStateMachine().ChangeSubState(subState->GetNextStateName());
+                    _nextStateName = ""; // 遷移後はクリア
+                    return;
+                }
+            }
+        }
+    }
+
+    // キャンセル判定
+    if (_owner->GetPlayer()->CallCancelEvent())
+    {
+        if (!_nextStateName.empty())
+            _owner->GetStateMachine().ChangeState(_nextStateName);
     }
     else
     {

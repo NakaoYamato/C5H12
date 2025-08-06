@@ -5,6 +5,7 @@
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Exporter/Exporter.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Actor/Camera/MainCamera.h"
@@ -313,7 +314,26 @@ void Scene::Render()
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
         // プリミティブ描画
+        {
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyColorSRV;
+            D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+            srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MipLevels = 1;
+
+            srvDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+            GpuResourceManager::CreateShaderResourceViewCopy(
+                Graphics::Instance().GetDevice(), dc,
+                renderFrame->GetColorSRV().Get(),
+                &srvDesc,
+                copyColorSRV.ReleaseAndGetAddressOf()
+            );
+            //dc->PSSetShaderResources(2, 1, gBuffer->GetRenderTargetSRV(GBUFFER_COLOR_MAP_INDEX).GetAddressOf());
+            dc->PSSetShaderResources(2, 1, copyColorSRV.GetAddressOf());
+        }
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
 		_primitiveRenderer.Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
+        ID3D11ShaderResourceView* nullsrvs[] = { nullptr };
+        dc->PSSetShaderResources(2, 1, nullsrvs);
 
         // デバッグ描画
         Debug::Renderer::Render(rc.camera->GetView(), rc.camera->GetProjection());

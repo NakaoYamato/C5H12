@@ -44,5 +44,6 @@ protected:
 	Vector3 _oldPosition = Vector3::Zero; // 前回の位置(ワールド座標)
 	Vector3 _locusRootLocalPosition = Vector3::Zero; // 軌跡のルート位置(ローカル座標)
 	Vector3 _locusTipLocalPosition = Vector3::Up; // 軌跡の先端位置(ローカル座標)
+    float _locusLifeTime = 0.1f; // 軌跡のライフタイム
 	bool _isDrawingLocusPosition = true; // 軌跡の位置を描画するかどうか
 };

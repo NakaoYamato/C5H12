@@ -2,7 +2,6 @@
 #include <filesystem>
 
 #include <d3dcompiler.h>
-#include <map>
 #include <memory>
 #include <fstream>
 
@@ -18,14 +17,14 @@
 
 #pragma comment(lib, "d3dcompiler.lib")
 
-static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderMap;
-static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> inputLayoutMap;
-static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderMap;
-static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11GeometryShader>> geometryShaderMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>>	GpuResourceManager::vertexShaderMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>>	GpuResourceManager::inputLayoutMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>>	GpuResourceManager::pixelShaderMap;
+std::map<std::string, Microsoft::WRL::ComPtr<ID3D11GeometryShader>> GpuResourceManager::geometryShaderMap;
 
-static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> resources;
+std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> GpuResourceManager::resources;
 
-static bool _isDrawingGui = false;
+bool GpuResourceManager::_isDrawShaderGui = false;
 
 // Gui描画
 void GpuResourceManager::DrawGui(ID3D11Device* device)
@@ -34,14 +33,14 @@ void GpuResourceManager::DrawGui(ID3D11Device* device)
 	{
 		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			ImGui::Checkbox(u8"シェーダリソース", &_isDrawingGui);
+			ImGui::Checkbox(u8"シェーダリソース", &_isDrawShaderGui);
 			ImGui::EndMenu();
 		}
 
 		ImGui::EndMainMenuBar();
 	}
 
-	if (_isDrawingGui)
+	if (_isDrawShaderGui)
 	{
 		if (ImGui::Begin(u8"シェーダリソース"))
 		{
@@ -77,6 +76,17 @@ void GpuResourceManager::DrawGui(ID3D11Device* device)
 	}
 }
 
+// 頂点シェーダー取得
+Microsoft::WRL::ComPtr<ID3D11VertexShader>& GpuResourceManager::GetVertexShader(const std::string& filepath)
+{
+	return vertexShaderMap[filepath];
+}
+// 入力レイアウト取得
+Microsoft::WRL::ComPtr<ID3D11InputLayout>& GpuResourceManager::GetInputLayout(const std::string& filepath)
+{
+	return inputLayoutMap[filepath];
+}
+// ピクセルシェーダ取得
 Microsoft::WRL::ComPtr<ID3D11PixelShader>& GpuResourceManager::GetPixelShader(const std::string& filepath)
 {
 	return pixelShaderMap[filepath];

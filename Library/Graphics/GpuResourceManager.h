@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <string>
 #include <wrl.h>
+#include <map>
 
 class GpuResourceManager
 {
@@ -10,6 +11,11 @@ public:
 	// Gui描画
 	static void DrawGui(ID3D11Device* device);
 
+	// 頂点シェーダー取得
+	static Microsoft::WRL::ComPtr<ID3D11VertexShader>& GetVertexShader(const std::string& filepath);
+	// 入力レイアウト取得
+	static Microsoft::WRL::ComPtr<ID3D11InputLayout>& GetInputLayout(const std::string& filepath);
+	// ピクセルシェーダ取得
 	static Microsoft::WRL::ComPtr<ID3D11PixelShader>& GetPixelShader(const std::string& filepath);
 public:
 	// 頂点シェーダ作成
@@ -104,4 +110,12 @@ public:
 		const std::string& filepath);
 #pragma endregion
 
+private:
+	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderMap;
+	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> inputLayoutMap;
+	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderMap;
+	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11GeometryShader>> geometryShaderMap;
+	static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> resources;
+
+	static bool _isDrawShaderGui;
 };

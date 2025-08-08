@@ -51,7 +51,7 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 	// ノイズテクスチャの読み込み
 	GpuResourceManager::LoadTextureFromFile(
 		device,
-		L"./Data/Texture/Noise/Noise000.png",
+		L"./Data/Texture/Noise/Noise001.png",
 		_noiseSRV.ReleaseAndGetAddressOf(),
 		nullptr);
 	// 距離テクスチャの読み込み

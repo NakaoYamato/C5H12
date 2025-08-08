@@ -38,6 +38,12 @@ void ConstantBufferManager::Update(const RenderContext& rc)
 		sceneCB.cameraPosition.z = eye.z;
 		sceneCB.cameraPosition.w = 0.0f; // w¬•ª‚ÍŽg—p‚µ‚È‚¢‚Ì‚Å0‚ÉÝ’è
 
+		D3D11_VIEWPORT viewport;
+		UINT num_viewports = 1;
+		dc->RSGetViewports(&num_viewports, &viewport);
+		sceneCB.aspect = viewport.Width / viewport.Height;
+		sceneCB.sumDistance = 1000.0f;
+
 		UpdateSceneCB(&sceneCB);
 		dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::SceneCB)].Get(), 0, 0, &this->_sceneCB, 0, 0);
 	}
@@ -127,6 +133,8 @@ void ConstantBufferManager::UpdateSceneCB(SceneConstantBuffer* buffer)
 		this->_sceneCB.invProjection = buffer->invProjection;
 		this->_sceneCB.invView = buffer->invView;
 		this->_sceneCB.invViewProjection = buffer->invViewProjection;
+		this->_sceneCB.aspect = buffer->aspect;
+		this->_sceneCB.sumDistance = buffer->sumDistance;
 	}
 }
 

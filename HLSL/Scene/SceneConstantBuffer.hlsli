@@ -14,6 +14,10 @@ cbuffer SCENE_CONSTANT_BUFFER : register(b0)
     float4 lightColor;
     float4 cameraPosition;
     
+    float aspect;
+    float sumDistance;
+    float2 sceneDummy;
+    
     float totalElapsedTime;
     float deltaTime;
     float windFrequency;

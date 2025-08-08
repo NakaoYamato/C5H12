@@ -55,6 +55,10 @@ public:
 		DirectX::XMFLOAT4		lightColor;
 		DirectX::XMFLOAT4		cameraPosition;
 
+		float					aspect{};
+		float					sumDistance = 1000.0f;
+		DirectX::XMFLOAT2		sceneDummy{};
+
 		float					totalElapsedTime{};
 		float					deltaTime{};
 		float					windFrequency = 22.388f;

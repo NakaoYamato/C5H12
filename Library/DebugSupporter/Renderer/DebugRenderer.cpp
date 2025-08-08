@@ -774,7 +774,7 @@ void DebugRenderer::Render(
 	const DirectX::XMFLOAT4X4& projection)
 {
 	// 定数バッファ設定
-	dc->VSSetConstantBuffers(0, 1, _constantBuffer.GetAddressOf());
+	dc->VSSetConstantBuffers(1, 1, _constantBuffer.GetAddressOf());
 
 	// ビュープロジェクション行列作成
 	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);

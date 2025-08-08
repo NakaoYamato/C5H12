@@ -141,7 +141,14 @@ void PostProcessManager::ApplyEffect(RenderContext& rc,
 
 	// ÅIƒpƒX
 	PostProcessBase* finalPassPP = GetPostProcess(PostProcessType::FinalPassPP);
-	finalPassPP->Render(dc, _bloomRenderFrame->GetColorSRV().GetAddressOf(), 0, 1);
+	{
+		ID3D11ShaderResourceView* srvs[] =
+		{
+			_bloomRenderFrame->GetColorSRV().Get(),
+			depthSRV
+		};
+		finalPassPP->Render(dc, srvs, 0, _countof(srvs));
+	}
 
 	_appliedEffectSRV = finalPassPP->GetColorSRV();
 }

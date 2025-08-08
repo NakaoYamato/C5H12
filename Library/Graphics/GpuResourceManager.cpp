@@ -1,6 +1,5 @@
 #include "GpuResourceManager.h"
 #include <filesystem>
-#include <wrl.h>
 
 #include <d3dcompiler.h>
 #include <map>
@@ -76,6 +75,11 @@ void GpuResourceManager::DrawGui(ID3D11Device* device)
 		}
 		ImGui::End();
 	}
+}
+
+Microsoft::WRL::ComPtr<ID3D11PixelShader>& GpuResourceManager::GetPixelShader(const std::string& filepath)
+{
+	return pixelShaderMap[filepath];
 }
 
 // 頂点シェーダ作成
@@ -649,7 +653,14 @@ bool GpuResourceManager::ReCompileVertexShader(
 	compileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
 
-	std::filesystem::path path(filepath);
+	std::string replacePath = filepath;
+	// ファイル階層がCSOとhlslでは異なるので"Data/Shader"を取り除く
+	size_t pos = replacePath.find("Data/Shader");
+	if (pos != std::string::npos)
+	{
+		replacePath.erase(pos, 12); // "Data/Shader"の長さは12
+	}
+	std::filesystem::path path(replacePath);
 	path.replace_extension(".hlsl");
 	Microsoft::WRL::ComPtr<ID3DBlob> outBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -710,7 +721,14 @@ bool GpuResourceManager::ReCompilePixelShader(
 	compileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
 
-	std::filesystem::path path(filepath);
+	std::string replacePath = filepath;
+	// ファイル階層がCSOとhlslでは異なるので"Data/Shader"を取り除く
+	size_t pos = replacePath.find("Data/Shader");
+	if (pos != std::string::npos)
+	{
+		replacePath.erase(pos, 12); // "Data/Shader"の長さは12
+	}
+	std::filesystem::path path(replacePath);
 	path.replace_extension(".hlsl");
 	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;

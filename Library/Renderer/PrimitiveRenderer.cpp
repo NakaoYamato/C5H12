@@ -24,6 +24,7 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 	);
 
 	// ピクセルシェーダー
+	_pixelShader.Load(device, "./Data/Shader/HLSL/PrimitiveRenderer/PrimitiveRendererPS.cso");
 	GpuResourceManager::CreatePsFromCso(
 		device,
 		"./Data/Shader/HLSL/PrimitiveRenderer/PrimitiveRendererPS.cso",
@@ -79,6 +80,7 @@ void PrimitiveRenderer::Render(ID3D11DeviceContext* dc, const DirectX::XMFLOAT4X
 	// シェーダー設定
 	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
+	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 	dc->IASetInputLayout(inputLayout.Get());
 
 	static constexpr int CBIndex = 1;

@@ -7,6 +7,7 @@
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Math/Quaternion.h"
+#include "../../Library/Shader/Shader.h"
 
 class PrimitiveRenderer
 {
@@ -43,6 +44,7 @@ private:
 	};
 	std::vector<Vertex>		vertices;
 
+	PixelShader			_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>	inputLayout;

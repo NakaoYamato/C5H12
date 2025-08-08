@@ -496,6 +496,7 @@
     <ClInclude Include="Library\Shader\PBR\PBRShader.h" />
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
+    <ClInclude Include="Library\Shader\Shader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Library\Shader\Test\TestShader.h" />
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />

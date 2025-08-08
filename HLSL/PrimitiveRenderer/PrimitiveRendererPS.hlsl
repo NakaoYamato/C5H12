@@ -9,6 +9,7 @@ Texture2D noiseMap : register(t4);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
+    //return float4(1, 0, 0, 1);
     float2 noiseTexcoord = pin.texcoord;
     noiseTexcoord.x *= 0.0025f;
     float noise = noiseMap.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], noiseTexcoord).r;

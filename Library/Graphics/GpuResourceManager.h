@@ -2,6 +2,7 @@
 
 #include <d3d11.h>
 #include <string>
+#include <wrl.h>
 
 class GpuResourceManager
 {
@@ -9,6 +10,7 @@ public:
 	// Gui描画
 	static void DrawGui(ID3D11Device* device);
 
+	static Microsoft::WRL::ComPtr<ID3D11PixelShader>& GetPixelShader(const std::string& filepath);
 public:
 	// 頂点シェーダ作成
 	static void CreateVsFromCso(ID3D11Device* device,

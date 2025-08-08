@@ -27,11 +27,11 @@ Primitive::Primitive(ID3D11Device* device)
     UINT numElements = ARRAYSIZE(layout);
 
     //	頂点シェーダーの読み込み
-    GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/PrimitiveVS.cso", _vertexShader.GetAddressOf(),
+    GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/HLSL/Primitive/PrimitiveVS.cso", _vertexShader.GetAddressOf(),
         _inputLayout.GetAddressOf(), layout, numElements);
 
     //	ピクセルシェーダーの作成
-    GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/PrimitivePS.cso", _pixelShader.GetAddressOf());
+    GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/Primitive/PrimitivePS.cso", _pixelShader.GetAddressOf());
 }
 
 void Primitive::Rect(ID3D11DeviceContext* context,

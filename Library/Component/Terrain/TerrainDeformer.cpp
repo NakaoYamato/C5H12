@@ -34,7 +34,7 @@ void TerrainDeformer::OnCreate()
     // マテリアルマップのコピーピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         device,
-        "./Data/Shader/TerrainCopyMaterialPS.cso",
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainCopyMaterialPS.cso",
         _copyMaterialPS.ReleaseAndGetAddressOf());
 
     // 定数バッファの作成
@@ -59,8 +59,8 @@ void TerrainDeformer::OnCreate()
 	// フルスクリーンクアッドのスプライトリソースを作成
     _fullscreenQuad = std::make_unique<SpriteResource>(device,
         L"",
-        "./Data/Shader/TerrainDeformerVS.cso",
-        "./Data/Shader/FullscreenQuadPS.cso");
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformerVS.cso",
+        "./Data/Shader/HLSL/Sprite/FullscreenQuadPS.cso");
 
     // デフォルトペイントテクスチャデータの読み込み
     {

@@ -5,14 +5,14 @@
 #include "../../HRTrace.h"
 
 GaussianFilter::GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t height) :
-	PostProcessBase(device, width, height, "./Data/Shader/UpsamplingPS.cso", sizeof(Constants))
+	PostProcessBase(device, width, height, "./Data/Shader/HLSL/PostProcess/GaussianFilter/UpsamplingPS.cso", sizeof(Constants))
 {
 	// ピクセルシェーダ作成
-	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/DownsamplingPS.cso",
+	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/PostProcess/GaussianFilter/DownsamplingPS.cso",
 		_pixelShaders[PIXEL_SHADER_TYPE::DOWNSAMPLING_PS].ReleaseAndGetAddressOf());
-	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HorizontalFilterPS.cso",
+	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/PostProcess/GaussianFilter/HorizontalFilterPS.cso",
 		_pixelShaders[PIXEL_SHADER_TYPE::HORIZONTAL_PS].ReleaseAndGetAddressOf());
-	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/VerticalFilterPS.cso",
+	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/PostProcess/GaussianFilter/VerticalFilterPS.cso",
 		_pixelShaders[PIXEL_SHADER_TYPE::VERTICAL_PS].ReleaseAndGetAddressOf());
 
 	for (size_t i = 0; i < DownSampledCount; ++i)

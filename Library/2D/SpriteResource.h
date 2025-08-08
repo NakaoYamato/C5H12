@@ -18,8 +18,8 @@ public:
 	/// <param name="psShaderFilename"></param>
 	SpriteResource(ID3D11Device* device, 
 		const wchar_t* filename,
-		const char* vsShaderFilename = "./Data/Shader/SpriteVS.cso",
-		const char* psShaderFilename = "./Data/Shader/SpritePS.cso");
+		const char* vsShaderFilename = "./Data/Shader/HLSL/Sprite/SpriteVS.cso",
+		const char* psShaderFilename = "./Data/Shader/HLSL/Sprite/SpritePS.cso");
 	/// <summary>
 	/// コンストラクタ（SRVを直接受け取る）
 	/// </summary>
@@ -29,8 +29,8 @@ public:
 	/// <param name="psShaderFilename"></param>
 	SpriteResource(ID3D11Device* device,
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
-		const char* vsShaderFilename = "./Data/Shader/SpriteVS.cso",
-		const char* psShaderFilename = "./Data/Shader/SpritePS.cso");
+		const char* vsShaderFilename = "./Data/Shader/HLSL/Sprite/SpriteVS.cso",
+		const char* psShaderFilename = "./Data/Shader/HLSL/Sprite/SpritePS.cso");
 
 	SpriteResource() = delete;
 	virtual ~SpriteResource();

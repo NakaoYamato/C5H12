@@ -32,7 +32,7 @@ public:
     };
 public:
     FinalPass(ID3D11Device* device, uint32_t width, uint32_t height) :
-        PostProcessBase(device, width, height, "./Data/Shader/FinalPassPS.cso", sizeof(Constants))
+        PostProcessBase(device, width, height, "./Data/Shader/HLSL/PostProcess/FinalPass/FinalPassPS.cso", sizeof(Constants))
     {
         // ‰Šú’l‚Ìİ’è
         _startData = GetCurrentData();

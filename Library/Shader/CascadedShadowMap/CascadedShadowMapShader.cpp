@@ -20,7 +20,7 @@ CascadedShadowMapShader::CascadedShadowMapShader(ID3D11Device* device,
 
 	// ジオメトリシェーダー
 	GpuResourceManager::CreateGsFromCso(device,
-		"./Data/Shader/CascadedShadowGS.cso",
+		"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowGS.cso",
 		_geometryShader.ReleaseAndGetAddressOf());
 }
 

@@ -5,8 +5,8 @@ void TextureRenderer::Initialize(ID3D11Device* device)
 {
 	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/FullscreenQuadPS.cso");
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadPS.cso");
 }
 
 void TextureRenderer::Blit(

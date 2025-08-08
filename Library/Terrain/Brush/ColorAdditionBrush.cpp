@@ -14,7 +14,7 @@ ColorAdditionBrush::ColorAdditionBrush(TerrainDeformer* deformer) :
     // 加算ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformAddPS.cso",
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformAddPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
 // 描画処理

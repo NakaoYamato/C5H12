@@ -14,7 +14,7 @@ GrassTransformingBrush::GrassTransformingBrush(TerrainDeformer* deformer) :
     // 草編集ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformGrassPS.cso",
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformGrassPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
 

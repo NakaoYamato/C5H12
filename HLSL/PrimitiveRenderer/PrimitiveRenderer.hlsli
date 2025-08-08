@@ -1,3 +1,5 @@
+#include "../Scene/SceneConstantBuffer.hlsli"
+
 struct VS_IN
 {
     float4 position : POSITION;
@@ -7,10 +9,13 @@ struct VS_IN
 struct VS_OUT
 {
     float4 position : SV_POSITION;
+    float2 texcoord : TEXCOORD;
     float4 color : COLOR;
 };
 
-cbuffer CbScene : register(b0)
-{
-    row_major float4x4 viewProjection;
+cbuffer CbScene : register(b1)
+{    
+    uint vertexCount;
+    float2 viewportSize;
+    float padding;
 };

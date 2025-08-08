@@ -40,7 +40,7 @@ public:
     };
 public:
     FXAA(ID3D11Device* device, uint32_t width, uint32_t height) :
-        PostProcessBase(device, width, height, "./Data/Shader/FXAAPS.cso", sizeof(Constants))
+        PostProcessBase(device, width, height, "./Data/Shader/HLSL/PostProcess/FXAA/FXAAPS.cso", sizeof(Constants))
     {
         _data.invScreenSize.x = 1.0f / static_cast<float>(width);
         _data.invScreenSize.y = 1.0f / static_cast<float>(height);

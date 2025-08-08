@@ -98,8 +98,8 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 
 	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/CascadedShadowMapPS.cso");
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/PostProcess/CascadedShadowMap/CascadedShadowMapPS.cso");
 }
 // çXêVèàóù
 void CascadedShadowMap::Update(float elapsedTime)

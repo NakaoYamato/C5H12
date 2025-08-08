@@ -29,7 +29,7 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         // 頂点シェーダー
         GpuResourceManager::CreateVsFromCso(
             device,
-            "./Data/Shader/TerrainVS.cso",
+            "./Data/Shader/HLSL/Terrain/TerrainVS.cso",
             _vertexShader.ReleaseAndGetAddressOf(),
             _inputLayout.ReleaseAndGetAddressOf(),
             inputElementDesc,
@@ -37,22 +37,22 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         // ハルシェーダー
         GpuResourceManager::CreateHsFromCso(
             device,
-            "./Data/Shader/TerrainHS.cso",
+            "./Data/Shader/HLSL/Terrain/TerrainHS.cso",
             _hullShader.ReleaseAndGetAddressOf());
         // ドメインシェーダー
         GpuResourceManager::CreateDsFromCso(
             device,
-            "./Data/Shader/TerrainDS.cso",
+            "./Data/Shader/HLSL/Terrain/TerrainDS.cso",
             _domainShader.ReleaseAndGetAddressOf());
         // ピクセルシェーダー
         GpuResourceManager::CreatePsFromCso(
             device,
-            "./Data/Shader/TerrainPS.cso",
+            "./Data/Shader/HLSL/Terrain/TerrainPS.cso",
             _pixelShader.ReleaseAndGetAddressOf());
         // GBufferへ書き込む用のピクセルシェーダー
         GpuResourceManager::CreatePsFromCso(
             device,
-            "./Data/Shader/TerrainGBPS.cso",
+            "./Data/Shader/HLSL/Terrain/TerrainGBPS.cso",
             _gbPixelShader.ReleaseAndGetAddressOf());
     }
 
@@ -61,7 +61,7 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         // 頂点シェーダー作成
         GpuResourceManager::CreateVsFromCso(
             device, 
-            "./Data/Shader/TerrainGrassVS.cso",
+            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassVS.cso",
             _grassVertexShader.GetAddressOf(),
             nullptr, 
             nullptr, 
@@ -69,27 +69,27 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         // ハルシェーダー
         GpuResourceManager::CreateHsFromCso(
             device,
-            "./Data/Shader/TerrainGrassHS.cso",
+            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassHS.cso",
             _grassHullShader.ReleaseAndGetAddressOf());
         // ドメインシェーダー
         GpuResourceManager::CreateDsFromCso(
             device,
-            "./Data/Shader/TerrainGrassDS.cso",
+            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassDS.cso",
             _grassDomainShader.ReleaseAndGetAddressOf());
 		// ジオメトリシェーダー作成
 		GpuResourceManager::CreateGsFromCso(
 			device,
-			"./Data/Shader/TerrainGrassGS.cso",
+			"./Data/Shader/HLSL/Terrain/Grass/TerrainGrassGS.cso",
 			_grassGeometryShader.GetAddressOf());
 		// ピクセルシェーダー作成
 		GpuResourceManager::CreatePsFromCso(
 			device,
-			"./Data/Shader/TerrainGrassPS.cso",
+			"./Data/Shader/HLSL/Terrain/Grass/TerrainGrassPS.cso",
             _grassPixelShader.GetAddressOf());
         // GBufferへ書き込む用のピクセルシェーダー
         GpuResourceManager::CreatePsFromCso(
             device,
-            "./Data/Shader/TerrainGrassGBPS.cso",
+            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassGBPS.cso",
             _grassGBPixelShader.ReleaseAndGetAddressOf());
 	}
 
@@ -107,7 +107,7 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         UINT bufferStrides[] = { sizeof(Terrain::StreamOutVertex) };
         GpuResourceManager::CreateGsWithStreamOutFromCso(
             device,
-            "./Data/Shader/TerrainGS.cso",
+            "./Data/Shader/HLSL/Terrain/TerrainGS.cso",
             _streamOutGeometryShader.ReleaseAndGetAddressOf(),
             declaration, _countof(declaration),
             bufferStrides, _countof(bufferStrides),

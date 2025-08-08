@@ -14,7 +14,7 @@ CostTransformingBrush::CostTransformingBrush(TerrainDeformer* deformer) :
     // コスト編集ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformCostPS.cso",
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformCostPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
 // 描画処理

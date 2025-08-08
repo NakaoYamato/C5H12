@@ -14,7 +14,7 @@ HeightTransformingBrush::HeightTransformingBrush(TerrainDeformer* deformer) :
     // 高さ変形ブラシピクセルシェーダの読み込み
     GpuResourceManager::CreatePsFromCso(
         Graphics::Instance().GetDevice(),
-        "./Data/Shader/TerrainDeformHeightPS.cso",
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformHeightPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
 // 描画処理

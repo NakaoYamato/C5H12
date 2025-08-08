@@ -1,6 +1,7 @@
 #include "Framework.h"
 
 #include "../Graphics/Graphics.h"
+#include "../Graphics/GpuResourceManager.h"
 #include "../ImGui/ImGuiManager.h"
 #include "../Input/Input.h"
 #include "../Audio/AudioSystem.h"
@@ -282,6 +283,9 @@ void Framework::Render()
 
         // GUIのメニューバーでシーン変更
         SceneManager::Instance().SceneMenuGui();
+
+		// リソース管理クラスのGui描画
+		GpuResourceManager::DrawGui(Graphics::Instance().GetDevice());
 
         // モデルリソース管理クラスのGui描画
         ModelResourceManager::Instance().DrawGui();

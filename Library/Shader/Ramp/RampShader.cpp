@@ -18,7 +18,7 @@ RampShader::RampShader(ID3D11Device* device,
 
 	// ピクセルシェーダ
 	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/RampPS.cso",
+		"./Data/Shader/HLSL/Model/Ramp/RampPS.cso",
 		_pixelShader.ReleaseAndGetAddressOf());
 
 

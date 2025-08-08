@@ -2,9 +2,12 @@
 #include <filesystem>
 #include <wrl.h>
 
-#include <string>
+#include <d3dcompiler.h>
 #include <map>
 #include <memory>
+#include <fstream>
+
+#include <imgui.h>
 
 #include "../../External/DirectXTex/DDS.h"
 #include "../../External/DirectXTK-main/WICTextureLoader.h"
@@ -14,42 +17,65 @@
 
 #include "../DebugSupporter/DebugSupporter.h"
 
-// 頂点シェーダー読み込み
-HRESULT GpuResourceManager::LoadVertexShader(
-	ID3D11Device* device,
-	const char* filename,
-	const D3D11_INPUT_ELEMENT_DESC inputElementDescs[],
-	UINT inputElementCount,
-	ID3D11InputLayout** inputLayout,
-	ID3D11VertexShader** vertexShader)
+#pragma comment(lib, "d3dcompiler.lib")
+
+static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderMap;
+static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> inputLayoutMap;
+static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderMap;
+static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11GeometryShader>> geometryShaderMap;
+
+static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> resources;
+
+static bool _isDrawingGui = false;
+
+// Gui描画
+void GpuResourceManager::DrawGui(ID3D11Device* device)
 {
-	// ファイルを開く
-	FILE* fp = nullptr;
-	fopen_s(&fp, filename, "rb");
-	_ASSERT_EXPR_A(fp, "Vertex Shader File not found");
-
-	// ファイルのサイズを求める
-	fseek(fp, 0, SEEK_END);
-	long size = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	// メモリ上に頂点シェーダーデータを格納する領域を用意する
-	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
-	fread(data.get(), size, 1, fp);
-	fclose(fp);
-
-	// 頂点シェーダー生成
-	HRESULT hr = device->CreateVertexShader(data.get(), size, nullptr, vertexShader);
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-	// 入力レイアウト
-	if (inputLayout != nullptr)
+	if (ImGui::BeginMainMenuBar())
 	{
-		hr = device->CreateInputLayout(inputElementDescs, inputElementCount, data.get(), size, inputLayout);
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		if (ImGui::BeginMenu(u8"デバッグ"))
+		{
+			ImGui::Checkbox(u8"シェーダリソース", &_isDrawingGui);
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
 	}
 
-	return hr;
+	if (_isDrawingGui)
+	{
+		if (ImGui::Begin(u8"シェーダリソース"))
+		{
+			ImGui::Text(u8"頂点シェーダー");
+			for (auto& [filepath, vertexShader] : vertexShaderMap)
+			{
+				if (ImGui::TreeNode(filepath.c_str()))
+				{
+					if (ImGui::Button(u8"再コンパイル"))
+					{
+						GpuResourceManager::ReCompileVertexShader(device, filepath.c_str());
+					}
+
+					ImGui::TreePop();
+				}
+			}
+			ImGui::Separator();
+
+			ImGui::Text(u8"ピクセルシェーダ");
+			for (auto& [filepath, pixelShader] : pixelShaderMap)
+			{
+				if (ImGui::TreeNode(filepath.c_str()))
+				{
+					if (ImGui::Button(u8"再コンパイル"))
+					{
+						GpuResourceManager::ReCompilePixelShader(device, filepath.c_str());
+					}
+					ImGui::TreePop();
+				}
+			}
+		}
+		ImGui::End();
+	}
 }
 
 // 頂点シェーダ作成
@@ -60,21 +86,18 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 	D3D11_INPUT_ELEMENT_DESC* inputElementDesc, 
 	UINT numElements)
 {
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderData;
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11InputLayout>> inputLayoutData;
-
 	HRESULT hr = { S_OK };
 
 	// 過去に生成しているか確認
-	auto it = vertexShaderData.find(csoName);
-	if (it != vertexShaderData.end())
+	auto it = vertexShaderMap.find(csoName);
+	if (it != vertexShaderMap.end())
 	{
 		// 過去に生成したデータを取得
 		*vertexShader = it->second.Get();
 		(*vertexShader)->AddRef();
 
-		auto inputIter = inputLayoutData.find(csoName);
-		if (inputIter != inputLayoutData.end())
+		auto inputIter = inputLayoutMap.find(csoName);
+		if (inputIter != inputLayoutMap.end())
 		{
 			*inputLayout = inputIter->second.Get();
 			(*inputLayout)->AddRef();
@@ -99,7 +122,7 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		// 生成したデータをセット
-		vertexShaderData.insert(std::make_pair(csoName, *vertexShader));
+		vertexShaderMap.insert(std::make_pair(csoName, *vertexShader));
 
 		// 入力レイアウトオブジェクトの生成
 		if (inputLayout)
@@ -109,7 +132,7 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 			// 生成したデータをセット
-			inputLayoutData.insert(std::make_pair(csoName, *inputLayout));
+			inputLayoutMap.insert(std::make_pair(csoName, *inputLayout));
 		}
 
 		Debug::Output::String(L"頂点シェーダーの作成成功\n");
@@ -124,11 +147,9 @@ void GpuResourceManager::CreatePsFromCso(ID3D11Device* device,
 	const char* csoName,
 	ID3D11PixelShader** pixelShader)
 {
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderData;
-
 	// 過去に生成しているか確認
-	auto it = pixelShaderData.find(csoName);
-	if (it != pixelShaderData.end())
+	auto it = pixelShaderMap.find(csoName);
+	if (it != pixelShaderMap.end())
 	{
 		// 過去に生成したデータを取得
 		*pixelShader = it->second.Get();
@@ -153,7 +174,7 @@ void GpuResourceManager::CreatePsFromCso(ID3D11Device* device,
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		// 生成したデータをセット
-		pixelShaderData.insert(std::make_pair(csoName, *pixelShader));
+		pixelShaderMap.insert(std::make_pair(csoName, *pixelShader));
 
 		Debug::Output::String(L"ピクセルシェーダーの作成成功\n");
 		Debug::Output::String("\t");
@@ -167,11 +188,9 @@ void GpuResourceManager::CreateGsFromCso(ID3D11Device* device,
 	const char* csoName, 
 	ID3D11GeometryShader** geometryShader)
 {
-	static std::map<std::string, Microsoft::WRL::ComPtr<ID3D11GeometryShader>> geometryShaderData;
-
 	// 過去に生成しているか確認
-	auto it = geometryShaderData.find(csoName);
-	if (it != geometryShaderData.end())
+	auto it = geometryShaderMap.find(csoName);
+	if (it != geometryShaderMap.end())
 	{
 		// 過去に生成したデータを取得
 		*geometryShader = it->second.Get();
@@ -196,7 +215,7 @@ void GpuResourceManager::CreateGsFromCso(ID3D11Device* device,
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		// 生成したデータをセット
-		geometryShaderData.insert(std::make_pair(csoName, *geometryShader));
+		geometryShaderMap.insert(std::make_pair(csoName, *geometryShader));
 
 		Debug::Output::String(L"ジオメトリシェーダーの作成成功\n");
 		Debug::Output::String("\t");
@@ -325,8 +344,6 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 	ID3D11ShaderResourceView** shaderResourceView,
 	D3D11_TEXTURE2D_DESC* texture2dDesc)
 {
-	static std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> resources;
-
 	HRESULT hr = { S_OK };
 	// 以前に読み込んだことがあるか確認
 	auto it = resources.find(filename);
@@ -576,4 +593,160 @@ void GpuResourceManager::RestoreStateCache(ID3D11DeviceContext* dc)
     cachedDSS.Reset();
     cachedRS.Reset();
     cachedBS.Reset();
+}
+
+class IncludeHandler : public ID3DInclude
+{
+public:
+	HRESULT __stdcall Open(
+		D3D_INCLUDE_TYPE IncludeType,    // インクルードの種類
+		LPCSTR pFileName,                // インクルードファイル名
+		LPCVOID pParentData,             // 親データ（無視）
+		LPCVOID* ppData,                 // ファイル内容を格納するポインタ
+		UINT* pBytes                     // ファイルサイズを格納するポインタ
+	) override
+	{
+		std::ifstream file(pFileName, std::ios::binary);
+		if (!file.is_open())
+		{
+			return E_FAIL; // ファイルが開けない場合
+		}
+
+		file.seekg(0, std::ios::end);
+		size_t fileSize = file.tellg();
+		file.seekg(0, std::ios::beg);
+
+		auto buffer = new char[fileSize]; // ファイルデータをバッファに格納
+		file.read(buffer, fileSize);
+		file.close();
+
+		*ppData = buffer;
+		*pBytes = static_cast<UINT>(fileSize);
+		return S_OK;
+	}
+
+	HRESULT __stdcall Close(LPCVOID pData) override
+	{
+		delete[] static_cast<const char*>(pData); // バッファを解放
+		return S_OK;
+	}
+}includeHandler;
+
+// 頂点シェーダーを再コンパイルする関数
+bool GpuResourceManager::ReCompileVertexShader(
+	ID3D11Device* device, 
+	const std::string& filepath)
+{
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>& vertexShader = vertexShaderMap[filepath];
+	// まだコンパイルされていない場合は、falseを返す
+	if (!vertexShader)
+		return false;
+
+	UINT compileFlags = 0;
+#if defined(_DEBUG)
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+	compileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+	std::filesystem::path path(filepath);
+	path.replace_extension(".hlsl");
+	Microsoft::WRL::ComPtr<ID3DBlob> outBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
+
+	HRESULT hr = D3DCompileFromFile(
+		path.c_str(),
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",
+		"vs_5_0",
+		compileFlags,
+		0,
+		outBlob.ReleaseAndGetAddressOf(),
+		errorBlob.ReleaseAndGetAddressOf()
+	);
+
+	// シェーダーの再コンパイルに失敗した場合
+	if (FAILED(hr)) 
+	{
+		if (errorBlob)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+		}
+		return false;
+	}
+
+	// 再コンパイル
+	hr = device->CreateVertexShader(
+		outBlob->GetBufferPointer(),
+		outBlob->GetBufferSize(),
+		nullptr,
+		vertexShader.ReleaseAndGetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		return false;
+	}
+
+
+	return true;
+}
+
+// ピクセルシェーダーを再コンパイルする関数
+bool GpuResourceManager::ReCompilePixelShader(
+	ID3D11Device* device,
+	const std::string& filepath)
+{
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>& pixelShader = pixelShaderMap[filepath];
+	// まだコンパイルされていない場合は、falseを返す
+	if (!pixelShader)
+		return false;
+
+	UINT compileFlags = 0;
+#if defined(_DEBUG)
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+	compileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+	std::filesystem::path path(filepath);
+	path.replace_extension(".hlsl");
+	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
+
+	HRESULT hr = D3DCompileFromFile(
+		path.c_str(),
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"main",
+		"ps_5_0",
+		compileFlags,
+		0,
+		&shaderBlob,
+		&errorBlob
+	);
+
+	if (FAILED(hr)) 
+	{
+		if (errorBlob) 
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+		}
+		return false;
+	}
+
+	hr = device->CreatePixelShader(
+		shaderBlob->GetBufferPointer(),
+		shaderBlob->GetBufferSize(),
+		nullptr,
+		pixelShader.ReleaseAndGetAddressOf()
+	);
+
+	if (FAILED(hr)) 
+	{
+		return false;
+	}
+
+	return true;
 }

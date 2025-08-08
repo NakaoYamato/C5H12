@@ -1379,7 +1379,7 @@
     <FxCompile Include="HLSL\PostProcess\DepthOfField\DepthOfFieldPS.hlsl" />
     <FxCompile Include="HLSL\PostProcess\FXAA\FXAAPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteWithDepthPS.hlsl" />
-    <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl" />
+    <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflectionPS.hlsl" />
     <FxCompile Include="HLSL\Particle\ComputeParticleInitCS.hlsl" />
     <FxCompile Include="HLSL\Particle\ComputeParticleEmitCS.hlsl" />
     <FxCompile Include="HLSL\Particle\ComputeParticleUpdateCS.hlsl" />

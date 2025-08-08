@@ -117,7 +117,7 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>.\Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(RelativeDir)%(Filename).cso</ObjectFileOutput>
       <AssemblerOutputFile>.\Data\Shader\%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
   </ItemDefinitionGroup>
@@ -143,7 +143,7 @@
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
-      <ObjectFileOutput>.\Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(ProjectDir)Data\Shader\%(RelativeDir)%(Filename).cso</ObjectFileOutput>
       <AssemblerOutputFile>.\Data\Shader\%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
   </ItemDefinitionGroup>
@@ -1054,7 +1054,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflection\ScreenSpaceReflectionPS.hlsl">
+    <FxCompile Include="HLSL\GBuffer\ScreenSpaceReflectionPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

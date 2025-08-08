@@ -9,7 +9,7 @@ PostProcessBase::PostProcessBase(ID3D11Device* device,
 		width, height);
 	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
-		".\\Data\\Shader\\FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
 		psName);
 
 	// 定数バッファ作成

@@ -14,9 +14,9 @@ SkyMap::SkyMap(ID3D11Device* device, const wchar_t* filename, const wchar_t* dif
 		_isTextureCube = true;
 	}
 
-	GpuResourceManager::CreateVsFromCso(device, ".\\Data\\Shader\\SkyMapVS.cso", _vertexShader.GetAddressOf(), NULL, NULL, 0);
-	GpuResourceManager::CreatePsFromCso(device, ".\\Data\\Shader\\SkyMapPS.cso", _pixelShader[0].GetAddressOf());
-	GpuResourceManager::CreatePsFromCso(device, ".\\Data\\Shader\\SkyBoxPS.cso", _pixelShader[1].GetAddressOf());
+	GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/HLSL/SkyMap/SkyMapVS.cso", _vertexShader.GetAddressOf(), NULL, NULL, 0);
+	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/SkyMap/SkyMapPS.cso", _pixelShader[0].GetAddressOf());
+	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/SkyMap/SkyBoxPS.cso", _pixelShader[1].GetAddressOf());
 
 	if(diffuseIEM)
 		GpuResourceManager::LoadTextureFromFile(device, diffuseIEM, _diffuseIEMSRV.GetAddressOf(), &texture2d_desc);

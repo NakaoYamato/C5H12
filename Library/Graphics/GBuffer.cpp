@@ -101,13 +101,13 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height) :
 
 	// ピクセルシェーダーオブジェクトの生成
 	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/DeferredRenderingPS.cso",
+		"./Data/Shader/HLSL/GBuffer/DeferredRenderingPS.cso",
 		_gbufferPS[RenderingType::Phong].ReleaseAndGetAddressOf());
 	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/PBRDeferredRenderingPS.cso",
+		"./Data/Shader/HLSL/GBuffer/PBRDeferredRenderingPS.cso",
 		_gbufferPS[RenderingType::PBR].ReleaseAndGetAddressOf());
 	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/SpriteWithDepthPS.cso",
+		"./Data/Shader/HLSL/Sprite/SpriteWithDepthPS.cso",
 		_depthWritePS.ReleaseAndGetAddressOf());
 
 	_frameBuffer = std::make_unique<FrameBuffer>(device,
@@ -121,8 +121,8 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height) :
 	// SSR用変数初期化
 	_ssrFullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/ScreenSpaceReflectionPS.cso");
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/GBuffer/ScreenSpaceReflectionPS.cso");
 
 	// 定数バッファ作成
 	(void)GpuResourceManager::CreateConstantBuffer(device,

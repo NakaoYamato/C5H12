@@ -29,16 +29,22 @@ void WeaponActor::OnLateUpdate(float elapsedTime)
 		auto ownerModelCollider = _ownerModelCollider.lock();
 		if (ownerModelCollider && ownerModelCollider->IsCollAttackEvent())
 		{
-			locusRenderer->PushFrontVertex(
-				_locusRootLocalPosition.TransformCoord(_transform.GetMatrix()),
-				_locusTipLocalPosition.TransformCoord(_transform.GetMatrix()),
-				velocity,
-				_locusLifeTime
-			);
+			_locusPushTimer += elapsedTime;
+			// 生成判定
+			if (_locusPushTimer >= _locusPushInterval)
+			{
+				_locusPushTimer -= _locusPushInterval; // タイマーをリセット
+				locusRenderer->PushFrontVertex(
+					_locusRootLocalPosition.TransformCoord(_transform.GetMatrix()),
+					_locusTipLocalPosition.TransformCoord(_transform.GetMatrix()),
+					velocity,
+					_locusLifeTime);
+			}
 		}
 		else
 		{
-			locusRenderer->ResetTrialPos();
+			//locusRenderer->ResetTrialPos();
+			_locusPushTimer = 0.0f; // タイマーをリセット
 		}
 	}
 

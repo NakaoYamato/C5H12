@@ -54,22 +54,22 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				ShaderMap& shaderMap = _deferredShaders[type];
 
 				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongVS.cso",
-					"./Data/Shader/PhongGBPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Ramp"] = std::make_unique<RampShader>(device,
-					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/TestGBPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/Test/TestGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -78,22 +78,22 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				ShaderMap& shaderMap = _deferredShaders[type];
 
 				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",
-					"./Data/Shader/PhongGBPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Ramp"] = std::make_unique<RampShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/PhysicalBasedRenderingGBPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/TestGBPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/Test/TestGBPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -110,18 +110,18 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				ShaderMap& shaderMap = _forwardShaders[type];
 
 				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongVS.cso",
-					"./Data/Shader/PhongPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongVS.cso",
-					"./Data/Shader/PhysicalBasedRenderingPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",
+					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/PhongVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/TestPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/Test/TestPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -130,26 +130,26 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				ShaderMap& shaderMap = _forwardShaders[type];
 
 				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",
-					"./Data/Shader/PhongPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				shaderMap["PhongAlpha"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",
-					"./Data/Shader/PhongAlphaPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",
-					"./Data/Shader/PhysicalBasedRenderingPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
+					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				shaderMap["PBRAlpha"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",
-					"./Data/Shader/PhysicalBasedRenderingAlphaPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
+					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/TestPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
+					"./Data/Shader/HLSL/Model/Test/TestPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 			}
 			{
@@ -158,20 +158,20 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				ShaderMap& shaderMap = _forwardShaders[type];
 
 				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongInstancedVS.cso",
-					"./Data/Shader/PhongPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongInstancedVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				shaderMap["PhongAlpha"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/PhongInstancedVS.cso",
-					"./Data/Shader/PhongAlphaPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongInstancedVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/PhongInstancedVS.cso",
-					"./Data/Shader/TestPS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongInstancedVS.cso",
+					"./Data/Shader/HLSL/Model/Test/TestPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 				shaderMap["Grass"] = std::make_unique<GrassShader>(device,
-					"./Data/Shader/GrassInstancedVS.cso",
-					"./Data/Shader/PhongAlphaPS.cso",
+					"./Data/Shader/HLSL/Model/Grass/GrassInstancedVS.cso",
+					"./Data/Shader/HLSL/Model/Phong/PhongAlphaPS.cso",
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 			}
@@ -180,15 +180,15 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 		// カスケードシャドウマップ用
 		_cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)] =
 			std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/CascadedShadowVS.cso",
+				"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 		_cascadedSMShader[static_cast<int>(ModelRenderType::Static)] =
 			std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/CascadedShadowBatchingVS.cso",
+				"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowBatchingVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 		_cascadedSMShader[static_cast<int>(ModelRenderType::Instancing)] =
 			std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/CascadedShadowInstancedVS.cso",
+				"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowInstancedVS.cso",
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 	}
 

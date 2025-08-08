@@ -23,7 +23,7 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	// 頂点シェーダー
 	GpuResourceManager::CreateVsFromCso(
 		device,
-		"./Data/Shader/DebugRendererVS.cso",
+		"./Data/Shader/HLSL/DebugSupporter/DebugRendererVS.cso",
 		_vertexShader.ReleaseAndGetAddressOf(),
 		_inputLayout.ReleaseAndGetAddressOf(),
 		inputElementDesc,
@@ -32,7 +32,7 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	// グリッド描画用頂点シェーダー
 	GpuResourceManager::CreateVsFromCso(
 		device,
-		"./Data/Shader/DebugGridRendererVS.cso",
+		"./Data/Shader/HLSL/DebugSupporter/DebugGridRendererVS.cso",
 		_gridVertexShader.ReleaseAndGetAddressOf(),
 		_gridInputLayout.ReleaseAndGetAddressOf(),
 		gridInputElementDesc,
@@ -42,7 +42,7 @@ DebugRenderer::DebugRenderer(ID3D11Device* device)
 	// ピクセルシェーダー
 	GpuResourceManager::CreatePsFromCso(
 		device,
-		"./Data/Shader/DebugRendererPS.cso",
+		"./Data/Shader/HLSL/DebugSupporter/DebugRendererPS.cso",
 		_pixelShader.ReleaseAndGetAddressOf()
 	);
 

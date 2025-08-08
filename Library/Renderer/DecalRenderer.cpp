@@ -52,24 +52,24 @@ void DecalRenderer::Initialize(ID3D11Device* device, UINT width, UINT height)
 	// 頂点シェーダーの読み込み
 	GpuResourceManager::CreateVsFromCso(
 		device,
-		"./Data/Shader/DecalGeometryVS.cso",
+		"./Data/Shader/HLSL/Decal/DecalGeometryVS.cso",
 		_geometryVertexShader.ReleaseAndGetAddressOf(),
 		_geometryInputLayout.ReleaseAndGetAddressOf(),
 		inputElementDesc, static_cast<UINT>(_countof(inputElementDesc)));
 
 	// ピクセルシェーダーの読み込み
 	CreatePixelShader(device, "Default",
-		"./Data/Shader/DecalGeometryPS.cso", "./Data/Shader/DecalSpritePS.cso");
+		"./Data/Shader/HLSL/Decal/DecalGeometryPS.cso", "./Data/Shader/HLSL/Decal/DecalSpritePS.cso");
 	CreatePixelShader(device, "TerrainBrush",
-		"./Data/Shader/TerrainBrushDecalGPS.cso", "./Data/Shader/TerrainBrushDecalSPS.cso");
+		"./Data/Shader/HLSL/Decal/TerrainBrush/TerrainBrushDecalGPS.cso", "./Data/Shader/HLSL/Decal/TerrainBrush/TerrainBrushDecalSPS.cso");
 
 	// デカールの頂点バッファとインデックスバッファを作成
 	CreateCubeCOMObject(device);
 
 	_fullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/DecalSpritePS.cso");
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/Decal/DecalSpritePS.cso");
 
 	// ダミーの法線マップを作成
 	D3D11_TEXTURE2D_DESC texture2dDesc{};

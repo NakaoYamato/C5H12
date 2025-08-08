@@ -158,20 +158,20 @@ void ParticleRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc,
 	}
 
 	// コンピュートシェーダー読み込み
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleInitCS.cso", _initComputeShader.GetAddressOf());
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleEmitCS.cso", _emitComputeShader.GetAddressOf());
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleUpdateCS.cso", _updateComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/ComputeParticleInitCS.cso", _initComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/ComputeParticleEmitCS.cso", _emitComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/ComputeParticleUpdateCS.cso", _updateComputeShader.GetAddressOf());
 
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleBeginFrameCS.cso", _beginFrameComputeShader.GetAddressOf());
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleEndFrameCS.cso", _endFrameComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/ComputeParticleBeginFrameCS.cso", _beginFrameComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/ComputeParticleEndFrameCS.cso", _endFrameComputeShader.GetAddressOf());
 
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleBitonicSortB2CS.cso", _sortB2ComputeShader.GetAddressOf());
-	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/ComputeParticleBitonicSortC2CS.cso", _sortC2ComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/Sort/ComputeParticleBitonicSortB2CS.cso", _sortB2ComputeShader.GetAddressOf());
+	GpuResourceManager::CreateCsFromCso(device, "./Data/Shader/HLSL/Particle/Sort/ComputeParticleBitonicSortC2CS.cso", _sortC2ComputeShader.GetAddressOf());
 
 	// 描画用情報生成
-	GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/ComputeParticleRenderVS.cso", _vertexShader.GetAddressOf(),	nullptr, nullptr, 0);
-	GpuResourceManager::CreateGsFromCso(device, "./Data/Shader/ComputeParticleRenderGS.cso", _geometryShader.GetAddressOf());
-	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/ComputeParticleRenderPS.cso", _pixelShader.GetAddressOf());
+	GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/HLSL/Particle/Render/ComputeParticleRenderVS.cso", _vertexShader.GetAddressOf(),	nullptr, nullptr, 0);
+	GpuResourceManager::CreateGsFromCso(device, "./Data/Shader/HLSL/Particle/Render/ComputeParticleRenderGS.cso", _geometryShader.GetAddressOf());
+	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/Particle/Render/ComputeParticleRenderPS.cso", _pixelShader.GetAddressOf());
 
 	// キャンバス作成
 	_particleCanvas = std::make_unique<ParticleCanvas>();

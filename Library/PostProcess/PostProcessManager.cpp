@@ -51,11 +51,11 @@ void PostProcessManager::Initialize(ID3D11Device* device, uint32_t width, uint32
 
 	// ÉuÉãÅ[ÉÄóp
 	_bloomRenderFrame = std::make_unique<FrameBuffer>(device, width, height);
-	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/AddBloomPS.cso",
+	(void)GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/PostProcess/Bloom/AddBloomPS.cso",
 		_bloomPS.ReleaseAndGetAddressOf());
 	_fullscreenQuad = std::make_unique<SpriteResource>(device, L"",
-		"./Data/Shader/FullscreenQuadVS.cso",
-		"./Data/Shader/FullscreenQuadPS.cso");
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadPS.cso");
 }
 
 void PostProcessManager::Update(float elapsedTime)

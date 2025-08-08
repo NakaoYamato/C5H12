@@ -1,19 +1,15 @@
 #pragma once
 
 #include <d3d11.h>
+#include <string>
 
 class GpuResourceManager
 {
 public:
-	// 頂点シェーダー読み込み
-	static HRESULT LoadVertexShader(
-		ID3D11Device* device,
-		const char* filename,
-		const D3D11_INPUT_ELEMENT_DESC inputElementDescs[],
-		UINT inputElementCount,
-		ID3D11InputLayout** inputLayout,
-		ID3D11VertexShader** vertexShader);
+	// Gui描画
+	static void DrawGui(ID3D11Device* device);
 
+public:
 	// 頂点シェーダ作成
 	static void CreateVsFromCso(ID3D11Device* device,
 		const char* csoName, 
@@ -93,4 +89,17 @@ public:
 
     // 保存してあるステートのキャッシュを復元
     static void RestoreStateCache(ID3D11DeviceContext* dc);
+
+#pragma region 再コンパイル
+	// 頂点シェーダーを再コンパイルする関数
+	static bool ReCompileVertexShader(
+		ID3D11Device* device,
+		const std::string& filepath);
+
+	// ピクセルシェーダーを再コンパイルする関数
+	static bool ReCompilePixelShader(
+		ID3D11Device* device,
+		const std::string& filepath);
+#pragma endregion
+
 };

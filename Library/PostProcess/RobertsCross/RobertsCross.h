@@ -16,7 +16,7 @@ public:
     RobertsCross(ID3D11Device* device, uint32_t width, uint32_t height) :
         PostProcessBase(device,
             width, height,
-            "./Data/Shader/RobertsCrossPS.cso",
+            "./Data/Shader/HLSL/PostProcess/RobertsCross/RobertsCrossPS.cso",
             sizeof(Constants)) {
         // ‰Šú’l‚Ìİ’è
         _startData = GetCurrentData();

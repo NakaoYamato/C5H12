@@ -16,7 +16,7 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 	// 頂点シェーダー
 	GpuResourceManager::CreateVsFromCso(
 		device,
-		"./Data/Shader/PrimitiveRendererVS.cso",
+		"./Data/Shader/HLSL/PrimitiveRenderer/PrimitiveRendererVS.cso",
 		vertexShader.ReleaseAndGetAddressOf(),
 		inputLayout.ReleaseAndGetAddressOf(),
 		inputElementDesc,
@@ -26,7 +26,7 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 	// ピクセルシェーダー
 	GpuResourceManager::CreatePsFromCso(
 		device,
-		"./Data/Shader/PrimitiveRendererPS.cso",
+		"./Data/Shader/HLSL/PrimitiveRenderer/PrimitiveRendererPS.cso",
 		pixelShader.ReleaseAndGetAddressOf()
 	);
 
@@ -46,6 +46,19 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 	desc.StructureByteStride = 0;
 	HRESULT hr = device->CreateBuffer(&desc, nullptr, vertexBuffer.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	// ノイズテクスチャの読み込み
+	GpuResourceManager::LoadTextureFromFile(
+		device,
+		L"./Data/Texture/Noise/Noise000.png",
+		_noiseSRV.ReleaseAndGetAddressOf(),
+		nullptr);
+	// 距離テクスチャの読み込み
+	GpuResourceManager::LoadTextureFromFile(
+		device,
+		L"./Data/Texture/Noise/NormalMap.png",
+		_distanceSRV.ReleaseAndGetAddressOf(),
+		nullptr);
 }
 
 // 頂点追加
@@ -59,25 +72,29 @@ void PrimitiveRenderer::AddVertex(const Vector3& position, const Vector4& color)
 // 描画実行
 void PrimitiveRenderer::Render(ID3D11DeviceContext* dc, const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
 {
+	D3D11_VIEWPORT viewport;
+	UINT numViewports = 1;
+	dc->RSGetViewports(&numViewports, &viewport);
+
 	// シェーダー設定
 	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 	dc->IASetInputLayout(inputLayout.Get());
 
-	static constexpr int CBIndex = 0;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> cacheBuffer;
-	dc->PSGetConstantBuffers(CBIndex, 1, cacheBuffer.ReleaseAndGetAddressOf());
+	static constexpr int CBIndex = 1;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> cachePSBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> cacheVSBuffer;
+	dc->VSGetConstantBuffers(CBIndex, 1, cacheVSBuffer.ReleaseAndGetAddressOf());
+	dc->PSGetConstantBuffers(CBIndex, 1, cachePSBuffer.ReleaseAndGetAddressOf());
 	// 定数バッファ設定
-	dc->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-
-	// ビュープロジェクション行列作成
-	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
-	DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&projection);
-	DirectX::XMMATRIX VP = V * P;
+	dc->VSSetConstantBuffers(CBIndex, 1, constantBuffer.GetAddressOf());
+	dc->PSSetConstantBuffers(CBIndex, 1, constantBuffer.GetAddressOf());
 
 	// 定数バッファ更新
 	CbScene cbScene;
-	DirectX::XMStoreFloat4x4(&cbScene.viewProjection, VP);
+	cbScene.viewportSize.x = viewport.Width;
+	cbScene.viewportSize.y = viewport.Height;
+	cbScene.vertexCount = static_cast<UINT>(vertices.size());
 	dc->UpdateSubresource(constantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 
 	// 頂点バッファ設定
@@ -85,6 +102,9 @@ void PrimitiveRenderer::Render(ID3D11DeviceContext* dc, const DirectX::XMFLOAT4X
 	UINT offset = 0;
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	dc->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+
+	dc->PSSetShaderResources(3, 1, _distanceSRV.GetAddressOf());
+	dc->PSSetShaderResources(4, 1, _noiseSRV.GetAddressOf());
 
 	// 描画
 	UINT totalVertexCount = static_cast<UINT>(vertices.size());
@@ -114,5 +134,6 @@ void PrimitiveRenderer::Render(ID3D11DeviceContext* dc, const DirectX::XMFLOAT4X
 
 	dc->VSSetShader(NULL, 0, 0);
 	dc->PSSetShader(NULL, 0, 0);
-	dc->PSSetConstantBuffers(CBIndex, 1, cacheBuffer.GetAddressOf());
+	dc->VSSetConstantBuffers(CBIndex, 1, cacheVSBuffer.GetAddressOf());
+	dc->PSSetConstantBuffers(CBIndex, 1, cachePSBuffer.GetAddressOf());
 }

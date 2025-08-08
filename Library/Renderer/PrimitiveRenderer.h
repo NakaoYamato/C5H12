@@ -31,8 +31,9 @@ private:
 
 	struct CbScene
 	{
-		DirectX::XMFLOAT4X4		viewProjection;
-		Vector4		color;
+		UINT vertexCount; // 頂点数
+		DirectX::XMFLOAT2 viewportSize; // ビューポートのサイズ
+		float padding; // パディング用
 	};
 
 	struct Vertex
@@ -47,4 +48,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>	inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _noiseSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _distanceSRV;
+
+	float timer = 0.0f; // タイマー
 };

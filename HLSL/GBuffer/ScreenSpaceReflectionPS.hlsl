@@ -1,5 +1,5 @@
-#include "../../Sprite/Sprite.hlsli"
-#include "../../Scene/SceneConstantBuffer.hlsli"
+#include "../Sprite/Sprite.hlsli"
+#include "../Scene/SceneConstantBuffer.hlsli"
 
 cbuffer SSR_BUFFER : register(b6)
 {
@@ -13,7 +13,7 @@ cbuffer SSR_BUFFER : register(b6)
 Texture2D colorMap : register(t0);
 Texture2D depthMap : register(t1);
 Texture2D normalMap : register(t2);
-#include "../../Define/SamplerStateDefine.hlsli"
+#include "../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 float2 NDC2UV(float2 ndc)

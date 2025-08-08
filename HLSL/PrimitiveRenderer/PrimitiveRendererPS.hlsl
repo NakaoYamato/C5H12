@@ -4,27 +4,23 @@
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 Texture2D<float4> gbufferColor : register(t2);
+Texture2D distanceMap : register(t3);
+Texture2D noiseMap : register(t4);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-    //return pin.color;
+    float2 noiseTexcoord = pin.texcoord;
+    noiseTexcoord.x *= 0.0025f;
+    float noise = noiseMap.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], noiseTexcoord).r;
     
-    float2 uv = float2(0.0f, 0.0f);
-    uv.x = (pin.position.x / pin.position.w + 1.0f) * 0.5f;
-    //uv.y = (1.0f - (pin.position.y / pin.position.w + 1.0f) * 0.5f);
-    uv.y = (pin.position.y / pin.position.w + 1.0f) * 0.5f;
-
-    uv = float2(0.5f, 0.5f) + normalize(pin.position.xy) / 2.0f;
+    float2 distanceTexcoord = noiseTexcoord;
+    distanceTexcoord.x -= totalElapsedTime * 0.05f;
+    float4 distance = distanceMap.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], distanceTexcoord);
     
-    //uv.x += 0.001f;
-    //uv.y += 0.001f;
+    float2 screenUV = pin.position.xy / viewportSize;
+    float2 uv = screenUV + (distance.xy * 2.0f - float2(1.0f, 1.0f) * 0.01f);
+    float4 color = gbufferColor.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], frac(uv));
+    //return color;
     
-    //float4 temp = gbufferColor.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], uv);
-    //uv.x += temp.x * 0.5f;
-    //uv.y += temp.y * 0.5f;
-    
-    float4 color = gbufferColor.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], uv);
-    return color;
-    return float4(pin.color.rgb * pin.color.a + color.rgb * (1.0f - pin.color.a), 1.0f);
-
+    return float4(pin.color.rgb * noise + color.rgb * (1.0f - noise), 1.0f);
 }

@@ -54,13 +54,13 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
                     Vector3(0.0f, 5.0f, 10.0f),
                     0.0f,
                     100.0f);
-                CreateEnemy(
-                    1,
-                    0,
-                    Network::CharacterType::Weak,
-                    Vector3(5.0f, 5.0f, -5.0f),
-                    0.0f,
-                    10.0f);
+                //CreateEnemy(
+                //    1,
+                //    0,
+                //    Network::CharacterType::Weak,
+                //    Vector3(5.0f, 5.0f, -5.0f),
+                //    0.0f,
+                //    10.0f);
             }
             else
             {

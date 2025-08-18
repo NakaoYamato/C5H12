@@ -108,12 +108,12 @@ void PlayerController::Update(float elapsedTime)
 void PlayerController::DelayedRender(const RenderContext& rc)
 {
 	// “ªã‚É–¼‘O•\Ž¦
-	GetActor()->GetScene()->GetTextRenderer().Draw3D(
-		FontType::MSGothic,
-		GetActor()->GetName(),
-		GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 2.0f, 0.0f),
-		Vector4::White
-	);
+	//GetActor()->GetScene()->GetTextRenderer().Draw3D(
+	//	FontType::MSGothic,
+	//	GetActor()->GetName(),
+	//	GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 2.0f, 0.0f),
+	//	Vector4::White
+	//);
 }
 
 // GUI•`‰æ

@@ -47,15 +47,15 @@ void EnemyController::Update(float elapsedTime)
 void EnemyController::DelayedRender(const RenderContext& rc)
 {
 	// 頭上にHPパーセント表示
-	std::wstring str = L"HP:";
-	str += std::to_wstring(static_cast<int>(_damageable.lock()->GetHealth() / _damageable.lock()->GetMaxHealth() * 100.0f));
-	str += L"%";
-	GetActor()->GetScene()->GetTextRenderer().Draw3D(
-		FontType::MSGothic,
-		str.c_str(),
-		GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 4.0f, 0.0f),
-		Vector4::White
-	);
+	//std::wstring str = L"HP:";
+	//str += std::to_wstring(static_cast<int>(_damageable.lock()->GetHealth() / _damageable.lock()->GetMaxHealth() * 100.0f));
+	//str += L"%";
+	//GetActor()->GetScene()->GetTextRenderer().Draw3D(
+	//	FontType::MSGothic,
+	//	str.c_str(),
+	//	GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 4.0f, 0.0f),
+	//	Vector4::White
+	//);
 }
 // GUI描画
 void EnemyController::DrawGui()

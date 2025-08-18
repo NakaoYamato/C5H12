@@ -43,7 +43,7 @@ void WeaponActor::OnLateUpdate(float elapsedTime)
 		}
 		else
 		{
-			//locusRenderer->ResetTrialPos();
+			locusRenderer->ResetTrialPos();
 			_locusPushTimer = 0.0f; // タイマーをリセット
 		}
 	}

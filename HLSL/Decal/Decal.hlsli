@@ -34,6 +34,9 @@ row_major float4x4 invWorld)
     // キューブ基準の空間の座標に変換してデカールのUV座標に変換
     float4 cubeTexturePosition = mul(float4(worldPosition, 1), invWorld);
     cubeTexturePosition /= cubeTexturePosition.w;
+    clip(abs(cubeTexturePosition.x) > 1.0f ? -1 : 1);
+    clip(abs(cubeTexturePosition.y) > 1.0f ? -1 : 1);
+    clip(abs(cubeTexturePosition.z) > 0.5f ? -1 : 1);
     cubeTexturePosition.x = cubeTexturePosition.x * 0.5f + 0.5f;
     cubeTexturePosition.y = cubeTexturePosition.y * -0.5f + 0.5f;
     return cubeTexturePosition.xy;    

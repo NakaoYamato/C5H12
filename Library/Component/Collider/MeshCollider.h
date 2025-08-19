@@ -98,5 +98,8 @@ protected:
 	int _cellSize = 16; // 分割エリアのサイズ
     int _drawCellIndex = -1; // 描画エリアのインデックス
 
-	std::mutex _collisionMeshMutex; // マルチスレッド用のミューテックス
+	// マルチスレッド用のミューテックス
+	std::mutex _collisionMeshMutex;
+	// 計算用のコリジョンメッシュ
+	CollisionMesh _calcCollisionMesh;
 };

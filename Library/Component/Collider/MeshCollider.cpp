@@ -36,16 +36,20 @@ void MeshCollider::Update(float elapsedTime)
 				CollisionMesh collisionMeshCopy = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
 				{
 					std::lock_guard<std::mutex> lock(_collisionMeshMutex);
-					_collisionMesh.areas.clear();
-					_collisionMesh.triangles.clear();
-					_collisionMesh = collisionMeshCopy;
+					_calcCollisionMesh = collisionMeshCopy;
 				}
 			});
+	}
 
-		//// コリジョンメッシュの計算
-		//_collisionMesh.areas.clear();
-		//_collisionMesh.triangles.clear();
-		//_collisionMesh = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
+	{
+		std::lock_guard<std::mutex> lock(_collisionMeshMutex);
+		// コリジョンメッシュの更新
+		if (!_calcCollisionMesh.areas.empty() && !_calcCollisionMesh.triangles.empty())
+		{
+			_collisionMesh = _calcCollisionMesh;
+			_calcCollisionMesh.areas.clear();
+			_calcCollisionMesh.triangles.clear();
+		}
 	}
 }
 // デバッグ描画処理

@@ -8,6 +8,11 @@
 // 初期化
 void TerrainRenderer::Initialize(ID3D11Device* device)
 {
+	const UINT StreamOutMaxVertex =	
+        (DivisionCount * 2) * 
+        (DivisionCount * 2 - 1) * 
+        static_cast<UINT>(std::pow(MaxTessellation, 2.0f));
+
     // 定数バッファ作成
     GpuResourceManager::CreateConstantBuffer(
         device,
@@ -279,7 +284,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 				// 頂点情報を受け取り
                 std::vector<Terrain::StreamOutVertex> streamOut;
 				// 頂点数を計算
-				UINT size = 3 * 3 * 4 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
+				UINT size = 3 * 3 * 9 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
                 streamOut.resize(size);
 				CopyMemory(streamOut.data(), mapped_resource.pData, sizeof(Terrain::StreamOutVertex) * size);
 				// マップ解除

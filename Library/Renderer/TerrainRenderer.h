@@ -52,7 +52,10 @@ public:
     };
     
 	static constexpr float MaxTessellation = 256.0f;
-    static constexpr LONG StreamOutMaxVertex = 3 * 3 * 4 * static_cast<LONG>(MaxTessellation) * static_cast<LONG>(MaxTessellation);
+    // •ªŠ„”
+    static constexpr size_t DivisionCount = 3;
+    // 1•Ó‚ ‚½‚è‚Ì’¸“_”
+    static constexpr size_t VertexCountPerSide = DivisionCount + 1;
     static constexpr UINT ParameterMapSRVIndex = 6;
 public:
 	TerrainRenderer() = default;

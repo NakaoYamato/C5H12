@@ -7,7 +7,7 @@ StructuredBuffer<StreamOutData> streamOutDatas : register(t2);
 
 STATIC_VS_OUT main(uint vertexId : SV_VertexID)
 {
-	STATIC_VS_OUT vout = streamOutDatas[vertexId];
+	STATIC_VS_OUT vout = streamOutDatas[vertexId % 331776];
     vout.position = mul(float4(vout.worldPosition.xyz, 1.0f), viewProjection);
     return vout;
 }

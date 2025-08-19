@@ -19,6 +19,7 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
 		sizeof(GrassConstantBuffer),
 		_grassConstantBuffer.ReleaseAndGetAddressOf());
 
+	// 通常描画用シェーダー作成
     {
         D3D11_INPUT_ELEMENT_DESC inputElementDesc[]
         {
@@ -54,6 +55,18 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             device,
             "./Data/Shader/HLSL/Terrain/TerrainGBPS.cso",
             _gbPixelShader.ReleaseAndGetAddressOf());
+    }
+
+	// 静的描画用シェーダー作成
+    {
+		// 頂点シェーダー作成
+		GpuResourceManager::CreateVsFromCso(
+			device,
+			"./Data/Shader/HLSL/Terrain/TerrainStaticVS.cso",
+			_staticVertexShader.ReleaseAndGetAddressOf(),
+            nullptr,
+            nullptr,
+            0);
     }
 
     // 草描画用シェーダー作成
@@ -116,30 +129,30 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
 
     // ストリームアウトプットされた情報の受け取り用バッファ
     {
-        D3D11_BUFFER_DESC vBufferDesc{};
-        vBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-        vBufferDesc.ByteWidth = sizeof(Terrain::StreamOutVertex) * StreamOutMaxVertex;
-        vBufferDesc.BindFlags = D3D11_BIND_STREAM_OUTPUT;
-        vBufferDesc.CPUAccessFlags = 0;
-        vBufferDesc.MiscFlags = 0;
-        vBufferDesc.StructureByteStride = 0;
+        D3D11_BUFFER_DESC desc{};
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.ByteWidth = sizeof(Terrain::StreamOutVertex) * StreamOutMaxVertex;
+        desc.BindFlags = D3D11_BIND_STREAM_OUTPUT;
+        desc.CPUAccessFlags = 0;
+        desc.MiscFlags = 0;
+        desc.StructureByteStride = 0;
 
-        HRESULT hr = device->CreateBuffer(&vBufferDesc, nullptr,
+        HRESULT hr = device->CreateBuffer(&desc, nullptr,
             _streamOutVertexBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 
     // CPUからアクセスするためのバッファ
     {
-        D3D11_BUFFER_DESC vBufferDesc{};
-        vBufferDesc.Usage = D3D11_USAGE_STAGING;
-        vBufferDesc.ByteWidth = sizeof(Terrain::StreamOutVertex) * StreamOutMaxVertex;
-        vBufferDesc.BindFlags = 0;
-        vBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-        vBufferDesc.MiscFlags = 0;
-        vBufferDesc.StructureByteStride = 0;
+        D3D11_BUFFER_DESC desc{};
+        desc.Usage = D3D11_USAGE_STAGING;
+        desc.ByteWidth = sizeof(Terrain::StreamOutVertex) * StreamOutMaxVertex;
+        desc.BindFlags = 0;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags = 0;
+        desc.StructureByteStride = 0;
 
-        HRESULT hr = device->CreateBuffer(&vBufferDesc, nullptr,
+        HRESULT hr = device->CreateBuffer(&desc, nullptr,
             _streamOutCopyBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
@@ -162,7 +175,18 @@ void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, b
 	drawInfo.terrain = terrain;
 	drawInfo.world = world;
 	drawInfo.isExportingVertices = isExportingVertices;
-	_drawInfos.push_back(drawInfo);
+
+    if (!isExportingVertices && terrain->GetStreamOutData().size() != 0)
+    {
+		_staticDrawInfos.push_back(drawInfo);
+    }
+    else
+    {
+        _drawInfos.push_back(drawInfo);
+    }
+
+	// 草の描画登録
+	_grassDrawInfos.push_back(drawInfo);
 }
 // 描画処理
 void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
@@ -270,9 +294,52 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
             }
         }
 	}
+
+    // シェーダー解除
+    dc->VSSetShader(nullptr, nullptr, 0);
+    dc->HSSetShader(nullptr, nullptr, 0);
+    dc->DSSetShader(nullptr, nullptr, 0);
+    dc->GSSetShader(nullptr, nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
+
+    // 静的描画
+    {
+        dc->IASetInputLayout(nullptr);
+        dc->VSSetShader(_staticVertexShader.Get(), nullptr, 0);
+        if (writeGBuffer)
+            dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
+        else
+            dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
+        // 頂点バッファ設定
+        ID3D11Buffer* clearBuffer[] = { nullptr };
+        UINT strides[] = { 0 };
+        UINT offsets[] = { 0 };
+        dc->IASetVertexBuffers(0, 1, clearBuffer, strides, offsets);
+        dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        for (const auto& drawInfo : _staticDrawInfos)
+        {
+            // 定数バッファの更新
+            _data.world = drawInfo.world;
+            dc->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_data, 0, 0);
+
+            // シェーダーリソースビューの設定
+            ID3D11ShaderResourceView* srvs[] =
+            {
+                drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
+                drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+                drawInfo.terrain->GetStreamOutSRV().Get(),
+            };
+            dc->VSSetShaderResources(0, _countof(srvs), srvs);
+            dc->PSSetShaderResources(0, _countof(srvs), srvs);
+
+            dc->Draw(static_cast<UINT>(drawInfo.terrain->GetStreamOutData().size()), 0);
+        }
+    }
+
     // シェーダーリソースビューを解除
-    ID3D11ShaderResourceView* nullSRVs[2] = {};
+    ID3D11ShaderResourceView* nullSRVs[3] = {};
     dc->PSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
+    dc->VSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
     dc->DSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
     dc->DSSetShaderResources(ParameterMapSRVIndex, 1, nullSRVs);
     dc->PSSetShaderResources(ParameterMapSRVIndex, 1, nullSRVs);
@@ -310,7 +377,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     if (_isDrawingGrass)
     {
         // 草の描画
-        for (const auto& drawInfo : _drawInfos)
+        for (const auto& drawInfo : _grassDrawInfos)
         {
             // シェーダーリソースビューの設定
             ID3D11ShaderResourceView* srvs[] =
@@ -337,6 +404,8 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 
     // 登録しているTerrainを描画した後はクリア
     _drawInfos.clear();
+    _staticDrawInfos.clear();
+    _grassDrawInfos.clear();
 }
 // GUI描画
 void TerrainRenderer::DrawGui()

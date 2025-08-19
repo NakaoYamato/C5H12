@@ -68,17 +68,20 @@ public:
 	void DrawGui();
 private:
 #pragma region 描画用COMオブジェクト
-    Microsoft::WRL::ComPtr<ID3D11Buffer>	_vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> _grassConstantBuffer;
 
+	// 通常描画用シェーダー
     Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
+
+	// 静的描画用シェーダー
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_staticVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout>	_staticInputLayout;
 
     // 草描画用シェーダー
     Microsoft::WRL::ComPtr<ID3D11VertexShader>	_grassVertexShader;
@@ -99,6 +102,11 @@ private:
 #pragma endregion
     // Terrainの描画用情報配列
 	std::vector<DrawInfo> _drawInfos;
+    // 静的描画用情報配列
+	std::vector<DrawInfo> _staticDrawInfos;
+	// 草の描画用情報
+	std::vector<DrawInfo> _grassDrawInfos;
+
 	// 定数バッファのデータ
 	ConstantBuffer                          _data;
 	// 草の定数バッファ

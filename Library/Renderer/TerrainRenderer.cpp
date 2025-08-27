@@ -181,7 +181,7 @@ void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, b
 	drawInfo.world = world;
 	drawInfo.isExportingVertices = isExportingVertices;
 
-    if (!isExportingVertices && terrain->GetStreamOutData().size() != 0)
+    if (!isExportingVertices && terrain->GetStreamOutData().size() != 0 && _isStaticDraw)
     {
 		_staticDrawInfos.push_back(drawInfo);
     }
@@ -198,7 +198,10 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
-    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+    if (_isWireFrame)
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::WireCullNone));
+    else
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 	// サンプラーを設定
     if (writeGBuffer)
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
@@ -300,6 +303,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
         }
 	}
 
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
     // シェーダー解除
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->HSSetShader(nullptr, nullptr, 0);
@@ -429,7 +433,9 @@ void TerrainRenderer::DrawGui()
     {
         if (ImGui::Begin(u8"Terrain"))
         {
+			ImGui::Checkbox(u8"静的描画", &_isStaticDraw);
 			ImGui::Checkbox(u8"草を描画", &_isDrawingGrass);
+			ImGui::Checkbox(u8"ワイヤーフレーム", &_isWireFrame);
 			ImGui::Separator();
 
             if (ImGui::TreeNode(u8"定数バッファ"))

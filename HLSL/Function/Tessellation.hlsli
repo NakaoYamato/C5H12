@@ -20,7 +20,11 @@ inline float4 CalcTriEdgeTessFactors(float3 triVertexFactors)
     tess.y = 0.5f * (triVertexFactors.x + triVertexFactors.z);
     tess.z = 0.5f * (triVertexFactors.x + triVertexFactors.y);
     tess.w = (triVertexFactors.x + triVertexFactors.y + triVertexFactors.z) / 3.0f;
-    return tess;
+    //return tess;
+    float3 rtf;
+    float ritf, itf;
+    ProcessTriTessFactorsAvg(tess.xyz, tess.w, rtf, ritf, itf);
+    return float4(rtf, ritf);
 }
 // 距離に基づくテッセレーション係数を計算する関数
 // v0, v1, v2: ワールド座標系での頂点位置

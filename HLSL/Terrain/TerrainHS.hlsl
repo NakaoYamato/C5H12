@@ -7,7 +7,7 @@ InputPatch<HS_IN, 3> ip,
 uint pid : SV_PrimitiveID)
 {
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
-#if 0
+#if 1
     // ƒJƒƒ‰‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä•ªŠ„”‚ğ’²®
     float4 v0 = mul(float4(ip[0].position.xyz, 1), world);
     float4 v1 = mul(float4(ip[1].position.xyz, 1), world);

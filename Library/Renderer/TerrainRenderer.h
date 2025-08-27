@@ -53,7 +53,7 @@ public:
     
 	static constexpr float MaxTessellation = 256.0f;
     // 分割数
-    static constexpr size_t DivisionCount = 3;
+    static constexpr size_t DivisionCount = 6;
     // 1辺あたりの頂点数
     static constexpr size_t VertexCountPerSide = DivisionCount + 1;
     static constexpr UINT ParameterMapSRVIndex = 6;
@@ -116,6 +116,10 @@ private:
 	GrassConstantBuffer _dataGrass;
     // 草を描画するか
 	bool _isDrawingGrass = true;
+    // 静的描画か
+	bool _isStaticDraw = true;
+    // ワイヤーフレーム描画
+	bool _isWireFrame = false;
     // GUI描画フラグ
 	bool _isDrawingGui = false;
 };

@@ -8,29 +8,21 @@ uint pid : SV_PrimitiveID)
 {
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
     // カメラからの距離に応じて分割数を調整
-    float4 v0 = mul(float4(ip[0].position.xyz, 1), world);
-    float4 v1 = mul(float4(ip[1].position.xyz, 1), world);
-    float4 v2 = mul(float4(ip[2].position.xyz, 1), world);
-    float4 v3 = mul(float4(ip[3].position.xyz, 1), world);
-    float4 edgeFactors;
-    float2 insideFactors;
-    DistanceBasedTessQuad(
-    v0, v1, v2, v3, 
-    cameraPosition.xyz,
-    0.0,
-    lodDistanceMax,
-    max(edgeFactor, innerFactor),
-    edgeFactors,
-    insideFactors);
-    // エッジの分割数を指定
-    hout.factor[0] = max(edgeFactors.x, lodLowFactor);
-    hout.factor[1] = max(edgeFactors.y, lodLowFactor);
-    hout.factor[2] = max(edgeFactors.z, lodLowFactor);
-    hout.factor[3] = max(edgeFactors.w, lodLowFactor);
-    // 内部部分の分割数を指定
-    hout.innerFactor[0] = max(insideFactors.x, lodLowFactor);
-    hout.innerFactor[1] = max(insideFactors.y, lodLowFactor);
+    float4 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) / 4.0;
+    float factor = CalcDistanceTessFactor(center, cameraPosition.xyz, 0.0, lodDistanceMax, max(edgeFactor, innerFactor));
+    // 奇数だときれいに分割できるので、奇数に丸める
+    factor = floor(factor);
+    factor = factor + factor % 2.0f + 1.0f;
+    factor = max(factor, lodLowFactor);
     
+    // エッジの分割数を指定
+    hout.factor[0] = factor;
+    hout.factor[1] = factor;
+    hout.factor[2] = factor;
+    hout.factor[3] = factor;
+    // 内部部分の分割数を指定
+    hout.innerFactor[0] = factor;
+    hout.innerFactor[1] = factor;
     return hout;
 }
 

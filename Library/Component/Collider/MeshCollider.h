@@ -85,6 +85,14 @@ public:
 	void SetRecalculate(bool f) { _recalculate = f; }
 #pragma endregion
 protected:
+	/// <summary>
+	/// コリジョンメッシュのAABBの構築
+	/// </summary>
+	/// <param name="collisionMesh"></param>
+	void BuildCollisionMeshAABB(CollisionMesh& collisionMesh, 
+		const Vector3& volumeMin,
+		const Vector3& volumeMax) const;
+
     /// <summary>
     /// 指定のAABBとコリジョンメッシュのAABBの交差判定
     /// </summary>

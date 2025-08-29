@@ -16,6 +16,13 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
         // ƒ}ƒCƒiƒX‚È‚ç•`‰æ‚µ‚È‚¢
         return;
     }
+    
+    float cameraLength = length(cameraPosition.xyz - gin[0].worldPosition);
+    if (cameraLength > grassLODDistanceMax)
+    {
+        // ‰“‚·‚¬‚é‚È‚ç•`‰æ‚µ‚È‚¢
+        return;
+    }
         
 #if 1
     const float randomXY = Random(gin[0].worldPosition.xy);

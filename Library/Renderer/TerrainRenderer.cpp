@@ -8,10 +8,11 @@
 // 初期化
 void TerrainRenderer::Initialize(ID3D11Device* device)
 {
+	const UINT MaxTess = static_cast<UINT>(MaxTessellation);
 	const UINT StreamOutMaxVertex =	
         (DivisionCount * 2) * 
         (DivisionCount * 2 - 1) * 
-        static_cast<UINT>(std::pow(MaxTessellation, 2.0f));
+        ((MaxTess - 1) * (MaxTess - 2)) / 2;
 
     // 定数バッファ作成
     GpuResourceManager::CreateConstantBuffer(
@@ -287,7 +288,10 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 				// 頂点情報を受け取り
                 std::vector<Terrain::StreamOutVertex> streamOut;
 				// 頂点数を計算
-				UINT size = 3 * 3 * 9 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
+				UINT size = 3 * static_cast<UINT>(_data.edgeFactor) +
+                    static_cast<UINT>(((_data.innerFactor - 1) * (_data.innerFactor - 2)) / 2);
+				size *= static_cast<UINT>(std::pow(DivisionCount, 2)) * 2 * 3 * 3; // パッチ数
+				//UINT size = 3 * 3 * 9 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
                 streamOut.resize(size);
 				CopyMemory(streamOut.data(), mapped_resource.pData, sizeof(Terrain::StreamOutVertex) * size);
 				// マップ解除
@@ -442,8 +446,10 @@ void TerrainRenderer::DrawGui()
             {
                 ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, MaxTessellation, "%.1f");
                 ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, MaxTessellation, "%.1f");
-                ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
                 ImGui::SliderFloat(u8"LOD Distance", &_data.lodDistanceMax, 1.0f, 200.0f, "%.1f");
+				ImGui::SliderFloat(u8"LOD Low Factor", &_data.lodLowFactor, 1.0f, MaxTessellation, "%.1f");
+
+                ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
                 ImGui::SliderFloat(u8"Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");

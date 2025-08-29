@@ -85,7 +85,7 @@ private:
 
 #pragma region デバッグ用
 	bool _drawGui = false; // GUIを描画するか
-    bool _useMultiThread = false;
+    bool _useMultiThread = true;
 #pragma endregion
 
 };

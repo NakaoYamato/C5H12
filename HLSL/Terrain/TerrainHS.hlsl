@@ -13,11 +13,11 @@ uint pid : SV_PrimitiveID)
     float4 v1 = mul(float4(ip[1].position.xyz, 1), world);
     float4 v2 = mul(float4(ip[2].position.xyz, 1), world);
     float4 f = DistanceBasedTess(v0, v1, v2, cameraPosition.xyz, 0.0, lodDistanceMax, max(edgeFactor, innerFactor));
-    hout.factor[0] = f.x;
-    hout.factor[1] = f.y;
-    hout.factor[2] = f.z;
+    hout.factor[0] = max(f.x, lodLowFactor);
+    hout.factor[1] = max(f.y, lodLowFactor);
+    hout.factor[2] = max(f.z, lodLowFactor);
     // 内部部分の分割数を指定
-    hout.innerFactor = f.w;
+    hout.innerFactor = max(f.w, lodLowFactor);
 #else
     // エッジの分割数を指定
     hout.factor[0] = edgeFactor;

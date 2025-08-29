@@ -46,11 +46,11 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
     
     float edgeFactor; // ƒGƒbƒW•ªŠ„”
     float innerFactor; // “à•”•ªŠ„”
-    float heightSclaer; // ‚‚³ŒW”
+    float lodLowFactor; // LODÅ’á•ªŠ„”ŒW”
     float lodDistanceMax; // LOD(Level Of Detail)‹——£
     
+    float heightSclaer; // ‚‚³ŒW”
     float emissive;
-    float roughness;
     float metalness;
-    float padding;
+    float roughness;
 }

@@ -21,13 +21,13 @@ public:
 
         float edgeFactor = 64.0f;    // エッジ分割数
         float innerFactor = 64.0f;    // 内部部分数
-        float heightScaler = 1.0f;     // 高さ係数
+		float lodLowFactor = 16.0f;      // LOD最低分割数係数
         float lodDistanceMax = 200.0f;    // LOD(Level Of Detail)距離
 
+        float heightScaler = 1.0f;     // 高さ係数
         float emissive = 0.0f;     // エミッシブ
         float metalness = 0.63f;    // メタリック
         float roughness = 0.6f;     // ラフネス
-		float padding = 0.0f; // パディング
     };
 	struct GrassConstantBuffer
 	{
@@ -115,9 +115,9 @@ private:
 	// 草の定数バッファ
 	GrassConstantBuffer _dataGrass;
     // 草を描画するか
-	bool _isDrawingGrass = true;
+	bool _isDrawingGrass = false;
     // 静的描画か
-	bool _isStaticDraw = true;
+	bool _isStaticDraw = false;
     // ワイヤーフレーム描画
 	bool _isWireFrame = false;
     // GUI描画フラグ

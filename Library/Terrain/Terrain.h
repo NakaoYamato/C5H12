@@ -31,8 +31,8 @@ public:
 
 	static constexpr size_t BaseColorTextureIndex = 0;
 	static constexpr size_t NormalTextureIndex = 1;
-    static constexpr LONG MaterialMapSize = 1024 * 6;
-    static constexpr LONG ParameterMapSize = 1024 * 3;
+    static constexpr LONG MaterialMapSize = 1024 * 4;
+    static constexpr LONG ParameterMapSize = 1024 * 2;
 public:
     Terrain(ID3D11Device* device, const std::string& serializePath = "./Data/Terrain/Save/Test000.json");
 	~Terrain() {}

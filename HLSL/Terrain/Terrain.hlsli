@@ -1,5 +1,6 @@
 #include "../Scene/SceneConstantBuffer.hlsli"
 
+// VS入力
 struct VS_IN
 {
     float4 position : POSITION;
@@ -7,23 +8,19 @@ struct VS_IN
     float2 texcoord : TEXCOORD;
 };
 
-// 受け渡し構造体
-struct HS_IN
-{
-    float4 position : SV_POSITION;
-    float3 normal : NORMAL;
-    float2 texcoord : TECCOORD;
-};
+// HS入力(VS出力と同じ)
+#define HS_IN VS_IN
 
 // パッチからの出力
 struct HS_CONSTANT_OUT
 {
-    float factor[3] : SV_TessFactor;
-    float innerFactor : SV_InsideTessFactor;
+    float factor[4] : SV_TessFactor;
+    float innerFactor[2] : SV_InsideTessFactor;
 };
 
-// コントロールポイントからの出力構造体
+// HS出力(VS出力と同じ)
 #define HS_OUT HS_IN
+// DS入力(VS出力と同じ)
 #define DS_IN HS_IN
 
 struct DS_OUT
@@ -49,8 +46,8 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
     float lodLowFactor; // LOD最低分割数係数
     float lodDistanceMax; // LOD(Level Of Detail)距離
     
-    float heightSclaer; // 高さ係数
     float emissive;
     float metalness;
     float roughness;
+    float tessPadding;
 }

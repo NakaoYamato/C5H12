@@ -23,10 +23,12 @@ void MeshCollider::OnDelete()
 // 更新処理
 void MeshCollider::Update(float elapsedTime)
 {
-	if (_recalculate)
+	if (_recalculate && !_isCalculating)
 	{
 		_recalculate = false;
 
+		// 再計算中フラグを立てる
+		_isCalculating = true;
 		// コリジョンメッシュの再計算をジョブシステムに申請
 		JobSystem::Instance().EnqueueJob(
 			GetName(),
@@ -37,6 +39,7 @@ void MeshCollider::Update(float elapsedTime)
 				{
 					std::lock_guard<std::mutex> lock(_collisionMeshMutex);
 					_calcCollisionMesh = collisionMeshCopy;
+					_isCalculating = false;
 				}
 			});
 	}
@@ -174,9 +177,11 @@ MeshCollider::CollisionMesh MeshCollider::RecalculateCollisionMesh(Model* model)
 	}
 
 	// モデル全体のAABB
-	DirectX::XMFLOAT3 volumeMin, volumeMax;
+	Vector3 volumeMin, volumeMax;
 	DirectX::XMStoreFloat3(&volumeMin, VolumeMin);
 	DirectX::XMStoreFloat3(&volumeMax, VolumeMax);
+	collisionMesh.meshBoundingBox.Center = (volumeMin + volumeMax) * 0.5f;
+	collisionMesh.meshBoundingBox.Extents = (volumeMax - volumeMin) * 0.5f;
 
 	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
 	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
@@ -221,6 +226,16 @@ bool MeshCollider::RayCast(
 	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
 	auto& collisionMesh = GetCollisionMesh();
 
+	// 全体のAABBとレイの交差判定
+	{
+		DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Center);
+		DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Extents);
+		if (!Collision3D::IntersectRayVsAABB(Start, DirectionNorm, *distance, aabbCenter, aabbRadii, nullptr, nullptr))
+		{
+			return false;
+		}
+	}
+
 	for (auto& area : collisionMesh.areas)
 	{
 		DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
@@ -263,8 +278,19 @@ bool MeshCollider::SphereCast(const Vector3& origin, const Vector3& direction, f
 	bool hit = false;
 	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&origin);
 	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
+	auto& collisionMesh = GetCollisionMesh();
 
-	for (auto& area : GetCollisionMesh().areas)
+	// 全体のAABBとレイの交差判定
+	{
+		DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Center);
+		DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Extents);
+		if (!Collision3D::IntersectRayVsAABB(Start, DirectionNorm, *distance, aabbCenter, aabbRadii, nullptr, nullptr))
+		{
+			return false;
+		}
+	}
+
+	for (auto& area : collisionMesh.areas)
 	{
 		DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
 		DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
@@ -275,7 +301,7 @@ bool MeshCollider::SphereCast(const Vector3& origin, const Vector3& direction, f
 			// エリアに含まれている三角形と判定
 			for (const int& index : area.triangleIndices)
 			{
-				const MeshCollider::CollisionMesh::Triangle& triangle = GetCollisionMesh().triangles[index];
+				const MeshCollider::CollisionMesh::Triangle& triangle = collisionMesh.triangles[index];
 				DirectX::XMVECTOR TrianglePos[3] = {
 					DirectX::XMLoadFloat3(&triangle.positions[0]),
 					DirectX::XMLoadFloat3(&triangle.positions[1]),

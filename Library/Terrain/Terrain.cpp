@@ -428,77 +428,31 @@ void Terrain::CreateTerrainMesh(ID3D11Device* device)
         }
 
 		// インデックスの生成
-        indices.reserve(divisionCount * divisionCount * 6);
+        indices.reserve(divisionCount * divisionCount * 4); // 1クアッドあたり4インデックス
         for (size_t x = 0; x < divisionCount; ++x)
         {
             for (size_t z = 0; z < divisionCount; ++z)
             {
-                // 現在のクアッドを構成する4つの頂点のインデックスを計算
+                // 現在のクアッド（パッチ）を構成する4つの頂点のインデックスを計算
+                // (zが下方向に増加するグリッドと仮定)
                 // v0 -- v2
-                // |  /  |
+                // |    |
                 // v1 -- v3
-                size_t v0 = x * vertexCountPerSide + z;        // 現在の列の、現在の行 (左下)
-                size_t v1 = x * vertexCountPerSide + (z + 1);    // 現在の列の、次の行 (左上)
-                size_t v2 = (x + 1) * vertexCountPerSide + z;    // 次の列の、現在の行 (右下)
-                size_t v3 = (x + 1) * vertexCountPerSide + (z + 1);  // 次の列の、次の行 (右上)
+                size_t v0 = x * vertexCountPerSide + z;          // 左上 (Top-Left)
+                size_t v1 = x * vertexCountPerSide + (z + 1);      // 左下 (Bottom-Left)
+                size_t v2 = (x + 1) * vertexCountPerSide + z;      // 右上 (Top-Right)
+                size_t v3 = (x + 1) * vertexCountPerSide + (z + 1);  // 右下 (Bottom-Right)
 
-                // 1つ目の三角形 (左下 -> 左上 -> 右下)
+                // 4つの頂点インデックスをパッチとして追加します。
+                // ハルシェーダーでの辺の扱いやカリングを意識して、一貫した順序で追加します。
+                // ここでは反時計回り (v0 -> v1 -> v3 -> v2) で追加しています。
                 indices.push_back(static_cast<uint32_t>(v0));
-                indices.push_back(static_cast<uint32_t>(v1));
-                indices.push_back(static_cast<uint32_t>(v2));
-
-                // 2つ目の三角形 (左上 -> 右上 -> 右下)
                 indices.push_back(static_cast<uint32_t>(v1));
                 indices.push_back(static_cast<uint32_t>(v3));
                 indices.push_back(static_cast<uint32_t>(v2));
             }
         }
     }
-
-
-  //  // 地形メッシュの頂点とインデックスを生成
-  //  std::vector<TerrainRenderer::Vertex> vertices =
-  //  {
-  //      {{-1.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},// 左下
-  //      {{-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.5f}},// 左中
-  //      {{-1.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},// 左上
-  //      {{ 0.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.5f, 1.0f}},// 中下
-  //      {{ 0.0f,  0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {0.5f, 0.5f}},// 中心
-  //      {{ 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.5f, 0.0f}},// 中上
-  //      {{ 1.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},// 右下
-  //      {{ 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.5f}},// 右中
-  //      {{ 1.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},// 右上
-  //  };
-  //  std::vector<uint32_t> indices = {
-  //      // 左下1面
-  //      0, 1, 3, // 左下, 左中, 中下
-  //      1, 4, 3, // 左中, 中心, 中下
-
-  //      // 左上1面
-  //      1, 2, 4, // 左中, 左上, 中心
-  //      2, 5, 4, // 左上, 中上, 中心
-
-		//// 右下1面
-		//3, 4, 6, // 中下, 中心, 右下
-		//4, 7, 6, // 中心, 右中, 右下
-
-		//// 右上1面
-		//4, 5, 7, // 中心, 中上, 右中
-		//5, 8, 7, // 中上, 右上, 右中
-  //  };
-    //// 地形メッシュの頂点とインデックスを生成
-    //std::vector<TerrainRenderer::Vertex> vertices =
-    //{
-    //    {{-1.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},// 左下
-    //    {{-1.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},// 左上
-    //    {{ 1.0f,  0.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},// 右下
-    //    {{ 1.0f,  0.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},// 右上
-    //};
-    //std::vector<uint32_t> indices = {
-    //    // 左下1面
-    //    0, 1, 2,
-    //    1, 3, 2
-    //};
 
     // 頂点バッファとインデックスバッファを作成
     HRESULT hr{ S_OK };

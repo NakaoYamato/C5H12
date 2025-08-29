@@ -21,7 +21,7 @@ struct HS_CONSTANT_DATA_OUTPUT
 #define NUM_CONTROL_POINTS 3
 
 [domain("tri")]
-GRASS_DS_OUT main(HS_CONSTANT_OUT input, float3 UV : SV_DomainLocation,
+GRASS_DS_OUT main(GRASS_HS_CONSTANT_OUT input, float3 UV : SV_DomainLocation,
 const OutputPatch<GRASS_DS_IN, 3> patch)
 {
 	GRASS_DS_OUT dout;

@@ -2,8 +2,6 @@
 
 #include "../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
-// パラメータマップ
-Texture2D<float4> parameterTexture : register(t6);
 
 [maxvertexcount(3)]
 void main(
@@ -19,9 +17,7 @@ void main(
         elemant.worldNormal = gin[i].worldNormal;
         elemant.worldTangent = gin[i].worldTangent;
         elemant.texcoord = gin[i].texcoord;
-        // コストをデータマップから取得
-        float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], elemant.texcoord, 0);
-        elemant.parameter = parameter;
+        elemant.parameter = gin[i].parameter;
         
         gout.Append(elemant);
     }

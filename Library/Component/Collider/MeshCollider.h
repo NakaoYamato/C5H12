@@ -22,6 +22,7 @@ public:
 
 		std::vector<Triangle>	triangles;
 		std::vector<Area>		areas;
+		DirectX::BoundingBox	meshBoundingBox;
 	};
 
 public:
@@ -91,12 +92,13 @@ protected:
     /// <returns>交差したAABBの番号</returns>
     std::vector<size_t> GetCollisionMeshIndex(const CollisionMesh& collisionMesh, const DirectX::BoundingBox& aabb) const;
 protected:
-	CollisionMesh	_collisionMesh;	// コリジョンメッシュ
-	bool _recalculate = true;	// 再計算フラグ
-	bool _isDebugDrawVertex = false; // 頂点描画フラグ
-	bool _isDebugDrawArea = false; // 頂点描画フラグ
-	int _cellSize = 16; // 分割エリアのサイズ
-    int _drawCellIndex = -1; // 描画エリアのインデックス
+	CollisionMesh	_collisionMesh;		// コリジョンメッシュ
+	bool _recalculate = true;			// 再計算フラグ
+	bool _isDebugDrawVertex = false;	// 頂点描画フラグ
+	bool _isDebugDrawArea = false;		// 頂点描画フラグ
+	bool _isCalculating = false;		// 計算中フラグ
+	int _cellSize = 16;					// 分割エリアのサイズ
+    int _drawCellIndex = -1;			// 描画エリアのインデックス
 
 	// マルチスレッド用のミューテックス
 	std::mutex _collisionMeshMutex;

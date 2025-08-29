@@ -197,13 +197,12 @@ void TerrainDeformer::Update(float elapsedTime)
 			{
 				// TerrainControllerを取得
 				terrainControllers.push_back(terrainController);
-
-                // 交差したアクターの情報を出力
-                Debug::Output::String(L"接触オブジェクト: ");
-                Debug::Output::String(hitActor->GetName());
-                Debug::Output::String(L"\n");
 			}
 		}
+        // 交差したアクターの情報を出力
+        Debug::Output::String(L"接触オブジェクト: ");
+        Debug::Output::String(hitActor->GetName());
+        Debug::Output::String(L"\n");
     }
 
     // 選択中のブラシを更新

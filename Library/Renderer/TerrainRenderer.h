@@ -21,13 +21,13 @@ public:
 
         float edgeFactor = 64.0f;    // エッジ分割数
         float innerFactor = 64.0f;    // 内部部分数
-		float lodLowFactor = 16.0f;      // LOD最低分割数係数
+		float lodLowFactor = 10.0f;      // LOD最低分割数係数
         float lodDistanceMax = 200.0f;    // LOD(Level Of Detail)距離
 
-        float heightScaler = 1.0f;     // 高さ係数
         float emissive = 0.0f;     // エミッシブ
         float metalness = 0.63f;    // メタリック
         float roughness = 0.6f;     // ラフネス
+		float padding = 0.0f; // パディング
     };
 	struct GrassConstantBuffer
 	{
@@ -78,6 +78,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
+    Microsoft::WRL::ComPtr<ID3D11HullShader>	_nonLODHullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;

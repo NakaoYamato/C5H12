@@ -99,7 +99,10 @@ MeshCollider::CollisionMesh TerrainCollider::RecalculateCollisionMesh(Model* mod
     }
 
 
-	// モデル全体のAABB
+	// テレイン全体のAABB
+	collisionMesh.meshBoundingBox.Center = (volumeMin + volumeMax) * 0.5f;
+	collisionMesh.meshBoundingBox.Extents = (volumeMax - volumeMin) * 0.5f;
+
 	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
 	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
 	float sizeZ = (volumeMax.z - volumeMin.z) / _cellSize;

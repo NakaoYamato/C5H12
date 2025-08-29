@@ -51,6 +51,11 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             device,
             "./Data/Shader/HLSL/Terrain/TerrainDS.cso",
             _domainShader.ReleaseAndGetAddressOf());
+        // LODを使用しないハルシェーダー
+		GpuResourceManager::CreateHsFromCso(
+			device,
+			"./Data/Shader/HLSL/Terrain/TerrainNonLODHS.cso",
+			_nonLODHullShader.ReleaseAndGetAddressOf());
         // ピクセルシェーダー
         GpuResourceManager::CreatePsFromCso(
             device,
@@ -223,7 +228,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
         dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
     else
         dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
-    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 
 	// 登録しているTerrainを描画
 	for (const auto& drawInfo : _drawInfos)
@@ -256,7 +261,6 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
         // パラメータマップ設定
 		dc->DSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
 		dc->PSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
-		dc->GSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
         // 頂点バッファとインデックスバッファを設定
         UINT stride = sizeof(TerrainRenderer::Vertex);
         UINT offset = 0;
@@ -449,7 +453,6 @@ void TerrainRenderer::DrawGui()
                 ImGui::SliderFloat(u8"LOD Distance", &_data.lodDistanceMax, 1.0f, 200.0f, "%.1f");
 				ImGui::SliderFloat(u8"LOD Low Factor", &_data.lodLowFactor, 1.0f, MaxTessellation, "%.1f");
 
-                ImGui::SliderFloat(u8"Height Scaler", &_data.heightScaler, 0.1f, 10.0f, "%.1f");
                 ImGui::SliderFloat(u8"Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");

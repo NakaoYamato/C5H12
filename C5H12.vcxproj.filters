@@ -1427,5 +1427,6 @@
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalGPS.hlsl" />
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalSPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainStaticVS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainNonLODHS.hlsl" />
   </ItemGroup>
 </Project>

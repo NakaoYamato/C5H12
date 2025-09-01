@@ -70,6 +70,11 @@ public:
 	// GUI描画
 	void DrawGui();
 private:
+    void RenderStreamOut(const RenderContext& rc, bool writeGBuffer);
+    void RenderDynamic(const RenderContext& rc, bool writeGBuffer);
+    void RenderStatic(const RenderContext& rc, bool writeGBuffer);
+    void RenderGrass(const RenderContext& rc, bool writeGBuffer);
+private:
 #pragma region 描画用COMオブジェクト
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> _grassConstantBuffer;
@@ -106,6 +111,8 @@ private:
 #pragma endregion
     // Terrainの描画用情報配列
 	std::vector<DrawInfo> _drawInfos;
+    // 頂点書き出し用情報配列
+    std::vector<DrawInfo> _exportVertexDrawInfos;
     // 静的描画用情報配列
 	std::vector<DrawInfo> _staticDrawInfos;
 	// 草の描画用情報

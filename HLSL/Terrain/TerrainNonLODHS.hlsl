@@ -21,8 +21,8 @@ uint pid : SV_PrimitiveID)
 
 // コントロールポイントごとに適用される関数
 [domain("quad")]
-[partitioning("integer")]
-[outputtopology("triangle_cw")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_ccw")]
 [outputcontrolpoints(4)]
 [patchconstantfunc("HSConstant")]
 DS_IN main(InputPatch<HS_IN, 4> input,

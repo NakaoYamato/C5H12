@@ -19,15 +19,15 @@ public:
     {
         DirectX::XMFLOAT4X4 world = {};
 
-        float edgeFactor = 64.0f;    // エッジ分割数
-        float innerFactor = 64.0f;    // 内部部分数
-		float lodLowFactor = 10.0f;      // LOD最低分割数係数
-        float lodDistanceMax = 200.0f;    // LOD(Level Of Detail)距離
+        float tessFactor = 63.0f;           // 分割数
+        float collisionTessFactor = 15.0f;  // 衝突判定用エッジ分割数(奇数のみ)
+		float lodLowFactor = 9.0f;          // LOD最低分割数係数
+        float lodDistanceMax = 200.0f;      // LOD(Level Of Detail)距離
 
-        float emissive = 0.0f;     // エミッシブ
-        float metalness = 0.63f;    // メタリック
-        float roughness = 0.6f;     // ラフネス
-		float padding = 0.0f; // パディング
+        float emissive = 0.0f;              // エミッシブ
+        float metalness = 0.63f;            // メタリック
+        float roughness = 0.6f;             // ラフネス
+        float padding;                      // パディング
     };
 	struct GrassConstantBuffer
 	{

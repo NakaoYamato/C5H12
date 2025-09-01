@@ -41,10 +41,10 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
 {
     row_major float4x4 world;
     
-    float edgeFactor; // エッジ分割数
-    float innerFactor; // 内部分割数
-    float lodLowFactor; // LOD最低分割数係数
-    float lodDistanceMax; // LOD(Level Of Detail)距離
+    float tessFactor;           // 分割数
+    float collisionTessFactor;  // 衝突判定用エッジ分割数(奇数のみ)
+    float lodLowFactor;         // LOD最低分割数係数
+    float lodDistanceMax;       // LOD(Level Of Detail)距離
     
     float emissive;
     float metalness;

@@ -272,15 +272,19 @@ void TerrainRenderer::DrawGui()
 
             if (ImGui::TreeNode(u8"定数バッファ"))
             {
-                ImGui::SliderFloat(u8"Edge Factor", &_data.edgeFactor, 1.0f, MaxTessellation, "%.1f");
-                ImGui::SliderFloat(u8"Inner Factor", &_data.innerFactor, 1.0f, MaxTessellation, "%.1f");
-                ImGui::SliderFloat(u8"LOD Distance", &_data.lodDistanceMax, 1.0f, 200.0f, "%.1f");
-				ImGui::SliderFloat(u8"LOD Low Factor", &_data.lodLowFactor, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat(u8"分割数", &_data.tessFactor, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat(u8"衝突判定用エッジ分割数", &_data.collisionTessFactor, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat(u8"LOD最低分割数係数", &_data.lodDistanceMax, 1.0f, 200.0f, "%.1f");
+				ImGui::SliderFloat(u8"LOD距離", &_data.lodLowFactor, 1.0f, MaxTessellation, "%.1f");
 
-                ImGui::SliderFloat(u8"Emissive", &_data.emissive, 0.0f, 1.0f, "%.2f");
-                ImGui::SliderFloat(u8"Metalness", &_data.metalness, 0.0f, 1.0f, "%.2f");
-                ImGui::SliderFloat(u8"Roughness", &_data.roughness, 0.0f, 1.0f, "%.2f");
+                ImGui::SliderFloat(u8"エミッシブ", &_data.emissive, 0.0f, 1.0f, "%.2f");
+                ImGui::SliderFloat(u8"メタリック", &_data.metalness, 0.0f, 1.0f, "%.2f");
+                ImGui::SliderFloat(u8"ラフネス", &_data.roughness, 0.0f, 1.0f, "%.2f");
                 ImGui::TreePop();
+
+                _data.collisionTessFactor = static_cast<int>(_data.collisionTessFactor) % 2 == 0 ? 
+                    _data.collisionTessFactor + 1 :
+                    _data.collisionTessFactor;
             }
             if (ImGui::TreeNode(u8"草の定数バッファ"))
             {
@@ -367,9 +371,9 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc, bool writeGBuffer
         {
             // 頂点情報を受け取り
             std::vector<Terrain::StreamOutVertex> streamOut;
-            // 頂点数を計算
-            UINT size = 3 * static_cast<UINT>(_data.edgeFactor) +
-                static_cast<UINT>(((_data.innerFactor - 1) * (_data.innerFactor - 2)) / 2);
+            // TODO : 頂点数を計算
+            UINT size = 3 * static_cast<UINT>(_data.collisionTessFactor) +
+                static_cast<UINT>(((_data.collisionTessFactor - 1) * (_data.collisionTessFactor - 2)) / 2);
             size *= static_cast<UINT>(std::pow(DivisionCount, 2)) * 2 * 3 * 3; // パッチ数
             //UINT size = 3 * 3 * 9 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
             streamOut.resize(size);

@@ -9,7 +9,7 @@ uint pid : SV_PrimitiveID)
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
     // ƒJƒƒ‰‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä•ªŠ„”‚ğ’²®
     float4 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) / 4.0;
-    float factor = CalcDistanceTessFactor(center, cameraPosition.xyz, 0.0, lodDistanceMax, max(edgeFactor, innerFactor));
+    float factor = CalcDistanceTessFactor(center, cameraPosition.xyz, 0.0, lodDistanceMax, tessFactor);
     // Šï”‚¾‚Æ‚«‚ê‚¢‚É•ªŠ„‚Å‚«‚é‚Ì‚ÅAŠï”‚ÉŠÛ‚ß‚é
     factor = floor(factor);
     factor = factor + factor % 2.0f + 1.0f;

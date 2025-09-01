@@ -8,13 +8,13 @@ uint pid : SV_PrimitiveID)
 {
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
     // エッジの分割数を指定
-    hout.factor[0] = edgeFactor;
-    hout.factor[1] = edgeFactor;
-    hout.factor[2] = edgeFactor;
-    hout.factor[3] = edgeFactor;
+    hout.factor[0] = collisionTessFactor;
+    hout.factor[1] = collisionTessFactor;
+    hout.factor[2] = collisionTessFactor;
+    hout.factor[3] = collisionTessFactor;
     // 内部部分の分割数を指定
-    hout.innerFactor[0] = innerFactor;
-    hout.innerFactor[1] = innerFactor;
+    hout.innerFactor[0] = collisionTessFactor;
+    hout.innerFactor[1] = collisionTessFactor;
     
     return hout;
 }

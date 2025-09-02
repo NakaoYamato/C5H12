@@ -19,20 +19,20 @@ public:
     {
         DirectX::XMFLOAT4X4 world = {};
 
-        float tessFactor = 63.0f;           // 分割数
-        float collisionTessFactor = 15.0f;  // 衝突判定用エッジ分割数(奇数のみ)
-		float lodLowFactor = 9.0f;          // LOD最低分割数係数
-        float lodDistanceMax = 200.0f;      // LOD(Level Of Detail)距離
+        Vector4 lodTessFactors = { 63.0f, 37.0f, 21.0f, 15.0f }; // LODの分割数
 
+        float lodTessDistance = 25.0f;      // LODの距離
+        float collisionTessFactor = 15.0f;  // 衝突判定用エッジ分割数(奇数のみ)
         float emissive = 0.0f;              // エミッシブ
         float metalness = 0.63f;            // メタリック
+
         float roughness = 0.6f;             // ラフネス
-        float padding;                      // パディング
+        float padding[3]{};
     };
 	struct GrassConstantBuffer
 	{
         float grassTessellation = 8.0f;     // 草の分割数
-        float lodDistanceMax = 100.0f;    // LOD(Level Of Detail)距離
+        float lodDistanceMax = 100.0f;    // LOD距離
         float height = 1.0f;
         float width = 0.04f;
 
@@ -51,9 +51,9 @@ public:
 		bool isExportingVertices = false; // 頂点情報をエクスポートするかどうか
     };
     
-	static constexpr float MaxTessellation = 256.0f;
+	static constexpr float MaxTessellation = 64.0f;
     // 分割数
-    static constexpr size_t DivisionCount = 6;
+    static constexpr size_t DivisionCount = 10;
     // 1辺あたりの頂点数
     static constexpr size_t VertexCountPerSide = DivisionCount + 1;
     static constexpr UINT ParameterMapSRVIndex = 6;

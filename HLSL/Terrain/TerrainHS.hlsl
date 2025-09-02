@@ -9,11 +9,10 @@ uint pid : SV_PrimitiveID)
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
     // カメラからの距離に応じて分割数を調整
     float4 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) / 4.0;
-    float factor = CalcDistanceTessFactor(center, cameraPosition.xyz, 0.0, lodDistanceMax, tessFactor);
-    // 奇数だときれいに分割できるので、奇数に丸める
-    factor = floor(factor);
-    factor = factor + factor % 2.0f + 1.0f;
-    factor = max(factor, lodLowFactor);
+    center = mul(center, world);
+    float len = length(center.xyz - cameraPosition.xyz);
+    int index = (int) clamp(len / lodDistance, 0.0f, 3.0f);
+    float factor = lodTessFactors[index];
     
     // エッジの分割数を指定
     hout.factor[0] = factor;

@@ -272,23 +272,30 @@ void TerrainRenderer::DrawGui()
 
             if (ImGui::TreeNode(u8"定数バッファ"))
             {
-                ImGui::SliderFloat(u8"分割数", &_data.tessFactor, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat4(u8"分割数", &_data.lodTessFactors.x, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat(u8"LOD距離", &_data.lodTessDistance, 1.0f, 200.0f, "%.1f");
                 ImGui::SliderFloat(u8"衝突判定用エッジ分割数", &_data.collisionTessFactor, 1.0f, MaxTessellation, "%.1f");
-                ImGui::SliderFloat(u8"LOD最低分割数係数", &_data.lodDistanceMax, 1.0f, 200.0f, "%.1f");
-				ImGui::SliderFloat(u8"LOD距離", &_data.lodLowFactor, 1.0f, MaxTessellation, "%.1f");
 
                 ImGui::SliderFloat(u8"エミッシブ", &_data.emissive, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"メタリック", &_data.metalness, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"ラフネス", &_data.roughness, 0.0f, 1.0f, "%.2f");
                 ImGui::TreePop();
 
-                _data.collisionTessFactor = static_cast<int>(_data.collisionTessFactor) % 2 == 0 ? 
-                    _data.collisionTessFactor + 1 :
-                    _data.collisionTessFactor;
+                auto Oddification = [](float& value)
+                {
+                    value += static_cast<int>(value) % 2 == 0 ? 1.0f : 0.0f;
+                    value = std::floor(value);
+                };
+                // 分割数を奇数にする
+                Oddification(_data.lodTessFactors.x);
+                Oddification(_data.lodTessFactors.y);
+                Oddification(_data.lodTessFactors.z);
+                Oddification(_data.lodTessFactors.w);
+                Oddification(_data.collisionTessFactor);
             }
             if (ImGui::TreeNode(u8"草の定数バッファ"))
             {
-                ImGui::SliderFloat(u8"分割数", &_dataGrass.grassTessellation, 1.0f, MaxTessellation, "%.1f");
+                ImGui::SliderFloat(u8"分割数", &_dataGrass.grassTessellation, 1.0f, MaxTessellation - 1.0f, "%.1f");
                 ImGui::SliderFloat(u8"LOD", &_dataGrass.lodDistanceMax, 1.0f, 200.0f, "%.1f");
                 ImGui::DragFloat(u8"高さ", &_dataGrass.height, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"幅", &_dataGrass.width, 0.001f, 0.001f, 10.0f, "%.2f");
@@ -371,11 +378,11 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc, bool writeGBuffer
         {
             // 頂点情報を受け取り
             std::vector<Terrain::StreamOutVertex> streamOut;
-            // TODO : 頂点数を計算
-            UINT size = 3 * static_cast<UINT>(_data.collisionTessFactor) +
-                static_cast<UINT>(((_data.collisionTessFactor - 1) * (_data.collisionTessFactor - 2)) / 2);
-            size *= static_cast<UINT>(std::pow(DivisionCount, 2)) * 2 * 3 * 3; // パッチ数
-            //UINT size = 3 * 3 * 9 * static_cast<UINT>(_data.edgeFactor) * static_cast<UINT>(_data.innerFactor);
+            // 頂点数を計算
+            const UINT size =
+                static_cast<UINT>(std::pow(DivisionCount, 2)) *
+                static_cast<UINT>(std::pow(_data.collisionTessFactor, 2)) *
+                6;
             streamOut.resize(size);
             CopyMemory(streamOut.data(), mapped_resource.pData, sizeof(Terrain::StreamOutVertex) * size);
             // マップ解除

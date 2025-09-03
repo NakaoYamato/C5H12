@@ -52,7 +52,7 @@ const OutputPatch<DS_IN, 4> patch)
     // 頂点座標をハイトマップで取得した値分ずらす
     {
         position = mul(float4(position, 1.0f), world).xyz;
-        position += worldNormal * height;
+        position.y += height;
     }
     // 情報設定
     dout.position = mul(float4(position, 1.0), viewProjection);

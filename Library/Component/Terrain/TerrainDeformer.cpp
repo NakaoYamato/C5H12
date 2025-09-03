@@ -311,10 +311,10 @@ void TerrainDeformer::Render(const RenderContext& rc)
             constantBufferData.brushStrength = task.strength;
             // テクスチャタイリング係数を設定
             constantBufferData.textureTillingScale = _textureTillingScale;
-            // 高さ変形スケールを設定
-            constantBufferData.heightScale = task.heightScale;
             // ブラシのY軸回転を設定
             constantBufferData.brushRotationY = task.brushRotationY;
+            // パディングを設定
+            constantBufferData.padding = task.padding;
 
             // 定数バッファ更新
             rc.deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &constantBufferData, 0, 0);
@@ -650,8 +650,6 @@ void TerrainDeformerBrush::DrawGui()
     ImGui::DragFloat(u8"ブラシ半径", &_brushRadius, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"ブラシY軸回転(ラジアン)", &_brushRotationY, 0.01f, -DirectX::XM_PI, DirectX::XM_PI);
     ImGui::DragFloat(u8"ブラシ強度", &_brushStrength, 0.01f, -10.0f, 10.0f);
-    ImGui::DragFloat(u8"高さ最小値", &_brushHeightScale.x, 0.01f, -100.0f, 0.0f);
-    ImGui::DragFloat(u8"高さ最大値", &_brushHeightScale.y, 0.01f, 0.0f, 100.0f);
 }
 // タスクを登録
 void TerrainDeformerBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
@@ -664,6 +662,6 @@ void TerrainDeformerBrush::RegisterTask(std::weak_ptr<TerrainController> terrain
 	task.radius = radius;
 	task.strength = strength;
 	task.brushRotationY = _brushRotationY;
-	task.heightScale = _brushHeightScale;
+	task.padding = _brushPadding;
 	_deformer->AddTask(terrainController.lock().get(), task);
 }

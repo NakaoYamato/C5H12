@@ -20,7 +20,7 @@ public:
 
         float textureTillingScale       = 5.0f; // タイリング係数(基本変えない)
         float brushRotationY            = 0.0f; // ブラシのY軸回転(ラジアン)
-        Vector2 heightScale = { -1.0f, 1.0f }; // 高さ変形スケール x : 最小値、 y : 最大値
+        Vector2 padding                 = {};   // パディング
     };
 	// 編集タスク
     struct Task
@@ -32,7 +32,7 @@ public:
 		float       radius          = 0.0f;             // ブラシ半径
 		float       strength        = 0.0f;             // ブラシ強度
         float       brushRotationY  = 0.0f;             // ブラシのY軸回転(ラジアン)
-		Vector2     heightScale     = { -1.0f, 1.0f };  // 高さ変形スケール x : 最小値、 y : 最大値
+        Vector2     padding         = {};               // パディング
     };
     // 書き込むテクスチャデータ
 	struct PaintTexture
@@ -203,8 +203,8 @@ public:
 	float GetBrushStrength() const { return _brushStrength; }
 	// ブラシのY軸回転(ラジアン)取得
 	float GetBrushRotationY() const { return _brushRotationY; }
-	// 高さ変形スケール取得 x : 最小値、 y : 最大値
-	const Vector2& GetBrushHeightScale() const { return _brushHeightScale; }
+	// パディング取得
+	const Vector2& GetBrushPadding() const { return _brushPadding; }
 	// ブラシのデバッグ描画フラグ取得
 	bool IsDrawDebugBrush() const { return _drawDebugBrush; }
 #pragma endregion
@@ -223,8 +223,8 @@ protected:
     float _brushStrength = 10.0f;
     // ブラシのY軸回転(ラジアン)
     float _brushRotationY = 0.0f;
-    // 高さ変形スケール x : 最小値、 y : 最大値
-    Vector2 _brushHeightScale = { -100.0f, 100.0f };
+    // パディング
+    Vector2 _brushPadding = {};
     // ブラシのデバッグ描画フラグ
 	bool _drawDebugBrush = true;
 };

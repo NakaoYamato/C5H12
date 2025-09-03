@@ -119,6 +119,8 @@ private:
 	void DrawModelSelectionGui();
 	// ブラシの選択GUI描画
 	void DrawBrushSelectionGui();
+    // ブラシのGUI描画
+    void DrawBrushGui();
 private:
     // マテリアルマップのコピーピクセルシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _copyMaterialPS;

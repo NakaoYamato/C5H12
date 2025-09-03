@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 #include <filesystem>
+#include <string>
+#include <vector>
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 namespace ImGui
@@ -98,5 +100,34 @@ namespace ImGui
 			}
 		}
 		return false; // 画像がクリックされなかった
+	}
+
+	/// <summary>
+	/// 指定された文字列リストから選択可能なコンボボックスを表示し、選択された項目を更新します。
+	/// </summary>
+	/// <param name="title">コンボボックスのタイトルとして表示する文字列。</param>
+	/// <param name="item">現在選択されている項目の文字列。選択が変更された場合は更新されます。</param>
+	/// <param name="items">選択肢として表示する文字列のリスト。</param>
+	/// <returns>ユーザーが項目を選択して変更した場合は true、それ以外は false を返します。</returns>
+	static bool ComboString(const char* title, std::string* item, const std::vector<const char*> items)
+	{
+		int currentIndex = -1;
+		for (size_t i = 0; i < items.size(); ++i)
+		{
+			if (*item == items[i])
+			{
+				currentIndex = static_cast<int>(i);
+				break;
+			}
+		}
+		if (ImGui::Combo(title, &currentIndex, items.data(), static_cast<int>(items.size())))
+		{
+			if (currentIndex >= 0 && currentIndex < static_cast<int>(items.size()))
+			{
+				*item = items[currentIndex];
+				return true;
+			}
+		}
+        return false;
 	}
 }

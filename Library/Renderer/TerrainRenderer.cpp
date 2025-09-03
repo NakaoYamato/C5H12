@@ -192,8 +192,9 @@ void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, b
     {
         _exportVertexDrawInfos.push_back(drawInfo);
     }
+    
     // 静的描画の場合
-    else if (terrain->GetStreamOutData().size() != 0 && _isStaticDraw)
+    if (terrain->GetStreamOutData().size() != 0 && _isStaticDraw)
     {
         _staticDrawInfos.push_back(drawInfo);
     }
@@ -227,7 +228,12 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     dc->GSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
     dc->PSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
 
+
+    // 頂点情報を書き出す
+    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
     RenderStreamOut(rc, writeGBuffer);
+    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+
     RenderDynamic(rc, writeGBuffer);
     RenderStatic(rc, writeGBuffer);
 
@@ -322,10 +328,8 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc, bool writeGBuffer
     dc->DSSetShader(_domainShader.Get(), nullptr, 0);
     // ストリームアウトを有効にする
     dc->GSSetShader(_streamOutGeometryShader.Get(), nullptr, 0);
-    if (writeGBuffer)
-        dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
-    else
-        dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
+    // 書き込みはしない
+    dc->PSSetShader(nullptr, nullptr, 0);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 
     // 登録しているTerrainを描画

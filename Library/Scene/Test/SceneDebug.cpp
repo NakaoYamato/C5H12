@@ -10,11 +10,11 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Stage/GrassController.h"
 
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Stage/StageActor.h"
 
 //‰Šú‰»
 void SceneDebug::OnInitialize()
@@ -122,7 +122,7 @@ void SceneDebug::OnInitialize()
             light->AddComponent<PointLightController>();
         }
         {
-            auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
+            auto stage = RegisterActor<TerrainActor>("Stage", ActorTag::Stage);
         }
         {
             //auto stage = actorManager.Create("StageGrass", ActorTag::Stage);

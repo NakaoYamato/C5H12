@@ -7,6 +7,7 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Exporter/Exporter.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
@@ -385,6 +386,20 @@ void TerrainDeformer::DrawGui()
 			Exporter::SaveJsonFile(DEFAULT_MODEL_DATA_PATH, jsonData);
         }
 	}
+    if (ImGui::Button(u8"Terrain‚Ì’Ç‰Á"))
+    {
+        std::string actorName = "Stage";
+        for (int i = 0; i < 100; ++i)
+        {
+            std::string tempName = actorName + std::to_string(i);
+            if (GetActor()->GetScene()->GetActorManager().FindByName(tempName) == nullptr)
+            {
+                actorName = tempName;
+                break;
+            }
+        }
+        auto terrainActor = GetActor()->GetScene()->RegisterActor<TerrainActor>(actorName, ActorTag::Stage);
+    }
 }
 // ŠÂ‹«•¨‚ð’Ç‰Á
 void TerrainDeformer::AddEnvironmentObject(TerrainController* controller, 

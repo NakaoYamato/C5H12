@@ -1,11 +1,11 @@
 #include "SceneGryphusDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 // コンポーネント
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Gryphus/GryphusActor.h"
 
 #include "../../InGame/InputMediator.h"
@@ -30,7 +30,7 @@ void SceneGryphusDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

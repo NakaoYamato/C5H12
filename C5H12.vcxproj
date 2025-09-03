@@ -151,6 +151,7 @@
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
     <ClCompile Include="Library\2D\SpriteResource.cpp" />
+    <ClCompile Include="Library\Actor\Terrain\TerrainActor.cpp" />
     <ClCompile Include="Library\Audio\AudioLoader.cpp" />
     <ClCompile Include="Library\Audio\AudioResource.cpp" />
     <ClCompile Include="Library\Audio\AudioSystem.cpp" />
@@ -331,7 +332,6 @@
     <ClCompile Include="Source\Scene\Test\SceneTwoBoneIKDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneLookAtDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernIKDebug.cpp" />
-    <ClCompile Include="Source\Stage\StageActor.cpp" />
     <ClCompile Include="Source\Player\Weapon\WeaponActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.cpp" />
@@ -357,6 +357,7 @@
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
     <ClInclude Include="Library\2D\SpriteResource.h" />
+    <ClInclude Include="Library\Actor\Terrain\TerrainActor.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorActionBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorData.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorJudgmentBase.h" />
@@ -560,7 +561,6 @@
     <ClInclude Include="Source\Scene\Test\SceneLookAtDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneTwoBoneIKDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernIKDebug.h" />
-    <ClInclude Include="Source\Stage\StageActor.h" />
     <ClInclude Include="Source\Player\Weapon\WeaponActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.h" />

@@ -1,11 +1,11 @@
 #include "ScenePlayerDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 // コンポーネント
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Enemy/Weak/WeakActor.h"
@@ -36,7 +36,7 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<StageActor>("Stage0", ActorTag::Stage, 0, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
     }
     //{
     //    auto stage1 = RegisterActor<StageActor>("Stage1", ActorTag::Stage, 1, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, -50.0f));

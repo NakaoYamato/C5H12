@@ -16,6 +16,11 @@ HeightTransformingBrush::HeightTransformingBrush(TerrainDeformer* deformer) :
         Graphics::Instance().GetDevice(),
         "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformHeightPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
+    // でこぼこブラシピクセルシェーダの読み込み
+    GpuResourceManager::CreatePsFromCso(
+        Graphics::Instance().GetDevice(),
+        "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformBumpyHeightPS.cso",
+        _bumpyPixelShader.ReleaseAndGetAddressOf());
 }
 // 更新処理
 void HeightTransformingBrush::Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
@@ -25,7 +30,7 @@ void HeightTransformingBrush::Update(std::vector<std::shared_ptr<TerrainControll
     if (!intersectWorldPosition)
         return;
 
-    for (auto& terrainController : terrainControllers)
+    if (!_useBumpyShader)
     {
         if (_INPUT_TRIGGERD("LeftClick"))
         {
@@ -39,9 +44,15 @@ void HeightTransformingBrush::Update(std::vector<std::shared_ptr<TerrainControll
                 _brushPadding.x = 1.0f;
             }
         }
+    }
 
-        // 地形に接触していて左クリックしたら編集
-        if (terrainController && _INPUT_PRESSED("LeftClick"))
+    for (auto& terrainController : terrainControllers)
+    {
+        if (!terrainController)
+            continue;
+
+        // 左クリックしたら編集
+        if (_INPUT_PRESSED("LeftClick"))
         {
             Vector3 uv = intersectWorldPosition->TransformCoord(terrainController->GetActor()->GetTransform().GetMatrixInverse());
             Vector2 intersectUVPosition{};
@@ -52,6 +63,12 @@ void HeightTransformingBrush::Update(std::vector<std::shared_ptr<TerrainControll
                 intersectUVPosition,
                 _brushRadius / terrainController->GetActor()->GetTransform().GetScale().x,
                 _brushStrength * elapsedTime);
+        }
+
+        if (_INPUT_RELEASED("LeftClick"))
+        {
+            // 地形に編集を適用
+            terrainController->SetEditState(TerrainController::EditState::Editing);
         }
     }
 }
@@ -64,24 +81,37 @@ void HeightTransformingBrush::Render(SpriteResource* fullscreenQuad,
     uint32_t numViews)
 {
     terrain->GetParameterMapFB()->Activate(rc.deviceContext);
-    fullscreenQuad->Blit(
-        rc.deviceContext,
-        srv,
-        startSlot, numViews,
-        _pixelShader.Get()
-    );
+    if (_useBumpyShader)
+    {
+        fullscreenQuad->Blit(
+            rc.deviceContext,
+            srv,
+            startSlot, numViews,
+            _bumpyPixelShader.Get()
+        );
+    }
+    else
+    {
+        fullscreenQuad->Blit(
+            rc.deviceContext,
+            srv,
+            startSlot, numViews,
+            _pixelShader.Get()
+        );
+    }
     terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
 }
 // GUI描画
 void HeightTransformingBrush::DrawGui()
 {
     TerrainDeformerBrush::DrawGui();
-    ImGui::InputFloat(u8"高さ", &_brushPadding.y);
+    ImGui::DragFloat(u8"高さ", &_brushPadding.y);
+    ImGui::Checkbox(u8"でこぼこブラシを使用", &_useBumpyShader);
+    if (_useBumpyShader)
+        ImGui::DragFloat(u8"でこぼこシード値", &_brushPadding.x, 0.1f, 0.0f, 10.0f);
 }
 // タスクを登録
 void HeightTransformingBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
 {
 	TerrainDeformerBrush::RegisterTask(terrainController, uvPosition, radius, strength);
-    // 地形に編集を適用
-    terrainController.lock()->SetEditState(TerrainController::EditState::Editing);
 }

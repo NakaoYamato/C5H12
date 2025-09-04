@@ -1428,5 +1428,6 @@
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalSPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainStaticVS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainNonLODHS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformBumpyHeightPS.hlsl" />
   </ItemGroup>
 </Project>

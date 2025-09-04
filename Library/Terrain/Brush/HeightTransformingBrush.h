@@ -27,4 +27,9 @@ public:
 		const Vector2& uvPosition,
 		float radius,
 		float strength) override;
+private:
+	// でこぼこシェーダ
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _bumpyPixelShader;
+	// でこぼこシェーダ使用フラグ
+    bool _useBumpyShader = false;
 };

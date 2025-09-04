@@ -26,6 +26,8 @@ public:
     void LateUpdate(float elapsedTime) override;
     // •`‰æˆ—
     void Render(const RenderContext& rc) override;
+    // ‰e•`‰æ
+    void CastShadow(const RenderContext& rc) override;
     // ƒfƒoƒbƒO•`‰æ
     void DebugRender(const RenderContext& rc) override;
     // GUI•`‰æ

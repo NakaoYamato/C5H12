@@ -1343,6 +1343,8 @@
     <None Include="HLSL\Function\Tessellation.hlsli" />
     <None Include="HLSL\Decal\DecalGeometry.hlsli" />
     <None Include="HLSL\Decal\Decal.hlsli" />
+    <None Include="HLSL\CBuffer\B3\CascadedShadowCB.hlsli" />
+    <None Include="HLSL\Terrain\Shadow\TerrainShadow.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -1429,5 +1431,6 @@
     <FxCompile Include="HLSL\Terrain\TerrainStaticVS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainNonLODHS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformBumpyHeightPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowVS.hlsl" />
   </ItemGroup>
 </Project>

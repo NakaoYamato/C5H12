@@ -2,6 +2,7 @@
 
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
+#include "../../Library/Shader/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include <Mygui.h>
 
@@ -168,6 +169,20 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 
+    // 影描画用シェーダ読み込み
+    {
+        // 頂点シェーダ
+        GpuResourceManager::CreateVsFromCso(device,
+            "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowVS.cso",
+            _shadowVertexShader.ReleaseAndGetAddressOf(),
+            nullptr, nullptr, 0);
+
+        // ジオメトリシェーダー
+        GpuResourceManager::CreateGsFromCso(device,
+            "./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowGS.cso",
+            _shadowGeometryShader.ReleaseAndGetAddressOf());
+    }
+
     // 風のゆがみテクスチャ読み込み
     GpuResourceManager::LoadTextureFromFile(device,
         L"./Data/Texture/Wind/distortion texture.png",
@@ -206,6 +221,19 @@ void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, b
 
 	// 草の描画登録
 	_grassDrawInfos.push_back(drawInfo);
+}
+// 影描画登録
+void TerrainRenderer::DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
+{
+    // 頂点情報を書き出していない場合は登録しない
+    if (terrain->GetStreamOutData().size() == 0)
+        return;
+
+    DrawInfo drawInfo;
+    drawInfo.terrain = terrain;
+    drawInfo.world = world;
+    drawInfo.isExportingVertices = false;
+    _shadowDrawInfos.push_back(drawInfo);
 }
 // 描画処理
 void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
@@ -253,6 +281,45 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     _staticDrawInfos.clear();
     _exportVertexDrawInfos.clear();
     _grassDrawInfos.clear();
+}
+// 影描画実行
+void TerrainRenderer::CastShadow(const RenderContext& rc)
+{
+    ID3D11DeviceContext* dc = rc.deviceContext;
+
+    dc->IASetInputLayout(nullptr);
+    dc->VSSetShader(_shadowVertexShader.Get(), nullptr, 0);
+    dc->GSSetShader(_shadowGeometryShader.Get(), nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
+    // 頂点バッファ設定
+    ID3D11Buffer* clearBuffer[] = { nullptr };
+    UINT strides[] = { 0 };
+    UINT offsets[] = { 0 };
+    dc->IASetVertexBuffers(0, 1, clearBuffer, strides, offsets);
+    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    for (const auto& drawInfo : _shadowDrawInfos)
+    {
+        // シェーダーリソースビューの設定
+        ID3D11ShaderResourceView* srvs[] =
+        {
+            nullptr,
+            nullptr,
+            drawInfo.terrain->GetStreamOutSRV().Get(),
+        };
+        dc->VSSetShaderResources(0, _countof(srvs), srvs);
+
+        dc->DrawInstanced(static_cast<UINT>(drawInfo.terrain->GetStreamOutData().size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0);
+    }
+
+    // シェーダー解除
+    dc->VSSetShader(nullptr, nullptr, 0);
+    dc->HSSetShader(nullptr, nullptr, 0);
+    dc->DSSetShader(nullptr, nullptr, 0);
+    dc->GSSetShader(nullptr, nullptr, 0);
+    dc->PSSetShader(nullptr, nullptr, 0);
+
+    // 登録しているTerrainを描画した後はクリア
+    _shadowDrawInfos.clear();
 }
 // GUI描画
 void TerrainRenderer::DrawGui()

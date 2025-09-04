@@ -79,6 +79,16 @@ void TerrainController::Render(const RenderContext& rc)
             _editState = EditState::Complete;
     }
 }
+// ‰e•`‰æ
+void TerrainController::CastShadow(const RenderContext& rc)
+{
+    if (_terrain)
+    {
+        GetActor()->GetScene()->GetTerrainRenderer().DrawShadow(
+            _terrain.get(),
+            GetActor()->GetTransform().GetMatrix());
+    }
+}
 // ƒfƒoƒbƒO•`‰æ
 void TerrainController::DebugRender(const RenderContext& rc)
 {

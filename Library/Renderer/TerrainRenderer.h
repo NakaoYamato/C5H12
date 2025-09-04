@@ -65,8 +65,12 @@ public:
 	void Initialize(ID3D11Device* device);
     // •`‰æ“o˜^
 	void Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, bool isExportingVertices);
+    // ‰e•`‰æ“o˜^
+    void DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
 	// •`‰æˆ—
 	void Render(const RenderContext& rc, bool writeGBuffer);
+    // ‰e•`‰æÀs
+    void CastShadow(const RenderContext& rc);
 	// GUI•`‰æ
 	void DrawGui();
 private:
@@ -105,9 +109,13 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _grassColorSRV;
 
     // ƒXƒgƒŠ[ƒ€ƒAƒEƒg—p
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutCopyBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCopyBuffer;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
+
+    // ‰e•`‰æ—p
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>	    _shadowVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_shadowGeometryShader;
 #pragma endregion
     // Terrain‚Ì•`‰æ—pî•ñ”z—ñ
 	std::vector<DrawInfo> _drawInfos;
@@ -117,6 +125,8 @@ private:
 	std::vector<DrawInfo> _staticDrawInfos;
 	// ‘‚Ì•`‰æ—pî•ñ
 	std::vector<DrawInfo> _grassDrawInfos;
+    // ‰e•`‰æ—pî•ñ”z—ñ
+    std::vector<DrawInfo> _shadowDrawInfos;
 
 	// ’è”ƒoƒbƒtƒ@‚Ìƒf[ƒ^
 	ConstantBuffer                          _data;

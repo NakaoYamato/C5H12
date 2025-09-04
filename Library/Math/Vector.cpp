@@ -1,184 +1,8 @@
-#include "VECTOR.h"
+#include "Vector.h"
 
-//--------------------------------------------------------------
-//  VECTOR2の長さの二乗を取得
-float Vec2LengthSq(const Vector2& v)
-{
-    return (v.x * v.x + v.y * v.y);
-}
-//--------------------------------------------------------------
-//  VECTOR2の長さを取得
-float Vec2Length(const Vector2& v)
-{
-    return sqrtf(Vec2LengthSq(v));
-}
-//--------------------------------------------------------------
-//  VECTOR2を単位化
-Vector2 Vec2Normalize(const Vector2& v)
-{
-    float d = Vec2Length(v);
-    return d != 0.0f ? v / d : v;
-}
-//--------------------------------------------------------------
-//  VECTOR2対VECTOR2の内積
-float Vec2Dot(const Vector2& src, const Vector2& dst)
-{
-    return DirectX::XMVectorGetX(
-        DirectX::XMVector2Dot(DirectX::XMLoadFloat2(&src), DirectX::XMLoadFloat2(&dst))
-    );
-}
-//--------------------------------------------------------------
-//  VECTOR2対VECTOR2の外積
-Vector2 Vec2Cross(const Vector2& src, const Vector2& dst)
-{
-    Vector2 v = {};
-    DirectX::XMStoreFloat2(&v,
-        DirectX::XMVector2Cross(DirectX::XMLoadFloat2(&src), DirectX::XMLoadFloat2(&dst)));
-    return v;
-}
-//--------------------------------------------------------------
-//  srcとdstで保管処理
-Vector2 Vec2Lerp(const Vector2& src, const Vector2& dst, float t, float(*Easing)(float))
-{
-    return Vector2(
-        EasingLerp(src.x, dst.x, t, Easing),
-        EasingLerp(src.y, dst.y, t, Easing)
-    );
-}
-//--------------------------------------------------------------
-//  VECTOR3の長さの二乗を取得
-float   Vec3LengthSq(const Vector3& v)
-{
-    return (v.x * v.x + v.y * v.y + v.z * v.z);
-}
-//--------------------------------------------------------------
-//  VECTOR3の長さを取得
-float   Vec3Length(const Vector3& v)
-{
-    return sqrtf(Vec3LengthSq(v));
-}
-//--------------------------------------------------------------
-//  VECTOR3を単位化
-Vector3 Vec3Normalize(const Vector3& v)
-{
-    float d = Vec3Length(v);
-    return d != 0.0f ? v / d : v;
-}
-//--------------------------------------------------------------
-//  VECTOR3対VECTOR3の内積
-float Vec3Dot(const Vector3& src, const Vector3& dst)
-{
-    return DirectX::XMVectorGetX(
-        DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&src), DirectX::XMLoadFloat3(&dst))
-    );
-}
-//--------------------------------------------------------------
-//  VECTOR3対VECTOR3の外積
-Vector3 Vec3Cross(const Vector3& src, const Vector3& dst)
-{
-    Vector3 v = {};
-    DirectX::XMStoreFloat3(&v,
-        DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&src), DirectX::XMLoadFloat3(&dst)));
-    return v;
-}
-
-Vector3 Vec3ConvertToDegrees(const Vector3& v)
-{
-    Vector3 d{};
-    d.x = DirectX::XMConvertToDegrees(v.x);
-    d.y = DirectX::XMConvertToDegrees(v.y);
-    d.z = DirectX::XMConvertToDegrees(v.z);
-    return d;
-}
-
-Vector3 Vec3ConvertToRadians(const Vector3& v)
-{
-    Vector3 d{};
-    d.x = DirectX::XMConvertToRadians(v.x);
-    d.y = DirectX::XMConvertToRadians(v.y);
-    d.z = DirectX::XMConvertToRadians(v.z);
-    return d;
-}
-
-Vector3 Vec3Lerp(const Vector3& src, const Vector3& dst, float t, float(*Easing)(float))
-{
-    return Vector3(
-        EasingLerp(src.x, dst.x, t, Easing),
-        EasingLerp(src.y, dst.y, t, Easing),
-        EasingLerp(src.z, dst.z, t, Easing)
-    );
-}
-
-Vector3 Vec3FromRotationMatrix(const DirectX::XMMATRIX& R)
-{
-    DirectX::XMFLOAT4X4 r{};
-    DirectX::XMStoreFloat4x4(&r, R);
-    return Vec3FromRotationMatrix(r);
-}
-
-Vector3 Vec3TransformCoord(const Vector3& src, const DirectX::XMFLOAT4X4& m)
-{
-    return Vec3TransformCoord(src, DirectX::XMLoadFloat4x4(&m));
-}
-
-//--------------------------------------------------------------
-// 行列との掛け算
-Vector3 Vec3TransformCoord(const Vector3& src, const DirectX::XMMATRIX& M)
-{
-    Vector3 res{};
-    DirectX::XMStoreFloat3(&res,
-        DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&src), M));
-    return res;
-}
-
-Vector3 Vec3TransformNormal(const Vector3& src, const DirectX::XMFLOAT4X4& m)
-{
-    return Vec3TransformNormal(src, DirectX::XMLoadFloat4x4(&m));
-}
-
-Vector3 Vec3TransformNormal(const Vector3& src, const DirectX::XMMATRIX& M)
-{
-    Vector3 res{};
-    DirectX::XMStoreFloat3(&res,
-        DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&src), M));
-    return res;
-}
-
-Vector3 Vec3CalcAngle(const Vector3& normalVec)
-{
-    Vector3 res{};
-    res.x = std::acosf(normalVec.x);
-    res.y = std::acosf(normalVec.y);
-    res.z = std::acosf(normalVec.z);
-    return res;
-}
-
-Vector3 Vec3FromRotationMatrix(const DirectX::XMFLOAT4X4& m)
-{
-    // 参考資料:https://qiita.com/aa_debdeb/items/3d02e28fb9ebfa357eaf
-    Vector3 r{};
-    r.x = asinf(m.m[2][1]);
-
-    const float cosX = cosf(r.x);
-    if (cosX != 0.0f)
-    {
-        r.y = atanf(-m.m[2][0] / m.m[2][1]);
-        r.z = atanf(-m.m[0][1] / m.m[1][1]);
-    }
-    else
-    {
-        // シンバルロック
-        // r.y が0と仮定
-        r.y = 0.0f;
-        r.z = atanf(m.m[1][0] / m.m[0][0]);
-    }
-
-    return r;
-}
-
-
-//--------------------------------------------------
-// VECTOR2
+#include "Random.h"
+#pragma region Vector2
+#pragma region 演算子オーバーロード
 Vector2& Vector2::operator=(const Vector2& v)
 {
     x = v.x; y = v.y; return *this;
@@ -243,13 +67,53 @@ bool Vector2::operator != (const Vector2& v) const
 {
     return (x != v.x) || (y != v.y);
 }
+#pragma endregion
 
+#pragma region 静的メンバ関数
+//  VECTOR2の長さの二乗を取得
+float Vector2::LengthSq(const Vector2& v)
+{
+    return (v.x * v.x + v.y * v.y);
+}
+//  VECTOR2の長さを取得
+float Vector2::Length(const Vector2& v)
+{
+    return sqrtf(LengthSq(v));
+}
+//  VECTOR2を単位化
+Vector2 Vector2::Normalize(const Vector2& v)
+{
+    float d = Length(v);
+    return d != 0.0f ? v / d : v;
+}
+//  VECTOR2対VECTOR2の内積
+float Vector2::Dot(const Vector2& src, const Vector2& dst)
+{
+    return DirectX::XMVectorGetX(
+        DirectX::XMVector2Dot(DirectX::XMLoadFloat2(&src), DirectX::XMLoadFloat2(&dst))
+    );
+}
+//  VECTOR2対VECTOR2の外積
+Vector2 Vector2::Cross(const Vector2& src, const Vector2& dst)
+{
+    Vector2 v = {};
+    DirectX::XMStoreFloat2(&v,
+        DirectX::XMVector2Cross(DirectX::XMLoadFloat2(&src), DirectX::XMLoadFloat2(&dst)));
+    return v;
+}
+//  srcとdstで保管処理
+Vector2 Vector2::Lerp(const Vector2& src, const Vector2& dst, float t, float(*Easing)(float))
+{
+    return Vector2(
+        EasingLerp(src.x, dst.x, t, Easing),
+        EasingLerp(src.y, dst.y, t, Easing)
+    );
+}
+#pragma endregion
+#pragma endregion
 
-//--------------------------------------------------
-// 構造体
-//--------------------------------------------------
-//--------------------------------------------------
-// VECTOR3
+#pragma region Vector3
+#pragma region 演算子オーバーロード
 Vector3& Vector3::operator=(const Vector3& v)
 {
     x = v.x;
@@ -321,8 +185,306 @@ bool Vector3::operator != (const Vector3& v) const
 {
     return (x != v.x) || (y != v.y) || (z != v.z);
 }
+#pragma endregion
+
+#pragma region 静的メンバ関数
+//  VECTOR3の長さの二乗を取得
+float Vector3::LengthSq(const Vector3& v)
+{
+    return (v.x * v.x + v.y * v.y + v.z * v.z);
+}
+//  VECTOR3の長さを取得
+float Vector3::Length(const Vector3& v)
+{
+    return sqrtf(Vector3::LengthSq(v));
+}
+//  VECTOR3を単位化
+Vector3 Vector3::Normalize(const Vector3& v)
+{
+    float d = Vector3::Length(v);
+    return d != 0.0f ? v / d : v;
+}
+//  VECTOR3対VECTOR3の内積
+float Vector3::Dot(const Vector3& src, const Vector3& dst)
+{
+    return DirectX::XMVectorGetX(
+        DirectX::XMVector3Dot(DirectX::XMLoadFloat3(&src), DirectX::XMLoadFloat3(&dst))
+    );
+}
+//  VECTOR3対VECTOR3の外積
+Vector3 Vector3::Cross(const Vector3& src, const Vector3& dst)
+{
+    Vector3 v = {};
+    DirectX::XMStoreFloat3(&v,
+        DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&src), DirectX::XMLoadFloat3(&dst)));
+    return v;
+}
+// Vector3対Vector3の各項目掛け算
+Vector3 Vector3::Multiply(const Vector3& src, const Vector3& dst)
+{
+    return Vector3(
+		src.x * dst.x,
+		src.y * dst.y,
+		src.z * dst.z
+    );
+}
+//  srcとdstで保管処理
+//  t   : 経過時間(0.0f ~ 1.0f)
+Vector3 Vector3::Lerp(const Vector3& src, const Vector3& dst, float t, float(*Easing)(float))
+{
+    return Vector3(
+        EasingLerp(src.x, dst.x, t, Easing),
+        EasingLerp(src.y, dst.y, t, Easing),
+        EasingLerp(src.z, dst.z, t, Easing)
+    );
+}
+//  Vector3をオイラー角で単位化
+Vector3 Vector3::NormalizeEuler(const Vector3& v)
+{
+    return Vector3(NormalizeAngle(v.x), NormalizeAngle(v.y), NormalizeAngle(v.z));
+}
+//  VECTOR3を度数法に変換
+Vector3 Vector3::ToDegrees(const Vector3& v)
+{
+    Vector3 d{};
+    d.x = DirectX::XMConvertToDegrees(v.x);
+    d.y = DirectX::XMConvertToDegrees(v.y);
+    d.z = DirectX::XMConvertToDegrees(v.z);
+    return d;
+}
+//  VECTOR3を弧度法に変換
+Vector3 Vector3::ToRadians(const Vector3& v)
+{
+    Vector3 d{};
+    d.x = DirectX::XMConvertToRadians(v.x);
+    d.y = DirectX::XMConvertToRadians(v.y);
+    d.z = DirectX::XMConvertToRadians(v.z);
+    return d;
+}
+//  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
+Vector3 Vector3::FromRotationMatrix(const DirectX::XMFLOAT4X4& m)
+{
+    // 参考資料:https://qiita.com/aa_debdeb/items/3d02e28fb9ebfa357eaf
+    Vector3 r{};
+    r.x = asinf(m.m[2][1]);
+
+    const float cosX = cosf(r.x);
+    if (cosX != 0.0f)
+    {
+        r.y = atanf(-m.m[2][0] / m.m[2][1]);
+        r.z = atanf(-m.m[0][1] / m.m[1][1]);
+    }
+    else
+    {
+        // シンバルロック
+        // r.y が0と仮定
+        r.y = 0.0f;
+        r.z = atanf(m.m[1][0] / m.m[0][0]);
+    }
+
+    return r;
+}
+//  回転行列からオイラー角取得(回転順ZXY XMMatrixRotationRollPitchYawはZXYの順番で回転している)
+Vector3 Vector3::FromRotationMatrix(const DirectX::XMMATRIX& R)
+{
+    DirectX::XMFLOAT4X4 r{};
+    DirectX::XMStoreFloat4x4(&r, R);
+    return Vector3::FromRotationMatrix(r);
+}
+// 行列との掛け算
+Vector3 Vector3::TransformCoord(const Vector3& src, const DirectX::XMFLOAT4X4& m)
+{
+    return Vector3::TransformCoord(src, DirectX::XMLoadFloat4x4(&m));
+}
+// 行列との掛け算
+Vector3 Vector3::TransformCoord(const Vector3& src, const DirectX::XMMATRIX& M)
+{
+    Vector3 res{};
+    DirectX::XMStoreFloat3(&res,
+        DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&src), M));
+    return res;
+}
+// 行列との掛け算
+Vector3 Vector3::TransformNormal(const Vector3& src, const DirectX::XMFLOAT4X4& m)
+{
+    return Vector3::TransformNormal(src, DirectX::XMLoadFloat4x4(&m));
+}
+// 行列との掛け算
+Vector3 Vector3::TransformNormal(const Vector3& src, const DirectX::XMMATRIX& M)
+{
+    Vector3 res{};
+    DirectX::XMStoreFloat3(&res,
+        DirectX::XMVector3TransformNormal(DirectX::XMLoadFloat3(&src), M));
+    return res;
+}
+// 各軸の角度取得
+Vector3 Vector3::CalcAngle(const Vector3& normalVec)
+{
+    Vector3 res{};
+    res.x = std::acosf(normalVec.x);
+    res.y = std::acosf(normalVec.y);
+    res.z = std::acosf(normalVec.z);
+    return res;
+}
+// 乱数取得
+Vector3 Vector3::Random(const Vector3& min, const Vector3& max)
+{
+    return Vector3(
+		Random::Rand(min.x, max.x),
+		Random::Rand(min.y, max.y),
+		Random::Rand(min.z, max.z)
+    );
+}
+// 0~1の範囲でランダムな値を取得
+Vector3 Vector3::RandomBias()
+{
+    return Vector3(
+		Random::RandBias(),
+		Random::RandBias(),
+		Random::RandBias()
+    );
+}
+// -1~1の範囲でランダムな値を取得
+Vector3 Vector3::RandomNormal()
+{
+    return Vector3(
+		Random::Rand01(),
+		Random::Rand01(),
+		Random::Rand01()
+    );
+}
+// Vector3の値をminとmaxで制限
+Vector3 Vector3::Clamp(const Vector3& v, const Vector3& min, const Vector3& max)
+{
+    return Vector3(
+        MathF::Clamp(v.x, min.x, max.x),
+        MathF::Clamp(v.y, min.y, max.y),
+        MathF::Clamp(v.z, min.z, max.z));
+}
+// Vector3の値を中心と半径で制限
+Vector3 Vector3::ClampSphere(const Vector3& v, const Vector3& center, float radius)
+{
+	Vector3 diff = v - center;
+	float length = diff.Length();
+	length = MathF::Clamp(length, 0.0f, radius);
+    return center + diff.Normalize() * length;
+}
+// ワールド座標をスクリーン座標に変換
+Vector3 Vector3::Project(const Vector3& worldPos, float screenWidth, float screenHeight, const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
+{
+    Vector3 res{};
+    DirectX::XMStoreFloat3(
+        &res,
+        DirectX::XMVector3Project(
+            DirectX::XMLoadFloat3(&worldPos),
+            0.0f, 0.0f,
+            screenWidth, screenHeight,
+            0.0f, 1.0f,
+            DirectX::XMLoadFloat4x4(&projection),
+            DirectX::XMLoadFloat4x4(&view),
+            DirectX::XMMatrixIdentity()
+        )
+    );
+    return res;
+}
+// スクリーン画面をワールド空間に変換
+Vector3 Vector3::Unproject(const Vector3& screenPos, 
+    float screenWidth, float screenHeight,
+    const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
+{
+    Vector3 res{};
+    DirectX::XMStoreFloat3(
+        &res,
+        DirectX::XMVector3Unproject(
+            DirectX::XMLoadFloat3(&screenPos),
+            0.0f, 0.0f,
+            screenWidth, screenHeight,
+            0.0f, 1.0f,
+            DirectX::XMLoadFloat4x4(&projection),
+            DirectX::XMLoadFloat4x4(&view),
+            DirectX::XMMatrixIdentity()
+        )
+    );
+    return res;
+}
+// Vector3の最小値を取得
+Vector3 Vector3::Minimum(const Vector3& src, const Vector3& dst)
+{
+	return Vector3(
+		std::min(src.x, dst.x),
+        std::min(src.y, dst.y),
+        std::min(src.z, dst.z)
+	);
+}
+// Vector3の最大値を取得
+Vector3 Vector3::Maximum(const Vector3& src, const Vector3& dst)
+{
+    return Vector3(
+        std::max(src.x, dst.x),
+        std::max(src.y, dst.y),
+        std::max(src.z, dst.z)
+    );
+}
+#pragma endregion
+
+#pragma endregion
+
+#pragma region Vector4
+#pragma region 静的メンバ関数
+Vector4 Vector4::Multiply(const Vector4& src, const Vector4& dst)
+{
+    return Vector4(
+        src.x * dst.x,
+        src.y * dst.y,
+        src.z * dst.z,
+		src.w * dst.w
+    );
+}
+Vector4 Vector4::Random(const Vector4& min, const Vector4& max)
+{
+    return Vector4(
+        Random::Rand(min.x, max.x),
+        Random::Rand(min.y, max.y),
+        Random::Rand(min.z, max.z),
+		Random::Rand(min.w, max.w)
+    );
+}
+Vector4 Vector4::RandomBias()
+{
+    return Vector4(
+        Random::RandBias(),
+        Random::RandBias(),
+        Random::RandBias(),
+		Random::RandBias()
+    );
+}
+Vector4 Vector4::RandomNormal()
+{
+    return Vector4(
+        Random::Rand01(),
+        Random::Rand01(),
+        Random::Rand01(),
+		Random::Rand01()
+    );
+}
+// 不透明で取得
+Vector4 Vector4::GetOpaque(const Vector4& v)
+{
+    return Vector4(v.x, v.y, v.z, 1.0f);
+}
+#pragma endregion
+Vector4 Vector4::operator+(const Vector4&) const
+{
+	return Vector4(x + x, y + y, z + z, w + w);
+}
+Vector4 Vector4::operator*(float f) const
+{
+    return Vector4(x * f, y * f, z * f, w);
+}
 
 Vector4 Vector4::operator*(const Vector4& v) const
 {
     return Vector4(x * v.x, y * v.y, z * v.z, w * v.w);
 }
+#pragma endregion
+

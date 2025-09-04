@@ -7,59 +7,93 @@
 
 Input::Input()
 {
-	// アクションの登録
-	inputActionMap["OK"] = { {InputType::InputKeyboard, 'A'}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::InputMouse,VK_LBUTTON}};
-	inputActionMap["Dash"] = { {InputType::InputKeyboard, VK_SHIFT}, {InputType::InputGamepad,XINPUT_GAMEPAD_LEFT_THUMB}};
-	inputActionMap["Avoidance"] = { {InputType::InputKeyboard, VK_SPACE}, {InputType::InputGamepad,XINPUT_GAMEPAD_B}};
-	inputActionMap["Attack1"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_A}, {InputType::InputMouse,VK_LBUTTON} };
-	inputActionMap["Attack2"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_X}, {InputType::InputMouse,VK_RBUTTON} };
-	inputActionMap["LookOn"] = { {InputType::InputGamepad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::InputMouse,VK_MBUTTON} };
+#pragma region アクションの登録
+	_buttonActionMap["OK"] = { {InputType::Keyboard, 'A'}, {InputType::XboxPad,XINPUT_GAMEPAD_LEFT_SHOULDER},{InputType::Mouse,VK_LBUTTON} };
+	_buttonActionMap["Dash"] = { {InputType::Keyboard, VK_SHIFT}, {InputType::XboxPad,XINPUT_GAMEPAD_RIGHT_SHOULDER}, {InputType::DirectPad, DIRECTPAD_BUTTON_R1} };
+	_buttonActionMap["Evade"] = { {InputType::Keyboard, VK_SPACE}, {InputType::XboxPad,XINPUT_GAMEPAD_A}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_DOWN} };
+	_buttonActionMap["Action1"] = { {InputType::XboxPad,XINPUT_GAMEPAD_Y}, {InputType::Mouse,VK_LBUTTON}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_UP} };
+	_buttonActionMap["Guard"] = { {InputType::Mouse,VK_XBUTTON2}, {InputType::DirectPad, DIRECTPAD_BUTTON_R2} };
+	_buttonActionMap["Menu"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::XboxPad,XINPUT_GAMEPAD_START}, {InputType::DirectPad, DIRECTPAD_BUTTON_START} };
 
-	moveActionMap["AxisLX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LX} ,{InputType::InputGamepad,GAMEPAD_AXIS_LX} };
-	moveActionMap["AxisLY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_LY} ,{InputType::InputGamepad,GAMEPAD_AXIS_LY} };
-	moveActionMap["AxisRX"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RX} ,{InputType::InputGamepad,GAMEPAD_AXIS_RX} ,{InputType::InputMouse,MOUSE_AXIS_RX} };
-	moveActionMap["AxisRY"] = { {InputType::InputKeyboard,KEYBORD_AXIS_RY} ,{InputType::InputGamepad,GAMEPAD_AXIS_RY} ,{InputType::InputMouse,MOUSE_AXIS_RY} };
-	moveActionMap["MouseMoveX"] = { {InputType::InputMouse,MOUSE_MOVE_X} };
-	moveActionMap["MouseMoveY"] = { {InputType::InputMouse,MOUSE_MOVE_Y} };
-	moveActionMap["MouseWheel"] = { {InputType::InputMouse,MOUSE_WHEEL} };
-	moveActionMap["MouseOldWheel"] = { {InputType::InputMouse,MOUSE_OLD_WHEEL} };
+	_buttonActionMap["Up"] = { {InputType::Keyboard, 'W'}, {InputType::Keyboard, VK_UP}, {InputType::XboxPad,XINPUT_GAMEPAD_DPAD_UP}, {InputType::DirectPad, DIRECTPAD_BUTTON_L_UP} };
+	_buttonActionMap["Down"] = { {InputType::Keyboard, 'S'}, {InputType::Keyboard, VK_DOWN}, {InputType::XboxPad,XINPUT_GAMEPAD_DPAD_DOWN}, {InputType::DirectPad, DIRECTPAD_BUTTON_L_DOWN} };
+	_buttonActionMap["Left"] = { {InputType::Keyboard, 'A'}, {InputType::Keyboard, VK_LEFT}, {InputType::XboxPad,XINPUT_GAMEPAD_DPAD_LEFT}, {InputType::DirectPad, DIRECTPAD_BUTTON_L_LEFT} };
+	_buttonActionMap["Right"] = { {InputType::Keyboard, 'D'}, {InputType::Keyboard, VK_RIGHT}, {InputType::XboxPad,XINPUT_GAMEPAD_DPAD_RIGHT}, {InputType::DirectPad, DIRECTPAD_BUTTON_L_RIGHT} };
+	_buttonActionMap["Select"] = { {InputType::Keyboard, 'F'}, {InputType::Keyboard, VK_SPACE}, {InputType::XboxPad,XINPUT_GAMEPAD_A}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_DOWN} };
+	_buttonActionMap["Back"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::Keyboard, VK_BACK}, {InputType::XboxPad,XINPUT_GAMEPAD_B}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_RIGHT} };
+
+	_valueActionMap["AxisLX"] = { {InputType::Keyboard,KEYBORD_AXIS_LX}, {InputType::XboxPad,XBOXPAD_AXIS_LX}, {InputType::DirectPad, DIRECTPAD_AXIS_LX} };
+	_valueActionMap["AxisLY"] = { {InputType::Keyboard,KEYBORD_AXIS_LY}, {InputType::XboxPad,XBOXPAD_AXIS_LY}, {InputType::DirectPad, DIRECTPAD_AXIS_LY} };
+	_valueActionMap["AxisRX"] = { {InputType::Keyboard,KEYBORD_AXIS_RX}, {InputType::XboxPad,XBOXPAD_AXIS_RX}, {InputType::Mouse,MOUSE_AXIS_RX}, {InputType::DirectPad, DIRECTPAD_AXIS_RX} };
+	_valueActionMap["AxisRY"] = { {InputType::Keyboard,KEYBORD_AXIS_RY}, {InputType::XboxPad,XBOXPAD_AXIS_RY}, {InputType::Mouse,MOUSE_AXIS_RY}, {InputType::DirectPad, DIRECTPAD_AXIS_RY} };
+	_valueActionMap["MousePositionX"] = { {InputType::Mouse,MOUSE_POSITION_X} };
+	_valueActionMap["MousePositionY"] = { {InputType::Mouse,MOUSE_POSITION_Y} };
+	_valueActionMap["MouseMoveX"] = { {InputType::Mouse,MOUSE_MOVE_X} };
+	_valueActionMap["MouseMoveY"] = { {InputType::Mouse,MOUSE_MOVE_Y} };
+	_valueActionMap["MouseWheel"] = { {InputType::Mouse,MOUSE_WHEEL} };
+	_valueActionMap["MouseOldWheel"] = { {InputType::Mouse,MOUSE_OLD_WHEEL} };
+	_valueActionMap["Guard"] = { {InputType::XboxPad,XBOXPAD_TRIGGER_R} };
+
+	_buttonActionMap["LeftClick"] = { {InputType::Mouse,VK_LBUTTON} };
+	_buttonActionMap["RightClick"] = { {InputType::Mouse,VK_RBUTTON} };
+	_buttonActionMap["MiddleClick"] = { {InputType::Mouse,VK_MBUTTON} };
+#pragma endregion
 
 	// 登録したアクションの入力監視情報を格納
-	for (const auto& mapInfo : inputActionMap)
+	for (const auto& mapInfo : _buttonActionMap)
 	{
-		lastInput[mapInfo.first] = FALSE;
-		currentInput[mapInfo.first] = FALSE;
+		_lastInput[mapInfo.first] = FALSE;
+		_currentInput[mapInfo.first] = FALSE;
 	}
 }
 
 // インプット生成
 // プログラム開始時に呼び出す
-void Input::Initialize(HWND hwnd)
+void Input::Initialize(HWND hwnd, HINSTANCE instance)
 {
-	mouseInputObserver = std::make_unique<MouseInputObserver>(hwnd);
-	this->hwnd = hwnd;
+	_mouseInput = std::make_unique<MouseInput>(hwnd);
+	_directInput = std::make_unique<DirectInput>(hwnd, instance);
+	this->_hwnd = hwnd;
 }
 
 /// 更新処理
 void Input::Update()
 {
-	lastInput = currentInput;
+	_lastInput = _currentInput;
+
+
+	// ウィンドウがアクティブかどうかを確認
+	if (GetForegroundWindow() != _hwnd)
+    {      
+		// ウィンドウがアクティブでない場合、入力を無効にする
+        for (auto& mapInfo : _buttonActionMap)
+        {
+            _currentInput[mapInfo.first] = FALSE;
+        }
+        for (auto& mapInfo : _valueActionMap)
+        {
+            _currentMovedParameter[mapInfo.first] = 0.0f;
+        }
+        return;
+	}
 
 	// 入力監視クラスを更新
-	keybordInputObserver.Update();
-	gamePadInputObserver.Update();
-	mouseInputObserver->Update();
+	_keybordInput.Update();
+	_gamePadInput.Update();
+	_mouseInput->Update();
+	_directInput->Update();
 
 	// 入力情報取得
-	const std::unordered_map<int, BOOL>* inputStates[3] =
+	const std::unordered_map<int, BOOL>* inputStates[] =
 	{
-		&keybordInputObserver.keystates,
-		&gamePadInputObserver.gamepadstates,
-		&mouseInputObserver->mousestates
+		_keybordInput.GetStates(),
+		_gamePadInput.GetStates(),
+		_mouseInput->GetStates(),
+		_directInput->GetStates(),
 	};
 
 	//それぞれのアクション名に割り当たっている全ての入力をチェック
-	for (const auto& mapInfo : inputActionMap)
+	for (const auto& mapInfo : _buttonActionMap)
 	{
 		BOOL isPressed = FALSE;
 		for (const auto& inputInfo : mapInfo.second)
@@ -73,19 +107,20 @@ void Input::Update()
 				break;
 		}
 
-		currentInput[mapInfo.first] = isPressed;
+		_currentInput[mapInfo.first] = isPressed;
 	}
 
 	// 入力量があるアクションの更新
-	const std::unordered_map<int, float>* movedParameters[3] =
+	const std::unordered_map<int, float>* movedParameters[] =
 	{
-		&keybordInputObserver.keyparameters,
-		&gamePadInputObserver.gamepadParameters,
-		&mouseInputObserver->mouseParameters,
+		_keybordInput.GetValues(),
+		_gamePadInput.GetValues(),
+		_mouseInput->GetValues(),
+		_directInput->GetValues(),
 	};
 
 	//それぞれのアクション名に割り当たっている全ての入力をチェック
-	for (const auto& mapInfo : moveActionMap)
+	for (const auto& mapInfo : _valueActionMap)
 	{
 		float moved = 0.0f;
 		for (const auto& movedInfo : mapInfo.second)
@@ -99,7 +134,7 @@ void Input::Update()
 				break;
 		}
 
-		currentMovedParameter[mapInfo.first] = moved;
+		_currentMovedParameter[mapInfo.first] = moved;
 	}
 }
 
@@ -110,7 +145,7 @@ void Input::DrawGui()
 	{
 		if (ImGui::BeginMenu(u8"デバッグ"))
 		{
-			ImGui::Checkbox(u8"入力情報", &showGui);
+			ImGui::Checkbox(u8"入力情報", &_showGui);
 
 			ImGui::EndMenu();
 		}
@@ -118,31 +153,31 @@ void Input::DrawGui()
 		ImGui::EndMainMenuBar();
 	}
 
-	if (showGui)
+	if (_showGui)
 	{
 		if (ImGui::Begin(u8"入力情報"))
 		{
 			if (ImGui::TreeNode(u8"押下情報"))
 			{
-				for (auto& [str, flag] : currentInput)
+				for (auto& [str, flag] : _currentInput)
 				{
 					bool v = flag == TRUE;
 					ImGui::Checkbox(str.c_str(), &v);
 					if (ImGui::TreeNode(u8"入力対象"))
 					{
-						auto iter = inputActionMap.find(str);
+						auto iter = _buttonActionMap.find(str);
 						for (auto& inputMapInfo : (*iter).second)
 						{
 							switch (inputMapInfo.type)
 							{
-							case InputType::InputKeyboard:
-								ImGui::Text(u8"キーボード:%s", KeybordInputObserver::ToString(inputMapInfo.buttonID));
+							case InputType::Keyboard:
+								ImGui::Text(u8"キーボード:%s", KeybordInput::ToString(inputMapInfo.buttonID));
 								break;
-							case InputType::InputGamepad:
-								ImGui::Text(u8"ゲームパッド:%s", GamePadInputObserver::ToString(inputMapInfo.buttonID));
+							case InputType::XboxPad:
+								ImGui::Text(u8"ゲームパッド:%s", XboxPadInput::ToString(inputMapInfo.buttonID));
 								break;
-							case InputType::InputMouse:
-								ImGui::Text(u8"マウス:%s", MouseInputObserver::ToString(inputMapInfo.buttonID));
+							case InputType::Mouse:
+								ImGui::Text(u8"マウス:%s", MouseInput::ToString(inputMapInfo.buttonID));
 								break;
 							}
 						}
@@ -156,7 +191,7 @@ void Input::DrawGui()
 
 			if (ImGui::TreeNode(u8"入力値"))
 			{
-				for (auto& [str, parameter] : currentMovedParameter)
+				for (auto& [str, parameter] : _currentMovedParameter)
 				{
 					ImGui::Text(u8"%s:%f", str.c_str(), parameter);
 				}
@@ -170,10 +205,10 @@ void Input::DrawGui()
 /// 押されているか確認
 bool Input::IsPressed(const std::string& action) const
 {
-	auto it = currentInput.find(action);
+	auto it = _currentInput.find(action);
 
 	// 要素があるかチェック
-	assert(it != currentInput.end());
+	assert(it != _currentInput.end());
 
 	return it->second;
 }
@@ -184,7 +219,7 @@ bool Input::IsTriggerd(const std::string& action) const
 	// 押されていて
 	if (IsPressed(action))
 	{
-		auto it = lastInput.find(action);
+		auto it = _lastInput.find(action);
 
 		// 直前に押されていたらfalse
 		// 押されていなかったらtrueを返す
@@ -200,7 +235,7 @@ bool Input::IsReleased(const std::string& action) const
 	// 押されていていなくて
 	if (!IsPressed(action))
 	{
-		auto it = lastInput.find(action);
+		auto it = _lastInput.find(action);
 
 		// 直前に押されていたらtrue
 		// 押されていなかったらfalseを返す
@@ -211,25 +246,25 @@ bool Input::IsReleased(const std::string& action) const
 }
 
 /// 入力量があるアクションの値取得
-float Input::IsMoved(const std::string& action) const
+float Input::IsValue(const std::string& action) const
 {
-	auto it = currentMovedParameter.find(action);
+	auto it = _currentMovedParameter.find(action);
 
 	// 要素があるかチェック
-	assert(it != currentMovedParameter.end());
+	assert(it != _currentMovedParameter.end());
 
 	return it->second;
 }
 
 void Input::ClearMapData()
 {
-	for (const auto& mapInfo : inputActionMap)
+	for (const auto& mapInfo : _buttonActionMap)
 	{
-		lastInput[mapInfo.first] = FALSE;
-		currentInput[mapInfo.first] = FALSE;
+		_lastInput[mapInfo.first] = FALSE;
+		_currentInput[mapInfo.first] = FALSE;
 	}
-	for (const auto& mapInfo : currentMovedParameter)
+	for (const auto& mapInfo : _currentMovedParameter)
 	{
-		currentMovedParameter[mapInfo.first] = 0.0f;
+		_currentMovedParameter[mapInfo.first] = 0.0f;
 	}
 }

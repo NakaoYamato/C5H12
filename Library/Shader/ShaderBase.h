@@ -1,13 +1,20 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "../Graphics/RenderContext.h"
-#include "../Resource/ModelResource.h"
+#include "../Material/Material.h"
 
 /// <summary>
 /// モデルの描画に使用するシェーダを指定するための基底クラス
 /// </summary>
 class ShaderBase
 {
+public:
+    // シェーダーに渡すデータ
+    using Parameter = std::unordered_map<std::string, float>;
+
+    static constexpr int CBIndex = 2;
 public:
     ShaderBase() {}
     virtual ~ShaderBase() {}
@@ -17,7 +24,8 @@ public:
 
     // 更新処理
     virtual void Update(const RenderContext& rc,
-        const ModelResource::Material* material) = 0;
+        const Material* material,
+        Parameter* parameter) = 0;
 
     // 終了処理
     virtual void End(const RenderContext& rc)
@@ -37,4 +45,7 @@ public:
         ID3D11ShaderResourceView* srvs[] = { nullptr };
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
     }
+
+    // パラメータのkey取得
+    virtual Parameter GetParameterKey()const = 0;
 };

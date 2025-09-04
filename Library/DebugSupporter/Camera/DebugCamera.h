@@ -14,8 +14,9 @@ public:
 	// デバッグ用Gui
 	void DrawGui()override;
 
-	bool isActive_ = false;
+	bool _isActive = false;
 private:
-	float movePower_ = 0.01f;
-	float targetMovePower_ = 0.8f;
+	float _movePower = 0.01f;
+	float _targetMovePower = 0.8f;
+	float _zoomPower = 0.5f;
 };

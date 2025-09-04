@@ -17,9 +17,9 @@ public:
     };
 public:
     RadialBlur(ID3D11Device* device, uint32_t width, uint32_t height) :
-        PostProcessBase(device, width, height, "./Data/Shader/RadialBlurPS.cso", sizeof(Constants)) {
+        PostProcessBase(device, width, height, "./Data/Shader/HLSL/PostProcess/RadialBlur/RadialBlurPS.cso", sizeof(Constants)) {
         // ‰Šú’l‚Ìİ’è
-        startData = GetCurrentData();
+        _startData = GetCurrentData();
     };
     ~RadialBlur()override {}
 
@@ -39,5 +39,5 @@ private:
         ID3D11Buffer* constantBuffer) override;
 
 private:
-    Constants data{};
+    Constants _data{};
 };

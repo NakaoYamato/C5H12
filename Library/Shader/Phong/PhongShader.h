@@ -7,6 +7,7 @@ class PhongShader : public ShaderBase
 public:
 	PhongShader(ID3D11Device* device,
 		const char* vsName,
+		const char* psName,
 		D3D11_INPUT_ELEMENT_DESC* inputDescs, UINT inputSize);
 	~PhongShader() override = default;
 
@@ -15,11 +16,14 @@ public:
 
 	// 更新処理
 	void Update(const RenderContext& rc,
-		const ModelResource::Material* material) override;
+		const Material* material,
+		Parameter* parameter) override;
 
 	// 終了処理
 	void End(const RenderContext& rc) override;
 
+	// パラメータのkey取得
+	Parameter GetParameterKey()const override;
 private:
 	struct CbMesh
 	{
@@ -28,8 +32,8 @@ private:
 		DirectX::XMFLOAT4		Ks;// スペキュラー
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>		vertexShader_;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixelShader_;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>		inputLayout_;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			meshConstantBuffer_;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>		_vertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>		_pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>		_inputLayout;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>			_meshConstantBuffer;
 };

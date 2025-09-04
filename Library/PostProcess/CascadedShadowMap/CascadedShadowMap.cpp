@@ -3,7 +3,7 @@
 #include "CascadedShadowMap.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 #include <array>
 
@@ -37,9 +37,9 @@ std::array<DirectX::XMFLOAT4, 8> ExtractFrustumCorners(const DirectX::XMFLOAT4X4
 }
 
 CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT height, UINT cascadeCount) :
-	cascadeCount(cascadeCount),
-	cascadedMatrices(cascadeCount),
-	cascadedPlaneDistances(cascadeCount + 1)
+	_cascadeCount(cascadeCount),
+	_cascadedMatrices(cascadeCount),
+	_cascadedPlaneDistances(cascadeCount + 1)
 {
 	HRESULT hr = S_OK;
 
@@ -55,7 +55,7 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 	texture2d_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	texture2d_desc.CPUAccessFlags = 0;
 	texture2d_desc.MiscFlags = 0;
-	hr = device->CreateTexture2D(&texture2d_desc, 0, depthStencilBuffer.GetAddressOf());
+	hr = device->CreateTexture2D(&texture2d_desc, 0, _depthStencilBuffer.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = {};
@@ -65,7 +65,7 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 	depth_stencil_view_desc.Texture2DArray.ArraySize = static_cast<UINT>(cascadeCount);
 	depth_stencil_view_desc.Texture2DArray.MipSlice = 0;
 	depth_stencil_view_desc.Flags = 0;
-	hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), &depth_stencil_view_desc, depthStencilView.GetAddressOf());
+	hr = device->CreateDepthStencilView(_depthStencilBuffer.Get(), &depth_stencil_view_desc, _depthStencilView.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc = {};
@@ -75,62 +75,78 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 	shader_resource_view_desc.Texture2DArray.MipLevels = 1;
 	shader_resource_view_desc.Texture2DArray.FirstArraySlice = 0;
 	shader_resource_view_desc.Texture2DArray.MostDetailedMip = 0;
-	hr = device->CreateShaderResourceView(depthStencilBuffer.Get(), &shader_resource_view_desc, shaderResourceView.GetAddressOf());
+	hr = device->CreateShaderResourceView(_depthStencilBuffer.Get(), &shader_resource_view_desc, _shaderResourceView.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	viewport.Width = static_cast<float>(width);
-	viewport.Height = static_cast<float>(height);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
+	_viewport.Width = static_cast<float>(width);
+	_viewport.Height = static_cast<float>(height);
+	_viewport.MinDepth = 0.0f;
+	_viewport.MaxDepth = 1.0f;
+	_viewport.TopLeftX = 0.0f;
+	_viewport.TopLeftY = 0.0f;
 
 	// モデルの影を描画するときに必要な定数バッファ 
 	(void)GpuResourceManager::CreateConstantBuffer(
 		device,
 		sizeof(Constants),
-		constantBuffer.GetAddressOf());
+		_constantBuffer.GetAddressOf());
 	// カスケードシャドウマップのパラメーター定数バッファ
 	(void)GpuResourceManager::CreateConstantBuffer(
 		device,
 		sizeof(ParametricConstants),
-		parametricConstantBuffer.GetAddressOf());
-}
+		_parametricConstantBuffer.GetAddressOf());
 
+	_fullscreenQuad = std::make_unique<SpriteResource>(device,
+		L"",
+		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
+		"./Data/Shader/HLSL/PostProcess/CascadedShadowMap/CascadedShadowMapPS.cso");
+}
+// 更新処理
+void CascadedShadowMap::Update(float elapsedTime)
+{
+	_createShadow = false;
+	_createShadowTimer += elapsedTime;
+	if (_createShadowTimer >= _createShadowInterval)
+	{
+		_createShadowTimer = 0.0f;
+		_createShadow = true;
+	}
+}
+// 影の生成開始
 void CascadedShadowMap::Activate(const RenderContext& rc,
 	const UINT& cbSlot)
 {
 	ID3D11DeviceContext* immediateContext = rc.deviceContext;
-	DirectX::XMFLOAT4X4 cameraProjection = rc.camera->projection_;
-	DirectX::XMFLOAT4X4 cameraView = rc.camera->view_;
+	DirectX::XMFLOAT4X4 cameraProjection = rc.camera->GetProjection();
+	DirectX::XMFLOAT4X4 cameraView = rc.camera->GetView();
 	DirectX::XMFLOAT4 lightDirection = rc.lightDirection;/*TODO : (0,-1,0,0)でエラー*/
 
-	immediateContext->RSGetViewports(&viewportCount, cachedViewports);
-	immediateContext->OMGetRenderTargets(1, cachedRenderTargetView.ReleaseAndGetAddressOf(), cachedDepthStencilView.ReleaseAndGetAddressOf());
+	immediateContext->RSGetViewports(&_viewportCount, _cachedViewports);
+	immediateContext->OMGetRenderTargets(1, _cachedRTV.ReleaseAndGetAddressOf(), _cachedDSV.ReleaseAndGetAddressOf());
 
 	// near/far value from perspective projection matrix
 	float m33 = cameraProjection._33;
 	float m43 = cameraProjection._43;
 	float zn = -m43 / m33;
 	float zf = (m33 * zn) / (m33 - 1);
-	zf = criticalDepthValue > 0 ? std::min(zf, criticalDepthValue) : zf;
+	zf = _criticalDepthValue > 0 ? std::min(zf, _criticalDepthValue) : zf;
 
 	// calculates split plane distances in view space
-	for (size_t cascade_index = 0; cascade_index < cascadeCount; ++cascade_index)
+	for (size_t cascade_index = 0; cascade_index < _cascadeCount; ++cascade_index)
 	{
-		float idc = cascade_index / static_cast<float>(cascadeCount);
+		float idc = cascade_index / static_cast<float>(_cascadeCount);
 		float logarithmic_split_scheme = zn * pow(zf / zn, idc);
 		float uniform_split_scheme = zn + (zf - zn) * idc;
-		cascadedPlaneDistances.at(cascade_index) = logarithmic_split_scheme * splitSchemeWeight + uniform_split_scheme * (1 - splitSchemeWeight);
+		_cascadedPlaneDistances.at(cascade_index) = logarithmic_split_scheme * _splitSchemeWeight + uniform_split_scheme * (1 - _splitSchemeWeight);
 	}
 	// make sure border values are accurate
-	cascadedPlaneDistances.at(0) = zn;
-	cascadedPlaneDistances.at(cascadeCount) = zf;
+	_cascadedPlaneDistances.at(0) = zn;
+	_cascadedPlaneDistances.at(_cascadeCount) = zf;
 
-	for (size_t cascade_index = 0; cascade_index < cascadeCount; ++cascade_index)
+	for (size_t cascade_index = 0; cascade_index < _cascadeCount; ++cascade_index)
 	{
-		float near_plane = fitToCascade ? cascadedPlaneDistances.at(cascade_index) : zn;
-		float far_plane = cascadedPlaneDistances.at(cascade_index + 1);
+		float near_plane = _fitToCascade ? _cascadedPlaneDistances.at(cascade_index) : zn;
+		float far_plane = _cascadedPlaneDistances.at(cascade_index + 1);
 
 		DirectX::XMFLOAT4X4 cascaded_projection = cameraProjection;
 		cascaded_projection._33 = far_plane / (far_plane - near_plane);
@@ -173,103 +189,120 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 		}
 
 #if 1
-		zMult = std::max<float>(1.0f, zMult);
+		_zMult = std::max<float>(1.0f, _zMult);
 		if (min_z < 0)
 		{
-			min_z *= zMult;
+			min_z *= _zMult;
 		}
 		else
 		{
-			min_z /= zMult;
+			min_z /= _zMult;
 		}
 		if (max_z < 0)
 		{
-			max_z /= zMult;
+			max_z /= _zMult;
 		}
 		else
 		{
-			max_z *= zMult;
+			max_z *= _zMult;
 		}
 #endif
 
 		DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicOffCenterLH(min_x, max_x, min_y, max_y, min_z, max_z);
-		DirectX::XMStoreFloat4x4(&cascadedMatrices.at(cascade_index), V * P);
+		DirectX::XMStoreFloat4x4(&_cascadedMatrices.at(cascade_index), V * P);
 	}
 
 	Constants data;
-	data.cascadedMatrices[0] = cascadedMatrices.at(0);
-	data.cascadedMatrices[1] = cascadedMatrices.at(1);
-	data.cascadedMatrices[2] = cascadedMatrices.at(2);
-	data.cascadedMatrices[3] = cascadedMatrices.at(3);
+	data.cascadedMatrices[0] = _cascadedMatrices.at(0);
+	data.cascadedMatrices[1] = _cascadedMatrices.at(1);
+	data.cascadedMatrices[2] = _cascadedMatrices.at(2);
+	data.cascadedMatrices[3] = _cascadedMatrices.at(3);
 
-	data.cascadedPlaneDistances[0] = cascadedPlaneDistances.at(1);
-	data.cascadedPlaneDistances[1] = cascadedPlaneDistances.at(2);
-	data.cascadedPlaneDistances[2] = cascadedPlaneDistances.at(3);
-	data.cascadedPlaneDistances[3] = cascadedPlaneDistances.at(4);
+	data.cascadedPlaneDistances[0] = _cascadedPlaneDistances.at(1);
+	data.cascadedPlaneDistances[1] = _cascadedPlaneDistances.at(2);
+	data.cascadedPlaneDistances[2] = _cascadedPlaneDistances.at(3);
+	data.cascadedPlaneDistances[3] = _cascadedPlaneDistances.at(4);
 
-	immediateContext->UpdateSubresource(constantBuffer.Get(), 0, 0, &data, 0, 0);
-	immediateContext->VSSetConstantBuffers(cbSlot, 1, constantBuffer.GetAddressOf());
-	immediateContext->PSSetConstantBuffers(cbSlot, 1, constantBuffer.GetAddressOf());
+	immediateContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &data, 0, 0);
+	immediateContext->VSSetConstantBuffers(cbSlot, 1, _constantBuffer.GetAddressOf());
+	immediateContext->PSSetConstantBuffers(cbSlot, 1, _constantBuffer.GetAddressOf());
 
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> null_render_target_view;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> null_depth_stencil_view;
-	immediateContext->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
-	immediateContext->OMSetRenderTargets(1, null_render_target_view.GetAddressOf(), depthStencilView.Get());
-	immediateContext->RSSetViewports(1, &viewport);
+	immediateContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
+	immediateContext->OMSetRenderTargets(1, null_render_target_view.GetAddressOf(), _depthStencilView.Get());
+	immediateContext->RSSetViewports(1, &_viewport);
 }
-
-void CascadedShadowMap::ClearAndActive(const RenderContext& rc,
-	const UINT& cbSlot)
+// 深度バッファのクリア
+void CascadedShadowMap::Clear(ID3D11DeviceContext* immediateContext)
+{
+	immediateContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
+}
+// 影の生成開始（クリアしてから）
+void CascadedShadowMap::ClearAndActivate(const RenderContext& rc)
 {
 	Clear(rc.deviceContext);
-	Activate(rc, cbSlot);
+	Activate(rc, _CASCADED_SHADOW_MAP_CB_SLOT_INDEX);
 }
-
+// 影の生成終了
 void CascadedShadowMap::Deactivate(const RenderContext& rc)
 {
-	rc.deviceContext->RSSetViewports(viewportCount, cachedViewports);
-	rc.deviceContext->OMSetRenderTargets(1, cachedRenderTargetView.GetAddressOf(), cachedDepthStencilView.Get());
+	rc.deviceContext->RSSetViewports(_viewportCount, _cachedViewports);
+	rc.deviceContext->OMSetRenderTargets(1, _cachedRTV.GetAddressOf(), _cachedDSV.Get());
 }
-
 // ImGui描画
 void CascadedShadowMap::DrawGui()
 {
 #if USE_IMGUI
-	if (ImGui::BeginMainMenuBar())
+	if (ImGui::Begin(u8"カスケードシャドウマップ"))
 	{
-		if (ImGui::BeginMenu(u8"カスケードシャドウマップ"))
-		{
-			ImGui::SliderFloat("criticalDepthValue", &criticalDepthValue, 0.0f, +1000.0f);
-			ImGui::SliderFloat("splitSchemeWeight", &splitSchemeWeight, 0.0f, +1.0f);
-			ImGui::SliderFloat("zMult", &zMult, 1.0f, +100.0f);
-			ImGui::Checkbox("fitToCascade", &fitToCascade);
+		ImGui::DragFloat(u8"影生成タイマー", &_createShadowTimer);
+		ImGui::DragFloat(u8"影生成間隔", &_createShadowInterval, 0.1f, 0.0f, 10.0f, "%.1f");
 
-			ImGui::SliderFloat("shadowColor", &parametricConstants.shadowColor, +0.0f, +1.0f);
-			ImGui::DragFloat("shadowDepthBias", &parametricConstants.shadowDepthBias, 0.00001f, 0.0f, 0.01f, "%.8f");
-			bool flag = parametricConstants.colorizeCascadedLayer != 0.0f ? true : false;
-			ImGui::Checkbox("colorizeCascadedLayer", &flag);
-			parametricConstants.colorizeCascadedLayer = flag ? 1.0f : 0.0f;
-			ImGui::EndMenu();
-		}
+		ImGui::Separator();
+		ImGui::SliderFloat("criticalDepthValue", &_criticalDepthValue, 0.0f, +1000.0f);
+		ImGui::SliderFloat("splitSchemeWeight", &_splitSchemeWeight, 0.0f, +1.0f);
+		ImGui::SliderFloat("zMult", &_zMult, 1.0f, +100.0f);
+		ImGui::Checkbox("fitToCascade", &_fitToCascade);
 
-		ImGui::EndMainMenuBar();
+		ImGui::SliderFloat("shadowColor", &_parametricConstants.shadowColor, +0.0f, +1.0f);
+		ImGui::DragFloat("shadowDepthBias", &_parametricConstants.shadowDepthBias, 0.00001f, 0.0f, 0.01f, "%.8f");
+		ImGui::DragFloat("shiftVolume", &_parametricConstants.shiftVolume);
+		bool flag = _parametricConstants.colorizeCascadedLayer != 0.0f ? true : false;
+		ImGui::Checkbox("colorizeCascadedLayer", &flag);
+		_parametricConstants.colorizeCascadedLayer = flag ? 1.0f : 0.0f;
 	}
+	ImGui::End();
 #endif
 }
-
+// カスケードシャドウマップ描画のための定数バッファ更新
 void CascadedShadowMap::UpdateCSMConstants(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// カスケードシャドウマップのシーン定数バッファ : スロット0
 	Graphics::Instance().GetConstantBufferManager()->SetCB(dc, 0,
-		ConstantBufferType::SceneCB, ConstantUpdateTarget::PIXEL);
+		ConstantBufferType::SceneCB, ConstantUpdateTarget::Pixel);
 
 	// カスケードシャドウマップのパラメーター定数バッファ : スロット2
-	dc->UpdateSubresource(parametricConstantBuffer.Get(), 0, 0, &parametricConstants, 0, 0);
-	dc->PSSetConstantBuffers(2, 1, parametricConstantBuffer.GetAddressOf());
+	dc->UpdateSubresource(_parametricConstantBuffer.Get(), 0, 0, &_parametricConstants, 0, 0);
+	dc->PSSetConstantBuffers(2, 1, _parametricConstantBuffer.GetAddressOf());
 
 	// モデルの影を描画するときに必要な定数バッファ : スロット3
-	dc->VSSetConstantBuffers(3, 1, constantBuffer.GetAddressOf());
-	dc->PSSetConstantBuffers(3, 1, constantBuffer.GetAddressOf());
+	dc->VSSetConstantBuffers(3, 1, _constantBuffer.GetAddressOf());
+	dc->PSSetConstantBuffers(3, 1, _constantBuffer.GetAddressOf());
+}
+// 影の描画
+void CascadedShadowMap::Blit(ID3D11DeviceContext* immediateContext,
+	ID3D11ShaderResourceView** colorSRV, 
+	ID3D11ShaderResourceView** depthSRV)
+{
+	ID3D11ShaderResourceView* srvs[]
+	{
+		*colorSRV, *depthSRV, GetDepthMap().Get()
+	};
+	// 描画処理
+	_fullscreenQuad->Blit(immediateContext,
+		srvs,
+		0, _countof(srvs));
 }

@@ -2,55 +2,104 @@
 
 #include "SceneLoading.h"
 
+#include "../Model/SerializeFunction.h"
+
 #include<imgui.h>
+#include <filesystem>
+#include <fstream>
+
+const char* SceneDefaultNamePath = "./Data/Debug/SceneDefaultName.cereal";
+
+void SceneManager::Initialize()
+{
+#ifdef _DEBUG
+	// デバッグビルド時のデフォルトシーンを読み込み
+	std::filesystem::path serializePath(SceneDefaultNamePath);
+	if (std::filesystem::exists(serializePath))
+	{
+		std::ifstream istream(serializePath, std::ios::binary);
+		if (istream.is_open())
+		{
+			cereal::BinaryInputArchive archive(istream);
+
+			try
+			{
+				archive(
+					CEREAL_NVP(_defaultSceneLevel),
+					CEREAL_NVP(_defaultSceneName)
+				);
+
+				if (_sceneDatas[_defaultSceneLevel][_defaultSceneName.c_str()].get() == nullptr)
+					throw nullptr;
+
+				ChangeScene(static_cast<SceneMenuLevel>(_defaultSceneLevel), _defaultSceneName.c_str());
+			}
+			catch (...)
+			{
+				ChangeScene(SceneMenuLevel::Debug, u8"Debug");
+			}
+		}
+		else
+		{
+			ChangeScene(SceneMenuLevel::Debug, u8"Debug");
+		}
+	}
+	else
+	{
+		ChangeScene(SceneMenuLevel::Debug, u8"Debug");
+	}
+#else
+	ChangeScene(SceneMenuLevel::Debug, u8"Debug");
+#endif
+}
 
 // 更新処理
 void SceneManager::Update(float elapsedTime)
 {
-	if (nextScene_.get() != nullptr)
+	if (_nextScene.get() != nullptr)
 	{
 		// 古いシーンの終了処理
 		Clear();
 
 		// 新しいシーンを設定
-		currentScene_ = std::move(nextScene_);
-		nextScene_.reset();
+		_currentScene = std::move(_nextScene);
+		_nextScene.reset();
 
 		// シーン初期化
-		if (!(currentScene_->IsReady()))
-			currentScene_->Initialize();
+		if (!(_currentScene->IsReady()))
+			_currentScene->Initialize();
 	}
 
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->Update(elapsedTime);
+		_currentScene->Update(elapsedTime);
 	}
 }
 
-// 1秒ごとの更新処理
+/// 一定間隔の更新処理
 void SceneManager::FixedUpdate()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->FixedUpdate();
+		_currentScene->FixedUpdate();
 	}
 }
 
 // 描画処理
 void SceneManager::Render()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->Render();
+		_currentScene->Render();
 	}
 }
 
 // Gui描画
 void SceneManager::DrawGui()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->DrawGui();
+		_currentScene->DrawGui();
 	}
 }
 
@@ -61,13 +110,44 @@ void SceneManager::SceneMenuGui()
 	{
 		if (ImGui::BeginMenu(u8"シーン選択"))
 		{
-			for (auto& [str, scene] : sceneDatas_)
+			for (int i = 0; i < static_cast<int>(SceneMenuLevel::LevelEnd); ++i)
 			{
-				if (ImGui::MenuItem(str.c_str()))
+				for (auto& [str, scene] : _sceneDatas[i])
 				{
-					SceneManager::Instance().ChangeScene(std::make_shared<SceneLoading>(scene->GetNewShared()));
+					if (ImGui::MenuItem(str.c_str()))
+					{
+						SceneManager::Instance().ChangeScene(std::make_shared<SceneLoading>(scene->GetNewShared()));
+					}
 				}
+				ImGui::Separator();
+			}
 
+			ImGui::Separator();
+			// 現在のシーンの名前
+			ImGui::Text(u8"現在のシーン : %s", _currentScene->GetName());
+			ImGui::Text(u8"起動時のシーン : %s", _defaultSceneName.c_str());
+			ImGui::Separator();
+			// 起動時のシーンをデフォルトに設定
+			if (ImGui::Button(u8"現在のシーンを起動時のシーンに設定"))
+			{
+				_defaultSceneLevel = static_cast<int>(_currentScene->GetLevel());
+				_defaultSceneName = _currentScene->GetName();
+				std::ofstream ostream(SceneDefaultNamePath, std::ios::binary);
+				if (ostream.is_open())
+				{
+					cereal::BinaryOutputArchive archive(ostream);
+
+					try
+					{
+						archive(
+							CEREAL_NVP(_defaultSceneLevel),
+							CEREAL_NVP(_defaultSceneName)
+						);
+					}
+					catch (...)
+					{
+					}
+				}
 			}
 
 			ImGui::EndMenu();
@@ -80,18 +160,18 @@ void SceneManager::SceneMenuGui()
 // シーンクリア
 void SceneManager::Clear()
 {
-	if (currentScene_ != nullptr)
+	if (_currentScene != nullptr)
 	{
-		currentScene_->Finalize();
-		currentScene_.reset();
+		_currentScene->Finalize();
+		_currentScene.reset();
 	}
 }
 
 // シーン切り替え
 // REGISTER_SCENE_MANAGERで登録したときの名前から切り替え
-void SceneManager::ChangeScene(std::string sceneName)
+void SceneManager::ChangeScene(SceneMenuLevel level, std::string sceneName)
 {
-	auto& scene = sceneDatas_[sceneName];
+	auto& scene = _sceneDatas[static_cast<int>(level)][sceneName];
 	assert(scene.get());
 	SceneManager::Instance().ChangeScene(std::make_shared<SceneLoading>(scene->GetNewShared()));
 }
@@ -100,5 +180,5 @@ void SceneManager::ChangeScene(std::string sceneName)
 void SceneManager::ChangeScene(std::shared_ptr<Scene> scene)
 {
 	// 新しいシーンを設定
-	nextScene_ = scene;
+	_nextScene = scene;
 }

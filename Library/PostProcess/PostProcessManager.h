@@ -13,14 +13,18 @@
 /// </summary>
 enum class PostProcessType
 {
-	ColorFilterPP,
-	GaussianFilterPP,
-	TonemappingPP,
+	FXAAPP,
+
+	DepthOfFieldGradationPP,
+	DepthOfFieldPP,
+
+	BloomGlowExtractionPP,
+	BloomGradationPP,
+
 	RadialBlurPP,
-	VignettePP,
 	ChromaticAberrationPP,
-	BloomPP,
-	RobertsCrossPP,
+
+	FinalPassPP,
 
 	MAX_PostProcessType
 };
@@ -50,34 +54,36 @@ public:
 	/// ポストプロセスをかける
 	/// </summary>
 	/// <param name="rc"></param>
-	/// <param name="srcSRV"></param>
+	/// <param name="colorSRV"></param>
+	/// <param name="depthSRV"></param>
 	void ApplyEffect(RenderContext& rc,
-		ID3D11ShaderResourceView** srcSRV);
+		ID3D11ShaderResourceView* colorSRV,
+		ID3D11ShaderResourceView* depthSRV);
 
 	// Gui描画
 	void DrawGui();
 
 	// アクセサ
 	[[nodiscard]] PostProcessBase* GetPostProcess(PostProcessType type) {
-		return postProcesses_[static_cast<int>(type)].first.get();
+		return _postProcesses[static_cast<int>(type)].first.get();
 	}
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetAppliedEffectSRV() {
-		return appliedEffectSRV_;
+		return _appliedEffectSRV;
 	}
 
 private:
 	using GuiFlag = std::pair<std::string, bool>;
 	// ポストプロセスの配列
 	// bool	: GUIの使用フラグ
-	std::pair<std::unique_ptr<PostProcessBase>, GuiFlag> postProcesses_[static_cast<int>(PostProcessType::MAX_PostProcessType)];
+	std::pair<std::unique_ptr<PostProcessBase>, GuiFlag> _postProcesses[static_cast<int>(PostProcessType::MAX_PostProcessType)];
 
 	// ポストプロセスをかけた後のSRV
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> appliedEffectSRV_;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _appliedEffectSRV;
 
 	// ブルーム用
-	std::unique_ptr<FrameBuffer> bloomRenderFrame_;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> bloomPS_;
-	std::unique_ptr<Sprite> fullscreenQuad_;
+	std::unique_ptr<FrameBuffer> _bloomRenderFrame;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> _bloomPS;
+	std::unique_ptr<SpriteResource> _fullscreenQuad;
 
 };

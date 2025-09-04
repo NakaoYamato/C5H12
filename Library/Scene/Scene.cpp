@@ -1,23 +1,157 @@
 #include "Scene.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/Camera/Camera.h"
+#include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
+#include "../../Library/Exporter/Exporter.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 
-#include "../../Library/Renderer/ModelRenderer.h"
-#include "../../Library/Renderer/PrimitiveRenderer.h"
-#include "../../Library/Renderer/ShapeRenderer.h"
+#include "../../Library/Component/Light/LightController.h"
+#include "../../Library/Actor/Camera/MainCamera.h"
 
-#include "../../Library/Actor/ActorManager.h"
+#include <imgui.h>
+
+// 初期化
+void Scene::Initialize()
+{
+    ProfileScopedSection_3(0, "Scene::Initialize", ImGuiControl::Profiler::Dark);
+    Graphics& graphics = Graphics::Instance();
+	ID3D11Device* device = graphics.GetDevice();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    // レンダーコンテキスト初期化
+    _renderContext.deviceContext = dc;
+    _renderContext.renderState = Graphics::Instance().GetRenderState();
+    _renderContext.camera = GetMainCamera();
+    _renderContext.lightDirection = Vector4::Right;
+    _renderContext.lightColor = Vector4::White;
+    _renderContext.lightAmbientColor = Vector4::Black;
+    _renderContext.environmentMap = nullptr;
+    _renderContext.pointLights.clear();
+    // サンプラーステート設定
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        RenderState* renderState = graphics.GetRenderState();
+        std::vector<ID3D11SamplerState*> samplerStates;
+        for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
+        {
+            samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
+        }
+        dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+    }
+
+	_primitive = std::make_unique<Primitive>(device);
+    // レンダラー作成
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _meshRenderer.Initialize(device);
+        _textureRenderer.Initialize(device);
+		_textRenderer.Initialize(device, dc);
+        _terrainRenderer.Initialize(device);
+        _particleRenderer.Initialize(device, dc);
+		_primitiveRenderer.Initialize(device);
+        _decalRenderer.Initialize(device, static_cast<UINT>(graphics.GetScreenWidth()), static_cast<UINT>(graphics.GetScreenHeight()));
+    }
+
+	// Effekseerエフェクトマネージャー作成
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _effekseerEffectManager.Initialize(device, dc);
+    }
+
+    // 必須オブジェクト生成
+    ActorManager& actorManager = GetActorManager();
+    {
+        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
+        _directionalLight = light->AddComponent<LightController>();
+		light->GetTransform().SetPositionY(1.0f);
+        light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(60.0f));
+    }
+    {
+        auto mainCamera = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::DrawContextParameter);
+    }
+
+    OnInitialize();
+}
+
+// 終了化
+void Scene::Finalize()
+{
+    _actorManager.Clear();
+
+    OnFinalize();
+}
 
 //更新処理
 void Scene::Update(float elapsedTime)
 {
+    // RCのデータをクリア
+	GetRenderContext().pointLights.clear();
+
     // ゲームオブジェクトの更新
-    ActorManager::Update(elapsedTime);
+    _actorManager.Update(elapsedTime);
+
     // 当たり判定処理
-    ActorManager::Judge();
+	_collisionManager.Update();
+
+    // ゲームオブジェクトの遅延更新処理
+    _actorManager.LateUpdate(elapsedTime);
+
+	// Effekseerの更新
+	_effekseerEffectManager.Update(elapsedTime);
+
+	// パーティクルの更新
+	_particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+
+	// 時間の更新
+	_time += elapsedTime;
+
+    // 定数バッファの更新
+    ConstantBufferManager* cbManager = Graphics::Instance().GetConstantBufferManager();
+	cbManager->GetSceneCB().totalElapsedTime = _time;
+	cbManager->GetSceneCB().deltaTime = elapsedTime;
+
+    // グリッド表示
+    if (_showGrid)
+        Debug::Renderer::DrawGrid(10);
+
+    // F1ボタンが有効ならImGuiのウィンドウに描画
+    _isImGuiRendering = Debug::Input::IsActive(DebugInput::BTN_F1);
+	// ImGuiのウィンドウに描画していないときはシーンImGuiウィンドウ選択フラグをオフにする
+    if (!_isImGuiRendering)
+        _isImGuiSceneWindowSelected = false;
+
+	// シーンの更新処理
+	OnUpdate(elapsedTime);
+
+    // F2ボタンが有効ならスクリーンショット
+	if (Debug::Input::IsActive(DebugInput::BTN_F2))
+	{
+        // 画面キャプチャ
+        std::wstring filename = L"./Data/Debug/Capture/" + std::to_wstring(GetTickCount64()) + L".dds";
+
+        if (Exporter::SaveDDSFile(
+            Graphics::Instance().GetDevice(),
+            Graphics::Instance().GetDeviceContext(),
+            PostProcessManager::Instance().GetAppliedEffectSRV().Get(),
+            filename))
+        {
+            // F2ボタンを無効化
+            Debug::GetDebugInput()->buttonData ^= DebugInput::BTN_F2;
+        }
+	}
+}
+
+/// 一定間隔の更新処理
+void Scene::FixedUpdate()
+{
+    // ゲームオブジェクトの更新
+    _actorManager.FixedUpdate();
+
+    OnFixedUpdate();
 }
 
 //描画処理
@@ -27,171 +161,345 @@ void Scene::Render()
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
     ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
     ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
+    float screenWidth = graphics.GetScreenWidth();
+	float screenHeight = graphics.GetScreenHeight();
 
+    // 各種マネジャー取得
     RenderState* renderState = graphics.GetRenderState();
     ConstantBufferManager* cbManager = graphics.GetConstantBufferManager();
 
+    // グレーで初期化
     FLOAT color[] = { 0.2f,0.2f,0.2f,1.0f };
     dc->ClearRenderTargetView(rtv, color);
     dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     dc->OMSetRenderTargets(1, &rtv, dsv);
 
+	// ビューポート設定
+	D3D11_VIEWPORT viewport{};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = screenWidth;
+	viewport.Height = screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	dc->RSSetViewports(1, &viewport);
+
     // サンプラーステート設定
     {
-        ID3D11SamplerState* samplerStates[] =
+        std::vector<ID3D11SamplerState*> samplerStates;
+        for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
         {
-            renderState->GetSamplerState(SamplerState::PointWrap),
-            renderState->GetSamplerState(SamplerState::PointClamp),
-            renderState->GetSamplerState(SamplerState::LinearWrap),
-            renderState->GetSamplerState(SamplerState::LinearClamp)
-        };
-        dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+            samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
+        }
+        dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+        dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
     }
 
-    // レンダーステート設定
-    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-
     // レンダーコンテキスト作成
-    RenderContext rc{};
+    RenderContext& rc = GetRenderContext();
     rc.deviceContext = dc;
     rc.renderState = graphics.GetRenderState();
-    rc.camera = &Camera::Instance().GetDate();
-    rc.lightDirection = { 1,0,0,0 };
-    rc.lightColor = { 1,1,1,1 };
-    rc.lightAmbientColor = { 0,0,0,0 };
-
-    // 描画の前処理
-    ActorManager::RenderPreprocess(rc);
+    rc.camera = GetMainCamera();
+    rc.lightDirection = Vector4::Right;
+    rc.lightColor = Vector4::White;
+    rc.lightAmbientColor = Vector4::Black;
+    if (_skyMap)
+    {
+        rc.environmentMap = _skyMap->GetSRV().GetAddressOf();
+        // スカイマップのSRVを設定
+        dc->PSSetShaderResources(_SKYMAP_COLOR_SRV_SLOT_INDEX,      1, _skyMap->GetSRV().GetAddressOf());
+        dc->PSSetShaderResources(_SKYMAP_DIFFUSE_SRV_SLOT_INDEX,    1, _skyMap->GetDiffuseSRV().GetAddressOf());
+        dc->PSSetShaderResources(_SKYMAP_SPECULAR_SRV_SLOT_INDEX,   1, _skyMap->GetSpecularSRV().GetAddressOf());
+        dc->PSSetShaderResources(_SKYMAP_LUT_SRV_SLOT_INDEX,        1, _skyMap->GetLutSRV().GetAddressOf());
+    }
+    if (_directionalLight.lock())
+    {
+		auto light = _directionalLight.lock();
+		rc.lightDirection = light->GetDirection();
+		rc.lightColor = light->GetColor();
+		rc.lightAmbientColor = light->GetAmbientColor();
+	}
 
     // シーン定数バッファ、ライト定数バッファの更新
     cbManager->Update(rc);
     // シーン定数バッファの設定
-    cbManager->SetCB(dc, 0, ConstantBufferType::SceneCB, ConstantUpdateTarget::ALL);
+    cbManager->SetCB(dc, _SCENE_CB_SLOT_INDEX, ConstantBufferType::SceneCB, ConstantUpdateTarget::ALL);
     // ライト定数バッファの設定
-    cbManager->SetCB(dc, 3, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
+    cbManager->SetCB(dc, _LIGHT_CB_SLOT_INDEX, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
 
     //--------------------------------------------------------------------------------------
-    // レンダーターゲットをフレームバッファ0番に設定
-    FrameBuffer* modelRenderBuffer = graphics.GetFrameBuffer(0);
-    modelRenderBuffer->ClearAndActive(dc);
+    // GBuffer生成
+    GBuffer* gBuffer = graphics.GetGBuffer();
+    if (graphics.RenderingDeferred())
     {
-        // ゲームオブジェクトの描画
-        ActorManager::Render(rc);
+        // レンダーステート設定
+        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc->OMSetBlendState(renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);
 
-        // 不透明描画
+        gBuffer->ClearAndActivate(dc);
         {
-            // モデルの不透明描画
-            ModelRenderer::RenderOpaque(rc);
+            // ゲームオブジェクトの描画
+            _actorManager.Render(rc);
 
-            // シェイプ描画
-            ShapeRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+            // モデルの描画
+            _meshRenderer.RenderOpaque(rc, true);
 
-            // プリミティブ描画
-            PrimitiveRenderer::Render(dc, rc.camera->view_, rc.camera->projection_);
+			// テレインの描画
+			_terrainRenderer.Render(rc, true);
+        }
+        gBuffer->Deactivate(dc);
+
+        // デカール描画
+		_decalRenderer.Render(gBuffer, Graphics::Instance().GetDevice(), rc);
+    }
+    // GBuffer生成終了
+    //--------------------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------------------
+    // フレームバッファ0番に空、GBuffer、その他レンダラーを描画
+    FrameBuffer* renderFrame = graphics.GetFrameBuffer(_RENDER_FRAME_INDEX);
+    renderFrame->ClearAndActivate(dc, Vector4::Zero, 1.0f);
+    {
+        // 空の描画
+        if (_skyMap)
+        {
+            // ブレンドなし
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+            // 深度テストOFF
+            dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 1);
+            // カリングを行わない
+            dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+            _skyMap->Blit(rc);
         }
 
-        // モデルの半透明描画
-        ModelRenderer::RenderTransparency(rc);
+        // GBufferのデータを書き出し
+        if (graphics.RenderingDeferred())
+        {
+            // レンダーステート設定
+            dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+            dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+            dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+
+            gBuffer->Blit(_textureRenderer, dc);
+        }
+        else
+        {
+            // レンダーステート設定
+            dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+            dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
+            dc->OMSetBlendState(renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
+
+            // ゲームオブジェクトの描画
+            _actorManager.Render(rc);
+
+            // フォワードレンダリング
+            _meshRenderer.RenderOpaque(rc, false);
+
+            // テレインの描画
+            _terrainRenderer.Render(rc, true);
+        }
+
+        // モデルの描画
+        _meshRenderer.RenderAlpha(rc);
+
+		// Effekseerの描画
+		_effekseerEffectManager.Render(rc.camera->GetView(), rc.camera->GetProjection());
+
+		// パーティクルの描画
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Additive), nullptr, 0xFFFFFFFF);
+		_particleRenderer.Render(rc.deviceContext);
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+
+        // プリミティブ描画
+        {
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyColorSRV;
+            D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+            srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MipLevels = 1;
+
+            srvDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+            GpuResourceManager::CreateShaderResourceViewCopy(
+                Graphics::Instance().GetDevice(), dc,
+                renderFrame->GetColorSRV().Get(),
+                &srvDesc,
+                copyColorSRV.ReleaseAndGetAddressOf()
+            );
+            //dc->PSSetShaderResources(2, 1, gBuffer->GetRenderTargetSRV(GBUFFER_COLOR_MAP_INDEX).GetAddressOf());
+            dc->PSSetShaderResources(2, 1, copyColorSRV.GetAddressOf());
+        }
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+		_primitiveRenderer.Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
+        ID3D11ShaderResourceView* nullsrvs[] = { nullptr };
+        dc->PSSetShaderResources(2, 1, nullsrvs);
 
         // デバッグ描画
-        Debug::Renderer::Render(Camera::Instance().GetView(), Camera::Instance().GetProjection());
+        Debug::Renderer::Render(rc.camera->GetView(), rc.camera->GetProjection());
     }
-    modelRenderBuffer->Deactivate(dc);
+    renderFrame->Deactivate(dc);
     // フレームバッファ0番の処理終了
     //--------------------------------------------------------------------------------------
 
     //--------------------------------------------------------------------------------------
     // カスケードシャドウマップ作成
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
-    cascadedShadowMap->ClearAndActive(rc, 3/*cb_slot*/);
+    if (cascadedShadowMap->IsCreateShadow())
     {
-        // ゲームオブジェクトの影描画処理
-        ActorManager::CastShadow(rc);
+        cascadedShadowMap->ClearAndActivate(rc);
+        {
+            // ゲームオブジェクトの影描画処理
+            _actorManager.CastShadow(rc);
 
-        // モデルの影描画処理
-        ModelRenderer::CastShadow(rc);
-
+            // モデルの影描画処理
+            _meshRenderer.CastShadow(rc);
+        }
+        cascadedShadowMap->Deactivate(rc);
     }
-    cascadedShadowMap->Deactivate(rc);
     // カスケードシャドウマップの処理終了
     //--------------------------------------------------------------------------------------
 
     //--------------------------------------------------------------------------------------
     // レンダーターゲットをフレームバッファ1番に設定
-    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(1);
-    modelAndShadowRenderFrame->ClearAndActive(dc);
+    FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(_APPLY_SHADOW_FRAME_INDEX);
+    modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
         // 影の描画
         // cascadedShadowMapにある深度情報から
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
         ID3D11ShaderResourceView* srvs[]
         {
-            modelRenderBuffer->GetColorSRV().Get(), // color_map
-            modelRenderBuffer->GetDepthSRV().Get(), // depth_map
+            renderFrame->GetColorSRV().Get(), // color_map
+            renderFrame->GetDepthSRV().Get(), // depth_map
             cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
         };
         // cascadedShadowMapの定数バッファ更新
         cascadedShadowMap->UpdateCSMConstants(rc);
         // レンダーステート設定
-        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+        dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-        // サンプラーステート設定
-        dc->PSSetSamplers(4, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::BorderPoint));
-        dc->PSSetSamplers(5, 1, rc.renderState->GetAddressOfSamplerState(SamplerState::Comparison));
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
-        graphics.Blit(
-            srvs,
-            0, _countof(srvs),
-            FullscreenQuadPS::CascadedPS);
+        cascadedShadowMap->Blit(dc,
+            renderFrame->GetColorSRV().GetAddressOf(),
+            renderFrame->GetDepthSRV().GetAddressOf());
     }
     modelAndShadowRenderFrame->Deactivate(dc);
     // フレームバッファ1番の処理終了
     //--------------------------------------------------------------------------------------
 
     //--------------------------------------------------------------------------------------
-    // ポストエフェクトの処理
-    ID3D11ShaderResourceView* srv[] =
+    // フレームバッファ2番にUIを含めたシーン画面を描画
+    FrameBuffer* sceneFrame = graphics.GetFrameBuffer(_SCENE_FRAME_INDEX);
+    sceneFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
-        modelAndShadowRenderFrame->GetColorSRV().Get(),
-        modelAndShadowRenderFrame->GetDepthSRV().Get(),
-    };
-    PostProcessManager::Instance().ApplyEffect(rc, srv);
-    // ポストエフェクトの処理終了
+        //--------------------------------------------------------------------------------------
+        // ポストエフェクトの処理
+        PostProcessManager::Instance().ApplyEffect(rc,
+            modelAndShadowRenderFrame->GetColorSRV().Get(),
+            renderFrame->GetDepthSRV().Get());
+        // ポストエフェクトの処理終了
+        //--------------------------------------------------------------------------------------
+
+        // サンプラーステート設定
+        {
+            ID3D11SamplerState* samplerStates[] =
+            {
+                renderState->GetSamplerState(SamplerState::PointWrap),
+                renderState->GetSamplerState(SamplerState::PointClamp),
+                renderState->GetSamplerState(SamplerState::LinearWrap),
+                renderState->GetSamplerState(SamplerState::LinearClamp)
+            };
+            dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+        }
+        dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
+        // バックバッファに描画
+        _textureRenderer.Blit(
+            dc,
+            PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
+            0, 1
+        );
+
+        // レンダーステート設定
+        dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+        dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+
+        // 3D描画後の描画処理
+        _actorManager.DelayedRender(rc);
+
+        // テキスト描画
+        _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+
+        OnRender();
+    }
+    sceneFrame->Deactivate(dc);
+    // フレームバッファ2番の処理終了
     //--------------------------------------------------------------------------------------
 
-    // サンプラーステート設定
+	// 描画先をバックバッファに戻す
+    dc->OMSetRenderTargets(1, &rtv, dsv);
+    dc->RSSetViewports(1, &viewport);
+    // ImGuiに描画フラグが無効ならバックバッファに描画
+    if (!_isImGuiRendering)
     {
-        ID3D11SamplerState* samplerStates[] =
-        {
-            renderState->GetSamplerState(SamplerState::PointWrap),
-            renderState->GetSamplerState(SamplerState::PointClamp),
-            renderState->GetSamplerState(SamplerState::LinearWrap),
-            renderState->GetSamplerState(SamplerState::LinearClamp)
-        };
-        dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+        _textureRenderer.Blit(
+            dc,
+            sceneFrame->GetColorSRV().GetAddressOf(),
+            0, 1
+        );
     }
-    dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
-    // バックバッファに描画
-    graphics.Blit(
-        PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
-        0, 1,
-        FullscreenQuadPS::EmbeddedPS);
-
-    // レンダーステート設定
-    dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-    dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-    dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullBack));
-
-    // 3D描画後の描画処理
-    ActorManager::DelayedRender(rc);
 }
 
 // デバッグ用Gui描画
 void Scene::DrawGui()
 {
+    // ImGuiに描画フラグが無効ならバックバッファに描画
+    if (_isImGuiRendering)
+    {
+        _isImGuiSceneWindowSelected = false;
+        if (ImGui::Begin(u8"シーン", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse))
+        {
+            // ウィンドウ内の描画領域を取得
+            ImVec2 windowPos = ImGui::GetWindowPos();
+            ImVec2 windowSize = ImGui::GetWindowSize();
+            windowPos.y += ImGui::GetFrameHeight();
+            windowSize.y -= ImGui::GetFrameHeight();
+            // 描画
+            ImGui::GetWindowDrawList()->AddImage(
+                Graphics::Instance().GetFrameBuffer(_SCENE_FRAME_INDEX)->GetColorSRV().Get(),
+                windowPos,
+                ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y)
+            );
+			// ImGuiのウィンドウが選択されているか
+            _isImGuiSceneWindowSelected = 
+                ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) ||
+                ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+        }
+        ImGui::End();
+    }
+
     //　ゲームオブジェクトのGui表示
-    ActorManager::DrawGui();
+    _actorManager.DrawGui();
+
+	//　当たり判定のGui表示
+	_collisionManager.DrawGui();
+
+	// パーティクルのGui表示
+	_particleRenderer.DrawGui();
+
+	// テレインレンダラーのGui表示
+	_terrainRenderer.DrawGui();
+
+    if(_skyMap)
+        _skyMap->DrawGui();
+
+    OnDrawGui();
+}
+
+// スカイマップ設定
+void Scene::SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM)
+{
+    _skyMap = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename, diffuseIEM, specularIDM);
 }

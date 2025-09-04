@@ -49,7 +49,7 @@ int WINAPI WinMain(_In_ HINSTANCE instance,
 	HWND hwnd = CreateWindowExW(0, APPLICATION_NAME, L"", WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, instance, NULL);
 	ShowWindow(hwnd, cmd_show);
 
-	Framework framework(hwnd);
+	Framework framework(hwnd, instance);
 	SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&framework));
 	// ファイルの受付を許可
 	DragAcceptFiles(hwnd, TRUE);

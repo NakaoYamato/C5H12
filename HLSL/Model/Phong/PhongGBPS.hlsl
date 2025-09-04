@@ -1,0 +1,48 @@
+#include "Phong.hlsli"
+
+#include "../../GBuffer/GBuffer.hlsli"
+
+#include "../../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
+Texture2D diffuseMap : register(t0);
+Texture2D normalMap : register(t1);
+Texture2D specularMap : register(t2);
+Texture2D roughnessMap : register(t3);
+Texture2D emissiveMap : register(t4);
+
+// 環境マッピング
+Texture2D environmentMap : register(t10);
+
+
+PS_GB_OUT main(VS_OUT pin)
+{
+    float4 diffuseColor = diffuseMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Kd * pin.materialColor;
+    // デザリング
+    Dithering(pin.position.xy, diffuseColor.a);
+    
+    float4 emissiveColor = emissiveMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
+    float4 specularColor = specularMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord) * Ks.rgba;
+    float3x3 mat =
+    {
+        normalize(pin.world_tangent.xyz),
+        normalize(pin.binormal.xyz),
+        normalize(pin.world_normal.xyz)
+    };
+    float3 N = normalMap.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord).rgb;
+    // ノーマルテクスチャ法線をワールドへ変換
+    N = normalize(mul(N * 2.0f - 1.0f, mat));
+    
+    //PS_GB_OUT pout = (PS_GB_OUT) 0;
+    //pout.diffuseColor = diffuseColor;
+    //pout.specularColor = specularColor;
+    //pout.worldPosition = pin.world_position;
+    //pout.worldNormal = float4(N, 1.0f);
+    
+    return CreateOutputData(
+    diffuseColor.rgb,
+    specularColor.x,
+    N,
+    0.5f,
+    emissiveColor.rgb, 
+    0.5f);
+}

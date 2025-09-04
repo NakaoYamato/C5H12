@@ -18,17 +18,17 @@ public:
 	virtual void DrawGui();
 
 	// アクセサ
-	const Vector3& GetTarget()const { return target_; }
-	const Vector3& GetEye()const { return eye_; }
-	const Vector3& GetAngle()const { return angle_; }
-	float GetRange()const { return range_; }
+	const Vector3& GetTarget()const { return _target; }
+	const Vector3& GetEye()const { return _eye; }
+	const Vector3& GetAngle()const { return _angle; }
+	float GetRange()const { return _range; }
 
-	void SetTarget(const Vector3& target) { this->target_ = target; }
-	void SetRange(const float& scaleRange) { this->range_ = scaleRange; }
-	void SetAngle(const Vector3 angle) { this->angle_ = angle; }
+	void SetTarget(const Vector3& target) { this->_target = target; }
+	void SetRange(const float& scaleRange) { this->_range = scaleRange; }
+	void SetAngle(const Vector3 angle) { this->_angle = angle; }
 protected:
-	Vector3 target_ = { 0,0,0 };
-	Vector3 eye_ = { 0,0,0 };
-	Vector3 angle_ = { 0,0,0 };
-	float range_ = 10.0f;
+	Vector3 _target = { 0,0,0 };
+	Vector3 _eye = { 0,0,0 };
+	Vector3 _angle = { 0,0,0 };
+	float _range = 10.0f;
 };

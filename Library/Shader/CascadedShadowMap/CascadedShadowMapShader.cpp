@@ -1,6 +1,6 @@
 #include "CascadedShadowMapShader.h"
 #include "../../HrTrace.h"
-#include "../../ResourceManager/GpuResourceManager.h"
+#include "../../Graphics/GpuResourceManager.h"
 
 CascadedShadowMapShader::CascadedShadowMapShader(ID3D11Device* device, 
     const char* vsName,
@@ -10,8 +10,8 @@ CascadedShadowMapShader::CascadedShadowMapShader(ID3D11Device* device,
 	GpuResourceManager::CreateVsFromCso(
 		device,
 		vsName,
-		vertexShader_.ReleaseAndGetAddressOf(),
-		inputLayout_.ReleaseAndGetAddressOf(),
+		_vertexShader.ReleaseAndGetAddressOf(),
+		_inputLayout.ReleaseAndGetAddressOf(),
 		inputDescs,
 		inputSize);
 
@@ -20,8 +20,8 @@ CascadedShadowMapShader::CascadedShadowMapShader(ID3D11Device* device,
 
 	// ジオメトリシェーダー
 	GpuResourceManager::CreateGsFromCso(device,
-		"./Data/Shader/CascadedShadowGS.cso",
-		geometryShader_.ReleaseAndGetAddressOf());
+		"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowGS.cso",
+		_geometryShader.ReleaseAndGetAddressOf());
 }
 
 void CascadedShadowMapShader::Begin(const RenderContext& rc)
@@ -29,16 +29,10 @@ void CascadedShadowMapShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(inputLayout_.Get());
-	dc->VSSetShader(vertexShader_.Get(), nullptr, 0);
-	dc->GSSetShader(geometryShader_.Get(), nullptr, 0);
+	dc->IASetInputLayout(_inputLayout.Get());
+	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	dc->GSSetShader(_geometryShader.Get(), nullptr, 0);
 	dc->PSSetShader(nullptr, nullptr, 0);
-}
-
-void CascadedShadowMapShader::Update(const RenderContext&, 
-	const ModelResource::Material*)
-{
-	// 特にやることはない
 }
 
 void CascadedShadowMapShader::End(const RenderContext& rc)
@@ -48,4 +42,9 @@ void CascadedShadowMapShader::End(const RenderContext& rc)
 	dc->VSSetShader(nullptr, nullptr, 0);
 	dc->IASetInputLayout(nullptr);
 	dc->GSSetShader(nullptr, nullptr, 0);
+}
+
+ShaderBase::Parameter CascadedShadowMapShader::GetParameterKey() const
+{
+	return ShaderBase::Parameter();
 }

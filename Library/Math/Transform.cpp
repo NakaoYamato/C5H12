@@ -4,45 +4,17 @@
 
 void Transform::UpdateTransform(const DirectX::XMFLOAT4X4* parent)
 {
-    static const DirectX::XMFLOAT4X4 COORDINATE_SYSTEM_TRANSFORMS[]
-    {
-        {
-            -1,0,0,0,
-            0,1,0,0,
-            0,0,1,0,
-            0,0,0,1
-        },
-        {
-            1,0,0,0,
-            0,1,0,0,
-            0,0,1,0,
-            0,0,0,1
-        },
-        {
-            -1,0,0,0,
-            0,0,-1,0,
-            0,1,0,0,
-            0,0,0,1
-        },
-        {
-            -1,0,0,0,
-            0,0,1,0,
-            0,1,0,0,
-            0,0,0,1
-        },
-    };
-    DirectX::XMMATRIX C{ DirectX::XMLoadFloat4x4(&COORDINATE_SYSTEM_TRANSFORMS[coordinateType_]) *
-        DirectX::XMMatrixScaling(lengthScale_, lengthScale_,lengthScale_) };
+    DirectX::XMMATRIX C{ DirectX::XMMatrixScaling(_lengthScale, _lengthScale,_lengthScale) };
 
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&position_));
-    DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle_.x, angle_.y, angle_.z);
-    DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&scale_));
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&_position));
+    DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(_angle.x, _angle.y, _angle.z);
+    DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&_scale));
 
     DirectX::XMMATRIX Parent = DirectX::XMMatrixIdentity();
     if (parent != nullptr)
         Parent = DirectX::XMLoadFloat4x4(parent);
 
-	DirectX::XMStoreFloat4x4(&transform,
+	DirectX::XMStoreFloat4x4(&_transform,
         C *
 		S *
 		R *
@@ -53,25 +25,20 @@ void Transform::UpdateTransform(const DirectX::XMFLOAT4X4* parent)
 
 void Transform::DrawGui()
 {
-    static const char* coordinates[4] =
-    {
-        u8"右手Y軸UP",
-        u8"左手Y軸UP",
-        u8"右手Z軸UP",
-        u8"左手Z軸UP"
-    };
-    int type = static_cast<int>(coordinateType_);
-    if (ImGui::Combo(u8"座標系", &type, coordinates, 4))
-        coordinateType_ = static_cast<COORDINATE_TYPE>(type);
-    ImGui::DragFloat(u8"長さの単位(m)", &lengthScale_, 0.01f, 0.01f, 10.0f);
+    ImGui::DragFloat(u8"長さの単位(m)", &_lengthScale, 0.01f, 0.01f, 10.0f);
 
-    ImGui::DragFloat3("position", &position_.x, 0.1f);
-    ImGui::DragFloat3("scale", &scale_.x, 0.1f);
-    Vector3 degree = Vec3ConvertToDegrees(angle_);
-    ImGui::DragFloat(u8"X軸", &degree.x);
-    ImGui::DragFloat(u8"Y軸", &degree.y);
-    ImGui::DragFloat(u8"Z軸", &degree.z);
-    angle_ = Vec3ConvertToRadians(degree);
+    ImGui::DragFloat3("position", &_position.x, 0.1f);
+    ImGui::DragFloat3("scale", &_scale.x, 0.1f);
+    Vector3 degree = Vector3::ToDegrees(_angle);
+    ImGui::DragFloat3("angle", &degree.x);
+    _angle = Vector3::ToRadians(degree);
     Vector3 wp = GetWorldPosition();
     ImGui::DragFloat3("world position", &wp.x, 0.1f);
+}
+
+/// 指定方向（ワールド空間）を向く
+void Transform::LookAt(const Vector3& worldDirection)
+{
+	Quaternion q = Quaternion::LookAt(_position, GetAxisZ(), _position + worldDirection);
+	_angle = Quaternion::ToRollPitchYaw(q);
 }

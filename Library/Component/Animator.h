@@ -1,37 +1,50 @@
 #pragma once
 
 #include "Component.h"
-#include "../../Library/3D/Model.h"
+#include "../../Library/Model/Model.h"
+#include "../../Library/Model/AnimationEvent.h"
 
 class Animator : public Component
 {
 public:
-	Animator(Model* model);
+	/// <summary>
+	/// ルートモーションのオプション
+	/// </summary>
+	enum class RootMotionOption
+	{
+		None,
+		RemovePositionX,
+		RemovePositionY,
+		RemovePositionZ,
+		RemovePositionXY,
+		RemovePositionXZ,
+		RemovePositionYZ,
+		RemovePositionXYZ,
+		UseOffset,
+	};
+
+public:
+	Animator() {}
 	~Animator()override {}
 
 	// 名前取得
 	const char* GetName()const { return "Animator"; }
-
 	// 開始処理
-	void Start()override {}
-
+	void Start()override;
 	// 更新処理
 	void Update(float elapsedTime) override;
-
+	// デバッグ表示
+	void DebugRender(const RenderContext& rc)override;
 	// GUI描画
 	void DrawGui() override;
 
 public:
 #pragma region アニメーション制御
-	// アニメーション更新処理
-	void UpdateAnimation(float elapsedTime);
-
 	// アニメーション経過時間更新
 	void UpdateAnimSeconds(float elapsedTime);
 
 	// アニメーション再生
 	void PlayAnimation(int index, bool loop, float blendSeconds = 0.0f);
-
 	// アニメーション再生(名前から検索)
 	void PlayAnimation(std::string name, bool loop, float blendSeconds = 0.0f);
 
@@ -41,47 +54,163 @@ public:
 
 	// アニメーション計算処理
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const;
+	// アニメーション計算処理
 	void ComputeAnimation(int animationIndex, float time, std::vector<ModelResource::Node>& nodePoses) const;
 
-	// ブレンディング計算処理
-	std::vector<ModelResource::Node> ComputeBlending(
+	/// <summary>
+	/// ブレンディング計算処理
+	/// </summary>
+	/// <param name="pose0">前のポーズ</param>
+	/// <param name="pose1">次のポーズ</param>
+	/// <param name="rate">ブレンド率</param>
+	/// <param name="result">結果</param>
+	void BlendPoseNode(
 		const std::vector<ModelResource::Node>& pose0,
-		const std::vector<ModelResource::Node>& pose1, float rate) const;
+		const std::vector<ModelResource::Node>& pose1,
+		float rate,
+		std::vector<ModelResource::Node>& result)const;
 
 	/// <summary>
-	/// ルートモーション処理
+	/// 現在のアニメーションの回転量を取り除く
 	/// </summary>
-	/// <param name="animationIndex">アニメーション番号</param>
-	/// <param name="oldAnimSeconds">前フレームのアニメーション経過時間</param>
-	/// <param name="currentAnimSeconds">今フレームのアニメーション経過時間</param>
-	/// <param name="controlNodeIndex">ルートモーションを適応させるノード</param>
-	/// <param name="resultNodePose">処理を行った後のノード</param>
-	/// <param name="movement">モデル空間内での移動量</param>
-	void ComputeRootMotion(int animationIndex,
-		float oldAnimSeconds, float currentAnimSeconds,
-		int controlNodeIndex,
-		std::vector<ModelResource::Node>& resultNodePose,
-		Vector3& movement) const;
+	/// <returns>回転変化量</returns>
+	Quaternion RemoveRootRotation(int rootIndex);
+#pragma endregion
 
+#pragma region アニメーションイベント
+	/// <summary>
+	/// 再生中のアニメーションのイベントを取得
+	/// </summary>
+	/// <returns></returns>
+	std::vector<AnimationEvent::EventData> GetCurrentEvents();
+#pragma endregion
+
+
+#pragma region アクセサ
+	/// <summary>
+	/// 現在のアニメーション番号取得
+	/// </summary>
+	/// <returns></returns>
+	int GetAnimationIndex() const { return _animationIndex; }
 	/// <summary>
 	/// アニメーション名から番号取得
 	/// </summary>
 	int GetAnimationIndex(const std::string& key) const;
+	/// <summary>
+	/// 現在のアニメーション経過時間取得
+	/// </summary>
+	/// <returns></returns>
+	float GetAnimationTimer() const { return _animationTimer; }
+	/// <summary>
+	/// アニメーションの終了時間取得
+	/// </summary>
+	/// <returns></returns>
+	float GetAnimationEndTime() const
+	{
+		if (_animationIndex == -1) return 0.0f;
+		return _model.lock()->GetResource()->GetAnimations().at(_animationIndex).secondsLength;
+	}
 
+	bool IsPlaying() const { return _isPlaying; }
+	bool IsLoop() const { return _isLoop; }
+	bool IsUseRootMotion() const { return _useRootMotion; }
+	bool IsRemoveRootMovement() const { return _removeRootMovement; }
+	bool IsRemoveRootRotation() const { return _removeRootRotation; }
+	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
+
+	/// <summary>
+	///	ルートモーションで使うノード番号設定
+	/// </summary>
+	/// <param name="index"></param>
+	void SetRootNodeIndex(int index) { _rootNodeIndex = index; }
+	/// <summary>
+	/// ルートモーションで使うノード番号設定
+	/// </summary>
+	/// <param name="key"></param>
+	void SetRootNodeIndex(const std::string& key);
+	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
+	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
+	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
+	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
+	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
+	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
+
+	/// <summary>
+	/// モデルをリセット
+	/// </summary>
+	/// <param name="model"></param>
+	void ResetModel(std::shared_ptr<Model> model);
+
+	/// <summary>
+	/// アニメーション番号から名前取得
+	/// </summary>
+	/// <param name="index"></param>
+	/// <returns></returns>
+	std::string GetAnimationName(int index)const;
+	/// <summary>
+	/// 現在のアニメーション名取得
+	/// </summary>
+	/// <returns></returns>
+	std::string GetAnimationName() const;
+
+	/// <summary>
+	/// ルートモーションによる移動量取得
+	/// </summary>
+	/// <returns></returns>
+	const Vector3& GetRootMovement() const { return _rootMovement; }
+	/// <summary>
+	///	アニメーションイベント取得
+	/// </summary>
+	/// <returns></returns>
+	AnimationEvent& GetAnimationEvent() { return _animationEvent; }
 #pragma endregion
-public:
-	// アニメーションパラメーター
-	int currentAnimationIndex = -1;
-	float currentAnimationSeconds = 0.0f;
-	bool animationPlaying = false;
-	bool animationLoop = false;
+private:
+    /// <summary>
+    /// ルートモーション計算
+    /// </summary>
+    /// <param name="elapsedTime"></param>
+    /// <param name="poseNodes"></param>
+    void CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node>& poseNodes);
 
-	// ブレンドアニメーションパラメーター
-	std::vector<ModelResource::Node> nodeCaches;
-	float animationBlendSeconds = 0.0f;
-	float currentAnimationBlendSeconds = 0.0f;
-	float animationBlendSecondsLength = -1.0f;
-	bool animationBlending = false;
+	/// <summary>
+	/// アニメーションのデバッグ表示をフィルタ
+	/// </summary>
+	/// <param name="filterStr">これを含むアニメーションを表示</param>
+	void Filtering(std::string filterStr);
 
-	Model* model{};
+private:
+	// アニメーションするモデル
+	std::weak_ptr<Model> _model;
+
+#pragma region パラメータ
+	int		_animationIndex = -1;
+	int		_rootNodeIndex = -1;
+	RootMotionOption _rootMotionOption = RootMotionOption::None;
+
+	float	_animationTimer = 0.0f;
+	float	_blendTimer = 0.0f;
+	float	_blendEndTime = -1.0f;
+
+	bool	_isPlaying		= false;
+	bool	_isLoop			= false;
+	bool	_useRootMotion	= false;
+	bool	_removeRootMovement = false;
+	bool	_removeRootRotation = false;
+
+	Vector3	_rootOffset		= Vector3::Zero;
+	Vector3	_rootMovement	= Vector3::Zero;
+#pragma endregion
+
+#pragma region イベント
+	AnimationEvent _animationEvent{};
+#pragma endregion
+
+
+#pragma region デバッグ用
+	std::vector<int> _displayAnimationIndices;
+	std::string _filterStr = "";
+	std::vector<const char*> _nodeNames;
+
+	float	_blendSeconds = 0.0f;
+#pragma endregion
 };

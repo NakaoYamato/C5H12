@@ -6,8 +6,9 @@
 #include <string>
 
 #include "ManagedTarget/KeybordInput.h"
-#include "ManagedTarget/GamePadInput.h"
+#include "ManagedTarget/XboxPadInput.h"
 #include "ManagedTarget/MouseInput.h"
+#include "ManagedTarget/DirectInput.h"
 
 // 参考資料:https://qiita.com/tsuchinokoman/items/cbca967f5b6a0a643f84
 
@@ -15,10 +16,11 @@
 class Input;
 
 // マクロ
-#define INPUT_IS_PRESSED(action) Input::Instance().IsPressed(action)
-#define INPUT_IS_TRIGGERD(action) Input::Instance().IsTriggerd(action)
-#define INPUT_IS_RELEASED(action) Input::Instance().IsReleased(action)
-#define INPUT_IS_MOVED(action) Input::Instance().IsMoved(action)
+#define _INPUT_PRESSED(action)	Input::Instance().IsPressed(action)
+#define _INPUT_TRIGGERD(action) Input::Instance().IsTriggerd(action)
+#define _INPUT_RELEASED(action) Input::Instance().IsReleased(action)
+#define _INPUT_VALUE(action)	Input::Instance().IsValue(action)
+#define _Mouse Input::Instance().GetMouseInput()
 
 /// <summary>
 /// 入力情報監視クラス
@@ -33,9 +35,10 @@ private:
 	// 入力情報の判別用
 	enum class InputType
 	{
-		InputKeyboard,
-		InputGamepad,
-		InputMouse
+		Keyboard,
+		XboxPad,
+		Mouse,
+		DirectPad
 	};
 
 	// 入力対応マップに使用
@@ -49,14 +52,13 @@ private:
 
 public:
 	/// <summary>
-	// インプット生成
-	// プログラム開始時に呼び出す
+	/// インプット生成
+	/// プログラム開始時に呼び出す
 	/// </summary>
-	void Initialize(HWND hwnd);
+	void Initialize(HWND hwnd, HINSTANCE instance);
 
-public:
 	/// <summary>
-	// インスタンス取得
+	/// インスタンス取得
 	/// </summary>
 	static Input& Instance() {
 		static Input ins;
@@ -67,7 +69,6 @@ public:
 	/// 更新処理
 	/// </summary>
 	void Update();
-
 	/// <summary>
 	/// デバッグGUI表示
 	/// </summary>
@@ -79,59 +80,58 @@ public:
 	/// <param name="action">調べたいアクションの名前</param>
 	/// <returns>押されていたらtrue</returns>
 	bool IsPressed(const std::string& action)const;
-
 	/// <summary>
 	/// 押された瞬間か確認
 	/// </summary>
 	/// <param name="action">調べたいアクションの名前</param>
 	/// <returns>今押されていたらtrue</returns>
 	bool IsTriggerd(const std::string& action)const;
-
 	/// <summary>
 	/// 離した瞬間か確認
 	/// </summary>
 	/// <param name="action">調べたいアクションの名前</param>
 	/// <returns>今離していたらtrue</returns>
 	bool IsReleased(const std::string& action)const;
-
 	/// <summary>
 	/// 入力量があるアクションの値取得
 	/// </summary>
 	/// <param name="action">調べたいアクションの名前</param>
 	/// <returns></returns>
-	float IsMoved(const std::string& action)const;
+	float IsValue(const std::string& action)const;
 
 	void ClearMapData();
 public:
 	// アクセサ(基本使わない)
-	KeybordInputObserver* GetKeybordInput() { return &keybordInputObserver;	}
-	GamePadInputObserver* GetGamePadInput() { return &gamePadInputObserver;	}
-	MouseInputObserver* GetMouseInput() { return mouseInputObserver.get();	}
+	KeybordInput* GetKeybordInput() { return &_keybordInput;	}
+	XboxPadInput* GetGamePadInput() { return &_gamePadInput;	}
+	MouseInput* GetMouseInput() { return _mouseInput.get();	}
+	DirectInput* GetDirectInput() { return _directInput.get(); }
 
 private:
 	// 入力とアクションの対応テーブル
 	using InputActionMap = std::unordered_map<std::string, std::vector<InputMapInfo>>;
-	InputActionMap inputActionMap;
+	InputActionMap							_buttonActionMap;
 	// 現在の押下状態
-	std::unordered_map<std::string, BOOL> currentInput;
+	std::unordered_map<std::string, BOOL>	_currentInput;
 	// 直前の押下状態
-	std::unordered_map<std::string, BOOL> lastInput;
+	std::unordered_map<std::string, BOOL>	_lastInput;
+	// 入力量があるアクション
+	InputActionMap							_valueActionMap;
 
-	/// 入力量があるアクション
-	InputActionMap moveActionMap;
 	// 現在の入力量
-	std::unordered_map<std::string, float> currentMovedParameter;
+	std::unordered_map<std::string, float>	_currentMovedParameter;
 
 	// キーボードの入力監視クラス
-	KeybordInputObserver keybordInputObserver;
+	KeybordInput					_keybordInput;
 	// ゲームパッドの入力監視クラス
-	GamePadInputObserver gamePadInputObserver;
+	XboxPadInput					_gamePadInput;
 	// マウスの入力監視クラス(ウィンドウのハンドルが必要なため動的に確保)
-	std::unique_ptr<MouseInputObserver> mouseInputObserver;
+	std::unique_ptr<MouseInput>		_mouseInput;
+	// DirectInputの入力監視クラス(ウィンドウのハンドル、インスタンスが必要なため動的に確保)
+	std::unique_ptr<DirectInput>	_directInput;
 
 	// ウィンドウのハンドル
-	HWND hwnd{};
-
+	HWND _hwnd{};
 	// GUIの表示フラグ
-	bool showGui = false;
+	bool _showGui = false;
 };

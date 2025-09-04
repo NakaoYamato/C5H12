@@ -8,11 +8,13 @@ public:
 	SceneDebug() {}
 	~SceneDebug()override {}
 
-	//初期化
-	void Initialize()override;
+	// 名前取得
+	const char* GetName()const { return u8"Debug"; }
+	// 階層取得
+	SceneMenuLevel GetLevel() const { return SceneMenuLevel::Debug; }
 
-	//終了化 
-	void Finalize()override;
+	//初期化
+	void OnInitialize()override;
 
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
@@ -22,4 +24,4 @@ public:
 };
 
 // メニューバーに登録
-REGISTER_SCENE_MANAGER(SceneDebug, u8"デバッグ");
+_REGISTER_SCENE(SceneDebug)

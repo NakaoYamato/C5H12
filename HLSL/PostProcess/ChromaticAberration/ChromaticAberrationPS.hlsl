@@ -10,7 +10,8 @@ cbuffer CHROMATIC_ABERRATION_BUFFER : register(b1)
 };
 
 Texture2D texture0 : register(t0);
-SamplerState sampler0 : register(s0);
+#include "../../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 float4 main(VsOut pin) : SV_TARGET
 {
@@ -29,7 +30,7 @@ float4 main(VsOut pin) : SV_TARGET
     for (uint index = 0; index < chromaticAberrationMaxSamples; ++index)
     {
         uint t = (uint) (((float) index + 0.5f) / samples);
-        float4 s = texture0.Sample(sampler0, pos);
+        float4 s = texture0.Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pos);
         float3 rgb = chromaticAberrationShift[t % 3].rgb;
         float4 filter = float4(rgb, 1.0f);
         

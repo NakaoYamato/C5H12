@@ -2,23 +2,28 @@
 
 #include <vector>
 
-#include "../Camera/CameraData.h"
+#include "../Camera/Camera.h"
 #include "RenderState.h"
 #include "../Math/Vector.h"
-#include "../Light/PointLight.h"
+#include "Light.h"
+
+#pragma region 描画関係の定義
+const UINT ModelCBIndex = 1; // モデル用定数バッファのインデックス
+#pragma endregion
+
 
 /// <summary>
 /// 描画用情報を格納する構造体
 /// </summary>
 struct RenderContext
 {
-	ID3D11DeviceContext* deviceContext;
-	const RenderState* renderState;
-	const CameraData* camera;
+	ID3D11DeviceContext* deviceContext = nullptr;
+	const RenderState* renderState = nullptr;
+	const Camera* camera = nullptr;
 	// ライト情報
-	Vector4 lightDirection = { 0.0f,-1.0f,0.0f,0.0f };
-	Vector4 lightColor = { 1.0f,1.0f,1.0f,1.0f };
-	Vector4 lightAmbientColor = { 1.0f,1.0f,1.0f,1.0f };
+	Vector4 lightDirection		= Vector4::Up;
+	Vector4 lightColor			= Vector4::White;
+	Vector4 lightAmbientColor	= Vector4::White;
 	ID3D11ShaderResourceView* const* environmentMap = nullptr;
-	std::vector<const PointLight::Data*> pointLights;
+	std::vector<const PointLight*> pointLights;
 };

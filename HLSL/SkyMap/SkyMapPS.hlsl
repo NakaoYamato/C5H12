@@ -1,9 +1,7 @@
 #include "SkyMap.hlsli"
 
-#define POINT 0
-#define LINEAR 1
-#define ANISOTROPIC 2
-SamplerState sampler_states[3] : register(s0);
+#include "../Define/SamplerStateDefine.hlsli"
+SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 Texture2D skymap : register(t0); // latitude-longitude mapped texture
 
 float4 main(VsOut pin) : SV_TARGET
@@ -19,5 +17,5 @@ float4 main(VsOut pin) : SV_TARGET
     sample_point.y = 1.0 - ((asin(v.y) + PI * 0.5) / PI);
 
     const float lod = 0;
-    return skymap.SampleLevel(sampler_states[LINEAR], sample_point, lod);
+    return skymap.SampleLevel(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], sample_point, lod);
 }

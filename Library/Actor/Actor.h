@@ -7,11 +7,28 @@
 
 #include "../../Library/Math/Transform.h"
 #include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/Model/Model.h"
+#include "../../Collision/CollisionDefine.h"
 
 // 前方宣言
 class Component;
-class ColliderComponent;
-enum class ActorTag;
+class ColliderBase;
+class Scene;
+
+/// <summary>
+/// ゲームオブジェクトのタグ
+/// </summary>
+enum class ActorTag
+{
+	DrawContextParameter,	// 描画の前準備
+	Stage,
+	Player,
+	Enemy,
+	UI,
+
+	ActorTagMax
+};
+
 
 /// <summary>
 /// ゲームオブジェクトの基底クラス
@@ -22,133 +39,308 @@ public:
 	Actor() {}
 	virtual ~Actor() {};
 
+#pragma region ActorManagerで呼ぶ関数
+	/// <summary>
+	/// 生成処理
+	/// </summary>
+	void Create(ActorTag tag);
+	/// <summary>
+	/// 削除時処理
+	/// </summary>
+	void Deleted();
+	/// <summary>
 	// 開始処理
-	virtual void Start();
-
-	// 更新処理
-	virtual void Update(float elapsedTime);
-
-	// 1秒ごとの更新処理
-	virtual void FixedUpdate();
-
-	// 描画の前処理
-	virtual void RenderPreprocess(RenderContext& rc);
-
-	// 描画処理
-	virtual void Render(const RenderContext& rc);
-
+	/// </summary>
+	void Start();
+	/// <summary>
+	///	更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	void Update(float elapsedTime);
+	/// <summary>
+	/// Update後更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	void LateUpdate(float elapsedTime);
+	/// <summary>
+	/// 固定間隔更新処理
+	/// </summary>
+	void FixedUpdate();
+	/// <summary>
+	/// 描画処理
+	/// </summary>
+	/// <param name="rc"></param>
+	void Render(const RenderContext& rc);
+	/// <summary>
 	// デバッグ表示
-	virtual void DebugRender(const RenderContext& rc);
-
+	/// </summary>
+	/// <param name="rc"></param>
+	void DebugRender(const RenderContext& rc);
+	/// <summary>
 	// 影描画
-	virtual void CastShadow(const RenderContext& rc);
-
+	/// </summary>
+	/// <param name="rc"></param>
+	void CastShadow(const RenderContext& rc);
+	/// <summary>
 	// 3D描画後の描画処理
-	virtual void DelayedRender(const RenderContext& rc);
-
+	/// </summary>
+	/// <param name="rc"></param>
+	void DelayedRender(const RenderContext& rc);
+	/// <summary>
 	// Gui描画
-	virtual void DrawGui();
+	/// </summary>
+	void DrawGui();
+#pragma endregion
 
-	// 当たり判定処理
-	virtual void Judge(Actor* other);
-
-	// 接触時の処理
-	virtual void OnCollision(Actor* other, 
-		const Vector3& hitPosition, 
-		const Vector3& hitNormal, 
-		const float& penetration);
+#pragma region 当たり判定
+	/// <summary>
+	/// 接触処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	void Contact(CollisionData& collisionData);
+	/// <summary>
+	/// 接触した瞬間の処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	void ContactEnter(CollisionData& collisionData);
+	/// <summary>
+	///	前フレームに接触したアクター情報をクリア
+	/// </summary>
+	void CrearLastContactActors()
+	{
+		_lastContactActors.clear();
+	}
+#pragma endregion
 
 #pragma region コンポーネント関係
+	/// <summary>
 	// コンポーネント追加
+	/// </summary>
 	template<class T, class... Args>
-	T* AddComponent(Args... args)
+	std::shared_ptr<T> AddComponent(Args... args)
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
-		components_.emplace_back(component);
-		return component.get();
+		_components.emplace_back(component);
+		// コンポーネントの生成時処理
+		component->OnCreate();
+		return component;
 	}
 
-	// コンポーネント取得
+	/// <summary>
+	/// コンポーネント取得
+	/// </summary>
+	/// <typeparam name="T">Componentを継承したもの</typeparam>
+	/// <returns>失敗でnullptr</returns>
 	template<class T>
-	T* GetComponent()
+	std::shared_ptr<T> GetComponent()
 	{
-		for (std::shared_ptr<Component>& component : components_)
+		for (std::shared_ptr<Component>& component : _components)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
-			return p.get();
+			return p;
 		}
 		return nullptr;
 	}
 
-	// 当たり判定コンポーネント
+	/// <summary>
+	/// 当たり判定コンポーネント追加
+	/// </summary>
+	/// <typeparam name="T">Colliderを継承したコンポーネント</typeparam>
+	/// <typeparam name="...Args"></typeparam>
+	/// <param name="...args">引数</param>
+	/// <returns></returns>
 	template<class T, class... Args>
-	T* AddCollider(Args... args)
+	std::shared_ptr<T> AddCollider(Args... args)
 	{
 		std::shared_ptr<T> component = std::make_shared<T>(args...);
 		component->SetActor(shared_from_this());
-		colliderComponents_.emplace_back(component);
-		return component.get();
+		_colliders.emplace_back(component);
+		// コンポーネントの生成時処理
+		component->OnCreate();
+		return component;
 	}
+
+	/// <summary>
+	/// 当たり判定コンポーネント取得
+	/// </summary>
+	/// <typeparam name="T">Colliderを継承したコンポーネント</typeparam>
+	/// <returns>失敗でnullptr</returns>
 	template<class T>
-	T* GetCollider()
+	std::shared_ptr<T> GetCollider()
 	{
-		for (std::shared_ptr<ColliderComponent>& component : colliderComponents_)
+		for (std::shared_ptr<ColliderBase>& component : _colliders)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
-			return p.get();
+			return p;
 		}
 		return nullptr;
 	}
-	std::shared_ptr<ColliderComponent> GetCollider(size_t index)
+	/// <summary>
+	/// 当たり判定コンポーネント取得
+	/// </summary>
+	/// <typeparam name="T">Colliderを継承したすべてのコンポーネント</typeparam>
+	/// <returns>失敗でsize() == 0</returns>
+	template<class T>
+	std::vector<std::shared_ptr<T>> GetColliders()
 	{
-		return colliderComponents_[index];
+		std::vector<std::shared_ptr<T>> result;
+		for (std::shared_ptr<ColliderBase>& component : _colliders)
+		{
+			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
+			if (p == nullptr) continue;
+			result.push_back(p);
+		}
+		return result;
 	}
-	size_t GetColliderComponentSize()const { return colliderComponents_.size(); }
 #pragma endregion
-
 
 #pragma region アクセサ
-	std::weak_ptr<Actor> GetParent() { return parent_; }
-	std::vector<std::weak_ptr<Actor>> GetChildren() { return children_; };
-	const char* GetName() const { return name_.c_str(); }
-	Transform& GetTransform() { return transform_; }
-	const std::unordered_map<ActorTag, bool>& GetJudgeTags()const { return judgeTags_; }
+	/// <summary>
+	// 自身を削除処理
+	/// </summary>
+	void Remove();
+	/// <summary>
+	/// モデルの読み込み
+	/// </summary>
+	/// <param name="filename"></param>
+	/// <returns></returns>
+	virtual std::weak_ptr<Model> LoadModel(const char* filename);
 
-	void SetParent(std::shared_ptr<Actor> parent) {
-		this->parent_ = parent;
-		parent->children_.push_back(shared_from_this());
-	}
-	void SetName(const char* name) { this->name_ = name; }
-	void SetTransform(const Transform& t) { this->transform_ = t; }
-	void SetActiveFlag(bool b) { this->isActive_ = b; }
-	void SetShowFlag(bool b) { this->isShowing_ = b; }
-	void SetDrawDebugFlag(bool b) { this->drawDebug_ = b; }
-	// そのタグに対して当たり判定を行うかのフラグをセット
-	void SetJudgeTagFlag(ActorTag tag, bool f) { judgeTags_[tag] = f; }
+	ActorTag GetTag() const { return _tag; }
+	Scene* GetScene() { return _scene; }
+	const char* GetName() const { return _name.c_str(); }
+	Transform& GetTransform() { return _transform; }
+	std::weak_ptr<Model> GetModel() { return _model; }
+	std::unordered_map<CollisionLayer, std::vector<Actor*>>& GetLastContactActors() { return _lastContactActors; }
 
-	bool IsActive()const { return isActive_; }
-	bool IsShowing()const { return isShowing_; }
-	bool DrawDebug()const { return drawDebug_; }
+	void SetScene(Scene* scene) { this->_scene = scene; }
+	void SetName(const char* name) { this->_name = name; }
+	void SetTransform(const Transform& t) { this->_transform = t; }
+	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
+#pragma region フラグ関係
+	void SetIsActive(bool b) { this->_isActive = b; }
+	void SetIsShowing(bool b) { this->_isShowing = b; }
+	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
+	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
+	void SetIsDrawingHierarchy(bool b) { this->_isDrawingHierarchy = b; }
 
+	bool IsActive()const { return _isActive; }
+	bool IsShowing()const { return _isShowing; }
+	bool IsDrawingDebug()const { return _isDrawingDebug; }
+	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
+	bool IsDrawingHierarchy()const { return _isDrawingHierarchy; }
+#pragma endregion
 #pragma endregion
 protected:
-	std::weak_ptr<Actor>	parent_;
-	std::vector<std::weak_ptr<Actor>> children_;
+#pragma region 仮想関数
+	/// <summary>
+	/// 生成時処理
+	/// </summary>
+	virtual void OnCreate() {};
+	/// <summary>
+	/// 削除時処理
+	/// </summary>
+	virtual void OnDeleted() {};
+	/// <summary>
+	// 開始時処理
+	/// </summary>
+	virtual void OnStart() {};
+	/// <summary>
+	/// 更新前処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void OnPreUpdate(float elapsedTime) {};
+	/// <summary>
+	/// モデルのトランスフォーム更新
+	/// </summary>
+	virtual void UpdateModelTransform();
+	/// <summary>
+	/// 更新時処理
+	/// </summary>
+	/// <param name="elapsedTime">前フレームからの更新時間</param>
+	virtual void OnUpdate(float elapsedTime) {};
+	/// <summary>
+	/// トランスフォーム更新
+	/// </summary>
+	virtual void UpdateTransform();
+	/// <summary> 
+	/// Updateのあとによばれる更新時処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	virtual void OnLateUpdate(float elapsedTime) {};
+	/// <summary>
+	/// 一定間隔の更新時処理
+	/// #include "../../Library/Scene/Scene.h"をインクルードして
+	/// _FIXED_UPDATE_INTERVAL　が一定間隔(秒)
+	/// </summary>
+	virtual void OnFixedUpdate() {};
+	/// <summary>
+	/// 描画時処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void OnRender(const RenderContext& rc) {};
+	/// <summary>
+	/// デバッグ表示時処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void OnDebugRender(const RenderContext& rc) {};
+	/// <summary>
+	/// 3D描画後の描画時処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void OnDelayedRender(const RenderContext& rc) {};
+	/// <summary>
+	/// ギズモ描画
+	/// </summary>
+	virtual void DrawGuizmo();
+	/// <summary>
+	/// GUI描画時処理
+	/// </summary>
+	virtual void OnDrawGui() {};
+	/// <summary>
+	/// 接触時処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContact(CollisionData& collisionData) {}
+	/// <summary>
+	/// 接触した瞬間の処理
+	/// </summary>
+	/// <param name="collisionData">接触情報</param>
+	virtual void OnContactEnter(CollisionData& collisionData) {}
+#pragma endregion
 
-	std::string			name_;
-	Transform			transform_;
-
-	bool				isActive_ = true;
-	bool				isShowing_ = true;
-	bool				drawDebug_ = true;
-
-	std::vector<std::shared_ptr<Component>>	components_;
+protected:
+	// タグ
+	ActorTag				_tag = ActorTag::ActorTagMax; // 初期値は無効なタグ
+	// 所属するシーン
+	Scene*					_scene = nullptr;
+	// 名前
+	std::string				_name;
+	// トランスフォーム
+	Transform				_transform;
+	// モデル
+	std::shared_ptr<Model>	_model;
+	// コンポーネント
+	std::vector<std::shared_ptr<Component>>		_components;
 	// 当たり判定コンポーネント
-	std::vector<std::shared_ptr<ColliderComponent>>	colliderComponents_;
+	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
 
-	// 各タグに対して当たり判定を行うかのフラグ
-	std::unordered_map<ActorTag, bool> judgeTags_;
+	// 自身のレイヤーごとの前フレームに接触したレイヤーごとのアクター
+	std::unordered_map<CollisionLayer, std::vector<Actor*>> _lastContactActors;
+
+#pragma region 各種フラグ
+	// アクティブフラグ
+	bool				_isActive = true;
+	// 表示フラグ
+	bool				_isShowing = true;
+	// デバッグ表示フラグ
+	bool				_isDrawingDebug = true;
+	// ギズモ使用フラグ
+	bool				_isUsingGuizmo = true;
+	// ヒエラルキー描画フラグ
+	bool 				_isDrawingHierarchy = false;
+#pragma endregion
 };

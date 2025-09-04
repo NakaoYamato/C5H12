@@ -1,5 +1,12 @@
 #include "PointLightController.h"
 
+#include "../../Library/Scene/Scene.h"
+#include "../../DebugSupporter/DebugSupporter.h"
+
+#include <imgui.h>
+
+std::mutex PointLightController::_renderContextMutex;
+
 // 更新処理
 void PointLightController::Update(float elapsedTime)
 {
@@ -7,24 +14,29 @@ void PointLightController::Update(float elapsedTime)
     pos.x = GetActor()->GetTransform().GetWorldPosition().x;
     pos.y = GetActor()->GetTransform().GetWorldPosition().y;
     pos.z = GetActor()->GetTransform().GetWorldPosition().z;
-    light_.SetPosition(pos);
-}
-
-// 描画の前処理
-void PointLightController::RenderPreprocess(RenderContext& rc)
-{
-    // rcの設定
-    rc.pointLights.push_back(light_.GetDataPointer());
+	_light.position = pos;
+    _light.color = _color * _colorVolume;
+    {
+        // ポイントライトの登録
+        // スレッドセーフ
+		std::lock_guard<std::mutex> lock(_renderContextMutex);
+        GetActor()->GetScene()->GetRenderContext().pointLights.push_back(&_light);
+    }
 }
 
 // デバッグ表示
 void PointLightController::DebugRender(const RenderContext& rc)
 {
-    light_.DebugRender();
+    Debug::Renderer::DrawSphere(_light.position.Vec3(), _light.range, _light.color);
 }
 
 // GUI描画
 void PointLightController::DrawGui()
 {
-    light_.DrawGui();
+    bool useFlag = _light.isAlive == 1;
+    ImGui::Checkbox(u8"使用フラグ", &useFlag);
+    _light.isAlive = useFlag == true ? 1 : 0;
+    ImGui::ColorEdit4(u8"color", &_color.x);
+    ImGui::DragFloat(u8"範囲", &_light.range, 0.1f);
+    ImGui::DragFloat(u8"強さ", &_colorVolume, 0.1f);
 }

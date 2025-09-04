@@ -13,13 +13,24 @@ public:
 	DebugRenderer(ID3D11Device* device);
 	~DebugRenderer() {}
 
-	// 箱描画
+	// 箱(半辺長１m)描画
 	void DrawBox(
 		const Vector3& position,
 		const Vector3& angle,
 		const Vector3& size,
 		const Vector4& color);
+	// 箱(半辺長１m)描画
 	void DrawBox(
+		const DirectX::XMFLOAT4X4& transform,
+		const Vector4& color);
+	// 箱(半辺長0.5m)描画
+	void DrawHalfBox(
+		const Vector3& position,
+		const Vector3& angle,
+		const Vector3& size,
+		const Vector4& color);
+	// 箱(半辺長0.5m)描画
+	void DrawHalfBox(
 		const DirectX::XMFLOAT4X4& transform,
 		const Vector4& color);
 
@@ -62,7 +73,7 @@ public:
 	void DrawGrid(int subdivisions, float scale);
 
 	// 頂点追加
-	void AddVertex(const Vector3& position);
+	void AddVertex(const Vector3& position, const Vector4& color = Vector4::White);
 
 	// 描画実行
 	void Render(
@@ -76,60 +87,66 @@ private:
 		Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 		UINT									vertexCount{};
 	};
-
 	struct Instance
 	{
 		Mesh* mesh = nullptr;
 		DirectX::XMFLOAT4X4		worldTransform{};
-		Vector4		color{ 1,1,1,1 };
+		Vector4		color = Vector4::White;
 	};
-
 	struct CbMesh
 	{
 		DirectX::XMFLOAT4X4		worldViewProjection{};
-		Vector4		color{ 1,1,1,1 };
+		Vector4		color = Vector4::White;
+	};
+	struct GridVertex
+	{
+		Vector3 position = Vector3::Zero;
+		Vector4 color = Vector4::White;
 	};
 
 	// メッシュ生成
 	void CreateMesh(ID3D11Device* device, const std::vector<Vector3>& vertices, Mesh& mesh);
 
 	// 箱メッシュ作成
-	void CreateBoxMesh(ID3D11Device* device, float width, float height, float depth);
+	void CreateBoxMesh(ID3D11Device* device, Mesh& mesh, float width, float height, float depth);
 
 	// 球メッシュ作成
-	void CreateSphereMesh(ID3D11Device* device, float radius, int subdivisions);
+	void CreateSphereMesh(ID3D11Device* device, Mesh& mesh, float radius, int subdivisions);
 
 	// 半球メッシュ作成
-	void CreateHalfSphereMesh(ID3D11Device* device, float radius, int subdivisions);
+	void CreateHalfSphereMesh(ID3D11Device* device, Mesh& mesh, float radius, int subdivisions);
 
 	// 円柱
-	void CreateCylinderMesh(ID3D11Device* device, float radius1, float radius2, float start, float height, int subdivisions);
+	void CreateCylinderMesh(ID3D11Device* device, Mesh& mesh, float radius1, float radius2, float start, float height, int subdivisions);
 
 	// 骨メッシュ作成
-	void CreateBoneMesh(ID3D11Device* device, float length);
+	void CreateBoneMesh(ID3D11Device* device, Mesh& mesh, float length);
 
 	// 矢印メッシュ作成
-	void CreateArrowMesh(ID3D11Device* device);
+	void CreateArrowMesh(ID3D11Device* device, Mesh& mesh);
 
 	// 軸メッシュ作成
-	void CreateAxis(ID3D11Device* device);
+	void CreateAxis(ID3D11Device* device, Mesh& mesh0, Mesh& mesh1, Mesh& mesh2);
 
 private:
-	Mesh										boxMesh;
-	Mesh										sphereMesh;
-	Mesh										halfSphereMesh;
-	Mesh										cylinderMesh;
-	Mesh										boneMesh;
-	Mesh										arrowMesh;
-	Mesh										axisMesh[3];// 0:X, 1:Y, 2:Z
-	std::vector<Instance>						instances;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>	inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer;
+	Mesh										_boxMesh;
+	Mesh										_halfBoxMesh;
+	Mesh										_sphereMesh;
+	Mesh										_halfSphereMesh;
+	Mesh										_cylinderMesh;
+	Mesh										_boneMesh;
+	Mesh										_arrowMesh;
+	Mesh										_axisMesh[3];// 0:X, 1:Y, 2:Z
+	std::vector<Instance>						_instances;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>		_constantBuffer;
 
 	// グリッド描画用
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_gridVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>	_gridInputLayout;
 	static const UINT VertexCapacity = 3 * 1024;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	gridVertexBuffer;
-	std::vector<Vector3> gridVertices;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>	_gridVertexBuffer;
+	std::vector<GridVertex> _gridVertices;
 };

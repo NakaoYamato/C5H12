@@ -1,30 +1,36 @@
 #include "Framework.h"
 
 #include "../Graphics/Graphics.h"
+#include "../Graphics/GpuResourceManager.h"
 #include "../ImGui/ImGuiManager.h"
 #include "../Input/Input.h"
+#include "../Audio/AudioSystem.h"
 #include "../DebugSupporter/DebugSupporter.h"
-#include "../ResourceManager/ModelResourceManager.h"
+#include "../Model/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
-//#include "../Effekseer/EffectManager.h"
-#include "../Renderer/ModelRenderer.h"
-#include "../Renderer/PrimitiveRenderer.h"
-#include "../Renderer/ShapeRenderer.h"
-
+#include "../JobSystem/JobSystem.h"
 #include "../Scene/SceneManager.h"
+
+#include <Dbt.h>
 
 // 垂直同期間隔設定
 int Framework::syncInterval = 0;
+// ドロップされたファイルパス
 std::wstring Framework::filePath;
+// プロファイラーの描画フラグ
+static bool imguiProfilerIsPause = false;
 
+/// ゲームループの実行
 int Framework::Run()
 {
     // ウィンドウからのメッセージを受け取る変数
     MSG msg{};
 
+    // 初期化処理　失敗したら終了
     if (!Initialize())
         return 0;
 
+    // ゲームループ
     while (WM_QUIT != msg.message)
     {
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -34,15 +40,22 @@ int Framework::Run()
         }
         else
         {
-            tictoc_.Tick();
+            // 前フレームからの経過時間計算
+            _tictoc.Tick();
             CalcFrameStatus();
-            Update(tictoc_.TimeInterval());
-            if (elapsed1Second_)
+
+            // 固定間隔更新処理
+            fixedUpdateTimer += _tictoc.TimeInterval();
+            if (fixedUpdateTimer - _FIXED_UPDATE_RATE >= 0.0f)
             {
                 FixedUpdate();
-                elapsed1Second_ = false;
+                fixedUpdateTimer = fixedUpdateTimer - _FIXED_UPDATE_RATE;
             }
-            Render(tictoc_.TimeInterval());
+
+            // 更新処理
+            Update(_tictoc.TimeInterval());
+
+            Render();
         }
     }
 
@@ -79,9 +92,9 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
         // 参考:https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
         switch (wparam)
         {
-        case VK_ESCAPE:
-            PostMessage(hwnd, WM_CLOSE, 0, 0);
-            break;
+        //case VK_ESCAPE:
+        //    PostMessage(hwnd, WM_CLOSE, 0, 0);
+        //    break;
 #ifdef _DEBUG
             // デバッグ中のみ有効化
         case VK_F1:
@@ -97,16 +110,16 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
         case VK_F11:
         case VK_F12:
             // 指定のキーを押すとそのビットを反転
-            Debug::GetDebugInput()->buttonData_ ^= (1 << (wparam - VK_F1));
+            Debug::GetDebugInput()->buttonData ^= (1 << (wparam - VK_F1));
             break;
 #endif
         }
         break;
     case WM_ENTERSIZEMOVE:
-        tictoc_.Stop();
+        _tictoc.Stop();
         break;
     case WM_EXITSIZEMOVE:
-        tictoc_.Start();
+        _tictoc.Start();
         break;
     case WM_MOUSEWHEEL:
         if (Input::Instance().GetMouseInput() != nullptr)
@@ -140,6 +153,14 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 #endif
         break;
     }
+    case WM_DEVICECHANGE:
+		// USBデバイスの接続・切断時の処理
+        if (Input::Instance().GetDirectInput() != nullptr)
+        {
+            // DirectInputのゲームパッド検索
+            Input::Instance().GetDirectInput()->SearchGamepad();
+        }
+        break;
     default:
         return DefWindowProc(hwnd, msg, wparam, lparam);
     }
@@ -150,12 +171,7 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 bool Framework::Initialize() const
 {
     // Graphicsの初期化
-    Graphics::Instance().Initialize(hwnd_, FULLSCREEN);
-
-    // 各種レンダラー作成
-    ModelRenderer::Initialize(Graphics::Instance().GetDevice());
-    PrimitiveRenderer::Initialize(Graphics::Instance().GetDevice());
-    ShapeRenderer::Initialize(Graphics::Instance().GetDevice());
+    Graphics::Instance().Initialize(_hwnd, _hInstance, FULLSCREEN);
 
     // ポストプロセス管理者初期化
     PostProcessManager::Instance().Initialize(Graphics::Instance().GetDevice(),
@@ -163,21 +179,26 @@ bool Framework::Initialize() const
         static_cast<uint32_t>(Graphics::Instance().GetScreenHeight()));
 
     // 入力監視クラスの初期化
-    Input::Instance().Initialize(hwnd_);
+    Input::Instance().Initialize(_hwnd, _hInstance);
 
-    //// エフェクトマネージャー初期化
-    //EffectManager::Instance().Initialize();
-
-    // シーンの初期設定
-    SceneManager::Instance().ChangeScene(u8"デバッグ");
+    // シーンの初期化
+    SceneManager::Instance().Initialize();
 
     // デバッグの初期化
     Debug::Initialize();
 
+	// ジョブシステム初期化
+    // サーバーのスレッドで最大２個必要なのでその分減らしている
+    JobSystem::Instance().Initialize(std::max<size_t>(std::thread::hardware_concurrency() - 2, 1));
+    //JobSystem::Instance().Initialize(std::max<size_t>(6, 1));
+
     // ImGui初期化
-    ImGuiManager::Initialize(hwnd_,
+    ImGuiManager::Initialize(_hwnd,
         Graphics::Instance().GetDevice(),
-        Graphics::Instance().GetDeviceContext());
+        Graphics::Instance().GetDeviceContext(),
+        &imguiProfilerIsPause,
+        [](bool pause) {imguiProfilerIsPause = pause; },
+        static_cast<int>(JobSystem::Instance().GetNumThreads()) + 1);
 
     return true;
 }
@@ -192,41 +213,79 @@ void Framework::Update(float elapsedTime)
     // F5キー有効化で時間停止
     if (Debug::Input::IsActive(DebugInput::BTN_F5))
         elapsedTime = 0.0f;
+    // F3キー有効化で低速化
+    if (Debug::Input::IsActive(DebugInput::BTN_F3))
+        elapsedTime = elapsedTime / 10.0f;
 
     // 入力監視クラスの更新
-    Input::Instance().Update();
+    {
+        ProfileScopedSection_3(0, "Input::Update", ImGuiControl::Profiler::Dark);
+        Input::Instance().Update();
+    }
 
     // デバッグの更新
-    Debug::Update(elapsedTime);
+    {
+        ProfileScopedSection_3(0, "Debug::Update", ImGuiControl::Profiler::Dark);
+        Debug::Update(elapsedTime);
+    }
 
     // シーンの更新
-    SceneManager::Instance().Update(elapsedTime);
+    {
+        ProfileScopedSection_3(0, "Scene::Update", ImGuiControl::Profiler::Dark);
+        SceneManager::Instance().Update(elapsedTime);
+    }
 
-    //// 3Dエフェクト更新
-    //EffectManager::Instance().Update(elapsedTime);
+	// シャドウマップの更新
+    {
+		ProfileScopedSection_3(0, "ShadowMap::Update", ImGuiControl::Profiler::Dark);
+        Graphics::Instance().GetCascadedShadowMap()->Update(elapsedTime);
+    }
+
+    // ポストエフェクトの更新
+    {
+		ProfileScopedSection_3(0, "PostProcessManager::Update", ImGuiControl::Profiler::Dark);
+        PostProcessManager::Instance().Update(elapsedTime);
+    }
+
+    // オーディオ更新
+    {
+		ProfileScopedSection_3(0, "AudioSystem::Update", ImGuiControl::Profiler::Dark);
+        AudioSystem::Instance().Update();
+    }
 }
 
+/// 一定間隔の更新処理
 void Framework::FixedUpdate()
 {
+    ProfileScopedSection_3(0, "Scene::FixedUpdate", ImGuiControl::Profiler::Dark);
     // シーンの更新
     SceneManager::Instance().FixedUpdate();
 }
 
-void Framework::Render(float elapsedTime)
+/// 描画処理
+void Framework::Render()
 {
     // 別スレッド中にデバイスコンテキストが使われていた場合に
     // 同時アクセスしないように排他制御する
     std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
 
     // シーンの描画
-    SceneManager::Instance().Render();
+    {
+		ProfileScopedSection_3(0, "Scene::Render", ImGuiControl::Profiler::Dark);
+		SceneManager::Instance().Render();
+    }
 
 #ifdef USE_IMGUI
     // F6キーでGUIを非表示
     if (!Debug::Input::IsActive(DebugInput::BTN_F6))
     {
+        ProfileScopedSection_3(0, "DrawGui", ImGuiControl::Profiler::Dark);
+
         // GUIのメニューバーでシーン変更
         SceneManager::Instance().SceneMenuGui();
+
+		// リソース管理クラスのGui描画
+		GpuResourceManager::DrawGui(Graphics::Instance().GetDevice());
 
         // モデルリソース管理クラスのGui描画
         ModelResourceManager::Instance().DrawGui();
@@ -240,8 +299,11 @@ void Framework::Render(float elapsedTime)
         // 入力管理クラスのGUI描画
         Input::Instance().DrawGui();
 
-        // カスケードシャドウマップのGUI
-        Graphics::Instance().GetCascadedShadowMap()->DrawGui();
+        // 描画管理者のGUI描画
+        Graphics::Instance().DrawGui();
+
+        // ジョブシステムのGUI描画
+        JobSystem::Instance().DrawGui();
 
         // デバッグのGui描画
         Debug::DrawGui();
@@ -252,7 +314,10 @@ void Framework::Render(float elapsedTime)
 #endif
 
     // バックバッファに描画した画を画面に表示する。
-    Graphics::Instance().Present(syncInterval);
+    {
+		ProfileScopedSection_3(0, "Graphics::Present", ImGuiControl::Profiler::Dark);
+        Graphics::Instance().Present(syncInterval);
+    }
 }
 
 bool Framework::Uninitialize()
@@ -263,8 +328,11 @@ bool Framework::Uninitialize()
     // エフェクトマネージャーの終了の後にエフェクトの終了処理を行うとエラーになるので防ぐ
     SceneManager::Instance().Clear();
 
-    // エフェクトマネージャー終了化
-    //EffectManager::Instance().Finalize();
+    // オーディオ終了化
+    AudioSystem::Instance().Finalize();
+
+    // ジョブシステム終了
+    JobSystem::Instance().Finalize();
 
     // フルスクリーン時の終了処理
     BOOL fullscreen = 0;
@@ -277,27 +345,26 @@ bool Framework::Uninitialize()
     return true;
 }
 
+/// フレームレートの計算
 void Framework::CalcFrameStatus()
 {
-    ++elapsedFrame_;
-    if ((tictoc_.TimeStamp() - elapsedTime_) >= 1.0f)
+    ++_elapsedFrame;
+    if ((_tictoc.TimeStamp() - _elapsedTime) >= 1.0f)
     {
-        fps_ = static_cast<float>(elapsedFrame_);
+        _fps = static_cast<float>(_elapsedFrame);
         std::ostringstream outs;
         outs.precision(6);
 #if _DEBUG
-        outs << fps_ << "/" << "FrameTime:" << 1000.0f / fps_ << "(ms)";
-        SetWindowTextA(hwnd_, outs.str().c_str());
+        // タイトルバーにFPS表示
+        outs << _fps << "/" << "FrameTime:" << 1000.0f / _fps << "(ms)";
+        SetWindowTextA(_hwnd, outs.str().c_str());
 #else
-        SetWindowTextW(hwnd, L"タイトル");
-        //outs << fps << "/" << "FrameTime:" << 1000.0f / fps << "(ms)";
-        //SetWindowTextA(hwnd, outs.str().c_str());
+        //SetWindowTextW(hwnd_, L"タイトル");
+        outs << _fps << "/" << "FrameTime:" << 1000.0f / _fps << "(ms)";
+        SetWindowTextA(_hwnd, outs.str().c_str());
 #endif
 
-        // 1秒が過ぎたフラグをオン
-        elapsed1Second_ = true;
-
-        elapsedFrame_ = 0;
-        elapsedTime_ += 1.0f;
+        _elapsedFrame = 0;
+        _elapsedTime += 1.0f;
     }
 }

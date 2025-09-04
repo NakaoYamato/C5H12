@@ -6,49 +6,53 @@
 class GaussianFilter : public PostProcessBase
 {
 public:
-#define KERNEL_MAX 25
     struct Constants
     {
-        DirectX::XMFLOAT4 weights[KERNEL_MAX * KERNEL_MAX];
-        float kernelSize;
-        DirectX::XMFLOAT2 texcel;
-        float dummy;
+        float intensity = 0.05f;
+        float something[3];
     };
 
-    struct Datas
-    {
-        int kernelSize = 3;
-        float sigma = 10.0f;    // 標準偏差(ぼかし量)
-        DirectX::XMFLOAT2 textureSize = { 1920.0f,1080.0f };
-    };
-
+    static constexpr size_t DownSampledCount = 6;
 public:
-    GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t height) :
-        PostProcessBase(device, width, height, "./Data/Shader/GaussianFilterPS.cso", sizeof(Constants)) {
-        // 初期値の設定
-        startData = GetCurrentData();
-    };
+    GaussianFilter(ID3D11Device* device, uint32_t width, uint32_t height);
     ~GaussianFilter()override {}
 
-    // 更新処理
-    void Update(float elapsedTime)override;
+    // 描画処理
+    void Render(ID3D11DeviceContext* immediateContext,
+        ID3D11ShaderResourceView** shaderResourceView,
+        uint32_t startSlot, uint32_t numViews)override;
 
     // デバッグGui描画
     void DrawGui()override;
-
-private:
-    // 定数バッファの更新
-    void UpdateConstantBuffer(ID3D11DeviceContext* immediateContext,
-        ID3D11Buffer* constantBuffer) override;
-
-    // フィルターの計算
-    void CalcGaussianFilterConstant(Constants& constant, const Datas data);
 
     // 現在のデータの取得
     std::unordered_map<std::string, float> GetCurrentData() override;
     // データのセット
     void SetData(std::unordered_map<std::string, float>& parameter) override;
 private:
-    Constants constant{};
-    Datas data{};
+    // 定数バッファの更新
+    void UpdateConstantBuffer(ID3D11DeviceContext* immediateContext,
+        ID3D11Buffer* constantBuffer) override;
+
+private:
+    Constants _data{};
+
+    std::unique_ptr<FrameBuffer> _pingPongFrameBuffer[DownSampledCount][2];
+
+    enum PIXEL_SHADER_TYPE
+    {
+        DOWNSAMPLING_PS,
+        HORIZONTAL_PS,
+        VERTICAL_PS,
+        //UPSAMPLING_PS, // -> PostProcessBase側で行う
+
+        BLOOM_PIXEL_TYPE_MAX
+    };
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShaders[PIXEL_SHADER_TYPE::BLOOM_PIXEL_TYPE_MAX];
+
+    // 専用ステート
+    Microsoft::WRL::ComPtr<ID3D11SamplerState>		_samplerState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depthStencilState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> _blendState;
 };

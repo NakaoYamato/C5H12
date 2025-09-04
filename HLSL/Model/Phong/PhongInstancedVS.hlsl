@@ -1,12 +1,5 @@
 #include "Phong.hlsli"
-
-// スケルトン用定数バッファ
-static const int INSTANCED_MAX = 100;
-cbuffer CbSkeleton : register(b1)
-{
-    float4 materialColor;
-    row_major float4x4 worldTransform[INSTANCED_MAX];
-}
+#include "../Instancing.hlsli"
 
 VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {
@@ -19,13 +12,13 @@ VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
     vout.world_normal = normalize(mul(vin.normal, worldTransform[instance_id]));
     vout.world_tangent = normalize(mul(vin.tangent, worldTransform[instance_id]));
     
-    vout.position = mul(vout.world_position, view_projection);
+    vout.position = mul(vout.world_position, viewProjection);
     vout.world_tangent.w = sigma;
     vout.binormal.xyz = normalize(cross(vout.world_normal.xyz, vout.world_tangent.xyz));
 	
     vout.texcoord = vin.texcoord;
     
-    vout.materialColor = materialColor;
+    vout.materialColor = materialColor[instance_id];
     
     return vout;
 }

@@ -4,16 +4,21 @@
 #include <string>
 
 #include "../HRTrace.h"
-#include "../ResourceManager/GpuResourceManager.h"
+#include "GpuResourceManager.h"
+#include "../DebugSupporter/DebugSupporter.h"
+
+#include <imgui.h>
 
 // 初期化処理
-void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
+void Graphics::Initialize(HWND hwnd, HINSTANCE instance, const BOOL FULLSCREEN)
 {
 	// ハンドル設定
-	this->hwnd_ = hwnd;
+	this->_hwnd = hwnd;
+	// インスタンス設定
+	this->_hInstance = instance;
 
 	// 初期状態のウィンドウのスタイル取得
-	windowedStyle_ = static_cast<DWORD>(GetWindowLongPtrW(hwnd, GWL_STYLE));
+	_windowedStyle = static_cast<DWORD>(GetWindowLongPtrW(hwnd, GWL_STYLE));
 
 	if (FULLSCREEN)
 	{
@@ -32,8 +37,8 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 	// 画面サイズ設定
 	RECT client_rect;
 	GetClientRect(hwnd, &client_rect);
-	framebufferDimensions_.cx = client_rect.right - client_rect.left;
-	framebufferDimensions_.cy = client_rect.bottom - client_rect.top;
+	_framebufferDimensions.cx = client_rect.right - client_rect.left;
+	_framebufferDimensions.cy = client_rect.bottom - client_rect.top;
 
 	// デバイス、デバイスコンテキスト、スワップチェーン生成
 #ifdef X3DGP_FULLSCREEN
@@ -84,8 +89,8 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 
 		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
 		swapChainDesc.BufferCount = 1;
-		swapChainDesc.BufferDesc.Width = framebufferDimensions_.cx;
-		swapChainDesc.BufferDesc.Height = framebufferDimensions_.cy;
+		swapChainDesc.BufferDesc.Width = _framebufferDimensions.cx;
+		swapChainDesc.BufferDesc.Height = _framebufferDimensions.cy;
 		swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -102,10 +107,10 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 			1,
 			D3D11_SDK_VERSION,
 			&swapChainDesc,
-			swapChain.GetAddressOf(),
-			device.GetAddressOf(),
+			_swapChain.GetAddressOf(),
+			_device.GetAddressOf(),
 			NULL,
-			immediateContext.GetAddressOf());
+			_immediateContext.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
@@ -116,8 +121,8 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		ID3D11Texture2D* depthStencilBuffer{};
 		// 深度ステンシルバッファの作成
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
-		texture2dDesc.Width = framebufferDimensions_.cx;
-		texture2dDesc.Height = framebufferDimensions_.cy;
+		texture2dDesc.Width = _framebufferDimensions.cx;
+		texture2dDesc.Height = _framebufferDimensions.cy;
 		texture2dDesc.MipLevels = 1;
 		texture2dDesc.ArraySize = 1;
 		// 深度値に24bitのfloat型、ステンシル値に8bitのuintを確保している
@@ -130,15 +135,15 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		texture2dDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		texture2dDesc.CPUAccessFlags = 0;
 		texture2dDesc.MiscFlags = 0;
-		hr = device->CreateTexture2D(&texture2dDesc, NULL, &depthStencilBuffer);
+		hr = _device->CreateTexture2D(&texture2dDesc, NULL, &depthStencilBuffer);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
 		depthStencilViewDesc.Format = texture2dDesc.Format;
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		depthStencilViewDesc.Texture2D.MipSlice = 0;
-		hr = device->CreateDepthStencilView(depthStencilBuffer, &depthStencilViewDesc,
-			depthStencilView.GetAddressOf());
+		hr = _device->CreateDepthStencilView(depthStencilBuffer, &depthStencilViewDesc,
+			_depthStencilView.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		depthStencilBuffer->Release();
@@ -146,15 +151,13 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 
 	// レンダーターゲットビュー生成
 	{
-		ID3D11Texture2D* backBuffer{};
-		hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
-			reinterpret_cast<LPVOID*>(&backBuffer));
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> renderTargetBuffer;
+		hr = _swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+			reinterpret_cast<LPVOID*>(renderTargetBuffer.ReleaseAndGetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-		hr = device->CreateRenderTargetView(backBuffer, NULL, renderTargetView.GetAddressOf());
+		hr = _device->CreateRenderTargetView(renderTargetBuffer.Get(), NULL, _renderTargetView.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-		backBuffer->Release();
 	}
 
 	// ビューポート設定
@@ -162,61 +165,51 @@ void Graphics::Initialize(HWND hwnd, const BOOL FULLSCREEN)
 		D3D11_VIEWPORT viewport{};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(framebufferDimensions_.cx);
-		viewport.Height = static_cast<float>(framebufferDimensions_.cy);
+		viewport.Width = static_cast<float>(_framebufferDimensions.cx);
+		viewport.Height = static_cast<float>(_framebufferDimensions.cy);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
-		immediateContext->RSSetViewports(1, &viewport);
+		_immediateContext->RSSetViewports(1, &viewport);
 	}
 #endif
 
 	// 各管理者の生成
 	{
+		UINT width = static_cast<UINT>(GetScreenWidth());
+		UINT height = static_cast<UINT>(GetScreenHeight());
 		// 各種ステートの生成
-		renderState = std::make_unique<RenderState>(device.Get());
+		_renderState = std::make_unique<RenderState>(_device.Get());
 		// 定数バッファの管理者作成
-		constantBufferManager = std::make_unique<ConstantBufferManager>(device.Get());
+		_constantBufferManager = std::make_unique<ConstantBufferManager>(_device.Get());
 		// ポストエフェクト用の管理者生成
-		for (size_t index = 0; index < _countof(frameBufferes); ++index)
+		for (size_t index = 0; index < _countof(_frameBufferes); ++index)
 		{
-			frameBufferes[index] = std::make_unique<FrameBuffer>(device.Get(),
-				static_cast<UINT>(GetScreenWidth()),
-				static_cast<UINT>(GetScreenHeight()));
+			_frameBufferes[index] = std::make_unique<FrameBuffer>(_device.Get(), width, height);
 		}
-		fullscreenQuad = std::make_unique<Sprite>(device.Get(),
-			L"",
-			".\\Data\\Shader\\FullscreenQuadVS.cso");
-		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/SpritePS.cso",
-			pixelShaders[static_cast<int>(FullscreenQuadPS::EmbeddedPS)].ReleaseAndGetAddressOf());
-		(void)GpuResourceManager::CreatePsFromCso(device.Get(), "./Data/Shader/CascadedShadowMapPS.cso",
-			pixelShaders[static_cast<int>(FullscreenQuadPS::CascadedPS)].ReleaseAndGetAddressOf());
-
-		cascadedShadowMap = std::make_unique<CascadedShadowMap>(device.Get(),
-			1024 * 4, 1024 * 4);
-
-		gBuffer = std::make_unique<GBuffer>(device.Get(), 
-			static_cast<UINT>(GetScreenWidth()),
-			static_cast<UINT>(GetScreenHeight()),
-			3);
+		// カスケードシャドウマップ管理者生成
+		_cascadedShadowMap = std::make_unique<CascadedShadowMap>(_device.Get(),
+			1024 * 6, 1024 * 6);
+		// GBuffer生成
+		_gBuffer = std::make_unique<GBuffer>(_device.Get(), width, height);
 	}
 }
 
 // フルスクリーンの切り替え
 void Graphics::StylizeWindow(BOOL fullscreen)
 {
-	fullscreenMode_ = fullscreen;
+	_fullscreenMode = fullscreen;
 	if (fullscreen)
 	{
-		GetWindowRect(hwnd_, &oldWindowRect_);
-		SetWindowLongPtrA(hwnd_, GWL_STYLE, WS_OVERLAPPEDWINDOW & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME));
+		GetWindowRect(_hwnd, &_oldWindowRect);
+		SetWindowLongPtrA(_hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME));
 
 		RECT fullscreen_window_rect;
 
 		HRESULT hr{ E_FAIL };
-		if (swapChain)
+		if (_swapChain)
 		{
 			Microsoft::WRL::ComPtr<IDXGIOutput> dxgi_output;
-			hr = swapChain->GetContainingOutput(&dxgi_output);
+			hr = _swapChain->GetContainingOutput(&dxgi_output);
 			if (hr == S_OK)
 			{
 				DXGI_OUTPUT_DESC output_desc;
@@ -241,7 +234,7 @@ void Graphics::StylizeWindow(BOOL fullscreen)
 			};
 		}
 		SetWindowPos(
-			hwnd_,
+			_hwnd,
 			NULL,
 			fullscreen_window_rect.left,
 			fullscreen_window_rect.top,
@@ -249,21 +242,21 @@ void Graphics::StylizeWindow(BOOL fullscreen)
 			fullscreen_window_rect.bottom,
 			SWP_FRAMECHANGED | SWP_NOACTIVATE);
 
-		ShowWindow(hwnd_, SW_MAXIMIZE);
+		ShowWindow(_hwnd, SW_MAXIMIZE);
 	}
 	else
 	{
-		SetWindowLongPtrA(hwnd_, GWL_STYLE, windowedStyle_);
+		SetWindowLongPtrA(_hwnd, GWL_STYLE, _windowedStyle);
 		SetWindowPos(
-			hwnd_,
+			_hwnd,
 			HWND_NOTOPMOST,
-			oldWindowRect_.left,
-			oldWindowRect_.top,
-			oldWindowRect_.right - oldWindowRect_.left,
-			oldWindowRect_.bottom - oldWindowRect_.top,
+			_oldWindowRect.left,
+			_oldWindowRect.top,
+			_oldWindowRect.right - _oldWindowRect.left,
+			_oldWindowRect.bottom - _oldWindowRect.top,
 			SWP_FRAMECHANGED | SWP_NOACTIVATE);
 
-		ShowWindow(hwnd_, SW_NORMAL);
+		ShowWindow(_hwnd, SW_NORMAL);
 	}
 }
 
@@ -271,13 +264,13 @@ void Graphics::StylizeWindow(BOOL fullscreen)
 void Graphics::OnSizeChanged(UINT width, UINT height)
 {
 	HRESULT hr{ S_OK };
-	if (width != framebufferDimensions_.cx || height != framebufferDimensions_.cy)
+	if (width != _framebufferDimensions.cx || height != _framebufferDimensions.cy)
 	{
-		framebufferDimensions_.cx = width;
-		framebufferDimensions_.cy = height;
+		_framebufferDimensions.cx = width;
+		_framebufferDimensions.cy = height;
 
 		Microsoft::WRL::ComPtr<IDXGIFactory6> dxgi_factory6;
-		hr = swapChain->GetParent(IID_PPV_ARGS(dxgi_factory6.GetAddressOf()));
+		hr = _swapChain->GetParent(IID_PPV_ARGS(dxgi_factory6.GetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		CreateSwapChain(dxgi_factory6.Get());
 	}
@@ -287,32 +280,63 @@ void Graphics::OnSizeChanged(UINT width, UINT height)
 void Graphics::Present(UINT syncInterval)
 {
 	HRESULT hr{ S_OK };
-	UINT flags = (tearingSupported_ && !fullscreenMode_ && syncInterval == 0) ?
+	UINT flags = (_tearingSupported && !_fullscreenMode && syncInterval == 0) ?
 		DXGI_PRESENT_ALLOW_TEARING : 0;
-	hr = swapChain->Present(syncInterval, flags);
+	hr = _swapChain->Present(syncInterval, flags);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }
 
-// PIXEL_SHADER_TYPEでピクセルシェーダを指定して描画
-void Graphics::Blit(ID3D11ShaderResourceView** shaderResourceView, 
-	uint32_t startSlot, uint32_t numViews, 
-	FullscreenQuadPS shaderType)
+// ImGui描画
+void Graphics::DrawGui()
 {
-	Graphics::Blit(shaderResourceView,
-		startSlot, numViews,
-		pixelShaders[static_cast<int>(shaderType)].Get());
-}
+#if USE_IMGUI
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu(u8"デバッグ"))
+		{
+			if (ImGui::BeginMenu(u8"描画管理"))
+			{
+				ImGui::Checkbox(u8"フレームバッファ", &_drawFrameBuffer);
+				ImGui::Checkbox(u8"デファードレンダリング", &_renderingDeferred);
+				ImGui::Checkbox(u8"シャドウマップ", &_drawCSMGui);
+				ImGui::Checkbox(u8"GBuffer", &_drawGBGui);
 
-// この関数の使用者側でピクセルシェーダを指定して描画
-void Graphics::Blit(ID3D11ShaderResourceView** shaderResourceView,
-	uint32_t startSlot, uint32_t numViews, 
-	ID3D11PixelShader* pixelShader)
-{
-	// 描画処理
-	fullscreenQuad->Blit(immediateContext.Get(),
-		shaderResourceView,
-		startSlot, numViews,
-		pixelShader);
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+	// フレームバッファGUI
+	if (_drawFrameBuffer)
+	{
+		if (ImGui::Begin(u8"フレームバッファ"))
+		{
+			static float textureSize = 256.0f;
+			ImGui::DragFloat("TextureSize", &textureSize);
+			for (UINT bufferIndex = 0; bufferIndex < 4; ++bufferIndex)
+			{
+				ImGui::Text(u8"%d", bufferIndex);
+				ImGui::Image(_frameBufferes[bufferIndex]->GetColorSRV().Get(),
+					{ textureSize ,textureSize });
+				ImGui::SameLine();
+				ImGui::Image(_frameBufferes[bufferIndex]->GetDepthSRV().Get(),
+					{ textureSize ,textureSize });
+			}
+		}
+		ImGui::End();
+	}
+
+	// カスケードシャドウマップGUI
+	if (_drawCSMGui)
+		GetCascadedShadowMap()->DrawGui();
+
+	// GBufferGUI
+	if (_drawGBGui)
+		GetGBuffer()->DrawGui();
+#endif
 }
 
 // 高性能アダプターの取得
@@ -336,17 +360,17 @@ void Graphics::AcquireHighPerformanceAdapter(IDXGIFactory6* dxgiFactory6, IDXGIA
 		if (adapterDesc.VendorId == 0x1002/*AMD*/ || adapterDesc.VendorId == 0x10DE/*NVIDIA*/)
 		{
 			// アダプターのデバッグ表示
-			//DebugManager::Instance().OutputString(std::wstring(adapterDesc.Description) + L" has been selected.\n");
-			//DebugManager::Instance().OutputString(std::string("\tVendorId:" + std::to_string(adapterDesc.VendorId) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tDeviceId:" + std::to_string(adapterDesc.DeviceId) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tSubSysId:" + std::to_string(adapterDesc.SubSysId) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tRevision:" + std::to_string(adapterDesc.Revision) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tDedicatedVideoMemory:" + std::to_string(adapterDesc.DedicatedVideoMemory) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tDedicatedSystemMemory:" + std::to_string(adapterDesc.DedicatedSystemMemory) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tSharedSystemMemory:" + std::to_string(adapterDesc.SharedSystemMemory) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tAdapterLuid.HighPart:" + std::to_string(adapterDesc.AdapterLuid.HighPart) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tAdapterLuid.LowPart:" + std::to_string(adapterDesc.AdapterLuid.LowPart) + '\n'));
-			//DebugManager::Instance().OutputString(std::string("\tFlags:" + std::to_string(adapterDesc.Flags) + '\n'));
+			Debug::Output::String(std::wstring(adapterDesc.Description) + L" has been selected.\n");
+			Debug::Output::String(std::string("\tVendorId:" + std::to_string(adapterDesc.VendorId) + '\n'));
+			Debug::Output::String(std::string("\tDeviceId:" + std::to_string(adapterDesc.DeviceId) + '\n'));
+			Debug::Output::String(std::string("\tSubSysId:" + std::to_string(adapterDesc.SubSysId) + '\n'));
+			Debug::Output::String(std::string("\tRevision:" + std::to_string(adapterDesc.Revision) + '\n'));
+			Debug::Output::String(std::string("\tDedicatedVideoMemory:" + std::to_string(adapterDesc.DedicatedVideoMemory) + '\n'));
+			Debug::Output::String(std::string("\tDedicatedSystemMemory:" + std::to_string(adapterDesc.DedicatedSystemMemory) + '\n'));
+			Debug::Output::String(std::string("\tSharedSystemMemory:" + std::to_string(adapterDesc.SharedSystemMemory) + '\n'));
+			Debug::Output::String(std::string("\tAdapterLuid.HighPart:" + std::to_string(adapterDesc.AdapterLuid.HighPart) + '\n'));
+			Debug::Output::String(std::string("\tAdapterLuid.LowPart:" + std::to_string(adapterDesc.AdapterLuid.LowPart) + '\n'));
+			Debug::Output::String(std::string("\tFlags:" + std::to_string(adapterDesc.Flags) + '\n'));
 			break;
 		}
 	}
@@ -359,28 +383,28 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 {
 	HRESULT hr{ S_OK };
 
-	if (swapChain)
+	if (_swapChain)
 	{
 		// スワップチェーンの再設定
 		ID3D11RenderTargetView* nullRenderTargetView{};
-		immediateContext->OMSetRenderTargets(1, &nullRenderTargetView, NULL);
-		renderTargetView.Reset();
+		_immediateContext->OMSetRenderTargets(1, &nullRenderTargetView, NULL);
+		_renderTargetView.Reset();
 #if 0
 		immediateContext->Flush();
 		immediateContext->ClearState();
 #endif
 		DXGI_SWAP_CHAIN_DESC swapChainDesc{};
-		swapChain->GetDesc(&swapChainDesc);
-		hr = swapChain->ResizeBuffers(swapChainDesc.BufferCount, framebufferDimensions_.cx, framebufferDimensions_.cy, swapChainDesc.BufferDesc.Format, swapChainDesc.Flags);
+		_swapChain->GetDesc(&swapChainDesc);
+		hr = _swapChain->ResizeBuffers(swapChainDesc.BufferCount, _framebufferDimensions.cx, _framebufferDimensions.cy, swapChainDesc.BufferDesc.Format, swapChainDesc.Flags);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> render_target_buffer;
-		hr = swapChain->GetBuffer(0, IID_PPV_ARGS(render_target_buffer.GetAddressOf()));
+		hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(render_target_buffer.GetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		D3D11_TEXTURE2D_DESC texture2d_desc;
 		render_target_buffer->GetDesc(&texture2d_desc);
 
-		hr = device->CreateRenderTargetView(render_target_buffer.Get(), NULL, renderTargetView.ReleaseAndGetAddressOf());
+		hr = _device->CreateRenderTargetView(render_target_buffer.Get(), NULL, _renderTargetView.ReleaseAndGetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 	else
@@ -390,12 +414,12 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		{
 			hr = dxgiFactory6->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allow_tearing, sizeof(allow_tearing));
 		}
-		tearingSupported_ = SUCCEEDED(hr) && allow_tearing;
+		_tearingSupported = SUCCEEDED(hr) && allow_tearing;
 
 		// スワップチェーン生成
 		DXGI_SWAP_CHAIN_DESC1 swap_chain_desc1{};
-		swap_chain_desc1.Width = framebufferDimensions_.cx;
-		swap_chain_desc1.Height = framebufferDimensions_.cy;
+		swap_chain_desc1.Width = _framebufferDimensions.cx;
+		swap_chain_desc1.Height = _framebufferDimensions.cy;
 		swap_chain_desc1.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 		swap_chain_desc1.Stereo = FALSE;
 		swap_chain_desc1.SampleDesc.Count = 1;
@@ -405,7 +429,7 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		swap_chain_desc1.Scaling = DXGI_SCALING_STRETCH;
 		swap_chain_desc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swap_chain_desc1.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		swap_chain_desc1.Flags = tearingSupported_ ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+		swap_chain_desc1.Flags = _tearingSupported ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 #ifdef X3DGP_FULLSCREEN
 		hr = dxgiFactory6->CreateSwapChainForHwnd(device.Get(), hwnd, &swap_chain_desc1, NULL, NULL, swapChain.ReleaseAndGetAddressOf());
 #endif
@@ -414,13 +438,13 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 #endif
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-		hr = dxgiFactory6->MakeWindowAssociation(hwnd_, DXGI_MWA_NO_ALT_ENTER);
+		hr = dxgiFactory6->MakeWindowAssociation(_hwnd, DXGI_MWA_NO_ALT_ENTER);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> render_target_buffer;
-		hr = swapChain->GetBuffer(0, IID_PPV_ARGS(render_target_buffer.GetAddressOf()));
+		hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(render_target_buffer.GetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		hr = device->CreateRenderTargetView(render_target_buffer.Get(), NULL, renderTargetView.ReleaseAndGetAddressOf());
+		hr = _device->CreateRenderTargetView(render_target_buffer.Get(), NULL, _renderTargetView.ReleaseAndGetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
@@ -431,8 +455,8 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer{};
 		// 深度ステンシルバッファの作成
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
-		texture2dDesc.Width = framebufferDimensions_.cx;
-		texture2dDesc.Height = framebufferDimensions_.cy;
+		texture2dDesc.Width = _framebufferDimensions.cx;
+		texture2dDesc.Height = _framebufferDimensions.cy;
 		texture2dDesc.MipLevels = 1;
 		texture2dDesc.ArraySize = 1;
 		// 深度値に24bitのfloat型、ステンシル値に8bitのuintを確保している
@@ -445,15 +469,15 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		texture2dDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		texture2dDesc.CPUAccessFlags = 0;
 		texture2dDesc.MiscFlags = 0;
-		hr = device->CreateTexture2D(&texture2dDesc, NULL, depthStencilBuffer.GetAddressOf());
+		hr = _device->CreateTexture2D(&texture2dDesc, NULL, depthStencilBuffer.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
 		depthStencilViewDesc.Format = texture2dDesc.Format;
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		depthStencilViewDesc.Texture2D.MipSlice = 0;
-		hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilViewDesc,
-			depthStencilView.ReleaseAndGetAddressOf());
+		hr = _device->CreateDepthStencilView(depthStencilBuffer.Get(), &depthStencilViewDesc,
+			_depthStencilView.ReleaseAndGetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	}
@@ -463,10 +487,10 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		D3D11_VIEWPORT viewport{};
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
-		viewport.Width = static_cast<float>(framebufferDimensions_.cx);
-		viewport.Height = static_cast<float>(framebufferDimensions_.cy);
+		viewport.Width = static_cast<float>(_framebufferDimensions.cx);
+		viewport.Height = static_cast<float>(_framebufferDimensions.cy);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
-		immediateContext->RSSetViewports(1, &viewport);
+		_immediateContext->RSSetViewports(1, &viewport);
 	}
 }

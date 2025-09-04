@@ -5,10 +5,12 @@
 
 #include "../Math/Vector.h"
 
-const int PRIMITIVE_VERTEX_NUM = 130;
-
 class Primitive
 {
+public:
+    static constexpr int VertexNum = 130;
+    static constexpr int CircleMaxPolygonal = 64;
+
 public:
     Primitive(ID3D11Device* device);
     Primitive() = delete;
@@ -25,9 +27,11 @@ public:
     //  bool  world        true:ワールド座標に描画 false : スクリーン座標に描画
     //--------------------------------------------------------------
     void Rect(ID3D11DeviceContext* context,
-        const Vector2& pos, const Vector2& size,
-        const Vector2& center = (Vector2(0.0f, 0.0f)), float angle = (0.0f),
-        const Vector4& color = (Vector4(1.0f, 1.0f, 1.0f, 1.0f))) const;
+        const Vector2& pos, 
+        const Vector2& size,
+        const Vector2& center = Vector2::Zero, 
+        float angle = (0.0f),
+        const Vector4& color = Vector4::White) const;
 
     //--------------------------------------------------------------
     //  線描画
@@ -39,8 +43,10 @@ public:
     //  bool world         true:ワールド座標に描画 false : スクリーン座標に描画
     //--------------------------------------------------------------
     void Line(ID3D11DeviceContext* context,
-        const Vector2& from, const Vector2& to,
-        const Vector4& color = (Vector4(1.0f, 1.0f, 1.0f, 1.0f)), float width = (1.0f)) const;
+        const Vector2& from, 
+        const Vector2& to,
+        const Vector4& color = Vector4::White, 
+        float width = (1.0f)) const;
 
     //--------------------------------------------------------------
     //  円描画
@@ -54,10 +60,12 @@ public:
     //  bool world              true:ワールド座標に描画 false : スクリーン座標に描画
     //--------------------------------------------------------------
     void Circle(ID3D11DeviceContext* context,
-        const Vector2& center, float radius,
-        const Vector2& scale = (Vector2(1.0f, 1.0f)), float angle = (0.0f),
-        const Vector4& color = (Vector4(1.0f, 1.0f, 1.0f, 1.0f)),
-        int n = (32)) const;
+        const Vector2& center, 
+        float radius,
+        const Vector2& scale = Vector2::Zero, 
+        float angle = (0.0f),
+        const Vector4& color = Vector4::White,
+        int n = CircleMaxPolygonal) const;
 
     //--------------------------------------------------------------
     //  カプセル描画
@@ -72,13 +80,13 @@ public:
         const Vector2& from, const Vector2& to,
         const Vector2& scale,
         const float& radius,
-        const Vector4& color = (Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
+        const Vector4& color = Vector4::White);
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader_;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader_;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout_;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> _inputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
 
     //--------------------------------------------------------------
     //  構造体定義

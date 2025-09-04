@@ -3,173 +3,210 @@
 #include <imgui.h>
 
 #include "ActorManager.h"
-
-#include "../../External/nameof/include/nameof.hpp"
-#include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
+#include "../Graphics/Graphics.h"
 
 #include "../Component/Component.h"
-#include "../Component/Collider/ColliderComponent.h"
+#include "../Component/Collider/ColliderBase.h"
 
-/// <summary>
-/// enumをstringに変換
-/// </summary>
-/// <param name="index"></param>
-/// <returns>string</returns>
-#define GET_ENUM_NAME(index) nameof::nameof_enum(magic_enum::enum_value<ActorTag>(index)).data()
+#include "../Scene/Scene.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
-// 開始処理
+#include <ImGuizmo.h>
+
+#pragma region ActorManagerで呼ぶ関数
+/// 生成処理
+void Actor::Create(ActorTag tag)
+{
+	// タグを設定
+	_tag = tag;
+
+	// 生成時処理
+	OnCreate();
+}
+/// 削除時処理
+void Actor::Deleted()
+{
+	// 各コンポーネントの削除処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->OnDelete();
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->OnDelete();
+	}
+
+	OnDeleted();
+}
+/// 開始処理
 void Actor::Start()
 {
+	// Transform内のmatrixを生成するために行列を更新
+	UpdateTransform();
+
+	// モデルのトランスフォーム更新
+	UpdateModelTransform();
+
+	if (_model != nullptr)
+	{
+		// モデルの行列を更新
+		_model->UpdateTransform(_model->GetPoseNodes(), _transform.GetMatrix());
+	}
+
 	// 各コンポーネントのスタート処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Start();
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->Start();
 	}
-}
 
-// 更新処理
+	OnStart();
+}
+///	更新処理
 void Actor::Update(float elapsedTime)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
+
+	OnPreUpdate(elapsedTime);
+
+	// モデルのトランスフォーム更新
+	UpdateModelTransform();
 
 	// 各コンポーネントの更新処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Update(elapsedTime);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->Update(elapsedTime);
 	}
 
-	const DirectX::XMFLOAT4X4* ParentMatrix = nullptr;
-	// 親がいるときの処理
-	// トランスフォーム更新
-	if (!parent_.expired())
-	{
-		// 親の起動チェック
-		if (!parent_.lock()->IsActive())
-			this->isActive_ = false;
+	OnUpdate(elapsedTime);
 
-		ParentMatrix = &parent_.lock()->GetTransform().GetMatrix();
-	}
 	// トランスフォーム更新
-	transform_.UpdateTransform(ParentMatrix);
+	UpdateTransform();
 }
+/// Update後更新処理
+void Actor::LateUpdate(float elapsedTime)
+{
+	// 起動チェック
+	if (!_isActive)return;
 
-// 1秒ごとの更新処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->LateUpdate(elapsedTime);
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->LateUpdate(elapsedTime);
+	}
+	OnLateUpdate(elapsedTime);
+}
+/// 固定間隔更新処理
 void Actor::FixedUpdate()
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
-	// 各コンポーネントの1秒ごとの更新処理
-	for (std::shared_ptr<Component>& component : components_)
+	// 各コンポーネントの一定間隔の更新処理
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->FixedUpdate();
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->FixedUpdate();
 	}
+
+	OnFixedUpdate();
 }
-
-// 描画の前処理
-void Actor::RenderPreprocess(RenderContext& rc)
-{
-	// 起動チェック
-	if (!isActive_)return;
-
-	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : components_)
-	{
-		component->RenderPreprocess(rc);
-	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
-	{
-		collider->RenderPreprocess(rc);
-	}
-}
-
-// 描画処理
+/// 描画処理
 void Actor::Render(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
-	if (!isShowing_)return;
+	if (!_isActive)return;
+	// 表示チェック
+	if (!_isShowing)return;
 
 	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->Render(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->Render(rc);
 	}
-}
 
-// デバッグ表示
+	// 描画時処理
+	OnRender(rc);
+}
+/// デバッグ表示
 void Actor::DebugRender(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
-	if (!drawDebug_)return;
+	if (!_isActive)return;
+	// デバッグ表示チェック
+	if (!_isDrawingDebug)return;
 
 	// 各コンポーネントの描画処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->DebugRender(rc);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->DebugRender(rc);
 	}
-}
 
-// 影描画
+	// デバッグ表示時処理
+	OnDebugRender(rc);
+}
+/// 影描画
 void Actor::CastShadow(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->CastShadow(rc);
 	}
 }
-
-// 3D描画後の描画処理
+/// 3D描画後の描画処理
 void Actor::DelayedRender(const RenderContext& rc)
 {
 	// 起動チェック
-	if (!isActive_)return;
+	if (!_isActive)return;
 
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
 		component->DelayedRender(rc);
 	}
-}
 
-// Gui描画
+	// 3D描画後の描画時処理
+	OnDelayedRender(rc);
+}
+/// Gui描画
 void Actor::DrawGui()
 {
-	if (ImGui::CollapsingHeader("Flags", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Flags"))
 	{
-		ImGui::Checkbox(u8"Active", &isActive_);
-		ImGui::Checkbox(u8"Show", &isShowing_);
-		ImGui::Checkbox(u8"DrawDebug", &drawDebug_);
+		ImGui::Checkbox(u8"Active", &_isActive);
+		ImGui::Checkbox(u8"Show", &_isShowing);
+		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
+		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
 	}
 
 	// トランスフォーム
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		transform_.DrawGui();
+		_transform.DrawGui();
 	}
 
 	static ImGuiTabBarFlags tab_bar_flags =
@@ -181,7 +218,7 @@ void Actor::DrawGui()
 		if (ImGui::BeginTabItem(u8"コンポーネント"))
 		{
 			// 各コンポーネントのGUI
-			for (std::shared_ptr<Component>& component : components_)
+			for (std::shared_ptr<Component>& component : _components)
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -195,16 +232,8 @@ void Actor::DrawGui()
 		}
 		if (ImGui::BeginTabItem(u8"コライダー"))
 		{
-			ImGui::Separator();
-			ImGui::Text(u8"当たり判定を除く対象");
-			for (auto& [tag, flag] : judgeTags_)
-			{
-				ImGui::Checkbox(nameof::nameof_enum(tag).data(), &flag);
-			}
-			ImGui::Separator();
-
 			int index = 0;
-			for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+			for (std::shared_ptr<ColliderBase>& collider : _colliders)
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
@@ -222,49 +251,96 @@ void Actor::DrawGui()
 
 		ImGui::EndTabBar();
 	}
-}
 
-// 当たり判定処理
-void Actor::Judge(Actor* other)
-{
-	// 起動チェック
-	if (!isActive_)return;
-
-	Vector3 hitPosition{};
-	Vector3 hitNormal{};
-	float penetration{};
-	// 当たり判定コンポーネントの検索
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	// ギズモ表示
+	if (_isUsingGuizmo)
 	{
-		// 接触対象の当たり判定コンポーネントの検索
-		const size_t otherComponentSize = other->GetColliderComponentSize();
-		for (size_t i = 0; i < otherComponentSize; ++i)
-		{
-			std::shared_ptr<ColliderComponent> otherComponent = other->GetCollider(i);
-
-			// 当たり判定処理
-			const bool result = collider->Judge(other, otherComponent.get(),
-				hitPosition, hitNormal, penetration);
-			if (result)
-			{
-				// 各コンポーネントの接触処理
-				this->OnCollision(other, hitPosition, hitNormal, penetration);
-				other->OnCollision(this, hitPosition, -hitNormal, penetration);
-			}
-		}
+		DrawGuizmo();
 	}
-}
 
-// 接触時の処理
-void Actor::OnCollision(Actor* other, const Vector3& hitPosition, const Vector3& hitNormal, const float& penetration)
+	OnDrawGui();
+}
+#pragma endregion
+
+#pragma region 当たり判定
+/// 接触時の処理
+void Actor::Contact(CollisionData& collisionData)
 {
 	// 各コンポーネントの接触処理
-	for (std::shared_ptr<Component>& component : components_)
+	for (std::shared_ptr<Component>& component : _components)
 	{
-		component->OnCollision(other, hitPosition, hitNormal, penetration);
+		component->OnContact(collisionData);
 	}
-	for (std::shared_ptr<ColliderComponent>& collider : colliderComponents_)
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
-		collider->OnCollision(other, hitPosition, hitNormal, penetration);
+		collider->OnContact(collisionData);
+	}
+
+	OnContact(collisionData);
+}
+/// 接触した瞬間の処理
+void Actor::ContactEnter(CollisionData& collisionData)
+{
+	// 各コンポーネントの接触処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->OnContactEnter(collisionData);
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->OnContactEnter(collisionData);
+	}
+
+	OnContactEnter(collisionData);
+}
+#pragma endregion
+/// 削除処理
+void Actor::Remove()
+{
+	_isActive = false;
+    _scene->GetActorManager().Remove(shared_from_this());
+}
+/// モデルの読み込み
+std::weak_ptr<Model> Actor::LoadModel(const char* filename)
+{
+	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
+	return _model;
+}
+#pragma region 仮想関数
+/// モデルのトランスフォーム更新
+void Actor::UpdateModelTransform()
+{
+	if (_model != nullptr)
+	{
+		// モデルの行列を更新
+		_model->UpdateTransform(_model->GetPoseNodes(), _transform.GetMatrix());
 	}
 }
+/// トランスフォーム更新
+void Actor::UpdateTransform()
+{
+	_transform.UpdateTransform(nullptr);
+}
+/// ギズモ描画
+void Actor::DrawGuizmo()
+{
+	DirectX::XMFLOAT4X4 transform = _transform.GetMatrix();
+	if (Debug::Guizmo(GetScene()->GetMainCamera()->GetView(), GetScene()->GetMainCamera()->GetProjection(),
+		&transform))
+	{
+		// 単位を考慮した行列から位置、回転、スケールを取得
+		DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
+		DirectX::XMMATRIX C{ DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()) };
+		M = DirectX::XMMatrixInverse(nullptr, C) * M;
+		DirectX::XMVECTOR S, R, T;
+		DirectX::XMMatrixDecompose(&S, &R, &T, M);
+		Vector3 s, r, t;
+		DirectX::XMStoreFloat3(&s, S);
+		DirectX::XMStoreFloat3(&t, T);
+		r = Quaternion::ToRollPitchYaw(R);
+		_transform.SetPosition(t);
+		_transform.SetScale(s);
+		_transform.SetAngle(r);
+	}
+}
+#pragma endregion

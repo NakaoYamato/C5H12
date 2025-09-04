@@ -30,7 +30,5 @@ uint cpid : SV_OutputControlPointID)
 {
     DS_IN hout = (DS_IN) 0;
     hout.position = input[cpid].position;
-    hout.texcoord = input[cpid].texcoord;
-    hout.normal = input[cpid].normal;
     return hout;
 }

@@ -416,14 +416,7 @@ void Terrain::CreateTerrainMesh(ID3D11Device* device)
                 float posX = -1.0f + static_cast<float>(x) / divisionCount * 2.0f;
                 float posZ = -1.0f + static_cast<float>(z) / divisionCount * 2.0f;
 
-                float u = static_cast<float>(x) / divisionCount;
-                float v = 1.0f - static_cast<float>(z) / divisionCount;
-
-                vertices.push_back({
-                    {posX, 0.0f, posZ},     // Position
-                    {0.0f, 1.0f, 0.0f},     // Normal (Y-up)
-                    {u, v}                  // Texture Coordinate
-                    });
+                vertices.push_back({{posX, 0.0f, posZ}});
             }
         }
 

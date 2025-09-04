@@ -23,26 +23,23 @@ const OutputPatch<DS_IN, 4> patch)
     // 上の辺 (左上 -> 右上) をuで補間
     DS_IN top = (DS_IN) 0;
     top.position = lerp(patch[0].position, patch[3].position, u);
-    top.texcoord = lerp(patch[0].texcoord, patch[3].texcoord, u);
-    top.normal = lerp(patch[0].normal, patch[3].normal, u);
 
     // 下の辺 (左下 -> 右下) をuで補間
     DS_IN bottom = (DS_IN) 0;
     bottom.position = lerp(patch[1].position, patch[2].position, u);
-    bottom.texcoord = lerp(patch[1].texcoord, patch[2].texcoord, u);
-    bottom.normal = lerp(patch[1].normal, patch[2].normal, u);
 
     // 上の辺と下の辺の結果をvで補間
     DS_IN finalAttrib = (DS_IN) 0;
     finalAttrib.position = lerp(top.position, bottom.position, v);
-    finalAttrib.texcoord = lerp(top.texcoord, bottom.texcoord, v);
-    finalAttrib.normal = lerp(top.normal, bottom.normal, v);
     // -----------------------------------------
 
     DS_OUT dout = (DS_OUT) 0;
-    float2 texcoord = finalAttrib.texcoord;
     float3 position = finalAttrib.position.xyz;
-    float3 normal = normalize(finalAttrib.normal);
+    float3 worldPosition = mul(float4(position, 1.0f), world).xyz;
+    // 法線計算
+    float3 normal = normalize(cross(patch[3].position.xyz - patch[1].position.xyz, patch[0].position.xyz - patch[1].position.xyz));
+    // positionをUVに変換
+    float2 texcoord = float2((position.x + 1.0f) / 2.0f, 1.0f - (position.z + 1.0f) / 2.0f);
     
     // ワールド法線
     float3 worldNormal = normalize(mul(normal, (float3x3) world));
@@ -51,12 +48,11 @@ const OutputPatch<DS_IN, 4> patch)
     float height = parameter.r;
     // 頂点座標をハイトマップで取得した値分ずらす
     {
-        position = mul(float4(position, 1.0f), world).xyz;
-        position.y += height;
+        worldPosition.y += height;
     }
     // 情報設定
-    dout.position = mul(float4(position, 1.0), viewProjection);
-    dout.worldPosition = position;
+    dout.position = mul(float4(worldPosition, 1.0), viewProjection);
+    dout.worldPosition = worldPosition;
     dout.worldNormal = worldNormal;
     dout.worldTangent = float4(normalize(cross(worldNormal, float3(0.0f, 1.0f, 0.01f))), 1.0f);
     dout.texcoord = texcoord;

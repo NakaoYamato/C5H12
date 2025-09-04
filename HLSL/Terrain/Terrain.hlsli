@@ -4,8 +4,6 @@
 struct VS_IN
 {
     float4 position : POSITION;
-    float4 normal : NORMAL;
-    float2 texcoord : TEXCOORD;
 };
 
 // HS“ü—Í(VSo—Í‚Æ“¯‚¶)

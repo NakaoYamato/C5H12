@@ -1,5 +1,5 @@
 #include "CascadedShadow.hlsli"
-#include "../Skinning.hlsli"
+#include "../../CBuffer/B1/Skeleton/SkinningModelCB.hlsli"
 
 VS_OUT_CSM main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {

@@ -1,4 +1,4 @@
-#include "../Scene/SceneConstantBuffer.hlsli"
+#include "../CBuffer/B0/SceneCB.hlsli"
 
 // VS“ü—Í
 struct VS_IN

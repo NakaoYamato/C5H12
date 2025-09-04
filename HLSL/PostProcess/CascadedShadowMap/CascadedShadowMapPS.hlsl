@@ -1,5 +1,5 @@
 #include "../../Sprite/Sprite.hlsli"
-#include "../../Scene/SceneConstantBuffer.hlsli"
+#include "../../CBuffer/B0/SceneCB.hlsli"
 
 SamplerState borderPointState : register(s4);
 // CASCADED_SHADOW_MAPS

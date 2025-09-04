@@ -1,4 +1,4 @@
-#include "../Scene/SceneConstantBuffer.hlsli"
+#include "../CBuffer/B0/SceneCB.hlsli"
 
 struct VS_IN
 {
@@ -19,5 +19,3 @@ struct VS_OUT
     float4 binormal : BINORMAL;
     float4 materialColor : COLOR;
 };
-
-// スケルトン用定数バッファはSkinning.hlsli側で1番に設定

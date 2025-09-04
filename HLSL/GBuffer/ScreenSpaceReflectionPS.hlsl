@@ -1,5 +1,5 @@
 #include "../Sprite/Sprite.hlsli"
-#include "../Scene/SceneConstantBuffer.hlsli"
+#include "../CBuffer/B0/SceneCB.hlsli"
 
 cbuffer SSR_BUFFER : register(b6)
 {

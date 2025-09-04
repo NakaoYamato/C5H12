@@ -1,12 +1,6 @@
 #include "CascadedShadow.hlsli"
 
-// スケルトン用定数バッファ
-static const int INSTANCED_MAX = 100;
-cbuffer CbSkeleton : register(b1)
-{
-    float4 materialColor;
-    row_major float4x4 worldTransform[INSTANCED_MAX];
-}
+#include "../../CBuffer/B1/Skeleton/InstancingModelCB.hlsli"
 
 VS_OUT_CSM main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {

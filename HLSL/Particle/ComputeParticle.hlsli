@@ -1,4 +1,4 @@
-#include "../Scene/SceneConstantBuffer.hlsli"
+#include "../CBuffer/B0/SceneCB.hlsli"
 
 // パーティクルスレッド数
 static const int NumParticleThread = 1024;

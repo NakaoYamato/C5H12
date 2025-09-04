@@ -1,5 +1,20 @@
-#include "Grass.hlsli"
-#include "../Instancing.hlsli"
+#include "../Phong/Phong.hlsli"
+
+#include "../../CBuffer/B1/Skeleton/InstancingModelCB.hlsli"
+
+// 草の揺れ用定数バッファ
+cbuffer GRASS_CONSTANT_BUFFER : register(b4)
+{
+    // 草が揺れる軸のタイプ
+    // 0 : +X軸, 1 : +Y軸, 2 : +Z軸
+    // 3 : -X軸, 4 : -Y軸, 5 : -Z軸
+    int shakeAxis;
+    float3 windDirection;
+    
+    float windSpeed;
+    float shakeAmplitude;
+    float2 grassPadding;
+}
 
 VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {

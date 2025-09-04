@@ -1,10 +1,6 @@
 #include "CascadedShadow.hlsli"
-// スケルトン用定数バッファ
-cbuffer CbSkeleton : register(b1)
-{
-    float4 materialColor;
-    row_major float4x4 worldTransform;
-}
+
+#include "../../CBuffer/B1/Skeleton/BatchingModelCB.hlsli"
 
 VS_OUT_CSM main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {

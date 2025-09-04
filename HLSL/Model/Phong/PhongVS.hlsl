@@ -1,5 +1,5 @@
 #include "Phong.hlsli"
-#include "../Skinning.hlsli"
+#include "../../CBuffer/B1/Skeleton/SkinningModelCB.hlsli"
 
 VS_OUT main(VS_IN vin)
 {

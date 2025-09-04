@@ -1,11 +1,5 @@
 #include "Phong.hlsli"
-
-// スケルトン用定数バッファ
-cbuffer CbSkeleton : register(b1)
-{
-    float4 materialColor;
-    row_major float4x4 worldTransform;
-}
+#include "../../CBuffer/B1/Skeleton/BatchingModelCB.hlsli"
 
 VS_OUT main(VS_IN vin)
 {

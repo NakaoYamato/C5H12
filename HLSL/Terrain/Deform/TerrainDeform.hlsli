@@ -1,4 +1,4 @@
-#include "../../Scene/SceneConstantBuffer.hlsli"
+#include "../../CBuffer/B0/SceneCB.hlsli"
 #include "../../Sprite/Sprite.hlsli"
 
 Texture2D<float4> colorTexture : register(t0);

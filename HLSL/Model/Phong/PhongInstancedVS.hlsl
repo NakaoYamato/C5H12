@@ -1,5 +1,5 @@
 #include "Phong.hlsli"
-#include "../Instancing.hlsli"
+#include "../../CBuffer/B1/Skeleton/InstancingModelCB.hlsli"
 
 VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {

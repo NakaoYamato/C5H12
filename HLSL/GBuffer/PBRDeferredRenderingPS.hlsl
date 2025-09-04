@@ -1,16 +1,8 @@
 #include "../Sprite/Sprite.hlsli"
 
-#include "../Scene/SceneConstantBuffer.hlsli"
-#include "../Model/Light.hlsli"
+#include "../CBuffer/B0/SceneCB.hlsli"
+#include "../CBuffer/B3/LightCB.hlsli"
 #include "GBuffer.hlsli"
-// 光源定数バッファ
-cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
-{
-    float4 world_ambient;
-    float4 directional_light_direction;
-    float4 directional_light_color;
-    PointLight pointLights[8];
-};
 // フォグ定数バッファ
 cbuffer FOG_CONSTANT_BUFFER : register(b4)
 {

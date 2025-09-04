@@ -583,7 +583,15 @@
     <ClInclude Include="Source\Title\Item\TitleToOnlineSettingItem.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="HLSL\CBuffer\B0\SceneCB.hlsli" />
+    <None Include="HLSL\CBuffer\B1\Skeleton\BatchingModelCB.hlsli" />
+    <None Include="HLSL\CBuffer\B1\Skeleton\InstancingModelCB.hlsli" />
+    <None Include="HLSL\CBuffer\B1\Skeleton\SkinningModelCB.hlsli" />
+    <None Include="HLSL\CBuffer\B2\DecalCB.hlsli" />
+    <None Include="HLSL\CBuffer\B2\Model\PBRMeshCB.hlsli" />
+    <None Include="HLSL\CBuffer\B2\Model\PhongMeshCB.hlsli" />
     <None Include="HLSL\CBuffer\B3\CascadedShadowCB.hlsli" />
+    <None Include="HLSL\CBuffer\B3\LightCB.hlsli" />
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
     <None Include="HLSL\Decal\Decal.hlsli" />
     <None Include="HLSL\Decal\DecalGeometry.hlsli" />
@@ -594,13 +602,10 @@
     <None Include="HLSL\Function\ToMatrix.hlsli" />
     <None Include="HLSL\GBuffer\GBuffer.hlsli" />
     <None Include="HLSL\Model\CascadedShadow\CascadedShadow.hlsli" />
-    <None Include="HLSL\Model\Grass\Grass.hlsli" />
-    <None Include="HLSL\Model\Instancing.hlsli" />
-    <None Include="HLSL\Model\Light.hlsli" />
+    <None Include="HLSL\Define\Light.hlsli" />
     <None Include="HLSL\Model\ModelInputLayout.hlsli" />
     <None Include="HLSL\Model\Phong\Phong.hlsli" />
     <None Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRendering.hlsli" />
-    <None Include="HLSL\Model\Skinning.hlsli" />
     <None Include="HLSL\Particle\ComputeParticle.hlsli" />
     <None Include="HLSL\Particle\Sort\ComputeParticleBitonicSort.hlsli" />
     <None Include="HLSL\PostProcess\Bloom\Bloom.hlsli" />
@@ -608,7 +613,6 @@
     <None Include="HLSL\PostProcess\FinalPass\FilterFunctions.hlsli" />
     <None Include="HLSL\PrimitiveRenderer\PrimitiveRenderer.hlsli" />
     <None Include="HLSL\Primitive\Primitive.hlsli" />
-    <None Include="HLSL\Scene\SceneConstantBuffer.hlsli" />
     <None Include="HLSL\SkyMap\SkyMap.hlsli" />
     <None Include="HLSL\Sprite\Sprite.hlsli" />
     <None Include="HLSL\Terrain\Deform\TerrainDeform.hlsli" />

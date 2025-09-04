@@ -2,15 +2,7 @@
 #include "../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
-#include "../Model/Light.hlsli"
-// 光源定数バッファ
-cbuffer LIGHT_CONSTANT_BUFFER : register(b3)
-{
-    float4 world_ambient;
-    float4 directional_light_direction;
-    float4 directional_light_color;
-    PointLight pointLights[8];
-};
+#include "../CBuffer/B3/LightCB.hlsli"
 #include "../Function/ShadingFunctions.hlsli"
 
 Texture2D terrainColorTexture : register(t0);

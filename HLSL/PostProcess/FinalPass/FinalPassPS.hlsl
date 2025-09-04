@@ -1,7 +1,7 @@
 #include "../../Sprite/Sprite.hlsli"
 #include "FilterFunctions.hlsli"
 
-#include "../../Scene/SceneConstantBuffer.hlsli"
+#include "../../CBuffer/B0/SceneCB.hlsli"
 
 inline float Random(float2 n)
 {

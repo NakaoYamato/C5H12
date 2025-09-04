@@ -1,11 +1,11 @@
 #include "SceneWyvernDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 // コンポーネント
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 #include "../../InGame/InputMediator.h"
@@ -30,7 +30,7 @@ void SceneWyvernDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

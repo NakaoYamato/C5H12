@@ -3,11 +3,11 @@
 #include "../../Function/Noise.hlsli"
 
 // パッチ毎に適用される関数
-HS_CONSTANT_OUT HSConstant(
+GRASS_HS_CONSTANT_OUT HSConstant(
 InputPatch<GRASS_HS_IN, 3> ip,
 uint pid : SV_PrimitiveID)
 {
-    HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
+    GRASS_HS_CONSTANT_OUT hout = (GRASS_HS_CONSTANT_OUT) 0;
     float4 v0 = float4(ip[0].worldPosition.xyz, 1);
     float4 v1 = float4(ip[1].worldPosition.xyz, 1);
     float4 v2 = float4(ip[2].worldPosition.xyz, 1);

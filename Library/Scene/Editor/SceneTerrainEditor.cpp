@@ -1,5 +1,6 @@
 #include "SceneTerrainEditor.h"
 
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 #include "../../Library/Component/Terrain/TerrainController.h"
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "../../Library/Component/Terrain/TerrainCollider.h"
@@ -17,36 +18,20 @@ void SceneTerrainEditor::OnInitialize()
 	auto deformerActor = RegisterActor<Actor>(u8"TerrainDeformer", ActorTag::DrawContextParameter);
     deformerActor->AddComponent<TerrainDeformer>();
 
-    auto terrainActor = RegisterActor<Actor>(u8"Terrain", ActorTag::Stage);
-    terrainActor->GetTransform().SetScale(50.0f);
-    terrainActor->GetTransform().UpdateTransform(nullptr);
-    terrainActor->AddComponent<TerrainController>();
-	terrainActor->AddCollider<TerrainCollider>();
-
-    // ‹«–Ú‚ğ‡‚í‚¹‚é‚½‚ß‚ÉŒ©‚é—p
-    {
-        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain0", ActorTag::Stage);
-        testTerrain->GetTransform().SetPositionZ(100.0f);
-        testTerrain->GetTransform().SetScale(50.0f);
-        testTerrain->GetTransform().UpdateTransform(nullptr);
-        testTerrain->AddComponent<TerrainController>();
-        testTerrain->AddCollider<TerrainCollider>();
-    }
-    {
-        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain1", ActorTag::Stage);
-        testTerrain->GetTransform().SetPositionX(100.0f);
-        testTerrain->GetTransform().SetScale(50.0f);
-        testTerrain->GetTransform().UpdateTransform(nullptr);
-        testTerrain->AddComponent<TerrainController>();
-        testTerrain->AddCollider<TerrainCollider>();
-    }
-    {
-        auto testTerrain = RegisterActor<Actor>(u8"TestTerrain2", ActorTag::Stage);
-        testTerrain->GetTransform().SetPositionX(100.0f);
-        testTerrain->GetTransform().SetPositionZ(100.0f);
-        testTerrain->GetTransform().SetScale(50.0f);
-        testTerrain->GetTransform().UpdateTransform(nullptr);
-        testTerrain->AddComponent<TerrainController>();
-        testTerrain->AddCollider<TerrainCollider>();
-    }
+    auto stage0 = RegisterActor<TerrainActor>("Stage0", 
+        ActorTag::Stage, 
+        "./Data/Terrain/Save/Test000.json",
+        Vector3(0.0f, 0.0f, 0.0f));
+    auto stage1 = RegisterActor<TerrainActor>("Stage1", 
+        ActorTag::Stage, 
+        "./Data/Terrain/Save/Test000.json",
+        Vector3(100.0f, 0.0f, 0.0f));
+    auto stage2 = RegisterActor<TerrainActor>("Stage2", 
+        ActorTag::Stage, 
+        "./Data/Terrain/Save/Test000.json",
+        Vector3(0.0f, 0.0f, 100.0f));
+    auto stage3 = RegisterActor<TerrainActor>("Stage3", 
+        ActorTag::Stage, 
+        "./Data/Terrain/Save/Test000.json",
+        Vector3(100.0f, 0.0f, 100.0f));
 }

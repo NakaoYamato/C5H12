@@ -23,10 +23,12 @@ void MeshCollider::OnDelete()
 // 更新処理
 void MeshCollider::Update(float elapsedTime)
 {
-	if (_recalculate)
+	if (_recalculate && !_isCalculating)
 	{
 		_recalculate = false;
 
+		// 再計算中フラグを立てる
+		_isCalculating = true;
 		// コリジョンメッシュの再計算をジョブシステムに申請
 		JobSystem::Instance().EnqueueJob(
 			GetName(),
@@ -36,16 +38,21 @@ void MeshCollider::Update(float elapsedTime)
 				CollisionMesh collisionMeshCopy = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
 				{
 					std::lock_guard<std::mutex> lock(_collisionMeshMutex);
-					_collisionMesh.areas.clear();
-					_collisionMesh.triangles.clear();
-					_collisionMesh = collisionMeshCopy;
+					_calcCollisionMesh = collisionMeshCopy;
+					_isCalculating = false;
 				}
 			});
+	}
 
-		//// コリジョンメッシュの計算
-		//_collisionMesh.areas.clear();
-		//_collisionMesh.triangles.clear();
-		//_collisionMesh = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
+	{
+		std::lock_guard<std::mutex> lock(_collisionMeshMutex);
+		// コリジョンメッシュの更新
+		if (!_calcCollisionMesh.areas.empty() && !_calcCollisionMesh.triangles.empty())
+		{
+			_collisionMesh = _calcCollisionMesh;
+			_calcCollisionMesh.areas.clear();
+			_calcCollisionMesh.triangles.clear();
+		}
 	}
 }
 // デバッグ描画処理
@@ -118,9 +125,8 @@ MeshCollider::CollisionMesh MeshCollider::RecalculateCollisionMesh(Model* model)
 
 	CollisionMesh collisionMesh;
 	ModelResource* modelResource = model->GetResource();
-
-	DirectX::XMVECTOR VolumeMin = DirectX::XMVectorReplicate(FLT_MAX);
-	DirectX::XMVECTOR VolumeMax = DirectX::XMVectorReplicate(-FLT_MAX);
+	Vector3 volumeMin = Vector3::Max;
+	Vector3 volumeMax = Vector3::Min;
 
 	// 頂点データをワールド空間変換し、三角形データを作成
 	for (const ModelResource::Mesh& mesh : modelResource->GetMeshes())
@@ -160,47 +166,17 @@ MeshCollider::CollisionMesh MeshCollider::RecalculateCollisionMesh(Model* model)
 			DirectX::XMStoreFloat3(&triangle.normal, N);
 
 			// モデル全体のAABBを計測
-			VolumeMin = DirectX::XMVectorMin(VolumeMin, A);
-			VolumeMin = DirectX::XMVectorMin(VolumeMin, B);
-			VolumeMin = DirectX::XMVectorMin(VolumeMin, C);
-			VolumeMax = DirectX::XMVectorMax(VolumeMax, A);
-			VolumeMax = DirectX::XMVectorMax(VolumeMax, B);
-			VolumeMax = DirectX::XMVectorMax(VolumeMax, C);
+			volumeMin = volumeMin.Minimum(triangle.positions[0]);
+			volumeMin = volumeMin.Minimum(triangle.positions[1]);
+			volumeMin = volumeMin.Minimum(triangle.positions[2]);
+			volumeMax = volumeMax.Maximum(triangle.positions[0]);
+			volumeMax = volumeMax.Maximum(triangle.positions[1]);
+			volumeMax = volumeMax.Maximum(triangle.positions[2]);
 		}
 	}
 
-	// モデル全体のAABB
-	DirectX::XMFLOAT3 volumeMin, volumeMax;
-	DirectX::XMStoreFloat3(&volumeMin, VolumeMin);
-	DirectX::XMStoreFloat3(&volumeMax, VolumeMax);
-
-	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
-	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
-	float sizeZ = (volumeMax.z - volumeMin.z) / _cellSize;
-	for (int i = 0; i < _cellSize * _cellSize; ++i)
-	{
-		collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % _cellSize) + 0.5f * sizeX;
-		collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
-		collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
-		collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
-		collisionMesh.areas[i].boundingBox.Extents.y = FLT_MAX; // 無限
-		collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
-	}
-	for (int i = 0; i < collisionMesh.triangles.size(); ++i)
-	{
-		const CollisionMesh::Triangle& triangle = collisionMesh.triangles[i];
-		std::vector<size_t> indexMap;
-		// 各頂点がどのエリアに属するかを調べる
-        // 三角形からAABBを算出し、各エリアのAABBと衝突しているか調べる
-        const Vector3 points[3] = { triangle.positions[0], triangle.positions[1], triangle.positions[2] };
-        DirectX::BoundingBox triangleBox;
-        DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, points, sizeof(Vector3));
-        indexMap = GetCollisionMeshIndex(collisionMesh, triangleBox);
-		for (auto& index : indexMap)
-		{
-			collisionMesh.areas[index].triangleIndices.push_back(i);
-		}
-	}
+	// AABBの構築
+	BuildCollisionMeshAABB(collisionMesh, volumeMin, volumeMax);
 
 	return collisionMesh;
 }
@@ -216,6 +192,16 @@ bool MeshCollider::RayCast(
 	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&start);
 	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
 	auto& collisionMesh = GetCollisionMesh();
+
+	// 全体のAABBとレイの交差判定
+	{
+		DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Center);
+		DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Extents);
+		if (!Collision3D::IntersectRayVsAABB(Start, DirectionNorm, *distance, aabbCenter, aabbRadii, nullptr, nullptr))
+		{
+			return false;
+		}
+	}
 
 	for (auto& area : collisionMesh.areas)
 	{
@@ -259,8 +245,19 @@ bool MeshCollider::SphereCast(const Vector3& origin, const Vector3& direction, f
 	bool hit = false;
 	DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&origin);
 	DirectX::XMVECTOR DirectionNorm = DirectX::XMLoadFloat3(&direction);
+	auto& collisionMesh = GetCollisionMesh();
 
-	for (auto& area : GetCollisionMesh().areas)
+	// 全体のAABBとレイの交差判定
+	{
+		DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Center);
+		DirectX::XMVECTOR aabbRadii = DirectX::XMLoadFloat3(&collisionMesh.meshBoundingBox.Extents);
+		if (!Collision3D::IntersectRayVsAABB(Start, DirectionNorm, *distance, aabbCenter, aabbRadii, nullptr, nullptr))
+		{
+			return false;
+		}
+	}
+
+	for (auto& area : collisionMesh.areas)
 	{
 		DirectX::XMVECTOR slubCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
 		DirectX::XMVECTOR slubRadii = DirectX::XMLoadFloat3(&area.boundingBox.Extents);
@@ -271,7 +268,7 @@ bool MeshCollider::SphereCast(const Vector3& origin, const Vector3& direction, f
 			// エリアに含まれている三角形と判定
 			for (const int& index : area.triangleIndices)
 			{
-				const MeshCollider::CollisionMesh::Triangle& triangle = GetCollisionMesh().triangles[index];
+				const MeshCollider::CollisionMesh::Triangle& triangle = collisionMesh.triangles[index];
 				DirectX::XMVECTOR TrianglePos[3] = {
 					DirectX::XMLoadFloat3(&triangle.positions[0]),
 					DirectX::XMLoadFloat3(&triangle.positions[1]),
@@ -295,6 +292,41 @@ bool MeshCollider::SphereCast(const Vector3& origin, const Vector3& direction, f
 	}
 
 	return hit;
+}
+/// コリジョンメッシュのAABBの構築
+void MeshCollider::BuildCollisionMeshAABB(CollisionMesh& collisionMesh, const Vector3& volumeMin, const Vector3& volumeMax) const
+{
+	// モデル全体のAABB
+	collisionMesh.meshBoundingBox.Center = (volumeMin + volumeMax) * 0.5f;
+	collisionMesh.meshBoundingBox.Extents = (volumeMax - volumeMin) * 0.5f;
+
+	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
+	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
+	float sizeZ = (volumeMax.z - volumeMin.z) / _cellSize;
+	for (int i = 0; i < _cellSize * _cellSize; ++i)
+	{
+		collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % _cellSize) + 0.5f * sizeX;
+		collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
+		collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
+		collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
+		collisionMesh.areas[i].boundingBox.Extents.y = FLT_MAX; // 無限
+		collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
+	}
+	for (int i = 0; i < collisionMesh.triangles.size(); ++i)
+	{
+		const CollisionMesh::Triangle& triangle = collisionMesh.triangles[i];
+		std::vector<size_t> indexMap;
+		// 各頂点がどのエリアに属するかを調べる
+		// 三角形からAABBを算出し、各エリアのAABBと衝突しているか調べる
+		const Vector3 points[3] = { triangle.positions[0], triangle.positions[1], triangle.positions[2] };
+		DirectX::BoundingBox triangleBox;
+		DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, points, sizeof(Vector3));
+		indexMap = GetCollisionMeshIndex(collisionMesh, triangleBox);
+		for (auto& index : indexMap)
+		{
+			collisionMesh.areas[index].triangleIndices.push_back(i);
+		}
+	}
 }
 /// 指定のAABBとコリジョンメッシュのAABBの交差判定
 std::vector<size_t> MeshCollider::GetCollisionMeshIndex(const CollisionMesh& collisionMesh, const DirectX::BoundingBox& aabb) const

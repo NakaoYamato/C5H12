@@ -354,6 +354,9 @@ void Scene::Render()
 
             // ƒ‚ƒfƒ‹‚Ì‰e•`‰æˆ—
             _meshRenderer.CastShadow(rc);
+
+            // ƒeƒŒƒCƒ“‚Ì‰e•`‰æˆ—
+            _terrainRenderer.CastShadow(rc);
         }
         cascadedShadowMap->Deactivate(rc);
     }

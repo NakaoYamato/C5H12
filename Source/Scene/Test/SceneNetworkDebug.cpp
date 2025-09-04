@@ -4,9 +4,9 @@
 #include "SceneNetworkDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 #include "../../Source/AI/MetaAI.h"
-#include "../../Source/Stage/StageActor.h"
 #include "../../InGame/CanvasMediator.h"
 
 #include "../../Source/Player/PlayerActor.h"
@@ -30,7 +30,7 @@ void SceneNetworkDebug::OnInitialize()
         auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
     }
     {
-        auto stage = RegisterActor<StageActor>("Stage", ActorTag::Stage);
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
     }
     {
         auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);

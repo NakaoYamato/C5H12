@@ -9,6 +9,13 @@ struct GRASS_PS_IN
     float4 color : COLOR; // 色
 };
 
+// パッチからの出力
+struct GRASS_HS_CONSTANT_OUT
+{
+    float factor[3] : SV_TessFactor;
+    float innerFactor : SV_InsideTessFactor;
+};
+
 #define GRASS_HS_IN StreamOutData
 #define GRASS_HS_OUT StreamOutData
 #define GRASS_DS_IN StreamOutData

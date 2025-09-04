@@ -7,6 +7,7 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Exporter/Exporter.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
@@ -124,6 +125,9 @@ void TerrainDeformer::OnCreate()
 // 更新処理
 void TerrainDeformer::Update(float elapsedTime)
 {
+    // ブラシのGUI描画
+    DrawBrushGui();
+
     // ブラシ使用フラグがオフの場合は何もしない
     if (!_useBrush)
         return;
@@ -197,13 +201,12 @@ void TerrainDeformer::Update(float elapsedTime)
 			{
 				// TerrainControllerを取得
 				terrainControllers.push_back(terrainController);
-
-                // 交差したアクターの情報を出力
-                Debug::Output::String(L"接触オブジェクト: ");
-                Debug::Output::String(hitActor->GetName());
-                Debug::Output::String(L"\n");
 			}
 		}
+        // 交差したアクターの情報を出力
+        Debug::Output::String(L"接触オブジェクト: ");
+        Debug::Output::String(hitActor->GetName());
+        Debug::Output::String(L"\n");
     }
 
     // 選択中のブラシを更新
@@ -312,10 +315,10 @@ void TerrainDeformer::Render(const RenderContext& rc)
             constantBufferData.brushStrength = task.strength;
             // テクスチャタイリング係数を設定
             constantBufferData.textureTillingScale = _textureTillingScale;
-            // 高さ変形スケールを設定
-            constantBufferData.heightScale = task.heightScale;
             // ブラシのY軸回転を設定
             constantBufferData.brushRotationY = task.brushRotationY;
+            // パディングを設定
+            constantBufferData.padding = task.padding;
 
             // 定数バッファ更新
             rc.deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &constantBufferData, 0, 0);
@@ -383,44 +386,19 @@ void TerrainDeformer::DrawGui()
 			Exporter::SaveJsonFile(DEFAULT_MODEL_DATA_PATH, jsonData);
         }
 	}
-
-    if (_useBrush)
+    if (ImGui::Button(u8"Terrainの追加"))
     {
-        if (ImGui::Begin(u8"TerrainDeformer"))
+        std::string actorName = "Stage";
+        for (int i = 0; i < 100; ++i)
         {
-            // ペイントテクスチャのGUI表示
-            DrawPaintTextureGui();
-            ImGui::Separator();
-
-			ImGui::SliderFloat(u8"タイリング係数", &_textureTillingScale, 1.0f, 20.0f, "%.0f", 1.0f);
-            ImGui::Separator();
-
-            // ブラシテクスチャのGUI表示
-            DrawBrushTextureGui();
-            ImGui::Separator();
-
-			// モデル選択GUI表示
-			DrawModelSelectionGui();
-			ImGui::Separator();
-
-            // ブラシの選択GUI描画
-            DrawBrushSelectionGui();
-            ImGui::Separator();
-        }
-        ImGui::End();
-
-
-        // ブラシ取得
-        auto brush = _brushes.find(_selectedBrushName);
-        // ブラシがあるならGUI描画
-        if (brush != _brushes.end())
-        {
-            if (ImGui::Begin(u8"ブラシ"))
+            std::string tempName = actorName + std::to_string(i);
+            if (GetActor()->GetScene()->GetActorManager().FindByName(tempName) == nullptr)
             {
-                brush->second->DrawGui();
+                actorName = tempName;
+                break;
             }
-            ImGui::End();
         }
+        auto terrainActor = GetActor()->GetScene()->RegisterActor<TerrainActor>(actorName, ActorTag::Stage);
     }
 }
 // 環境物を追加
@@ -617,11 +595,56 @@ void TerrainDeformer::DrawModelSelectionGui()
 // ブラシの選択GUI描画
 void TerrainDeformer::DrawBrushSelectionGui()
 {
-	for (const auto& [name, brush] : _brushes)
-	{
-		if (ImGui::RadioButton(name.c_str(), _selectedBrushName == name))
-			_selectedBrushName = name;
-	}
+    static std::vector<const char*> brushNames;
+    if (brushNames.size() != _brushes.size())
+    {
+        brushNames.clear();
+        for (const auto& [name, brush] : _brushes)
+        {
+            brushNames.push_back(name.c_str());
+        }
+    }
+    ImGui::ComboString(u8"ブラシ選択", &_selectedBrushName, brushNames);
+}
+// ブラシのGUI描画
+void TerrainDeformer::DrawBrushGui()
+{
+    if (_useBrush)
+    {
+        if (ImGui::Begin(u8"TerrainDeformer"))
+        {
+            // ブラシの選択GUI描画
+            DrawBrushSelectionGui();
+            ImGui::Separator();
+
+            // ペイントテクスチャのGUI表示
+            DrawPaintTextureGui();
+            ImGui::Separator();
+
+            ImGui::SliderFloat(u8"タイリング係数", &_textureTillingScale, 1.0f, 20.0f, "%.0f", 1.0f);
+            ImGui::Separator();
+
+            // ブラシテクスチャのGUI表示
+            DrawBrushTextureGui();
+            ImGui::Separator();
+
+            // モデル選択GUI表示
+            DrawModelSelectionGui();
+        }
+        ImGui::End();
+
+        // ブラシ取得
+        auto brush = _brushes.find(_selectedBrushName);
+        // ブラシがあるならGUI描画
+        if (brush != _brushes.end())
+        {
+            if (ImGui::Begin(u8"ブラシ"))
+            {
+                brush->second->DrawGui();
+            }
+            ImGui::End();
+        }
+    }
 }
 // 更新処理
 void TerrainDeformerBrush::Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
@@ -651,8 +674,6 @@ void TerrainDeformerBrush::DrawGui()
     ImGui::DragFloat(u8"ブラシ半径", &_brushRadius, 0.01f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"ブラシY軸回転(ラジアン)", &_brushRotationY, 0.01f, -DirectX::XM_PI, DirectX::XM_PI);
     ImGui::DragFloat(u8"ブラシ強度", &_brushStrength, 0.01f, -10.0f, 10.0f);
-    ImGui::DragFloat(u8"高さ最小値", &_brushHeightScale.x, 0.01f, -100.0f, 0.0f);
-    ImGui::DragFloat(u8"高さ最大値", &_brushHeightScale.y, 0.01f, 0.0f, 100.0f);
 }
 // タスクを登録
 void TerrainDeformerBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
@@ -665,6 +686,6 @@ void TerrainDeformerBrush::RegisterTask(std::weak_ptr<TerrainController> terrain
 	task.radius = radius;
 	task.strength = strength;
 	task.brushRotationY = _brushRotationY;
-	task.heightScale = _brushHeightScale;
+	task.padding = _brushPadding;
 	_deformer->AddTask(terrainController.lock().get(), task);
 }

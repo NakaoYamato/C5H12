@@ -276,9 +276,6 @@
     <ClCompile Include="Source\Camera\PlayerCameraController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Stage\StageActor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Component\Collider\MeshCollider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -627,6 +624,9 @@
     <ClCompile Include="Library\Shader\Shader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Actor\Terrain\TerrainActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -921,9 +921,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Camera\PlayerCameraController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Stage\StageActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\Collider\MeshCollider.h">
@@ -1310,6 +1307,9 @@
     <ClInclude Include="Library\Shader\Shader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Actor\Terrain\TerrainActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1343,6 +1343,8 @@
     <None Include="HLSL\Function\Tessellation.hlsli" />
     <None Include="HLSL\Decal\DecalGeometry.hlsli" />
     <None Include="HLSL\Decal\Decal.hlsli" />
+    <None Include="HLSL\CBuffer\B3\CascadedShadowCB.hlsli" />
+    <None Include="HLSL\Terrain\Shadow\TerrainShadow.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />
@@ -1427,5 +1429,8 @@
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalGPS.hlsl" />
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalSPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainStaticVS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainNonLODHS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformBumpyHeightPS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowVS.hlsl" />
   </ItemGroup>
 </Project>

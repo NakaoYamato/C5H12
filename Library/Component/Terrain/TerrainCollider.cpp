@@ -98,35 +98,8 @@ MeshCollider::CollisionMesh TerrainCollider::RecalculateCollisionMesh(Model* mod
 		}
     }
 
-
-	// モデル全体のAABB
-	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
-	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;
-	float sizeZ = (volumeMax.z - volumeMin.z) / _cellSize;
-	for (int i = 0; i < _cellSize * _cellSize; ++i)
-	{
-		collisionMesh.areas[i].boundingBox.Center.x = volumeMin.x + sizeX * (float)(i % _cellSize) + 0.5f * sizeX;
-		collisionMesh.areas[i].boundingBox.Center.y = 0.0f;
-		collisionMesh.areas[i].boundingBox.Center.z = volumeMin.z + sizeZ * (float)(i / _cellSize) + 0.5f * sizeZ;
-		collisionMesh.areas[i].boundingBox.Extents.x = 0.5f * sizeX;
-		collisionMesh.areas[i].boundingBox.Extents.y = FLT_MAX; // 無限
-		collisionMesh.areas[i].boundingBox.Extents.z = 0.5f * sizeZ;
-	}
-	for (int i = 0; i < collisionMesh.triangles.size(); ++i)
-	{
-		const CollisionMesh::Triangle& triangle = collisionMesh.triangles[i];
-		std::vector<size_t> indexMap;
-		// 各頂点がどのエリアに属するかを調べる
-		// 三角形からAABBを算出し、各エリアのAABBと衝突しているか調べる
-		const Vector3 points[3] = { triangle.positions[0], triangle.positions[1], triangle.positions[2] };
-		DirectX::BoundingBox triangleBox;
-		DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, points, sizeof(Vector3));
-		indexMap = GetCollisionMeshIndex(collisionMesh, triangleBox);
-		for (auto& index : indexMap)
-		{
-			collisionMesh.areas[index].triangleIndices.push_back(i);
-		}
-	}
+	// AABBの構築
+	BuildCollisionMeshAABB(collisionMesh, volumeMin, volumeMax);
 
 	return collisionMesh;
 }

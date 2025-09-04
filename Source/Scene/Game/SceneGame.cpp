@@ -4,15 +4,16 @@
 #include "SceneGame.h"
 
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Actor/Terrain/TerrainActor.h"
 
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Player/Weapon/Warrior/PlayerSwordActor.h"
 #include "../../Source/Player/Weapon/Warrior/PlayerShieldActor.h"
-#include "../../Source/Stage/StageActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Enemy/Gryphus/GryphusActor.h"
 #include "../../Source/Enemy/Weak/WeakActor.h"
+#include "../../Source/Stage/StageController.h"
 
 #include "../../InGame/InputMediator.h"
 #include "../../InGame/CanvasMediator.h"
@@ -57,7 +58,8 @@ void SceneGame::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<StageActor>("Stage0", ActorTag::Stage, 0, "./Data/Terrain/Save/002.json", Vector3(0.0f, -5.0f, 0.0f));
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+        auto stageController = stage0->AddComponent<StageController>(0);
     }
     //{
     //    auto stage0 = RegisterActor<StageActor>("Stage0", ActorTag::Stage, 0, "./Data/Terrain/Save/002.json", Vector3(-50.0f, 0.0f, -50.0f));

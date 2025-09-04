@@ -15,7 +15,7 @@ void CollisionManager::Update()
 	SetDataByCollider();
 
 	// 全体の計算時間
-	ProfileScopedSection_2(0, ActorManager, ImGuiControl::Profiler::Purple);
+	ProfileScopedSection_2(0, CollisionManager, ImGuiControl::Profiler::Purple);
     // ジョブシステムでマルチスレッドを使用する場合
 	if (JobSystem::Instance().UseMultiThread())
 	{

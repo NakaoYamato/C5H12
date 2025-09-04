@@ -22,6 +22,7 @@ public:
 
 		std::vector<Triangle>	triangles;
 		std::vector<Area>		areas;
+		DirectX::BoundingBox	meshBoundingBox;
 	};
 
 public:
@@ -84,6 +85,14 @@ public:
 	void SetRecalculate(bool f) { _recalculate = f; }
 #pragma endregion
 protected:
+	/// <summary>
+	/// コリジョンメッシュのAABBの構築
+	/// </summary>
+	/// <param name="collisionMesh"></param>
+	void BuildCollisionMeshAABB(CollisionMesh& collisionMesh, 
+		const Vector3& volumeMin,
+		const Vector3& volumeMax) const;
+
     /// <summary>
     /// 指定のAABBとコリジョンメッシュのAABBの交差判定
     /// </summary>
@@ -91,12 +100,16 @@ protected:
     /// <returns>交差したAABBの番号</returns>
     std::vector<size_t> GetCollisionMeshIndex(const CollisionMesh& collisionMesh, const DirectX::BoundingBox& aabb) const;
 protected:
-	CollisionMesh	_collisionMesh;	// コリジョンメッシュ
-	bool _recalculate = true;	// 再計算フラグ
-	bool _isDebugDrawVertex = false; // 頂点描画フラグ
-	bool _isDebugDrawArea = false; // 頂点描画フラグ
-	int _cellSize = 16; // 分割エリアのサイズ
-    int _drawCellIndex = -1; // 描画エリアのインデックス
+	CollisionMesh	_collisionMesh;		// コリジョンメッシュ
+	bool _recalculate = true;			// 再計算フラグ
+	bool _isDebugDrawVertex = false;	// 頂点描画フラグ
+	bool _isDebugDrawArea = false;		// 頂点描画フラグ
+	bool _isCalculating = false;		// 計算中フラグ
+	int _cellSize = 16;					// 分割エリアのサイズ
+    int _drawCellIndex = -1;			// 描画エリアのインデックス
 
-	std::mutex _collisionMeshMutex; // マルチスレッド用のミューテックス
+	// マルチスレッド用のミューテックス
+	std::mutex _collisionMeshMutex;
+	// 計算用のコリジョンメッシュ
+	CollisionMesh _calcCollisionMesh;
 };

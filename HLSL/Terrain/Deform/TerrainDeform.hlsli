@@ -1,3 +1,4 @@
+#include "../../Scene/SceneConstantBuffer.hlsli"
 #include "../../Sprite/Sprite.hlsli"
 
 Texture2D<float4> colorTexture : register(t0);
@@ -16,9 +17,9 @@ cbuffer CONSTANT_BUFFER : register(b1)
     float brushRadius;
     float brushStrength;
     
-    float  textureTillingScale;
-    float1 brushRotationY; // Y軸回転角度（ラジアン）
-    float2 heightScale; // x : 最小値、 y : 最大値
+    float textureTillingScale;
+    float brushRotationY; // Y軸回転角度（ラジアン）
+    float2 padding;
 }
 
 struct PS_OUT

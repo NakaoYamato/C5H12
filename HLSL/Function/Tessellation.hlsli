@@ -12,16 +12,6 @@ float tess)
     float f = clamp(1.0 - (dist - minDist) / (maxDist - minDist), 0.001f, 1.0f) * tess;
     return f;
 }
-
-inline float4 CalcTriEdgeTessFactors(float3 triVertexFactors)
-{
-    float4 tess;
-    tess.x = 0.5f * (triVertexFactors.y + triVertexFactors.z);
-    tess.y = 0.5f * (triVertexFactors.x + triVertexFactors.z);
-    tess.z = 0.5f * (triVertexFactors.x + triVertexFactors.y);
-    tess.w = (triVertexFactors.x + triVertexFactors.y + triVertexFactors.z) / 3.0f;
-    return tess;
-}
 // 距離に基づくテッセレーション係数を計算する関数
 // v0, v1, v2: ワールド座標系での頂点位置
 inline float4 DistanceBasedTess(
@@ -44,6 +34,32 @@ float tess)
     f.x = CalcDistanceTessFactor(v0, cameraPosition, minDist, maxDist, tess);
     f.y = CalcDistanceTessFactor(v1, cameraPosition, minDist, maxDist, tess);
     f.z = CalcDistanceTessFactor(v2, cameraPosition, minDist, maxDist, tess);
-    return CalcTriEdgeTessFactors(f);
+    float3 rtf;
+    float ritf, itf;
+    ProcessTriTessFactorsAvg(f, (f.x + f.y + f.z) / 3.0f, rtf, ritf, itf);
+    return float4(rtf, ritf);
 #endif
+}
+inline void DistanceBasedTessQuad(
+float4 v0, float4 v1, float4 v2, float4 v3,
+float3 cameraPosition, 
+float minDist, 
+float maxDist, 
+float tess,
+out float4 edgeFactors,
+out float2 insideFactors)
+{
+    edgeFactors = float4(1, 1, 1, 1);
+    insideFactors = float2(1, 1);
+    float4 f;
+    f.x = CalcDistanceTessFactor(v0, cameraPosition, minDist, maxDist, tess);
+    f.y = CalcDistanceTessFactor(v1, cameraPosition, minDist, maxDist, tess);
+    f.z = CalcDistanceTessFactor(v2, cameraPosition, minDist, maxDist, tess);
+    f.w = CalcDistanceTessFactor(v3, cameraPosition, minDist, maxDist, tess);
+    float2 unroundInsideFactors;
+    ProcessQuadTessFactorsAvg(f,
+    (f.x + f.y + f.z + f.w) / 4.0f,
+    edgeFactors,
+    insideFactors, 
+    unroundInsideFactors);
 }

@@ -192,20 +192,22 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
 		_grassColorSRV.ReleaseAndGetAddressOf(),
 		nullptr);
 }
+// ’¸“_î•ñ‘‚«o‚µ“o˜^
+void TerrainRenderer::ExportVertices(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
+{
+    DrawInfo drawInfo;
+    drawInfo.terrain = terrain;
+    drawInfo.world = world;
+
+    _exportVertexDrawInfos.push_back(drawInfo);
+}
 // •`‰æ“o˜^
-void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, bool isExportingVertices)
+void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
 {
 	DrawInfo drawInfo;
 	drawInfo.terrain = terrain;
 	drawInfo.world = world;
-	drawInfo.isExportingVertices = isExportingVertices;
 
-    // ’¸“_î•ñ‚ð‘‚«o‚·ê‡
-    if (isExportingVertices)
-    {
-        _exportVertexDrawInfos.push_back(drawInfo);
-    }
-    
     // Ã“I•`‰æ‚Ìê‡
     if (terrain->GetStreamOutData().size() != 0 && _isStaticDraw)
     {
@@ -230,8 +232,24 @@ void TerrainRenderer::DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& wo
     DrawInfo drawInfo;
     drawInfo.terrain = terrain;
     drawInfo.world = world;
-    drawInfo.isExportingVertices = false;
     _shadowDrawInfos.push_back(drawInfo);
+}
+// ’¸“_‘‚«o‚µˆ—
+void TerrainRenderer::ExportVertex(const RenderContext& rc)
+{
+    ID3D11DeviceContext* dc = rc.deviceContext;
+
+    // ’è”ƒoƒbƒtƒ@Ý’è
+    dc->VSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->HSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->DSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->GSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->PSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+
+    // ’¸“_î•ñ‚ð‘‚«o‚·
+    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+    RenderStreamOut(rc);
+    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 }
 // •`‰æˆ—
 void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
@@ -253,12 +271,6 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     dc->DSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
     dc->GSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
     dc->PSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
-
-
-    // ’¸“_î•ñ‚ð‘‚«o‚·
-    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
-    RenderStreamOut(rc, writeGBuffer);
-    dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 
     RenderDynamic(rc, writeGBuffer);
     RenderStatic(rc, writeGBuffer);
@@ -382,7 +394,7 @@ void TerrainRenderer::DrawGui()
     }
 }
 
-void TerrainRenderer::RenderStreamOut(const RenderContext& rc, bool writeGBuffer)
+void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 

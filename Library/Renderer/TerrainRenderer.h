@@ -46,7 +46,6 @@ public:
     {
 		Terrain* terrain = nullptr;  // •`‰æ‚·‚éTerrain
 		DirectX::XMFLOAT4X4 world = {}; // ƒ[ƒ‹ƒhs—ñ
-		bool isExportingVertices = false; // ’¸“_î•ñ‚ğƒGƒNƒXƒ|[ƒg‚·‚é‚©‚Ç‚¤‚©
     };
     
 	static constexpr float MaxTessellation = 64.0f;
@@ -61,10 +60,14 @@ public:
 
 	// ‰Šú‰»
 	void Initialize(ID3D11Device* device);
+    // ’¸“_î•ñ‘‚«o‚µ“o˜^
+    void ExportVertices(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
     // •`‰æ“o˜^
-	void Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world, bool isExportingVertices);
+	void Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
     // ‰e•`‰æ“o˜^
     void DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
+    // ’¸“_‘‚«o‚µˆ—
+    void ExportVertex(const RenderContext& rc);
 	// •`‰æˆ—
 	void Render(const RenderContext& rc, bool writeGBuffer);
     // ‰e•`‰æÀs
@@ -72,7 +75,7 @@ public:
 	// GUI•`‰æ
 	void DrawGui();
 private:
-    void RenderStreamOut(const RenderContext& rc, bool writeGBuffer);
+    void RenderStreamOut(const RenderContext& rc);
     void RenderDynamic(const RenderContext& rc, bool writeGBuffer);
     void RenderStatic(const RenderContext& rc, bool writeGBuffer);
     void RenderGrass(const RenderContext& rc, bool writeGBuffer);

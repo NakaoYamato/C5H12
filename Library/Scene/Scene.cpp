@@ -75,6 +75,9 @@ void Scene::Initialize()
     }
 
     OnInitialize();
+
+    // Terrainの頂点書き出し
+    _terrainRenderer.ExportVertex(GetRenderContext());
 }
 
 // 終了化
@@ -245,6 +248,9 @@ void Scene::Render()
 
             // モデルの描画
             _meshRenderer.RenderOpaque(rc, true);
+
+            // Terrainの頂点書き出し
+            _terrainRenderer.ExportVertex(GetRenderContext());
 
 			// テレインの描画
 			_terrainRenderer.Render(rc, true);

@@ -63,6 +63,15 @@ void TerrainController::LateUpdate(float elapsedTime)
     // 編集状態がCompleteの場合は、未編集状態に変更
     if (_editState == EditState::Complete)
         _editState = EditState::None;
+
+    // 編集状態がEditingの場合は、地形の頂点再計算とコライダーの再構築を行い、編集状態をCompleteに変更
+    if (_editState == EditState::Editing)
+    {
+        GetActor()->GetScene()->GetTerrainRenderer().ExportVertices(
+            _terrain.get(),
+            GetActor()->GetTransform().GetMatrix());
+        _editState = EditState::Complete;
+    }
 }
 // 描画処理
 void TerrainController::Render(const RenderContext& rc)
@@ -71,12 +80,7 @@ void TerrainController::Render(const RenderContext& rc)
     {
         GetActor()->GetScene()->GetTerrainRenderer().Draw(
             _terrain.get(),
-            GetActor()->GetTransform().GetMatrix(),
-            _editState == EditState::Editing);
-
-		// 編集状態がEditingの場合は、編集完了状態に変更
-        if (_editState == EditState::Editing)
-            _editState = EditState::Complete;
+            GetActor()->GetTransform().GetMatrix());
     }
 }
 // 影描画

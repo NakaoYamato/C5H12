@@ -7,6 +7,7 @@ Texture2D<float4> parameterTexture : register(t2);
 
 Texture2D<float4> paintColorTexture : register(t4);
 Texture2D<float4> paintNormalTexture : register(t5);
+Texture2D<float4> paintHeightTexture : register(t6);
 Texture2D<float4> brushTexture : register(t7);
 #include "../../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
@@ -26,7 +27,16 @@ struct PS_OUT
 {
     float4 color : SV_TARGET0;
     float4 normal : SV_TARGET1;
+    float4 parameter : SV_TARGET2;
 };
+
+// 元のテクスチャ情報を取得
+void SampleBaseTexture(float2 texcoord, out float4 baseColor, out float4 baseNormal, out float4 baseParameter)
+{
+    baseColor = colorTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], texcoord);
+    baseNormal = normalTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], texcoord);
+    baseParameter = parameterTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], texcoord);
+}
 
 // ブレンドレートの計算
 float CalculateBrushRate(float2 texcoord)

@@ -17,23 +17,6 @@ CostTransformingBrush::CostTransformingBrush(TerrainDeformer* deformer) :
         "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformCostPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
-// •`‰æˆ—
-void CostTransformingBrush::Render(SpriteResource* fullscreenQuad, 
-    std::shared_ptr<Terrain> terrain,
-    const RenderContext& rc, 
-    ID3D11ShaderResourceView** srv, 
-    uint32_t startSlot,
-    uint32_t numViews)
-{
-    terrain->GetParameterMapFB()->Activate(rc.deviceContext);
-    fullscreenQuad->Blit(
-        rc.deviceContext,
-        srv,
-        startSlot, numViews,
-        _pixelShader.Get()
-    );
-    terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
-}
 // ƒ^ƒXƒN‚ğ“o˜^
 void CostTransformingBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
 {

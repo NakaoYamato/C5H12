@@ -3,7 +3,7 @@
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 // パラメータマップ
-Texture2D<float4> parameterTexture : register(t6);
+Texture2D<float4> parameterTexture : register(t2);
 
 [domain("quad")]
 DS_OUT main(HS_CONSTANT_OUT input,
@@ -36,7 +36,7 @@ const OutputPatch<DS_IN, 4> patch)
     float3 worldNormal = normalize(mul(normal, (float3x3) world));
     // パラメータマップから高さ方向取得
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
-    float height = parameter.r;
+    float height = parameter.r + parameter.b;
     // 頂点座標をハイトマップで取得した値分ずらす
     {
         worldPosition.y += height;

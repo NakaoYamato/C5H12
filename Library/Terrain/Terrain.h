@@ -29,10 +29,10 @@ public:
         Vector2 texcoord = {};
     };
 
-	static constexpr size_t BaseColorTextureIndex = 0;
-	static constexpr size_t NormalTextureIndex = 1;
-    static constexpr LONG MaterialMapSize = 1024 * 4;
-    static constexpr LONG ParameterMapSize = 1024 * 2;
+	static constexpr size_t BaseColorTextureIndex   = 0;
+	static constexpr size_t NormalTextureIndex      = 1;
+	static constexpr size_t ParameterTextureIndex   = 2;
+    static constexpr LONG   MaterialMapSize         = 1024 * 4;
 public:
     Terrain(ID3D11Device* device, const std::string& serializePath = "./Data/Terrain/Save/Test000.json");
 	~Terrain() {}
@@ -63,8 +63,6 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetStreamOutSRV() { return _streamOutSRV; }
     // マテリアルマップのフレームバッファを取得
 	FrameBuffer* GetMaterialMapFB() { return _materialMapFB.get(); }
-    // パラメータマップのフレームバッファを取得
-    FrameBuffer* GetParameterMapFB() { return _parameterMapFB.get(); }
     // ストリームアウトデータを取得
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
 	// ストリームアウトデータを設定
@@ -105,10 +103,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadNormalSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterSRV;
 #pragma endregion
-    // マテリアルマップ(RT0:BaseColor,RT1:Normal)
+    // マテリアルマップ(RT0:BaseColor,RT1:Normal,RT2:Parameter{R：高さ、G：草、B：テクスチャのハイトマップ})
     std::unique_ptr<FrameBuffer> _materialMapFB;
-    // パラメータマップ（R：高さ、G：草、B：コスト、A：（空き））
-    std::unique_ptr<FrameBuffer> _parameterMapFB;
     // マテリアルのリセット
     bool _resetMap = false;
     // テクスチャをロードしたかどうか

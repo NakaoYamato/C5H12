@@ -24,12 +24,9 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
 			{ 
                 DXGI_FORMAT_R8G8B8A8_UNORM, // BaseColor 
                 DXGI_FORMAT_R8G8B8A8_UNORM, // Normal
+                DXGI_FORMAT_R16G16B16A16_FLOAT, // Parameter
             })
     );
-    // パラメータマップ作成
-    _parameterMapFB = std::make_unique<FrameBuffer>(
-        device, 
-        ParameterMapSize, ParameterMapSize, true);
 	// 頂点情報をGPUに送るためのバッファ、SRV作成
 	{
 		D3D11_BUFFER_DESC desc{};
@@ -61,7 +58,7 @@ bool Terrain::UpdateTextures(TextureRenderer& textureRenderer, ID3D11DeviceConte
     {
         _materialMapFB->Clear(BaseColorTextureIndex, dc, Vector4::White);
         _materialMapFB->Clear(NormalTextureIndex, dc, Vector4::Blue);
-        _parameterMapFB->Clear(dc, Vector4::Black);
+        _materialMapFB->Clear(ParameterTextureIndex, dc, Vector4::Black);
         _resetMap = false;
         res = true;
     }
@@ -87,9 +84,9 @@ bool Terrain::UpdateTextures(TextureRenderer& textureRenderer, ID3D11DeviceConte
         }
         if (_loadParameterSRV)
         {
-            _parameterMapFB->ClearAndActivate(dc);
+            _materialMapFB->ClearAndActivate(ParameterTextureIndex, dc);
             textureRenderer.Blit(dc, _loadParameterSRV.GetAddressOf(), 0, 1);
-            _parameterMapFB->Deactivate(dc);
+            _materialMapFB->Deactivate(dc);
             _loadParameterSRV.Reset();
             res = true;
         }
@@ -170,7 +167,7 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
         if (ImGui::TreeNode(u8"パラメータ"))
         {
             ImGui::Text(ToString(_parameterTexturePath).c_str());
-            ImGui::Image(_parameterMapFB->GetColorSRV().Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::Image(_materialMapFB->GetColorSRV(ParameterTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 
             std::string resultPath = "";
             if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
@@ -307,7 +304,7 @@ void Terrain::SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, c
 void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)
 {
     if (Exporter::SaveDDSFile(device, dc,
-        _parameterMapFB->GetColorSRV().Get(),
+        _materialMapFB->GetColorSRV(ParameterTextureIndex).Get(),
         parameterMapPath))
     {
 		// パラメータマップのパスを更新

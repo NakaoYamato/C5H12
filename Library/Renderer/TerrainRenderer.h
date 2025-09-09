@@ -53,7 +53,6 @@ public:
     static constexpr size_t DivisionCount = 17;
     // 1ï”Ç†ÇΩÇËÇÃí∏ì_êî
     static constexpr size_t VertexCountPerSide = DivisionCount + 1;
-    static constexpr UINT ParameterMapSRVIndex = 6;
 public:
 	TerrainRenderer() = default;
 	~TerrainRenderer() = default;

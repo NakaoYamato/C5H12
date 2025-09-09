@@ -80,7 +80,6 @@ void HeightTransformingBrush::Render(SpriteResource* fullscreenQuad,
     uint32_t startSlot, 
     uint32_t numViews)
 {
-    terrain->GetParameterMapFB()->Activate(rc.deviceContext);
     if (_useBumpyShader)
     {
         fullscreenQuad->Blit(
@@ -99,7 +98,6 @@ void HeightTransformingBrush::Render(SpriteResource* fullscreenQuad,
             _pixelShader.Get()
         );
     }
-    terrain->GetParameterMapFB()->Deactivate(rc.deviceContext);
 }
 // GUI•`‰æ
 void HeightTransformingBrush::DrawGui()

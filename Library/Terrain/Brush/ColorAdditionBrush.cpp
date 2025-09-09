@@ -17,20 +17,3 @@ ColorAdditionBrush::ColorAdditionBrush(TerrainDeformer* deformer) :
         "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformAddPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 }
-// •`‰æˆ—
-void ColorAdditionBrush::Render(SpriteResource* fullscreenQuad, 
-    std::shared_ptr<Terrain> terrain,
-    const RenderContext& rc,
-    ID3D11ShaderResourceView** srv,
-    uint32_t startSlot,
-    uint32_t numViews)
-{
-    terrain->GetMaterialMapFB()->Activate(rc.deviceContext);
-    fullscreenQuad->Blit(
-        rc.deviceContext,
-        srv,
-        startSlot, numViews,
-        _pixelShader.Get()
-    );
-    terrain->GetMaterialMapFB()->Deactivate(rc.deviceContext);
-}

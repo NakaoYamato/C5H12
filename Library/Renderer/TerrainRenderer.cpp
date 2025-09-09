@@ -280,9 +280,6 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     dc->PSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
     dc->VSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
     dc->DSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
-    dc->DSSetShaderResources(ParameterMapSRVIndex, 1, nullSRVs);
-    dc->PSSetShaderResources(ParameterMapSRVIndex, 1, nullSRVs);
-    dc->GSSetShaderResources(ParameterMapSRVIndex, 1, nullSRVs);
 
     RenderGrass(rc, writeGBuffer);
 
@@ -424,13 +421,11 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
         ID3D11ShaderResourceView* srvs[] =
         {
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get()
+            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
         dc->DSSetShaderResources(0, _countof(srvs), srvs);
-        // パラメータマップ設定
-        dc->DSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
-        dc->PSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
         // 頂点バッファとインデックスバッファを設定
         UINT stride = sizeof(TerrainRenderer::Vertex);
         UINT offset = 0;
@@ -513,13 +508,11 @@ void TerrainRenderer::RenderDynamic(const RenderContext& rc, bool writeGBuffer)
         ID3D11ShaderResourceView* srvs[] =
         {
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get()
+            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
         dc->DSSetShaderResources(0, _countof(srvs), srvs);
-        // パラメータマップ設定
-        dc->DSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
-        dc->PSSetShaderResources(ParameterMapSRVIndex, 1, drawInfo.terrain->GetParameterMapFB()->GetColorSRV().GetAddressOf());
         // 頂点バッファとインデックスバッファを設定
         UINT stride = sizeof(TerrainRenderer::Vertex);
         UINT offset = 0;

@@ -41,6 +41,8 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseColorSRV; // ベースカラーのSRV
 		std::wstring normalPath;     // 法線マップのパス
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV; // 法線マップのSRV
+		std::wstring heightPath;     // 高さマップのパス
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> heightSRV; // 高さマップのSRV
 	};
     // ブラシテクスチャデータ
     struct BrushTexture
@@ -102,7 +104,7 @@ private:
     // テクスチャ読み込み
     void LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv);
     // ペイントテクスチャの追加
-    void AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath);
+    void AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath, const std::wstring& heightPath);
     // ブラシテクスチャの追加
     void AddBrushTexture(const std::wstring& path);
     // 配置するモデルデータの追加
@@ -128,8 +130,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> _constantBuffer;
     // マテリアルマップのコピーバッファ
     std::unique_ptr<FrameBuffer> _copyMaterialMapFB;
-    // テレインのパラメータマップを別枠で格納するフレームバッファ
-    std::unique_ptr<FrameBuffer> _copyParameterMapFB;
 	// フルスクリーンクアッドのスプライトリソース
     std::unique_ptr<SpriteResource>		_fullscreenQuad;
 
@@ -182,12 +182,12 @@ public:
         float elapsedTime,
         Vector3* intersectWorldPosition);
 	// 描画処理
-	virtual void Render(SpriteResource* fullscreenQuad,
+    virtual void Render(SpriteResource* fullscreenQuad,
         std::shared_ptr<Terrain> terrain,
         const RenderContext& rc,
         ID3D11ShaderResourceView** srv,
         uint32_t startSlot,
-        uint32_t numViews) {};
+        uint32_t numViews);
 	// GUI描画
     virtual void DrawGui();
 

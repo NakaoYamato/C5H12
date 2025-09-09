@@ -77,7 +77,10 @@ void Scene::Initialize()
     OnInitialize();
 
     // Terrain‚Ì’¸“_‘‚«o‚µ
-    _terrainRenderer.ExportVertex(GetRenderContext());
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _terrainRenderer.ExportVertex(GetRenderContext());
+    }
 }
 
 // I—¹‰»

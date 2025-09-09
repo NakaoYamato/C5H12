@@ -298,7 +298,7 @@ void MeshCollider::BuildCollisionMeshAABB(CollisionMesh& collisionMesh, const Ve
 {
 	// ƒ‚ƒfƒ‹‘S‘Ì‚ÌAABB
 	collisionMesh.meshBoundingBox.Center = (volumeMin + volumeMax) * 0.5f;
-	collisionMesh.meshBoundingBox.Extents = (volumeMax - volumeMin) * 0.5f;
+	collisionMesh.meshBoundingBox.Extents = Vector3::Maximum((volumeMax - volumeMin), Vector3(0.01f, 0.01f, 0.01f)) * 0.5f;
 
 	collisionMesh.areas.resize((size_t)(_cellSize * _cellSize));
 	float sizeX = (volumeMax.x - volumeMin.x) / _cellSize;

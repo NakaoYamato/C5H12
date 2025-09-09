@@ -52,7 +52,7 @@ void TerrainDeformer::OnCreate()
             { 
                 DXGI_FORMAT_R8G8B8A8_UNORM,
                 DXGI_FORMAT_R8G8B8A8_UNORM,
-                DXGI_FORMAT_R8G8B8A8_UNORM
+                DXGI_FORMAT_R16G16B16A16_FLOAT
             }));
 	// フルスクリーンクアッドのスプライトリソースを作成
     _fullscreenQuad = std::make_unique<SpriteResource>(device,

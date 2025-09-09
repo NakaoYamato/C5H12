@@ -12,32 +12,23 @@ const OutputPatch<DS_IN, 4> patch)
 {
     float u = UV.x;
     float v = UV.y;
-
-    // --- 双線形補間 (Bilinear Interpolation) ---
-    // C++側のインデックス順序 (v0, v1, v3, v2) に対応
-    // patch[0]: 左上 (u=0, v=0)
-    // patch[1]: 左下 (u=0, v=1)
-    // patch[2]: 右下 (u=1, v=1)
-    // patch[3]: 右上 (u=1, v=0)
-
-    // 上の辺 (左上 -> 右上) をuで補間
-    DS_IN top = (DS_IN) 0;
-    top.position = lerp(patch[0].position, patch[3].position, u);
-
-    // 下の辺 (左下 -> 右下) をuで補間
-    DS_IN bottom = (DS_IN) 0;
-    bottom.position = lerp(patch[1].position, patch[2].position, u);
-
-    // 上の辺と下の辺の結果をvで補間
-    DS_IN finalAttrib = (DS_IN) 0;
-    finalAttrib.position = lerp(top.position, bottom.position, v);
-    // -----------------------------------------
-
+    float uBar = 1.0f - u;
+    float vBar = 1.0f - v;
+    
+    float uv = u * v;
+    float uBarv = uBar * v;
+    float uvBar = u * vBar;
+    float uBarvBar = uBar * vBar;
+    
     DS_OUT dout = (DS_OUT) 0;
-    float3 position = finalAttrib.position.xyz;
+    float3 position =
+    patch[0].position * uBarvBar +
+    patch[1].position * uBarv +
+    patch[2].position * uv +
+    patch[3].position * uvBar;
     float3 worldPosition = mul(float4(position, 1.0f), world).xyz;
     // 法線計算
-    float3 normal = normalize(cross(patch[3].position.xyz - patch[1].position.xyz, patch[0].position.xyz - patch[1].position.xyz));
+    float3 normal = normalize(cross(patch[3].position - patch[1].position, patch[0].position - patch[1].position));
     // positionをUVに変換
     float2 texcoord = float2((position.x + 1.0f) / 2.0f, 1.0f - (position.z + 1.0f) / 2.0f);
     

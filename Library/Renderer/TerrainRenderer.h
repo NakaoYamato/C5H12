@@ -50,7 +50,7 @@ public:
     
 	static constexpr float MaxTessellation = 64.0f;
     // •ªŠ„”
-    static constexpr size_t DivisionCount = 20;
+    static constexpr size_t DivisionCount = 17;
     // 1•Ó‚ ‚½‚è‚Ì’¸“_”
     static constexpr size_t VertexCountPerSide = DivisionCount + 1;
     static constexpr UINT ParameterMapSRVIndex = 6;

@@ -8,9 +8,9 @@ uint pid : SV_PrimitiveID)
 {
     HS_CONSTANT_OUT hout = (HS_CONSTANT_OUT) 0;
     // ƒJƒƒ‰‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä•ªŠ„”‚ğ’²®
-    float4 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) / 4.0;
-    center = mul(center, world);
-    float len = length(center.xyz - cameraPosition.xyz);
+    float3 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) / 4.0;
+    center = mul(float4(center, 1.0f), world).xyz;
+    float len = length(center - cameraPosition.xyz);
     int index = (int) clamp(len / lodDistance, 0.0f, 3.0f);
     float factor = lodTessFactors[index];
     

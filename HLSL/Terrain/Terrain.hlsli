@@ -3,7 +3,7 @@
 // VS“ü—Í
 struct VS_IN
 {
-    float4 position : POSITION;
+    float3 position : POSITION;
 };
 
 // HS“ü—Í(VSo—Í‚Æ“¯‚¶)

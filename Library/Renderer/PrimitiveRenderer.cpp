@@ -57,7 +57,7 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 	// 距離テクスチャの読み込み
 	GpuResourceManager::LoadTextureFromFile(
 		device,
-		L"./Data/Texture/Noise/NormalMap002.png",
+		L"./Data/Texture/Noise/SwordTrail000.png",
 		_distanceSRV.ReleaseAndGetAddressOf(),
 		nullptr);
 }

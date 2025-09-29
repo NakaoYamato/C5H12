@@ -56,7 +56,7 @@ namespace ImGui
 	/// <param name="resultPath"></param>
 	/// <param name="filter"></param>
 	/// <returns></returns>
-	static bool SaveDialogBotton(const char* title, std::string* resultPath, const char* filter = "All Files(*.*)\0*.*;\0\0")
+	static bool SaveDialogBotton(const char* title, std::string* resultPath, const char* filter = "All Files(*.*)\0*.*;\0\0", LPCSTR dialogTitle = nullptr)
 	{
 		if (ImGui::Button(title))
 		{
@@ -64,7 +64,7 @@ namespace ImGui
 			Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
 				resultPath,
 				filter,
-				title,
+				dialogTitle,
 				"txt");
 			if (result == Debug::Dialog::DialogResult::OK)
 			{

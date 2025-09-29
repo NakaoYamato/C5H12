@@ -145,7 +145,7 @@ namespace Debug
             std::string& filepath,
             std::string& currentDirectory,
             const char* filter,
-            const char* title,
+            LPCSTR title,
             HWND hwnd, 
             bool multi_select)
         {
@@ -226,8 +226,8 @@ namespace Debug
             char* filepath, 
             int size, 
             const char* filter, 
-            const char* title, 
-            const char* ext, 
+            LPCSTR title,
+            LPCSTR ext,
             HWND hwnd)
         {
             // èâä˙ÉpÉXê›íË
@@ -298,8 +298,8 @@ namespace Debug
         DialogResult SaveFileName(
             std::string* filepath,
             const char* filter, 
-            const char* title,
-            const char* ext,
+            LPCSTR title,
+            LPCSTR ext,
             HWND hwnd)
         {
             char path[MAX_PATH]{};

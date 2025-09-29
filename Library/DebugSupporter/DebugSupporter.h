@@ -200,7 +200,7 @@ namespace Debug
 			std::string& filepath,
 			std::string& currentDirectory,
 			const char* filter = nullptr, 
-			const char* title = nullptr,
+			LPCSTR title = nullptr,
 			HWND hwnd = NULL,
 			bool multi_select = false);
 
@@ -209,14 +209,14 @@ namespace Debug
 			char* filepath, 
 			int size, 
 			const char* filter = nullptr, 
-			const char* title = nullptr,
-			const char* ext = nullptr,
+			LPCSTR title = nullptr,
+			LPCSTR ext = nullptr,
 			HWND hwnd = NULL);
 		DialogResult SaveFileName(
 			std::string* filepath,
 			const char* filter = nullptr,
-			const char* title = nullptr,
-			const char* ext = nullptr,
+			LPCSTR title = nullptr,
+			LPCSTR ext = nullptr,
 			HWND hwnd = NULL);
 	}
 

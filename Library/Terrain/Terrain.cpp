@@ -60,6 +60,9 @@ bool Terrain::UpdateTextures(TextureRenderer& textureRenderer, ID3D11DeviceConte
         _materialMapFB->Clear(NormalTextureIndex, dc, Vector4::Blue);
         _materialMapFB->Clear(ParameterTextureIndex, dc, Vector4::Black);
         _resetMap = false;
+        _baseColorTexturePath.clear();
+		_normalTexturePath.clear();
+		_parameterTexturePath.clear();
         res = true;
     }
 
@@ -333,8 +336,45 @@ void Terrain::SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<Stream
         0);
 }
 // 書き出し
-void Terrain::SaveToFile(const std::string& path)
+void Terrain::SaveToFile(ID3D11Device* device, ID3D11DeviceContext* dc, const std::string& path)
 {
+    if (_baseColorTexturePath.empty())
+    {
+        // ダイアログを開く
+        std::string resultPath = "";
+        Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
+            &resultPath,
+            ImGui::DDSTextureFilter,
+            "ベースカラーファイルパス");
+        if (result != Debug::Dialog::DialogResult::OK)
+            return;
+		SaveBaseColorTexture(device, dc, ToWString(resultPath).c_str());
+    }
+    if (_normalTexturePath.empty())
+    {
+        // ダイアログを開く
+        std::string resultPath = "";
+        Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
+            &resultPath,
+            ImGui::DDSTextureFilter,
+            "法線ファイルパス");
+        if (result != Debug::Dialog::DialogResult::OK)
+            return;
+        SaveNormalTexture(device, dc, ToWString(resultPath).c_str());
+    }
+	if (_parameterTexturePath.empty())
+	{
+		// ダイアログを開く
+		std::string resultPath = "";
+		Debug::Dialog::DialogResult result = Debug::Dialog::SaveFileName(
+			&resultPath,
+			ImGui::DDSTextureFilter,
+			"パラメータファイルパス");
+		if (result != Debug::Dialog::DialogResult::OK)
+			return;
+		SaveParameterMap(device, dc, ToWString(resultPath).c_str());
+	}
+
     nlohmann::json jsonData;
     {
         jsonData["baseColorTexturePath"] = _baseColorTexturePath;

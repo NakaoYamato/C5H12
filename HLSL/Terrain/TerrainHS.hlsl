@@ -10,7 +10,8 @@ uint pid : SV_PrimitiveID)
     // ƒJƒƒ‰‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä•ªŠ„”‚ğ’²®
     float3 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) / 4.0;
     center = mul(float4(center, 1.0f), world).xyz;
-    float len = length(center - cameraPosition.xyz);
+    float3 vec = center - cameraPosition.xyz;
+    float len = length(vec);
     int index = (int) clamp(len / lodDistance, 0.0f, 3.0f);
     float factor = lodTessFactors[index];
     

@@ -73,7 +73,7 @@ public:
 	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
 
     // ‘‚«o‚µ
-    void SaveToFile(const std::string& path);
+    void SaveToFile(ID3D11Device* device, ID3D11DeviceContext* dc, const std::string& path);
     // “Ç‚İ‚İ
     void LoadFromFile(ID3D11Device* device, const std::string& path);
 #pragma endregion

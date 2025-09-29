@@ -197,10 +197,10 @@ void TerrainController::DrawGui()
         }
         ImGui::Separator();
         std::string resultPath = "";
-        if (ImGui::SaveDialogBotton(u8"保存", &resultPath, ImGui::JsonFilter))
+        if (ImGui::SaveDialogBotton(u8"保存", &resultPath, ImGui::JsonFilter, "保存先を指定"))
         {
             // 地形の情報をJSONファイルに保存
-            _terrain->SaveToFile(resultPath);
+            _terrain->SaveToFile(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext(), resultPath);
         }
         if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::JsonFilter))
         {

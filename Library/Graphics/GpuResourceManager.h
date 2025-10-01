@@ -70,13 +70,13 @@ public:
 	static void MakeDummyTexture(
 		ID3D11Device* device,
 		ID3D11ShaderResourceView** shaderResourceView,
-		DWORD value/*0xAABBFFRR*/, UINT dimension);
+		DWORD value/*0xAABBGGRR*/, UINT dimension);
 	// ダミーテクスチャ作成
 	static void MakeDummyTexture(
 		ID3D11Device* device,
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc,
-		DWORD value/*0xAABBFFRR*/, UINT dimension);
+		DWORD value/*0xAABBGGRR*/, UINT dimension);
 
 	// SRVのコピーを作成
 	static void CreateShaderResourceViewCopy(

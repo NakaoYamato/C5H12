@@ -1,7 +1,30 @@
 #include "LocusRenderer.h"
 
 #include "../../Library/Scene/Scene.h"
+#include "../../Library/Graphics/Graphics.h"
 #include <imgui.h>
+
+// 開始処理
+void LocusRenderer::Start()
+{
+	auto device = Graphics::Instance().GetDevice();
+	// ピクセルシェーダ読み込み
+	_pixelShader.Load(device, "./Data/Shader/HLSL/PrimitiveRenderer/Locus/PlayerSwordLocusPS.cso");
+	// 定数バッファ生成
+	_constantBuffer.Create(device, sizeof(CBPrimitive));
+	// ノイズテクスチャの読み込み
+	GpuResourceManager::LoadTextureFromFile(
+		device,
+		L"./Data/Texture/Noise/Noise002.png",
+		_colorSRV.ReleaseAndGetAddressOf(),
+		nullptr);
+	// 距離テクスチャの読み込み
+	GpuResourceManager::LoadTextureFromFile(
+		device,
+		L"./Data/Texture/Noise/SwordTrail000.png",
+		_parameterSRV.ReleaseAndGetAddressOf(),
+		nullptr);
+}
 
 // 更新処理
 void LocusRenderer::Update(float elapsedTime)
@@ -47,16 +70,19 @@ void LocusRenderer::Render(const RenderContext& rc)
 {
     auto& primitiveRenderer = GetActor()->GetScene()->GetPrimitiveRenderer();
 
+	PrimitiveRenderer::RenderInfo primitiveInfo{};
+	primitiveInfo.colorSRV = _colorSRV.GetAddressOf();
+	primitiveInfo.parameterSRV = _parameterSRV.GetAddressOf();
+	primitiveInfo.pixelShader = &_pixelShader;
+	primitiveInfo.constantBuffer = &_constantBuffer;
 	if (_splineInterpolation)
 	{
 		// スプライン補間を使用する場合
 		int numPoints = static_cast<int>(_trailPositions.size());
 		for (int i = 0; i < numPoints; ++i)
 		{
-			primitiveRenderer.AddVertex(
-				_trailPositions[i].rootPosition, _rootColor);
-			primitiveRenderer.AddVertex(
-				_trailPositions[i].tipPosition, _tipColor);
+			primitiveInfo.vertices.push_back({ _trailPositions[i].rootPosition, _rootColor });
+			primitiveInfo.vertices.push_back({ _trailPositions[i].tipPosition, _tipColor });
 
 			// 最初と最後2つでなければ処理
 			if (0 < i && i < numPoints - 2)
@@ -72,8 +98,7 @@ void LocusRenderer::Render(const RenderContext& rc)
 							DirectX::XMLoadFloat3(&_trailPositions[static_cast<size_t>(i + 1)].rootPosition),
 							DirectX::XMLoadFloat3(&_trailPositions[static_cast<size_t>(i + 2)].rootPosition),
 							t / _catmullRom));
-					primitiveRenderer.AddVertex(
-						lerpPos, _rootColor);
+					primitiveInfo.vertices.push_back({ lerpPos, _rootColor });
 
 					// tip
 					DirectX::XMStoreFloat3(&lerpPos,
@@ -83,8 +108,7 @@ void LocusRenderer::Render(const RenderContext& rc)
 							DirectX::XMLoadFloat3(&_trailPositions[static_cast<size_t>(i + 1)].tipPosition),
 							DirectX::XMLoadFloat3(&_trailPositions[static_cast<size_t>(i + 2)].tipPosition),
 							t / _catmullRom));
-					primitiveRenderer.AddVertex(
-						lerpPos, _tipColor);
+					primitiveInfo.vertices.push_back({ lerpPos, _tipColor });
 				}
 			}
         }
@@ -93,12 +117,22 @@ void LocusRenderer::Render(const RenderContext& rc)
 	{
 		for (auto& pos : _trailPositions)
 		{
-			primitiveRenderer.AddVertex(
-				pos.rootPosition, _rootColor);
-			primitiveRenderer.AddVertex(
-				pos.tipPosition, _tipColor);
+			primitiveInfo.vertices.push_back({ pos.rootPosition, _rootColor });
+			primitiveInfo.vertices.push_back({ pos.tipPosition, _tipColor });
 		}
 	}
+	// 定数バッファ更新
+	CBPrimitive cb{};
+	cb.vertexCount = static_cast<UINT>(primitiveInfo.vertices.size());
+	D3D11_VIEWPORT viewport;
+	UINT numViewports = 1;
+	rc.deviceContext->RSGetViewports(&numViewports, &viewport);
+	cb.viewportSize = Vector2(
+		static_cast<float>(viewport.Width),
+		static_cast<float>(viewport.Height));
+	_constantBuffer.Update(rc.deviceContext, &cb);
+
+	GetActor()->GetScene()->GetPrimitiveRenderer().Draw(primitiveInfo);
 }
 // 軌跡追加
 void LocusRenderer::PushFrontVertex(const Vector3& rootWP, 

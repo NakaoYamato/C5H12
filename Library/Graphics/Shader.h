@@ -25,7 +25,6 @@ class PixelShader
 public:
 	PixelShader() = default;
 	~PixelShader() = default;
-
 	// ピクセルシェーダーを読み込む
 	void Load(ID3D11Device* device, const std::string& filepath);
 	// 読み込んだピクセルシェーダーを取得

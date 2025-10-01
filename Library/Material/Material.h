@@ -6,6 +6,8 @@
 #include <d3d11.h>
 
 #include "../../Library/Math/Vector.h"
+#include "../../Library/Graphics/Shader.h"
+#include "../../Library/Graphics/Texture.h"
 
 /// <summary>
 /// ブレンドタイプ
@@ -20,13 +22,6 @@ enum class BlendType
 
 class Material
 {
-public:
-	struct TextureData
-	{
-		std::wstring filename;
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
-		D3D11_TEXTURE2D_DESC texture2dDesc{};
-	};
 public:
 	Material() = default;
 	Material(const std::string& name) : _name(name) {}
@@ -64,21 +59,21 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
 		const std::string& key)
 	{
-		_textureDatas[key].textureSRV = srv;
+		_textureDatas[key].Set(srv);
 	}
 #pragma region アクセサ
 	const std::string& GetName() const { return _name; }
 	const Vector4& GetColor(const std::string& key) const { return _colors.at(key); }
-	const std::unordered_map<std::string, TextureData>& GetTextureDatas() const { return _textureDatas; }
-	const TextureData& GetTextureData(const std::string& key) const { return _textureDatas.at(key); }
-	ID3D11ShaderResourceView* const* GetAddressOfTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.GetAddressOf(); }
-	ID3D11ShaderResourceView* GetTextureSRV(const std::string& key) const { return _textureDatas.at(key).textureSRV.Get(); }
+	const std::unordered_map<std::string, Texture>& GetTextureDatas() const { return _textureDatas; }
+	const Texture& GetTextureData(const std::string& key) const { return _textureDatas.at(key); }
+	ID3D11ShaderResourceView* const* GetAddressOfTextureSRV(const std::string& key) const { return _textureDatas.at(key).GetAddressOf(); }
+	ID3D11ShaderResourceView* GetTextureSRV(const std::string& key) const { return _textureDatas.at(key).Get(); }
 	BlendType GetBlendType() const { return _blendType; }
 	const std::string& GetShaderName() const { return _shaderName; }
 
 	void SetName(const std::string& name) { _name = name; }
 	void SetColor(const std::string& key, const Vector4& color) { _colors[key] = color; }
-	void SetTextureData(const std::string& key, const TextureData& textureData) { _textureDatas[key] = textureData; }
+	void SetTextureData(const std::string& key, const Texture& textureData) { _textureDatas[key] = textureData; }
 	void SetBlendType(BlendType type) { _blendType = type; }
 	void SetShaderName(std::string type) { _shaderName = type; }
 #pragma endregion
@@ -86,8 +81,11 @@ public:
 private:
 	std::string										_name;
 	std::unordered_map<std::string, Vector4>		_colors;
-	std::unordered_map<std::string, TextureData>	_textureDatas;
+	std::unordered_map<std::string, Texture>		_textureDatas;
 
-	BlendType		_blendType = BlendType::Opaque;
+	VertexShader									_vertexShader;
+	PixelShader										_pixelShader;
+
+	BlendType										_blendType = BlendType::Opaque;
 	std::string		_shaderName = "";
 };

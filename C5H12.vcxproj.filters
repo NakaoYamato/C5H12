@@ -621,10 +621,16 @@
     <ClCompile Include="Library\Component\LocusRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\Shader.cpp">
+    <ClCompile Include="Library\Graphics\Shader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Actor\Terrain\TerrainActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Graphics\ConstantBuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Graphics\Texture.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1304,10 +1310,16 @@
     <ClInclude Include="Library\Component\LocusRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\Shader.h">
+    <ClInclude Include="Library\Graphics\Shader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Actor\Terrain\TerrainActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\ConstantBuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Texture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1436,5 +1448,6 @@
     <FxCompile Include="HLSL\Terrain\TerrainNonLODHS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformBumpyHeightPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowVS.hlsl" />
+    <FxCompile Include="HLSL\PrimitiveRenderer\Locus\PlayerSwordLocusPS.hlsl" />
   </ItemGroup>
 </Project>

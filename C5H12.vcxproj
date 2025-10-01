@@ -175,6 +175,8 @@
     <ClCompile Include="Library\Decal\Decal.cpp" />
     <ClCompile Include="Library\Effekseer\EffekseerEffectManager.cpp" />
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
+    <ClCompile Include="Library\Graphics\ConstantBuffer.cpp" />
+    <ClCompile Include="Library\Graphics\Texture.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
     <ClCompile Include="Library\Math\MathF.cpp" />
@@ -272,7 +274,7 @@
     <ClCompile Include="Library\Shader\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Ramp\RampShader.cpp" />
-    <ClCompile Include="Library\Shader\Shader.cpp" />
+    <ClCompile Include="Library\Graphics\Shader.cpp" />
     <ClCompile Include="Library\Shader\Test\TestShader.cpp" />
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
@@ -388,6 +390,8 @@
     <ClInclude Include="Library\Decal\Decal.h" />
     <ClInclude Include="Library\Effekseer\EffekseerEffectManager.h" />
     <ClInclude Include="Library\Exporter\Exporter.h" />
+    <ClInclude Include="Library\Graphics\ConstantBuffer.h" />
+    <ClInclude Include="Library\Graphics\Texture.h" />
     <ClInclude Include="Library\ImGui\imgui-docking\Mygui.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
     <ClInclude Include="Library\Material\Material.h" />
@@ -498,7 +502,7 @@
     <ClInclude Include="Library\Shader\PBR\PBRShader.h" />
     <ClInclude Include="Library\Shader\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Ramp\RampShader.h" />
-    <ClInclude Include="Library\Shader\Shader.h" />
+    <ClInclude Include="Library\Graphics\Shader.h" />
     <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Library\Shader\Test\TestShader.h" />
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
@@ -858,6 +862,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\PostProcess\DepthOfField\DepthOfFieldPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\PrimitiveRenderer\Locus\PlayerSwordLocusPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

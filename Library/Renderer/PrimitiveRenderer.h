@@ -7,28 +7,18 @@
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Math/Quaternion.h"
-#include "../../Library/Shader/Shader.h"
+
+#include "../../Library/Graphics/Shader.h"
+#include "../../Library/Graphics/ConstantBuffer.h"
 
 class PrimitiveRenderer
 {
 public:
-	PrimitiveRenderer() = default;
-	~PrimitiveRenderer() = default;
-
-	// 初期化処理
-	void Initialize(ID3D11Device* device);
-
-	// 頂点追加
-	void AddVertex(const Vector3& position, const Vector4& color);
-
-	// 描画実行
-	void Render(
-		ID3D11DeviceContext* dc,
-		const DirectX::XMFLOAT4X4& view,
-		const DirectX::XMFLOAT4X4& projection);
-
-private:
 	static const UINT VertexCapacity = 3 * 1024;
+
+	static const UINT CBIndex = 1;
+	static const UINT ColorSRVIndex = 3;
+	static const UINT ParameterSRVIndex = 4;
 
 	struct CbScene
 	{
@@ -42,16 +32,37 @@ private:
 		Vector3	position;
 		Vector4	color;
 	};
-	std::vector<Vertex>		vertices;
 
-	PixelShader			_pixelShader;
+	struct RenderInfo
+	{
+		ID3D11ShaderResourceView**	colorSRV		= nullptr;
+		ID3D11ShaderResourceView**	parameterSRV	= nullptr;
+		PixelShader*				pixelShader		= nullptr;
+		ConstantBuffer*				constantBuffer	= nullptr;
+
+		std::vector<Vertex>			vertices;
+	};
+
+public:
+	PrimitiveRenderer() = default;
+	~PrimitiveRenderer() = default;
+
+	// 初期化処理
+	void Initialize(ID3D11Device* device);
+
+	// 描画
+	void Draw(const RenderInfo& info);
+
+	// 描画実行
+	void Render(
+		ID3D11DeviceContext* dc,
+		const DirectX::XMFLOAT4X4& view,
+		const DirectX::XMFLOAT4X4& projection);
+
+private:
+	std::vector<RenderInfo>						_renderInfos;
+	PixelShader									_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>	inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _noiseSRV;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _distanceSRV;
-
-	float timer = 0.0f; // タイマー
 };

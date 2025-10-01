@@ -39,10 +39,10 @@ void Material::DrawGui()
 		ImGui::Text((u8"テクスチャ名:" + key).c_str());
 		ImGui::Text(u8"ファイル名:");
 		ImGui::SameLine();
-		ImGui::Text(ToString(textureData.filename).c_str());
+		ImGui::Text(ToString(textureData.GetFilepath()).c_str());
 		static float textureSize = 128.0f;
-		ImGui::Image(textureData.textureSRV.Get(), { textureSize,textureSize });
-		ImGui::PushID(&textureData.filename);
+		ImGui::Image(textureData.Get(), { textureSize,textureSize });
+		ImGui::PushID(textureData.GetFilepath().data());
 		ImGui::SameLine();
 		if (ImGui::Button("..."))
 		{
@@ -58,11 +58,7 @@ void Material::DrawGui()
 				std::filesystem::path path =
 					std::filesystem::relative(filepath, currentDirectory);
                 // テクスチャの読み込み
-                textureData.filename = path.c_str();
-				GpuResourceManager::LoadTextureFromFile(Graphics::Instance().GetDevice(),
-					textureData.filename.c_str(),
-					textureData.textureSRV.ReleaseAndGetAddressOf(),
-					&textureData.texture2dDesc);
+				textureData.Load(Graphics::Instance().GetDevice(), path.c_str());
 			}
 		}
 		ImGui::PopID();
@@ -75,21 +71,7 @@ void Material::LoadTexture(const std::string& key,
 	const wchar_t* filename)
 {
 	// テクスチャの読み込み
-	TextureData& textureData = _textureDatas[key];
-	textureData.filename = filename;
-	bool res = GpuResourceManager::LoadTextureFromFile(Graphics::Instance().GetDevice(), filename,
-		textureData.textureSRV.ReleaseAndGetAddressOf(),
-		&textureData.texture2dDesc);
-
-    // 読み込みに失敗した場合はダミーテクスチャを作成
-	if (!res)
-	{
-		Debug::Output::String(L"テクスチャの読み込みに失敗しました: ");
-		Debug::Output::String(filename);
-		Debug::Output::String(L"\n");
-		// 赤色の1x1ダミーテクスチャを作成
-		MakeDummyTexture(key, 0xFF0000FF, 1);
-	}
+	_textureDatas[key].Load(Graphics::Instance().GetDevice(), filename);
 }
 
 /// ダミーテクスチャ作成
@@ -98,9 +80,5 @@ void Material::MakeDummyTexture(const std::string& key,
 	UINT dimension)
 {
 	// テクスチャの作成
-	TextureData& textureData = _textureDatas[key];
-	GpuResourceManager::MakeDummyTexture(Graphics::Instance().GetDevice(),
-		textureData.textureSRV.ReleaseAndGetAddressOf(), 
-		&textureData.texture2dDesc,
-		value, dimension);
+	_textureDatas[key].MakeDummyTexture(Graphics::Instance().GetDevice(), value, dimension);
 }

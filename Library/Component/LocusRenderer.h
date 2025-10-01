@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Library/Graphics/Shader.h"
+#include "../../Library/Graphics/ConstantBuffer.h"
 
 class LocusRenderer : public Component
 {
@@ -13,11 +15,20 @@ public:
 		float	lifeTime = 0.0f; // 追加した時刻からの経過時間
 	};
 
+	struct CBPrimitive
+	{
+		UINT	vertexCount;	// 頂点数
+		Vector2 viewportSize;	// ビューポートのサイズ
+		float	padding;		// パディング用
+	};
+
 public:
 	LocusRenderer() {}
 	~LocusRenderer() override {}
 	// 名前取得
 	const char* GetName() const override { return "LocusRenderer"; }
+	// 開始処理
+	void Start() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
 	// GUI描画
@@ -40,4 +51,9 @@ private:
 	Vector4					_tipColor = { 1.0f, 0.8f, 0.8f, 0.5f };
     float					_catmullRom = 3.0f; // Catmull-Romスプラインのパラメータ
     bool					_splineInterpolation = true; // スプライン補間を使用するかどうか
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _colorSRV = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _parameterSRV = nullptr;
+	PixelShader				_pixelShader;
+	ConstantBuffer			_constantBuffer;
 };

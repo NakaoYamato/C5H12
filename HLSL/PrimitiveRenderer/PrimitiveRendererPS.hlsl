@@ -12,6 +12,8 @@ float4 main(VS_OUT pin) : SV_TARGET
     {
         float4 distance = distanceMap.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], pin.texcoord);
         float rate = saturate(length(distance.xyz));
+        if (rate > 0.5f && rate < 0.7f)
+            return float4(1.0f, 1.0f, 1.0f, 1.0f) * pin.texcoord.y;
         //return float4(rate, 0.0f, 0.0f, 1.0f);
         float2 vec = (pin.texcoord - float2(0.5f, 0.5f)) * 0.3f * rate;
         float2 screenUV = pin.position.xy / viewportSize;

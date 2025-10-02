@@ -115,14 +115,17 @@ void TerrainEnvironmentController::Update(float elapsedTime)
 		if (_renderer.lock())
 		{
 			auto renderer = _renderer.lock();
-			auto iter = renderer->GetShaderParameter().end();
+			if (renderer == nullptr)
+				return;
+			static std::string PrameterName = "shakeAxis";
+
 			if (renderer->GetMaterial().GetShaderName() != "Grass")
 			{
 				renderer->ChangeShader("Grass");
-				iter = renderer->GetShaderParameter().find("shakeAxis");
-				if (iter != renderer->GetShaderParameter().end())
+				auto& materials = renderer->GetMaterial();
+				if (materials.GetParameterI1(PrameterName) != nullptr)
 				{
-					iter->second = 5.0f; // ‘‚Ì—h‚ê²‚ğ-Z²‚Éİ’è
+					materials.SetParameter(PrameterName, 5);// ‘‚Ì—h‚ê²‚ğ-Z²‚Éİ’è
 				}
 			}
 		}

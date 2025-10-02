@@ -7,7 +7,6 @@
 #include <variant>
 
 #include "../../Library/Math/Vector.h"
-#include "../../Library/Graphics/Shader.h"
 #include "../../Library/Graphics/Texture.h"
 
 /// <summary>
@@ -25,7 +24,9 @@ class Material
 {
 public:
 	using VariantType = std::variant<int, float, Vector2, Vector3, Vector4>;
-
+	using ColorMap = std::unordered_map<std::string, Vector4>;
+	using TextureMap = std::unordered_map<std::string, Texture>;
+	using ParameterMap = std::unordered_map<std::string, VariantType>;
 public:
 	Material() = default;
 	Material(const std::string& name) : _name(name) {}
@@ -66,30 +67,69 @@ public:
 		_textureDatas[key].Set(srv);
 	}
 #pragma region アクセサ
-	const std::string& GetName() const { return _name; }
-	const Vector4& GetColor(const std::string& key) const { return _colors.at(key); }
-	const std::unordered_map<std::string, Texture>& GetTextureDatas() const { return _textureDatas; }
-	const Texture& GetTextureData(const std::string& key) const { return _textureDatas.at(key); }
-	ID3D11ShaderResourceView* const* GetAddressOfTextureSRV(const std::string& key) const { return _textureDatas.at(key).GetAddressOf(); }
-	ID3D11ShaderResourceView* GetTextureSRV(const std::string& key) const { return _textureDatas.at(key).Get(); }
-	BlendType GetBlendType() const { return _blendType; }
-	const std::string& GetShaderName() const { return _shaderName; }
+	// マテリアル名取得
+	const std::string&								GetName() const { return _name; }
+	// 色取得
+	const Vector4&									GetColor(const std::string& key) const { return _colors.at(key); }
+	// テクスチャ情報取得
+	const Texture&									GetTextureData(const std::string& key) const { return _textureDatas.at(key); }
+	// パラメータ取得
+	const VariantType&								GetParameter(const std::string& key) const { return _parameters.at(key); }
+	// パラメータ(int1)取得　失敗でnullptr
+	const int*										GetParameterI1(const std::string& key) const { return std::get_if<int>(&_parameters.at(key)); }
+	// パラメータ(float1)取得　失敗でnullptr
+	const float*									GetParameterF1(const std::string& key) const { return std::get_if<float>(&_parameters.at(key)); }
+	// パラメータ(Vector2)取得　失敗でnullptr
+	const Vector2*									GetParameterF2(const std::string& key) const { return std::get_if<Vector2>(&_parameters.at(key)); }
+	// パラメータ(Vector3)取得　失敗でnullptr
+	const Vector3*									GetParameterF3(const std::string& key) const { return std::get_if<Vector3>(&_parameters.at(key)); }
+	// パラメータ(Vector4)取得　失敗でnullptr
+	const Vector4*									GetParameterF4(const std::string& key) const { return std::get_if<Vector4>(&_parameters.at(key)); }
+	// ブレンドタイプ取得
+	BlendType										GetBlendType() const { return _blendType; }
+	// シェーダー名取得
+	const std::string&								GetShaderName() const { return _shaderName; }
 
+	// マテリアル名設定
 	void SetName(const std::string& name) { _name = name; }
+	// 色設定
 	void SetColor(const std::string& key, const Vector4& color) { _colors[key] = color; }
+	// テクスチャ設定
 	void SetTextureData(const std::string& key, const Texture& textureData) { _textureDatas[key] = textureData; }
+	// パラメータ設定
+	void SetParameter(const std::string& key, const VariantType& parameter) { _parameters[key] = parameter; }
+	// パラメータ設定
+	void SetParameter(const std::string& key, int parameter) { _parameters[key] = parameter; }
+	// パラメータ設定
+	void SetParameter(const std::string& key, float parameter) { _parameters[key] = parameter; }
+	// パラメータ設定
+	void SetParameter(const std::string& key, const Vector2& parameter) { _parameters[key] = parameter; }
+	// パラメータ設定
+	void SetParameter(const std::string& key, const Vector3& parameter) { _parameters[key] = parameter; }
+	// パラメータ設定
+	void SetParameter(const std::string& key, const Vector4& parameter) { _parameters[key] = parameter; }
+	// パラメータ設定
+	void SetParameterMap(const Material::ParameterMap& parameter) { _parameters = parameter; }
+	// ブレンドタイプ設定
 	void SetBlendType(BlendType type) { _blendType = type; }
+	// シェーダー名設定
 	void SetShaderName(std::string type) { _shaderName = type; }
 #pragma endregion
 
 private:
-	std::string										_name;
-	std::unordered_map<std::string, Vector4>		_colors;
-	std::unordered_map<std::string, Texture>		_textureDatas;
-	std::unordered_map<std::string, VariantType>	_parameters;
-	VertexShader									_vertexShader;
-	PixelShader										_pixelShader;
+	// ColorMapGUI描画
+	void DrawColorMapGui();
+	// TextureMapGUI描画
+	void DrawTextureMapGui();
+	// ParameterMapGUI描画
+	void DrawParameterMapGui();
 
-	BlendType										_blendType = BlendType::Opaque;
+private:
+	std::string		_name;
+	ColorMap		_colors;
+	TextureMap		_textureDatas;
+	ParameterMap	_parameters;
+
+	BlendType		_blendType = BlendType::Opaque;
 	std::string		_shaderName = "";
 };

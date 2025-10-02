@@ -129,10 +129,10 @@
     <ClCompile Include="Library\2D\SkyMap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.cpp">
+    <ClCompile Include="Library\Shader\Model\CascadedShadowMap\CascadedShadowMapShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\Phong\PhongShader.cpp">
+    <ClCompile Include="Library\Shader\Model\Phong\PhongShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\2D\Primitive.cpp">
@@ -183,7 +183,7 @@
     <ClCompile Include="Library\Component\Animator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\Ramp\RampShader.cpp">
+    <ClCompile Include="Library\Shader\Model\Ramp\RampShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\PostProcess\RobertsCross\RobertsCross.cpp">
@@ -204,13 +204,13 @@
     <ClCompile Include="Library\Renderer\MeshRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\Grass\GrassShader.cpp">
+    <ClCompile Include="Library\Shader\Model\Grass\GrassShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Stage\GrassController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\PBR\PBRShader.cpp">
+    <ClCompile Include="Library\Shader\Model\PBR\PBRShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Player\PlayerActor.cpp">
@@ -516,7 +516,7 @@
     <ClCompile Include="Library\Component\Terrain\TerrainEnvironmentController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Shader\Test\TestShader.cpp">
+    <ClCompile Include="Library\Shader\Model\Test\TestShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp">
@@ -773,10 +773,10 @@
     <ClInclude Include="Library\2D\SkyMap.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\CascadedShadowMap\CascadedShadowMapShader.h">
+    <ClInclude Include="Library\Shader\Model\CascadedShadowMap\CascadedShadowMapShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\Phong\PhongShader.h">
+    <ClInclude Include="Library\Shader\Model\Phong\PhongShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Shader\ShaderBase.h">
@@ -836,7 +836,7 @@
     <ClInclude Include="Library\Component\Animator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\Ramp\RampShader.h">
+    <ClInclude Include="Library\Shader\Model\Ramp\RampShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\PostProcess\RobertsCross\RobertsCross.h">
@@ -854,13 +854,13 @@
     <ClInclude Include="Library\Renderer\MeshRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\Grass\GrassShader.h">
+    <ClInclude Include="Library\Shader\Model\Grass\GrassShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Stage\GrassController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\PBR\PBRShader.h">
+    <ClInclude Include="Library\Shader\Model\PBR\PBRShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Player\PlayerActor.h">
@@ -1193,7 +1193,7 @@
     <ClInclude Include="Library\Component\Terrain\TerrainEnvironmentController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Shader\Test\TestShader.h">
+    <ClInclude Include="Library\Shader\Model\Test\TestShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\InstancingModelRenderer.h">
@@ -1320,6 +1320,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Graphics\Texture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Model\ModelShaderBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

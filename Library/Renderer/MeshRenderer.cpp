@@ -1,13 +1,13 @@
 #include "MeshRenderer.h"
 
 #include "../Graphics/GpuResourceManager.h"
-#include "../../Shader/Phong/PhongShader.h"
-#include "../../Shader/Ramp/RampShader.h"
-#include "../../Shader/Grass/GrassShader.h"
-#include "../../Shader/PBR/PBRShader.h"
-#include "../../Shader/Test/TestShader.h"
+#include "../../Shader/Model/Phong/PhongShader.h"
+#include "../../Shader/Model/Ramp/RampShader.h"
+#include "../../Shader/Model/Grass/GrassShader.h"
+#include "../../Shader/Model/PBR/PBRShader.h"
+#include "../../Shader/Model/Test/TestShader.h"
 
-#include "../../Shader/CascadedShadowMap/CascadedShadowMapShader.h"
+#include "../../Shader/Model/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
@@ -200,23 +200,22 @@ void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
 	Model* model,
 	const Vector4& color,
 	Material* material,
-	ModelRenderType renderType,
-	ShaderBase::Parameter* parameter)
+	ModelRenderType renderType)
 {
 	// 描画タイプに応じて登録
 	switch (renderType)
 	{
 	case ModelRenderType::Dynamic:
 		if (material->GetBlendType() == BlendType::Alpha)
-			_alphaDrawInfomap.push_back({ model, mesh, color, material, parameter, renderType, 0.0f });
+			_alphaDrawInfomap.push_back({ model, mesh, color, material, renderType, 0.0f });
 		else
-			_dynamicInfomap[material->GetShaderName()].push_back({ model, mesh, color, material, parameter });
+			_dynamicInfomap[material->GetShaderName()].push_back({ model, mesh, color, material });
 		break;
 	case ModelRenderType::Static:
 		if (material->GetBlendType() == BlendType::Alpha)
-			_alphaDrawInfomap.push_back({ model, mesh, color, material, parameter, renderType, 0.0f });
+			_alphaDrawInfomap.push_back({ model, mesh, color, material, renderType, 0.0f });
 		else
-			_staticInfomap[material->GetShaderName()].push_back({ model, mesh, color,  material, parameter });
+			_staticInfomap[material->GetShaderName()].push_back({ model, mesh, color,  material });
 		break;
 	case ModelRenderType::Instancing:
 		assert(!"Please Call \"DrawInstancing\"");
@@ -230,12 +229,12 @@ void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
 /// メッシュのテスト描画
 void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType)
 {
-	MeshRenderer::Draw(mesh, model, Vector4::White, &_testMaterial, renderType, nullptr);
+	MeshRenderer::Draw(mesh, model, Vector4::White, &_testMaterial, renderType);
 }
 /// メッシュのテスト描画
 void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
 {
-	MeshRenderer::DrawInstancing(model, Vector4::White, &_testMaterial, world, nullptr);
+	MeshRenderer::DrawInstancing(model, Vector4::White, &_testMaterial, world);
 }
 
 /// 影描画
@@ -244,17 +243,16 @@ void MeshRenderer::DrawShadow(
 	Model* model,
 	const Vector4& color,
 	Material* material,
-	ModelRenderType renderType,
-	ShaderBase::Parameter* parameter)
+	ModelRenderType renderType)
 {
 	// 描画タイプに応じて登録
 	switch (renderType)
 	{
 	case ModelRenderType::Dynamic:
-		_dynamicInfomap["CascadedShadowMap"].push_back({ model, mesh, color, material, parameter });
+		_dynamicInfomap["CascadedShadowMap"].push_back({ model, mesh, color, material });
 		break;
 	case ModelRenderType::Static:
-		_staticInfomap["CascadedShadowMap"].push_back({ model, mesh, color,  material, parameter });
+		_staticInfomap["CascadedShadowMap"].push_back({ model, mesh, color,  material });
 		break;
 	case ModelRenderType::Instancing:
 		// TODO
@@ -270,14 +268,13 @@ void MeshRenderer::DrawShadow(
 void MeshRenderer::DrawInstancing(Model* model,
 	const Vector4& color,
 	Material* material,
-	const DirectX::XMFLOAT4X4& world,
-	ShaderBase::Parameter* parameter)
+	const DirectX::XMFLOAT4X4& world)
 {
 	std::string key = material->GetShaderName() + model->GetFilename();
 	// 過去に登録しているか確認
 	auto iter = _instancingInfoMap.find(key);
 
-	InstancingDrawInfo::ModelParameter modelParameter{ color, world };
+	InstancingDrawInfo::ModelMatrix modelParameter{ color, world };
 	if (iter != _instancingInfoMap.end())
 	{
 		// 既に登録している場合はパラメータを追加
@@ -287,7 +284,6 @@ void MeshRenderer::DrawInstancing(Model* model,
 	{
 		// ない場合は新規で登録
 		_instancingInfoMap[key].model = model;
-		_instancingInfoMap[key].parameter = parameter;
 		_instancingInfoMap[key].modelParameters.push_back(modelParameter);
 		_instancingInfoMap[key].material = material;
 	}
@@ -328,7 +324,7 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 		// 不透明描画処理
 		for (auto& drawInfomap : _dynamicInfomap)
 		{
-			ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
+			auto* shader = shaders[static_cast<int>(ModelRenderType::Dynamic)][drawInfomap.first].get();
 			// シェーダーがnullptrの場合はPhongシェーダーを使用
 			if (shader == nullptr)
 			{
@@ -360,7 +356,7 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 		// 不透明描画処理
 		for (auto& drawInfomap : _staticInfomap)
 		{
-			ShaderBase* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
+			auto* shader = shaders[static_cast<int>(ModelRenderType::Static)][drawInfomap.first].get();
 			// シェーダーがnullptrの場合はPhongシェーダーを使用
 			if (shader == nullptr)
 			{
@@ -437,7 +433,7 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 			dc->GSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 			dc->PSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 
-			ShaderBase* shader = shaders
+			auto* shader = shaders
 				[static_cast<int>(ModelRenderType::Dynamic)]
 				[alphaDrawInfo.drawInfo.material->GetShaderName()].get();
 			// シェーダーがnullptrの場合はPhongシェーダーを使用
@@ -462,7 +458,7 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 			dc->GSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 			dc->PSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 
-			ShaderBase* shader = shaders
+			auto* shader = shaders
 				[static_cast<int>(ModelRenderType::Static)]
 				[alphaDrawInfo.drawInfo.material->GetShaderName()].get();
 			// シェーダーがnullptrの場合はPhongシェーダーを使用
@@ -514,7 +510,7 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 		dc->PSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 
 		// 不透明描画処理
-		ShaderBase* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)].get();
+		auto* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)].get();
 		shader->Begin(rc);
 		for (auto& drawInfomap : _dynamicInfomap)
 		{
@@ -554,7 +550,7 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 					dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);
 
 					// シェーダーの更新処理
-					shader->Update(rc, drawInfo.material, drawInfo.parameter);
+					shader->Update(rc, drawInfo.material);
 
 					dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 				}
@@ -572,7 +568,7 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 		dc->PSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 
 		// 不透明描画処理
-		ShaderBase* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Static)].get();
+		auto* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Static)].get();
 		shader->Begin(rc);
 		for (auto& drawInfomap : _staticInfomap)
 		{
@@ -597,7 +593,7 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 					dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
 
 					// シェーダーの更新処理
-					shader->Update(rc, drawInfo.material, drawInfo.parameter);
+					shader->Update(rc, drawInfo.material);
 
 					dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 				}
@@ -655,15 +651,15 @@ std::vector<const char*> MeshRenderer::GetInstancingShaderNames()
 }
 
 /// typeとkeyからパラメータのkeyを取得
-ShaderBase::Parameter MeshRenderer::GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred)
+Material::ParameterMap MeshRenderer::GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred)
 {
 	if (deferred)
 	{
-		return _deferredShaders[static_cast<int>(type)][key]->GetParameterKey();
+		return _deferredShaders[static_cast<int>(type)][key]->GetParameterMap();
 	}
 	else
 	{
-		return _forwardShaders[static_cast<int>(type)][key]->GetParameterKey();
+		return _forwardShaders[static_cast<int>(type)][key]->GetParameterMap();
 	}
 }
 
@@ -676,7 +672,7 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 	dc->PSSetConstantBuffers(ModelCBIndex, 1, _instancingCB.GetAddressOf());
 
 	// モデルの描画関数
-	auto DrawModel = [&](InstancingDrawInfo& drawInfo, ShaderBase* shader)->void
+	auto DrawModel = [&](InstancingDrawInfo& drawInfo, ModelShaderBase* shader)->void
 		{
 			Model* model = drawInfo.model;
 			const ModelResource* resource = model->GetResource();
@@ -733,7 +729,7 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 				dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 				// シェーダーの更新処理
-				shader->Update(rc, drawInfo.material, drawInfo.parameter);
+				shader->Update(rc, drawInfo.material);
 
 				dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), static_cast<UINT>(modelCount), 0, 0, 0);
 			}
@@ -742,7 +738,7 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 	// 描画処理
 	for (auto& [shaderName, drawInfo] : _instancingInfoMap)
 	{
-		ShaderBase* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.material->GetShaderName()].get();
+		auto* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.material->GetShaderName()].get();
 		shader->Begin(rc);
 
 		DrawModel(drawInfo, shader);
@@ -753,14 +749,13 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 }
 
 // DynamicBoneModelのメッシュ描画
-void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ShaderBase* shader, DrawInfo& drawInfo)
+void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ModelShaderBase* shader, DrawInfo& drawInfo)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	Model* model = drawInfo.model;
 	const ModelResource::Mesh* mesh = drawInfo.mesh;
 	const Vector4& materialColor = drawInfo.color;
 	Material* material = drawInfo.material;
-	ShaderBase::Parameter* parameter = drawInfo.parameter;
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 
 	uint32_t stride{ sizeof(ModelResource::Vertex) };
@@ -790,20 +785,19 @@ void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ShaderBase* shad
 	dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);
 
 	// シェーダーの更新処理
-	shader->Update(rc, material, parameter);
+	shader->Update(rc, material);
 
 	dc->DrawIndexed(static_cast<UINT>(mesh->indices.size()), 0, 0);
 }
 
 // StaticBoneModelのメッシュ描画
-void MeshRenderer::DrawStaticBoneModel(const RenderContext& rc, ShaderBase* shader, DrawInfo& drawInfo)
+void MeshRenderer::DrawStaticBoneModel(const RenderContext& rc, ModelShaderBase* shader, DrawInfo& drawInfo)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	Model* model = drawInfo.model;
 	const ModelResource::Mesh* mesh = drawInfo.mesh;
 	const Vector4& materialColor = drawInfo.color;
 	Material* material = drawInfo.material;
-	ShaderBase::Parameter* parameter = drawInfo.parameter;
 	const ModelResource* resource = model->GetResource();
 	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 
@@ -819,7 +813,7 @@ void MeshRenderer::DrawStaticBoneModel(const RenderContext& rc, ShaderBase* shad
 	dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
 
 	// シェーダーの更新処理
-	shader->Update(rc, material, parameter);
+	shader->Update(rc, material);
 
 	dc->DrawIndexed(static_cast<UINT>(mesh->indices.size()), 0, 0);
 }

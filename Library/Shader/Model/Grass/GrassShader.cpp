@@ -5,25 +5,15 @@
 GrassShader::GrassShader(ID3D11Device* device, const char* vsName, const char* psName, D3D11_INPUT_ELEMENT_DESC* inputDescs, UINT inputSize)
 {
 	// 頂点シェーダー
-	GpuResourceManager::CreateVsFromCso(
-		device,
-		vsName,
-		_vertexShader.ReleaseAndGetAddressOf(),
-		_inputLayout.ReleaseAndGetAddressOf(),
-		inputDescs,
-		inputSize);
+	_vertexShader.Load(device, vsName, inputDescs, inputSize);
 
 	// ピクセルシェーダ
-	GpuResourceManager::CreatePsFromCso(device, psName,	_pixelShader.ReleaseAndGetAddressOf());
+	_pixelShader.Load(device, psName);
 
 	// メッシュ用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(CbMesh),
-		_meshConstantBuffer.ReleaseAndGetAddressOf());
+	_meshConstantBuffer.Create(device, sizeof(CbMesh));
 	// グラス用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(CbGrass),
-		_grassConstantBuffer.ReleaseAndGetAddressOf());
+	_grassConstantBuffer.Create(device, sizeof(CbGrass));
 }
 
 void GrassShader::Begin(const RenderContext& rc)
@@ -31,7 +21,7 @@ void GrassShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(_inputLayout.Get());
+	dc->IASetInputLayout(_vertexShader.GetInputLayout());
 	dc->VSSetShader(_vertexShader.Get(),	nullptr, 0);
 	dc->PSSetShader(_pixelShader.Get(),		nullptr, 0);
 
@@ -45,8 +35,7 @@ void GrassShader::Begin(const RenderContext& rc)
 }
 
 void GrassShader::Update(const RenderContext& rc, 
-	const Material* material,
-    Parameter* parameter)
+	const Material* material)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -58,22 +47,20 @@ void GrassShader::Update(const RenderContext& rc,
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 	// グラス用定数バッファ更新
 	CbGrass cbGrass{};
-	cbGrass.shakeAxis = static_cast<int>((*parameter)["shakeAxis"]);
-	cbGrass.shakeAmplitude = (*parameter)["shakeAmplitude"];
-	cbGrass.windSpeed = (*parameter)["windSpeed"];
-	cbGrass.windDirection.x = (*parameter)["windDirection.x"];
-	cbGrass.windDirection.y = (*parameter)["windDirection.y"];
-	cbGrass.windDirection.z = (*parameter)["windDirection.z"];
+	cbGrass.shakeAxis		= *material->GetParameterI1("shakeAxis");
+	cbGrass.shakeAmplitude	= *material->GetParameterF1("shakeAmplitude");
+	cbGrass.windSpeed		= *material->GetParameterF1("windSpeed");
+	cbGrass.windDirection	= *material->GetParameterF3("windDirection");
 	dc->UpdateSubresource(_grassConstantBuffer.Get(), 0, 0, &cbGrass, 0, 0);
 
 	// シェーダーリソースビュー設定
 	ID3D11ShaderResourceView* srvs[] =
 	{
-		material->GetTextureSRV("Diffuse"),
-		material->GetTextureSRV("Normal"),
-		material->GetTextureSRV("Specular"),
-		material->GetTextureSRV("Roughness"),
-		material->GetTextureSRV("Emissive")
+		material->GetTextureData("Diffuse").Get(),
+		material->GetTextureData("Normal").Get(),
+		material->GetTextureData("Specular").Get(),
+		material->GetTextureData("Roughness").Get(),
+		material->GetTextureData("Emissive").Get()
 	};
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
@@ -104,15 +91,13 @@ void GrassShader::End(const RenderContext& rc)
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
-ShaderBase::Parameter GrassShader::GetParameterKey() const
+Material::ParameterMap GrassShader::GetParameterMap() const
 {
 	CbGrass cb;
-    ShaderBase::Parameter p;
-    p["shakeAxis"] = static_cast<float>(cb.shakeAxis);
+    Material::ParameterMap p;
+    p["shakeAxis"] = cb.shakeAxis;
     p["shakeAmplitude"] = cb.shakeAmplitude;
     p["windSpeed"] = cb.windSpeed;
-    p["windDirection.x"] = cb.windDirection.x;
-    p["windDirection.y"] = cb.windDirection.y;
-    p["windDirection.z"] = cb.windDirection.z;
+    p["windDirection"] = cb.windDirection;
     return p;
 }

@@ -8,24 +8,14 @@ RampShader::RampShader(ID3D11Device* device,
 	UINT inputSize)
 {
 	// 頂点シェーダー
-	GpuResourceManager::CreateVsFromCso(
-		device,
-		vsName,
-		_vertexShader.ReleaseAndGetAddressOf(),
-		_inputLayout.ReleaseAndGetAddressOf(),
-		inputDescs,
-		inputSize);
+	_vertexShader.Load(device, vsName, inputDescs, inputSize);
 
 	// ピクセルシェーダ
-	GpuResourceManager::CreatePsFromCso(device,
-		"./Data/Shader/HLSL/Model/Ramp/RampPS.cso",
-		_pixelShader.ReleaseAndGetAddressOf());
-
+	_pixelShader.Load(device,
+		"./Data/Shader/HLSL/Model/Ramp/RampPS.cso");
 
 	// メッシュ用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(CbMesh),
-		_meshConstantBuffer.ReleaseAndGetAddressOf());
+	_meshConstantBuffer.Create(device, sizeof(CbMesh));
 
 	// ランプシェーディング用テクスチャ読み込み
 	D3D11_TEXTURE2D_DESC texture2dDesc{};
@@ -40,7 +30,7 @@ void RampShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(_inputLayout.Get());
+	dc->IASetInputLayout(_vertexShader.GetInputLayout());
 	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 
@@ -56,8 +46,7 @@ void RampShader::Begin(const RenderContext& rc)
 }
 
 void RampShader::Update(const RenderContext& rc,
-	const Material* material,
-	Parameter* parameter)
+	const Material* material)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -69,8 +58,8 @@ void RampShader::Update(const RenderContext& rc,
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
-	dc->PSSetShaderResources(0, 1, material->GetAddressOfTextureSRV("Diffuse"));
-	dc->PSSetShaderResources(1, 1, material->GetAddressOfTextureSRV("Normal"));
+	dc->PSSetShaderResources(0, 1, material->GetTextureData("Diffuse").GetAddressOf());
+	dc->PSSetShaderResources(1, 1, material->GetTextureData("Normal").GetAddressOf());
 }
 
 void RampShader::End(const RenderContext& rc)
@@ -94,9 +83,9 @@ void RampShader::End(const RenderContext& rc)
 	dc->PSSetShaderResources(5, 1, rampsrvs);
 }
 
-ShaderBase::Parameter RampShader::GetParameterKey() const
+Material::ParameterMap RampShader::GetParameterMap() const
 {
-	ShaderBase::Parameter p;
+	Material::ParameterMap p;
 	p["test2"] = 0.0f;
 	return p;
 }

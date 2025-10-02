@@ -1,8 +1,7 @@
 #pragma once
+#include "../ModelShaderBase.h"
 
-#include "../ShaderBase.h"
-
-class PhongShader : public ShaderBase
+class PhongShader : public ModelShaderBase
 {
 public:
 	PhongShader(ID3D11Device* device,
@@ -16,14 +15,13 @@ public:
 
 	// 更新処理
 	void Update(const RenderContext& rc,
-		const Material* material,
-		Parameter* parameter) override;
+		const Material* material) override;
 
 	// 終了処理
 	void End(const RenderContext& rc) override;
 
 	// パラメータのkey取得
-	Parameter GetParameterKey()const override;
+	Material::ParameterMap GetParameterMap()const override;
 private:
 	struct CbMesh
 	{
@@ -32,8 +30,7 @@ private:
 		DirectX::XMFLOAT4		Ks;// スペキュラー
 	};
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>		_vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>		_pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>		_inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			_meshConstantBuffer;
+	VertexShader 	_vertexShader;
+	PixelShader		_pixelShader;
+	ConstantBuffer	_meshConstantBuffer;
 };

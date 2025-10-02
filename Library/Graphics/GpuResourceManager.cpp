@@ -92,6 +92,12 @@ Microsoft::WRL::ComPtr<ID3D11PixelShader>& GpuResourceManager::GetPixelShader(co
 	return pixelShaderMap[filepath];
 }
 
+// ジオメトリシェーダ取得
+Microsoft::WRL::ComPtr<ID3D11GeometryShader>& GpuResourceManager::GetGeometryShader(const std::string& filepath)
+{
+	return geometryShaderMap[filepath];
+}
+
 // 頂点シェーダ作成
 void GpuResourceManager::CreateVsFromCso(ID3D11Device* device, 
 	const char* csoName,

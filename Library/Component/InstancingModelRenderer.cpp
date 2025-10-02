@@ -23,8 +23,7 @@ void InstancingModelRenderer::Render(const RenderContext& rc)
 		_model.lock().get(),
 		_color,
 		&_material,
-		GetActor()->GetTransform().GetMatrix(),
-		&_shaderParameter);
+		GetActor()->GetTransform().GetMatrix());
 }
 // 影描画
 void InstancingModelRenderer::CastShadow(const RenderContext& rc)
@@ -61,18 +60,14 @@ void InstancingModelRenderer::DrawGui()
 		ImGui::TreePop();
 	}
 	ImGui::Separator();
-	for (auto& [name, parameter] : _shaderParameter)
-	{
-		ImGui::DragFloat(name.c_str(), &parameter, 0.1f);
-	}
 }
 // シェーダー変更
 void InstancingModelRenderer::ChangeShader(const std::string& shaderName)
 {
 	_material.SetShaderName(shaderName);
 	// シェーダー変更時はパラメータも初期化
-	_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+	_material.SetParameterMap(GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
 		ModelRenderType::Instancing,
 		shaderName,
-		false);
+		false));
 }

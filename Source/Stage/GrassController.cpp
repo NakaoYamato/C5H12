@@ -7,11 +7,16 @@ void GrassController::Start()
 
 void GrassController::Update(float elapsedTime)
 {
-    auto parameter = _mr.lock()->GetShaderParameter();
-    auto total = parameter.find("totalElapsedTime");
-    if (total != parameter.end())
+	if (_mr.lock() == nullptr)
+        return;
+	if (_mr.lock()->GetMaterials().size() > 0)
+        return;
+	static std::string PrameterName = "totalElapsedTime";
+
+	auto& materials = _mr.lock()->GetMaterials()[0];
+    auto total = materials.GetParameterF1(PrameterName);
+    if (total)
     {
-        parameter["totalElapsedTime"] += elapsedTime;
+		materials.SetParameter(PrameterName, *total + elapsedTime);
     }
-    _mr.lock()->SetShaderParameter(parameter);
 }

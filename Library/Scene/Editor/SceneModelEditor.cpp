@@ -514,6 +514,8 @@ void SceneModelEditor::DrawAddAnimationGui()
 // テクスチャのGUI描画
 void SceneModelEditor::DrawTextureGui()
 {
+    static float textureSize = 128.0f;
+
     if (_modelRenderer.lock()->GetMaterials().size() == 0)
         return;
     if (ImGui::Begin(u8"テクスチャ編集"))
@@ -539,11 +541,13 @@ void SceneModelEditor::DrawTextureGui()
                 {
                     ImGui::Text("%s", key.c_str());
                     ImGui::SameLine();
+
                     ImGui::Text("%s", textureData.filename.c_str());
-                    static float textureSize = 128.0f;
-                    ImGui::Image(materials[index].GetTextureSRV(key), { textureSize,textureSize });
+                    if (const auto& srv = materials[index].GetTextureData(key).Get())
+                        ImGui::Image(srv, { textureSize,textureSize });
                     ImGui::PushID(&textureData.filename);
                     ImGui::SameLine();
+
                     if (ImGui::Button("..."))
                     {
                         // ダイアログを開く

@@ -28,8 +28,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 			_model.lock().get(),
 			_color, 
 			&_materialMap.at(mesh.materialIndex),
-			_renderType, 
-			&_shaderParameter);
+			_renderType);
 	}
 }
 // 影描画
@@ -45,8 +44,7 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 			_model.lock().get(),
 			Vector4::White,
 			&_materialMap.at(mesh.materialIndex),
-			_renderType, 
-			&_shadowParameter);
+			_renderType);
 	}
 }
 // GUI描画
@@ -89,10 +87,10 @@ void ModelRenderer::DrawGui()
 						{
 							material.SetShaderName(activeShaderType);
 							// シェーダー変更時はパラメータも初期化
-							_shaderParameter = GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
-								_renderType, 
+							material.SetParameterMap(GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+								_renderType,
 								activeShaderType,
-								isDeferred);
+								isDeferred));
 						}
 					}
 					ImGui::TreePop();
@@ -107,10 +105,6 @@ void ModelRenderer::DrawGui()
 		ImGui::TreePop();
 	}
 	ImGui::Separator();
-	for (auto& [name, parameter] : _shaderParameter)
-	{
-		ImGui::DragFloat(name.c_str(), &parameter, 0.1f);
-	}
 
 	auto model = GetActor()->GetModel().lock();
 	if (model == nullptr) return;
@@ -147,5 +141,15 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 	// マテリアルの取得
 	_materialMap.clear();
 	_materialMap = _model.lock()->GetMaterials();
+	// パラメータの取得
+	for (auto& material : _materialMap)
+	{
+		bool isDeferred = Graphics::Instance().RenderingDeferred() && material.GetBlendType() != BlendType::Alpha;
+
+		material.SetParameterMap(GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+			_renderType,
+			material.GetShaderName(),
+			isDeferred));
+	}
 }
 

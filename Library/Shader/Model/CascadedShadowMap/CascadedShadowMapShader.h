@@ -1,11 +1,11 @@
 #pragma once
-#include "../ShaderBase.h"
+#include "../ModelShaderBase.h"
 
 // カスケードシャドウマップの書き込む先の数
 #define _CASCADED_SHADOW_MAPS_SIZE 3
 
 // カスケードシャドウマップを描画するためのシェーダー
-class CascadedShadowMapShader : public ShaderBase
+class CascadedShadowMapShader : public ModelShaderBase
 {
 public:
 	CascadedShadowMapShader(ID3D11Device* device,
@@ -18,17 +18,15 @@ public:
 
 	// 更新処理
 	void Update(const RenderContext& rc,
-		const Material* material,
-		Parameter* parameter) override {
+		const Material* material) override {
 	}
 
 	// 終了処理
 	void End(const RenderContext& rc) override;
 
 	// パラメータのkey取得
-	Parameter GetParameterKey()const override;
+	Material::ParameterMap GetParameterMap()const override;
 private:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>		_vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>		_inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_geometryShader;
+	VertexShader 	_vertexShader;
+	GeometryShader 	_geometryShader;
 };

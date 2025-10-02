@@ -2,6 +2,7 @@
 
 #include "../../Library/Graphics/GpuResourceManager.h"
 
+// 頂点シェーダークラス
 class VertexShader
 {
 public:
@@ -20,6 +21,7 @@ private:
 	ID3D11InputLayout* _inputLayout{};
 };
 
+// ピクセルシェーダークラス
 class PixelShader
 {
 public:
@@ -32,4 +34,19 @@ public:
 private:
 	std::string _filepath{};
 	ID3D11PixelShader* _pixelShader{};
+};
+
+// ジオメトリシェーダークラス
+class GeometryShader
+{
+public:
+	GeometryShader() = default;
+	~GeometryShader() = default;
+	// ジオメトリシェーダーを読み込む
+	void Load(ID3D11Device* device, const std::string& filepath);
+	// 読み込んだジオメトリシェーダーを取得
+	ID3D11GeometryShader* Get();
+private:
+	std::string _filepath{};
+	ID3D11GeometryShader* _geometryShader{};
 };

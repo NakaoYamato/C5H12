@@ -27,6 +27,7 @@ ID3D11VertexShader* VertexShader::Get()
 #endif // _DEBUG
 }
 
+// 読み込んだ入力レイアウトを取得
 ID3D11InputLayout* VertexShader::GetInputLayout()
 {
 #ifdef _DEBUG
@@ -35,6 +36,7 @@ ID3D11InputLayout* VertexShader::GetInputLayout()
 	return _inputLayout;
 #endif // _DEBUG
 }
+
 // ピクセルシェーダーを読み込む
 void PixelShader::Load(ID3D11Device* device, const std::string& filepath)
 {
@@ -47,6 +49,7 @@ void PixelShader::Load(ID3D11Device* device, const std::string& filepath)
 	);
 	_pixelShader = GpuResourceManager::GetPixelShader(_filepath).Get();
 }
+
 // 読み込んだピクセルシェーダーを取得
 ID3D11PixelShader* PixelShader::Get()
 {
@@ -57,3 +60,25 @@ ID3D11PixelShader* PixelShader::Get()
 #endif // _DEBUG
 }
 
+// ジオメトリシェーダーを読み込む
+void GeometryShader::Load(ID3D11Device* device, const std::string& filepath)
+{
+	_filepath = filepath;
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+	GpuResourceManager::CreateGsFromCso(
+		device,
+		_filepath.c_str(),
+		geometryShader.ReleaseAndGetAddressOf()
+	);
+	_geometryShader = GpuResourceManager::GetGeometryShader(_filepath).Get();
+}
+
+// 読み込んだジオメトリシェーダーを取得
+ID3D11GeometryShader* GeometryShader::Get()
+{
+#ifdef _DEBUG
+	return GpuResourceManager::GetGeometryShader(_filepath).Get();
+#else
+	return _geometryShader;
+#endif // _DEBUG
+}

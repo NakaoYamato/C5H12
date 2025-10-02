@@ -17,6 +17,8 @@ public:
 	static Microsoft::WRL::ComPtr<ID3D11InputLayout>& GetInputLayout(const std::string& filepath);
 	// ピクセルシェーダ取得
 	static Microsoft::WRL::ComPtr<ID3D11PixelShader>& GetPixelShader(const std::string& filepath);
+	// ジオメトリシェーダ取得
+	static Microsoft::WRL::ComPtr<ID3D11GeometryShader>& GetGeometryShader(const std::string& filepath);
 public:
 	// 頂点シェーダ作成
 	static void CreateVsFromCso(ID3D11Device* device,

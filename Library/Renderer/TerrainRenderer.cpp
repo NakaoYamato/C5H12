@@ -2,7 +2,7 @@
 
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
-#include "../../Library/Shader/CascadedShadowMap/CascadedShadowMapShader.h"
+#include "../../Library/Shader/Model/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include <Mygui.h>
 

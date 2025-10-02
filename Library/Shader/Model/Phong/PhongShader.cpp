@@ -9,24 +9,13 @@ PhongShader::PhongShader(ID3D11Device* device,
 	UINT inputSize)
 {
 	// 頂点シェーダー
-	GpuResourceManager::CreateVsFromCso(
-		device,
-		vsName,
-		_vertexShader.ReleaseAndGetAddressOf(),
-		_inputLayout.ReleaseAndGetAddressOf(),
-		inputDescs,
-		inputSize);
+	_vertexShader.Load(device, vsName, inputDescs, inputSize);
 
 	// ピクセルシェーダ
-	GpuResourceManager::CreatePsFromCso(device,
-		psName,
-		_pixelShader.ReleaseAndGetAddressOf());
-
+	_pixelShader.Load(device, psName);
 
 	// メッシュ用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(CbMesh),
-		_meshConstantBuffer.ReleaseAndGetAddressOf());
+	_meshConstantBuffer.Create(device, sizeof(CbMesh));
 }
 
 void PhongShader::Begin(const RenderContext& rc)
@@ -34,7 +23,7 @@ void PhongShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(_inputLayout.Get());
+	dc->IASetInputLayout(_vertexShader.GetInputLayout());
 	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 
@@ -47,8 +36,7 @@ void PhongShader::Begin(const RenderContext& rc)
 }
 
 void PhongShader::Update(const RenderContext& rc, 
-	const Material* material,
-	Parameter* parameter)
+	const Material* material)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -62,11 +50,11 @@ void PhongShader::Update(const RenderContext& rc,
 	// シェーダーリソースビュー設定
 	ID3D11ShaderResourceView* srvs[] = 
 	{
-		material->GetTextureSRV("Diffuse"),
-		material->GetTextureSRV("Normal"),
-		material->GetTextureSRV("Specular"),
-		material->GetTextureSRV("Roughness"),
-		material->GetTextureSRV("Emissive")
+		material->GetTextureData("Diffuse").Get(),
+		material->GetTextureData("Normal").Get(),
+		material->GetTextureData("Specular").Get(),
+		material->GetTextureData("Roughness").Get(),
+		material->GetTextureData("Emissive").Get()
 	};
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
@@ -97,8 +85,8 @@ void PhongShader::End(const RenderContext& rc)
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
-ShaderBase::Parameter PhongShader::GetParameterKey() const
+Material::ParameterMap PhongShader::GetParameterMap() const
 {
-	ShaderBase::Parameter p;
+	Material::ParameterMap p;
 	return p;
 }

@@ -8,24 +8,14 @@ PBRShader::PBRShader(ID3D11Device* device,
     UINT inputSize)
 {
 	// 頂点シェーダー
-	GpuResourceManager::CreateVsFromCso(
-		device,
-		vsName,
-		_vertexShader.ReleaseAndGetAddressOf(),
-		_inputLayout.ReleaseAndGetAddressOf(),
-		inputDescs,
-		inputSize);
+	_vertexShader.Load(device, vsName, inputDescs, inputSize);
 
 	// ピクセルシェーダ
-	GpuResourceManager::CreatePsFromCso(device,
-		psName,
-		_pixelShader.ReleaseAndGetAddressOf());
+	_pixelShader.Load(device, psName);
 
 
 	// メッシュ用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(CbMesh),
-		_meshConstantBuffer.ReleaseAndGetAddressOf());
+	_meshConstantBuffer.Create(device, sizeof(CbMesh));
 }
 
 void PBRShader::Begin(const RenderContext& rc)
@@ -33,7 +23,7 @@ void PBRShader::Begin(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定
-	dc->IASetInputLayout(_inputLayout.Get());
+	dc->IASetInputLayout(_vertexShader.GetInputLayout());
 	dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
 
@@ -46,8 +36,7 @@ void PBRShader::Begin(const RenderContext& rc)
 }
 
 void PBRShader::Update(const RenderContext& rc, 
-	const Material* material,
-	Parameter* parameter)
+	const Material* material)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -56,16 +45,20 @@ void PBRShader::Update(const RenderContext& rc,
 	CbMesh cbMesh{};
 	cbMesh.baseColor = material->GetColor("Diffuse");
 	cbMesh.roughness = pbrFactor.y;
+	if (auto it = material->GetParameterF1("roughnessFactor"))
+		cbMesh.roughness *= *it;
 	cbMesh.metalness = pbrFactor.z;
+	if (auto it = material->GetParameterF1("metalnessFactor"))
+		cbMesh.metalness *= *it;
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
 	ID3D11ShaderResourceView* srvs[] =
 	{
-		material->GetTextureSRV("Diffuse"),
-		material->GetTextureSRV("Roughness"),
-		material->GetTextureSRV("Normal"),
-		material->GetTextureSRV("Emissive")
+		material->GetTextureData("Diffuse").Get(),
+		material->GetTextureData("Roughness").Get(),
+		material->GetTextureData("Normal").Get(),
+		material->GetTextureData("Emissive").Get()
 	};
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
@@ -94,10 +87,10 @@ void PBRShader::End(const RenderContext& rc)
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
-ShaderBase::Parameter PBRShader::GetParameterKey() const
+Material::ParameterMap PBRShader::GetParameterMap() const
 {
-	ShaderBase::Parameter p;
-	p["roughness"] = 0.1f;
-	p["metalness"] = 0.0f;
+	Material::ParameterMap p;
+	p["roughnessFactor"] = 1.0f;
+	p["metalnessFactor"] = 1.0f;
     return p;
 }

@@ -24,20 +24,17 @@ public:
 	// シェーダー変更
 	void ChangeShader(const std::string& shaderName);
 #pragma region アクセサ
-	// シェーダーパラメータ取得
-	ShaderBase::Parameter& GetShaderParameter() { return _shaderParameter; }
 	// 色取得
 	const Vector4& GetColor() const { return _color; }
 	// 色設定
 	void SetColor(const Vector4& color) { _color = color; }
 	// マテリアル取得
-	const Material& GetMaterial() const { return _material; }
+	Material& GetMaterial() { return _material; }
 	// マテリアル設定
 	void SetMaterial(const Material& material) { _material = material; }
 #pragma endregion
 private:
 	std::weak_ptr<Model> _model;
-	ShaderBase::Parameter _shaderParameter;
 	Vector4 _color{ 1,1,1,1 };
 	Material _material;
 };

@@ -10,8 +10,8 @@ public:
 	~TerrainCollider() override {}
 	// 名前取得
 	const char* GetName() const override { return "TerrainCollider"; }
-	// 開始処理
-	void Start() override;
+	// 生成時処理
+	void OnCreate() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
 	// コリジョンメッシュの再計算

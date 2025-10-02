@@ -30,8 +30,8 @@ public:
 	~MeshCollider() override {}
 	// 名前取得
 	const char* GetName() const override { return "MeshCollider"; }
-	// 開始処理
-	void Start() override;
+	// 生成時処理
+	void OnCreate() override;
 	// 削除時処理
 	void OnDelete() override;
 	// 更新処理
@@ -83,6 +83,11 @@ public:
 	}
 	// 再計算フラグのセット
 	void SetRecalculate(bool f) { _recalculate = f; }
+	// 計算用コリジョンメッシュのセット
+	void SetCalcCollisionMesh(const CollisionMesh& mesh) {
+		std::lock_guard<std::mutex> lock(_collisionMeshMutex);
+		_calcCollisionMesh = mesh;
+	}
 #pragma endregion
 protected:
 	/// <summary>
@@ -110,6 +115,6 @@ protected:
 
 	// マルチスレッド用のミューテックス
 	std::mutex _collisionMeshMutex;
-	// 計算用のコリジョンメッシュ
+	// 計算用コリジョンメッシュ
 	CollisionMesh _calcCollisionMesh;
 };

@@ -6,6 +6,25 @@
 #include "../../Library/JobSystem/JobSystem.h"
 #include "../DebugSupporter/DebugSupporter.h"
 
+// 初期化処理
+void CollisionManager::Setup()
+{
+	for (auto& meshCollider : _meshColliders)
+	{
+		auto model = meshCollider->GetActor()->GetModel().lock();
+		MeshCollider::CollisionMesh collMesh;
+
+		if (model)
+			collMesh = meshCollider->RecalculateCollisionMesh(model.get());
+		else
+			collMesh = meshCollider->RecalculateCollisionMesh(nullptr);
+
+		meshCollider->SetCalcCollisionMesh(collMesh);
+		meshCollider->Update(0.0f);
+	}
+}
+
+// 更新処理
 void CollisionManager::Update()
 {
 	// 衝突情報のコンテナ

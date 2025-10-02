@@ -10,6 +10,6 @@ void TerrainActor::OnCreate()
     GetTransform().SetScale(50.0f);
     GetTransform().UpdateTransform(nullptr);
 
-    auto terrainController = this->AddComponent<TerrainController>(_terrainPath);
+    this->AddComponent<TerrainController>(_terrainPath);
     this->AddCollider<TerrainCollider>();
 }

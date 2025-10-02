@@ -8,7 +8,7 @@
 #include <imgui.h>
 
 // 開始処理
-void MeshCollider::Start()
+void MeshCollider::OnCreate()
 {
 	// コライダーの登録
 	GetActor()->GetScene()->GetCollisionManager().RegisterMeshCollider(this);
@@ -37,8 +37,7 @@ void MeshCollider::Update(float elapsedTime)
 			{
 				CollisionMesh collisionMeshCopy = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
 				{
-					std::lock_guard<std::mutex> lock(_collisionMeshMutex);
-					_calcCollisionMesh = collisionMeshCopy;
+					this->SetCalcCollisionMesh(collisionMeshCopy);
 					_isCalculating = false;
 				}
 			});

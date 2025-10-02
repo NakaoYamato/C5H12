@@ -6,12 +6,13 @@
 
 #include <imgui.h>
 
-// 開始処理
-void TerrainCollider::Start()
+// 生成時処理
+void TerrainCollider::OnCreate()
 {
+	MeshCollider::OnCreate();
 	_terrainController = GetActor()->GetComponent<TerrainController>();
-	MeshCollider::Start();
 	_worldMatrix = &GetActor()->GetTransform().GetMatrix();
+	_recalculate = false;
 }
 // 更新処理
 void TerrainCollider::Update(float elapsedTime)

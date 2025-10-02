@@ -84,6 +84,9 @@ public:
 	CollisionManager() {}
 	~CollisionManager() {}
 
+	// ‰Šú‰»ˆ—
+	void Setup();
+
 	// XVˆ—
 	void Update();
 

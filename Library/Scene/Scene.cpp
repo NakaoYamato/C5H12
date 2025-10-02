@@ -81,6 +81,9 @@ void Scene::Initialize()
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
         _terrainRenderer.ExportVertex(GetRenderContext());
     }
+
+	// ƒRƒŠƒWƒ‡ƒ“‚Ì‰Šú‰»
+    _collisionManager.Setup();
 }
 
 // I—¹‰»

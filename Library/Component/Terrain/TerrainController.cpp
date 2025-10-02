@@ -22,12 +22,23 @@ TerrainController::TerrainController(const std::string& serializePath)
 void TerrainController::OnCreate()
 {
 	// 地形の初期化
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _terrain->UpdateTextures(GetActor()->GetScene()->GetTextureRenderer(),
+            Graphics::Instance().GetDeviceContext());
+    }
+
     // 地形の環境物配置情報からアクター生成
 	auto objectLayout = _terrain->GetTerrainObjectLayout();
     for (const auto& [index, layout] : objectLayout->GetLayouts())
     {
 		CreateEnvironment(index);
     }
+
+	// 地形の頂点情報をエクスポートする
+    GetActor()->GetScene()->GetTerrainRenderer().ExportVertices(
+        _terrain.get(),
+        GetActor()->GetTransform().GetMatrix());
 	_editState = EditState::Editing;
 }
 // 更新処理

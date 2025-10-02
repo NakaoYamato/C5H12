@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <wrl.h>
 #include <d3d11.h>
+#include <variant>
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Graphics/Shader.h"
@@ -22,6 +23,9 @@ enum class BlendType
 
 class Material
 {
+public:
+	using VariantType = std::variant<int, float, Vector2, Vector3, Vector4>;
+
 public:
 	Material() = default;
 	Material(const std::string& name) : _name(name) {}
@@ -82,7 +86,7 @@ private:
 	std::string										_name;
 	std::unordered_map<std::string, Vector4>		_colors;
 	std::unordered_map<std::string, Texture>		_textureDatas;
-
+	std::unordered_map<std::string, VariantType>	_parameters;
 	VertexShader									_vertexShader;
 	PixelShader										_pixelShader;
 

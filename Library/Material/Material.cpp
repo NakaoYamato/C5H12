@@ -72,6 +72,15 @@ void Material::LoadTexture(const std::string& key,
 {
 	// テクスチャの読み込み
 	_textureDatas[key].Load(Graphics::Instance().GetDevice(), filename);
+
+	//_parameters["Test"].emplace<float>(1.0f);
+	//_parameters["Test1"].emplace<Vector2>(Vector2(0,0));
+	//if (auto* it = std::get_if<float>(&_parameters["Test"]))
+	//	Debug::Output::String("float OK");
+	//if (auto* it = std::get_if<float>(&_parameters["Test1"]))
+	//	Debug::Output::String("float OK");
+	//if (auto* it = std::get_if<Vector2>(&_parameters["Test1"]))
+	//	Debug::Output::String("float OK");
 }
 
 /// ダミーテクスチャ作成

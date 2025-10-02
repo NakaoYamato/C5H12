@@ -14,7 +14,7 @@ struct VS_OUT
 };
 
 cbuffer CbScene : register(b1)
-{    
+{
     uint vertexCount;
     float2 viewportSize;
     float padding;

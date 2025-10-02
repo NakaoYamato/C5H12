@@ -276,6 +276,8 @@
     <ClCompile Include="Library\Shader\Model\Ramp\RampShader.cpp" />
     <ClCompile Include="Library\Graphics\Shader.cpp" />
     <ClCompile Include="Library\Shader\Model\Test\TestShader.cpp" />
+    <ClCompile Include="Library\Shader\Primitive\Locus\LocusPrimitiveShader.cpp" />
+    <ClCompile Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.cpp" />
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\GrassTransformingBrush.cpp" />
@@ -504,8 +506,10 @@
     <ClInclude Include="Library\Shader\Model\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Model\Ramp\RampShader.h" />
     <ClInclude Include="Library\Graphics\Shader.h" />
-    <ClInclude Include="Library\Shader\ShaderBase.h" />
     <ClInclude Include="Library\Shader\Model\Test\TestShader.h" />
+    <ClInclude Include="Library\Shader\Primitive\Locus\LocusPrimitiveShader.h" />
+    <ClInclude Include="Library\Shader\Primitive\PrimitiveShaderBase.h" />
+    <ClInclude Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.h" />
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h" />

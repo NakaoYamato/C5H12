@@ -340,7 +340,7 @@ void Scene::Render()
             dc->PSSetShaderResources(2, 1, copyColorSRV.GetAddressOf());
         }
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-		_primitiveRenderer.Render(dc, rc.camera->GetView(), rc.camera->GetProjection());
+		_primitiveRenderer.Render(rc);
         ID3D11ShaderResourceView* nullsrvs[] = { nullptr };
         dc->PSSetShaderResources(2, 1, nullsrvs);
 

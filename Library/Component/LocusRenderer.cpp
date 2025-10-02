@@ -8,22 +8,12 @@
 void LocusRenderer::Start()
 {
 	auto device = Graphics::Instance().GetDevice();
-	// ピクセルシェーダ読み込み
-	_pixelShader.Load(device, "./Data/Shader/HLSL/PrimitiveRenderer/Locus/PlayerSwordLocusPS.cso");
-	// 定数バッファ生成
-	_constantBuffer.Create(device, sizeof(CBPrimitive));
+	// カラーテクスチャの読み込み
+	_material.LoadTexture("Diffuse", L"./Data/Texture/Noise/Noise002.png");
 	// ノイズテクスチャの読み込み
-	GpuResourceManager::LoadTextureFromFile(
-		device,
-		L"./Data/Texture/Noise/Noise002.png",
-		_colorSRV.ReleaseAndGetAddressOf(),
-		nullptr);
-	// 距離テクスチャの読み込み
-	GpuResourceManager::LoadTextureFromFile(
-		device,
-		L"./Data/Texture/Noise/SwordTrail000.png",
-		_parameterSRV.ReleaseAndGetAddressOf(),
-		nullptr);
+	_material.LoadTexture("Noise", L"./Data/Texture/Noise/SwordTrail000.png");
+
+	_material.SetShaderName("Locus");
 }
 
 // 更新処理
@@ -64,6 +54,7 @@ void LocusRenderer::DrawGui()
     ImGui::SliderFloat("Catmull-Rom", &_catmullRom, 1.0f, 10.0f, "%.1f");
 	ImGui::ColorEdit4("rootColor", &_rootColor.x);
 	ImGui::ColorEdit4("tipColor", &_tipColor.x);
+	_material.DrawGui();
 }
 // 描画処理
 void LocusRenderer::Render(const RenderContext& rc)
@@ -71,10 +62,7 @@ void LocusRenderer::Render(const RenderContext& rc)
     auto& primitiveRenderer = GetActor()->GetScene()->GetPrimitiveRenderer();
 
 	PrimitiveRenderer::RenderInfo primitiveInfo{};
-	primitiveInfo.colorSRV = _colorSRV.GetAddressOf();
-	primitiveInfo.parameterSRV = _parameterSRV.GetAddressOf();
-	primitiveInfo.pixelShader = &_pixelShader;
-	primitiveInfo.constantBuffer = &_constantBuffer;
+	primitiveInfo.material = &_material;
 	if (_splineInterpolation)
 	{
 		// スプライン補間を使用する場合
@@ -121,16 +109,6 @@ void LocusRenderer::Render(const RenderContext& rc)
 			primitiveInfo.vertices.push_back({ pos.tipPosition, _tipColor });
 		}
 	}
-	// 定数バッファ更新
-	CBPrimitive cb{};
-	cb.vertexCount = static_cast<UINT>(primitiveInfo.vertices.size());
-	D3D11_VIEWPORT viewport;
-	UINT numViewports = 1;
-	rc.deviceContext->RSGetViewports(&numViewports, &viewport);
-	cb.viewportSize = Vector2(
-		static_cast<float>(viewport.Width),
-		static_cast<float>(viewport.Height));
-	_constantBuffer.Update(rc.deviceContext, &cb);
 
 	GetActor()->GetScene()->GetPrimitiveRenderer().Draw(primitiveInfo);
 }

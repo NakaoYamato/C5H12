@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
-#include "../../Library/Graphics/Shader.h"
-#include "../../Library/Graphics/ConstantBuffer.h"
+#include "../../Library/Material/Material.h"
 
 class LocusRenderer : public Component
 {
@@ -51,9 +50,6 @@ private:
 	Vector4					_tipColor = { 1.0f, 0.8f, 0.8f, 0.5f };
     float					_catmullRom = 3.0f; // Catmull-Romスプラインのパラメータ
     bool					_splineInterpolation = true; // スプライン補間を使用するかどうか
-
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _colorSRV = nullptr;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _parameterSRV = nullptr;
-	PixelShader				_pixelShader;
-	ConstantBuffer			_constantBuffer;
+	// マテリアル
+	Material				_material;
 };

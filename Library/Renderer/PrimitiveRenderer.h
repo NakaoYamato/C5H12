@@ -4,12 +4,15 @@
 #include <wrl.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <unordered_map>
+#include <memory>
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Math/Quaternion.h"
 
-#include "../../Library/Graphics/Shader.h"
 #include "../../Library/Graphics/ConstantBuffer.h"
+#include "../../Library/Material/Material.h"
+#include "../../Library/Shader/Primitive/PrimitiveShaderBase.h"
 
 class PrimitiveRenderer
 {
@@ -17,14 +20,11 @@ public:
 	static const UINT VertexCapacity = 3 * 1024;
 
 	static const UINT CBIndex = 1;
-	static const UINT ColorSRVIndex = 3;
-	static const UINT ParameterSRVIndex = 4;
-
-	struct CbScene
+	struct CbPrimitive
 	{
-		UINT vertexCount; // 頂点数
-		DirectX::XMFLOAT2 viewportSize; // ビューポートのサイズ
-		float padding; // パディング用
+		UINT	vertexCount;	// 頂点数
+		Vector2 viewportSize;	// ビューポートのサイズ
+		float	padding;		// パディング用
 	};
 
 	struct Vertex
@@ -35,12 +35,8 @@ public:
 
 	struct RenderInfo
 	{
-		ID3D11ShaderResourceView**	colorSRV		= nullptr;
-		ID3D11ShaderResourceView**	parameterSRV	= nullptr;
-		PixelShader*				pixelShader		= nullptr;
-		ConstantBuffer*				constantBuffer	= nullptr;
-
-		std::vector<Vertex>			vertices;
+		Material*			material = nullptr;
+		std::vector<Vertex>	vertices;
 	};
 
 public:
@@ -54,15 +50,11 @@ public:
 	void Draw(const RenderInfo& info);
 
 	// 描画実行
-	void Render(
-		ID3D11DeviceContext* dc,
-		const DirectX::XMFLOAT4X4& view,
-		const DirectX::XMFLOAT4X4& projection);
+	void Render(RenderContext& rc);
 
 private:
 	std::vector<RenderInfo>						_renderInfos;
-	PixelShader									_pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>	inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>		vertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>		_vertexBuffer;
+	ConstantBuffer 								_constantBuffer;
+	std::unordered_map<std::string, std::unique_ptr<PrimitiveShaderBase>> _shaders;
 };

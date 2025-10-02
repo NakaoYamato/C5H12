@@ -16,4 +16,11 @@ ColorAdditionBrush::ColorAdditionBrush(TerrainDeformer* deformer) :
         Graphics::Instance().GetDevice(),
         "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformAddPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
+	_brushPadding.x = 1.0f;
+}
+// GUI描画
+void ColorAdditionBrush::DrawGui()
+{
+    TerrainDeformerBrush::DrawGui();
+    ImGui::DragFloat(u8"高さマップ影響度", &_brushPadding.x, 0.01f);
 }

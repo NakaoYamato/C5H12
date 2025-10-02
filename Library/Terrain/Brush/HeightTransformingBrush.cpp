@@ -108,8 +108,3 @@ void HeightTransformingBrush::DrawGui()
     if (_useBumpyShader)
         ImGui::DragFloat(u8"でこぼこシード値", &_brushPadding.x, 0.1f, 0.0f, 10.0f);
 }
-// タスクを登録
-void HeightTransformingBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
-{
-	TerrainDeformerBrush::RegisterTask(terrainController, uvPosition, radius, strength);
-}

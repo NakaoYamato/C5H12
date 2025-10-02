@@ -22,11 +22,6 @@ public:
 		uint32_t numViews) override;
 	// GUI描画
 	void DrawGui() override;
-	// タスクを登録
-	void RegisterTask(std::weak_ptr<TerrainController> terrainController,
-		const Vector2& uvPosition,
-		float radius,
-		float strength) override;
 private:
 	// でこぼこシェーダ
     Microsoft::WRL::ComPtr<ID3D11PixelShader> _bumpyPixelShader;

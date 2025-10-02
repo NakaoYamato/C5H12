@@ -19,7 +19,7 @@ PS_OUT main(VsOut pin)
     normal = normalize(normal);
     
     float4 height = paintHeightTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], paintTexcoord);
-    baseParameter.b = lerp(baseParameter.b, height.r, brushStrength * rate);
+    baseParameter.b = lerp(baseParameter.b, height.r * padding.x, brushStrength * rate);
     
     PS_OUT pout = (PS_OUT) 0;
     pout.color = color;

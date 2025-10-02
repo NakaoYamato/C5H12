@@ -9,4 +9,6 @@ public:
 	~ColorAdditionBrush() override = default;
 	// –¼‘Oæ“¾
 	const char* GetName() const override { return u8"F‰ÁZ"; }
+	// GUI•`‰æ
+	void DrawGui() override;
 };

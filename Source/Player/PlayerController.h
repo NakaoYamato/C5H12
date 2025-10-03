@@ -60,6 +60,7 @@ public:
 	bool IsMoving()	const { return _isMoving; }
 	bool IsDash()	const { return _isDash; }
 	bool IsEvade()	const { return _isEvade; }
+	bool IsInCombat() const { return _isInCombat; }
 	bool IsAttack() const { return _isAttack; }
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
@@ -68,6 +69,7 @@ public:
 	void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
 	void SetIsDash(bool isDush) { _isDash = isDush; }
 	void SetIsEvade(bool isEvade) { _isEvade = isEvade; }
+	void SetIsInCombat(bool isInCombat) { _isInCombat = isInCombat; }
 	void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
@@ -92,6 +94,7 @@ private:
 	bool _isMoving = false;
 	bool _isDash = false;
 	bool _isEvade = false;
+	bool _isInCombat = false;
 	bool _isAttack = false;
 	bool _isGuard = false;
 	bool _isDead = false;

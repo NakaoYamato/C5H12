@@ -251,7 +251,7 @@ namespace SprintSubState
             _owner->GetAnimator()->SetRootNodeIndex("root");
             _owner->GetAnimator()->SetIsUseRootMotion(true);
             _owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::None);
-            _owner->GetAnimator()->PlayAnimation(u8"RunCombatLoopF0", true, 0.2f);
+            _owner->GetAnimator()->PlayAnimation(u8"RunCombatLoopF0", true, 0.0f);
         }
         void OnExecute(float elapsedTime) override
         {

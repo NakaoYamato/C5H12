@@ -496,8 +496,8 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         // その場合は前フレームの姿勢、アニメーション終了時の姿勢、アニメーション開始時の姿勢、現在時の姿勢を使って
         // 移動量を取得する
         float animationLength = GetAnimationEndTime();
-        oldTimer = animationLength - oldTimer;
-        float endTimer = _animationTimer;
+        oldTimer = animationLength + oldTimer;
+        float endTimer = animationLength - FLT_EPSILON;
         float startTimer = 0.0f;
 
         ModelResource::Node oldRootNode{};

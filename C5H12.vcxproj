@@ -315,6 +315,7 @@
     <ClCompile Include="Source\InGame\InputMediator.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
+    <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneGryphusDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
@@ -549,6 +550,7 @@
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
+    <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Scene\Test\SceneGryphusDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />

@@ -20,6 +20,7 @@ void CollisionManager::Setup()
 			collMesh = meshCollider->RecalculateCollisionMesh(nullptr);
 
 		meshCollider->SetCalcCollisionMesh(collMesh);
+		meshCollider->SetRecalculate(false);
 		meshCollider->Update(0.0f);
 	}
 }

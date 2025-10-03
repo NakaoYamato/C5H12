@@ -52,6 +52,13 @@ public:
 	// •`‰æŽÀs
 	void Render(RenderContext& rc);
 
+	Material::ParameterMap GetParameterMap(const std::string& shaderName)const
+	{
+		if (_shaders.find(shaderName) != _shaders.end())
+			return _shaders.at(shaderName)->GetParameterMap();
+		return Material::ParameterMap{};
+	}
+
 private:
 	std::vector<RenderInfo>						_renderInfos;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		_vertexBuffer;

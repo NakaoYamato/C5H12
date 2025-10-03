@@ -1,8 +1,21 @@
 #pragma once
 #include "../PrimitiveShaderBase.h"
+#include "../../Library/Graphics/ConstantBuffer.h"
 
 class LocusPrimitiveShader : public PrimitiveShaderBase
 {
+public:
+	struct CbLocus
+	{
+		float distanceRate = 0.1f;
+		float colorMinValue = 0.9f;
+		float colorMaxValue = 0.9f;
+		float locusPadding = {};
+
+		Vector4 baseColor = Vector4::White;
+	};
+
+	static constexpr UINT CbLocusIndex = 2;
 public:
 	LocusPrimitiveShader(ID3D11Device* device, D3D11_INPUT_ELEMENT_DESC* inputDescs, UINT inputSize);
 	~LocusPrimitiveShader() override = default;
@@ -15,4 +28,7 @@ public:
 	void End(const RenderContext& rc) override;
 	// ÉpÉâÉÅÅ[É^ÇÃkeyéÊìæ
 	Material::ParameterMap GetParameterMap()const override;
+
+private:
+	ConstantBuffer _cbLocus;
 };

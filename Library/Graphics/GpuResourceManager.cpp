@@ -365,8 +365,21 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 	D3D11_TEXTURE2D_DESC* texture2dDesc)
 {
 	HRESULT hr = { S_OK };
+	std::filesystem::path filepath(filename);
+
+	// DDSファイルが存在するか確認
+	{
+		std::filesystem::path ddsPath = filepath;
+		ddsPath.replace_extension(".dds");
+		if (std::filesystem::exists(ddsPath))
+		{
+			// DDSファイルが存在したらそちらを読み込む
+			filepath = ddsPath;
+		}
+	}
+
 	// 以前に読み込んだことがあるか確認
-	auto it = resources.find(filename);
+	auto it = resources.find(filepath.wstring());
 	if (it != resources.end())
 	{
 		// 過去に読み込んだデータを取得
@@ -384,7 +397,6 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 	}
 
 	// ファイル拡張子を確認してそれに応じた読み込みを行う
-	std::filesystem::path filepath(filename);
 	std::string extension = filepath.extension().string();
 	// 小文字化
 	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
@@ -458,7 +470,7 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 
 	Debug::Output::String(L"テクスチャ読み込み成功\n");
 	Debug::Output::String("\t");
-	Debug::Output::String(filename);
+	Debug::Output::String(filepath.wstring());
 	Debug::Output::String("\n");
 
 	return true;

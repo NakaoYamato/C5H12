@@ -1,4 +1,5 @@
 #include "PrimitiveRenderer.hlsli"
+#include "../CBuffer/B0/SceneCB.hlsli"
 
 VS_OUT main(VS_IN vin, uint vertexId : SV_VertexID)
 {

@@ -1,5 +1,3 @@
-#include "../CBuffer/B0/SceneCB.hlsli"
-
 struct VS_IN
 {
     float4 position : POSITION;
@@ -13,7 +11,7 @@ struct VS_OUT
     float4 color : COLOR;
 };
 
-cbuffer CbScene : register(b1)
+cbuffer CbPrimitive : register(b1)
 {
     uint vertexCount;
     float2 viewportSize;

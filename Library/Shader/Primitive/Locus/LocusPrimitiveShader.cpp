@@ -6,6 +6,8 @@ LocusPrimitiveShader::LocusPrimitiveShader(ID3D11Device* device, D3D11_INPUT_ELE
 	_vertexShader.Load(device, "./Data/Shader/HLSL/PrimitiveRenderer/PrimitiveRendererVS.cso", inputDescs, inputSize);
 	// ピクセルシェーダ読み込み
 	_pixelShader.Load(device, "./Data/Shader/HLSL/PrimitiveRenderer/Locus/PlayerSwordLocusPS.cso");
+	// 定数バッファ
+	_cbLocus.Create(device, sizeof(CbLocus));
 }
 
 // 開始処理
@@ -28,6 +30,18 @@ void LocusPrimitiveShader::Update(const RenderContext& rc, const Material* mater
 		material->GetTextureData("Diffuse").Get(),
 		material->GetTextureData("Noise").Get(),
 	};
+	CbLocus cb{};
+	if (auto it = material->GetParameterF1("distanceRate"))
+		cb.distanceRate = *it;
+	if (auto it = material->GetParameterF1("colorMinValue"))
+		cb.colorMinValue = *it;
+	if (auto it = material->GetParameterF1("colorMaxValue"))
+		cb.colorMaxValue = *it;
+	if (auto it = material->GetParameterF4("baseColor"))
+		cb.baseColor = *it;
+
+	_cbLocus.Update(dc, &cb);
+	dc->PSSetConstantBuffers(CbLocusIndex, 1, _cbLocus.GetAddressOf());
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
@@ -51,5 +65,10 @@ void LocusPrimitiveShader::End(const RenderContext& rc)
 Material::ParameterMap LocusPrimitiveShader::GetParameterMap() const
 {
 	Material::ParameterMap p;
-	return Material::ParameterMap();
+	CbLocus cb{};
+	p["distanceRate"] = cb.distanceRate;
+	p["colorMinValue"] = cb.colorMinValue;
+	p["colorMaxValue"] = cb.colorMaxValue;
+	p["baseColor"] = cb.baseColor;
+	return p;
 }

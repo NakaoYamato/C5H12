@@ -14,6 +14,7 @@ void LocusRenderer::Start()
 	_material.LoadTexture("Noise", L"./Data/Texture/Noise/SwordTrail000.png");
 
 	_material.SetShaderName("Locus");
+	_material.SetParameterMap(GetActor()->GetScene()->GetPrimitiveRenderer().GetParameterMap("Locus"));
 }
 
 // XVˆ—

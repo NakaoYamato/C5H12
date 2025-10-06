@@ -12,6 +12,8 @@
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
+#include "../../Library/HRTrace.h"
+
 #include <algorithm>
 
 /// 初期化
@@ -27,11 +29,6 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 		device,
 		sizeof(StaticBoneCB),
 		_staticBoneCB.GetAddressOf());
-	// インスタンシングモデル用定数バッファ
-	GpuResourceManager::CreateConstantBuffer(
-		device,
-		sizeof(InstancingModelCB),
-		_instancingCB.GetAddressOf());
 
 	// インプットレイアウト
 	D3D11_INPUT_ELEMENT_DESC modelInputDesc[]
@@ -192,6 +189,22 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 	}
 
+	// インスタンシング描画用バッファ作成
+	{
+		D3D11_BUFFER_DESC desc{};
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.ByteWidth = sizeof(InstancingDrawInfo::Data) * INSTANCED_MAX;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		desc.StructureByteStride = sizeof(InstancingDrawInfo::Data);
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		HRESULT hr = device->CreateBuffer(&desc, nullptr, _instancingDataBuffer.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+		hr = device->CreateShaderResourceView(_instancingDataBuffer.Get(),
+			nullptr, _instancingDataSRV.ReleaseAndGetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+
 	_testMaterial.SetShaderName("Test");
 }
 
@@ -271,22 +284,17 @@ void MeshRenderer::DrawInstancing(Model* model,
 	const DirectX::XMFLOAT4X4& world)
 {
 	std::string key = material->GetShaderName() + model->GetFilename();
-	// 過去に登録しているか確認
-	auto iter = _instancingInfoMap.find(key);
 
-	InstancingDrawInfo::ModelMatrix modelParameter{ color, world };
-	if (iter != _instancingInfoMap.end())
+	// 過去に登録しているか確認
+	if (_instancingInfoMap.find(key) == _instancingInfoMap.end())
 	{
-		// 既に登録している場合はパラメータを追加
-		(*iter).second.modelParameters.push_back(modelParameter);
-	}
-	else
-	{
-		// ない場合は新規で登録
+		// 要素がないならば新規登録
 		_instancingInfoMap[key].model = model;
-		_instancingInfoMap[key].modelParameters.push_back(modelParameter);
 		_instancingInfoMap[key].material = material;
 	}
+	// パラメータを追加
+	InstancingDrawInfo::Data modelData{ world, color };
+	_instancingInfoMap[key].modelDatas.push_back(modelData);
 }
 
 /// 描画実行
@@ -667,9 +675,6 @@ Material::ParameterMap MeshRenderer::GetShaderParameterKey(ModelRenderType type,
 void MeshRenderer::RenderInstancing(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
-	// 定数バッファ設定
-	dc->VSSetConstantBuffers(ModelCBIndex, 1, _instancingCB.GetAddressOf());
-	dc->PSSetConstantBuffers(ModelCBIndex, 1, _instancingCB.GetAddressOf());
 
 	// モデルの描画関数
 	auto DrawModel = [&](InstancingDrawInfo& drawInfo, ModelShaderBase* shader)->void
@@ -677,48 +682,54 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 			Model* model = drawInfo.model;
 			const ModelResource* resource = model->GetResource();
 			const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
-			// 定数バッファの設定
-			size_t modelCount = 0;
-			if (drawInfo.modelParameters.size() > INSTANCED_MAX)
+
+			if (drawInfo.modelDatas.size() > INSTANCED_MAX)
 			{
 				// インスタンス数が多い場合はカメラの距離でソートして描画
 				// key : モデルのインデックス, value : カメラからの距離
 				std::vector<std::pair<size_t, float>> distanceMap;
-				DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
-				size_t index = 0;
-				for (auto& [color, world] : drawInfo.modelParameters)
 				{
-					DirectX::XMVECTOR Position = DirectX::XMVectorSet(world._41, world._42, world._43, 0.0f);
-					DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
-					distanceMap.push_back(std::make_pair(index, DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(Vec))));
-					index++;
-				}
-				// 近い順にソート
-				std::sort(distanceMap.begin(), distanceMap.end(),
-					[](const std::pair<size_t, float>& lhs, const std::pair<size_t, float>& rhs)
+					DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
+					size_t index = 0;
+					for (auto& [world, color] : drawInfo.modelDatas)
 					{
-						return lhs.second < rhs.second;
-					});
-				for (auto& [index, distance] : distanceMap)
-				{
-					auto& [modelColor, world] = drawInfo.modelParameters[index];
-					_cbInstancingSkeleton.materialColor[modelCount] = modelColor;
-					_cbInstancingSkeleton.world[modelCount] = world;
-					modelCount++;
-					if (modelCount >= INSTANCED_MAX)
-						break; // INSTANCED_MAXを超えたら終了
+						DirectX::XMVECTOR Position = DirectX::XMVectorSet(world._41, world._42, world._43, 0.0f);
+						DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
+						distanceMap.push_back(std::make_pair(index, DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(Vec))));
+						index++;
+					}
+					// 近い順にソート
+					std::sort(distanceMap.begin(), distanceMap.end(),
+						[](const std::pair<size_t, float>& lhs, const std::pair<size_t, float>& rhs)
+						{
+							return lhs.second < rhs.second;
+						});
 				}
-			}
-			else
-			{
-				for (auto& [color, world] : drawInfo.modelParameters)
+				std::vector<InstancingDrawInfo::Data> temp;
+				for (size_t i = 0; i < INSTANCED_MAX; ++i)
 				{
-					_cbInstancingSkeleton.materialColor[modelCount] = color;
-					_cbInstancingSkeleton.world[modelCount] = world;
-					modelCount++;
+					temp.push_back(drawInfo.modelDatas[distanceMap[i].first]);
 				}
+				drawInfo.modelDatas.clear();
+				drawInfo.modelDatas = temp;
 			}
-			dc->UpdateSubresource(_instancingCB.Get(), 0, 0, &_cbInstancingSkeleton, 0, 0);
+
+			// モデルデータ更新
+			D3D11_BOX writeBox = {};
+			writeBox.left = 0;
+			writeBox.right = static_cast<UINT>(drawInfo.modelDatas.size() * sizeof(InstancingDrawInfo::Data));
+			writeBox.top = 0;
+			writeBox.bottom = 1;
+			writeBox.front = 0;
+			writeBox.back = 1;
+			dc->UpdateSubresource(
+				_instancingDataBuffer.Get(),
+				0,
+				&writeBox,
+				drawInfo.modelDatas.data(),
+				writeBox.right,
+				0);
+			dc->VSSetShaderResources(10, 1, _instancingDataSRV.GetAddressOf());
 
 			for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 			{
@@ -731,7 +742,7 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 				// シェーダーの更新処理
 				shader->Update(rc, drawInfo.material);
 
-				dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), static_cast<UINT>(modelCount), 0, 0, 0);
+				dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), static_cast<UINT>(drawInfo.modelDatas.size()), 0, 0, 0);
 			}
 		};
 

@@ -24,7 +24,7 @@ class MeshRenderer
 {
 private:
     static const int FBX_MAX_BONES = 256;
-    static const int INSTANCED_MAX = 100;
+    static const int INSTANCED_MAX = 256;
 
 #pragma region 定数バッファ
     // 通常モデル用
@@ -47,12 +47,6 @@ private:
         DirectX::XMFLOAT4   materialColor{ 1,1,1,1 };
         DirectX::XMFLOAT4X4 world{};
     };
-    // インスタンシングモデル用
-    struct InstancingModelCB
-    {
-        DirectX::XMFLOAT4   materialColor[INSTANCED_MAX]{};
-        DirectX::XMFLOAT4X4 world[INSTANCED_MAX]{};
-    };
 #pragma endregion
 
 #pragma region Info
@@ -74,9 +68,14 @@ private:
     // インスタンシング描画用情報
     struct InstancingDrawInfo
     {
+        struct Data
+        {
+			DirectX::XMFLOAT4X4     world{};
+			Vector4                 color = Vector4::White;
+        };
+
         Model*                      model = nullptr;
-        using ModelMatrix = std::tuple<Vector4, DirectX::XMFLOAT4X4>;
-        std::vector<ModelMatrix> modelParameters;
+		std::vector<Data>           modelDatas;
         Material*                   material = nullptr;
     };
 #pragma endregion
@@ -212,7 +211,6 @@ private:
     // サイズが大きいく関数内で定義するとスタック警告がでるため静的に確保
     DynamicBoneCB		_cbDynamicSkeleton{};
     StaticBoneCB		_cbStaticSkeleton{};
-    InstancingModelCB	_cbInstancingSkeleton{};
 
     // シェーダーの配列
     using ShaderMap = std::unordered_map<std::string, std::unique_ptr<ModelShaderBase>>;
@@ -229,11 +227,12 @@ private:
     // Key : シェーダー名+モデルファイル名
     using InstancingDrawInfoMap = std::unordered_map<std::string, InstancingDrawInfo>;
     InstancingDrawInfoMap       _instancingInfoMap;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>				_instancingDataBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	_instancingDataSRV;
 
     // 各定数バッファ
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_dynamicBoneCB;
     Microsoft::WRL::ComPtr<ID3D11Buffer>	_staticBoneCB;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>	_instancingCB;
 
     // テスト描画用マテリアル
     Material _testMaterial{};

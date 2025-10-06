@@ -18,6 +18,7 @@ cbuffer GRASS_CONSTANT_BUFFER : register(b4)
 
 VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 {
+    InstancingModelData modelData = matrixBuffer[instance_id];
     vin.normal.w = 0;
     float sigma = vin.tangent.w;
     vin.tangent.w = 0;
@@ -48,16 +49,16 @@ VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
     rate = rate * shakeAmplitude;
     
     // 風のシード値計算
-    float seed = worldTransform[instance_id]._41 + worldTransform[instance_id]._42 + worldTransform[instance_id]._43;
+    float seed = modelData.worldTransform._41 + modelData.worldTransform._42 + modelData.worldTransform._43;
     
     float4 position = vin.position;
     // 草の揺れを計算
     position.xyz += windDirection * windStrength * sin(seed + totalElapsedTime * windSpeed) * rate;
     
     VS_OUT vout = (VS_OUT) 0;
-    vout.world_position = mul(position, worldTransform[instance_id]);
-    vout.world_normal = normalize(mul(vin.normal, worldTransform[instance_id]));
-    vout.world_tangent = normalize(mul(vin.tangent, worldTransform[instance_id]));
+    vout.world_position = mul(position, modelData.worldTransform);
+    vout.world_normal = normalize(mul(vin.normal, modelData.worldTransform));
+    vout.world_tangent = normalize(mul(vin.tangent, modelData.worldTransform));
     
     vout.position = mul(vout.world_position, viewProjection);
     vout.world_tangent.w = sigma;
@@ -65,7 +66,7 @@ VS_OUT main(VS_IN vin, uint instance_id : SV_INSTANCEID)
 	
     vout.texcoord = vin.texcoord;
     
-    vout.materialColor = materialColor[instance_id];
+    vout.materialColor = modelData.materialColor;
     
     return vout;
 }

@@ -12,7 +12,8 @@ VS_OUT_CSM main(VS_IN vin, uint instance_id : SV_INSTANCEID)
     uint modelInstanceId = instance_id / CASCADED_SHADOW_MAPS_SIZE;
     vout.instance_id = instance_id - (CASCADED_SHADOW_MAPS_SIZE * modelInstanceId);
     
-    float4 worldPosition = mul(vin.position, worldTransform[modelInstanceId]);    
+    InstancingModelData modelData = matrixBuffer[modelInstanceId];
+    float4 worldPosition = mul(vin.position, modelData.worldTransform);
     vout.position = mul(float4(worldPosition.xyz, 1), csm_data.cascaded_matrices[vout.instance_id]);
     
     return vout;

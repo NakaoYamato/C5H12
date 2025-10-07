@@ -265,12 +265,11 @@ void Framework::FixedUpdate()
 /// 描画処理
 void Framework::Render()
 {
-    // 別スレッド中にデバイスコンテキストが使われていた場合に
-    // 同時アクセスしないように排他制御する
-    std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-
     // シーンの描画
     {
+        // 別スレッド中にデバイスコンテキストが使われていた場合に
+        // 同時アクセスしないように排他制御する
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
 		ProfileScopedSection_3(0, "Scene::Render", ImGuiControl::Profiler::Dark);
 		SceneManager::Instance().Render();
     }
@@ -310,11 +309,19 @@ void Framework::Render()
     }
 
     // ImGui描画
-    ImGuiManager::Render();
+    {
+        // 別スレッド中にデバイスコンテキストが使われていた場合に
+        // 同時アクセスしないように排他制御する
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        ImGuiManager::Render();
+    }
 #endif
 
     // バックバッファに描画した画を画面に表示する。
     {
+        // 別スレッド中にデバイスコンテキストが使われていた場合に
+        // 同時アクセスしないように排他制御する
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
 		ProfileScopedSection_3(0, "Graphics::Present", ImGuiControl::Profiler::Dark);
         Graphics::Instance().Present(syncInterval);
     }

@@ -64,6 +64,7 @@ public:
 	bool IsAttack() const { return _isAttack; }
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
+	bool IsUsingItem() const { return _isUsingItem; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
 	void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
@@ -73,6 +74,7 @@ public:
 	void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
+	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
 #pragma endregion
 
 private:
@@ -98,6 +100,7 @@ private:
 	bool _isAttack = false;
 	bool _isGuard = false;
 	bool _isDead = false;
+	bool _isUsingItem = false;
 #pragma endregion
 
 #pragma region çUåÇä÷åW

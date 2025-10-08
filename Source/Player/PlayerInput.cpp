@@ -57,6 +57,8 @@ void PlayerInput::Update(float elapsedTime)
 	playerController->SetIsAttack(_INPUT_TRIGGERD("Action1"));
 	playerController->SetIsEvade(_INPUT_TRIGGERD("Evade"));
 
+	playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));
+
 	// ƒƒjƒ…[‰æ–Ê‹N“®“ü—Í
 	if (_INPUT_TRIGGERD("Menu"))
 	{

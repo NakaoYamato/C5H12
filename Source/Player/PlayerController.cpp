@@ -29,6 +29,7 @@ void PlayerController::Start()
 				vec.Dot(front) > 0.0f)
 			{
 				// ƒK[ƒh¬Œ÷
+				//_stateMachine.lock()->GetStateMachine().ChangeSubState("GuardHit");
 				_stateMachine.lock()->ChangeState("GuardHit", nullptr);
 				return false;
 			}

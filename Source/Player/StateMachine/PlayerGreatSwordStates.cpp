@@ -4,108 +4,41 @@
 #include "../PlayerController.h"
 #include "../../Library/Algorithm/Converter.h"
 
-#pragma region ベースステート
-void PlayerHSB::OnEnter()
-{
-    _owner->GetAnimator()->PlayAnimation(_animationName, _isLoop, _blendSeconds);
-    _owner->GetAnimator()->SetIsUseRootMotion(_isUsingRootMotion);
-}
-
-class Player8WaySSB : public StateBase<PlayerStateMachine>
-{
-public:
-    Player8WaySSB(PlayerStateMachine* stateMachine,
-        const std::string& name,
-        const std::string& animationName,
-        float blendSeconds,
-        bool isUsingRootMotion) : 
-        StateBase(stateMachine),
-        _name(name),
-        _animationName(animationName),
-        _blendSeconds(blendSeconds),
-        _isUsingRootMotion(isUsingRootMotion)
-    {
-    }
-    const char* GetName() const override { return _name.c_str(); }
-    void OnEnter() override
-    {
-        _owner->GetAnimator()->SetIsUseRootMotion(_isUsingRootMotion);
-        _owner->GetAnimator()->PlayAnimation(_animationName, false, _blendSeconds);
-    }
-    void OnExecute(float elapsedTime) override
-    {
-    }
-    void OnExit() override
-    {
-    }
-private:
-    std::string _name = "";
-    std::string _animationName = "";
-    float		_blendSeconds = 0.2f;
-    bool		_isUsingRootMotion = false;
-};
-
-Player8WayHSB::Player8WayHSB(PlayerStateMachine* stateMachine,
-    std::vector<std::string> animationNames,
-    float blendSeconds,
-    bool isUsingRootMotion) :
-    HierarchicalStateBase(stateMachine)
-{
-    // 要素数チェック
-    assert(animationNames.size() == Direction::NumDirections);
-
-    // サブステート登録
-    for (size_t i = 0; i < Direction::NumDirections; ++i)
-    {
-        RegisterSubState(std::make_shared<Player8WaySSB>(
-            stateMachine,
-            ToString<Direction>(i),
-            animationNames[i],
-            blendSeconds, 
-            isUsingRootMotion));
-    }
-}
-
-void Player8WayHSB::ChangeSubState(Direction animationIndex)
-{
-    HierarchicalStateBase<PlayerStateMachine>::ChangeSubState(ToString<Direction>(animationIndex));
-}
-
-#pragma endregion
-
 #pragma region 待機
 void PlayerGreatSwordIdleState::OnExecute(float elapsedTime)
 {
     // 攻撃遷移
     if (_owner->GetPlayer()->IsAttack())
-        _owner->GetStateMachine().ChangeState("Attack1");
+        _owner->GetStateMachine().ChangeState("CombatAttack1");
     // 移動
     else if (_owner->GetPlayer()->IsMoving())
-        _owner->GetStateMachine().ChangeState("GreatSwordWalk");
+        _owner->GetStateMachine().ChangeState("CombatRun");
     // 回避移行
     else if (_owner->GetPlayer()->IsEvade())
-        _owner->GetStateMachine().ChangeState("Evade");
+        _owner->GetStateMachine().ChangeState("CombatEvade");
     // ガード移行
     else if (_owner->GetPlayer()->IsGuard())
-        _owner->GetStateMachine().ChangeState("Guard");
+        _owner->GetStateMachine().ChangeState("CombatGuard");
+    // 納刀移行
+	else if (_owner->GetPlayer()->IsUsingItem())
+		_owner->GetStateMachine().ChangeState("ToNonCombat");
 }
 #pragma endregion
 
 #pragma region 走り
-namespace SprintSubState
+namespace RunSubState
 {
-    class SprintStartSubState : public StateBase<PlayerStateMachine>
+	// 走り開始
+    class RunStartSubState final : public PlayerSSB
     {
     public:
-        SprintStartSubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        RunStartSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "RunStart",
+                u8"RunCombatStartF0", 0.2f,
+                false,
+                true)
         {
-        }
-        const char* GetName() const override { return "SprintStart"; }
-
-        void OnEnter() override
-        {
-            _owner->GetAnimator()->SetIsUseRootMotion(true);
-            _owner->GetAnimator()->PlayAnimation(u8"RunCombatStartF0", false, 0.2f);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -113,40 +46,32 @@ namespace SprintSubState
             _owner->RotationMovement(elapsedTime);
             // 攻撃移行
             if (_owner->GetPlayer()->IsAttack())
-                _owner->GetStateMachine().ChangeSubState("SprintAttack");
+                _owner->GetStateMachine().ChangeSubState("RunAttack");
             // 回避移行
             else if (_owner->GetPlayer()->IsEvade())
-                _owner->GetStateMachine().ChangeState("Evade");
+                _owner->GetStateMachine().ChangeState("CombatEvade");
             // ガード移行
             else if (_owner->GetPlayer()->IsGuard())
-                _owner->GetStateMachine().ChangeState("Guard");
+                _owner->GetStateMachine().ChangeState("CombatGuard");
             // アニメーションが終了していたら遷移
             else if (!_owner->GetAnimator()->IsPlayAnimation())
-            {
-                _owner->GetStateMachine().ChangeSubState("Sprinting");
-            }
-            // ダッシュ解除で移動に遷移
-            else if (!_owner->GetPlayer()->IsDash())
-            {
-                _owner->GetStateMachine().ChangeState("Run");
-            }
-        }
-        void OnExit() override
-        {
+                _owner->GetStateMachine().ChangeSubState("Running");
+            // 移動していなければ終了に遷移
+            else if (!_owner->GetPlayer()->IsMoving())
+                _owner->GetStateMachine().ChangeSubState("RunStop");
         }
     };
-    class SprintingSubState : public StateBase<PlayerStateMachine>
+	// 走りループ
+    class RunningSubState final : public PlayerSSB
     {
     public:
-        SprintingSubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        RunningSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "Running",
+                u8"RunCombatLoopF0", 0.2f,
+                true,
+                true)
         {
-        }
-        const char* GetName() const override { return "Sprinting"; }
-
-        void OnEnter() override
-        {
-            _owner->GetAnimator()->SetIsUseRootMotion(true);
-            _owner->GetAnimator()->PlayAnimation(u8"RunCombatLoopF0", true, 0.0f);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -154,39 +79,40 @@ namespace SprintSubState
             _owner->RotationMovement(elapsedTime);
             // 攻撃移行
             if (_owner->GetPlayer()->IsAttack())
-                _owner->GetStateMachine().ChangeSubState("SprintAttack");
+                _owner->GetStateMachine().ChangeSubState("RunAttack");
             // 回避移行
             else if (_owner->GetPlayer()->IsEvade())
-                _owner->GetStateMachine().ChangeState("Evade");
+                _owner->GetStateMachine().ChangeState("CombatEvade");
             // ガード移行
             else if (_owner->GetPlayer()->IsGuard())
-                _owner->GetStateMachine().ChangeState("Guard");
-            // ダッシュ解除で移動に遷移
-            else if (!_owner->GetPlayer()->IsDash())
-                _owner->GetStateMachine().ChangeState("Run");
-        }
-        void OnExit() override
-        {
+                _owner->GetStateMachine().ChangeState("CombatGuard");
+            // 移動していなければ終了に遷移
+            else if (!_owner->GetPlayer()->IsMoving())
+                _owner->GetStateMachine().ChangeSubState("RunStop");
+            // 納刀移行
+            else if (_owner->GetPlayer()->IsUsingItem() || _owner->GetPlayer()->IsDash())
+                _owner->GetStateMachine().ChangeSubState("RunToNonCombat");
         }
     };
-    class SprintAttackSubState : public StateBase<PlayerStateMachine>
+	// 走り攻撃
+    class RunAttackSubState final : public PlayerSSB
     {
     public:
         static constexpr float ATK = 1.0f;
     public:
-        SprintAttackSubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        RunAttackSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "RunAttack",
+                u8"RunAttack01", 0.2f,
+                false,
+                true)
         {
         }
-        const char* GetName() const override { return "SprintAttack"; }
-
         void OnEnter() override
         {
-            _owner->GetAnimator()->SetIsUseRootMotion(true);
-            _owner->GetAnimator()->PlayAnimation(u8"RunAttack01", false, 0.2f);
-
+			PlayerSSB::OnEnter();
             // 攻撃フラグを立てる
             _owner->GetPlayer()->SetBaseATK(ATK);
-
             // 先行入力遷移先をクリア
             _nextStateName = "";
         }
@@ -198,18 +124,18 @@ namespace SprintSubState
                 // 先行入力遷移先を設定
                 // 攻撃
                 if (_owner->GetPlayer()->IsAttack())
-                    _nextStateName = "Attack1";
+                    _nextStateName = "CombatAttack1";
                 // 回避移行
                 else if (_owner->GetPlayer()->IsEvade())
-                    _nextStateName = "Evade";
+                    _nextStateName = "CombatEvade";
                 // ガード移行
                 else if (_owner->GetPlayer()->IsGuard())
-                    _nextStateName = "Guard";
+                    _nextStateName = "CombatGuard";
             }
 
             // アニメーションが終了していたら遷移
             if (!_owner->GetAnimator()->IsPlayAnimation())
-                _owner->GetStateMachine().ChangeState("Idle");
+                _owner->GetStateMachine().ChangeState("CombatIdle");
             else if (_owner->GetPlayer()->CallCancelEvent())
             {
                 // キャンセル待機中に入力があった場合は先行入力遷移
@@ -217,20 +143,74 @@ namespace SprintSubState
                     _owner->GetStateMachine().ChangeState(_nextStateName);
             }
         }
-        void OnExit() override
-        {
-        }
     private:
         std::string _nextStateName = "";
+    };
+	// 走り終了
+    class RunStopSubState final : public PlayerSSB
+    {
+    public:
+        RunStopSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "RunStop",
+                u8"RunCombatStopF0", 0.2f,
+                false,
+                true)
+        {
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // 移動方向に向く
+            _owner->RotationMovement(elapsedTime);
+            // 移動があれば遷移
+            if (_owner->GetPlayer()->IsMoving())
+                _owner->GetStateMachine().ChangeSubState("Running");
+            // 攻撃移行
+            else if (_owner->GetPlayer()->IsAttack())
+                _owner->GetStateMachine().ChangeState("CombatAttack1");
+            // 回避移行
+            else if (_owner->GetPlayer()->IsEvade())
+                _owner->GetStateMachine().ChangeState("CombatEvade");
+            // ガード移行
+            else if (_owner->GetPlayer()->IsGuard())
+                _owner->GetStateMachine().ChangeState("CombatGuard");
+            // アニメーションが終了していたら遷移
+            else if (!_owner->GetAnimator()->IsPlayAnimation())
+                _owner->GetStateMachine().ChangeState("CombatIdle");
+        }
+    };
+    // 走り納刀
+    class RunToNonCombatSubState final : public PlayerSSB
+    {
+	public:
+		RunToNonCombatSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"RunToNonCombat",
+				u8"RunCombatToRun", 0.2f,
+				false,
+				true)
+		{
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+            {
+                _owner->GetStateMachine().ChangeState("Run");
+                _owner->GetStateMachine().ChangeSubState("Running");
+            }
+		}
     };
 }
 PlayerGreatSwordRunState::PlayerGreatSwordRunState(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
 {
     // サブステート登録
-    RegisterSubState(std::make_shared<SprintSubState::SprintStartSubState>(stateMachine));
-    RegisterSubState(std::make_shared<SprintSubState::SprintingSubState>(stateMachine));
-    RegisterSubState(std::make_shared<SprintSubState::SprintAttackSubState>(stateMachine));
+    RegisterSubState(std::make_shared<RunSubState::RunStartSubState>(stateMachine));
+    RegisterSubState(std::make_shared<RunSubState::RunningSubState>(stateMachine));
+    RegisterSubState(std::make_shared<RunSubState::RunAttackSubState>(stateMachine));
+    RegisterSubState(std::make_shared<RunSubState::RunStopSubState>(stateMachine));
+    RegisterSubState(std::make_shared<RunSubState::RunToNonCombatSubState>(stateMachine));
 }
 
 void PlayerGreatSwordRunState::OnEnter()
@@ -238,7 +218,7 @@ void PlayerGreatSwordRunState::OnEnter()
     // フラグを立てる
     _owner->GetPlayer()->SetIsDash(true);
     // 初期サブステート設定
-    ChangeSubState("SprintStart");
+    ChangeSubState("RunStart");
 }
 void PlayerGreatSwordRunState::OnExecute(float elapsedTime)
 {
@@ -303,19 +283,19 @@ void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!_owner->GetAnimator()->IsPlayAnimation())
     {
-        _owner->GetStateMachine().ChangeState("Idle");
+        _owner->GetStateMachine().ChangeState("CombatIdle");
     }
     else if (_owner->GetPlayer()->CallCancelEvent())
     {
         // 攻撃移行
         if (_owner->GetPlayer()->IsAttack())
-            _owner->GetStateMachine().ChangeState("Attack1");
+            _owner->GetStateMachine().ChangeState("CombatAttack1");
         // 移動移行
         else if (_owner->GetPlayer()->IsMoving())
-            _owner->GetStateMachine().ChangeState("Run");
+            _owner->GetStateMachine().ChangeState("CombatRun");
         // ガード移行
         else if (_owner->GetPlayer()->IsGuard())
-            _owner->GetStateMachine().ChangeState("Guard");
+            _owner->GetStateMachine().ChangeState("CombatGuard");
     }
 }
 #pragma endregion
@@ -324,7 +304,7 @@ void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
 // 攻撃1サブステート
 namespace Attack1SubState
 {
-    class ComboSubState : public StateBase<PlayerStateMachine>
+    class ComboSubState final : public PlayerSSB
     {
     public:
         static constexpr float ATK = 1.0f;
@@ -334,37 +314,28 @@ namespace Attack1SubState
             const std::string& animationName,
             const std::string& nextSubStateName,
             float animationBlendTime,
-            float ATK)
-            : StateBase(stateMachine),
-            _name(name),
-            _animationName(animationName),
-            _nextSubStateName(nextSubStateName),
-            _animationBlendTime(animationBlendTime),
-            _ATK(ATK)
+            float ATK) :
+            PlayerSSB(stateMachine,
+                name,
+                animationName,
+                animationBlendTime,
+                false,
+                true),
+			_nextSubStateName(nextSubStateName),
+			_ATK(ATK)
         {
         }
 
-        const char* GetName() const override { return _name.c_str(); }
         const char* GetNextStateName() const { return _nextSubStateName.c_str(); }
 
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(_animationName, false, _animationBlendTime);
+            PlayerSSB::OnEnter();
             // 攻撃フラグを立てる
             _owner->GetPlayer()->SetBaseATK(_ATK);
         }
-        void OnExecute(float elapsedTime) override
-        {
-        }
-        void OnExit() override
-        {
-        }
     private:
-        std::string _name;
-        std::string _animationName;
         std::string _nextSubStateName;
-
-        float _animationBlendTime = 0.2f;
         float _ATK = 1.0f;
     };
 }
@@ -418,10 +389,10 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
             _nextStateName = "Attack";
         // 回避移行
         else if (_owner->GetPlayer()->IsEvade())
-            _nextStateName = "Evade";
+            _nextStateName = "CombatEvade";
         // ガード移行
         else if (_owner->GetPlayer()->IsGuard())
-            _nextStateName = "Guard";
+            _nextStateName = "CombatGuard";
     }
 
     // 攻撃キャンセル判定
@@ -459,7 +430,7 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
     if (!_owner->GetAnimator()->IsPlayAnimation())
     {
         // 攻撃からIdleに遷移
-        _owner->GetStateMachine().ChangeState("Idle");
+        _owner->GetStateMachine().ChangeState("CombatIdle");
     }
 }
 #pragma endregion
@@ -468,16 +439,91 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
 // ガードサブステート
 namespace GuardSubState
 {
-    class GuardStartSubState : public StateBase<PlayerStateMachine>
+    // ガード開始
+    class GuardStartSubState final : public PlayerSSB
     {
     public:
-        GuardStartSubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
+        GuardStartSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "GuardStart",
+                u8"BlockStart",
+                2.0f,
+                false,
+                true)
         {
         }
-        const char* GetName() const override { return "GuardStart"; }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションが終了していたら遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+                _owner->GetStateMachine().ChangeSubState("Guarding");
+            // ガード解除
+            else if (!_owner->GetPlayer()->IsGuard())
+                _owner->GetStateMachine().ChangeSubState("GuardEnd");
+        }
+    };
+    // ガード中
+    class GuardingSubState final : public PlayerSSB
+    {
+    public:
+        GuardingSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "Guarding",
+                u8"BlockLoop",
+                0.2f,
+                true,
+                true)
+        {
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // ガード解除
+            if (!_owner->GetPlayer()->IsGuard())
+                _owner->GetStateMachine().ChangeSubState("GuardEnd");
+        }
+    };
+    // ガード終了
+    class GuardEndSubState final : public PlayerSSB
+    {
+    public:
+        GuardEndSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "GuardEnd",
+                u8"BlockEnd",
+                0.2f,
+                false,
+                true)
+        {
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションが終了していたら遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+                _owner->GetStateMachine().ChangeState("CombatIdle");
+        }
+    };
+    // ガード時被弾
+    class GuardHitSubState final : public PlayerSSB
+    {
+    public:
+        GuardHitSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "GuardHit",
+                u8"BlockHit",
+                0.2f,
+                false,
+                true)
+        {
+        }
         void OnEnter() override
         {
-            _owner->GetAnimator()->PlayAnimation(u8"BlockStart", false, 2.0f);
+			PlayerSSB::OnEnter();
+            // 被弾モーション中は押し出されないようにする
+            auto charactorController = _owner->GetPlayer()->GetCharactorController();
+            if (charactorController != nullptr)
+            {
+                charactorController->SetIsPushable(false);
+            }
         }
         void OnExecute(float elapsedTime) override
         {
@@ -487,25 +533,12 @@ namespace GuardSubState
         }
         void OnExit() override
         {
-        }
-    };
-
-    class GuardingSubState : public StateBase<PlayerStateMachine>
-    {
-    public:
-        GuardingSubState(PlayerStateMachine* stateMachine) : StateBase(stateMachine)
-        {
-        }
-        const char* GetName() const override { return "Guarding"; }
-        void OnEnter() override
-        {
-            _owner->GetAnimator()->PlayAnimation(u8"BlockLoop", true, 0.2f);
-        }
-        void OnExecute(float elapsedTime) override
-        {
-        }
-        void OnExit() override
-        {
+            // 押し出されれるようにする
+            auto charactorController = _owner->GetPlayer()->GetCharactorController();
+            if (charactorController != nullptr)
+            {
+                charactorController->SetIsPushable(true);
+            }
         }
     };
 }
@@ -513,14 +546,173 @@ namespace GuardSubState
 PlayerGreatSwordGuardState::PlayerGreatSwordGuardState(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
 {
+    // サブステート登録
+    RegisterSubState(std::make_shared<GuardSubState::GuardStartSubState>(stateMachine));
+    RegisterSubState(std::make_shared<GuardSubState::GuardingSubState>(stateMachine));
+    RegisterSubState(std::make_shared<GuardSubState::GuardHitSubState>(stateMachine));
 }
 void PlayerGreatSwordGuardState::OnEnter()
 {
+    // フラグを立てる
+    _owner->GetPlayer()->SetIsGuard(true);
+    _owner->GetAnimator()->SetIsUseRootMotion(true);
+    // 初期サブステート設定
+    ChangeSubState("GuardStart");
 }
 void PlayerGreatSwordGuardState::OnExecute(float elapsedTime)
 {
+    // 移動方向に向く
+    _owner->RotationMovement(elapsedTime);
+
+    // 攻撃移行
+    if (_owner->GetPlayer()->IsAttack())
+        _owner->GetStateMachine().ChangeState("CombatAttack1");
+    // 回避移行
+    else if (_owner->GetPlayer()->IsEvade())
+        _owner->GetStateMachine().ChangeState("CombatEvade");
 }
 void PlayerGreatSwordGuardState::OnExit()
 {
+    // フラグを下ろす
+    _owner->GetPlayer()->SetIsGuard(false);
+}
+#pragma endregion
+
+#pragma region 被弾
+PlayerGreatSwordHitState::PlayerGreatSwordHitState(PlayerStateMachine* stateMachine) :
+    Player8WayHSB(
+        stateMachine,
+        { u8"HitCombatF",
+        u8"HitCombatF",
+        u8"HitCombatR",
+        u8"HitCombatB",
+        u8"HitCombatB",
+        u8"HitCombatB",
+        u8"HitCombatL",
+        u8"HitCombatF", },
+        0.2f,
+        true)
+{
+}
+void PlayerGreatSwordHitState::OnEnter()
+{
+	// プレイヤーの向きと、被弾方向から被弾アニメーションを決定
+	auto& position = _owner->GetPlayer()->GetActor()->GetTransform().GetPosition();
+    auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	auto hitDirection = (hitPosition - position).Normalize();
+
+    float angle =
+        DirectX::XMConvertToDegrees(
+            atan2f(hitDirection.x, hitDirection.z)
+            - _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+        );
+    // 角度を0~360度に正規化
+    angle = fmodf(angle, 360.0f);
+    if (angle < 0.0f)
+        angle += 360.0f;
+    // 360度を8方向に分割
+    int index = (int)(angle / 45.0f + 0.5f);
+    if (index >= 8)
+        index = 0;
+    Player8WayHSB::Direction directionType = static_cast<Player8WayHSB::Direction>(index);
+    ChangeSubState(directionType);
+
+    // 被弾モーション中は押し出されないようにする
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(false);
+    }
+}
+
+void PlayerGreatSwordHitState::OnExecute(float elapsedTime)
+{
+    // アニメーションが終了していたら遷移
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState("CombatIdle");
+}
+
+void PlayerGreatSwordHitState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
+}
+
+PlayerGreatSwordHitKnockDownState::PlayerGreatSwordHitKnockDownState(PlayerStateMachine* stateMachine) :
+    Player8WayHSB(
+        stateMachine,
+        { u8"HitCombatLargeF",
+        u8"HitCombatLargeF",
+        u8"HitCombatLargeR",
+        u8"HitCombatLargeB",
+        u8"HitCombatLargeB",
+        u8"HitCombatLargeB",
+        u8"HitCombatLargeL",
+        u8"HitCombatLargeF", },
+        0.2f,
+        true)
+{
+}
+
+void PlayerGreatSwordHitKnockDownState::OnEnter()
+{
+    // プレイヤーの向きと、被弾方向から被弾アニメーションを決定
+    auto& position = _owner->GetPlayer()->GetActor()->GetTransform().GetPosition();
+    auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+    auto hitDirection = (hitPosition - position).Normalize();
+
+    float angle =
+        DirectX::XMConvertToDegrees(
+            atan2f(hitDirection.x, hitDirection.z)
+            - _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+        );
+    // 角度を0~360度に正規化
+    angle = fmodf(angle, 360.0f);
+    if (angle < 0.0f)
+        angle += 360.0f;
+    // 360度を8方向に分割
+    int index = (int)(angle / 45.0f + 0.5f);
+    if (index >= 8)
+        index = 0;
+    Player8WayHSB::Direction directionType = static_cast<Player8WayHSB::Direction>(index);
+    ChangeSubState(directionType);
+
+    // 被弾モーション中は押し出されないようにする
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(false);
+    }
+}
+
+void PlayerGreatSwordHitKnockDownState::OnExecute(float elapsedTime)
+{
+    // アニメーションが終了していたら遷移
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState("CombatIdle");
+}
+
+void PlayerGreatSwordHitKnockDownState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
+}
+
+#pragma endregion
+
+#pragma region 納刀
+void PlayerGreatSwordToNonCombatState::OnExecute(float elapsedTime)
+{
+    // アニメーションが終了していたら遷移
+    if (!_owner->GetAnimator()->IsPlayAnimation())
+        _owner->GetStateMachine().ChangeState("Idle");
 }
 #pragma endregion

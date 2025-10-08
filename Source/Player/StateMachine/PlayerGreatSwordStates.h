@@ -2,66 +2,6 @@
 
 #include "PlayerStateMachine.h"
 
-// プレイヤーのヒエラルキカルステートのベースクラス
-#pragma region ベースステート
-// OnEnterでアニメーションを再生するだけの簡易ステート
-class PlayerHSB : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerHSB(PlayerStateMachine* stateMachine,
-		const std::string& animationName,
-		float blendSeconds,
-		bool isLoop,
-		bool isUsingRootMotion) :
-		HierarchicalStateBase(stateMachine),
-		_animationName(animationName),
-		_blendSeconds(blendSeconds),
-		_isLoop(isLoop),
-		_isUsingRootMotion(isUsingRootMotion)
-	{
-	}
-	~PlayerHSB() override {}
-	virtual void OnEnter() override;
-	virtual void OnExecute(float elapsedTime) override {}
-	virtual void OnExit() override {}
-private:
-	std::string _animationName = "";
-	float		_blendSeconds = 0.2f;
-	bool		_isLoop = false;
-	bool		_isUsingRootMotion = false;
-};
-
-// 8方向のサブステートを持つヒエラルキカルステート
-class Player8WayHSB : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	enum Direction
-	{
-		Front = 0,
-		FrontRight,
-		Right,
-		BackRight,
-		Back,
-		BackLeft,
-		Left,
-		FrontLeft,
-
-		NumDirections,
-	};
-
-public:
-	Player8WayHSB(PlayerStateMachine* stateMachine,
-		std::vector<std::string> animationNames,
-		float blendSeconds,
-		bool isUsingRootMotion);
-	~Player8WayHSB() override {}
-	virtual void OnEnter() override {}
-	virtual void OnExecute(float elapsedTime) override {}
-	virtual void OnExit() override {}
-	void ChangeSubState(Direction animationIndex);
-};
-#pragma endregion
-
 // 大剣装備状態のプレイヤーステート
 #pragma region 待機
 class PlayerGreatSwordIdleState final : public PlayerHSB
@@ -71,7 +11,7 @@ public:
 		PlayerHSB(stateMachine, u8"IdleCombat", 0.2f, true, false) {}
 	~PlayerGreatSwordIdleState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "GreatSwordIdle"; }
+	const char* GetName() const override { return "CombatIdle"; }
 	void OnExecute(float elapsedTime) override;
 };
 #pragma endregion
@@ -83,7 +23,7 @@ public:
 	PlayerGreatSwordRunState(PlayerStateMachine* stateMachine);
 	~PlayerGreatSwordRunState() override {}
 	// ステート名取得
-	const char* GetName() const override { return "GreatSwordWalk"; }
+	const char* GetName() const override { return "CombatRun"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
@@ -98,7 +38,7 @@ public:
 	~PlayerGreatSwordEvadeState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "GreatSwordEvade"; }
+	const char* GetName() const override { return "CombatEvade"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -113,7 +53,7 @@ public:
 	~PlayerGreatSwordAttack1State() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "GreatSwordAttack1"; }
+	const char* GetName() const override { return "CombatAttack1"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
@@ -131,9 +71,48 @@ public:
 	~PlayerGreatSwordGuardState() override {}
 
 	// ステート名取得
-	const char* GetName() const override { return "GreatSwordGuard"; }
+	const char* GetName() const override { return "CombatGuard"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override;
+};
+#pragma endregion
+
+#pragma region 被弾
+class PlayerGreatSwordHitState final : public Player8WayHSB
+{
+public:
+	PlayerGreatSwordHitState(PlayerStateMachine* stateMachine);
+	~PlayerGreatSwordHitState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "CombatHit"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+class PlayerGreatSwordHitKnockDownState final : public Player8WayHSB
+{
+public:
+	PlayerGreatSwordHitKnockDownState(PlayerStateMachine* stateMachine);
+	~PlayerGreatSwordHitKnockDownState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "CombatHitKnockDown"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+#pragma endregion
+
+#pragma region 納刀
+class PlayerGreatSwordToNonCombatState  final : public PlayerHSB
+{
+public:
+	PlayerGreatSwordToNonCombatState(PlayerStateMachine* stateMachine) :
+		PlayerHSB(stateMachine, u8"IdleCombatToIdle", 0.2f, false, true) {
+	}
+	~PlayerGreatSwordToNonCombatState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "ToNonCombat"; }
+	void OnExecute(float elapsedTime) override;
 };
 #pragma endregion

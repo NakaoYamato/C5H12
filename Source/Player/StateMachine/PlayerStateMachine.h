@@ -45,160 +45,92 @@ private:
 	Animator* _animator = nullptr;
 };
 
-#pragma region 各ステート
-#pragma region 待機
-class PlayerIdleState final : public HierarchicalStateBase<PlayerStateMachine>
+// プレイヤーのヒエラルキカルステートのベースクラス
+#pragma region ベースステート
+// OnEnterでアニメーションを再生するだけの簡易ステート
+class PlayerHSB : public HierarchicalStateBase<PlayerStateMachine>
 {
 public:
-	PlayerIdleState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerIdleState() override {}
-
-	// ステート名取得
-	const char* GetName() const override { return "Idle"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	PlayerHSB(PlayerStateMachine* stateMachine,
+		const std::string& animationName,
+		float blendSeconds,
+		bool isLoop,
+		bool isUsingRootMotion) :
+		HierarchicalStateBase(stateMachine),
+		_animationName(animationName),
+		_blendSeconds(blendSeconds),
+		_isLoop(isLoop),
+		_isUsingRootMotion(isUsingRootMotion)
+	{
+	}
+	~PlayerHSB() override {}
+	virtual void OnEnter() override;
+	virtual void OnExecute(float elapsedTime) override {}
+	virtual void OnExit() override {}
+private:
+	std::string _animationName = "";
+	float		_blendSeconds = 0.2f;
+	bool		_isLoop = false;
+	bool		_isUsingRootMotion = false;
 };
-#pragma endregion
 
-#pragma region 走り
-class PlayerRunState final : public HierarchicalStateBase<PlayerStateMachine>
+// 8方向のサブステートを持つヒエラルキカルステート
+class Player8WayHSB : public HierarchicalStateBase<PlayerStateMachine>
 {
 public:
-	PlayerRunState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerRunState() override {}
+	enum Direction
+	{
+		Front = 0,
+		FrontRight,
+		Right,
+		BackRight,
+		Back,
+		BackLeft,
+		Left,
+		FrontLeft,
 
-	// ステート名取得
-	const char* GetName() const override { return "Run"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
+		NumDirections,
+	};
+
+public:
+	Player8WayHSB(PlayerStateMachine* stateMachine,
+		std::vector<std::string> animationNames,
+		float blendSeconds,
+		bool isUsingRootMotion);
+	~Player8WayHSB() override {}
+	virtual void OnEnter() override {}
+	virtual void OnExecute(float elapsedTime) override {}
+	virtual void OnExit() override {}
+	void ChangeSubState(Direction animationIndex);
 };
-#pragma endregion
 
-#pragma region ダッシュ
-class PlayerSprintState final : public HierarchicalStateBase<PlayerStateMachine>
+// アニメーション再生のみの簡易サブステート
+class PlayerSSB : public StateBase<PlayerStateMachine>
 {
 public:
-	PlayerSprintState(PlayerStateMachine* stateMachine);
-	~PlayerSprintState() override {}
-
-	// ステート名取得
-	const char* GetName() const override { return "Sprint"; }
+	PlayerSSB(PlayerStateMachine* stateMachine,
+		const std::string& name,
+		const std::string& animationName,
+		float blendSeconds,
+		bool isLoop,
+		bool isUsingRootMotion) :
+		StateBase(stateMachine),
+		_name(name),
+		_animationName(animationName),
+		_blendSeconds(blendSeconds),
+		_isLoop(isLoop),
+		_isUsingRootMotion(isUsingRootMotion)
+	{
+	}
+	const char* GetName() const override { return _name.c_str(); }
 	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
-};
-#pragma endregion
-
-#pragma region 回避
-class PlayerEvadeState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerEvadeState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerEvadeState() override {}
-
-	// ステート名取得
-	const char* GetName() const override { return "Evade"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
-};
-#pragma endregion
-
-#pragma region 攻撃1
-class PlayerAttack1State final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerAttack1State(PlayerStateMachine* stateMachine);
-	~PlayerAttack1State() override {}
-
-	// ステート名取得
-	const char* GetName() const override { return "Attack1"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
+	void OnExecute(float elapsedTime) override {}
 	void OnExit() override {}
 private:
-    // 先行入力遷移先
-	std::string _nextStateName = "";
+	std::string _name = "";
+	std::string _animationName = "";
+	float		_blendSeconds = 0.2f;
+	bool		_isLoop = false;
+	bool		_isUsingRootMotion = false;
 };
-#pragma endregion
-
-#pragma region ガード
-class PlayerGuardState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerGuardState(PlayerStateMachine* stateMachine);
-	~PlayerGuardState() override {}
-
-	// ステート名取得
-	const char* GetName() const override { return "Guard"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
-};
-#pragma endregion
-
-#pragma region 被弾
-class PlayerHitState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerHitState() override {}
-	// ステート名取得
-	const char* GetName() const override { return "Hit"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
-};
-class PlayerHitKnockDownState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerHitKnockDownState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerHitKnockDownState() override {}
-	// ステート名取得
-	const char* GetName() const override { return "HitKnockDown"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
-};
-class PlayerGuardHitState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerGuardHitState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerGuardHitState() override {}
-	// ステート名取得
-	const char* GetName() const override { return "GuardHit"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
-};
-class PlayerGuardBreakState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerGuardBreakState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerGuardBreakState() override {}
-	// ステート名取得
-	const char* GetName() const override { return "GuardBreak"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override;
-};
-#pragma endregion
-
-#pragma region 死亡
-class PlayerDeathState final : public HierarchicalStateBase<PlayerStateMachine>
-{
-public:
-	PlayerDeathState(PlayerStateMachine* stateMachine) : HierarchicalStateBase(stateMachine) {}
-	~PlayerDeathState() override {}
-	// ステート名取得
-	const char* GetName() const override { return "Death"; }
-	void OnEnter() override;
-	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
-};
-#pragma endregion
-
-
 #pragma endregion

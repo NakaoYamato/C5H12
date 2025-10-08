@@ -55,6 +55,7 @@ void PlayerInput::Update(float elapsedTime)
 	playerController->SetIsGuard(_INPUT_PRESSED("Guard") || _INPUT_VALUE("Guard") > 0.0f);
 
 	playerController->SetIsAttack(_INPUT_TRIGGERD("Action1"));
+	playerController->SetIsSpecialAttack(_INPUT_TRIGGERD("Action2"));
 	playerController->SetIsEvade(_INPUT_TRIGGERD("Evade"));
 
 	playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));

@@ -26,6 +26,7 @@ PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* anima
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordRunState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordEvadeState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordAttack1State>(this));
+    _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordAttack2State>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordGuardState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordHitState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordHitKnockDownState>(this));

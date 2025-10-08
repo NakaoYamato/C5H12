@@ -118,7 +118,8 @@ void PlayerNonCombatWalkState::OnExecute(float elapsedTime)
 	if (_owner->GetPlayer()->IsMoving() && _owner->GetPlayer()->IsDash())
 	{
 		_owner->GetStateMachine().ChangeState("Run");
-		_owner->GetStateMachine().ChangeSubState("Running");
+		if (std::string(this->GetSubStateName()) != "WalkStart")
+			_owner->GetStateMachine().ChangeSubState("Running");
 	}
 
 	// ‰ñ”ğˆÚs

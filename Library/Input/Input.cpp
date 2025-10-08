@@ -12,6 +12,7 @@ Input::Input()
 	_buttonActionMap["Dash"] = { {InputType::Keyboard, VK_SHIFT}, {InputType::XboxPad,XINPUT_GAMEPAD_RIGHT_SHOULDER}, {InputType::DirectPad, DIRECTPAD_BUTTON_R1} };
 	_buttonActionMap["Evade"] = { {InputType::Keyboard, VK_SPACE}, {InputType::XboxPad,XINPUT_GAMEPAD_A}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_DOWN} };
 	_buttonActionMap["Action1"] = { {InputType::XboxPad,XINPUT_GAMEPAD_Y}, {InputType::Mouse,VK_LBUTTON}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_UP} };
+	_buttonActionMap["Action2"] = { {InputType::XboxPad,XINPUT_GAMEPAD_B}, {InputType::Mouse,VK_RBUTTON}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_RIGHT} };
 	_buttonActionMap["Guard"] = { {InputType::Mouse,VK_XBUTTON2}, {InputType::DirectPad, DIRECTPAD_BUTTON_R2} };
 	_buttonActionMap["Use"] = { {InputType::Keyboard, 'E'}, {InputType::XboxPad, XINPUT_GAMEPAD_X}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_LEFT} };
 	_buttonActionMap["Menu"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::XboxPad,XINPUT_GAMEPAD_START}, {InputType::DirectPad, DIRECTPAD_BUTTON_START} };

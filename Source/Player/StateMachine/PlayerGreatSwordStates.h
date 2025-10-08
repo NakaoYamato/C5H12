@@ -63,6 +63,24 @@ private:
 };
 #pragma endregion
 
+#pragma region 攻撃2
+class PlayerGreatSwordAttack2State final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerGreatSwordAttack2State(PlayerStateMachine* stateMachine);
+	~PlayerGreatSwordAttack2State() override {}
+
+	// ステート名取得
+	const char* GetName() const override { return "CombatAttack2"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override {}
+private:
+	// 先行入力遷移先
+	std::string _nextStateName = "";
+};
+#pragma endregion
+
 #pragma region ガード
 class PlayerGreatSwordGuardState final : public HierarchicalStateBase<PlayerStateMachine>
 {

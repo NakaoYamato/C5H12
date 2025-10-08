@@ -62,6 +62,7 @@ public:
 	bool IsEvade()	const { return _isEvade; }
 	bool IsInCombat() const { return _isInCombat; }
 	bool IsAttack() const { return _isAttack; }
+	bool IsSpecialAttack() const { return _isSpecialAttack; }
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
 	bool IsUsingItem() const { return _isUsingItem; }
@@ -72,6 +73,7 @@ public:
 	void SetIsEvade(bool isEvade) { _isEvade = isEvade; }
 	void SetIsInCombat(bool isInCombat) { _isInCombat = isInCombat; }
 	void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
+	void SetIsSpecialAttack(bool isSpecialAttack) { _isSpecialAttack = isSpecialAttack; }
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
@@ -98,6 +100,7 @@ private:
 	bool _isEvade = false;
 	bool _isInCombat = false;
 	bool _isAttack = false;
+	bool _isSpecialAttack = false;
 	bool _isGuard = false;
 	bool _isDead = false;
 	bool _isUsingItem = false;

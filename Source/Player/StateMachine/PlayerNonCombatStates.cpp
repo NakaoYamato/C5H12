@@ -22,6 +22,62 @@ void PlayerNonCombatIdleState::OnExecute(float elapsedTime)
 }
 #pragma endregion
 
+#pragma region 振り向き
+PlayerNonCombatTurnState::PlayerNonCombatTurnState(PlayerStateMachine* stateMachine) :
+	HierarchicalStateBase(stateMachine)
+{
+	RegisterSubState(std::make_shared<PlayerSSB>(stateMachine, "TurnL", "Turn180L", 0.5f, false, true));
+	RegisterSubState(std::make_shared<PlayerSSB>(stateMachine, "TurnR", "Turn180R", 0.5f, false, true));
+}
+
+void PlayerNonCombatTurnState::OnEnter()
+{
+	_owner->GetAnimator()->SetIsRemoveRootMovement(true);
+	Vector2 movement = _owner->GetPlayer()->GetMovement();
+	// 入力方向とプレイヤーのY軸回転量から角度取得
+	float angle =
+		DirectX::XMConvertToDegrees(
+			atan2f(movement.x, movement.y)
+			- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+		);
+	// 角度を0~360度に正規化
+	angle = fmodf(angle, 360.0f);
+	if (angle < 0.0f)
+		angle += 360.0f;
+
+	if (angle < 180.0f)
+		_owner->GetStateMachine().ChangeSubState("TurnR");
+	else
+		_owner->GetStateMachine().ChangeSubState("TurnL");
+}
+
+void PlayerNonCombatTurnState::OnExecute(float elapsedTime)
+{
+	// アニメーションが終了しているとき
+	if (!_owner->GetAnimator()->IsPlayAnimation())
+	{
+		// 待機に移行
+		_owner->GetStateMachine().ChangeState("Idle");
+	}
+}
+
+void PlayerNonCombatTurnState::OnExit()
+{
+	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+	int rootNodeIndex = _owner->GetPlayer()->GetActor()->GetModel().lock()->GetNodeIndex("root");
+	// 回転量の差分を求める
+	Quaternion q = _owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+	// 回転量をアクターに反映する
+	auto& transform = _owner->GetPlayer()->GetActor()->GetTransform();
+	Vector3 angle{};
+	// z値をyに設定
+	angle.y = q.ToRollPitchYaw().z;
+	transform.AddRotation(angle);
+	transform.UpdateTransform(nullptr);
+	_owner->GetAnimator()->SetIsRemoveRootMovement(false);
+}
+#pragma endregion
+
 #pragma region 歩き
 namespace NonCombatWalkSubState
 {
@@ -40,6 +96,29 @@ namespace NonCombatWalkSubState
 		~WalkStartSubState() override {}
 		void OnExecute(float elapsedTime) override
 		{
+			// プレイヤーの正面と移動方向から振り向きが必要か判定
+			bool isNeedTurn = false;
+			Vector2 movement = _owner->GetPlayer()->GetMovement();
+			if (movement.LengthSq() != 0.0f)
+			{
+				// 入力方向とプレイヤーのY軸回転量から角度取得
+				float angle =
+					DirectX::XMConvertToDegrees(
+						atan2f(movement.x, movement.y)
+						- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+					);
+				// 角度を0~360度に正規化
+				angle = fmodf(angle, 360.0f);
+				if (angle < 0.0f)
+					angle += 360.0f;
+
+				if (angle > 135.0f && angle <= 225.0f)
+				{
+					// 後ろに回転
+					_owner->GetStateMachine().ChangeState("Turn");
+					return;
+				}
+			}
 			// 移動方向に向く
 			_owner->RotationMovement(elapsedTime);
 			// アニメーションが終了していたら遷移
@@ -70,6 +149,28 @@ namespace NonCombatWalkSubState
 			// 移動していなければ終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
 				_owner->GetStateMachine().ChangeSubState("WalkStop");
+			// プレイヤーの正面と移動方向から振り向きが必要か判定
+			Vector2 movement = _owner->GetPlayer()->GetMovement();
+			if (movement.LengthSq() != 0.0f)
+			{
+				// 入力方向とプレイヤーのY軸回転量から角度取得
+				float angle =
+					DirectX::XMConvertToDegrees(
+						atan2f(movement.x, movement.y)
+						- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+					);
+				// 角度を0~360度に正規化
+				angle = fmodf(angle, 360.0f);
+				if (angle < 0.0f)
+					angle += 360.0f;
+
+				if (angle > 135.0f && angle <= 225.0f)
+				{
+					// 後ろに回転
+					_owner->GetStateMachine().ChangeState("Turn");
+					return;
+				}
+			}
 		}
 	};
 	// 歩き停止
@@ -187,14 +288,59 @@ namespace NonCombatRunSubState
 		{
 		}
 		~RunningSubState() override {}
+		void OnEnter() override
+		{
+			PlayerSSB::OnEnter();
+			_timer = 0.0f;
+		}
 		void OnExecute(float elapsedTime) override
 		{
 			// 移動方向に向く
 			_owner->RotationMovement(elapsedTime);
-			// 移動していなければ終了に遷移
+			// 入力が一定時間ないなら終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
-				_owner->GetStateMachine().ChangeSubState("RunStop");
+			{
+				_timer += elapsedTime;
+				if (_timer >= _runningTime)
+					_owner->GetStateMachine().ChangeSubState("RunStop");
+			}
+			else
+			{
+				_timer = 0.0f;
+			}
+			// プレイヤーの正面と移動方向から振り向きが必要か判定
+			bool isNeedTurn = false;
+			Vector2 movement = _owner->GetPlayer()->GetMovement();
+			if (movement.LengthSq() != 0.0f)
+			{
+				// 入力方向とプレイヤーのY軸回転量から角度取得
+				float angle =
+					DirectX::XMConvertToDegrees(
+						atan2f(movement.x, movement.y)
+						- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+					);
+				// 角度を0~360度に正規化
+				angle = fmodf(angle, 360.0f);
+				if (angle < 0.0f)
+					angle += 360.0f;
+
+				if (180.0f > angle && angle > 135.0f)
+				{
+					// 後ろに回転
+					_owner->GetStateMachine().ChangeSubState("RunTurnL");
+					return;
+				}
+				else if (180.0f <= angle && angle < 225.0f)
+				{
+					// 後ろに回転
+					_owner->GetStateMachine().ChangeSubState("RunTurnR");
+					return;
+				}
+			}
 		}
+	private:
+		float _timer = 0.0f;
+		float _runningTime = 0.2f;
 	};
 	// 走り停止
 	class RunStopSubState : public PlayerSSB
@@ -221,6 +367,74 @@ namespace NonCombatRunSubState
 				_owner->GetStateMachine().ChangeState("Idle");
 		}
 	};
+	// 走りながら回転L
+	class RunTurnLSubState : public PlayerSSB
+	{
+	public:
+		RunTurnLSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"RunTurnL",
+				u8"RunFastTurnL", 0.2f,
+				false,
+				true)
+		{
+		}
+		~RunTurnLSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+				_owner->GetStateMachine().ChangeSubState("Running");
+		}
+		void OnExit() override
+		{
+			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+			int rootNodeIndex = _owner->GetPlayer()->GetActor()->GetModel().lock()->GetNodeIndex("root");
+			// 回転量の差分を求める
+			Quaternion q = _owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+			// 回転量をアクターに反映する
+			auto& transform = _owner->GetPlayer()->GetActor()->GetTransform();
+			Vector3 angle{};
+			// z値をyに設定
+			angle.y = q.ToRollPitchYaw().z;
+			transform.AddRotation(angle);
+			transform.UpdateTransform(nullptr);
+		}
+	};
+	// 走りながら回転R
+	class RunTurnRSubState : public PlayerSSB
+	{
+	public:
+		RunTurnRSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"RunTurnR",
+				u8"RunFastTurnR", 0.2f,
+				false,
+				true)
+		{
+		}
+		~RunTurnRSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+				_owner->GetStateMachine().ChangeSubState("Running");
+		}
+		void OnExit() override
+		{
+			// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+			int rootNodeIndex = _owner->GetPlayer()->GetActor()->GetModel().lock()->GetNodeIndex("root");
+			// 回転量の差分を求める
+			Quaternion q = _owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+			// 回転量をアクターに反映する
+			auto& transform = _owner->GetPlayer()->GetActor()->GetTransform();
+			Vector3 angle{};
+			// z値をyに設定
+			angle.y = q.ToRollPitchYaw().z;
+			transform.AddRotation(angle);
+			transform.UpdateTransform(nullptr);
+		}
+	};
 }
 PlayerNonCombatRunState::PlayerNonCombatRunState(PlayerStateMachine* stateMachine) : 
 	HierarchicalStateBase(stateMachine)
@@ -228,6 +442,8 @@ PlayerNonCombatRunState::PlayerNonCombatRunState(PlayerStateMachine* stateMachin
 	RegisterSubState(std::make_shared<NonCombatRunSubState::RunStartSubState>(stateMachine));
 	RegisterSubState(std::make_shared<NonCombatRunSubState::RunningSubState>(stateMachine));
 	RegisterSubState(std::make_shared<NonCombatRunSubState::RunStopSubState>(stateMachine));
+	RegisterSubState(std::make_shared<NonCombatRunSubState::RunTurnLSubState>(stateMachine));
+	RegisterSubState(std::make_shared<NonCombatRunSubState::RunTurnRSubState>(stateMachine));
 }
 void PlayerNonCombatRunState::OnEnter()
 {
@@ -340,6 +556,10 @@ void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
 #pragma region 抜刀
 void PlayerNonCombatToCombatState::OnExecute(float elapsedTime)
 {
+	// 攻撃をもう一度押しているなら攻撃へ遷移
+	if (_owner->GetPlayer()->IsAttack())
+		_owner->GetStateMachine().ChangeState("CombatAttack1");
+
 	// アニメーションが終了していたら遷移
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 		_owner->GetStateMachine().ChangeState("CombatIdle");

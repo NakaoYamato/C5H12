@@ -18,8 +18,22 @@ public:
 };
 #pragma endregion
 
+#pragma region 振り向き
+class PlayerNonCombatTurnState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerNonCombatTurnState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatTurnState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Turn"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+#pragma endregion
+
 #pragma region 歩き
-class PlayerNonCombatWalkState : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatWalkState final : public HierarchicalStateBase<PlayerStateMachine>
 {
 public:
 	PlayerNonCombatWalkState(PlayerStateMachine* stateMachine);
@@ -33,7 +47,7 @@ public:
 #pragma endregion
 
 #pragma region 走り
-class PlayerNonCombatRunState : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatRunState final : public HierarchicalStateBase<PlayerStateMachine>
 {
 public:
 	PlayerNonCombatRunState(PlayerStateMachine* stateMachine);

@@ -16,6 +16,7 @@ PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* anima
 {
     // ステート設定
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatIdleState>(this));
+	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatTurnState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatWalkState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatRunState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatEvadeState>(this));

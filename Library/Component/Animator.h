@@ -113,6 +113,8 @@ public:
 
 	bool IsPlaying() const { return _isPlaying; }
 	bool IsLoop() const { return _isLoop; }
+	bool IsPaused() const { return _isPaused; }
+	bool IsBlending() const { return _isBlending; }
 	bool IsUseRootMotion() const { return _useRootMotion; }
 	bool IsRemoveRootMovement() const { return _removeRootMovement; }
 	bool IsRemoveRootRotation() const { return _removeRootRotation; }
@@ -131,6 +133,7 @@ public:
 	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
 	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
 	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
+	void SetIsPaused(bool isPaused) { _isPaused = isPaused; }
 	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
 	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
 	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
@@ -193,6 +196,8 @@ private:
 
 	bool	_isPlaying		= false;
 	bool	_isLoop			= false;
+	bool	_isPaused		= false;
+	bool	_isBlending		= false;
 	bool	_useRootMotion	= false;
 	bool	_removeRootMovement = false;
 	bool	_removeRootRotation = false;

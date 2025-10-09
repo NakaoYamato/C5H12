@@ -54,7 +54,10 @@ public:
 	bool CallCancelAttackEvent() const { return _callCancelAttackEvent; }
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
+	// 無敵時間
 	bool CallInvisivleEvent() const { return _callInvisivleEvent; }
+	// 溜めイベント取得
+	bool CallChargingEvent() const { return _callChargingEvent; }
 	bool OldInvisibleEvent() const { return _oldInvisibleEvent; }
 	const Vector2& GetMovement() const { return _movement; }
 	bool IsMoving()	const { return _isMoving; }
@@ -62,6 +65,7 @@ public:
 	bool IsEvade()	const { return _isEvade; }
 	bool IsInCombat() const { return _isInCombat; }
 	bool IsAttack() const { return _isAttack; }
+	bool IsHoldingAttackKey() const { return _isHoldingAttackKey; }
 	bool IsSpecialAttack() const { return _isSpecialAttack; }
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
@@ -73,6 +77,7 @@ public:
 	void SetIsEvade(bool isEvade) { _isEvade = isEvade; }
 	void SetIsInCombat(bool isInCombat) { _isInCombat = isInCombat; }
 	void SetIsAttack(bool isAttack) { _isAttack = isAttack; }
+	void SetIsHoldingAttackKey(bool isHoldingAttackKey) { _isHoldingAttackKey = isHoldingAttackKey; }
 	void SetIsSpecialAttack(bool isSpecialAttack) { _isSpecialAttack = isSpecialAttack; }
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
@@ -92,6 +97,7 @@ private:
 	bool _callCancelAttackEvent = false;
 	bool _callCancelEvent = false;
 	bool _callInvisivleEvent = false;
+	bool _callChargingEvent = false;
 	bool _oldInvisibleEvent = false;
 	// 入力方向をワールド空間に変換したもの
 	Vector2 _movement = { 0.0f, 0.0f };
@@ -100,6 +106,7 @@ private:
 	bool _isEvade = false;
 	bool _isInCombat = false;
 	bool _isAttack = false;
+	bool _isHoldingAttackKey = false;
 	bool _isSpecialAttack = false;
 	bool _isGuard = false;
 	bool _isDead = false;

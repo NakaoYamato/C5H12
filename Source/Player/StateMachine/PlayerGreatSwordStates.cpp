@@ -46,19 +46,8 @@ namespace RunSubState
         {
             // 移動方向に向く
             _owner->RotationMovement(elapsedTime);
-            // 攻撃移行
-            if (_owner->GetPlayer()->IsAttack())
-                _owner->GetStateMachine().ChangeSubState("RunAttack");
-            else if (_owner->GetPlayer()->IsSpecialAttack())
-                _owner->GetStateMachine().ChangeState("CombatAttack2");
-            // 回避移行
-            else if (_owner->GetPlayer()->IsEvade())
-                _owner->GetStateMachine().ChangeState("CombatEvade");
-            // ガード移行
-            else if (_owner->GetPlayer()->IsGuard())
-                _owner->GetStateMachine().ChangeState("CombatGuard");
             // アニメーションが終了していたら遷移
-            else if (!_owner->GetAnimator()->IsPlayAnimation())
+            if (!_owner->GetAnimator()->IsPlayAnimation())
                 _owner->GetStateMachine().ChangeSubState("Running");
             // 移動していなければ終了に遷移
             else if (!_owner->GetPlayer()->IsMoving())
@@ -81,78 +70,13 @@ namespace RunSubState
         {
             // 移動方向に向く
             _owner->RotationMovement(elapsedTime);
-            // 攻撃移行
-            if (_owner->GetPlayer()->IsAttack())
-                _owner->GetStateMachine().ChangeSubState("RunAttack");
-            else if (_owner->GetPlayer()->IsSpecialAttack())
-                _owner->GetStateMachine().ChangeState("CombatAttack2");
-            // 回避移行
-            else if (_owner->GetPlayer()->IsEvade())
-                _owner->GetStateMachine().ChangeState("CombatEvade");
-            // ガード移行
-            else if (_owner->GetPlayer()->IsGuard())
-                _owner->GetStateMachine().ChangeState("CombatGuard");
             // 移動していなければ終了に遷移
-            else if (!_owner->GetPlayer()->IsMoving())
+            if (!_owner->GetPlayer()->IsMoving())
                 _owner->GetStateMachine().ChangeSubState("RunStop");
             // 納刀移行
             else if (_owner->GetPlayer()->IsUsingItem() || _owner->GetPlayer()->IsDash())
                 _owner->GetStateMachine().ChangeSubState("RunToNonCombat");
         }
-    };
-	// 走り攻撃
-    class RunAttackSubState final : public PlayerSSB
-    {
-    public:
-        static constexpr float ATK = 1.0f;
-    public:
-        RunAttackSubState(PlayerStateMachine* stateMachine) :
-            PlayerSSB(stateMachine,
-                "RunAttack",
-                u8"RunAttack01", 0.2f,
-                false,
-                true)
-        {
-        }
-        void OnEnter() override
-        {
-			PlayerSSB::OnEnter();
-            // 攻撃フラグを立てる
-            _owner->GetPlayer()->SetBaseATK(ATK);
-            // 先行入力遷移先をクリア
-            _nextStateName = "";
-        }
-        void OnExecute(float elapsedTime) override
-        {
-            // 先行入力受付時
-            if (_owner->GetPlayer()->CallInputBufferingEvent())
-            {
-                // 先行入力遷移先を設定
-                // 攻撃
-                if (_owner->GetPlayer()->IsAttack())
-                    _nextStateName = "CombatAttack1";
-                else if (_owner->GetPlayer()->IsSpecialAttack())
-                    _owner->GetStateMachine().ChangeState("CombatAttack2");
-                // 回避移行
-                else if (_owner->GetPlayer()->IsEvade())
-                    _nextStateName = "CombatEvade";
-                // ガード移行
-                else if (_owner->GetPlayer()->IsGuard())
-                    _nextStateName = "CombatGuard";
-            }
-
-            // アニメーションが終了していたら遷移
-            if (!_owner->GetAnimator()->IsPlayAnimation())
-                _owner->GetStateMachine().ChangeState("CombatIdle");
-            else if (_owner->GetPlayer()->CallCancelEvent())
-            {
-                // キャンセル待機中に入力があった場合は先行入力遷移
-                if (!_nextStateName.empty())
-                    _owner->GetStateMachine().ChangeState(_nextStateName);
-            }
-        }
-    private:
-        std::string _nextStateName = "";
     };
 	// 走り終了
     class RunStopSubState final : public PlayerSSB
@@ -173,19 +97,8 @@ namespace RunSubState
             // 移動があれば遷移
             if (_owner->GetPlayer()->IsMoving())
                 _owner->GetStateMachine().ChangeSubState("Running");
-            // 攻撃移行
-            else if (_owner->GetPlayer()->IsAttack())
-                _owner->GetStateMachine().ChangeState("CombatAttack1");
-            else if (_owner->GetPlayer()->IsSpecialAttack())
-                _owner->GetStateMachine().ChangeState("CombatAttack2");
-            // 回避移行
-            else if (_owner->GetPlayer()->IsEvade())
-                _owner->GetStateMachine().ChangeState("CombatEvade");
-            // ガード移行
-            else if (_owner->GetPlayer()->IsGuard())
-                _owner->GetStateMachine().ChangeState("CombatGuard");
             // アニメーションが終了していたら遷移
-            else if (!_owner->GetAnimator()->IsPlayAnimation())
+            if (!_owner->GetAnimator()->IsPlayAnimation())
                 _owner->GetStateMachine().ChangeState("CombatIdle");
         }
     };
@@ -218,7 +131,6 @@ PlayerGreatSwordRunState::PlayerGreatSwordRunState(PlayerStateMachine* stateMach
     // サブステート登録
     RegisterSubState(std::make_shared<RunSubState::RunStartSubState>(stateMachine));
     RegisterSubState(std::make_shared<RunSubState::RunningSubState>(stateMachine));
-    RegisterSubState(std::make_shared<RunSubState::RunAttackSubState>(stateMachine));
     RegisterSubState(std::make_shared<RunSubState::RunStopSubState>(stateMachine));
     RegisterSubState(std::make_shared<RunSubState::RunToNonCombatSubState>(stateMachine));
 }
@@ -232,6 +144,17 @@ void PlayerGreatSwordRunState::OnEnter()
 }
 void PlayerGreatSwordRunState::OnExecute(float elapsedTime)
 {
+    // 攻撃遷移
+    if (_owner->GetPlayer()->IsAttack())
+        _owner->GetStateMachine().ChangeState("CombatAttack1");
+    else if (_owner->GetPlayer()->IsSpecialAttack())
+        _owner->GetStateMachine().ChangeState("CombatAttack2");
+    // 回避移行
+    else if (_owner->GetPlayer()->IsEvade())
+        _owner->GetStateMachine().ChangeState("CombatEvade");
+    // ガード移行
+    else if (_owner->GetPlayer()->IsGuard())
+        _owner->GetStateMachine().ChangeState("CombatGuard");
 }
 void PlayerGreatSwordRunState::OnExit()
 {
@@ -316,15 +239,17 @@ void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
 // 攻撃1サブステート
 namespace Attack1SubState
 {
-    class ComboSubState final : public PlayerSSB
+    class ComboSubState : public PlayerSSB
     {
     public:
         static constexpr float ATK = 1.0f;
+
     public:
         ComboSubState(PlayerStateMachine* stateMachine,
             const std::string& name,
             const std::string& animationName,
             const std::string& nextSubStateName,
+            const std::string& branchSubStateName,
             float animationBlendTime,
             float ATK) :
             PlayerSSB(stateMachine,
@@ -334,11 +259,13 @@ namespace Attack1SubState
                 false,
                 true),
 			_nextSubStateName(nextSubStateName),
+            _branchSubStateName(branchSubStateName),
 			_ATK(ATK)
         {
         }
 
-        const char* GetNextStateName() const { return _nextSubStateName.c_str(); }
+        const std::string& GetNextStateName() const { return _nextSubStateName; }
+        const std::string& GetBranchStateName() const { return _branchSubStateName; }
 
         void OnEnter() override
         {
@@ -348,36 +275,90 @@ namespace Attack1SubState
         }
     private:
         std::string _nextSubStateName;
+        std::string _branchSubStateName;
         float _ATK = 1.0f;
+    };
+    class ChargingAttackSubState final : public ComboSubState
+    {
+    public:
+        ChargingAttackSubState(PlayerStateMachine* stateMachine,
+            const std::string& name,
+            const std::string& animationName,
+            const std::string& nextSubStateName,
+            const std::string& branchSubStateName,
+            float animationBlendTime,
+            float ATK) :
+            ComboSubState(stateMachine,
+                name,
+                animationName,
+                nextSubStateName,
+                branchSubStateName,
+                animationBlendTime,
+                ATK)
+        {
+        }
+
+        void OnEnter() override
+        {
+            ComboSubState::OnEnter();
+            _chargingTimer = 0.0f;
+            _isCharging = true;
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // チャージ中の処理
+            if (_owner->GetPlayer()->CallChargingEvent() && _isCharging)
+            {
+                if (_owner->GetPlayer()->IsHoldingAttackKey())
+                {
+                    _chargingTimer += elapsedTime;
+                    // アニメーションを止める
+                    _owner->GetAnimator()->SetIsPaused(true);
+                }
+                else
+                {
+                    _isCharging = false;
+                    // アニメーションを再開
+                    _owner->GetAnimator()->SetIsPaused(false);
+                }
+            }
+        }
+    private:
+        float _chargingTimer = 0.0f;
+        bool _isCharging = true;
     };
 }
 PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
 {
     // サブステート登録
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
+    RegisterSubState(std::make_shared<Attack1SubState::ChargingAttackSubState>(stateMachine,
         "ComboAttack1",
-        "ComboAttack01_01",
+        "ComboAttack02_02",
         "ComboAttack2",
-        0.3f,
+        "ComboAttack1",
+        1.0f,
         1.0f));
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
         "ComboAttack2",
+        "ComboAttack03_01",
+        "ComboAttack3",
+        "ComboAttack1",
+        0.5f,
+        1.0f));
+    RegisterSubState(std::make_shared<Attack1SubState::ChargingAttackSubState>(stateMachine,
+        "ComboAttack3",
         "ComboAttack01_02",
-        "ComboAttack3",
-        0.3f,
-        1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ComboAttack3",
-        "ComboAttack01_03",
         "ComboAttack4",
-        0.3f,
+        "ComboAttack1",
+        1.0f,
         1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
+    RegisterSubState(std::make_shared<Attack1SubState::ChargingAttackSubState>(stateMachine,
         "ComboAttack4",
-        "ComboAttack01_04",
+        "ComboAttack04_02",
         "",
-        0.3f,
+        "ComboAttack1",
+        1.0f,
         1.0f));
 }
 
@@ -392,6 +373,12 @@ void PlayerGreatSwordAttack1State::OnEnter()
 
 void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
 {
+    // ブレンドアニメーション中は向きを変えれるようにする
+    if (_owner->GetAnimator()->IsBlending())
+    {
+        _owner->RotationMovement(_rotationSpeed * elapsedTime);
+    }
+
     // 先行入力受付時
     if (_owner->GetPlayer()->CallInputBufferingEvent())
     {
@@ -399,6 +386,8 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
         // 攻撃
         if (_owner->GetPlayer()->IsAttack())
             _nextStateName = "Attack";
+        else if (_owner->GetPlayer()->IsSpecialAttack())
+            _nextStateName = "SpecialAttack";
         // 回避移行
         else if (_owner->GetPlayer()->IsEvade())
             _nextStateName = "CombatEvade";
@@ -410,18 +399,23 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
     // 攻撃キャンセル判定
     if (_owner->GetPlayer()->CallCancelAttackEvent())
     {
-        if (_nextStateName == "Attack")
+        auto subState = dynamic_cast<Attack1SubState::ComboSubState*>(this->_subState);
+        if (subState)
         {
-            auto subState = dynamic_cast<Attack1SubState::ComboSubState*>(this->_subState);
-            if (subState)
+            if (_nextStateName == "Attack" && !subState->GetNextStateName().empty())
             {
-                if (subState->GetNextStateName() != "")
-                {
-                    // キャンセル待機中に入力があった場合は先行入力遷移
-                    _owner->GetStateMachine().ChangeSubState(subState->GetNextStateName());
-                    _nextStateName = ""; // 遷移後はクリア
-                    return;
-                }
+                // キャンセル待機中に入力があった場合は先行入力遷移
+                _owner->GetStateMachine().ChangeSubState(subState->GetNextStateName());
+                _nextStateName = ""; // 遷移後はクリア
+                return;
+            }
+            else if (_nextStateName == "SpecialAttack" && !subState->GetBranchStateName().empty())
+            {
+                // 攻撃2のほうに遷移
+                _owner->GetStateMachine().ChangeState("CombatAttack2");
+                _owner->GetStateMachine().ChangeSubState(subState->GetBranchStateName());
+                _nextStateName = ""; // 遷移後はクリア
+                return;
             }
         }
     }
@@ -431,11 +425,6 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
     {
         if (!_nextStateName.empty())
             _owner->GetStateMachine().ChangeState(_nextStateName);
-    }
-    else
-    {
-        // キャンセルがかかるまでの間は移動方向に向く
-        _owner->RotationMovement(elapsedTime);
     }
 
     // アニメーションが終了していたら遷移
@@ -454,26 +443,9 @@ PlayerGreatSwordAttack2State::PlayerGreatSwordAttack2State(PlayerStateMachine* s
     // サブステート登録
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
         "ComboAttack1",
-        "ComboAttack02_01",
-        "ComboAttack2",
-        0.3f,
-        1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ComboAttack2",
-        "ComboAttack02_02",
-        "ComboAttack3",
-        0.3f,
-        1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ComboAttack3",
-        "ComboAttack02_03",
-        "ComboAttack4",
-        0.3f,
-        1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ComboAttack4",
-        "ComboAttack02_04",
+        "ComboAttack04_01",
         "",
+        "ComboAttack2",
         0.3f,
         1.0f));
 }
@@ -494,8 +466,10 @@ void PlayerGreatSwordAttack2State::OnExecute(float elapsedTime)
     {
         // 先行入力遷移先を設定
         // 攻撃
-        if (_owner->GetPlayer()->IsSpecialAttack())
+        if (_owner->GetPlayer()->IsAttack())
             _nextStateName = "Attack";
+        else if (_owner->GetPlayer()->IsSpecialAttack())
+            _nextStateName = "SpecialAttack";
         // 回避移行
         else if (_owner->GetPlayer()->IsEvade())
             _nextStateName = "CombatEvade";
@@ -507,18 +481,23 @@ void PlayerGreatSwordAttack2State::OnExecute(float elapsedTime)
     // 攻撃キャンセル判定
     if (_owner->GetPlayer()->CallCancelAttackEvent())
     {
-        if (_nextStateName == "Attack")
+        auto subState = dynamic_cast<Attack1SubState::ComboSubState*>(this->_subState);
+        if (subState)
         {
-            auto subState = dynamic_cast<Attack1SubState::ComboSubState*>(this->_subState);
-            if (subState)
+            if (_nextStateName == "Attack" && !subState->GetBranchStateName().empty())
             {
-                if (subState->GetNextStateName() != "")
-                {
-                    // キャンセル待機中に入力があった場合は先行入力遷移
-                    _owner->GetStateMachine().ChangeSubState(subState->GetNextStateName());
-                    _nextStateName = ""; // 遷移後はクリア
-                    return;
-                }
+                // 攻撃1のほうに遷移
+                _owner->GetStateMachine().ChangeState("CombatAttack1");
+                _owner->GetStateMachine().ChangeSubState(subState->GetBranchStateName());
+                _nextStateName = ""; // 遷移後はクリア
+                return;
+            }
+            else if (_nextStateName == "SpecialAttack" && !subState->GetNextStateName().empty())
+            {
+                // キャンセル待機中に入力があった場合は先行入力遷移
+                _owner->GetStateMachine().ChangeSubState(subState->GetNextStateName());
+                _nextStateName = ""; // 遷移後はクリア
+                return;
             }
         }
     }

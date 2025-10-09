@@ -19,6 +19,7 @@ void Animator::Update(float elapsedTime)
     if (_animationIndex == -1)
         return;
 
+	_isBlending = false;
     _rootMovement = Vector3::Zero;
     std::vector<ModelResource::Node>&   poseNodes = _model.lock()->GetPoseNodes();
 	std::vector<ModelResource::Node>    oldPoseNodes = poseNodes;
@@ -32,6 +33,13 @@ void Animator::Update(float elapsedTime)
     // ブレンディング計算処理
     if (_blendTimer < _blendEndTime)
     {
+        // 時間経過
+        _blendTimer += elapsedTime;
+        if (_blendTimer >= _blendEndTime)
+        {
+            _blendTimer = _blendEndTime;
+        }
+
         // ブレンド率計算
         float rate = _blendTimer / _blendEndTime;
 
@@ -41,12 +49,7 @@ void Animator::Update(float elapsedTime)
         // ノード設定
         _model.lock()->SetPoseNodes(poseNodes);
 
-        // 時間経過
-        _blendTimer += elapsedTime;
-        if (_blendTimer >= _blendEndTime)
-        {
-            _blendTimer = _blendEndTime;
-        }
+		_isBlending = true;
     }
 
 	// ルートモーション計算
@@ -123,6 +126,8 @@ void Animator::DrawGui()
     }
     ImGui::SameLine();
     ImGui::Checkbox(u8"ループ", &_isLoop);
+    ImGui::SameLine();
+    ImGui::Checkbox(u8"ポーズ", &_isPaused);
     if (ImGui::TreeNode(u8"アニメーション"))
     {
 
@@ -205,6 +210,9 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
 {
     // 再生中でなければ処理しない
     if (!_isPlaying)
+        return;
+    // ポーズ中なら処理しない
+    if (_isPaused)
         return;
 
     // 経過時間
@@ -462,6 +470,7 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
     if (!_useRootMotion) return;
     if (_rootNodeIndex == -1) return;
     if (!_isPlaying) return;
+    if (_isPaused) return;
 
     // 現在のルートノード取得
     ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];

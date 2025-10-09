@@ -60,6 +60,8 @@ public:
 private:
 	// æs“ü—Í‘JˆÚæ
 	std::string _nextStateName = "";
+	// ‰ñ“]‘¬“x
+	float _rotationSpeed = 0.1f;
 };
 #pragma endregion
 

@@ -68,6 +68,7 @@ void PlayerController::Update(float elapsedTime)
 	_callCancelEvent = false;
 	_oldInvisibleEvent = _callInvisivleEvent;
 	_callInvisivleEvent = false;
+	_callChargingEvent = false;
 
 	// アニメーションイベント取得
 	if (animator->IsPlayAnimation())
@@ -87,19 +88,24 @@ void PlayerController::Update(float elapsedTime)
 				_callInputBufferingEvent = true;
 			}
 			// 攻撃キャンセル判定
-			if (animationEvent.GetMessageList().at(event.messageIndex) == "CancelAttack")
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "CancelAttack")
 			{
 				_callCancelAttackEvent = true;
 			}
 			// キャンセル判定
-			if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "Cancel")
 			{
 				_callCancelEvent = true;
 			}
 			// 無敵判定
-			if (animationEvent.GetMessageList().at(event.messageIndex) == "Invisible")
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "Invisible")
 			{
 				_callInvisivleEvent = true;
+			}
+			// 溜め
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "Charging")
+			{
+				_callChargingEvent = true;
 			}
 		}
 	}

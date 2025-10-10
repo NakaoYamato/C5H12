@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "../../Library/Model/Model.h"
 #include "../../Library/Model/AnimationEvent.h"
+#include "../../Library/Model/AnimationCurve.h"
 
 class Animator : public Component
 {
@@ -205,6 +206,8 @@ private:
 	Vector3	_rootOffset		= Vector3::Zero;
 	Vector3	_rootMovement	= Vector3::Zero;
 #pragma endregion
+
+	AnimationCurve _curve;
 
 #pragma region ƒCƒxƒ“ƒg
 	AnimationEvent _animationEvent{};

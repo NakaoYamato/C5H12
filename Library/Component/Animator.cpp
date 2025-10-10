@@ -89,6 +89,7 @@ void Animator::DebugRender(const RenderContext& rc)
 // GUI•`‰æ
 void Animator::DrawGui()
 {
+    _curve.DrawGui();
     auto& animations = _model.lock()->GetResource()->GetAddressAnimations();
     static const char* optionNames[] =
     {

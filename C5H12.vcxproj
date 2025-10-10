@@ -179,6 +179,7 @@
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
     <ClCompile Include="Library\Math\MathF.cpp" />
+    <ClCompile Include="Library\Model\AnimationCurve.cpp" />
     <ClCompile Include="Library\Model\AnimationEvent.cpp" />
     <ClCompile Include="Library\Model\Model.cpp" />
     <ClCompile Include="Library\2D\SkyMap.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
     <ClInclude Include="Library\Material\Material.h" />
     <ClInclude Include="Library\Math\MathF.h" />
+    <ClInclude Include="Library\Model\AnimationCurve.h" />
     <ClInclude Include="Library\Model\AnimationEvent.h" />
     <ClInclude Include="Library\Model\Model.h" />
     <ClInclude Include="Library\2D\SkyMap.h" />

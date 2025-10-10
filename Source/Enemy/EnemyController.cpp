@@ -11,7 +11,7 @@ void EnemyController::Start()
 	// コンポーネント取得
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_animator = GetActor()->GetComponent<Animator>();
-	_hitEffectController = GetActor()->GetComponent<EffekseerEffectController>();
+	_effectController = GetActor()->GetComponent<EffectController>();
 	_damageable = GetActor()->GetComponent<Damageable>();
 
 	if (_damageable.lock())
@@ -87,8 +87,10 @@ void EnemyController::OnContactEnter(CollisionData& collisionData)
 			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
 			{
 				// ダメージを与えたらヒットエフェクト再生
-				if (_hitEffectController.lock())
-					_hitEffectController.lock()->Play(collisionData.hitPosition, 1.0f);
+				if (_effectController.lock())
+				{
+					_effectController.lock()->Play(0, collisionData.hitPosition);
+				}
 			}
 		}
 	}

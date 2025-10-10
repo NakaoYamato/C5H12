@@ -3,7 +3,7 @@
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
-#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+#include "../../Library/Component/EffectController.h"
 
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/Targetable.h"
@@ -88,7 +88,7 @@ private:
 	std::weak_ptr<PlayerStateMachine> _stateMachine;
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
-	std::weak_ptr<EffekseerEffectController> _hitEffectController;
+	std::weak_ptr<EffectController> _hitEffectController;
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<Targetable> _targetable;
 

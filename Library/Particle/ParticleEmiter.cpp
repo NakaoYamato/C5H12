@@ -278,7 +278,7 @@ void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer, const
 		// パーティクルを生成
 		Emit(renderer, transform);
 		// 生成間隔タイマーをリセット
-		_emitIntervalElapsedTimer = 0.0f;
+		_emitIntervalElapsedTimer -= _emitIntervalTime;
 	}
 
 	// 再生時間タイマーが再生時間を超えた場合は再生を停止

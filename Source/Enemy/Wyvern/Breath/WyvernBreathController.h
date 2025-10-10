@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/Collider/CapsuleCollider.h"
-#include "../../Library/Component/ParticleController.h"
+#include "../../Library/Component/EffectController.h"
 
 class WyvernBreathController : public Component
 {
@@ -27,8 +27,8 @@ public:
 private:
 	// ブレスを撃ったアクター
 	std::weak_ptr<Actor> _breathActor;
-	// パーティクルコントローラー
-	std::weak_ptr<ParticleController> _particleController;
+	// エフェクトコントローラー
+	std::weak_ptr<EffectController> _effectController;
 	// カプセルコライダー群
 	std::vector<std::weak_ptr<CapsuleCollider>> _capsuleColliders;
 

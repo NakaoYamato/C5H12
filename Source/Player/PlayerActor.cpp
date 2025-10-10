@@ -4,7 +4,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Component/CharactorController.h"
-#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+#include "../../Library/Component/EffectController.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 
 #include "../../Source/Common/Targetable.h"
@@ -37,10 +37,12 @@ void PlayerActor::OnCreate()
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(playerController.get(), animator.get()));
-	auto effekseerController	= this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	auto effectController		= this->AddComponent<EffectController>();
 	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
+
+	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
 	if (_isUserControlled)
 		this->AddComponent<PlayerInput>();

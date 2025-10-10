@@ -162,11 +162,10 @@
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
+    <ClCompile Include="Library\Component\EffectController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
     <ClCompile Include="Library\Component\LocusRenderer.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp" />
-    <ClCompile Include="Library\Component\Effekseer\EffekseerEffectController.cpp" />
-    <ClCompile Include="Library\Component\ParticleController.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Component\StateController.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainController.cpp" />
@@ -381,11 +380,10 @@
     <ClInclude Include="Library\Component\BehaviorController.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\DecalController.h" />
+    <ClInclude Include="Library\Component\EffectController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
     <ClInclude Include="Library\Component\LocusRenderer.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainCollider.h" />
-    <ClInclude Include="Library\Component\Effekseer\EffekseerEffectController.h" />
-    <ClInclude Include="Library\Component\ParticleController.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Component\StateController.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainController.h" />

@@ -18,14 +18,14 @@ void WyvernBreathController::Start()
 		_capsuleColliders.push_back(capsule);
 		capsule->SetRadius(_breathRadius);
 	}
-	_particleController = GetActor()->GetComponent<ParticleController>();
-	_particleController.lock()->Play();
+	_effectController = GetActor()->GetComponent<EffectController>();
+	_effectController.lock()->Play(0);
 }
 
 // íœˆ—
 void WyvernBreathController::OnDelete()
 {
-	_particleController.lock()->Stop();
+	_effectController.lock()->Stop(0);
 }
 
 // XVˆ—

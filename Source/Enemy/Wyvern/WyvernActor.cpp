@@ -5,7 +5,7 @@
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
-#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+#include "../../Library/Component/EffectController.h"
 
 #include "../EnemyController.h"
 #include "WyvernController.h"
@@ -41,7 +41,8 @@ void WyvernActor::OnCreate()
 		_damageable.lock().get());
 	auto stateController		= AddComponent<StateController>(stateMachine);
 	auto behaviorController		= AddComponent<BehaviorController>(std::make_shared<WyvernBehaviorTree>(stateMachine.get(), _animator.lock().get()));
-	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	auto effectController = this->AddComponent<EffectController>();
+	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();

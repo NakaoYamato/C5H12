@@ -38,7 +38,8 @@ void WeakActor::OnCreate()
 		_damageable.lock().get());
 	auto stateController = AddComponent<StateController>(stateMachine);
 	auto behaviorController = AddComponent<BehaviorController>(std::make_shared<WeakBehaviorTree>(stateMachine.get(), animator.get(), metaAI.get()));
-	auto effekseerController = this->AddComponent<EffekseerEffectController>("./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	auto effectController = this->AddComponent<EffectController>();
+	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();

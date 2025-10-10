@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/CharactorController.h"
-#include "../../Library/Component/Effekseer/EffekseerEffectController.h"
+#include "../../Library/Component/EffectController.h"
 #include "../../Library/Component/Animator.h"
 
 #include "../../Source/Common/Damageable.h"
@@ -75,7 +75,7 @@ public:
 protected:
     std::weak_ptr<CharactorController> _charactorController;
     std::weak_ptr<Animator> _animator;
-    std::weak_ptr<EffekseerEffectController> _hitEffectController;
+    std::weak_ptr<EffectController> _effectController;
     std::weak_ptr<Damageable> _damageable;
 
 	Vector3 _targetPosition = Vector3::Zero;

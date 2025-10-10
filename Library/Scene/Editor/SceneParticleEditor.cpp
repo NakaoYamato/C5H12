@@ -1,6 +1,6 @@
 #include "SceneParticleEditor.h"
 
-#include "../../Library/Component/ParticleController.h"
+#include "../../Library/Component/EffectController.h"
 
 #include <imgui.h>
 
@@ -9,9 +9,9 @@ void SceneParticleEditor::OnInitialize()
 {
 	// パーティクル用アクター生成
 	auto particleActor = RegisterActor<Actor>(u8"ParticleEmiter", ActorTag::DrawContextParameter);
-	auto particleController = particleActor->AddComponent<ParticleController>(u8"./Data/Particle/ParticleEmiter.json");
-
-	particleController->SetShowEditorGui(true);
+	auto effectController = particleActor->AddComponent<EffectController>();
+	effectController->LoadParticleEffect(0, u8"./Data/Particle/ParticleEmiter.json");
+	((EffectController::ParticleEffectData*)effectController->GetEffectData(0))->SetShowEditorGui(true);
 
 	// グリッド表示
 	SetShowGrid(true);

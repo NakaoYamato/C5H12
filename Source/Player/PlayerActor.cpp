@@ -42,7 +42,8 @@ void PlayerActor::OnCreate()
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
 
-	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	// エフェクト読み込み
+	effectController->LoadEffekseerEffect(PlayerController::EffectType::HitEffect, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
 	if (_isUserControlled)
 		this->AddComponent<PlayerInput>();

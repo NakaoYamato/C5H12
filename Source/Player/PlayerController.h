@@ -12,6 +12,14 @@
 class PlayerController : public Component
 {
 public:
+	enum EffectType : UINT
+	{
+		HitEffect = 0,
+
+		MaxEffect
+	};
+
+public:
 	PlayerController() {}
 	~PlayerController() override {}
 

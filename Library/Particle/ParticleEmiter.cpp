@@ -272,6 +272,15 @@ void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer, const
 	_playElapsedTimer += elapsedTime;
 	_emitIntervalElapsedTimer += elapsedTime;
 
+	// 再生時間タイマーが再生時間を超えた場合は再生を停止
+	if (_playElapsedTimer >= _playingTime)
+	{
+		_playing = false;
+		_playElapsedTimer = 0.0f;
+		_emitIntervalElapsedTimer = 0.0f;
+		return;
+	}
+
 	// 生成間隔タイマーが生成間隔を超えた場合はパーティクルを生成
 	if (_emitIntervalElapsedTimer >= _emitIntervalTime)
 	{
@@ -279,13 +288,6 @@ void ParticleEmiter::Update(float elapsedTime, ParticleRenderer& renderer, const
 		Emit(renderer, transform);
 		// 生成間隔タイマーをリセット
 		_emitIntervalElapsedTimer -= _emitIntervalTime;
-	}
-
-	// 再生時間タイマーが再生時間を超えた場合は再生を停止
-	if (_playElapsedTimer >= _playingTime)
-	{
-		_playing = false;
-		_playElapsedTimer = 0.0f;
 	}
 }
 

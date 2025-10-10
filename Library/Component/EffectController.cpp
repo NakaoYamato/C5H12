@@ -42,7 +42,7 @@ void EffectController::EffekseerEffectData::Play()
 {
     Effekseer::ManagerRef effekseerManager = owner->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 
-    Effekseer::Handle handle = effekseerManager->Play(effekseerEffect, position.x, position.y, position.z);
+	handle = effekseerManager->Play(effekseerEffect, position.x, position.y, position.z);
 
 	effekseerManager->SetRotation(handle, rotation.x, rotation.y, rotation.z);
     effekseerManager->SetScale(handle, scale.x, scale.y, scale.z);

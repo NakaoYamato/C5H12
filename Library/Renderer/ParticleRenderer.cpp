@@ -181,6 +181,7 @@ void ParticleRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc,
 	RegisterTextureData(dc, "Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
 	RegisterTextureData(dc, "Breath2", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753233552.png", { 3,2 });
 	RegisterTextureData(dc, "Breath3", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753234506.png", { 3,2 });
+	RegisterTextureData(dc, "Smoke", L"./Data/Texture/Particle/Smoke.png", { 2,2 });
 }
 
 /// パーティクル生成

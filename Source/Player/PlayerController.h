@@ -15,6 +15,9 @@ public:
 	enum EffectType : UINT
 	{
 		HitEffect = 0,
+		Charge0,
+		Charge1,
+		Charge2,
 
 		MaxEffect
 	};
@@ -96,7 +99,7 @@ private:
 	std::weak_ptr<PlayerStateMachine> _stateMachine;
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
-	std::weak_ptr<EffectController> _hitEffectController;
+	std::weak_ptr<EffectController> _effectController;
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<Targetable> _targetable;
 

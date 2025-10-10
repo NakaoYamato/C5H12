@@ -303,6 +303,7 @@ namespace Attack1SubState
             ComboSubState::OnEnter();
             _chargingTimer = 0.0f;
             _isCharging = true;
+            _chargeStage = 1;
         }
         void OnExecute(float elapsedTime) override
         {
@@ -314,6 +315,27 @@ namespace Attack1SubState
                     _chargingTimer += elapsedTime;
                     // アニメーションを止める
                     _owner->GetAnimator()->SetIsPaused(true);
+
+                    if (_chargeStage <= _chargeStageMax && _chargingTimer > _chargeStageTimer * _chargeStage)
+                    {
+                        // 各チャージエフェクト停止
+						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
+						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);
+						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge2);
+						// エフェクト再生
+						PlayerController::EffectType effectType = PlayerController::EffectType::Charge0;
+                        switch (_chargeStage)
+                        {
+						case 1: effectType = PlayerController::EffectType::Charge0; break;
+						case 2: effectType = PlayerController::EffectType::Charge1; break;
+						case 3: effectType = PlayerController::EffectType::Charge2; break;
+                        }
+                        _owner->GetEffect()->Play(effectType,
+                            _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset);
+
+                        // チャージステージを上げる
+                        _chargeStage++;
+                    }
                 }
                 else
                 {
@@ -322,10 +344,20 @@ namespace Attack1SubState
                     _owner->GetAnimator()->SetIsPaused(false);
                 }
             }
+            // エフェクトの位置を更新
+            Vector3 position = _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset;
+            _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge0)->SetPosition(position);
+            _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge1)->SetPosition(position);
+            _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge2)->SetPosition(position);
         }
     private:
         float _chargingTimer = 0.0f;
+        float _chargeStageTimer = 1.0f;
+        int _chargeStage = 1;
+        int _chargeStageMax = 3;
         bool _isCharging = true;
+
+		Vector3 _effectOffset = Vector3(0.0f, 0.5f, 0.0f);
     };
 }
 PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* stateMachine) :

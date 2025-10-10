@@ -12,7 +12,7 @@ void PlayerController::Start()
 {
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_animator = GetActor()->GetComponent<Animator>();
-	_hitEffectController = GetActor()->GetComponent<EffectController>();
+	_effectController = GetActor()->GetComponent<EffectController>();
 	_damageable = GetActor()->GetComponent<Damageable>();
 	_targetable = GetActor()->GetComponent<Targetable>();
 
@@ -146,7 +146,7 @@ void PlayerController::OnContactEnter(CollisionData& collisionData)
 			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
 			{
 				// ダメージを与えたらヒットエフェクト再生
-				_hitEffectController.lock()->Play(PlayerController::EffectType::HitEffect, collisionData.hitPosition);
+				_effectController.lock()->Play(PlayerController::EffectType::HitEffect, collisionData.hitPosition);
 				// 自身のヘイト値を増やす
 				_targetable.lock()->AddHateValue(_ATK);
 			}

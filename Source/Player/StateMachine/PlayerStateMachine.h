@@ -2,6 +2,7 @@
 
 #include <variant>
 #include "../../Library/Component/StateController.h"
+#include "../../Library/Component/EffectController.h"
 #include "../../Library/Math/Vector.h"
 
 // 前方宣言
@@ -12,7 +13,7 @@ class Animator;
 class PlayerStateMachine : public StateMachine
 {
 public:
-    PlayerStateMachine(PlayerController* player, Animator* animator);
+    PlayerStateMachine(PlayerController* player, Animator* animator, EffectController* effect);
     ~PlayerStateMachine() {}
 
 	// 開始処理
@@ -32,6 +33,7 @@ public:
 	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
 	PlayerController* GetPlayer() { return _player; }
 	Animator* GetAnimator() { return _animator; }
+	EffectController* GetEffect() { return _effect; }
 	// ステート変更
 	void ChangeState(const char* mainStateName, const char* subStateName) override;
     // ステート名取得
@@ -43,6 +45,7 @@ private:
 	StateMachineBase<PlayerStateMachine> _stateMachine;
 	PlayerController* _player = nullptr;
 	Animator* _animator = nullptr;
+	EffectController* _effect = nullptr;
 };
 
 // プレイヤーのヒエラルキカルステートのベースクラス

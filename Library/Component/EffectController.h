@@ -60,9 +60,12 @@ public:
 		void SetPosition(const Vector3& position) override;
 		void SetRotation(const Vector3& rotation) override;
 		void SetScale(const Vector3& scale) override;
+		void SetAllColor(const Vector4& color);
+		void DrawGui() override;
 	private:
 		Effekseer::EffectRef effekseerEffect;
 		Effekseer::Handle handle = -1;
+		Vector4 color = Vector4::White;
 	};
 	// パーティクルエフェクトデータ
 	class ParticleEffectData : public EffectData
@@ -96,7 +99,13 @@ public:
 	void DrawGui() override;
 
 	// エフェクト再生
-	void Play(UINT id, const Vector3& position = Vector3::Zero, const Vector3& rotation = Vector3::Zero, const Vector3& scale = Vector3::One);
+	void Play(UINT id);
+	// エフェクト再生
+	void Play(UINT id, const Vector3& position);
+	// エフェクト再生
+	void Play(UINT id, const Vector3& position, const Vector3& rotation);
+	// エフェクト再生
+	void Play(UINT id, const Vector3& position, const Vector3& rotation, const Vector3& scale);
 	// エフェクト停止
 	void Stop(UINT id);
 	// エフェクトデータ取得

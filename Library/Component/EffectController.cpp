@@ -46,6 +46,12 @@ void EffectController::EffekseerEffectData::Play()
 
 	effekseerManager->SetRotation(handle, rotation.x, rotation.y, rotation.z);
     effekseerManager->SetScale(handle, scale.x, scale.y, scale.z);
+	effekseerManager->SetAllColor(handle,
+		Effekseer::Color(
+			static_cast<uint8_t>(color.x * 255.0f),
+			static_cast<uint8_t>(color.y * 255.0f),
+			static_cast<uint8_t>(color.z * 255.0f),
+			static_cast<uint8_t>(color.w * 255.0f)));
 }
 
 void EffectController::EffekseerEffectData::Stop()
@@ -82,6 +88,28 @@ void EffectController::EffekseerEffectData::SetScale(const Vector3& scale)
 	{
 		Effekseer::ManagerRef effekseerManager = owner->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 		effekseerManager->SetScale(handle, scale.x, scale.y, scale.z);
+	}
+}
+void EffectController::EffekseerEffectData::SetAllColor(const Vector4& color)
+{
+	this->color = color;
+	if (handle != -1)
+	{
+		Effekseer::ManagerRef effekseerManager = owner->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
+		effekseerManager->SetAllColor(handle, 
+			Effekseer::Color(
+				static_cast<uint8_t>(color.x * 255.0f), 
+				static_cast<uint8_t>(color.y * 255.0f), 
+				static_cast<uint8_t>(color.z * 255.0f), 
+				static_cast<uint8_t>(color.w * 255.0f)));
+	}
+}
+void EffectController::EffekseerEffectData::DrawGui()
+{
+	EffectData::DrawGui();
+	if (ImGui::ColorEdit4(u8"全体色", &color.x))
+	{
+		SetAllColor(color);
 	}
 }
 #pragma endregion
@@ -215,6 +243,36 @@ void EffectController::DrawGui()
 			UINT id = static_cast<UINT>(_effectMap.size());
 			LoadParticleEffect(id, relativePath.string());
 		}
+	}
+}
+
+// エフェクト再生
+void EffectController::Play(UINT id)
+{
+	if (_effectMap.find(id) != _effectMap.end())
+	{
+		_effectMap[id]->Play();
+	}
+}
+
+// エフェクト再生
+void EffectController::Play(UINT id, const Vector3& position)
+{
+	if (_effectMap.find(id) != _effectMap.end())
+	{
+		_effectMap[id]->SetPosition(position);
+		_effectMap[id]->Play();
+	}
+}
+
+// エフェクト再生
+void EffectController::Play(UINT id, const Vector3& position, const Vector3& rotation)
+{
+	if (_effectMap.find(id) != _effectMap.end())
+	{
+		_effectMap[id]->SetPosition(position);
+		_effectMap[id]->SetRotation(rotation);
+		_effectMap[id]->Play();
 	}
 }
 

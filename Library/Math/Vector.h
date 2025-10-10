@@ -310,6 +310,11 @@ public:
     static constexpr DirectX::XMFLOAT4 Green    = { 0.0f, 1.0f, 0.0f, 1.0f };
     static constexpr DirectX::XMFLOAT4 Blue     = { 0.0f, 0.0f, 1.0f, 1.0f };
     static constexpr DirectX::XMFLOAT4 Yellow   = { 1.0f, 1.0f, 0.0f, 1.0f };
+    static constexpr DirectX::XMFLOAT4 Orange   = { 1.0f, 0.5f, 0.0f, 1.0f };
+    static constexpr DirectX::XMFLOAT4 Purple   = { 1.0f, 0.0f, 0.5f, 1.0f };
+    static constexpr DirectX::XMFLOAT4 Pink     = { 1.0f, 0.5f, 0.5f, 1.0f };
+    static constexpr DirectX::XMFLOAT4 Cyan     = { 0.0f, 1.0f, 0.5f, 1.0f };
+    static constexpr DirectX::XMFLOAT4 LightGreen = { 0.5f, 1.0f, 0.5f, 1.0f };
 #pragma endregion
 
 #pragma region ê√ìIÉÅÉìÉoä÷êî

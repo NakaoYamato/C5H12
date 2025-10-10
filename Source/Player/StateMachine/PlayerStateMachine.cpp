@@ -10,9 +10,10 @@
 
 #include <imgui.h>
 
-PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* animator) :
+PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* animator, EffectController* effect) :
 	_player(player),
-    _animator(animator)
+    _animator(animator),
+	_effect(effect)
 {
     // ステート設定
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatIdleState>(this));

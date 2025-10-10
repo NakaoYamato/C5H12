@@ -46,9 +46,7 @@ namespace WyvernToTargetSubStates
 				u8"WalkForward",
 				true,
 				1.5f);
-			_owner->GetAnimator()->SetRootNodeIndex("CG");
 			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 		}
 		void OnExecute(float elapsedTime) override 
 		{
@@ -78,9 +76,7 @@ namespace WyvernToTargetSubStates
 				u8"TurnLeft90",
 				false,
 				0.2f);
-			_owner->GetAnimator()->SetRootNodeIndex("CG");
 			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override 
@@ -121,9 +117,7 @@ namespace WyvernToTargetSubStates
 				u8"TurnLeft180",
 				false,
 				0.2f);
-			_owner->GetAnimator()->SetRootNodeIndex("CG");
 			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override
@@ -164,9 +158,7 @@ namespace WyvernToTargetSubStates
 				u8"TurnRight90",
 				false,
 				0.2f);
-			_owner->GetAnimator()->SetRootNodeIndex("CG");
 			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override
@@ -206,9 +198,7 @@ namespace WyvernToTargetSubStates
 				u8"TurnRight180",
 				false,
 				0.2f);
-			_owner->GetAnimator()->SetRootNodeIndex("CG");
 			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
 		}
 		void OnExecute(float elapsedTime) override
@@ -337,9 +327,7 @@ void WyvernBiteAttackState::OnEnter()
 			false,
 			0.5f);
 	}
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernBiteAttackState::OnExecute(float elapsedTime)
 {
@@ -411,9 +399,7 @@ void WyvernClawAttackState::OnEnter()
 		targetLocalPosition.y = 0.0f; // yÀ•W‚Í0‚É‚·‚é
 		_targetWorldPosition = targetLocalPosition.TransformCoord(WyvernTransform);
 	}
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 
 	_lerpTimer = 0.0f;
 }
@@ -512,9 +498,7 @@ void WyvernTailAttackState::OnEnter()
 			false,
 			0.5f);
 	}
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernTailAttackState::OnExecute(float elapsedTime)
 {
@@ -538,9 +522,7 @@ void WyvernBackStepState::OnEnter()
 		u8"WalkBack",
 		false,
 		0.5f);
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
@@ -569,9 +551,7 @@ void WyvernBreathAttackState::OnEnter()
 		u8"AttackFireBreath",
 		false,
 		1.5f);
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernBreathAttackState::OnExecute(float elapsedTime)
 {
@@ -630,7 +610,6 @@ void WyvernPursuitState::OnEnter()
 		u8"RunForward",
 		true,
 		1.0f);
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
 	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
@@ -747,8 +726,6 @@ void WyvernDamageState::OnEnter()
 			_applyRotation = true;
 		}
 	}
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernDamageState::OnExecute(float elapsedTime)
 {
@@ -791,9 +768,7 @@ void WyvernDeathState::OnEnter()
 		u8"Death01",
 		false,
 		0.5f);
-	_owner->GetAnimator()->SetRootNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 void WyvernDeathState::OnExecute(float elapsedTime)
 {

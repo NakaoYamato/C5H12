@@ -18,6 +18,8 @@ public:
 	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
+	// オブジェクトとの接触した瞬間時の処理
+	void OnContactEnter(CollisionData& collisionData) override;
 
 #pragma region アクセサ
 	float GetNearAttackRadian() const { return _nearAttackRadian; }

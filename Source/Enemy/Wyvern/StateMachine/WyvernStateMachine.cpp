@@ -36,6 +36,10 @@ WyvernStateMachine::WyvernStateMachine(
 // 開始処理
 void WyvernStateMachine::Start()
 {
+	// ルートモーション設定
+	GetAnimator()->SetRootNodeIndex("CG");
+	GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
+
 	// 初期ステートを設定
 	_stateMachine.ChangeState("Idle");
 }

@@ -3,6 +3,8 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/Common/Damageable.h"
 #include "../EnemyController.h"
+#include "../../Library/Component/Terrain/TerrainEnvironmentController.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 
@@ -47,4 +49,15 @@ void WyvernController::Update(float elapsedTime)
 void WyvernController::DrawGui()
 {
 	ImGui::DragFloat(u8"近接攻撃角度", &_nearAttackRadian, 0.01f, 0.0f, DirectX::XM_PI, "%.1f rad");
+}
+// オブジェクトとの接触した瞬間時の処理
+void WyvernController::OnContactEnter(CollisionData& collisionData)
+{
+	auto environment = collisionData.other->GetComponent<TerrainEnvironmentController>();
+	if (environment && !collisionData.otherIsTrigger)
+	{
+		Debug::Output::String(L"地形オブジェクトに接触\n");
+		collisionData.other->Remove();
+		return;
+	}
 }

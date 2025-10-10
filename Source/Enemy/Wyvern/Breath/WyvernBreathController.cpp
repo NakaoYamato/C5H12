@@ -19,7 +19,8 @@ void WyvernBreathController::Start()
 		capsule->SetRadius(_breathRadius);
 	}
 	_effectController = GetActor()->GetComponent<EffectController>();
-	_effectController.lock()->Play(0);
+	auto& transform = GetActor()->GetTransform();
+	_effectController.lock()->Play(0, transform.GetWorldPosition(), transform.GetRotation());
 }
 
 // íœˆ—

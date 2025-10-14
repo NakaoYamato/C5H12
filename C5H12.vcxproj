@@ -304,6 +304,8 @@
     <ClCompile Include="Source\Enemy\Weak\StateMachine\WeakStates.cpp" />
     <ClCompile Include="Source\Enemy\Weak\WeakActor.cpp" />
     <ClCompile Include="Source\Enemy\Weak\WeakController.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\Ball\WyvernBallActor.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\Ball\WyvernBallController.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.cpp" />
@@ -538,6 +540,8 @@
     <ClInclude Include="Source\Enemy\Weak\StateMachine\WeakStates.h" />
     <ClInclude Include="Source\Enemy\Weak\WeakActor.h" />
     <ClInclude Include="Source\Enemy\Weak\WeakController.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\Ball\WyvernBallActor.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\Ball\WyvernBallController.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.h" />
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.h" />

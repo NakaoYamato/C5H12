@@ -1,6 +1,7 @@
 #pragma once
 #include "WyvernStateMachine.h"
 #include "../Breath/WyvernBreathActor.h"
+#include "../Ball/WyvernBallActor.h"
 
 #pragma region 待機
 class WyvernIdleState : public HierarchicalStateBase<WyvernStateMachine>
@@ -91,6 +92,21 @@ public:
 };
 #pragma endregion
 
+#pragma region 突進攻撃
+class WyvernChargeAttackState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernChargeAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	const char* GetName() const override { return "ChargeAttack"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
+};
+#pragma endregion
+
 #pragma region 後退
 class WyvernBackStepState : public HierarchicalStateBase<WyvernStateMachine>
 {
@@ -122,6 +138,24 @@ public:
 private:
 	// ブレスのエフェクトを表示するアクター
 	std::weak_ptr<WyvernBreathActor> _fireBreathActor;
+};
+#pragma endregion
+
+#pragma region 火球
+class WyvernFireBallAttackState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernFireBallAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	const char* GetName() const override { return "BallAttack"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
+private:
+	// 火球のエフェクトを表示するアクター
+	std::weak_ptr<WyvernBallActor> _fireBallActor;
 };
 #pragma endregion
 

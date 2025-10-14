@@ -42,10 +42,14 @@ public:
 
 	// ブレス攻撃のグローバル位置を設定
 	const Vector3& GetBreathGlobalPosition() const { return _breathGlobalPosition; }
+	// 火球攻撃のグローバル位置を設定	
+	const Vector3& GetFireBallGlobalPosition() const { return _fireBallGlobalPosition; }
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 	// ブレス攻撃イベントを取得
 	bool CallFireBreathEvent() const { return _callFireBreath; }
+	// 火球攻撃イベントを取得	
+	bool CallFireBallEvent() const { return _callFireBall; }
 	// ターゲットを見つめるイベントを取得
 	bool CallLookAtTargetEvent() const { return _callLookAtTarget; }
 #pragma endregion
@@ -59,6 +63,8 @@ private:
 
 	// ブレス攻撃のグローバル位置
 	Vector3 _breathGlobalPosition = Vector3::Zero;
+	// 火球攻撃のグローバル位置
+	Vector3 _fireBallGlobalPosition = Vector3::Zero;
 	// 頭の回転時のターゲットオフセット
 	Vector3 _headRotationOffset = Vector3(0.0f, 1.5f, 0.0f);
 	// 頭の回転制限角度（X軸方向）
@@ -66,5 +72,6 @@ private:
 
 	bool		_callCancelEvent = false;
 	bool		_callFireBreath = false;
+	bool		_callFireBall = false;
 	bool		_callLookAtTarget = false;
 };

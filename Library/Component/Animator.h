@@ -139,6 +139,8 @@ public:
 	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
 	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
 
+	void SetRootOffset(const Vector3& offset) { _rootOffset = offset; }
+
 	/// <summary>
 	/// モデルをリセット
 	/// </summary>

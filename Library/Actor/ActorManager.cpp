@@ -5,8 +5,8 @@
 #include "../Algorithm/Converter.h"
 
 #include "../../Library/JobSystem/JobSystem.h"
-
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 // 更新処理
 void ActorManager::Update(float elapsedTime)
@@ -309,7 +309,12 @@ void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
 {
 #ifdef _DEBUG
 	if (FindByName(actor->GetName(), tag))
-		assert(!"名前の重複");
+	{
+		Debug::Output::String(L"名前の重複\n");
+		std::string str = actor->GetName();
+		str += "_dup";
+		actor->SetName(str.c_str());
+	}
 #endif
 	// スレッドセーフ
 	std::lock_guard<std::mutex> lock(_mutex);

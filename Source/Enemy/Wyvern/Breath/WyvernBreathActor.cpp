@@ -1,7 +1,5 @@
 #include "WyvernBreathActor.h"
 
-#include "WyvernBreathController.h"
-
 void WyvernBreathActor::OnCreate()
 {
 	auto capsule0 = this->AddCollider<CapsuleCollider>();

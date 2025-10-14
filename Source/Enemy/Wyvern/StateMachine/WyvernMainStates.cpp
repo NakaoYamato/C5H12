@@ -515,6 +515,44 @@ void WyvernTailAttackState::OnExit()
 }
 #pragma endregion
 
+#pragma region 突進攻撃
+void WyvernChargeAttackState::OnEnter()
+{
+	_owner->GetAnimator()->PlayAnimation(
+		u8"AttackCharge",
+		true,
+		1.0f);
+	_owner->GetAnimator()->SetIsUseRootMotion(false);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::UseOffset);
+}
+
+void WyvernChargeAttackState::OnExecute(float elapsedTime)
+{
+	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto targetDirection = (targetPosition - position);
+	float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed();
+	// ターゲット方向に回転
+	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+
+	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
+	float nearAttackRange = _owner->GetEnemy()->GetNearAttackRange();
+	if (targetDirection.Length() < nearAttackRange)
+	{
+		// 攻撃範囲内なら完了
+		// 待機状態へ遷移
+		_owner->GetBase().ChangeState("Idle");
+		return;
+	}
+}
+
+void WyvernChargeAttackState::OnExit()
+{
+	_owner->GetAnimator()->SetIsUseRootMotion(false);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
+}
+#pragma endregion
+
 #pragma region 後退
 void WyvernBackStepState::OnEnter()
 {
@@ -603,6 +641,62 @@ void WyvernBreathAttackState::OnExit()
 }
 #pragma endregion
 
+#pragma region 火球
+void WyvernFireBallAttackState::OnEnter()
+{
+	_owner->GetAnimator()->PlayAnimation(
+		u8"AttackFireBall",
+		false,
+		1.0f);
+	_owner->GetAnimator()->SetIsUseRootMotion(false);
+}
+
+void WyvernFireBallAttackState::OnExecute(float elapsedTime)
+{
+	// 火球処理
+	if (_owner->CallFireBallEvent())
+	{
+		// 火球の生成
+		if (!_fireBallActor.lock())
+		{
+			// 火球のグローバル座標取得
+			Vector3 fireBallGlobalPosition = _owner->GetFireBallGlobalPosition();
+			// 火球を生成
+			_fireBallActor = _owner->GetEnemy()->GetActor()->GetScene()->RegisterActor<WyvernBallActor>(
+				std::string(_owner->GetEnemy()->GetActor()->GetName()) + "FireBallEffect",
+				ActorTag::Enemy);
+			// 親を設定
+			_fireBallActor.lock()->GetBallController()->SetBallActor(_owner->GetEnemy()->GetActor());
+			Vector3 position = Vector3::TransformCoord(fireBallGlobalPosition, _owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
+			_fireBallActor.lock()->GetTransform().SetPosition(position);
+			// ブレスのアクターを頭の向いている方向に向かせる
+			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+		}
+	}
+	else
+	{
+		auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+		auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+		auto targetDirection = (targetPosition - position);
+		float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed() * 1.5f/*TODO : 変数化*/;
+		// ターゲット方向に回転
+		_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+	}
+	// アニメーションが終了しているとき
+	if (!_owner->GetAnimator()->IsPlayAnimation())
+	{
+		// 待機状態へ遷移
+		_owner->GetBase().ChangeState("Idle");
+	}
+}
+
+void WyvernFireBallAttackState::OnExit()
+{
+	_fireBallActor.reset();
+	_owner->GetAnimator()->SetIsUseRootMotion(false);
+}
+#pragma endregion
+
 #pragma region 近づく
 void WyvernPursuitState::OnEnter()
 {
@@ -611,7 +705,7 @@ void WyvernPursuitState::OnEnter()
 		true,
 		1.0f);
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
-	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::UseOffset);
 }
 void WyvernPursuitState::OnExecute(float elapsedTime)
 {
@@ -635,6 +729,7 @@ void WyvernPursuitState::OnExecute(float elapsedTime)
 void WyvernPursuitState::OnExit()
 {
 	_owner->GetAnimator()->SetIsUseRootMotion(false);
+	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 #pragma endregion
 

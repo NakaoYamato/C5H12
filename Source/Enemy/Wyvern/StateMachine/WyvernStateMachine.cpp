@@ -24,7 +24,9 @@ WyvernStateMachine::WyvernStateMachine(
 	_stateMachine.RegisterState(std::make_unique<WyvernBiteAttackState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernClawAttackState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernTailAttackState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernChargeAttackState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernBreathAttackState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernFireBallAttackState>(this));
 
 	_stateMachine.RegisterState(std::make_unique<WyvernBackStepState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernPursuitState>(this));
@@ -39,6 +41,7 @@ void WyvernStateMachine::Start()
 	// ルートモーション設定
 	GetAnimator()->SetRootNodeIndex("CG");
 	GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
+	GetAnimator()->SetRootOffset(Vector3(0.0f, 200.0f, 0.0f));
 
 	// 初期ステートを設定
 	_stateMachine.ChangeState("Idle");
@@ -48,6 +51,7 @@ void WyvernStateMachine::Execute(float elapsedTime)
 {
     _callCancelEvent = false;
     _callFireBreath = false;
+	_callFireBall = false;
     _callLookAtTarget = false;
 
     // アニメーションイベント取得
@@ -73,6 +77,13 @@ void WyvernStateMachine::Execute(float elapsedTime)
 				_callFireBreath = true;
                 // ブレス攻撃のグローバル位置を設定
 				_breathGlobalPosition = event.position;
+			}
+			// 火球攻撃判定
+			if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBall")
+			{
+				_callFireBall = true;
+				// 火球攻撃のグローバル位置を設定
+				_fireBallGlobalPosition = event.position;
 			}
             // ルックアット判定
 			if (animationEvent.GetMessageList().at(event.messageIndex) == "LookAtTarget")

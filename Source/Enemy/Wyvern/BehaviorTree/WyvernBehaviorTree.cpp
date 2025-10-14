@@ -39,7 +39,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(
 					nearAttack->AddNode("Tail", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "TailAttack"));
 					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackStep"));
 				}
-				attackNode->AddNode("Breath", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BreathAttack"));
+				attackNode->AddNode("Ball", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
 			}
 			auto pursuitNode = battleNode->AddNode("Pursuit", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
 		}

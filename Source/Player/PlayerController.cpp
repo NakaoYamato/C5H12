@@ -39,15 +39,27 @@ void PlayerController::Start()
 	_damageable.lock()->SetOnDamageCallback(
 		[&](float damage, Vector3 hitPosition)
 		{
+			bool isCombat = false;
+			{
+				if (std::string(_stateMachine.lock()->GetStateName()).find("Combat") != std::string::npos)
+					isCombat = true;
+			}
+
 			if (damage >= 2.0f)
 			{
 				// ‘å‚«‚­‚Ì‚¯‚¼‚é
-				_stateMachine.lock()->ChangeState("HitKnockDown", nullptr);
+				if (isCombat)
+					_stateMachine.lock()->ChangeState("CombatHitKnockDown", nullptr);
+				else
+					_stateMachine.lock()->ChangeState("HitKnockDown", nullptr);
 			}
 			else
 			{
 				// Œy‚­‚Ì‚¯‚¼‚é
-				_stateMachine.lock()->ChangeState("Hit", nullptr);
+				if (isCombat)
+					_stateMachine.lock()->ChangeState("CombatHit", nullptr);
+				else
+					_stateMachine.lock()->ChangeState("Hit", nullptr);
 			}
 		}
 	);

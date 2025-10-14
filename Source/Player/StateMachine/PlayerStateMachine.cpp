@@ -22,6 +22,8 @@ PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* anima
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatRunState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatEvadeState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatToCombatState>(this));
+    _stateMachine.RegisterState(std::make_shared<PlayerNonCombatHitState>(this));
+    _stateMachine.RegisterState(std::make_shared<PlayerNonCombatHitKnockDownState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDeathState>(this));
 
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordIdleState>(this));

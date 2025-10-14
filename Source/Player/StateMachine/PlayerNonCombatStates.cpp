@@ -565,3 +565,133 @@ void PlayerNonCombatToCombatState::OnExecute(float elapsedTime)
 		_owner->GetStateMachine().ChangeState("CombatIdle");
 }
 #pragma endregion
+
+#pragma region 被弾
+PlayerNonCombatHitState::PlayerNonCombatHitState(PlayerStateMachine* stateMachine) :
+	Player8WayHSB(
+		stateMachine,
+		{ u8"HitF",
+		u8"HitF",
+		u8"HitR",
+		u8"HitB",
+		u8"HitB",
+		u8"HitB",
+		u8"HitL",
+		u8"HitF", },
+		0.2f,
+		true)
+{
+}
+
+void PlayerNonCombatHitState::OnEnter()
+{
+	// プレイヤーの向きと、被弾方向から被弾アニメーションを決定
+	auto& position = _owner->GetPlayer()->GetActor()->GetTransform().GetPosition();
+	auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	auto hitDirection = (hitPosition - position).Normalize();
+
+	float angle =
+		DirectX::XMConvertToDegrees(
+			atan2f(hitDirection.x, hitDirection.z)
+			- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+		);
+	// 角度を0~360度に正規化
+	angle = fmodf(angle, 360.0f);
+	if (angle < 0.0f)
+		angle += 360.0f;
+	// 360度を8方向に分割
+	int index = (int)(angle / 45.0f + 0.5f);
+	if (index >= 8)
+		index = 0;
+	Player8WayHSB::Direction directionType = static_cast<Player8WayHSB::Direction>(index);
+	ChangeSubState(directionType);
+
+	// 被弾モーション中は押し出されないようにする
+	auto charactorController = _owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(false);
+	}
+}
+
+void PlayerNonCombatHitState::OnExecute(float elapsedTime)
+{
+	// アニメーションが終了していたら遷移
+	if (!_owner->GetAnimator()->IsPlayAnimation())
+		_owner->GetStateMachine().ChangeState("Idle");
+}
+
+void PlayerNonCombatHitState::OnExit()
+{
+	// 押し出されれるようにする
+	auto charactorController = _owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(true);
+	}
+}
+
+PlayerNonCombatHitKnockDownState::PlayerNonCombatHitKnockDownState(PlayerStateMachine* stateMachine) :
+	Player8WayHSB(
+		stateMachine,
+		{ u8"HitLargeF",
+		u8"HitLargeF",
+		u8"HitLargeR",
+		u8"HitLargeB",
+		u8"HitLargeB",
+		u8"HitLargeB",
+		u8"HitLargeL",
+		u8"HitLargeF", },
+		0.2f,
+		true)
+{
+}
+
+void PlayerNonCombatHitKnockDownState::OnEnter()
+{
+	// プレイヤーの向きと、被弾方向から被弾アニメーションを決定
+	auto& position = _owner->GetPlayer()->GetActor()->GetTransform().GetPosition();
+	auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	auto hitDirection = (hitPosition - position).Normalize();
+
+	float angle =
+		DirectX::XMConvertToDegrees(
+			atan2f(hitDirection.x, hitDirection.z)
+			- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+		);
+	// 角度を0~360度に正規化
+	angle = fmodf(angle, 360.0f);
+	if (angle < 0.0f)
+		angle += 360.0f;
+	// 360度を8方向に分割
+	int index = (int)(angle / 45.0f + 0.5f);
+	if (index >= 8)
+		index = 0;
+	Player8WayHSB::Direction directionType = static_cast<Player8WayHSB::Direction>(index);
+	ChangeSubState(directionType);
+
+	// 被弾モーション中は押し出されないようにする
+	auto charactorController = _owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(false);
+	}
+}
+
+void PlayerNonCombatHitKnockDownState::OnExecute(float elapsedTime)
+{
+	// アニメーションが終了していたら遷移
+	if (!_owner->GetAnimator()->IsPlayAnimation())
+		_owner->GetStateMachine().ChangeState("Idle");
+}
+
+void PlayerNonCombatHitKnockDownState::OnExit()
+{
+	// 押し出されれるようにする
+	auto charactorController = _owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(true);
+	}
+}
+#pragma endregion

@@ -58,7 +58,7 @@ void SceneGame::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/alpha/Alpha000.json", Vector3(0.0f, 0.0f, 0.0f));
         auto stageController = stage0->AddComponent<StageController>(0);
     }
     //{

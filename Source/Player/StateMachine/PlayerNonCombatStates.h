@@ -89,6 +89,31 @@ public:
 };
 #pragma endregion
 
+#pragma region 被弾
+class PlayerNonCombatHitState final : public Player8WayHSB
+{
+public:
+	PlayerNonCombatHitState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatHitState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Hit"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+class PlayerNonCombatHitKnockDownState final : public Player8WayHSB
+{
+public:
+	PlayerNonCombatHitKnockDownState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatHitKnockDownState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "HitKnockDown"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+#pragma endregion
+
 #pragma region 死亡
 class PlayerNonCombatDeathState   final : public PlayerHSB
 {

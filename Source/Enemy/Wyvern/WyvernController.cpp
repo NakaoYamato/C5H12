@@ -19,6 +19,9 @@ void WyvernController::Start()
 	{
 		_metaAI = metaAIActor->GetComponent<MetaAI>();
 	}
+
+	// ダメージ間隔を設定
+	_enemyController.lock()->SetDamageReactionRate(5.0f);
 }
 // 更新処理
 void WyvernController::Update(float elapsedTime)

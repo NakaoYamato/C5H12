@@ -70,6 +70,8 @@ public:
 	void SetAttackCooldown(float attackCooldown) { _attackCooldown = attackCooldown; }
 	void SetPerformDamageReaction(bool performDamageReaction) { _performDamageReaction = performDamageReaction; }
 	void SetInFighting(bool inFighting) { _inFighting = inFighting; }
+
+	void SetDamageReactionRate(float rate) { _damageReactionRate = rate; }
 #pragma endregion
 
 protected:

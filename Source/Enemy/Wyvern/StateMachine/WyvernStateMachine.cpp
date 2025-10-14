@@ -19,6 +19,7 @@ WyvernStateMachine::WyvernStateMachine(
 	// ƒXƒe[ƒg‚Ì“o˜^
 	_stateMachine.RegisterState(std::make_unique<WyvernIdleState>(this));
 
+	_stateMachine.RegisterState(std::make_unique<WyvernRoarState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernToTargetState>(this));
 
 	_stateMachine.RegisterState(std::make_unique<WyvernBiteAttackState>(this));

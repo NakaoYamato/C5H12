@@ -4,6 +4,22 @@
 #include "../WyvernController.h"
 #include "../../EnemyController.h"
 
+// ™ôšK‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernRoarJudgment::Judgment()
+{
+	bool res = false;
+	bool currentFightingFlag = _owner->GetStateMachine()->GetEnemy()->InFighting();
+
+	// ‘OƒtƒŒ[ƒ€‚Å”ñí“¬ó‘Ô && ¡ƒtƒŒ[ƒ€‚Åí“¬ó‘Ô
+	if (!_wasInFighting && currentFightingFlag)
+	{
+		res = true;
+	}
+
+	_wasInFighting = currentFightingFlag;
+	return res;
+}
+
 // BattleNode‘JˆÚ”»’è
 bool WyvernBattleJudgment::Judgment()
 {
@@ -67,6 +83,7 @@ bool WyvernNearAttackJudgment::Judgment()
 	return false;
 }
 
+// WanderNode‘JˆÚ”»’è
 bool WyvernWanderJudgment::Judgment()
 {
 	return false;

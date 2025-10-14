@@ -23,6 +23,8 @@ WyvernBehaviorTree::WyvernBehaviorTree(
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
 	{
+		auto roarNode = rootNode->AddNode("Roar", 0, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
+
 		auto battleNode = rootNode->AddNode("Battle", 4, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
 		{
 			auto confrontNode = battleNode->AddNode("Confront", 0, SelectRule::Priority, std::make_shared<WyvernConfrontJudgment>(this), nullptr);

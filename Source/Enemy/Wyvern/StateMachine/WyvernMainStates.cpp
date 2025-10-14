@@ -32,6 +32,34 @@ void WyvernIdleState::OnExit()
 }
 #pragma endregion
 
+#pragma region 咆哮
+// 開始処理
+void WyvernRoarState::OnEnter()
+{
+	_owner->GetAnimator()->PlayAnimation(
+		u8"Roar",
+		false,
+		0.5f);
+	_owner->GetAnimator()->SetIsUseRootMotion(false);
+}
+
+// 実行処理
+void WyvernRoarState::OnExecute(float elapsedTime)
+{
+	// アニメーションが終了しているとき
+	if (!_owner->GetAnimator()->IsPlayAnimation())
+	{
+		// 再び待機状態
+		_owner->GetBase().ChangeState("Idle");
+	}
+}
+
+// 終了処理
+void WyvernRoarState::OnExit()
+{
+}
+#pragma endregion
+
 #pragma region ターゲットに向かう
 namespace WyvernToTargetSubStates
 {

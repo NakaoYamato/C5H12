@@ -5,6 +5,17 @@
 // ‘O•ûéŒ¾
 class WyvernBehaviorTree;
 
+// ™ôšK‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class WyvernRoarJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernRoarJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
+private:
+	bool _wasInFighting = false;
+};
+
 // BattleNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 class WyvernBattleJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
 {

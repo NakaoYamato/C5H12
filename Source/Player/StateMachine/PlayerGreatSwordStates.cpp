@@ -350,6 +350,12 @@ namespace Attack1SubState
             _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge1)->SetPosition(position);
             _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge2)->SetPosition(position);
         }
+        void OnExit() override
+        {
+            ComboSubState::OnExit();
+            // アニメーションを再開
+            _owner->GetAnimator()->SetIsPaused(false);
+        }
     private:
         float _chargingTimer = 0.0f;
         float _chargeStageTimer = 1.0f;

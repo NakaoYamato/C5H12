@@ -137,13 +137,13 @@ public:
 	NodeTempPtr SelectPriority(std::vector<NodeTempPtr>* list)
 	{
 		NodeTempPtr selectNode = nullptr;
-		unsigned int priority = INT_MAX;
+		unsigned int priority = 0;
 
 		// ”Ô—Dæ‡ˆÊ‚ª‚‚¢ƒm[ƒh‚ğ’T‚µ‚ÄselectNode‚ÉŠi”[
 		for (int i = 0; i < list->size(); i++)
 		{
-			// list->at(i)->priority ‚ª’á‚¢‚Ù‚Ç—Dæ
-			if (list->at(i)->_priority < priority)
+			// list->at(i)->priority ‚ª‚‚¢‚Ù‚Ç—Dæ
+			if (list->at(i)->_priority >= priority)
 			{
 				priority = list->at(i)->_priority;
 				selectNode = list->at(i);

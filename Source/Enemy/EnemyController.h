@@ -25,7 +25,7 @@ public:
     // 接触時処理
     void OnContactEnter(CollisionData& collisionData) override;
 
-    // 指定位置との角度
+    // ターゲットとの角度
     float GetAngleToTarget(const Vector3& target);
 	// ターゲット方向に移動
 	void MoveToTarget(const Vector3& targetPosition, float speed);

@@ -37,3 +37,10 @@ BehaviorActionState WyvernOneAction::Execute(float elapsedTime)
 	// ‚·‚®‚ÉI—¹
 	return BehaviorActionState::Complete;
 }
+
+// I—¹ˆ—
+void WyvernRoarAction::Exit()
+{
+	// ™ôšK‚ªI‚í‚Á‚½‚çí“¬ó‘Ô‚É‚·‚é
+	_owner->GetCombatStatus()->SetStatus(CombatStatusController::Status::Combat);
+}

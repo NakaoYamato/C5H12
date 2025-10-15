@@ -28,7 +28,7 @@ void CombatStatusController::Update(float elapsedTime)
 		UpdateNormalStatus(elapsedTime);
 		break;
 	case Status::Alert:
-		// 警戒状態では特に何もしない
+		UpdateAlertStatus(elapsedTime);
 		break;
 	case Status::Combat:
 		UpdateCombatStatus(elapsedTime);
@@ -56,6 +56,12 @@ void CombatStatusController::DrawGui()
 	ImGui::Checkbox(u8"更新する", &_isUpdate);
 }
 
+// 現在位置からターゲットまでのベクトル取得
+Vector3 CombatStatusController::GetToTargetVec(const Vector3& target)
+{
+	return target - GetActor()->GetTransform().GetPosition();
+}
+
 // ターゲットの範囲内かどうか
 bool CombatStatusController::IsInTargetRange(const Vector3& targetPosition, float targetRadius)
 {
@@ -76,7 +82,24 @@ void CombatStatusController::UpdateNormalStatus(float elapsedTime)
 		if (targetable)
 		{
 			SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
-			SetStatus(CombatStatusController::Status::Combat);
+			SetStatus(CombatStatusController::Status::Alert);
+		}
+	}
+}
+
+// 警戒状態の更新
+void CombatStatusController::UpdateAlertStatus(float elapsedTime)
+{
+	// メタAIからターゲット座標を取得
+	if (auto metaAI = _metaAI.lock())
+	{
+		auto targetable = metaAI->SearchTarget(
+			_targetFaction,
+			GetActor()->GetTransform().GetWorldPosition(),
+			_searchRange);
+		if (targetable)
+		{
+			SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
 		}
 	}
 }

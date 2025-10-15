@@ -14,6 +14,7 @@ WyvernStateMachine::WyvernStateMachine(Actor* owner)
 	_animator = owner->GetComponent<Animator>().get();
 	_damageable = owner->GetComponent<Damageable>().get();
 	_combatStatus = owner->GetComponent<CombatStatusController>().get();
+	_roarController = owner->GetComponent<RoarController>().get();
 
 	// ステートの登録
 	_stateMachine.RegisterState(std::make_unique<WyvernIdleState>(this));
@@ -53,6 +54,7 @@ void WyvernStateMachine::Execute(float elapsedTime)
     _callFireBreath = false;
 	_callFireBall = false;
     _callLookAtTarget = false;
+	float blurRate = 0.0f;
 
     // アニメーションイベント取得
     if (GetAnimator()->IsPlayAnimation())
@@ -72,23 +74,28 @@ void WyvernStateMachine::Execute(float elapsedTime)
                 _callCancelEvent = true;
             }
             // ブレス攻撃判定
-			if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBreath")
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBreath")
 			{
 				_callFireBreath = true;
                 // ブレス攻撃のグローバル位置を設定
 				_breathGlobalPosition = event.position;
 			}
 			// 火球攻撃判定
-			if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBall")
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "FireBall")
 			{
 				_callFireBall = true;
 				// 火球攻撃のグローバル位置を設定
 				_fireBallGlobalPosition = event.position;
 			}
             // ルックアット判定
-			if (animationEvent.GetMessageList().at(event.messageIndex) == "LookAtTarget")
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "LookAtTarget")
 			{
                 _callLookAtTarget = true;
+			}
+			// 咆哮判定
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "Roar")
+			{
+				blurRate = 1.0f - (GetAnimator()->GetAnimationTimer() - event.startSeconds) / (event.endSeconds - event.startSeconds);
 			}
         }
     }
@@ -150,6 +157,22 @@ void WyvernStateMachine::Execute(float elapsedTime)
   //      // 行列更新
 		//model->UpdateNodeTransform(headParentNode);
     }
+
+	// 咆哮のブラー処理
+	if (blurRate > 0.0f)
+	{
+		// ワイバーンの頭の位置を取得
+		auto model = GetEnemy()->GetActor()->GetModel().lock();
+		int nodeIndex = model->GetNodeIndex("Head");
+		Vector3 headWorldPosition =
+		{
+			model->GetPoseNodes()[nodeIndex].worldTransform._41,
+			model->GetPoseNodes()[nodeIndex].worldTransform._42,
+			model->GetPoseNodes()[nodeIndex].worldTransform._43
+		};
+		_roarController->SetWorldPosition(headWorldPosition);
+	}
+	_roarController->SetRate(blurRate);
 
 	// ステートマシンの実行
     _stateMachine.Update(elapsedTime);

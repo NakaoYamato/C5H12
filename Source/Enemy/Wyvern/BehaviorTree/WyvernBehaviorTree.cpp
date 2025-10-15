@@ -24,11 +24,15 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
 	{
-		auto roarNode = rootNode->AddNode("Roar", 0, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
-
-		auto battleNode = rootNode->AddNode("Battle", 4, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
+		auto alertNode = rootNode->AddNode("Alert", 2, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
 		{
-			auto confrontNode = battleNode->AddNode("Confront", 0, SelectRule::Priority, std::make_shared<WyvernConfrontJudgment>(this), nullptr);
+			alertNode->AddNode("ToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
+			alertNode->AddNode("Roar", 1, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernRoarAction>(this, "Roar"));
+		}
+
+		auto battleNode = rootNode->AddNode("Battle", 1, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
+		{
+			auto confrontNode = battleNode->AddNode("Confront", 2, SelectRule::Priority, std::make_shared<WyvernConfrontJudgment>(this), nullptr);
 			{
 				confrontNode->AddNode("ToTarget", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
 			}
@@ -44,9 +48,9 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 				}
 				attackNode->AddNode("Ball", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
 			}
-			auto pursuitNode = battleNode->AddNode("Pursuit", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
+			auto pursuitNode = battleNode->AddNode("Pursuit", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
 		}
-		auto scoutNode = rootNode->AddNode("Scout", 5, SelectRule::Priority, nullptr, nullptr);
+		auto scoutNode = rootNode->AddNode("Scout", 0, SelectRule::Priority, nullptr, nullptr);
 		{
 			//auto wanderNode = scoutNode->AddNode("Wander", 1, SelectRule::Random, std::make_shared<WyvernWanderJudgment>(this), nullptr);
 			//{

@@ -6,6 +6,7 @@
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/CombatStatusController.h"
+#include "../../Source/Common/RoarController.h"
 
 class EnemyActor : public Actor
 {

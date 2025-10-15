@@ -4,20 +4,19 @@
 #include "../WyvernController.h"
 #include "../../EnemyController.h"
 
+// alertNodeに遷移できるか判定
+bool WyvernAlertJudgment::Judgment()
+{
+	return _owner->GetCombatStatus()->GetCurrentStatus() == CombatStatusController::Status::Alert;
+}
+
 // 咆哮に遷移できるか判定
 bool WyvernRoarJudgment::Judgment()
 {
-	bool res = false;
-	bool currentFightingFlag = _owner->GetCombatStatus()->GetCurrentStatus() == CombatStatusController::Status::Combat;
-
-	// 前フレームで非戦闘状態 && 今フレームで戦闘状態
-	if (!_wasInFighting && currentFightingFlag)
-	{
-		res = true;
-	}
-
-	_wasInFighting = currentFightingFlag;
-	return res;
+	// ターゲット方向に向いているか判定
+	float angleToTarget = _owner->GetStateMachine()->GetEnemy()->GetAngleToTarget(
+		_owner->GetCombatStatus()->GetTargetPosition());
+	return (angleToTarget < _owner->GetStateMachine()->GetEnemy()->GetLookAtRadian());
 }
 
 // BattleNode遷移判定
@@ -27,12 +26,11 @@ bool WyvernBattleJudgment::Judgment()
 	if (_owner->GetCombatStatus()->GetCurrentStatus() != CombatStatusController::Status::Combat)
 		return false;
 
-	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
+	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
 	float searchRange = _owner->GetCombatStatus()->GetSearchRange();
 
 	// 現在の位置とターゲットの位置の距離から索敵できるか判定
-	return (position - targetPosition).Length() < searchRange;
+	return length < searchRange;
 }
 
 // ConfrontNodeに遷移できるか判定
@@ -56,26 +54,25 @@ bool WyvernAttackJudgment::Judgment()
 	if (std::rand() % 10 == 0)
 		return false;
 
-	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
+	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
 	float attackRange = _owner->GetStateMachine()->GetEnemy()->GetAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
-	return (position - targetPosition).Length() < attackRange;
+	return length < attackRange;
 }
 
 // NearAttackNodeに遷移できるか判定
 bool WyvernNearAttackJudgment::Judgment()
 {
-	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
+	auto vec = _owner->GetCombatStatus()->GetToTargetVec();
+	float length = vec.Length();
 	float nearAttackRange = _owner->GetStateMachine()->GetEnemy()->GetNearAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から近接攻撃できるか判定
-	if ((position - targetPosition).Length() < nearAttackRange)
+	if (length < nearAttackRange)
 	{
 		// 自身の向いている方向にターゲットがいるか判定
-		auto targetDirection = (targetPosition - position).Normalize();
+		auto targetDirection = vec.Normalize();
 		auto front = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
 		if (std::acosf(targetDirection.Dot(front)) < _owner->GetStateMachine()->GetWyvern()->GetNearAttackRadian())
 			return true;

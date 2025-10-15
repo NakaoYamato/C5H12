@@ -26,6 +26,10 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
+	// 現在位置からターゲットまでのベクトル取得
+	Vector3 GetToTargetVec(const Vector3& target);
+	// 現在位置からターゲットまでのベクトル取得
+	Vector3 GetToTargetVec() { return GetToTargetVec(_targetPosition); };
 	// ターゲットの範囲内かどうか
 	bool IsInTargetRange(const Vector3& targetPosition, float targetRadius = 1.0f);
 	// ターゲットの範囲内かどうか
@@ -63,6 +67,8 @@ public:
 private:
 	// 通常状態の更新
 	void UpdateNormalStatus(float elapsedTime);
+	// 警戒状態の更新
+	void UpdateAlertStatus(float elapsedTime);
 	// 戦闘状態の更新
 	void UpdateCombatStatus(float elapsedTime);
 

@@ -44,3 +44,20 @@ public:
 private:
 	const char* _stateName = nullptr; // 実行するステート名
 };
+
+/// <summary>
+/// 咆哮アクション
+/// </summary>
+class WyvernRoarAction : public WyvernCompleteStateAction
+{
+public:
+	WyvernRoarAction(WyvernBehaviorTree* owner,
+		const char* startStateName) :
+		WyvernCompleteStateAction(owner, startStateName)
+	{
+	}
+	// 終了処理
+	void Exit() override;
+private:
+	bool _hasRoared = false;
+};

@@ -5,6 +5,7 @@
 #include "../../Library/Math/Vector.h"
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/CombatStatusController.h"
+#include "../../Source/Common/RoarController.h"
 
 // 前方宣言
 class EnemyController;
@@ -59,6 +60,7 @@ private:
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
 	CombatStatusController* _combatStatus = nullptr;
+	RoarController* _roarController = nullptr;
 
 	// ブレス攻撃のグローバル位置
 	Vector3 _breathGlobalPosition = Vector3::Zero;

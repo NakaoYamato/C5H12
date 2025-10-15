@@ -3,6 +3,7 @@
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Math/Vector.h"
 #include "../../Source/Common/Damageable.h"
+#include "../../Source/Common/CombatStatusController.h"
 
 // ‘O•ûéŒ¾
 class EnemyController;
@@ -12,11 +13,7 @@ class Animator;
 class WeakStateMachine : public StateMachine
 {
 public:
-	WeakStateMachine(
-		EnemyController* enemy,
-		WeakController* weak,
-		Animator* animator,
-		Damageable* damageable);
+	WeakStateMachine(Actor* owner);
 	~WeakStateMachine() {}
 	// ŠJnˆ—
 	void Start() override;
@@ -38,6 +35,7 @@ public:
 	WeakController* GetWeak() { return _weak; }
 	Animator* GetAnimator() { return _animator; }
 	Damageable* GetDamageable() { return _damageable; }
+	CombatStatusController* GetCombatStatus() { return _combatStatus; }
 #pragma endregion
 
 private:
@@ -46,4 +44,5 @@ private:
 	WeakController* _weak = nullptr;
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
+	CombatStatusController* _combatStatus = nullptr;
 };

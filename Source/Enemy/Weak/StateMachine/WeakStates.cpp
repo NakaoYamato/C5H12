@@ -93,11 +93,11 @@ void WeakMoveState::OnEnter()
 }
 void WeakMoveState::OnExecute(float elapsedTime)
 {
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	Vector3 vec = targetPosition - _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	float length = vec.Length();
 
-	bool isTargetInRange = _owner->GetEnemy()->IsInTargetRange(targetPosition, _owner->GetEnemy()->GetNearAttackRange());
+	bool isTargetInRange = _owner->GetCombatStatus()->IsInTargetRange(targetPosition, _owner->GetEnemy()->GetNearAttackRange());
 	bool isLookAtTarget = _owner->GetEnemy()->GetAngleToTarget(targetPosition) < _owner->GetEnemy()->GetLookAtRadian();
 
 	// ターゲットが攻撃範囲外なら移動処理
@@ -148,11 +148,11 @@ void WeakDashState::OnEnter()
 }
 void WeakDashState::OnExecute(float elapsedTime)
 {
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	Vector3 vec = targetPosition - _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	float length = vec.Length();
 
-	bool isTargetInRange = _owner->GetEnemy()->IsInTargetRange(targetPosition, _owner->GetEnemy()->GetNearAttackRange());
+	bool isTargetInRange = _owner->GetCombatStatus()->IsInTargetRange(targetPosition, _owner->GetEnemy()->GetNearAttackRange());
 	bool isLookAtTarget = _owner->GetEnemy()->GetAngleToTarget(targetPosition) < _owner->GetEnemy()->GetLookAtRadian();
 
 	// ターゲットが攻撃範囲外なら移動処理

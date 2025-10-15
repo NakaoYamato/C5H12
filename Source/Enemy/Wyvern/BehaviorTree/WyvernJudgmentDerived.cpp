@@ -8,7 +8,7 @@
 bool WyvernRoarJudgment::Judgment()
 {
 	bool res = false;
-	bool currentFightingFlag = _owner->GetStateMachine()->GetEnemy()->InFighting();
+	bool currentFightingFlag = _owner->GetCombatStatus()->GetCurrentStatus() == CombatStatusController::Status::Combat;
 
 	// 前フレームで非戦闘状態 && 今フレームで戦闘状態
 	if (!_wasInFighting && currentFightingFlag)
@@ -24,12 +24,12 @@ bool WyvernRoarJudgment::Judgment()
 bool WyvernBattleJudgment::Judgment()
 {
 	// 戦闘状態でなければ遷移しない
-	if (!_owner->GetStateMachine()->GetEnemy()->InFighting())
+	if (_owner->GetCombatStatus()->GetCurrentStatus() != CombatStatusController::Status::Combat)
 		return false;
 
 	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
-	float searchRange = _owner->GetStateMachine()->GetEnemy()->GetSearchRange();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
+	float searchRange = _owner->GetCombatStatus()->GetSearchRange();
 
 	// 現在の位置とターゲットの位置の距離から索敵できるか判定
 	return (position - targetPosition).Length() < searchRange;
@@ -38,7 +38,7 @@ bool WyvernBattleJudgment::Judgment()
 // ConfrontNodeに遷移できるか判定
 bool WyvernConfrontJudgment::Judgment()
 {
-	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	// ターゲット方向に向いているか判定
 	float angle = _owner->GetStateMachine()->GetEnemy()->GetAngleToTarget(targetPosition);
 	// 向いてるならfalse
@@ -57,7 +57,7 @@ bool WyvernAttackJudgment::Judgment()
 		return false;
 
 	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	float attackRange = _owner->GetStateMachine()->GetEnemy()->GetAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
@@ -68,7 +68,7 @@ bool WyvernAttackJudgment::Judgment()
 bool WyvernNearAttackJudgment::Judgment()
 {
 	auto& position = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetStateMachine()->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	float nearAttackRange = _owner->GetStateMachine()->GetEnemy()->GetNearAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から近接攻撃できるか判定

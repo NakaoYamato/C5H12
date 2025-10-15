@@ -11,11 +11,17 @@
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 #include <imgui.h>
 
-WeakBehaviorTree::WeakBehaviorTree(WeakStateMachine* stateMachine, Animator* animator, MetaAI* metaAI) :
+WeakBehaviorTree::WeakBehaviorTree(
+	WeakStateMachine* stateMachine,
+	Actor* owner,
+	MetaAI* metaAI) :
 	_stateMachine(stateMachine),
-	_animator(animator),
 	_metaAI(metaAI)
 {
+	// オーナーからコンポーネントを取得
+	_animator = owner->GetComponent<Animator>().get();
+	_combatStatus = owner->GetComponent<CombatStatusController>().get();
+
 	_behaviorData = std::make_unique<BehaviorData<WeakBehaviorTree>>();
 	_behaviorTree = std::make_unique<BehaviorTreeBase<WeakBehaviorTree>>(this);
 
@@ -49,6 +55,7 @@ WeakBehaviorTree::WeakBehaviorTree(WeakStateMachine* stateMachine, Animator* ani
 // 開始処理
 void WeakBehaviorTree::Start()
 {
+	_combatStatus->SetIsUpdate(false);
 }
 // ビヘイビアツリー実行
 void WeakBehaviorTree::Execute(float elapsedTime)
@@ -58,7 +65,7 @@ void WeakBehaviorTree::Execute(float elapsedTime)
 	{
 		auto enemy = GetStateMachine()->GetEnemy();
 		auto position = enemy->GetActor()->GetTransform().GetWorldPosition();
-		float searchRange = enemy->GetSearchRange();
+		float searchRange = _combatStatus->GetSearchRange();
 
 		// メタAIからターゲット座標を取得
 		auto targetable = _metaAI->SearchTarget(
@@ -67,16 +74,16 @@ void WeakBehaviorTree::Execute(float elapsedTime)
 			searchRange);
 		if (targetable)
 		{
-			enemy->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
-			enemy->SetTargetRadius(enemy->GetAttackRange());
-			enemy->SetInFighting(true);
+			_combatStatus->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
+			_combatStatus->SetTargetRadius(enemy->GetAttackRange());
+			_combatStatus->SetStatus(CombatStatusController::Status::Combat);
 		}
 		else
 		{
 			// 戦闘状態を解除
-			enemy->SetInFighting(false);
+			_combatStatus->SetStatus(CombatStatusController::Status::Normal);
 			// メタAIにランダムな位置を取得してもらう
-			enemy->SetTargetPosition(_metaAI->GetRandomPositionInRange(position, 100.0f));
+			_combatStatus->SetTargetPosition(_metaAI->GetRandomPositionInRange(position, 100.0f));
 		}
 
 		// 推論

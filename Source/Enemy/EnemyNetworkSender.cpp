@@ -8,6 +8,8 @@ void EnemyNetworkSender::Start()
 	_stateController = GetActor()->GetComponent<StateController>();
 	// ダメージ可能コンポーネントの取得
 	_damageable = GetActor()->GetComponent<Damageable>();
+	// 戦闘状態コントローラーの取得
+	_combatStatus = GetActor()->GetComponent<CombatStatusController>();
 }
 
 Network::CharacterMove EnemyNetworkSender::GetMoveData()
@@ -15,14 +17,15 @@ Network::CharacterMove EnemyNetworkSender::GetMoveData()
 	Network::CharacterMove moveData{};
 	auto controller = _enemyController.lock();
 	auto state = _stateController.lock();
-	if (!controller || !state)
+	auto combatStatus = _combatStatus.lock();
+	if (!controller || !state || !combatStatus)
 	{
 		moveData.uniqueID = -1; // 無効なユニークID
 		return moveData;
 	}
 	moveData.uniqueID = 0;
 	moveData.position = GetActor()->GetTransform().GetPosition();
-	moveData.target = controller->GetTargetPosition();
+	moveData.target = combatStatus->GetTargetPosition();
 	moveData.angleY = GetActor()->GetTransform().GetRotation().y;
 	strcpy_s(moveData.mainState, state->GetStateName());
 	strcpy_s(moveData.subState, state->GetSubStateName());

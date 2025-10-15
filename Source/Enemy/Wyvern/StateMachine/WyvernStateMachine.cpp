@@ -6,16 +6,15 @@
 
 #include <imgui.h>
 
-WyvernStateMachine::WyvernStateMachine(
-	EnemyController* enemy,
-	WyvernController* wyvern,
-	Animator* animator,
-	Damageable* damageable) :
-	_enemy(enemy),
-	_wyvern(wyvern),
-	_animator(animator),
-	_damageable(damageable)
+WyvernStateMachine::WyvernStateMachine(Actor* owner)
 {
+	// コンポーネント取得
+	_enemy = owner->GetComponent<EnemyController>().get();
+	_wyvern = owner->GetComponent<WyvernController>().get();
+	_animator = owner->GetComponent<Animator>().get();
+	_damageable = owner->GetComponent<Damageable>().get();
+	_combatStatus = owner->GetComponent<CombatStatusController>().get();
+
 	// ステートの登録
 	_stateMachine.RegisterState(std::make_unique<WyvernIdleState>(this));
 

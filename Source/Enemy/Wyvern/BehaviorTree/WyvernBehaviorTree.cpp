@@ -11,12 +11,13 @@
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 #include <imgui.h>
 
-WyvernBehaviorTree::WyvernBehaviorTree(
-	WyvernStateMachine* stateMachine,
-	Animator* animator) :
-	_stateMachine(stateMachine),
-	_animator(animator)
+WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* owner) :
+	_stateMachine(stateMachine)
 {
+	// オーナーからコンポーネントを取得
+	_animator	= owner->GetComponent<Animator>().get();
+	_combatStatus = owner->GetComponent<CombatStatusController>().get();
+
 	_behaviorData = std::make_unique<BehaviorData<WyvernBehaviorTree>>();
 	_behaviorTree = std::make_unique<BehaviorTreeBase<WyvernBehaviorTree>>(this);
 

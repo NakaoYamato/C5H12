@@ -4,6 +4,7 @@
 #include "../../Library/Component/StateController.h"
 #include "../../Source/Enemy/EnemyController.h"
 #include "../../Source/Common/Damageable.h"
+#include "../../Source/Common/CombatStatusController.h"
 
 class EnemyNetworkSender : public NetworkSender
 {
@@ -26,4 +27,5 @@ private:
 	std::weak_ptr<EnemyController> _enemyController; // 敵コントローラーへの参照
 	std::weak_ptr<StateController> _stateController; // ステートコントローラーへの参照
 	std::weak_ptr<Damageable> _damageable; // ダメージ可能コンポーネントへの参照
+	std::weak_ptr<CombatStatusController> _combatStatus; // 戦闘状態コントローラーへの参照
 };

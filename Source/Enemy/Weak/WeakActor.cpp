@@ -31,13 +31,11 @@ void WeakActor::OnCreate()
 	auto animator = AddComponent<Animator>();
 	auto enemyController = AddComponent<EnemyController>();
 	auto weakController = AddComponent<WeakController>();
-	auto stateMachine = std::make_shared<WeakStateMachine>(
-		enemyController.get(),
-		weakController.get(),
-		animator.get(),
-		_damageable.lock().get());
+	auto stateMachine = std::make_shared<WeakStateMachine>(this);
 	auto stateController = AddComponent<StateController>(stateMachine);
-	auto behaviorController = AddComponent<BehaviorController>(std::make_shared<WeakBehaviorTree>(stateMachine.get(), animator.get(), metaAI.get()));
+	auto behaviorController = AddComponent<BehaviorController>(
+		std::make_shared<WeakBehaviorTree>(stateMachine.get(), this, metaAI.get())
+	);
 	auto effectController = this->AddComponent<EffectController>();
 	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 
@@ -46,8 +44,8 @@ void WeakActor::OnCreate()
 	modelCollider->SetLayer(CollisionLayer::Hit);
 
 	// ƒpƒ‰ƒ[ƒ^Ý’è
-	enemyController->SetSearchRange(10.0f);
-	enemyController->SetCombatRange(30.0f);
+	_combatStatus.lock()->SetSearchRange(10.0f);
+	_combatStatus.lock()->SetCombatRange(30.0f);
 	enemyController->SetAttackRange(3.0f);
 	enemyController->SetNearAttackRange(2.0f);
 	enemyController->SetRotationSpeed(DirectX::XMConvertToRadians(1080.0f));

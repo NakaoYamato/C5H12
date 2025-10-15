@@ -43,8 +43,8 @@ void GryphusActor::OnCreate()
     modelCollider->SetLayer(CollisionLayer::Hit);
 
     // ƒpƒ‰ƒ[ƒ^Ý’è
-    enemyController->SetSearchRange(10.0f);
-    enemyController->SetCombatRange(30.0f);
+    _combatStatus.lock()->SetSearchRange(10.0f);
+    _combatStatus.lock()->SetCombatRange(30.0f);
     enemyController->SetAttackRange(3.0f);
     enemyController->SetNearAttackRange(2.0f);
     enemyController->SetRotationSpeed(DirectX::XMConvertToRadians(1080.0f));

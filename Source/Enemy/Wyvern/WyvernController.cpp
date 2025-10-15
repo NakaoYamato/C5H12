@@ -13,6 +13,7 @@ void WyvernController::Start()
 {
 	_enemyController = GetActor()->GetComponent<EnemyController>();
 	_behaviorController = GetActor()->GetComponent<BehaviorController>();
+	_combatStatus = GetActor()->GetComponent<CombatStatusController>();
 	// メタAI取得
 	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
 	if (metaAIActor)
@@ -26,27 +27,9 @@ void WyvernController::Start()
 // 更新処理
 void WyvernController::Update(float elapsedTime)
 {
-	if (_enemyController.lock() && _behaviorController.lock() && _behaviorController.lock()->IsExecute())
-	{
-		// メタAIからターゲット座標を取得
-		if (auto metaAI = _metaAI.lock())
-		{
-			auto targetable = metaAI->SearchTarget(
-				Targetable::Faction::Player,
-				GetActor()->GetTransform().GetWorldPosition(),
-				100.0f);
-			if (targetable)
-			{
-				_enemyController.lock()->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
-				_enemyController.lock()->SetInFighting(true);
-			}
-			else
-			{
-				// 戦闘状態を解除
-				_enemyController.lock()->SetInFighting(false);
-			}
-		}
-	}
+	_combatStatus.lock()->SetIsUpdate(
+		_enemyController.lock() && _behaviorController.lock() && _behaviorController.lock()->IsExecute()
+	);
 }
 // GUI描画
 void WyvernController::DrawGui()

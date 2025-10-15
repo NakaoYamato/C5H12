@@ -4,6 +4,7 @@
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Math/Vector.h"
 #include "../../Source/Common/Damageable.h"
+#include "../../Source/Common/CombatStatusController.h"
 
 // 前方宣言
 class EnemyController;
@@ -13,11 +14,7 @@ class Animator;
 class WyvernStateMachine : public StateMachine
 {
 public:
-	WyvernStateMachine(
-		EnemyController* enemy,
-		WyvernController* wyvern,
-		Animator* animator,
-		Damageable* damageable);
+	WyvernStateMachine(Actor* owner);
 	~WyvernStateMachine() {}
 	// 開始処理
 	void Start() override;
@@ -38,6 +35,7 @@ public:
 	EnemyController* GetEnemy() { return _enemy; }
 	WyvernController* GetWyvern() { return _wyvern; }
 	Animator* GetAnimator() { return _animator; }
+	CombatStatusController* GetCombatStatus() { return _combatStatus; }
 	Damageable* GetDamageable() { return _damageable; }
 
 	// ブレス攻撃のグローバル位置を設定
@@ -60,6 +58,7 @@ private:
 	WyvernController* _wyvern = nullptr;
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
+	CombatStatusController* _combatStatus = nullptr;
 
 	// ブレス攻撃のグローバル位置
 	Vector3 _breathGlobalPosition = Vector3::Zero;

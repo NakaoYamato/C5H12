@@ -3,18 +3,19 @@
 #include "../../Library/Component/Animator.h"
 #include "../../EnemyController.h"
 #include "WeakStates.h"
+#include "../WeakController.h"
 
 #include <imgui.h>
 
-WeakStateMachine::WeakStateMachine(EnemyController* enemy,
-	WeakController* weak,
-	Animator* animator,
-	Damageable* damageable) :
-	_enemy(enemy),
-	_weak(weak),
-	_animator(animator),
-	_damageable(damageable)
+WeakStateMachine::WeakStateMachine(Actor* owner)
 {
+	// コンポーネント取得
+	_enemy = owner->GetComponent<EnemyController>().get();
+	_weak = owner->GetComponent<WeakController>().get();
+	_animator = owner->GetComponent<Animator>().get();
+	_damageable = owner->GetComponent<Damageable>().get();
+	_combatStatus = owner->GetComponent<CombatStatusController>().get();
+
 	// ステートの登録
 	_stateMachine.RegisterState(std::make_unique<WeakIdleState>(this));
 	_stateMachine.RegisterState(std::make_unique<WeakRestState>(this));

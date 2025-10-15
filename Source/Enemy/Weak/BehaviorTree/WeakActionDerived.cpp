@@ -25,7 +25,7 @@ BehaviorActionState WeakCompleteStatePursuitAction::Execute(float elapsedTime)
 {
 	auto enemy = _owner->GetStateMachine()->GetEnemy();
 	auto position = enemy->GetActor()->GetTransform().GetWorldPosition();
-	float searchRange = enemy->GetSearchRange();
+	float searchRange = _owner->GetCombatStatus()->GetSearchRange();
 
 	// メタAIからターゲット座標を取得
 	auto targetable = _owner->GetMetaAI()->SearchTarget(
@@ -34,7 +34,7 @@ BehaviorActionState WeakCompleteStatePursuitAction::Execute(float elapsedTime)
 		searchRange);
 	if (targetable)
 	{
-		enemy->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
+		_owner->GetCombatStatus()->SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
 	}
 
 	return WeakCompleteStateAction::Execute(elapsedTime);
@@ -50,7 +50,7 @@ BehaviorActionState WeakSearchTargetAction::Execute(float elapsedTime)
 {
 	auto enemy = _owner->GetStateMachine()->GetEnemy();
 	auto position = enemy->GetActor()->GetTransform().GetWorldPosition();
-	float searchRange = enemy->GetSearchRange();
+	float searchRange = _owner->GetCombatStatus()->GetSearchRange();
 
 	// メタAIからターゲット座標を取得
 	auto targetable = _owner->GetMetaAI()->SearchTarget(

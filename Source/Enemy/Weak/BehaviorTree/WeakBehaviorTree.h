@@ -4,13 +4,14 @@
 #include "../../Library/Component/BehaviorController.h"
 #include "../StateMachine/WeakStateMachine.h"
 #include "../../Source/AI/MetaAI.h"
+#include "../../Source/Common/CombatStatusController.h"
 
 class WeakBehaviorTree : public BehaviorTree
 {
 public:
 	WeakBehaviorTree(
 		WeakStateMachine* stateMachine,
-		Animator* animator,
+		Actor* owner,
 		MetaAI* metaAI);
 
 	// 開始処理
@@ -22,7 +23,10 @@ public:
 #pragma region アクセサ
 	// ステートマシンを取得
 	WeakStateMachine* GetStateMachine() { return _stateMachine; }
+	// アニメーターを取得
 	Animator* GetAnimator() { return _animator; }
+	// 戦闘状態を取得	
+	CombatStatusController* GetCombatStatus() { return _combatStatus; }
 	MetaAI* GetMetaAI() { return _metaAI; }
 #pragma endregion
 private:
@@ -37,5 +41,6 @@ private:
 	BehaviorNodeBase<WeakBehaviorTree>* _activeNode = nullptr;
 	WeakStateMachine* _stateMachine = nullptr;
 	Animator* _animator = nullptr;
+	CombatStatusController* _combatStatus = nullptr;
 	MetaAI* _metaAI = nullptr;
 };

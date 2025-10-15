@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Library/Component/BehaviorController.h"
 #include "../EnemyController.h"
 #include "../../Source/AI/MetaAI.h"
-#include "../../Library/Component/BehaviorController.h"
+#include "../../Source/Common/CombatStatusController.h"
 
 class WyvernController : public Component
 {
@@ -27,9 +28,12 @@ public:
 	void SetNearAttackRadian(float nearAttackRadian) { _nearAttackRadian = nearAttackRadian; }
 #pragma endregion
 private:
+	// エネミーコントローラー
 	std::weak_ptr<EnemyController> _enemyController;
 	// ビヘイビアコントローラー
 	std::weak_ptr<BehaviorController> _behaviorController;
+	// 戦闘状態
+	std::weak_ptr<CombatStatusController> _combatStatus;
 	// メタAI
 	std::weak_ptr<MetaAI> _metaAI;
 	// 近接攻撃ができる角度

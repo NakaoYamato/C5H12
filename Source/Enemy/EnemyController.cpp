@@ -65,10 +65,7 @@ void EnemyController::DrawGui()
 	ImGui::Text(u8"ダメージカウンター: %.1f", _damageCounter);
 	ImGui::Separator();
 
-	ImGui::DragFloat3(u8"ターゲット位置", &_targetPosition.x, 0.1f, -100.0f, 100.0f, "%.1f m");
-	ImGui::DragFloat(u8"ターゲット半径", &_targetRadius, 0.1f, 0.0f, 100.0f, "%.1f m");
 	ImGui::DragFloat(u8"攻撃力", &_ATK, 0.1f, 0.0f, 100.0f, "%.1f");
-	ImGui::DragFloat(u8"探索範囲", &_searchRange, 0.1f, 0.0f, 100.0f, "%.1f m");
 	ImGui::DragFloat(u8"攻撃範囲", &_attackRange, 0.1f, 0.0f, 100.0f, "%.1f m");
 	ImGui::DragFloat(u8"近接攻撃範囲", &_nearAttackRange, 0.1f, 0.0f, 100.0f, "%.1f m");
 	ImGui::DragFloat(u8"回転速度", &_rotationSpeed, 0.1f, 0.0f, 10.0f, "%.1f");
@@ -99,7 +96,7 @@ void EnemyController::OnContactEnter(CollisionData& collisionData)
 float EnemyController::GetAngleToTarget(const Vector3& target)
 {
 	auto& position = GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = GetTargetPosition();
+	auto& targetPosition = target;
 	auto targetDirection = (targetPosition - position).Normalize();
 	auto front = GetActor()->GetTransform().GetAxisZ().Normalize();
 	return std::acosf(front.Dot(targetDirection));
@@ -129,9 +126,4 @@ void EnemyController::LookAtTarget(const Vector3& target, float elapsedTime, flo
 	auto charactorController = GetCharactorController();
 	Vector2 targetDirection2D = Vector2(targetDirection.x, targetDirection.z);
 	charactorController->UpdateRotation(elapsedTime, targetDirection2D.Normalize() * rotationSpeed);
-}
-// ターゲットの範囲内かどうか
-bool EnemyController::IsInTargetRange(const Vector3& targetPosition, float targetRadius)
-{
-	return (targetPosition - GetActor()->GetTransform().GetPosition()).Length() <= targetRadius;
 }

@@ -3,13 +3,14 @@
 #include <memory>
 #include "../../Library/Component/BehaviorController.h"
 #include "../StateMachine/WyvernStateMachine.h"
+#include "../../Source/Common/CombatStatusController.h"
 
 class WyvernBehaviorTree : public BehaviorTree
 {
 public:
 	WyvernBehaviorTree(
 		WyvernStateMachine* stateMachine,
-		Animator* animator);
+		Actor* owner);
 
 	// 開始処理
 	void Start() override;
@@ -21,7 +22,10 @@ public:
 #pragma region アクセサ
 	// ステートマシンを取得
 	WyvernStateMachine* GetStateMachine() { return _stateMachine; }
+	// アニメーターを取得
 	Animator* GetAnimator() { return _animator; }
+	// 戦闘状態を取得	
+	CombatStatusController* GetCombatStatus() { return _combatStatus; }
 	// キャンセルイベントを取得
 	bool CallCancelEvent() const { return _callCancelEvent; }
 #pragma endregion
@@ -38,7 +42,8 @@ private:
 	// 起動中のビヘイビアノード
 	BehaviorNodeBase<WyvernBehaviorTree>* _activeNode = nullptr;
 
-	WyvernStateMachine* _stateMachine = nullptr;
+	WyvernStateMachine*		_stateMachine = nullptr;
 	Animator*				_animator = nullptr;
+	CombatStatusController*	_combatStatus = nullptr;
 	bool					_callCancelEvent = false;
 };

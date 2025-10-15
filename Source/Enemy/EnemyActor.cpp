@@ -11,7 +11,8 @@ void EnemyActor::OnCreate()
 {
 	_charactorController	= this->AddComponent<CharactorController>();
 	_damageable				= this->AddComponent<Damageable>();
-	_targetable				= this->AddComponent<Targetable>(); 
+	_targetable				= this->AddComponent<Targetable>();
+	_combatStatus 			= this->AddComponent<CombatStatusController>();
 	auto networkReceiver	= this->AddComponent<NetworkReceiver>();
 	auto networkSender		= this->AddComponent<EnemyNetworkSender>();
 	// ネットワーク受信イベントの設定
@@ -35,10 +36,10 @@ void EnemyActor::OnCreate()
                     return;
 				this->GetTransform().SetPosition(move.position);
 				this->GetTransform().SetAngleY(move.angleY);
-                auto enemyController = this->GetComponent<EnemyController>();
-				if (enemyController)
+				auto combatStatus = this->GetComponent<CombatStatusController>();
+				if (combatStatus)
 				{
-					enemyController->SetTargetPosition(move.target);
+					combatStatus->SetTargetPosition(move.target);
 				}
                 auto stateController = this->GetComponent<StateController>();
                 if (stateController)

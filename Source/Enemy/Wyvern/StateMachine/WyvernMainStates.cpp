@@ -78,7 +78,7 @@ namespace WyvernToTargetSubStates
 		}
 		void OnExecute(float elapsedTime) override 
 		{
-			auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+			auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 			float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed();
 			// ターゲット方向に回転
 			_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
@@ -269,7 +269,7 @@ WyvernToTargetState::WyvernToTargetState(WyvernStateMachine* owner) :
 void WyvernToTargetState::OnEnter()
 {
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
 	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	// ターゲット位置からどの方向に回転するか判定
@@ -333,7 +333,7 @@ void WyvernBiteAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
 	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	float crossY = front.Cross(targetDirection).y;
@@ -377,7 +377,7 @@ void WyvernClawAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
 	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	float crossY = front.Cross(targetDirection).y;
@@ -504,7 +504,7 @@ void WyvernTailAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position).Normalize();
 	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	float crossY = front.Cross(targetDirection).y;
@@ -557,7 +557,7 @@ void WyvernChargeAttackState::OnEnter()
 void WyvernChargeAttackState::OnExecute(float elapsedTime)
 {
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position);
 	float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed();
 	// ターゲット方向に回転
@@ -592,7 +592,7 @@ void WyvernBackStepState::OnEnter()
 }
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed();
 	// ターゲット方向に回転
 	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
@@ -704,7 +704,7 @@ void WyvernFireBallAttackState::OnExecute(float elapsedTime)
 	else
 	{
 		auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-		auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+		auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 		auto targetDirection = (targetPosition - position);
 		float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed() * 1.5f/*TODO : 変数化*/;
 		// ターゲット方向に回転
@@ -738,7 +738,7 @@ void WyvernPursuitState::OnEnter()
 void WyvernPursuitState::OnExecute(float elapsedTime)
 {
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetEnemy()->GetTargetPosition();
+	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	auto targetDirection = (targetPosition - position);
 	float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed();
 	// ターゲット方向に回転

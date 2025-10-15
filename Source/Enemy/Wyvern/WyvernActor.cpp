@@ -34,13 +34,11 @@ void WyvernActor::OnCreate()
 	_animator					= AddComponent<Animator>();
 	auto enemyController		= AddComponent<EnemyController>();
 	auto wyvernController		= AddComponent<WyvernController>();
-	auto stateMachine = std::make_shared<WyvernStateMachine>(
-		enemyController.get(),
-		wyvernController.get(),
-		_animator.lock().get(),
-		_damageable.lock().get());
+	auto stateMachine			= std::make_shared<WyvernStateMachine>(this);
 	auto stateController		= AddComponent<StateController>(stateMachine);
-	auto behaviorController		= AddComponent<BehaviorController>(std::make_shared<WyvernBehaviorTree>(stateMachine.get(), _animator.lock().get()));
+	auto behaviorController		= AddComponent<BehaviorController>(
+		std::make_shared<WyvernBehaviorTree>(stateMachine.get(), this)
+	);
 	auto effectController = this->AddComponent<EffectController>();
 	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 

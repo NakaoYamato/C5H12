@@ -32,7 +32,8 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 
 		auto angryNode = rootNode->AddNode("Angry", 2, SelectRule::Priority, std::make_shared<WyvernAngryJudgment>(this), nullptr);
 		{
-			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
+			angryNode->AddNode("AngryRoar", 1, SelectRule::Sequence, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
+			//angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Sequence, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack"));
 		}
 
 		auto battleNode = rootNode->AddNode("Battle", 1, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);

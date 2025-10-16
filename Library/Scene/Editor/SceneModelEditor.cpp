@@ -364,7 +364,19 @@ void SceneModelEditor::DrawEditAnimationGui()
         ImGui::Separator();
 		for (size_t i = 0; i < model->GetResource()->GetAddressAnimations().size(); ++i)
 		{
+			ImGui::PushID(static_cast<int>(i));
             ImGui::InputText(std::to_string(i).c_str(), &model->GetResource()->GetAddressAnimations()[i].name);
+            ImGui::SameLine();
+			if (ImGui::Button(u8"削除"))
+			{
+				model->GetResource()->GetAddressAnimations().erase(
+					model->GetResource()->GetAddressAnimations().begin() + i);
+				// アニメーションを-1にする
+				_animator.lock()->PlayAnimation(-1, _animator.lock()->IsLoop());
+                ImGui::PopID();
+                break;
+			}
+            ImGui::PopID();
 		}
         ImGui::Separator();
         if (ImGui::Button(u8"アニメーションのソート"))
@@ -380,7 +392,7 @@ void SceneModelEditor::DrawEditAnimationGui()
 
         // アニメーション再生中か確認
         int currentAnimIndex = _animator.lock()->GetAnimationIndex();
-        if (currentAnimIndex == -1)
+        if (currentAnimIndex == -1 || currentAnimIndex < model->GetResource()->GetAddressAnimations().size())
         {
             ImGui::End();
             return;

@@ -42,6 +42,9 @@ public:
 	float GetRotationSpeed() const { return _rotationSpeed; }
 	float GetLookAtRadian() const { return _lookAtRadian; }
 	float GetAttackCooldown() const { return _attackCooldown; }
+	float GetAngryDuration() const { return _angryDuration; }
+	float GetAngryTimer() const { return _angryTimer; }
+	bool IsAngry() const { return _isAngry; }
 
 	bool IsPerformDamageReaction() const { return _performDamageReaction; }
 
@@ -51,6 +54,8 @@ public:
 	void SetRotationSpeed(float rotationSpeed) { _rotationSpeed = rotationSpeed; }
 	void SetLookAtRadian(float lookAtRadian) { _lookAtRadian = lookAtRadian; }
 	void SetAttackCooldown(float attackCooldown) { _attackCooldown = attackCooldown; }
+	void SetIsAngry(bool isAngry) { _isAngry = isAngry; }
+	void SetAngryDuration(float duration) { _angryDuration = duration; }
 	void SetPerformDamageReaction(bool performDamageReaction) { _performDamageReaction = performDamageReaction; }
 
 	void SetDamageReactionRate(float rate) { _damageReactionRate = rate; }
@@ -74,6 +79,13 @@ protected:
 	float _lookAtRadian = DirectX::XMConvertToRadians(20.0f);
 	// 攻撃クールタイム
 	float _attackCooldown = 0.0f;
+
+	// 怒り状態か
+	bool _isAngry = false;
+	// 怒り状態タイマー
+	float _angryTimer = 0.0f;
+	// 怒り状態持続時間
+	float _angryDuration = 30.0f;
 
     // ダメージリアクションを行うかどうか
 	bool _performDamageReaction = false;

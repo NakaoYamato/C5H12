@@ -42,6 +42,19 @@ void EnemyController::Update(float elapsedTime)
 		if (_attackCooldown < 0.0f)
 			_attackCooldown = 0.0f;
 	}
+
+	// 怒り状態の処理
+	if (_isAngry)
+	{
+		// 怒りタイマーを増加
+		_angryTimer += elapsedTime;
+		if (_angryTimer >= _angryDuration)
+		{
+			// 怒り状態解除
+			_isAngry = false;
+			_angryTimer = 0.0f;
+		}
+	}
 }
 // 3D描画後の描画処理
 void EnemyController::DelayedRender(const RenderContext& rc)
@@ -63,6 +76,11 @@ void EnemyController::DrawGui()
 	ImGui::Text(u8"体力 : %f", _damageable.lock()->GetHealth());
 	ImGui::DragFloat(u8"ダメージリアクションの間隔", &_damageReactionRate, 0.1f, 0.0f, 10.0f, "%.1f s");
 	ImGui::Text(u8"ダメージカウンター: %.1f", _damageCounter);
+	ImGui::Separator();
+
+	ImGui::Checkbox(u8"怒り状態", &_isAngry);
+	ImGui::DragFloat(u8"怒り状態の持続時間", &_angryDuration, 0.1f, 0.0f, 100.0f, "%.1f s");
+	ImGui::Text(u8"怒りタイマー: %.1f", _angryTimer);
 	ImGui::Separator();
 
 	ImGui::DragFloat(u8"攻撃力", &_ATK, 0.1f, 0.0f, 100.0f, "%.1f");

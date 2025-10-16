@@ -19,6 +19,21 @@ bool WyvernRoarJudgment::Judgment()
 	return (angleToTarget < _owner->GetStateMachine()->GetEnemy()->GetLookAtRadian());
 }
 
+// angryNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernAngryJudgment::Judgment()
+{
+	bool res = false;
+
+	if (_owner->GetStateMachine()->GetEnemy()->IsAngry() && !_wasAngry)
+	{
+		res = true;
+	}
+
+	_wasAngry = _owner->GetStateMachine()->GetEnemy()->IsAngry();
+
+	return res;
+}
+
 // BattleNode‘JˆÚ”»’è
 bool WyvernBattleJudgment::Judgment()
 {

@@ -21,8 +21,17 @@ public:
 	WyvernRoarJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
 	// ”»’è
 	bool Judgment() override;
+};
+
+// angryNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class WyvernAngryJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernAngryJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
 private:
-	bool _wasInFighting = false;
+	bool _wasAngry = false;
 };
 
 // BattleNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è

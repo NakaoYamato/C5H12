@@ -24,10 +24,15 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
 	{
-		auto alertNode = rootNode->AddNode("Alert", 2, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
+		auto alertNode = rootNode->AddNode("Alert", 3, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
 		{
 			alertNode->AddNode("ToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
 			alertNode->AddNode("Roar", 1, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernRoarAction>(this, "Roar"));
+		}
+
+		auto angryNode = rootNode->AddNode("Angry", 2, SelectRule::Priority, std::make_shared<WyvernAngryJudgment>(this), nullptr);
+		{
+			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
 		}
 
 		auto battleNode = rootNode->AddNode("Battle", 1, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);

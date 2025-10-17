@@ -14,6 +14,15 @@ public:
 	bool Judgment() override;
 };
 
+// ‰ñ“]‚ª•K—v‚©”»’è
+class WyvernTurnJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernTurnJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
+};
+
 // ™ôšK‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 class WyvernRoarJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
 {
@@ -21,6 +30,8 @@ public:
 	WyvernRoarJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
 	// ”»’è
 	bool Judgment() override;
+private:
+	float _roarTime = 3.0f;
 };
 
 // angryNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è

@@ -18,6 +18,18 @@ void BehaviorController::Update(float elapsedTime)
 	{
 		_behaviorTree->Execute(elapsedTime);
 	}
+
+#ifdef USE_IMGUI
+	// GUI表示
+	if (_behaviorTree && _isShowGui)
+	{
+		if (ImGui::Begin(u8"ビヘイビアツリー"))
+		{
+			_behaviorTree->DrawGui();
+		}
+		ImGui::End();
+	}
+#endif
 }
 
 void BehaviorController::DrawGui()
@@ -26,6 +38,6 @@ void BehaviorController::DrawGui()
 	{
 		bool flag = _isExecute;
 		ImGui::Checkbox(u8"ビヘイビアツリーを実行する", &flag);
-		_behaviorTree->DrawGui();
+		ImGui::Checkbox(u8"ビヘイビアツリーのGUIを表示する", &_isShowGui);
 	}
 }

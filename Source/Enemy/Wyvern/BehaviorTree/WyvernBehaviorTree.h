@@ -8,18 +8,6 @@
 class WyvernBehaviorTree : public BehaviorTree
 {
 public:
-	enum Desire
-	{
-		NearAttack,
-		FarAttack,
-		Flight,
-		TakeDistance,
-		ShortBreak,
-
-		DesireCount
-	};
-
-public:
 	WyvernBehaviorTree(
 		WyvernStateMachine* stateMachine,
 		Actor* owner);
@@ -58,7 +46,4 @@ private:
 	Animator*				_animator = nullptr;
 	CombatStatusController*	_combatStatus = nullptr;
 	bool					_callCancelEvent = false;
-
-	float _desires[static_cast<size_t>(Desire::DesireCount)] = {};
-	float _desiresFactor[static_cast<size_t>(Desire::DesireCount)] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 };

@@ -36,6 +36,7 @@ void CombatStatusController::Update(float elapsedTime)
 	default:
 		break;
 	}
+	_statusTimer += elapsedTime;
 }
 
 // GUI•`‰æ

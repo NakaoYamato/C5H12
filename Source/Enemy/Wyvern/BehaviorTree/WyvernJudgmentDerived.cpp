@@ -10,13 +10,20 @@ bool WyvernAlertJudgment::Judgment()
 	return _owner->GetCombatStatus()->GetCurrentStatus() == CombatStatusController::Status::Alert;
 }
 
-// ™ôšK‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-bool WyvernRoarJudgment::Judgment()
+// ‰ñ“]‚ª•K—v‚©”»’è
+bool WyvernTurnJudgment::Judgment()
 {
 	// ƒ^[ƒQƒbƒg•ûŒü‚ÉŒü‚¢‚Ä‚¢‚é‚©”»’è
 	float angleToTarget = _owner->GetStateMachine()->GetEnemy()->GetAngleToTarget(
 		_owner->GetCombatStatus()->GetTargetPosition());
-	return (angleToTarget < _owner->GetStateMachine()->GetEnemy()->GetLookAtRadian());
+	return (angleToTarget >= DirectX::XMConvertToRadians(90.0f));
+}
+
+// ™ôšK‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernRoarJudgment::Judgment()
+{
+	// Œx‰úó‘Ô‚ªˆê’è’lˆÈã‚É‚È‚Á‚Ä‚¢‚½‚ç‘JˆÚ
+	return _owner->GetCombatStatus()->GetStatusTimer() >= _roarTime;
 }
 
 // angryNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è

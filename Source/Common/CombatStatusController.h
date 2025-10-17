@@ -47,9 +47,15 @@ public:
 	float GetSearchRange() const { return _searchRange; }
 	// 戦闘継続範囲を取得
 	float GetCombatRange() const { return _combatRange; }
+	// 状態継続タイマーを取得
+	float GetStatusTimer() const { return _statusTimer; }
 
 	// 状態を設定
-	void SetStatus(Status status) { _currentStatus = status; }
+	void SetStatus(Status status) { 
+		if (_currentStatus == status) return;
+		_currentStatus = status;
+		_statusTimer = 0.0f;
+	}
 	// ターゲット陣営を設定	
 	void SetTargetFaction(Targetable::Faction faction) { _targetFaction = faction; }
 	// ターゲット座標を設定	
@@ -87,6 +93,8 @@ private:
 	float _searchRange = 30.0f;
 	// 戦闘継続範囲
 	float _combatRange = 60.0f;
+	// 状態継続タイマー
+	float _statusTimer = 0.0f;
 
 	// 更新するかどうか
 	bool _isUpdate = true;

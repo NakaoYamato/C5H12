@@ -39,4 +39,6 @@ private:
 	std::shared_ptr<BehaviorTree> _behaviorTree = nullptr;
 	// ビヘイビアツリーを実行するかどうか
 	bool _isExecute = true;
+	// GUI表示フラグ
+	bool _isShowGui = false;
 };

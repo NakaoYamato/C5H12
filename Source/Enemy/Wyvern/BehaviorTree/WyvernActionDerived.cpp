@@ -14,7 +14,7 @@ BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 
 	if (currentStateName == _endStateName)
 	{
-		// ステートが開始ステートと同じなら成功
+		// ステートが終了ステートと同じなら成功
 		return BehaviorActionState::Complete;
 	}
 	// それ以外は実行中

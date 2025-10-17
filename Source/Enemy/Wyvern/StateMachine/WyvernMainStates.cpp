@@ -725,6 +725,72 @@ void WyvernFireBallAttackState::OnExit()
 }
 #pragma endregion
 
+#pragma region バックジャンプ火球
+void WyvernBackJumpFireBallAttackState::OnEnter()
+{
+	_owner->GetAnimator()->PlayAnimation(
+		u8"AttackBackJumpBall",
+		false,
+		1.0f);
+	_owner->GetAnimator()->SetIsUseRootMotion(true);
+}
+
+void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
+{
+	// 火球処理
+	if (_owner->CallFireBallEvent())
+	{
+		// 火球の生成
+		if (!_fireBallActor.lock())
+		{
+			// ワイバーンの頭の位置を取得
+			auto model = _owner->GetEnemy()->GetActor()->GetModel().lock();
+			int nodeIndex = model->GetNodeIndex("Head");
+			DirectX::XMFLOAT4X4 worldMatrix = model->GetPoseNodes()[nodeIndex].worldTransform;
+			Vector3 headWorldPosition =
+			{
+				worldMatrix._41,
+				worldMatrix._42,
+				worldMatrix._43
+			};
+			// 火球のグローバル座標取得
+			Vector3 fireBallGlobalPosition = _owner->GetFireBallGlobalPosition();
+			// 火球を生成
+			_fireBallActor = _owner->GetEnemy()->GetActor()->GetScene()->RegisterActor<WyvernBallActor>(
+				std::string(_owner->GetEnemy()->GetActor()->GetName()) + "FireBallEffect",
+				ActorTag::Enemy);
+			// 親を設定
+			_fireBallActor.lock()->GetBallController()->SetBallActor(_owner->GetEnemy()->GetActor());
+			_fireBallActor.lock()->GetTransform().SetPosition(headWorldPosition);
+			// ブレスのアクターを頭の向いている方向に向かせる
+			Quaternion q = Quaternion::FromRollPitchYaw(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation());
+			Quaternion headQ = model->GetPoseNodes()[nodeIndex].rotation;
+			_fireBallActor.lock()->GetTransform().SetAngle((q * headQ).Normalize().ToRollPitchYaw());
+		}
+	}
+	else
+	{
+		auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+		auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
+		auto targetDirection = (targetPosition - position);
+		float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed() * 1.5f/*TODO : 変数化*/;
+		// ターゲット方向に回転
+		_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
+	}
+	// アニメーションが終了しているとき
+	if (!_owner->GetAnimator()->IsPlayAnimation())
+	{
+		// 滞空状態へ遷移
+		_owner->GetBase().ChangeState("Hover");
+	}
+}
+
+void WyvernBackJumpFireBallAttackState::OnExit()
+{
+	_fireBallActor.reset();
+}
+#pragma endregion
+
 #pragma region 近づく
 void WyvernPursuitState::OnEnter()
 {
@@ -884,6 +950,7 @@ void WyvernDamageState::OnExit()
 	_owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
+
 #pragma region 死亡
 void WyvernDeathState::OnEnter()
 {
@@ -899,5 +966,23 @@ void WyvernDeathState::OnExecute(float elapsedTime)
 void WyvernDeathState::OnExit()
 {
 	_owner->GetAnimator()->SetIsUseRootMotion(false);
+}
+#pragma endregion
+
+#pragma region 滞空
+void WyvernHoverState::OnEnter()
+{
+	_owner->GetAnimator()->PlayAnimation(
+		u8"FlyStand",
+		true,
+		0.5f);
+}
+
+void WyvernHoverState::OnExecute(float elapsedTime)
+{
+}
+
+void WyvernHoverState::OnExit()
+{
 }
 #pragma endregion

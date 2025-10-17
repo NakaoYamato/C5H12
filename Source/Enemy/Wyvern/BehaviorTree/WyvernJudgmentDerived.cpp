@@ -34,6 +34,12 @@ bool WyvernAngryJudgment::Judgment()
 	return res;
 }
 
+// flightNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernFlightJudgment::Judgment()
+{
+	return _owner->GetStateMachine()->GetWyvern()->IsDuringFlight();
+}
+
 // BattleNode‘JˆÚ”»’è
 bool WyvernBattleJudgment::Judgment()
 {

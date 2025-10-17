@@ -32,6 +32,8 @@ public:
 	static Quaternion RotationAxisDegree(const DirectX::XMFLOAT3& axis, float radian);
 	// 軸を指定して指定量回転
 	static Quaternion RotationAxisDegree(const DirectX::XMVECTOR& axis, float radian);
+	// 正規化
+	static Quaternion Normalize(const Quaternion& src);
 	// クォータニオンの掛け算
 	static Quaternion Multiply(const Quaternion& src, const Quaternion& dst);
 	/// <summary>
@@ -71,6 +73,8 @@ public:
 
     // クォータニオンの掛け算
 	Quaternion operator*(const Quaternion& q) const;
+	// 正規化
+	Quaternion Normalize() const { return Quaternion::Normalize(*this); }
     // クォータニオンの掛け算
 	Quaternion Multiply(const Quaternion& q) const;
 	// 補完処理

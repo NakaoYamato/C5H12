@@ -174,6 +174,24 @@ private:
 };
 #pragma endregion
 
+#pragma region バックジャンプ火球
+class WyvernBackJumpFireBallAttackState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernBackJumpFireBallAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	const char* GetName() const override { return "BackJumpBallAttack"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
+private:
+	// 火球のエフェクトを表示するアクター
+	std::weak_ptr<WyvernBallActor> _fireBallActor;
+};
+#pragma endregion
+
 #pragma region 近づく
 class WyvernPursuitState : public HierarchicalStateBase<WyvernStateMachine>
 {
@@ -218,6 +236,21 @@ class WyvernDeathState : public HierarchicalStateBase<WyvernStateMachine>
 public:
 	WyvernDeathState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
 	const char* GetName() const override { return "Death"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
+};
+#pragma endregion
+
+#pragma region 滞空
+class WyvernHoverState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernHoverState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	const char* GetName() const override { return "Hover"; };
 	// 開始処理
 	void OnEnter() override;
 	// 実行処理

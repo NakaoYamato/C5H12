@@ -11,6 +11,7 @@
 // 名前取得
 void WyvernController::Start()
 {
+	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_enemyController = GetActor()->GetComponent<EnemyController>();
 	_behaviorController = GetActor()->GetComponent<BehaviorController>();
 	_combatStatus = GetActor()->GetComponent<CombatStatusController>();
@@ -23,6 +24,9 @@ void WyvernController::Start()
 
 	// ダメージ間隔を設定
 	_enemyController.lock()->SetDamageReactionRate(5.0f);
+
+	// 初期スキン幅取得
+	_initialSkinWidth = _charactorController.lock()->GetSkinWidth();
 }
 // 更新処理
 void WyvernController::Update(float elapsedTime)
@@ -30,11 +34,23 @@ void WyvernController::Update(float elapsedTime)
 	_combatStatus.lock()->SetIsUpdate(
 		_enemyController.lock() && _behaviorController.lock() && _behaviorController.lock()->IsExecute()
 	);
+
+	// 空中処理
+	if (_isDuringFlight)
+	{
+		_charactorController.lock()->SetSkinWidth(_airborneSkinWidth);
+	}
+	else
+	{
+		_charactorController.lock()->SetSkinWidth(_initialSkinWidth);
+	}
 }
 // GUI描画
 void WyvernController::DrawGui()
 {
 	ImGui::DragFloat(u8"近接攻撃角度", &_nearAttackRadian, 0.01f, 0.0f, DirectX::XM_PI, "%.1f rad");
+	ImGui::DragFloat(u8"空中スキン幅", &_airborneSkinWidth, 0.1f, 0.0f, 20.0f, "%.1f");
+	ImGui::Checkbox(u8"空中か", &_isDuringFlight);
 }
 // オブジェクトとの接触した瞬間時の処理
 void WyvernController::OnContactEnter(CollisionData& collisionData)

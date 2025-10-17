@@ -5,9 +5,7 @@
 // 前方宣言
 class WyvernBehaviorTree;
 
-/// <summary>
-/// 指定のステートが完了するまで実行し続ける
-/// </summary>
+#pragma region 指定のステートが完了するまで実行し続ける
 class WyvernCompleteStateAction : public BehaviorActionBase<WyvernBehaviorTree>
 {
 public:
@@ -24,12 +22,11 @@ public:
 	BehaviorActionState Execute(float elapsedTime) override;
 private:
 	const char* _startStateName = nullptr; // 実行するステート名
-	const char* _endStateName = nullptr; // 実行するステート名
+	const char* _endStateName = nullptr; // 終了判定のステート名
 };
+#pragma endregion
 
-/// <summary>
-/// 指定のステートを再生してすぐに終了する
-/// </summary>
+#pragma region 指定のステートを再生してすぐに終了する
 class WyvernOneAction : public BehaviorActionBase<WyvernBehaviorTree>
 {
 public:
@@ -44,10 +41,9 @@ public:
 private:
 	const char* _stateName = nullptr; // 実行するステート名
 };
+#pragma endregion
 
-/// <summary>
-/// 咆哮アクション
-/// </summary>
+#pragma region 咆哮アクション
 class WyvernRoarAction : public WyvernCompleteStateAction
 {
 public:
@@ -61,3 +57,27 @@ public:
 private:
 	bool _hasRoared = false;
 };
+#pragma endregion
+
+#pragma region 指定時間再生するアクション
+class WyvernTimerAction : public BehaviorActionBase<WyvernBehaviorTree>
+{
+public:
+	WyvernTimerAction(
+		WyvernBehaviorTree* owner,
+		const char* startStateName,
+		float time) :
+		BehaviorActionBase(owner),
+		_startStateName(startStateName),
+		_time(time) {
+	}
+	// 開始処理
+	void Enter()override;
+	// 実行処理
+	BehaviorActionState Execute(float elapsedTime) override;
+private:
+	const char* _startStateName = nullptr; // 実行するステート名
+	float _time = 0.0f;
+	float _timer = 0.0f;
+};
+#pragma endregion

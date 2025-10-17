@@ -29,6 +29,10 @@ WyvernStateMachine::WyvernStateMachine(Actor* owner)
 	_stateMachine.RegisterState(std::make_unique<WyvernBreathAttackState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernFireBallAttackState>(this));
 
+	_stateMachine.RegisterState(std::make_unique<WyvernBackJumpFireBallAttackState>(this));
+	
+	_stateMachine.RegisterState(std::make_unique<WyvernHoverState>(this));
+
 	_stateMachine.RegisterState(std::make_unique<WyvernBackStepState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernPursuitState>(this));
 
@@ -50,11 +54,12 @@ void WyvernStateMachine::Start()
 
 void WyvernStateMachine::Execute(float elapsedTime)
 {
+	bool airFlag = false;
+	float blurRate = 0.0f;
     _callCancelEvent = false;
     _callFireBreath = false;
 	_callFireBall = false;
     _callLookAtTarget = false;
-	float blurRate = 0.0f;
 
     // アニメーションイベント取得
     if (GetAnimator()->IsPlayAnimation())
@@ -96,6 +101,11 @@ void WyvernStateMachine::Execute(float elapsedTime)
 			else if (animationEvent.GetMessageList().at(event.messageIndex) == "Roar")
 			{
 				blurRate = 1.0f - (GetAnimator()->GetAnimationTimer() - event.startSeconds) / (event.endSeconds - event.startSeconds);
+			}
+			// 飛行判定
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "DuringFlight")
+			{
+				airFlag = true;
 			}
         }
     }
@@ -173,6 +183,9 @@ void WyvernStateMachine::Execute(float elapsedTime)
 		_roarController->SetWorldPosition(headWorldPosition);
 	}
 	_roarController->SetRate(blurRate);
+
+	// 空中処理
+	GetWyvern()->SetIsDuringFlight(airFlag);
 
 	// ステートマシンの実行
     _stateMachine.Update(elapsedTime);

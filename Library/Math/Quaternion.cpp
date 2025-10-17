@@ -57,6 +57,14 @@ Quaternion Quaternion::RotationAxisDegree(const DirectX::XMVECTOR& axis, float r
 {
     return Quaternion::RotationAxis(axis, DirectX::XMConvertToRadians(radian));
 }
+// 正規化
+Quaternion Quaternion::Normalize(const Quaternion& src)
+{
+	DirectX::XMVECTOR Q = DirectX::XMQuaternionNormalize(DirectX::XMLoadFloat4(&src));
+	Quaternion q{};
+	DirectX::XMStoreFloat4(&q, Q);
+	return q;
+}
 // クォータニオンの掛け算
 Quaternion Quaternion::Multiply(const Quaternion& src, const Quaternion& dst)
 {

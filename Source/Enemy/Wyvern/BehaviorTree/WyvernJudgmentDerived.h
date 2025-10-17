@@ -34,6 +34,15 @@ private:
 	bool _wasAngry = false;
 };
 
+// flightNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class WyvernFlightJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernFlightJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
+};
+
 // BattleNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 class WyvernBattleJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
 {

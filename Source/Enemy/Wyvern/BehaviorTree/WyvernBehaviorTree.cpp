@@ -24,16 +24,29 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
 	{
-		auto alertNode = rootNode->AddNode("Alert", 3, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
+		auto alertNode = rootNode->AddNode("Alert", 4, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
 		{
 			alertNode->AddNode("ToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
 			alertNode->AddNode("Roar", 1, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernRoarAction>(this, "Roar"));
 		}
 
-		auto angryNode = rootNode->AddNode("Angry", 2, SelectRule::Priority, std::make_shared<WyvernAngryJudgment>(this), nullptr);
+		auto angryNode = rootNode->AddNode("Angry", 3, SelectRule::Sequence, std::make_shared<WyvernAngryJudgment>(this), nullptr);
 		{
-			angryNode->AddNode("AngryRoar", 1, SelectRule::Sequence, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
-			//angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Sequence, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack"));
+			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
+			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack", "Hover"));
+		}
+		
+		auto flightNode = rootNode->AddNode("Flight", 2, SelectRule::Priority, std::make_shared<WyvernFlightJudgment>(this), nullptr);
+		{
+			//flightNode->AddNode("FlightConfront", 2, SelectRule::Non, std::make_shared<>(this), std::make_shared<>(this, "ToTarget"));
+
+			//auto flightAttackNode = flightNode->AddNode("FlightAttack", 1, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), nullptr);
+			//{
+			//	flightAttackNode->AddNode("FlightClaw", 4, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ClawAttack"));
+			//	flightAttackNode->AddNode("FlightBall", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
+			//}
+
+			flightNode->AddNode("Hover", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "Hover", 2.0f));
 		}
 
 		auto battleNode = rootNode->AddNode("Battle", 1, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);

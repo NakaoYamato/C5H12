@@ -75,7 +75,15 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 					nearAttack->AddNode("Tail", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "TailAttack"));
 					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackStep"));
 				}
-				attackNode->AddNode("Ball", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
+				auto farAttack = attackNode->AddNode("FarAttack", 0, SelectRule::NoDuplicatesRandom, nullptr, nullptr);
+				{
+					farAttack->AddNode("Ball", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
+					auto chargeNode = farAttack->AddNode("Charge", 2, SelectRule::Sequence, nullptr, nullptr);
+					{
+						chargeNode->AddNode("Alignment", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "BackStep", GetStateMachine()->GetWyvern()->GetChargeAttackChargeTime()));
+						chargeNode->AddNode("ChargeAttack", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ChargeAttack"));
+					}
+				}
 			}
 			auto pursuitNode = battleNode->AddNode("Pursuit", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
 		}
@@ -101,8 +109,13 @@ void WyvernBehaviorTree::Execute(float elapsedTime)
 	// 現在の実行ノードがなければ取得
 	if (_activeNode == nullptr)
 	{
+		// ターゲットを更新する
+		GetCombatStatus()->SetIsUpdateTarget(true);
+		GetCombatStatus()->Update(0.0f);
 		// 推論
 		_activeNode = _behaviorTree->ActiveNodeInference(_behaviorData.get());
+		// ターゲットを更新しないようにする
+		GetCombatStatus()->SetIsUpdateTarget(false);
 	}
 	// 実行ノードがあれば実行
 	if (_activeNode != nullptr)

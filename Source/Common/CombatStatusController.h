@@ -49,6 +49,10 @@ public:
 	float GetCombatRange() const { return _combatRange; }
 	// 状態継続タイマーを取得
 	float GetStatusTimer() const { return _statusTimer; }
+	// 更新するかどうかを取得
+	bool GetIsUpdate() const { return _isUpdate; }
+	// ターゲットを更新するかどうかを取得
+	bool GetIsUpdateTarget() const { return _isUpdateTarget; }
 
 	// 状態を設定
 	void SetStatus(Status status) { 
@@ -59,7 +63,10 @@ public:
 	// ターゲット陣営を設定	
 	void SetTargetFaction(Targetable::Faction faction) { _targetFaction = faction; }
 	// ターゲット座標を設定	
-	void SetTargetPosition(const Vector3& position) { _targetPosition = position; }
+	void SetTargetPosition(const Vector3& position) { 
+		if (!_isUpdateTarget) return;
+		_targetPosition = position; 
+	}
 	// ターゲットの半径を設定	
 	void SetTargetRadius(float radius) { _targetRadius = radius; }
 	// 検索範囲を設定
@@ -68,6 +75,8 @@ public:
 	void SetCombatRange(float range) { _combatRange = range; }
 	// 更新するかどうかを設定
 	void SetIsUpdate(bool isUpdate) { _isUpdate = isUpdate; }
+	// ターゲットを更新するかどうかを設定
+	void SetIsUpdateTarget(bool isUpdateTarget) { _isUpdateTarget = isUpdateTarget; }
 #pragma endregion
 
 private:
@@ -98,4 +107,6 @@ private:
 
 	// 更新するかどうか
 	bool _isUpdate = true;
+	// ターゲットを更新するかどうか
+	bool _isUpdateTarget = true;
 };

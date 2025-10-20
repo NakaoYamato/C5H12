@@ -29,6 +29,7 @@ public:
 	float GetFlightMoveSpeed() const { return _flightMoveSpeed; }
 	float GetFlightTimer() const { return _flightTimer; }
 	float GetFlightDuration() const { return _flightDuration; }
+	float GetChargeAttackChargeTime() const { return _chargeAttackChargeTime; }
 	bool IsDuringFlight() const { return _isDuringFlight; }
 
 	void SetNearAttackRadian(float nearAttackRadian) { _nearAttackRadian = nearAttackRadian; }
@@ -60,4 +61,7 @@ private:
 	float _flightTimer = 0.0f;
 	// ‹ó’†Œp‘±ŠÔ
 	float _flightDuration = 20.0f;
+
+	// “ËiUŒ‚‚Ì—­‚ßŠÔ
+	float _chargeAttackChargeTime = 1.0f;
 };

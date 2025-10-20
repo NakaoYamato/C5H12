@@ -153,6 +153,8 @@ public:
 	void OnExecute(float elapsedTime) override;
 	// I—¹ˆ—
 	void OnExit() override;
+private:
+	Vector3 _startPosition = Vector3::Zero;
 };
 #pragma endregion
 

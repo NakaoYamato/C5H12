@@ -58,6 +58,8 @@ void WyvernController::DrawGui()
 	ImGui::DragFloat(u8"飛行中移動速度", &_flightMoveSpeed, 0.1f, 0.0f, 50.0f, "%.1f");
 	ImGui::DragFloat(u8"飛行中タイマー", &_flightTimer, 0.1f, 0.0f, 100.0f, "%.1f");
 	ImGui::DragFloat(u8"飛行継続時間", &_flightDuration, 0.1f, 0.0f, 100.0f, "%.1f");
+	ImGui::Separator();
+	ImGui::DragFloat(u8"近接攻撃チャージ時間", &_chargeAttackChargeTime, 0.1f, 0.0f, 10.0f, "%.1f");
 }
 // オブジェクトとの接触した瞬間時の処理
 void WyvernController::OnContactEnter(CollisionData& collisionData)

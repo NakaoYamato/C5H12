@@ -462,35 +462,43 @@ void WyvernChargeAttackState::OnEnter()
 {
 	_owner->GetAnimator()->PlayAnimation(
 		u8"AttackCharge",
-		true,
+		false,
 		1.0f);
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
+	_owner->GetAnimator()->SetIsUseRootMotion(true);
 	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::UseOffset);
+	_startPosition = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 }
 
 void WyvernChargeAttackState::OnExecute(float elapsedTime)
 {
-	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
-	auto targetDirection = (targetPosition - position);
-	float rotationSpeed = _owner->GetEnemy()->GetRotationSpeed();
-	// ターゲット方向に回転
-	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
-
-	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
-	float nearAttackRange = _owner->GetEnemy()->GetNearAttackRange();
-	if (targetDirection.Length() < nearAttackRange)
+	// アニメーションが終了しているとき
+	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 攻撃範囲内なら完了
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
-		return;
+		// 現在の位置がターゲット位置を越しているか判定
+		auto& currentPosition = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+		auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
+		auto toTargetVecLenSq	= (targetPosition - _startPosition).LengthSq();
+		auto toCurrentVecLenSq	= (currentPosition - _startPosition).LengthSq();
+		if (toCurrentVecLenSq >= toTargetVecLenSq)
+		{
+			// ターゲット位置を越しているなら待機状態へ遷移
+			_owner->GetBase().ChangeState("Idle");
+			return;
+		}
+		else
+		{
+			// 越していないなら再度突進攻撃を行う
+			_owner->GetAnimator()->PlayAnimation(
+				u8"AttackCharge",
+				false,
+				1.0f);
+			return;
+		}
 	}
 }
 
 void WyvernChargeAttackState::OnExit()
 {
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
 	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::RemovePositionX);
 }
 #pragma endregion

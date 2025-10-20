@@ -99,3 +99,20 @@ public:
 	bool Judgment() override;
 };
 
+// ‘Ø‹ó‹ß‹——£”»’è
+class WyvernHoverNearJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernHoverNearJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
+};
+
+// ‘Ø‹óI—¹”»’è
+class WyvernHoverEndJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernHoverEndJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	// ”»’è
+	bool Judgment() override;
+};

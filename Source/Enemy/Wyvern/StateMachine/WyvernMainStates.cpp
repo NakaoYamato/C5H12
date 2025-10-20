@@ -695,7 +695,7 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
 		// ‘Ø‹óó‘Ô‚Ö‘JˆÚ
-		_owner->GetBase().ChangeState("Hover");
+		_owner->GetBase().ChangeState("HoverIdle");
 	}
 }
 
@@ -880,23 +880,5 @@ void WyvernDeathState::OnExecute(float elapsedTime)
 void WyvernDeathState::OnExit()
 {
 	_owner->GetAnimator()->SetIsUseRootMotion(false);
-}
-#pragma endregion
-
-#pragma region ‘Ø‹ó
-void WyvernHoverState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"FlyStand",
-		true,
-		0.5f);
-}
-
-void WyvernHoverState::OnExecute(float elapsedTime)
-{
-}
-
-void WyvernHoverState::OnExit()
-{
 }
 #pragma endregion

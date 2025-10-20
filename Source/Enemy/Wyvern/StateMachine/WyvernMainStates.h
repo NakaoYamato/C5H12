@@ -278,18 +278,3 @@ public:
 	void OnExit() override;
 };
 #pragma endregion
-
-#pragma region 滞空
-class WyvernHoverState : public HierarchicalStateBase<WyvernStateMachine>
-{
-public:
-	WyvernHoverState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
-	const char* GetName() const override { return "Hover"; };
-	// 開始処理
-	void OnEnter() override;
-	// 実行処理
-	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
-};
-#pragma endregion

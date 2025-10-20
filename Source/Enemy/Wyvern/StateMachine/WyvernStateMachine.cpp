@@ -3,6 +3,7 @@
 #include "../../Library/Component/Animator.h"
 #include "../WyvernController.h"
 #include "WyvernMainStates.h"
+#include "WyvernHoverState.h"
 
 #include <imgui.h>
 
@@ -33,13 +34,19 @@ WyvernStateMachine::WyvernStateMachine(Actor* owner)
 
 	_stateMachine.RegisterState(std::make_unique<WyvernBackJumpFireBallAttackState>(this));
 	
-	_stateMachine.RegisterState(std::make_unique<WyvernHoverState>(this));
-
 	_stateMachine.RegisterState(std::make_unique<WyvernBackStepState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernPursuitState>(this));
 
 	_stateMachine.RegisterState(std::make_unique<WyvernDamageState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernDeathState>(this));
+
+	_stateMachine.RegisterState(std::make_unique<WyvernHoverIdleState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernHoverToTargetState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernHoverTurnState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernHoverFireBallAttackState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernHoverClawAttackState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernHitFallState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernLandState>(this));
 }
 
 // ŠJnˆ—

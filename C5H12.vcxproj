@@ -310,6 +310,7 @@
     <ClCompile Include="Source\Enemy\Wyvern\Ball\WyvernBallController.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.cpp" />
+    <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernHoverState.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
@@ -548,6 +549,7 @@
     <ClInclude Include="Source\Enemy\Wyvern\Ball\WyvernBallController.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathController.h" />
+    <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernHoverState.h" />
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernMainStates.h" />
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernStateMachine.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />

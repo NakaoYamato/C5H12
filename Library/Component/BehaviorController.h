@@ -14,6 +14,8 @@ public:
 	virtual void Execute(float elapsedTime) {}
 	// GUI•`‰æ
 	virtual void DrawGui() {}
+	// Œ»İ‚ÌÀsƒm[ƒh–¼‚ğæ“¾
+	virtual std::string GetActiveNodeName() const { return ""; }
 };
 
 class BehaviorController : public Component

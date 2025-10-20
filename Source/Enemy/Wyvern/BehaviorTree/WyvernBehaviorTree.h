@@ -18,6 +18,8 @@ public:
 	void Execute(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
+	// 現在の実行ノード名を取得
+	std::string GetActiveNodeName() const { return _activeNode ? _activeNode->GetName() : ""; }
 
 #pragma region アクセサ
 	// ステートマシンを取得

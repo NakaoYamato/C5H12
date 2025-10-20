@@ -24,6 +24,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	// ƒrƒwƒCƒrƒAƒcƒŠ[‚ð\’z
 	auto rootNode = _behaviorTree->GetRoot();
 	{
+		// Œx‰ú
 		auto alertNode = rootNode->AddNode("Alert", 4, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
 		{
 			alertNode->AddNode("AlertToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
@@ -32,25 +33,31 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			alertNode->AddNode("AlertRoar", 3, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernRoarAction>(this, "Roar"));
 		}
 
+		// “{‚èˆÚs
 		auto angryNode = rootNode->AddNode("Angry", 3, SelectRule::Sequence, std::make_shared<WyvernAngryJudgment>(this), nullptr);
 		{
 			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
-			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack", "Hover"));
+			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack", "HoverIdle"));
 		}
 		
-		auto flightNode = rootNode->AddNode("Flight", 2, SelectRule::Priority, std::make_shared<WyvernFlightJudgment>(this), nullptr);
+		// ‘Ø‹ó
+		auto hoverNode = rootNode->AddNode("Hover", 2, SelectRule::Priority, std::make_shared<WyvernFlightJudgment>(this), nullptr);
 		{
-			//flightNode->AddNode("FlightConfront", 2, SelectRule::Non, std::make_shared<>(this), std::make_shared<>(this, "Turn"));
+			hoverNode->AddNode("HoverEnd", 4, SelectRule::Non, std::make_shared<WyvernHoverEndJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Land"));
+			
+			auto nearNode = hoverNode->AddNode("HoverNear", 3, SelectRule::NoDuplicatesRandom, std::make_shared<WyvernHoverNearJudgment>(this), nullptr);
+			{
+				nearNode->AddNode("HoverClaw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverClawAttack", "HoverIdle"));
+				nearNode->AddNode("HoverTurn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverTurn", "HoverIdle"));
+			}
 
-			//auto flightAttackNode = flightNode->AddNode("FlightAttack", 1, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), nullptr);
-			//{
-			//	flightAttackNode->AddNode("FlightClaw", 4, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ClawAttack"));
-			//	flightAttackNode->AddNode("FlightBall", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
-			//}
+			auto farNode = hoverNode->AddNode("HoverBall", 2, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverFireBallAttack", "HoverIdle"));
 
-			flightNode->AddNode("Hover", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "Hover", 2.0f));
+			hoverNode->AddNode("HoverToTarget", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverToTarget", "HoverIdle"));
+			hoverNode->AddNode("HoverIdle", 0, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "HoverIdle", 2.0f));
 		}
 
+		// ’nãí“¬
 		auto battleNode = rootNode->AddNode("Battle", 1, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
 		{
 			auto confrontNode = battleNode->AddNode("Confront", 2, SelectRule::Priority, std::make_shared<WyvernConfrontJudgment>(this), nullptr);
@@ -72,6 +79,8 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			}
 			auto pursuitNode = battleNode->AddNode("Pursuit", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
 		}
+
+		// ’ãŽ@
 		auto scoutNode = rootNode->AddNode("Scout", 0, SelectRule::Priority, nullptr, nullptr);
 		{
 			//auto wanderNode = scoutNode->AddNode("Wander", 1, SelectRule::Random, std::make_shared<WyvernWanderJudgment>(this), nullptr);
@@ -104,7 +113,6 @@ void WyvernBehaviorTree::Execute(float elapsedTime)
 // GUI•`‰æ
 void WyvernBehaviorTree::DrawGui()
 {
-	ImGui::Text("ActiveNode : %s", _activeNode ? _activeNode->GetName().c_str() : "None");
 	// ƒrƒwƒCƒrƒAƒcƒŠ[‚ÌGUI•`‰æ
 	DrawBehaviorTreeGui(_behaviorTree->GetRoot().get());
 }

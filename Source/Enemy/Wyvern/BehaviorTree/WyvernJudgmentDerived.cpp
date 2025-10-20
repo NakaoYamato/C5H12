@@ -113,3 +113,18 @@ bool WyvernWanderJudgment::Judgment()
 {
 	return false;
 }
+
+// ‘Ø‹ó‹ß‹——£”»’è
+bool WyvernHoverNearJudgment::Judgment()
+{
+	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
+	float range = _owner->GetStateMachine()->GetWyvern()->GetFlightNearRange();
+
+	return length < range;
+}
+
+// ‘Ø‹óI—¹”»’è
+bool WyvernHoverEndJudgment::Judgment()
+{
+	return _owner->GetStateMachine()->GetWyvern()->GetFlightTimer() >= _owner->GetStateMachine()->GetWyvern()->GetFlightDuration();
+}

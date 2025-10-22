@@ -46,8 +46,6 @@ public:
 	float GetAngryTimer() const { return _angryTimer; }
 	bool IsAngry() const { return _isAngry; }
 
-	bool IsPerformDamageReaction() const { return _performDamageReaction; }
-
 	void SetATK(float atk) { _ATK = atk; }
 	void SetAttackRange(float attackRange) { _attackRange = attackRange; }
 	void SetNearAttackRange(float nearAttackRange) { _nearAttackRange = nearAttackRange; }
@@ -56,9 +54,13 @@ public:
 	void SetAttackCooldown(float attackCooldown) { _attackCooldown = attackCooldown; }
 	void SetIsAngry(bool isAngry) { _isAngry = isAngry; }
 	void SetAngryDuration(float duration) { _angryDuration = duration; }
-	void SetPerformDamageReaction(bool performDamageReaction) { _performDamageReaction = performDamageReaction; }
 
+	bool IsPerformDamageReaction() const { return _performDamageReaction; }
+	bool IsPerformDownReaction() const { return _performDownReaction; }
+	void SetPerformDamageReaction(bool performDamageReaction) { _performDamageReaction = performDamageReaction; }
+	void SetPerformDownReaction(bool performDownReaction) { _performDownReaction = performDownReaction; }
 	void SetDamageReactionRate(float rate) { _damageReactionRate = rate; }
+	void SetDownDamageReactionRate(float rate) { _downDamageReactionRate = rate; }
 #pragma endregion
 
 protected:
@@ -93,4 +95,10 @@ protected:
     float _damageReactionRate = 2.0f;
     // ダメージカウンター
     float _damageCounter = 0.0f;
+	// ダウンリアクションを行うかどうか
+	bool _performDownReaction = false;
+	// ダウンダメージリアクションの間隔
+	float _downDamageReactionRate = 5.0f;
+	// ダウンダメージカウンター
+	float _downDamageCounter = 0.0f;
 };

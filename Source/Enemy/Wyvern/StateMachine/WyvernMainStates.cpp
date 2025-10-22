@@ -7,41 +7,7 @@
 
 #include <imgui.h>
 
-#pragma region 待機
-void WyvernIdleState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"Idle03Shake",
-		false,
-		0.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
-}
-
-void WyvernIdleState::OnExecute(float elapsedTime)
-{
-	// アニメーションが終了しているとき
-	if (!_owner->GetAnimator()->IsPlayAnimation())
-	{
-		// 再び待機状態
-		_owner->GetBase().ChangeState("Idle");
-	}
-}
-
-void WyvernIdleState::OnExit()
-{
-}
-#pragma endregion
-
 #pragma region 威嚇
-void WyvernThreatState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"IdleCombat",
-		false,
-		1.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
-}
-
 void WyvernThreatState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき
@@ -51,23 +17,9 @@ void WyvernThreatState::OnExecute(float elapsedTime)
 		_owner->GetBase().ChangeState("Idle");
 	}
 }
-
-void WyvernThreatState::OnExit()
-{
-}
 #pragma endregion
 
 #pragma region 咆哮
-// 開始処理
-void WyvernRoarState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"Roar",
-		false,
-		0.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
-}
-
 // 実行処理
 void WyvernRoarState::OnExecute(float elapsedTime)
 {
@@ -78,55 +30,22 @@ void WyvernRoarState::OnExecute(float elapsedTime)
 		_owner->GetBase().ChangeState("Idle");
 	}
 }
-
-// 終了処理
-void WyvernRoarState::OnExit()
-{
-}
 #pragma endregion
 
 #pragma region ターゲットに向く
-namespace WyvernTurnSubStates
-{
-	class TurnSubStateBase : public StateBase<WyvernStateMachine>
-	{
-	public:
-		TurnSubStateBase(WyvernStateMachine* owner, 
-			const std::string& name,
-			const std::string& animationName) : 
-			StateBase(owner),
-			_name(name),
-			_animationName(animationName)
-		{}
-		const char* GetName() const override { return _name.c_str(); }
-		void OnEnter() override
-		{
-			_owner->GetAnimator()->PlayAnimation(
-				_animationName,
-				false,
-				0.2f);
-			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
-		}
-		void OnExecute(float elapsedTime) override {}
-		void OnExit() override {}
-	private:
-		std::string _name;
-		std::string _animationName;
-	};
-}
 WyvernTurnState::WyvernTurnState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernTurnSubStates::TurnSubStateBase>(owner, u8"TurnLeft90", u8"TurnLeft90"));
-	RegisterSubState(std::make_unique<WyvernTurnSubStates::TurnSubStateBase>(owner, u8"TurnLeft180", u8"TurnLeft180"));
-	RegisterSubState(std::make_unique<WyvernTurnSubStates::TurnSubStateBase>(owner, u8"TurnRight90", u8"TurnRight90"));
-	RegisterSubState(std::make_unique<WyvernTurnSubStates::TurnSubStateBase>(owner, u8"TurnRight180", u8"TurnRight180"));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft90", u8"TurnLeft90", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft180", u8"TurnLeft180", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight90", u8"TurnRight90", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight180", u8"TurnRight180", 0.5f, false, true));
 }
 
 void WyvernTurnState::OnEnter()
 {
+	_owner->GetAnimator()->SetIsRemoveRootMovement(true);
 	_rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
@@ -206,15 +125,6 @@ void WyvernTurnState::OnExit()
 #pragma endregion
 
 #pragma region ターゲットに近づく
-void WyvernToTargetState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"WalkForward",
-		false,
-		1.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
-}
-
 void WyvernToTargetState::OnExecute(float elapsedTime)
 {
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
@@ -236,13 +146,16 @@ void WyvernToTargetState::OnExecute(float elapsedTime)
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 		_owner->GetBase().ChangeState("Idle");
 }
-
-void WyvernToTargetState::OnExit()
-{
-}
 #pragma endregion
 
 #pragma region 噛みつき攻撃
+WyvernBiteAttackState::WyvernBiteAttackState(WyvernStateMachine* owner) : 
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteLeft", u8"AttackBiteLeft", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteRight", u8"AttackBiteRight", 0.5f, false, true));
+}
 void WyvernBiteAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
@@ -254,22 +167,13 @@ void WyvernBiteAttackState::OnEnter()
 	if (crossY > 0.0f)
 	{
 		// 右に攻撃
-		// アニメーション再生
-		_owner->GetAnimator()->PlayAnimation(
-			u8"AttackBiteLeft",
-			false,
-			0.5f);
+		ChangeSubState(u8"AttackBiteLeft");
 	}
 	else
 	{
 		// 左に攻撃
-		// アニメーション再生
-		_owner->GetAnimator()->PlayAnimation(
-			u8"AttackBiteRight",
-			false,
-			0.5f);
+		ChangeSubState(u8"AttackBiteRight");
 	}
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
 }
 void WyvernBiteAttackState::OnExecute(float elapsedTime)
 {
@@ -282,13 +186,20 @@ void WyvernBiteAttackState::OnExecute(float elapsedTime)
 }
 void WyvernBiteAttackState::OnExit()
 {
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 
 #pragma region かぎ爪攻撃
+WyvernClawAttackState::WyvernClawAttackState(WyvernStateMachine* owner) :
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistLeft", u8"AttackWingFistLeft", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistRight", u8"AttackWingFistRight", 0.5f, false, true));
+}
 void WyvernClawAttackState::OnEnter()
 {
+	auto model = _owner->GetEnemy()->GetActor()->GetModel().lock();
 	// ターゲット座標から左前右のどこに攻撃するか判定
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
@@ -298,14 +209,9 @@ void WyvernClawAttackState::OnEnter()
 	if (crossY > 0.0f)
 	{
 		// 右に攻撃
-		// アニメーション再生
-		_owner->GetAnimator()->PlayAnimation(
-			u8"AttackWingFistRight",
-			false,
-			0.5f);
+		ChangeSubState(u8"AttackWingFistRight");
 
 		// 手のノードインデックスを取得
-		auto model = _owner->GetEnemy()->GetActor()->GetModel().lock();
 		_handNodeIndex = model->GetNodeIndex("R Hand");
 		// ターゲット位置設定
 		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&_owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
@@ -321,14 +227,9 @@ void WyvernClawAttackState::OnEnter()
 	else
 	{
 		// 左に攻撃
-		// アニメーション再生
-		_owner->GetAnimator()->PlayAnimation(
-			u8"AttackWingFistLeft",
-			false,
-			0.5f);
+		ChangeSubState(u8"AttackWingFistLeft");
 
 		// 手のノードインデックスを取得
-		auto model = _owner->GetEnemy()->GetActor()->GetModel().lock();
 		_handNodeIndex = model->GetNodeIndex("L Hand");
 		// ターゲット位置設定
 		DirectX::XMMATRIX WyvernTransform = DirectX::XMLoadFloat4x4(&_owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
@@ -410,10 +311,16 @@ void WyvernClawAttackState::OnExecute(float elapsedTime)
 }
 void WyvernClawAttackState::OnExit()
 {
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 #pragma region 尻尾攻撃
+WyvernTailAttackState::WyvernTailAttackState(WyvernStateMachine* owner) :
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailLeft", u8"AttackTailLeft", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailRight", u8"AttackTailRight", 0.5f, false, true));
+}
 void WyvernTailAttackState::OnEnter()
 {
 	// ターゲット座標から左前右のどこに攻撃するか判定
@@ -426,21 +333,14 @@ void WyvernTailAttackState::OnEnter()
 	{
 		// 右に攻撃
 		// アニメーション再生
-		_owner->GetAnimator()->PlayAnimation(
-			u8"AttackTailRight",
-			false,
-			0.5f);
+		ChangeSubState(u8"AttackTailRight");
 	}
 	else
 	{
 		// 左に攻撃
 		// アニメーション再生
-		_owner->GetAnimator()->PlayAnimation(
-			u8"AttackTailLeft",
-			false,
-			0.5f);
+		ChangeSubState(u8"AttackTailLeft");
 	}
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
 }
 void WyvernTailAttackState::OnExecute(float elapsedTime)
 {
@@ -453,18 +353,13 @@ void WyvernTailAttackState::OnExecute(float elapsedTime)
 }
 void WyvernTailAttackState::OnExit()
 {
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
 }
 #pragma endregion
 
 #pragma region 突進攻撃
 void WyvernChargeAttackState::OnEnter()
 {
-	_owner->GetAnimator()->PlayAnimation(
-		u8"AttackCharge",
-		false,
-		1.0f);
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
+	WyvernHSB::OnEnter();
 	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::UseOffset);
 	_startPosition = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 }
@@ -504,14 +399,6 @@ void WyvernChargeAttackState::OnExit()
 #pragma endregion
 
 #pragma region 後退
-void WyvernBackStepState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"WalkBack",
-		false,
-		0.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
-}
 void WyvernBackStepState::OnExecute(float elapsedTime)
 {
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
@@ -526,21 +413,9 @@ void WyvernBackStepState::OnExecute(float elapsedTime)
 		_owner->GetBase().ChangeState("Idle");
 	}
 }
-void WyvernBackStepState::OnExit()
-{
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
-}
 #pragma endregion
 
 #pragma region ブレス
-void WyvernBreathAttackState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"AttackFireBreath",
-		false,
-		1.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
-}
 void WyvernBreathAttackState::OnExecute(float elapsedTime)
 {
 	// ブレス処理
@@ -582,25 +457,11 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 void WyvernBreathAttackState::OnExit()
 {
 	// ブレスのエフェクトを削除
-	if (_fireBreathActor.lock())
-	{
-		_fireBreathActor.lock()->Remove();
-	}
-
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
+	_fireBreathActor.reset();
 }
 #pragma endregion
 
 #pragma region 火球
-void WyvernFireBallAttackState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"AttackFireBall",
-		false,
-		1.0f);
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
-}
-
 void WyvernFireBallAttackState::OnExecute(float elapsedTime)
 {
 	// 火球処理
@@ -648,15 +509,6 @@ void WyvernFireBallAttackState::OnExit()
 #pragma endregion
 
 #pragma region バックジャンプ火球
-void WyvernBackJumpFireBallAttackState::OnEnter()
-{
-	_owner->GetAnimator()->PlayAnimation(
-		u8"AttackBackJumpBall",
-		false,
-		1.0f);
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
-}
-
 void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 {
 	// 火球処理
@@ -870,6 +722,24 @@ void WyvernDamageState::OnExit()
 	}
 
 	_owner->GetAnimator()->SetIsUseRootMotion(false);
+}
+#pragma endregion
+
+#pragma region ダウン
+namespace WyvernDownSubState
+{
+
+}
+void WyvernDownState::OnEnter()
+{
+}
+
+void WyvernDownState::OnExecute(float elapsedTime)
+{
+}
+
+void WyvernDownState::OnExit()
+{
 }
 #pragma endregion
 

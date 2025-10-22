@@ -76,3 +76,61 @@ private:
 	bool		_callFireBall = false;
 	bool		_callLookAtTarget = false;
 };
+
+#pragma region ベースステート
+class WyvernHSB : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernHSB(WyvernStateMachine* stateMachine,
+		const std::string& animationName,
+		float blendSeconds,
+		bool isLoop,
+		bool isUsingRootMotion) :
+		HierarchicalStateBase(stateMachine),
+		_animationName(animationName),
+		_blendSeconds(blendSeconds),
+		_isLoop(isLoop),
+		_isUsingRootMotion(isUsingRootMotion)
+	{
+	}
+	~WyvernHSB() override {}
+	virtual void OnEnter() override;
+	virtual void OnExecute(float elapsedTime) override {}
+	virtual void OnExit() override {}
+private:
+	std::string _animationName = "";
+	float		_blendSeconds = 0.2f;
+	bool		_isLoop = false;
+	bool		_isUsingRootMotion = false;
+};
+
+// アニメーション再生のみの簡易サブステート
+class WyvernSSB : public StateBase<WyvernStateMachine>
+{
+public:
+	WyvernSSB(WyvernStateMachine* stateMachine,
+		const std::string& name,
+		const std::string& animationName,
+		float blendSeconds,
+		bool isLoop,
+		bool isUsingRootMotion) :
+		StateBase(stateMachine),
+		_name(name),
+		_animationName(animationName),
+		_blendSeconds(blendSeconds),
+		_isLoop(isLoop),
+		_isUsingRootMotion(isUsingRootMotion)
+	{
+	}
+	const char* GetName() const override { return _name.c_str(); }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override {}
+	void OnExit() override {}
+private:
+	std::string _name = "";
+	std::string _animationName = "";
+	float		_blendSeconds = 0.2f;
+	bool		_isLoop = false;
+	bool		_isUsingRootMotion = false;
+};
+#pragma endregion

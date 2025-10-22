@@ -72,6 +72,9 @@ public:
 	// オブジェクトの配置情報を取得
 	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
 
+	// Mipmap用SRVを取得
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetMipmapBaseColorSRV() { return _mipmapBaseColorSRV; }
+
     // 書き出し
     void SaveToFile(ID3D11Device* device, ID3D11DeviceContext* dc, const std::string& path);
     // 読み込み
@@ -102,6 +105,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadBaseColorSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadNormalSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadParameterSRV;
+
+	// Mipmap用SRV
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _mipmapBaseColorSRV;
 #pragma endregion
     // マテリアルマップ(RT0:BaseColor,RT1:Normal,RT2:Parameter{R：高さ、G：草、B：テクスチャのハイトマップ})
     std::unique_ptr<FrameBuffer> _materialMapFB;

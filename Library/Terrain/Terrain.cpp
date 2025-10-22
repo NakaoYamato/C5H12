@@ -133,6 +133,9 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
                     ToWString(resultPath).c_str());
             }
 
+            ImGui::Text(u8"ミップマップ");
+            ImGui::Image(_mipmapBaseColorSRV.Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+
             ImGui::TreePop();
         }
         if (ImGui::TreeNode(u8"法線"))
@@ -418,6 +421,10 @@ void Terrain::LoadFromFile(ID3D11Device* device, const std::string& path)
             _baseColorTexturePath.c_str(),
             _loadBaseColorSRV.ReleaseAndGetAddressOf(),
             nullptr);
+        // Mipmapの読み込み
+		GpuResourceManager::LoadMipMapTextureFromFile(device,
+			_baseColorTexturePath.c_str(),
+			_mipmapBaseColorSRV.ReleaseAndGetAddressOf());
     }
     if (!_normalTexturePath.empty())
     {

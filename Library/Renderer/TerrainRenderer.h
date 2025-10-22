@@ -140,4 +140,6 @@ private:
 	bool _isWireFrame = false;
     // GUI描画フラグ
 	bool _isDrawingGui = false;
+    // Mipmapを使用するか
+	bool _isUsingMipmap = false;
 };

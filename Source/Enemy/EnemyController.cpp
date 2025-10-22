@@ -21,11 +21,18 @@ void EnemyController::Start()
 			[&](float damage, Vector3 hitPosition) -> void
 			{
 				_damageCounter += damage;
+				_downDamageCounter += damage;
 				if (_damageCounter >= _damageReactionRate)
 				{
 					// ダメージリアクションを行う
 					SetPerformDamageReaction(true);
 					_damageCounter = 0.0f;
+				}
+				if (_downDamageCounter >= _downDamageReactionRate)
+				{
+					// ダウンリアクションを行う
+					SetPerformDownReaction(true);
+					_downDamageCounter = 0.0f;
 				}
 			}
 		);

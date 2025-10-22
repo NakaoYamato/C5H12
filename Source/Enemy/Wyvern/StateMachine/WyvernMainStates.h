@@ -4,52 +4,60 @@
 #include "../Ball/WyvernBallActor.h"
 
 #pragma region 待機
-class WyvernIdleState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernIdleState final : public WyvernHSB
 {
 public:
-	WyvernIdleState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernIdleState(WyvernStateMachine* owner) : 
+		WyvernHSB(
+			owner,
+			u8"Idle03Shake",
+			0.5f,
+			false,
+			true
+			) {}
 	const char* GetName() const override { return "Idle"; };
-	// 開始処理
-	void OnEnter() override;
-	// 実行処理
-	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
 };
 #pragma endregion
 
 #pragma region 威嚇
-class WyvernThreatState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernThreatState final : public WyvernHSB
 {
 public:
-	WyvernThreatState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernThreatState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"IdleCombat",
+			1.5f,
+			false,
+			false
+		) {}
 	const char* GetName() const override { return "Threat"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
 };
 #pragma endregion
 
 #pragma region 咆哮
-class WyvernRoarState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernRoarState final : public WyvernHSB
 {
 public:
-	WyvernRoarState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernRoarState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"Roar",
+			1.5f,
+			false,
+			false
+		) {
+	}
 	const char* GetName() const override { return "Roar"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
 };
 #pragma endregion
 
 #pragma region ターゲットに向く
-class WyvernTurnState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernTurnState final : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
 	WyvernTurnState(WyvernStateMachine* owner);
@@ -66,27 +74,29 @@ private:
 #pragma endregion
 
 #pragma region ターゲットに近づく
-class WyvernToTargetState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernToTargetState final : public WyvernHSB
 {
 public:
 	WyvernToTargetState(WyvernStateMachine* owner) :
-		HierarchicalStateBase(owner) {
+		WyvernHSB(
+			owner,
+			u8"WalkForward",
+			1.5f,
+			false,
+			true
+		) {
 	}
 	const char* GetName() const override { return "ToTarget"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
 };
 #pragma endregion
 
 #pragma region 噛みつき攻撃
-class WyvernBiteAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernBiteAttackState final : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
-	WyvernBiteAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernBiteAttackState(WyvernStateMachine* owner);
 	const char* GetName() const override { return "BiteAttack"; };
 	// 開始処理
 	void OnEnter() override;
@@ -98,10 +108,10 @@ public:
 #pragma endregion
 
 #pragma region かぎ爪攻撃
-class WyvernClawAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernClawAttackState final : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
-	WyvernClawAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernClawAttackState(WyvernStateMachine* owner);
 	const char* GetName() const override { return "ClawAttack"; };
 	// 開始処理
 	void OnEnter() override;
@@ -127,10 +137,10 @@ private:
 #pragma endregion
 
 #pragma region 尻尾攻撃
-class WyvernTailAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernTailAttackState final : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
-	WyvernTailAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernTailAttackState(WyvernStateMachine* owner);
 	const char* GetName() const override { return "TailAttack"; };
 	// 開始処理
 	void OnEnter() override;
@@ -142,10 +152,18 @@ public:
 #pragma endregion
 
 #pragma region 突進攻撃
-class WyvernChargeAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernChargeAttackState final : public WyvernHSB
 {
 public:
-	WyvernChargeAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernChargeAttackState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"AttackCharge",
+			1.5f,
+			false,
+			true
+		) {
+	}
 	const char* GetName() const override { return "ChargeAttack"; };
 	// 開始処理
 	void OnEnter() override;
@@ -159,28 +177,38 @@ private:
 #pragma endregion
 
 #pragma region 後退
-class WyvernBackStepState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernBackStepState final : public WyvernHSB
 {
 public:
-	WyvernBackStepState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernBackStepState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"WalkBack",
+			1.5f,
+			false,
+			true
+		) {
+	}
 	const char* GetName() const override { return "BackStep"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
 };
 #pragma endregion
 
 #pragma region ブレス
-class WyvernBreathAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernBreathAttackState final : public WyvernHSB
 {
 public:
-	WyvernBreathAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernBreathAttackState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"AttackFireBreath",
+			1.5f,
+			false,
+			true
+		) {
+	}
 	const char* GetName() const override { return "BreathAttack"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
 	// 終了処理
@@ -193,13 +221,19 @@ private:
 #pragma endregion
 
 #pragma region 火球
-class WyvernFireBallAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernFireBallAttackState final : public WyvernHSB
 {
 public:
-	WyvernFireBallAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernFireBallAttackState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"AttackFireBall",
+			1.5f,
+			false,
+			true
+		) {
+	}
 	const char* GetName() const override { return "BallAttack"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
 	// 終了処理
@@ -211,13 +245,19 @@ private:
 #pragma endregion
 
 #pragma region バックジャンプ火球
-class WyvernBackJumpFireBallAttackState : public HierarchicalStateBase<WyvernStateMachine>
+class WyvernBackJumpFireBallAttackState final : public WyvernHSB
 {
 public:
-	WyvernBackJumpFireBallAttackState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernBackJumpFireBallAttackState(WyvernStateMachine* owner) :
+		WyvernHSB(
+			owner,
+			u8"AttackBackJumpBall",
+			1.5f,
+			false,
+			true
+		) {
+	}
 	const char* GetName() const override { return "BackJumpBallAttack"; };
-	// 開始処理
-	void OnEnter() override;
 	// 実行処理
 	void OnExecute(float elapsedTime) override;
 	// 終了処理
@@ -263,6 +303,21 @@ private:
 
 	// アニメーションの回転を適用するかどうか
 	bool _applyRotation = false;
+};
+#pragma endregion
+
+#pragma region ダウン
+class WyvernDownState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernDownState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	const char* GetName() const override { return "Down"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
 };
 #pragma endregion
 

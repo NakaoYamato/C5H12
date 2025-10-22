@@ -120,11 +120,19 @@ void WyvernStateMachine::Execute(float elapsedTime)
     }
 
     // 被弾処理
-	if (_enemy->IsPerformDamageReaction())
+	if (_enemy->IsPerformDamageReaction() && _stateMachine.GetStateName() != "Down")
 	{
         // 被弾遷移
 		_stateMachine.ChangeState("Damage");
 		_enemy->SetPerformDamageReaction(false);
+	}
+	// ダウン処理
+	if (_enemy->IsPerformDownReaction())
+	{
+		// ダウン遷移
+		_stateMachine.ChangeState("Down");
+		_enemy->SetPerformDamageReaction(false);
+		_enemy->SetPerformDownReaction(false);
 	}
 
     // 死亡処理
@@ -263,3 +271,17 @@ const char* WyvernStateMachine::GetSubStateName()
 
     return _stateMachine.GetState()->GetSubStateName();
 }
+
+#pragma region ベースステート
+void WyvernHSB::OnEnter()
+{
+	_owner->GetAnimator()->PlayAnimation(_animationName, _isLoop, _blendSeconds);
+	_owner->GetAnimator()->SetIsUseRootMotion(_isUsingRootMotion);
+}
+
+void WyvernSSB::OnEnter()
+{
+	_owner->GetAnimator()->SetIsUseRootMotion(_isUsingRootMotion);
+	_owner->GetAnimator()->PlayAnimation(_animationName, _isLoop, _blendSeconds);
+}
+#pragma endregion

@@ -476,6 +476,81 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 	return true;
 }
 
+// MipMapテクスチャ読み込み
+bool GpuResourceManager::LoadMipMapTextureFromFile(ID3D11Device* device,
+	const wchar_t* filename,
+	ID3D11ShaderResourceView** shaderResourceView)
+{
+	DirectX::ScratchImage scratchImage;
+	DirectX::TexMetadata metadata;
+	HRESULT hr;
+
+	// DDSファイルを ScratchImage に読み込む
+	hr = DirectX::LoadFromDDSFile(
+		filename,
+		DirectX::DDS_FLAGS_NONE,
+		&metadata,
+		scratchImage
+	);
+
+	if (FAILED(hr))
+	{
+		// DDSの読み込みに失敗
+		return false;
+	}
+
+	// ミップマップが1レベル（存在しない）場合のみ、ミップマップを生成する
+	if (metadata.mipLevels == 1)
+	{
+		DirectX::ScratchImage mipChain;
+
+		// GenerateMipMaps を呼び出してミップマップチェーンを生成
+		hr = DirectX::GenerateMipMaps(
+			scratchImage.GetImages(),
+			scratchImage.GetImageCount(),
+			metadata,
+			DirectX::TEX_FILTER_DEFAULT, // デフォルトのフィルター (ボックスフィルター)
+			0,                           // 生成するレベル数 (0 = フルチェーン)
+			mipChain                     // 結果を格納する ScratchImage
+		);
+
+		if (FAILED(hr))
+		{
+			// ミップマップ生成失敗
+			return false;
+		}
+
+		// 元のイメージをミップマップ付きのイメージで置き換える
+		scratchImage = std::move(mipChain);
+		metadata = scratchImage.GetMetadata();
+	}
+
+	// D3Dリソースを作成
+	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+	hr = DirectX::CreateTexture(
+		device,
+		scratchImage.GetImages(),
+		scratchImage.GetImageCount(),
+		metadata,
+		resource.GetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		// テクスチャリソース作成失敗
+		return false;
+	}
+
+	// SRV (Shader Resource View) を作成
+	hr = device->CreateShaderResourceView(
+		resource.Get(),
+		nullptr, // デフォルトのビューデスク
+		shaderResourceView    // 結果のSRV
+	);
+
+	return true;
+}
+
 // ダミーテクスチャ作成
 void GpuResourceManager::MakeDummyTexture(ID3D11Device* device,
 	ID3D11ShaderResourceView** shaderResouceView,

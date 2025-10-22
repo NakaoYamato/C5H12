@@ -348,6 +348,7 @@ void TerrainRenderer::DrawGui()
 			ImGui::Checkbox(u8"静的描画", &_isStaticDraw);
 			ImGui::Checkbox(u8"草を描画", &_isDrawingGrass);
 			ImGui::Checkbox(u8"ワイヤーフレーム", &_isWireFrame);
+			ImGui::Checkbox(u8"Mipmapを使用", &_isUsingMipmap);
 			ImGui::Separator();
 
             if (ImGui::TreeNode(u8"定数バッファ"))
@@ -424,6 +425,9 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
+		// Mipmapを使用するかどうか設定
+        if (_isUsingMipmap)
+			srvs[0] = drawInfo.terrain->GetMipmapBaseColorSRV().Get();
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
         dc->DSSetShaderResources(0, _countof(srvs), srvs);
         // 頂点バッファとインデックスバッファを設定
@@ -511,6 +515,9 @@ void TerrainRenderer::RenderDynamic(const RenderContext& rc, bool writeGBuffer)
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
+        // Mipmapを使用するかどうか設定
+        if (_isUsingMipmap)
+            srvs[0] = drawInfo.terrain->GetMipmapBaseColorSRV().Get();
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
         dc->DSSetShaderResources(0, _countof(srvs), srvs);
         // 頂点バッファとインデックスバッファを設定
@@ -561,6 +568,9 @@ void TerrainRenderer::RenderStatic(const RenderContext& rc, bool writeGBuffer)
             drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
             drawInfo.terrain->GetStreamOutSRV().Get(),
         };
+        // Mipmapを使用するかどうか設定
+        if (_isUsingMipmap)
+            srvs[0] = drawInfo.terrain->GetMipmapBaseColorSRV().Get();
         dc->VSSetShaderResources(0, _countof(srvs), srvs);
         dc->PSSetShaderResources(0, _countof(srvs), srvs);
 

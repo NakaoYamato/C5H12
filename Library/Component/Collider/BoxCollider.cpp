@@ -21,7 +21,7 @@ void BoxCollider::DebugRender(const RenderContext& rc)
 
 	Debug::Renderer::DrawBox(
 		GetPosition().TransformCoord(GetActor()->GetTransform().GetMatrix()),
-		GetActor()->GetTransform().GetRotation(),
+		GetActor()->GetTransform().GetAngle(),
 		GetHalfSize(),
 		IsTrigger() ? Vector4::Blue : Vector4::Green);
 }

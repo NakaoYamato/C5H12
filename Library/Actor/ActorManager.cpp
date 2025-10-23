@@ -1,5 +1,6 @@
 #include "ActorManager.h"
 
+#include <functional>
 #include <imgui.h>
 
 #include "../Algorithm/Converter.h"
@@ -172,6 +173,34 @@ void ActorManager::DelayedRender(RenderContext& rc)
 // Gui描画
 void ActorManager::DrawGui()
 {
+	// アクターのGUI表示
+	std::function<void(std::shared_ptr<Actor>)>DrawActorGui = [&](std::shared_ptr<Actor> actor) -> void
+		{
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
+			// 子供がいるなら矢印表示
+			if (actor->GetChildren().size() > 0)
+				nodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+			
+			if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
+			{
+				actor->SetIsDrawingHierarchy(false);
+
+				// ダブルクリックで選択
+				if (ImGui::IsItemClicked())
+				{
+					_showGuiObj = actor->GetName();
+				}
+
+				// 子供の表示
+				for (auto& child : actor->GetChildren())
+				{
+					DrawActorGui(child);
+				}
+
+				ImGui::TreePop();
+			}
+		};
+
 	// 登録しているオブジェクトの一覧
 	ImGui::SetNextWindowBgAlpha(0.0f);
 	ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
@@ -183,19 +212,10 @@ void ActorManager::DrawGui()
 			{
 				for (auto& actor : _updateActors[i])
 				{
-					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
-					if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
-					{
-						actor->SetIsDrawingHierarchy(false);
+					// 親が存在するなら親の方で表示されているのでスキップ
+					if (actor->GetParent()) break;
 
-						// ダブルクリックで選択
-						if (ImGui::IsItemClicked())
-						{
-							_showGuiObj = actor->GetName();
-						}
-
-						ImGui::TreePop();
-					}
+					DrawActorGui(actor);
 				}
 
 				ImGui::TreePop();
@@ -213,7 +233,16 @@ void ActorManager::DrawGui()
 		Actor* object = FindByName(_showGuiObj).get();
 		if (object)
 		{
-			ImGui::Text(_showGuiObj.c_str());
+			// 親の名前表示
+			if (object->GetParent())
+			{
+				ImGui::Text(object->GetParent()->GetName());
+				ImGui::Text((u8"└" + _showGuiObj).c_str());
+			}
+			else
+			{
+				ImGui::Text(_showGuiObj.c_str());
+			}
 
 			object->SetIsDrawingHierarchy(true);
 

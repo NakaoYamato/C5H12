@@ -37,6 +37,12 @@ void Actor::Deleted()
 	}
 
 	OnDeleted();
+
+	// 子供の削除
+	for (std::shared_ptr<Actor>& child : _children)
+	{
+		child->Deleted();
+	}
 }
 /// 開始処理
 void Actor::Start()
@@ -306,6 +312,32 @@ std::weak_ptr<Model> Actor::LoadModel(const char* filename)
 	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
 	return _model;
 }
+#pragma region 親子関係
+/// 親設定
+void Actor::SetParent(Actor* parent)
+{
+	if (parent)
+	{
+		_parent = parent;
+		// 親の子供に自分がいるか確認
+		for (const std::shared_ptr<Actor>& child : parent->_children)
+		{
+			if (child.get() == this)
+			{
+				return;
+			}
+		}
+		// 親の子リストに自分を追加
+		parent->AddChild(shared_from_this());
+	}
+}
+/// 子追加
+void Actor::AddChild(std::shared_ptr<Actor> child)
+{
+	_children.emplace_back(child);
+	child->SetParent(this);
+}
+#pragma endregion
 #pragma region 仮想関数
 /// モデルのトランスフォーム更新
 void Actor::UpdateModelTransform()
@@ -319,7 +351,7 @@ void Actor::UpdateModelTransform()
 /// トランスフォーム更新
 void Actor::UpdateTransform()
 {
-	_transform.UpdateTransform(nullptr);
+	_transform.UpdateTransform(_parent ? &_parent->GetTransform().GetMatrix() : nullptr);
 }
 /// ギズモ描画
 void Actor::DrawGuizmo()

@@ -14,7 +14,7 @@ void WeaponActor::OnCreate()
 void WeaponActor::OnStart()
 {
 	// 親のモデルコライダーを取得
-	_ownerModelCollider = _owner->GetCollider<ModelCollider>();
+	_ownerModelCollider = GetParent()->GetCollider<ModelCollider>();
 }
 // 遅延更新時処理
 void WeaponActor::OnLateUpdate(float elapsedTime)

@@ -22,7 +22,8 @@ public:
 	// 初期設定
 	void Initialize(Actor* owner, const ModelResource::Node* parentNode)
 	{
-		_owner = owner;
+		// 親情報を保存
+		SetParent(owner);
 		_parentNode = parentNode;
 	}
 protected:
@@ -36,7 +37,6 @@ protected:
 	void DrawGuizmo() override;
 
 protected:
-	Actor* _owner = nullptr;
 	const ModelResource::Node* _parentNode = nullptr;
 	std::weak_ptr<ModelCollider>	_ownerModelCollider; // 親のモデルコライダー
 	std::weak_ptr<LocusRenderer>	_locusRenderer; // 軌跡レンダラー

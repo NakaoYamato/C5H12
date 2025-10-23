@@ -13,7 +13,7 @@ void WyvernBallController::Start()
 	_ballCollider = GetActor()->GetCollider<SphereCollider>();
 	_effectController = GetActor()->GetComponent<EffectController>();
 	auto& transform = GetActor()->GetTransform();
-	_effectController.lock()->Play(0, transform.GetWorldPosition(), transform.GetRotation());
+	_effectController.lock()->Play(0, transform.GetWorldPosition(), transform.GetAngle());
 }
 
 // 削除処理
@@ -46,7 +46,7 @@ void WyvernBallController::Update(float elapsedTime)
 	if (_ballTime <= 0.0f)
 	{
 		// 火球の進む時間が尽きたら消滅
-		_effectController.lock()->Play(1, transform.GetWorldPosition(), transform.GetRotation());
+		_effectController.lock()->Play(1, transform.GetWorldPosition(), transform.GetAngle());
 		_isExploded = true;
 		// コライダーを大きくする
 		_ballCollider.lock()->SetRadius(3.0f);
@@ -76,7 +76,7 @@ void WyvernBallController::OnContactEnter(CollisionData& collisionData)
 			{
 				// ダメージを与えたらヒットエフェクト再生
 				auto& transform = GetActor()->GetTransform();
-				_effectController.lock()->Play(1, transform.GetWorldPosition(), transform.GetRotation());
+				_effectController.lock()->Play(1, transform.GetWorldPosition(), transform.GetAngle());
 				_isExploded = true;
 
 				// コライダーを無効化

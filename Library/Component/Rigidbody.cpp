@@ -7,7 +7,7 @@
 // 開始処理
 void Rigidbody::Start()
 {
-	_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
+	_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetAngle());
 	DirectX::XMStoreFloat4x4(&_inertiaTensor, DirectX::XMMatrixIdentity());
 }
 // 更新処理
@@ -163,7 +163,7 @@ void Rigidbody::UpdatePosition(float deltaTime)
 		DirectX::XMVECTOR q = DirectX::XMVectorScale(wt, sinf(angle * 0.5f));
 		q.m128_f32[3] = cosf(angle * 0.5f);
 
-		_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetRotation());
+		_orientation = Quaternion::FromRollPitchYaw(this->GetActor()->GetTransform().GetAngle());
 		DirectX::XMStoreFloat4(&_orientation, DirectX::XMQuaternionMultiply(DirectX::XMLoadFloat4(&_orientation), q));
 		this->GetActor()->GetTransform().SetAngle(Quaternion::ToRollPitchYaw(_orientation));
 	}

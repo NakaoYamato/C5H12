@@ -38,7 +38,7 @@ void PlayerNonCombatTurnState::OnEnter()
 	float angle =
 		DirectX::XMConvertToDegrees(
 			atan2f(movement.x, movement.y)
-			- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+			- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 		);
 	// Šp“x‚ğ0~360“x‚É³‹K‰»
 	angle = fmodf(angle, 360.0f);
@@ -72,7 +72,7 @@ void PlayerNonCombatTurnState::OnExit()
 	Vector3 angle{};
 	// z’l‚ğy‚Éİ’è
 	angle.y = q.ToRollPitchYaw().z;
-	transform.AddRotation(angle);
+	transform.AddAngle(angle);
 	transform.UpdateTransform(nullptr);
 	_owner->GetAnimator()->SetIsRemoveRootMovement(false);
 }
@@ -105,7 +105,7 @@ namespace NonCombatWalkSubState
 				float angle =
 					DirectX::XMConvertToDegrees(
 						atan2f(movement.x, movement.y)
-						- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+						- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 					);
 				// Šp“x‚ğ0~360“x‚É³‹K‰»
 				angle = fmodf(angle, 360.0f);
@@ -157,7 +157,7 @@ namespace NonCombatWalkSubState
 				float angle =
 					DirectX::XMConvertToDegrees(
 						atan2f(movement.x, movement.y)
-						- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+						- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 					);
 				// Šp“x‚ğ0~360“x‚É³‹K‰»
 				angle = fmodf(angle, 360.0f);
@@ -317,7 +317,7 @@ namespace NonCombatRunSubState
 				float angle =
 					DirectX::XMConvertToDegrees(
 						atan2f(movement.x, movement.y)
-						- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+						- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 					);
 				// Šp“x‚ğ0~360“x‚É³‹K‰»
 				angle = fmodf(angle, 360.0f);
@@ -397,7 +397,7 @@ namespace NonCombatRunSubState
 			Vector3 angle{};
 			// z’l‚ğy‚Éİ’è
 			angle.y = q.ToRollPitchYaw().z;
-			transform.AddRotation(angle);
+			transform.AddAngle(angle);
 			transform.UpdateTransform(nullptr);
 		}
 	};
@@ -431,7 +431,7 @@ namespace NonCombatRunSubState
 			Vector3 angle{};
 			// z’l‚ğy‚Éİ’è
 			angle.y = q.ToRollPitchYaw().z;
-			transform.AddRotation(angle);
+			transform.AddAngle(angle);
 			transform.UpdateTransform(nullptr);
 		}
 	};
@@ -518,7 +518,7 @@ void PlayerNonCombatEvadeState::OnEnter()
 		float angle =
 			DirectX::XMConvertToDegrees(
 				atan2f(movement.x, movement.y)
-				- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+				- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 			);
 		// Šp“x‚ğ0~360“x‚É³‹K‰»
 		angle = fmodf(angle, 360.0f);
@@ -593,7 +593,7 @@ void PlayerNonCombatHitState::OnEnter()
 	float angle =
 		DirectX::XMConvertToDegrees(
 			atan2f(hitDirection.x, hitDirection.z)
-			- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+			- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 		);
 	// Šp“x‚ğ0~360“x‚É³‹K‰»
 	angle = fmodf(angle, 360.0f);
@@ -657,7 +657,7 @@ void PlayerNonCombatHitKnockDownState::OnEnter()
 	float angle =
 		DirectX::XMConvertToDegrees(
 			atan2f(hitDirection.x, hitDirection.z)
-			- _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+			- _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
 		);
 	// Šp“x‚ğ0~360“x‚É³‹K‰»
 	angle = fmodf(angle, 360.0f);

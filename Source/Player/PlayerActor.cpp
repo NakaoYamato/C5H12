@@ -163,19 +163,3 @@ void PlayerActor::OnCreate()
         camera->AddComponent<PlayerCameraController>(this);
 	}
 }
-
-// íœˆ—
-void PlayerActor::OnDeleted()
-{
-	if (_swordActor.lock())
-	{
-		// Œ•íœ
-        _swordActor.lock()->Remove();
-	}
-	if (_shieldActor.lock())
-	{
-		// ‚íœ
-		_shieldActor.lock()->Remove();
-	}
-}
-

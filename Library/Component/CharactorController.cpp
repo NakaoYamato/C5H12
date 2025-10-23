@@ -249,7 +249,7 @@ void CharactorController::UpdateRotation(float deltaTime, const Vector2& vec)
 	if (vec.x == 0.0f && vec.y == 0.0f)
 		return;
 
-	Vector3 angle = this->GetActor()->GetTransform().GetRotation();
+	Vector3 angle = this->GetActor()->GetTransform().GetAngle();
 	float speed = _rotationSpeed * deltaTime;
 
 	// 進行ベクトルを単位ベクトル化

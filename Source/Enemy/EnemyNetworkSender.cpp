@@ -26,7 +26,7 @@ Network::CharacterMove EnemyNetworkSender::GetMoveData()
 	moveData.uniqueID = 0;
 	moveData.position = GetActor()->GetTransform().GetPosition();
 	moveData.target = combatStatus->GetTargetPosition();
-	moveData.angleY = GetActor()->GetTransform().GetRotation().y;
+	moveData.angleY = GetActor()->GetTransform().GetAngle().y;
 	strcpy_s(moveData.mainState, state->GetStateName());
 	strcpy_s(moveData.subState, state->GetSubStateName());
 	return moveData;

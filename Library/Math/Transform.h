@@ -2,6 +2,7 @@
 
 #include "Vector.h"
 #include "Quaternion.h"
+#include "Matrix.h"
 
 class Transform
 {
@@ -35,21 +36,19 @@ public:
 	/// 回転（オイラー）取得(ローカル)
 	/// </summary>
 	/// <returns></returns>
-	const Vector3& GetRotation()const { return _angle; }
+	const Vector3& GetAngle()const { return _angle; }
 	/// <summary>
 	/// 行列取得(ワールド)
 	/// </summary>
 	/// <returns></returns>
-	const DirectX::XMFLOAT4X4& GetMatrix()const { return _transform; }
+	const Matrix& GetMatrix()const { return _transform; }
     /// <summary>
     /// 逆行列取得(ワールド)
     /// </summary>
     /// <returns></returns>
-    DirectX::XMFLOAT4X4 GetMatrixInverse()const
+	Matrix GetMatrixInverse()const
     {
-        DirectX::XMFLOAT4X4 inverse;
-        DirectX::XMStoreFloat4x4(&inverse, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&_transform)));
-        return inverse;
+        return _transform.Inverse();
     }
 	/// <summary>
 	/// 単位取得
@@ -78,7 +77,7 @@ public:
 
 	void AddPosition(const Vector3& v) { this->_position += v; }
 	void AddScale(const Vector3& v) { this->_scale += v; }
-	void AddRotation(const Vector3& v) { this->_angle += v; }
+	void AddAngle(const Vector3& v) { this->_angle += v; }
 
 	// X軸取得
 	Vector3 GetAxisX()const { return Vector3(_transform._11, _transform._12, _transform._13); }
@@ -97,11 +96,5 @@ private:
 	Vector3 _scale		= Vector3::One;
 	Vector3 _angle		= Vector3::Zero;
 
-	DirectX::XMFLOAT4X4 _transform =
-	{
-		1.0f,0.0f,0.0f,0.0f,
-		0.0f,1.0f,0.0f,0.0f,
-		0.0f,0.0f,1.0f,0.0f,
-		0.0f,0.0f,0.0f,1.0f
-	};
+	Matrix _transform = Matrix::Identity;
 };

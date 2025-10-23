@@ -17,8 +17,6 @@ public:
 
 	// 生成時処理
 	void OnCreate() override;
-	// 削除処理
-	void OnDeleted() override;
 
 private:
 	// ユーザーが操作するプレイヤーか

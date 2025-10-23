@@ -197,7 +197,7 @@ void PlayerGreatSwordEvadeState::OnEnter()
         float angle =
             DirectX::XMConvertToDegrees(
                 atan2f(movement.x, movement.y)
-                - _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+                - _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
             );
         // Šp“x‚ğ0~360“x‚É³‹K‰»
         angle = fmodf(angle, 360.0f);
@@ -733,7 +733,7 @@ void PlayerGreatSwordHitState::OnEnter()
     float angle =
         DirectX::XMConvertToDegrees(
             atan2f(hitDirection.x, hitDirection.z)
-            - _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+            - _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
         );
     // Šp“x‚ğ0~360“x‚É³‹K‰»
     angle = fmodf(angle, 360.0f);
@@ -797,7 +797,7 @@ void PlayerGreatSwordHitKnockDownState::OnEnter()
     float angle =
         DirectX::XMConvertToDegrees(
             atan2f(hitDirection.x, hitDirection.z)
-            - _owner->GetPlayer()->GetActor()->GetTransform().GetRotation().y
+            - _owner->GetPlayer()->GetActor()->GetTransform().GetAngle().y
         );
     // Šp“x‚ğ0~360“x‚É³‹K‰»
     angle = fmodf(angle, 360.0f);

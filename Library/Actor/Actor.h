@@ -220,6 +220,8 @@ public:
 	void SetName(const char* name) { this->_name = name; }
 	void SetTransform(const Transform& t) { this->_transform = t; }
 	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
+#pragma endregion
+
 #pragma region フラグ関係
 	void SetIsActive(bool b) { this->_isActive = b; }
 	void SetIsShowing(bool b) { this->_isShowing = b; }
@@ -233,6 +235,20 @@ public:
 	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
 	bool IsDrawingHierarchy()const { return _isDrawingHierarchy; }
 #pragma endregion
+
+#pragma region 親子関係
+	/// <summary>
+	/// 親設定
+	/// </summary>
+	/// <param name="parent"></param>
+	void SetParent(Actor* parent);
+	/// <summary>
+	/// 子追加
+	/// </summary>
+	/// <param name="child"></param>
+	void AddChild(std::shared_ptr<Actor> child);
+	Actor* GetParent() { return _parent; }
+	const std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }
 #pragma endregion
 protected:
 #pragma region 仮想関数
@@ -325,11 +341,18 @@ protected:
 	std::shared_ptr<Model>	_model;
 	// コンポーネント
 	std::vector<std::shared_ptr<Component>>		_components;
+
+#pragma region 親子関係
+	Actor*								_parent = nullptr;
+	std::vector<std::shared_ptr<Actor>> _children;
+#pragma endregion
+
+#pragma region 当たり判定
 	// 当たり判定コンポーネント
 	std::vector<std::shared_ptr<ColliderBase>>	_colliders;
-
 	// 自身のレイヤーごとの前フレームに接触したレイヤーごとのアクター
 	std::unordered_map<CollisionLayer, std::vector<Actor*>> _lastContactActors;
+#pragma endregion
 
 #pragma region 各種フラグ
 	// アクティブフラグ

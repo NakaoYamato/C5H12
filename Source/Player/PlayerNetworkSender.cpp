@@ -26,7 +26,7 @@ Network::CharacterMove PlayerNetworkSender::GetMoveData()
 	moveData.position = GetActor()->GetTransform().GetPosition();
 	Vector3 movement = Vector3(controller->GetMovement().x, 0.0f, controller->GetMovement().y);
 	moveData.target = movement;
-	moveData.angleY = GetActor()->GetTransform().GetRotation().y;
+	moveData.angleY = GetActor()->GetTransform().GetAngle().y;
 	strcpy_s(moveData.mainState, state->GetStateName());
 	strcpy_s(moveData.subState, state->GetSubStateName());
 

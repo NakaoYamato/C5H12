@@ -117,7 +117,7 @@ void WyvernTurnState::OnExit()
 	Vector3 angle{};
 	// y値をyに設定
 	angle.y = -q.ToRollPitchYaw().y;
-	transform.AddRotation(angle);
+	transform.AddAngle(angle);
 	transform.UpdateTransform(nullptr);
 	// フラグを下ろす
 	_owner->GetAnimator()->SetIsRemoveRootMovement(false);
@@ -438,7 +438,7 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 			Vector3 position = Vector3::TransformCoord(breathGlobalPosition, _owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
 			_fireBreathActor.lock()->GetTransform().SetPosition(position);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			_fireBreathActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+			_fireBreathActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetAngle().y);
 		}
 	}
 	// ブレスの削除
@@ -481,7 +481,7 @@ void WyvernFireBallAttackState::OnExecute(float elapsedTime)
 			Vector3 position = Vector3::TransformCoord(fireBallGlobalPosition, _owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
 			_fireBallActor.lock()->GetTransform().SetPosition(position);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetAngle().y);
 		}
 	}
 	else
@@ -535,7 +535,7 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 			_fireBallActor.lock()->GetBallController()->SetBallActor(_owner->GetEnemy()->GetActor());
 			_fireBallActor.lock()->GetTransform().SetPosition(headWorldPosition);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetAngle().y);
 			_fireBallActor.lock()->GetTransform().SetAngleX(_launchAngleX);
 		}
 	}
@@ -710,7 +710,7 @@ void WyvernDamageState::OnExit()
 		Vector3 angle{};
 		// y値をyに設定
 		angle.y = -q.ToRollPitchYaw().y;
-		transform.AddRotation(angle);
+		transform.AddAngle(angle);
 		transform.UpdateTransform(nullptr);
 
 		// フラグを下ろす

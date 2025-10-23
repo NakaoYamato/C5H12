@@ -8,7 +8,7 @@
 
 void PlayerCameraController::Start()
 {
-    Vector3 angle = GetActor()->GetTransform().GetRotation();
+    Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform =
         DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
@@ -31,7 +31,7 @@ void PlayerCameraController::Update(float elapsedTime)
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
         return;
 
-    Vector3 angle = GetActor()->GetTransform().GetRotation();
+    Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform =
         DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);

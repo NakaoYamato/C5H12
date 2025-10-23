@@ -137,7 +137,7 @@ void WyvernHoverTurnState::OnExit()
 	Vector3 angle{};
 	// y値をyに設定
 	angle.y = -q.ToRollPitchYaw().y;
-	transform.AddRotation(angle);
+	transform.AddAngle(angle);
 	transform.UpdateTransform(nullptr);
 }
 #pragma endregion
@@ -172,7 +172,7 @@ void WyvernHoverFireBallAttackState::OnExecute(float elapsedTime)
 			Vector3 position = Vector3::TransformCoord(fireBallGlobalPosition, _owner->GetEnemy()->GetActor()->GetTransform().GetMatrix());
 			_fireBallActor.lock()->GetTransform().SetPosition(position);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetAngle().y);
 			_fireBallActor.lock()->GetTransform().SetAngleX(_launchAngleX);
 		}
 	}

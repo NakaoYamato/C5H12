@@ -20,7 +20,7 @@ void WyvernBreathController::Start()
 	}
 	_effectController = GetActor()->GetComponent<EffectController>();
 	auto& transform = GetActor()->GetTransform();
-	_effectController.lock()->Play(0, transform.GetWorldPosition(), transform.GetRotation());
+	_effectController.lock()->Play(0, transform.GetWorldPosition(), transform.GetAngle());
 }
 
 // íœˆ—

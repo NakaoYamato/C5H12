@@ -6,9 +6,11 @@ void Transform::UpdateTransform(const DirectX::XMFLOAT4X4* parent)
 {
     DirectX::XMMATRIX C{ DirectX::XMMatrixScaling(_lengthScale, _lengthScale,_lengthScale) };
 
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&_position));
-    DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(_angle.x, _angle.y, _angle.z);
-    DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&_scale));
+	DirectX::XMMATRIX M = Matrix::CreateTransform(
+		_scale,
+		_angle,
+		_position
+	).ToXMMATRIX();
 
     DirectX::XMMATRIX Parent = DirectX::XMMatrixIdentity();
     if (parent != nullptr)
@@ -16,9 +18,7 @@ void Transform::UpdateTransform(const DirectX::XMFLOAT4X4* parent)
 
 	DirectX::XMStoreFloat4x4(&_transform,
         C *
-		S *
-		R *
-        T *
+        M *
         Parent
 	);
 }

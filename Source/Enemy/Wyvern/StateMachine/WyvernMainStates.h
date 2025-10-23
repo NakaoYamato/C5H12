@@ -310,14 +310,12 @@ private:
 class WyvernDownState : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
-	WyvernDownState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernDownState(WyvernStateMachine* owner);
 	const char* GetName() const override { return "Down"; };
 	// 開始処理
 	void OnEnter() override;
-	// 実行処理
-	void OnExecute(float elapsedTime) override;
-	// 終了処理
-	void OnExit() override;
+private:
+	float _downTime = 5.0f;
 };
 #pragma endregion
 

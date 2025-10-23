@@ -38,6 +38,7 @@ WyvernStateMachine::WyvernStateMachine(Actor* owner)
 	_stateMachine.RegisterState(std::make_unique<WyvernPursuitState>(this));
 
 	_stateMachine.RegisterState(std::make_unique<WyvernDamageState>(this));
+	_stateMachine.RegisterState(std::make_unique<WyvernDownState>(this));
 	_stateMachine.RegisterState(std::make_unique<WyvernDeathState>(this));
 
 	_stateMachine.RegisterState(std::make_unique<WyvernHoverIdleState>(this));

@@ -605,7 +605,7 @@ void WyvernPursuitState::OnExit()
 void WyvernDamageState::OnEnter()
 {
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto hitPosition = _owner->GetDamageable()->GetHitPosition();
+	auto& hitPosition = _owner->GetDamageable()->GetHitPosition();
 	auto targetDirection = (hitPosition - position).Normalize();
 	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
 	// 被弾位置から右前、右、右後ろ、左前、左、左後ろのどこに被弾するか判定
@@ -728,18 +728,107 @@ void WyvernDamageState::OnExit()
 #pragma region ダウン
 namespace WyvernDownSubState
 {
+	class WyvernDownStartState : public WyvernSSB
+	{
+	public:
+		WyvernDownStartState(WyvernStateMachine* owner,
+			const std::string& animationName,
+			const std::string& nextState) :
+			WyvernSSB(owner, animationName, animationName, 1.5f, false, false),
+			_nextState(nextState)
+		{
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき次の状態へ遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+			{
+				_owner->GetBase().ChangeSubState(_nextState);
+			}
+		}
+	private:
+		std::string _nextState;
+	};
+	class WyvernDownLoopState : public WyvernSSB
+	{
+	public:
+		WyvernDownLoopState(WyvernStateMachine* owner,
+			const std::string& animationName,
+			const std::string& nextState,
+			float timer) :
+			WyvernSSB(owner, animationName, animationName, 1.0f, true, false),
+			_nextState(nextState),
+			_time(timer),
+			_timer(0.0f)
+		{
+		}
+		void OnEnter() override
+		{
+			WyvernSSB::OnEnter();
+			_timer = _time;
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			_timer -= elapsedTime;
+			// タイマーが0以下になったら次の状態へ遷移
+			if (_timer <= 0.0f)
+			{
+				_owner->GetBase().ChangeSubState(_nextState);
+			}
+		}
+	private:
+		std::string _nextState;
+		float _timer;
+		float _time;
+	};
+	class WyvernDownEndState : public WyvernSSB
+	{
+	public:
+		WyvernDownEndState(WyvernStateMachine* owner,
+			const std::string& animationName) :
+			WyvernSSB(owner, animationName, animationName, 1.5f, false, false)
+		{
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき待機状態へ遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+			{
+				_owner->GetBase().ChangeState("Idle");
+			}
+		}
+	};
+}
+WyvernDownState::WyvernDownState(WyvernStateMachine* owner) :
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernDownSubState::WyvernDownStartState>(owner, u8"DownRStart", u8"DownRLoop"));
+	RegisterSubState(std::make_unique<WyvernDownSubState::WyvernDownLoopState>(owner, u8"DownRLoop", u8"DownREnd", _downTime));
+	RegisterSubState(std::make_unique<WyvernDownSubState::WyvernDownEndState>(owner, u8"DownREnd"));
 
+	RegisterSubState(std::make_unique<WyvernDownSubState::WyvernDownStartState>(owner, u8"DownLStart", u8"DownLLoop"));
+	RegisterSubState(std::make_unique<WyvernDownSubState::WyvernDownLoopState>(owner, u8"DownLLoop", u8"DownLEnd", _downTime));
+	RegisterSubState(std::make_unique<WyvernDownSubState::WyvernDownEndState>(owner, u8"DownLEnd"));
 }
 void WyvernDownState::OnEnter()
 {
-}
-
-void WyvernDownState::OnExecute(float elapsedTime)
-{
-}
-
-void WyvernDownState::OnExit()
-{
+	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	auto& hitPosition = _owner->GetDamageable()->GetHitPosition();
+	auto targetDirection = (hitPosition - position).Normalize();
+	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
+	// 被弾位置から左右判定
+	float crossY = front.Cross(targetDirection).y;
+	if (crossY > 0.0f)
+	{
+		// 右方向に被弾
+		ChangeSubState(u8"DownRStart");
+	}
+	else
+	{
+		// 左方向に被弾
+		ChangeSubState(u8"DownLStart");
+	}
 }
 #pragma endregion
 

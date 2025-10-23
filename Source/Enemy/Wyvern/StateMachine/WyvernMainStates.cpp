@@ -830,6 +830,9 @@ void WyvernDownState::OnEnter()
 		ChangeSubState(u8"DownLStart");
 	}
 }
+void WyvernDownState::OnExit()
+{
+}
 #pragma endregion
 
 #pragma region Ž€–S

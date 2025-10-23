@@ -217,8 +217,85 @@ void WyvernHoverClawAttackState::OnExit()
 #pragma endregion
 
 #pragma region 墜落
+namespace WyvernHitFallSubState
+{
+	class WyvernHitFallStartState : public WyvernSSB
+	{
+	public:
+		WyvernHitFallStartState(WyvernStateMachine* owner) :
+			WyvernSSB(
+				owner,
+				u8"HitFallStart",
+				u8"FallHitDown",
+				1.5f,
+				false,
+				false
+			) {
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき次の状態へ遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+			{
+				_owner->GetBase().ChangeSubState(u8"HitFallLoop");
+			}
+		}
+	};
+	class WyvernHitFallLoopState : public WyvernSSB
+	{
+	public:
+		WyvernHitFallLoopState(WyvernStateMachine* owner) :
+			WyvernSSB(
+				owner,
+				u8"HitFallLoop",
+				u8"FallHitLoop",
+				1.5f,
+				true,
+				false
+			) {
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			if (_owner->GetEnemy()->GetCharactorController()->GetVelocity().y >= 0)
+			{
+				_owner->GetBase().ChangeSubState(u8"HitFallEnd");
+			}
+		}
+	};
+	class WyvernHitFallEndState : public WyvernSSB
+	{
+	public:
+		WyvernHitFallEndState(WyvernStateMachine* owner) :
+			WyvernSSB(
+				owner,
+				u8"HitFallEnd",
+				u8"FallDeathGround",
+				1.5f,
+				false,
+				false
+			) {
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了しているとき次の状態へ遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+			{
+				_owner->ChangeState(u8"Down", u8"DownRLoop");
+			}
+		}
+	};
+}
+WyvernHitFallState::WyvernHitFallState(WyvernStateMachine* owner) : 
+	HierarchicalStateBase(owner)
+{
+	RegisterSubState(std::make_unique<WyvernHitFallSubState::WyvernHitFallStartState>(owner));
+	RegisterSubState(std::make_unique<WyvernHitFallSubState::WyvernHitFallLoopState>(owner));
+	RegisterSubState(std::make_unique<WyvernHitFallSubState::WyvernHitFallEndState>(owner));
+}
 void WyvernHitFallState::OnEnter()
 {
+	// サブステートを開始状態に設定
+	ChangeSubState(u8"HitFallStart");
 }
 
 void WyvernHitFallState::OnExecute(float elapsedTime)

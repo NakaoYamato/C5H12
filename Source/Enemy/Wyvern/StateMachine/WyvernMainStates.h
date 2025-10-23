@@ -314,6 +314,8 @@ public:
 	const char* GetName() const override { return "Down"; };
 	// ŠJnˆ—
 	void OnEnter() override;
+	// I—¹ˆ—
+	void OnExit() override;
 private:
 	float _downTime = 5.0f;
 };

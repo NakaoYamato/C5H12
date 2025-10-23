@@ -23,7 +23,8 @@ void WyvernController::Start()
 	}
 
 	// ダメージ間隔を設定
-	_enemyController.lock()->SetDamageReactionRate(5.0f);
+	_enemyController.lock()->SetDamageReactionRate(3.0f);
+	_enemyController.lock()->SetDownDamageReactionRate(5.0f);
 
 	// 初期スキン幅取得
 	_initialSkinWidth = _charactorController.lock()->GetSkinWidth();
@@ -44,9 +45,8 @@ void WyvernController::Update(float elapsedTime)
 	else
 	{
 		_charactorController.lock()->SetSkinWidth(_initialSkinWidth);
-		_flightTimer -= elapsedTime;
+		_flightTimer = 0.0f;
 	}
-	_flightTimer = MathF::Clamp(_flightTimer, 0.0f, _flightDuration);
 }
 // GUI描画
 void WyvernController::DrawGui()

@@ -64,7 +64,6 @@ void WyvernStateMachine::Start()
 
 void WyvernStateMachine::Execute(float elapsedTime)
 {
-	bool airFlag = false;
 	float blurRate = 0.0f;
     _callCancelEvent = false;
     _callFireBreath = false;
@@ -112,29 +111,18 @@ void WyvernStateMachine::Execute(float elapsedTime)
 			{
 				blurRate = 1.0f - (GetAnimator()->GetAnimationTimer() - event.startSeconds) / (event.endSeconds - event.startSeconds);
 			}
-			// 飛行判定
-			else if (animationEvent.GetMessageList().at(event.messageIndex) == "DuringFlight")
+			// 飛行開始判定
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "StartFlight")
 			{
-				airFlag = true;
+				GetWyvern()->SetIsDuringFlight(true);
+			}
+			// 飛行終了判定
+			else if (animationEvent.GetMessageList().at(event.messageIndex) == "EndFlight")
+			{
+				GetWyvern()->SetIsDuringFlight(false);
 			}
         }
     }
-
-    // 被弾処理
-	if (_enemy->IsPerformDamageReaction() && _stateMachine.GetStateName() != "Down")
-	{
-        // 被弾遷移
-		_stateMachine.ChangeState("Damage");
-		_enemy->SetPerformDamageReaction(false);
-	}
-	// ダウン処理
-	if (_enemy->IsPerformDownReaction())
-	{
-		// ダウン遷移
-		_stateMachine.ChangeState("Down");
-		_enemy->SetPerformDamageReaction(false);
-		_enemy->SetPerformDownReaction(false);
-	}
 
     // 死亡処理
     if (GetDamageable()->IsDead() && _stateMachine.GetStateName() != "Death")
@@ -201,9 +189,6 @@ void WyvernStateMachine::Execute(float elapsedTime)
 		_roarController->SetWorldPosition(headWorldPosition);
 	}
 	_roarController->SetRate(blurRate);
-
-	// 空中処理
-	GetWyvern()->SetIsDuringFlight(airFlag);
 
 	// ステートマシンの実行
     _stateMachine.Update(elapsedTime);

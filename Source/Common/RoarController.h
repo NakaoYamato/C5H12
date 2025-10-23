@@ -23,6 +23,6 @@ public:
 private:
 	Vector3 _worldPosition = Vector3::Zero;
 	Vector2 _screenPosition = Vector2::Zero;
-	float _radius = 300.0f;
+	float _radius = 150.0f;
 	float _rate = 0.0f;
 };

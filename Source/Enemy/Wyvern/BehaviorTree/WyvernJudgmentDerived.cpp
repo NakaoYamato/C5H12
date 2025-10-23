@@ -128,3 +128,15 @@ bool WyvernHoverEndJudgment::Judgment()
 {
 	return _owner->GetStateMachine()->GetWyvern()->GetFlightTimer() >= _owner->GetStateMachine()->GetWyvern()->GetFlightDuration();
 }
+
+// damageNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernDamageJudgment::Judgment()
+{
+	return _owner->GetStateMachine()->GetEnemy()->IsPerformDamageReaction();
+}
+
+// downNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool WyvernDownJudgment::Judgment()
+{
+	return _owner->GetStateMachine()->GetEnemy()->IsPerformDownReaction();
+}

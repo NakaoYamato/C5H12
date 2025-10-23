@@ -87,7 +87,7 @@ public:
 class WyvernHitFallState : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
-	WyvernHitFallState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernHitFallState(WyvernStateMachine* owner);
 	const char* GetName() const override { return "HitFall"; };
 	// ŠJnˆ—
 	void OnEnter() override;

@@ -24,24 +24,29 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	// ビヘイビアツリーを構築
 	auto rootNode = _behaviorTree->GetRoot();
 	{
-		// 警戒
-		auto alertNode = rootNode->AddNode("Alert", 4, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
+		// ダウン処理
+		auto downNode = rootNode->AddNode("Down", 6, SelectRule::Priority, std::make_shared<WyvernDownJudgment>(this), nullptr);
 		{
-			alertNode->AddNode("AlertToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
-			alertNode->AddNode("AlertTurn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn"));
-			alertNode->AddNode("AlertThreat", 2, SelectRule::Non, std::make_shared<WyvernNearAttackJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Threat"));
-			alertNode->AddNode("AlertRoar", 3, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernRoarAction>(this, "Roar"));
+			downNode->AddNode("FallDown", 1, SelectRule::Non, std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
+			downNode->AddNode("LandDown", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Down"));
+		}
+
+		// ダメージ処理
+		auto damageNode = rootNode->AddNode("Damage", 5, SelectRule::Priority, std::make_shared<WyvernDamageJudgment>(this), nullptr);
+		{
+			damageNode->AddNode("FallDamage", 1, SelectRule::Non, std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
+			damageNode->AddNode("LandDamage", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Damage"));
 		}
 
 		// 怒り移行
-		auto angryNode = rootNode->AddNode("Angry", 3, SelectRule::Sequence, std::make_shared<WyvernAngryJudgment>(this), nullptr);
+		auto angryNode = rootNode->AddNode("Angry", 4, SelectRule::Sequence, std::make_shared<WyvernAngryJudgment>(this), nullptr);
 		{
 			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
 			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack", "HoverIdle"));
 		}
 		
 		// 滞空
-		auto hoverNode = rootNode->AddNode("Hover", 2, SelectRule::Priority, std::make_shared<WyvernFlightJudgment>(this), nullptr);
+		auto hoverNode = rootNode->AddNode("Hover", 3, SelectRule::Priority, std::make_shared<WyvernFlightJudgment>(this), nullptr);
 		{
 			hoverNode->AddNode("HoverEnd", 4, SelectRule::Non, std::make_shared<WyvernHoverEndJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Land"));
 			
@@ -58,7 +63,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 		}
 
 		// 地上戦闘
-		auto battleNode = rootNode->AddNode("Battle", 1, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
+		auto battleNode = rootNode->AddNode("Battle", 2, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
 		{
 			auto confrontNode = battleNode->AddNode("Confront", 2, SelectRule::Priority, std::make_shared<WyvernConfrontJudgment>(this), nullptr);
 			{
@@ -88,6 +93,15 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			auto pursuitNode = battleNode->AddNode("Pursuit", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
 		}
 
+		// 警戒
+		auto alertNode = rootNode->AddNode("Alert", 1, SelectRule::Priority, std::make_shared<WyvernAlertJudgment>(this), nullptr);
+		{
+			alertNode->AddNode("AlertToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
+			alertNode->AddNode("AlertTurn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn"));
+			alertNode->AddNode("AlertThreat", 2, SelectRule::Non, std::make_shared<WyvernNearAttackJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Threat"));
+			alertNode->AddNode("AlertRoar", 3, SelectRule::Non, std::make_shared<WyvernRoarJudgment>(this), std::make_shared<WyvernRoarAction>(this, "Roar"));
+		}
+
 		// 偵察
 		auto scoutNode = rootNode->AddNode("Scout", 0, SelectRule::Priority, nullptr, nullptr);
 		{
@@ -106,6 +120,16 @@ void WyvernBehaviorTree::Start()
 // ビヘイビアツリー実行
 void WyvernBehaviorTree::Execute(float elapsedTime)
 {
+	// 被弾処理
+	if (GetStateMachine()->GetEnemy()->IsPerformDamageReaction() ||
+		GetStateMachine()->GetEnemy()->IsPerformDownReaction())
+	{
+		// 推論
+		_activeNode = _behaviorTree->ActiveNodeInference(_behaviorData.get());
+		GetStateMachine()->GetEnemy()->SetPerformDamageReaction(false);
+		GetStateMachine()->GetEnemy()->SetPerformDownReaction(false);
+	}
+
 	// 現在の実行ノードがなければ取得
 	if (_activeNode == nullptr)
 	{

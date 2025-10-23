@@ -265,6 +265,8 @@ public:
 private:
 	// 火球のエフェクトを表示するアクター
 	std::weak_ptr<WyvernBallActor> _fireBallActor;
+	// 発射角度
+	const float _launchAngleX = DirectX::XMConvertToRadians(50.0f);
 };
 #pragma endregion
 

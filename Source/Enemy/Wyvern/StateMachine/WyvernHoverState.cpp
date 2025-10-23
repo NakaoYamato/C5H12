@@ -173,6 +173,7 @@ void WyvernHoverFireBallAttackState::OnExecute(float elapsedTime)
 			_fireBallActor.lock()->GetTransform().SetPosition(position);
 			// ブレスのアクターを頭の向いている方向に向かせる
 			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+			_fireBallActor.lock()->GetTransform().SetAngleX(_launchAngleX);
 		}
 	}
 	else

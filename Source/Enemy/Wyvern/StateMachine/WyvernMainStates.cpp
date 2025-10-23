@@ -527,8 +527,6 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 				worldMatrix._42,
 				worldMatrix._43
 			};
-			// 火球のグローバル座標取得
-			Vector3 fireBallGlobalPosition = _owner->GetFireBallGlobalPosition();
 			// 火球を生成
 			_fireBallActor = _owner->GetEnemy()->GetActor()->GetScene()->RegisterActor<WyvernBallActor>(
 				std::string(_owner->GetEnemy()->GetActor()->GetName()) + "FireBallEffect",
@@ -537,9 +535,8 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 			_fireBallActor.lock()->GetBallController()->SetBallActor(_owner->GetEnemy()->GetActor());
 			_fireBallActor.lock()->GetTransform().SetPosition(headWorldPosition);
 			// ブレスのアクターを頭の向いている方向に向かせる
-			Quaternion q = Quaternion::FromRollPitchYaw(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation());
-			Quaternion headQ = model->GetPoseNodes()[nodeIndex].rotation;
-			_fireBallActor.lock()->GetTransform().SetAngle((q * headQ).Normalize().ToRollPitchYaw());
+			_fireBallActor.lock()->GetTransform().SetAngleY(_owner->GetEnemy()->GetActor()->GetTransform().GetRotation().y);
+			_fireBallActor.lock()->GetTransform().SetAngleX(_launchAngleX);
 		}
 	}
 	else

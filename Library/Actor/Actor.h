@@ -247,8 +247,14 @@ public:
 	/// </summary>
 	/// <param name="child"></param>
 	void AddChild(std::shared_ptr<Actor> child);
+
 	Actor* GetParent() { return _parent; }
 	const std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }
+
+	virtual std::string GetParentName()
+	{
+		return _parent ? _parent->GetName() : "";
+	}
 #pragma endregion
 protected:
 #pragma region ‰¼‘zŠÖ”

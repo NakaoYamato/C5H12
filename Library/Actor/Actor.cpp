@@ -201,6 +201,18 @@ void Actor::DelayedRender(const RenderContext& rc)
 /// Gui描画
 void Actor::DrawGui()
 {
+	// 親の名前表示
+	if (GetParent())
+	{
+		ImGui::Text(GetParentName().c_str());
+		ImGui::Text((std::string(u8"└") + GetName()).c_str());
+	}
+	else
+	{
+		ImGui::Text(GetName());
+	}
+
+	// フラグ
 	if (ImGui::CollapsingHeader("Flags"))
 	{
 		ImGui::Checkbox(u8"Active", &_isActive);

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../Library/Actor/Actor.h"
+#include "../../Library/Actor/ModelAttach/ModelAttachActor.h"
 
 #include "../../Library/Model/ModelResource.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/LocusRenderer.h"
 
-class WeaponActor : public Actor
+class WeaponActor : public ModelAttachActor
 {
 public:
 	~WeaponActor()override {}
@@ -19,25 +19,7 @@ public:
 	void OnLateUpdate(float elapsedTime) override;
 	// GUI描画時処理
 	void OnDrawGui() override;
-	// 初期設定
-	void Initialize(Actor* owner, const ModelResource::Node* parentNode)
-	{
-		// 親情報を保存
-		SetParent(owner);
-		_parentNode = parentNode;
-	}
 protected:
-	// トランスフォーム更新
-	void UpdateTransform() override
-	{
-		_transform.UpdateTransform(&_parentNode->worldTransform);
-	}
-
-	// ギズモ描画
-	void DrawGuizmo() override;
-
-protected:
-	const ModelResource::Node* _parentNode = nullptr;
 	std::weak_ptr<ModelCollider>	_ownerModelCollider; // 親のモデルコライダー
 	std::weak_ptr<LocusRenderer>	_locusRenderer; // 軌跡レンダラー
 

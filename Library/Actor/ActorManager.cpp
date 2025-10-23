@@ -233,17 +233,6 @@ void ActorManager::DrawGui()
 		Actor* object = FindByName(_showGuiObj).get();
 		if (object)
 		{
-			// e‚Ì–¼‘O•\Ž¦
-			if (object->GetParent())
-			{
-				ImGui::Text(object->GetParent()->GetName());
-				ImGui::Text((u8"„¤" + _showGuiObj).c_str());
-			}
-			else
-			{
-				ImGui::Text(_showGuiObj.c_str());
-			}
-
 			object->SetIsDrawingHierarchy(true);
 
 			object->DrawGui();

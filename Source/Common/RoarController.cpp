@@ -49,3 +49,15 @@ void RoarController::SetWorldPosition(const Vector3& position)
 		camera->GetProjection());
 	_screenPosition = Vector2(vec.x, vec.y);
 }
+
+void RoarController::Reset()
+{
+	auto data = PostProcessManager::Instance().GetPostProcess(PostProcessType::RadialBlurPP)->GetCurrentData();
+
+	_rate = 0.0f;
+	data["blurCenter.x"] = (_screenPosition.x / Graphics::Instance().GetScreenWidth());
+	data["blurCenter.y"] = (_screenPosition.y / Graphics::Instance().GetScreenHeight());
+	data["blurRadius"] = _radius * _rate;
+
+	PostProcessManager::Instance().GetPostProcess(PostProcessType::RadialBlurPP)->SetData(data);
+}

@@ -188,8 +188,12 @@ void WyvernStateMachine::Execute(float elapsedTime)
 			model->GetPoseNodes()[nodeIndex].worldTransform._43
 		};
 		_roarController->SetWorldPosition(headWorldPosition);
+		_roarController->SetRate(blurRate);
 	}
-	_roarController->SetRate(blurRate);
+	else
+	{
+		_roarController->Reset();
+	}
 
 	// ステートマシンの実行
     _stateMachine.Update(elapsedTime);

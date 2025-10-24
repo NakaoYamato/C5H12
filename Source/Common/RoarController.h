@@ -20,6 +20,7 @@ public:
 	void SetRadius(float radius) { _radius = radius; }
 	void SetRate(float rate) { _rate = rate; }
 
+	void Reset();
 private:
 	Vector3 _worldPosition = Vector3::Zero;
 	Vector2 _screenPosition = Vector2::Zero;

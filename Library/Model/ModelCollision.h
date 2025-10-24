@@ -7,7 +7,16 @@
 class ModelCollision
 {
 public:
-	struct SphereData
+	struct CollisionBaseData
+	{
+		int tagIndex = -1; // タグインデックス
+		float hitzoneFactor = 45.0f; // 肉質倍率
+
+		// デバッグ用
+		bool isSelected = false; // 選択中か
+	};
+
+	struct SphereData : public CollisionBaseData
 	{
 		int nodeIndex		= -1;	// ノードインデックス
 		Vector3 position	= {};	// 中心座標
@@ -17,7 +26,7 @@ public:
 		template<class T>
 		void serialize(T& archive, const std::uint32_t version);
 	};
-	struct CapsuleData
+	struct CapsuleData : public CollisionBaseData
 	{
 		int startNodeIndex	= -1;	// 開始ノードインデックス
 		int endNodeIndex	= -1;	// 終了ノードインデックス
@@ -85,12 +94,26 @@ public:
 #pragma endregion
 private:
 	std::weak_ptr<Model> _model;
+	std::vector<std::string> _tags; // タグ名リスト
 	std::vector<SphereData> _sphereDatas; // 球データ
 	std::vector<CapsuleData> _capsuleDatas; // カプセルデータ
 	// モデルのノード名
 	std::vector<const char*> _nodeNames;
 
-	bool _isUsingGuizmo = false; // GUIでGizmoを使用中か
-	Vector3* _gizmoPosition = nullptr; // Gizmoの位置
-	int _gizmoNodeIndex = -1; // Gizmoのノードインデックス
+	bool		_isDrowSelectedOnly = false; // 選択中の当たり判定のみ描画するか
+	bool		_isUsingGuizmo = false; // GUIでGizmoを使用中か
+	Vector3*	_gizmoPosition = nullptr; // Gizmoの位置
+	int			_gizmoNodeIndex = -1; // Gizmoのノードインデックス
+	Vector4 _colorTable[10] = {
+		Vector4::Gray,
+		Vector4::Red,
+		Vector4::Green,
+		Vector4::Blue,
+		Vector4::Yellow,
+		Vector4::Orange,
+		Vector4::Purple,
+		Vector4::Pink,
+		Vector4::Cyan,
+		Vector4::LightGreen,
+	};
 };

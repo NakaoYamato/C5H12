@@ -2,14 +2,19 @@
 
 #include <filesystem>
 #include <fstream>
-#include <imgui.h>
+#include <Mygui.h>
 #include <ImGuizmo.h>
 
 #include "SerializeFunction.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 // データのバージョン管理
-CEREAL_CLASS_VERSION(ModelCollision, 0)
+#define MC_VERSION_0 0
+#define MC_VERSION_1 1
+
+CEREAL_CLASS_VERSION(ModelCollision, MC_VERSION_1)
+CEREAL_CLASS_VERSION(ModelCollision::SphereData, MC_VERSION_1)
+CEREAL_CLASS_VERSION(ModelCollision::CapsuleData, MC_VERSION_1)
 
 /// モデル情報読み込み
 void ModelCollision::Load(std::weak_ptr<Model> model)
@@ -45,11 +50,15 @@ void ModelCollision::DebugRender(const RenderContext& rc)
         if (sphere.nodeIndex == -1)
             continue;
 
+		if (_isDrowSelectedOnly && !sphere.isSelected)
+			continue;
+
 		auto& node = _model.lock()->GetPoseNodes()[sphere.nodeIndex];
+		Vector4 color = sphere.tagIndex == -1 ? Vector4::White : _colorTable[sphere.tagIndex % 10];
 		Debug::Renderer::DrawSphere(
             sphere.position.TransformCoord(node.worldTransform), 
             sphere.radius, 
-            Vector4::White);
+            color);
 	}
 	for (auto& capsule : _capsuleDatas)
 	{
@@ -58,13 +67,17 @@ void ModelCollision::DebugRender(const RenderContext& rc)
         if (capsule.endNodeIndex == -1)
             continue;
 
+        if (_isDrowSelectedOnly && !capsule.isSelected)
+            continue;
+
 		auto& startNode = _model.lock()->GetPoseNodes()[capsule.startNodeIndex];
 		auto& endNode = _model.lock()->GetPoseNodes()[capsule.endNodeIndex];
+        Vector4 color = capsule.tagIndex == -1 ? Vector4::White : _colorTable[capsule.tagIndex % 10];
 		Debug::Renderer::DrawCapsule(
 			capsule.start.TransformCoord(startNode.worldTransform),
 			capsule.end.TransformCoord(endNode.worldTransform),
 			capsule.radius,
-			Vector4::White);
+            color);
 	}
 
     // ギズモ描画
@@ -120,14 +133,49 @@ void ModelCollision::DrawGui(bool canEdit)
             }
         }
     }
+	ImGui::Checkbox(u8"選択中の当たり判定のみ描画", &_isDrowSelectedOnly);
+    ImGui::Separator();
+	// タグ名リストの表示
+	{
+		static char tagName[64] = "";
+		ImGui::InputText(u8"タグ名入力", tagName, sizeof(tagName));
+		ImGui::SameLine();
+		if (ImGui::Button(u8"追加"))
+		{
+			if (strlen(tagName) > 0)
+			{
+				_tags.push_back(tagName);
+				tagName[0] = '\0';
+			}
+		}
+		ImGui::BeginChild("TagList", ImVec2(0, 100), true);
+		int index = 0;
+		for (auto& tag : _tags)
+		{
+			ImGui::Text(u8"%d: %s", index, tag.c_str());
+			ImGui::SameLine();
+			if (ImGui::Button((std::string(u8"削除") + std::to_string(index)).c_str()))
+			{
+				_tags.erase(_tags.begin() + index);
+				break;
+			}
+			index++;
+		}
+		ImGui::EndChild();
+	}
+
     ImGui::Separator();
 
     int index = 0;
 	for (auto& sphere : _sphereDatas)
 	{
         std::string str = "sphere" + std::to_string(index);
-        if (ImGui::TreeNodeEx(str.c_str()))
+        if (sphere.isSelected = ImGui::TreeNodeEx(str.c_str()))
         {
+			ImGui::Combo(u8"タグ", &sphere.tagIndex, _tags);
+
+			ImGui::DragFloat(u8"肉質", &sphere.hitzoneFactor, 0.01f, 0.0f, 100.0f);
+
             // nodeの選択
             ImGui::Combo(u8"ノード", &sphere.nodeIndex, _nodeNames.data(), (int)_nodeNames.size());
             ImGui::DragFloat3(u8"中心座標", &sphere.position.x, 0.01f);
@@ -158,8 +206,12 @@ void ModelCollision::DrawGui(bool canEdit)
 	for (auto& capsule : _capsuleDatas)
 	{
         std::string str = "capsule" + std::to_string(index);
-        if (ImGui::TreeNode(str.c_str()))
+        if (capsule.isSelected = ImGui::TreeNode(str.c_str()))
         {
+            ImGui::Combo(u8"タグ", &capsule.tagIndex, _tags);
+
+            ImGui::DragFloat(u8"肉質", &capsule.hitzoneFactor, 0.01f, 0.0f, 100.0f);
+
             // nodeの選択
             ImGui::Combo(u8"開始ノード", &capsule.startNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
             ImGui::Combo(u8"終了ノード", &capsule.endNodeIndex, _nodeNames.data(), (int)_nodeNames.size());
@@ -199,9 +251,19 @@ void ModelCollision::DrawGui(bool canEdit)
 template<class T>
 inline void ModelCollision::SphereData::serialize(T& archive, const std::uint32_t version)
 {
-    if (version == 0)
+    if (version == MC_VERSION_0)
     {
         archive(
+            CEREAL_NVP(nodeIndex),
+            CEREAL_NVP(position),
+            CEREAL_NVP(radius)
+        );
+    }
+    if (version == MC_VERSION_1)
+    {
+        archive(
+            CEREAL_NVP(tagIndex),
+            CEREAL_NVP(hitzoneFactor),
             CEREAL_NVP(nodeIndex),
             CEREAL_NVP(position),
             CEREAL_NVP(radius)
@@ -212,9 +274,21 @@ inline void ModelCollision::SphereData::serialize(T& archive, const std::uint32_
 template<class T>
 inline void ModelCollision::CapsuleData::serialize(T& archive, const std::uint32_t version)
 {
-    if (version == 0)
+    if (version == MC_VERSION_0)
     {
         archive(
+            CEREAL_NVP(startNodeIndex),
+            CEREAL_NVP(start),
+            CEREAL_NVP(endNodeIndex),
+            CEREAL_NVP(end),
+            CEREAL_NVP(radius)
+        );
+    }
+    if (version == MC_VERSION_1)
+    {
+        archive(
+            CEREAL_NVP(tagIndex),
+            CEREAL_NVP(hitzoneFactor),
             CEREAL_NVP(startNodeIndex),
             CEREAL_NVP(start),
             CEREAL_NVP(endNodeIndex),
@@ -239,7 +313,8 @@ bool ModelCollision::Serialize(const char* filename)
         {
             archive(
                 CEREAL_NVP(_sphereDatas),
-                CEREAL_NVP(_capsuleDatas)
+                CEREAL_NVP(_capsuleDatas),
+				CEREAL_NVP(_tags)
             );
             return true;
         }
@@ -265,7 +340,8 @@ bool ModelCollision::Deserialize(const char* filename)
         {
             archive(
                 CEREAL_NVP(_sphereDatas),
-                CEREAL_NVP(_capsuleDatas)
+                CEREAL_NVP(_capsuleDatas),
+                CEREAL_NVP(_tags)
             );
             return true;
         }

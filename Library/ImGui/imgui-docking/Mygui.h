@@ -130,4 +130,22 @@ namespace ImGui
 		}
         return false;
 	}
+
+	/// <summary>
+	/// Comboのラッパー（std::vector<std::string>版）
+	/// </summary>
+	/// <param name="title"></param>
+	/// <param name="itemIndex"></param>
+	/// <param name="items"></param>
+	/// <returns></returns>
+	static bool Combo(const char* title, int* itemIndex, const std::vector<std::string>& items)
+	{
+		std::vector<const char*> itemPtrs;
+		itemPtrs.reserve(items.size());
+		for (const auto& str : items)
+		{
+			itemPtrs.push_back(str.c_str());
+		}
+		return ImGui::Combo(title, itemIndex, itemPtrs.data(), static_cast<int>(itemPtrs.size()));
+	}
 }

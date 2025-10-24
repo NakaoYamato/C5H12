@@ -4,7 +4,6 @@
 #include "../../Library/Component/Terrain/TerrainController.h"
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "../../Library/Component/Terrain/TerrainCollider.h"
-#include "../../DebugSupporter/DebugSupporter.h"
 
 // ‰Šú‰»
 void SceneDecalEditor::OnInitialize()

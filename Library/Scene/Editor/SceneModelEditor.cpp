@@ -7,8 +7,6 @@
 #include "../../Library/Math/Quaternion.h"
 #include "../../Library/Graphics/Graphics.h"
 
-#include "../../DebugSupporter/DebugSupporter.h"
-
 void SceneModelEditor::OnInitialize()
 {
     ID3D11Device* device = Graphics::Instance().GetDevice();

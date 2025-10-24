@@ -4,8 +4,6 @@
 #include "../../Library/Math/Random.h"
 #include "../../Source/Common/Damageable.h"
 
-#include "../../Library/DebugSupporter/DebugSupporter.h"
-
 #include <imgui.h>
 // 開始処理
 void WyvernBallController::Start()
@@ -65,9 +63,13 @@ void WyvernBallController::OnContactEnter(CollisionData& collisionData)
 {
 	// 攻撃判定
 	if (collisionData.myLayer == CollisionLayer::Attack &&
-		collisionData.otherLayer == CollisionLayer::Hit &&
-		collisionData.other != _ballActor.lock().get())
+		collisionData.otherLayer == CollisionLayer::Hit)
 	{
+		// 自身には当たらないようにする
+		if (collisionData.other->GetParent() != nullptr &&
+			collisionData.other->GetParent() == _ballActor.lock().get())
+			return;
+
 		// ダメージを与える
 		auto damageable = collisionData.other->GetComponent<Damageable>();
 		if (damageable != nullptr)

@@ -1,7 +1,6 @@
 #include "SceneTwoBoneIKDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../DebugSupporter/DebugSupporter.h"
 #include "../../Library/Input/Input.h"
 #include <imgui.h>
 #include <ImGuizmo.h>

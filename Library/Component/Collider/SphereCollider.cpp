@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "../../Scene/Scene.h"
-#include "../../DebugSupporter/DebugSupporter.h"
 
 void SphereCollider::Start()
 {

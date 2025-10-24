@@ -2,7 +2,6 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Scene/Scene.h"
-#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 

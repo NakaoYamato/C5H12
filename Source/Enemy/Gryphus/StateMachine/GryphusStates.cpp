@@ -5,8 +5,6 @@
 #include "../../EnemyController.h"
 #include "../GryphusController.h"
 
-#include "../../Library/DebugSupporter/DebugSupporter.h"
-
 #include <imgui.h>
 
 #pragma region ‘Ò‹@

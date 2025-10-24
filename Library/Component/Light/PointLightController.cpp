@@ -1,7 +1,6 @@
 #include "PointLightController.h"
 
 #include "../../Library/Scene/Scene.h"
-#include "../../DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 

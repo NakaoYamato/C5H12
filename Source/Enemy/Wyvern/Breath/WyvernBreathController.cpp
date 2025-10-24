@@ -4,8 +4,6 @@
 #include "../../Library/Math/Random.h"
 #include "../../Source/Common/Damageable.h"
 
-#include "../../Library/DebugSupporter/DebugSupporter.h"
-
 #include <imgui.h>
 
 // ŠJnˆ—

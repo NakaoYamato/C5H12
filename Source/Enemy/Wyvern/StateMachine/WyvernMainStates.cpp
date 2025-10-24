@@ -3,7 +3,6 @@
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Scene/Scene.h"
 #include "../WyvernController.h"
-#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 

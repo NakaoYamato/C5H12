@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "../../Scene/Scene.h"
-#include "../../DebugSupporter/DebugSupporter.h"
 
 // ŠJnˆ—
 void CapsuleCollider::Start()

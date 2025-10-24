@@ -2,7 +2,6 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Input/Input.h"
-#include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 

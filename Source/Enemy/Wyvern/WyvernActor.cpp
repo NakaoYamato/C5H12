@@ -13,6 +13,7 @@
 #include "BehaviorTree/WyvernBehaviorTree.h"
 
 #include "../../Source/Common/DamageableChild.h"
+#include "../../Source/Stage/EnvironmentDestroyer.h"
 
 #include <imgui.h>
 
@@ -51,6 +52,8 @@ void WyvernActor::OnCreate()
 	for (auto& child : GetChildren())
 	{
 		child->AddComponent<DamageableChild>(_damageable);
+		// 接触した地形を破壊するコンポーネントを追加
+		child->AddComponent<EnvironmentDestroyer>();
 	}
 }
 // 更新処理

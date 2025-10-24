@@ -10,6 +10,8 @@
 #include "../../Library/Model/Model.h"
 #include "../../Collision/CollisionDefine.h"
 
+#include "../../Library/DebugSupporter/DebugSupporter.h"
+
 // ‘O•ûéŒ¾
 class Component;
 class ColliderBase;

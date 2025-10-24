@@ -26,6 +26,12 @@ public:
 	// モデル当たり判定情報取得
 	const ModelCollision& GetModelCollision() const { return _modelCollision; }
 	bool IsCollAttackEvent() const { return _collAttackEvent; }
+
+	// タグごとのアクター取得
+	std::unordered_map<std::string, std::shared_ptr<Actor>>& GetTagActors()
+	{
+		return _tagActors;
+	}
 private:
 	// アニメーションイベントの当たり判定更新
 	// sphereDatas : アニメーションイベントの球体当たり判定データ

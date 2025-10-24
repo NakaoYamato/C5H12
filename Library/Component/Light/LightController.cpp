@@ -1,6 +1,5 @@
 #include "LightController.h"
 
-#include "../../DebugSupporter/DebugSupporter.h"
 #include "../../Scene/Scene.h"
 
 #include <imgui.h>

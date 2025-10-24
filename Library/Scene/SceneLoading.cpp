@@ -2,7 +2,6 @@
 
 #include "../Graphics/Graphics.h"
 #include "../../Library/Input/Input.h"
-#include "../DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/EffectController.h"
 #include "../../Source/Common/Targetable.h"
 
@@ -13,11 +14,18 @@ public:
 	const char* GetName() const override { return "DamageSender"; }
 	// 開始処理
 	void Start() override;
+	// 更新処理
+	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
 	// 接触時処理
-	void OnContactEnter(CollisionData& collisionData) override;
+	void OnContact(CollisionData& collisionData) override;
 
+	// 攻撃情報のリセット
+	void ResetAttackState()
+	{
+		_attackedTargets.clear();
+	}
 #pragma region アクセサ
 	// 基本攻撃力のセット
 	void SetBaseATK(float baseATK) { _baseATK = baseATK; }
@@ -60,4 +68,8 @@ private:
 	std::weak_ptr<Targetable> _targetable;
 	float _heteFactor = 1.0f;	// ヘイト倍率
 #pragma endregion
+
+	std::weak_ptr<ModelCollider> _modelCollider;
+	// 攻撃先情報
+	std::unordered_map<std::string, Actor*> _attackedTargets;
 };

@@ -84,8 +84,19 @@ void CharactorController::OnContact(CollisionData& collisionData)
 	// トリガーでなければ押し出し処理
     if (!collisionData.isTrigger && !collisionData.otherIsTrigger)
     {
+		// 攻撃判定の場合は押し出し処理を行わない
+		if (collisionData.myLayer == CollisionLayer::Attack ||
+			collisionData.otherLayer == CollisionLayer::Attack)
+			return;
+
 		// 相手がキャラクターコントローラーを持っているか確認
 		auto otherCharactor = collisionData.other->GetComponent<CharactorController>();
+		// 親がキャラクターコントローラーを持っているか確認
+		if (collisionData.other->GetParent() != nullptr && !otherCharactor)
+		{
+			otherCharactor = collisionData.other->GetParent()->GetComponent<CharactorController>();
+		}
+
 		if (otherCharactor)
 		{
             float sum = _mass + otherCharactor->GetMass();

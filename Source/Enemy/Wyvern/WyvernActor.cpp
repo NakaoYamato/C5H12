@@ -11,7 +11,8 @@
 #include "WyvernController.h"
 #include "StateMachine/WyvernStateMachine.h"
 #include "BehaviorTree/WyvernBehaviorTree.h"
-#include "../../Source/Player/PlayerController.h"
+
+#include "../../Source/Common/DamageableChild.h"
 
 #include <imgui.h>
 
@@ -45,6 +46,12 @@ void WyvernActor::OnCreate()
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();
 	modelCollider->SetLayer(CollisionLayer::Hit);
+
+	// 子供オブジェクトにDamageableChildコンポーネントを追加
+	for (auto& child : GetChildren())
+	{
+		child->AddComponent<DamageableChild>(_damageable);
+	}
 }
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)

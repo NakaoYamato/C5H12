@@ -4,7 +4,6 @@
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include "../../Source/Enemy/EnemyController.h" 
-#include "../../Source/Common/Damageable.h"
 
 #include <imgui.h>
 

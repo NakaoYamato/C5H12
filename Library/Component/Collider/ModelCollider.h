@@ -12,6 +12,8 @@ public:
 	~ModelCollider() override {}
 	// 名前取得
 	const char* GetName() const override { return "ModelCollider"; }
+	// 生成時処理
+	void OnCreate() override;
 	// 開始処理
 	void Start() override;
 	// 更新処理
@@ -48,6 +50,8 @@ private:
 private:
 	// モデル当たり判定情報
 	ModelCollision _modelCollision;
+	// 当たり判定タグごとのアクター
+	std::unordered_map<std::string, std::shared_ptr<Actor>> _tagActors;
 	// アニメータ
 	std::weak_ptr<Animator> _animator;
 	// 攻撃判定が出たかどうか

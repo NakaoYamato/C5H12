@@ -1,4 +1,7 @@
 #include "Damageable.h"
+
+#include <imgui.h>
+
 // 開始処理
 void Damageable::Start()
 {
@@ -12,6 +15,13 @@ void Damageable::Update(float elapsedTime)
 		_invisibleTimer -= elapsedTime;
 	// 前フレームに受けたダメージ量をリセット
 	_lastDamage = 0.0f;
+}
+// Gui描画
+void Damageable::DrawGui()
+{
+	ImGui::Text(u8"体力 : %f / %f", _health, _maxHealth);
+	ImGui::Text(u8"無敵状態 : %s", _invisibleTimer > 0.0f ? u8"True" : u8"False");
+	ImGui::Text(u8"前フレームに受けたダメージ量 : %f", _lastDamage);
 }
 // HP初期化
 void Damageable::ResetHealth(float maxHealth)

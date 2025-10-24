@@ -8,18 +8,20 @@ class Damageable : public Component
 {
 public:
 	Damageable() {}
-	~Damageable() override = default;
+	virtual ~Damageable() override = default;
 	// 名前取得
 	const char* GetName() const override { return "Damagable"; }
 	// 開始処理
 	void Start() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
+	// Gui描画
+	void DrawGui() override;
 
 	// HP初期化
-	void ResetHealth(float maxHealth);
+	virtual void ResetHealth(float maxHealth);
 	// ダメージを与える
-	bool AddDamage(float damage, Vector3 hitPosition, bool networkData = false);
+	virtual bool AddDamage(float damage, Vector3 hitPosition, bool networkData = false);
 
 #pragma region アクセサ
 	// ヘルス取得

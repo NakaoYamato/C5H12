@@ -7,8 +7,20 @@
 // 開始処理
 void DamageSender::Start()
 {
+	_modelCollider = GetActor()->GetCollider<ModelCollider>();
 	_effectController = GetActor()->GetComponent<EffectController>();
 	_targetable = GetActor()->GetComponent<Targetable>();
+}
+
+// 更新処理
+void DamageSender::Update(float elapsedTime)
+{
+	if (auto modelCollider = _modelCollider.lock())
+	{
+		// 攻撃イベントが呼び出されていなければリセット
+		if (!modelCollider->IsCollAttackEvent())
+			ResetAttackState();
+	}
 }
 
 // GUI描画
@@ -23,11 +35,21 @@ void DamageSender::DrawGui()
 }
 
 // 接触時処理
-void DamageSender::OnContactEnter(CollisionData& collisionData)
+void DamageSender::OnContact(CollisionData& collisionData)
 {
 	// 攻撃判定
 	if (collisionData.myLayer == CollisionLayer::Attack)
 	{
+		// 攻撃先情報を取得
+		// もし親がいるならその親の名前で取得
+		std::string targetName = collisionData.other->GetParent() ?
+			collisionData.other->GetParent()->GetName() :
+			collisionData.other->GetName();
+
+		// 以前に攻撃していた相手には攻撃しない
+		if (_attackedTargets.find(targetName) != _attackedTargets.end())
+			return;
+
 		// ダメージを与える
 		auto damageable = collisionData.other->GetComponent<Damageable>();
 		if (damageable != nullptr)
@@ -39,6 +61,9 @@ void DamageSender::OnContactEnter(CollisionData& collisionData)
 					_effectController.lock()->Play(_hitEffectIndex, collisionData.hitPosition);
 				// 自身のヘイト値を増やす
 				_targetable.lock()->AddHateValue(_ATK);
+
+				// 攻撃先情報を保存
+				_attackedTargets[targetName] = collisionData.other;
 			}
 		}
 	}

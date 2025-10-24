@@ -1,15 +1,30 @@
 #include "ModelCollider.h"
 
 #include "../../Library/Collision/CollisionMath.h"
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/DebugSupporter/DebugSupporter.h"
 
 #include <imgui.h>
 
-// 開始処理
-void ModelCollider::Start()
+// 生成時処理
+void ModelCollider::OnCreate()
 {
 	// モデルの当たり判定情報を読み込む
 	_modelCollision.Load(GetActor()->GetModel());
+
+	// 当たり判定情報のタグ名から子供オブジェクトを生成
+	std::string actorName = GetActor()->GetName();
+	for (auto& tag : _modelCollision.GetTags())
+	{
+		auto tagActor = GetActor()->GetScene()->RegisterActor<Actor>(actorName + tag, GetActor()->GetTag());
+		tagActor->SetParent(GetActor().get());
+		_tagActors[tag] = tagActor;
+	}
+}
+
+// 開始処理
+void ModelCollider::Start()
+{
 	// アニメータを取得
 	_animator = GetActor()->GetComponent<Animator>();
 }
@@ -23,6 +38,7 @@ void ModelCollider::Update(float elapsedTime)
 	auto& poseNodes = GetActor()->GetModel().lock()->GetPoseNodes();
 	auto& sphereDatas = _modelCollision.GetSphereDatas();
 	auto& capsuleDatas = _modelCollision.GetCapsuleDatas();
+	auto& tagNames = _modelCollision.GetTags();
 
 	std::vector<CollisionManager::SphereData> animationEventSphereDatas;
 	std::vector<CollisionManager::CapsuleData> animationEventCapsuleDatas;
@@ -35,6 +51,9 @@ void ModelCollider::Update(float elapsedTime)
 		if (sphere.nodeIndex == -1)
 			continue;
 		auto& node = poseNodes[sphere.nodeIndex];
+		Actor* actor = sphere.tagIndex != -1 ? 
+			_tagActors[tagNames.at(sphere.tagIndex)].get() :
+			GetActor().get();
 		Vector3 worldPosition = sphere.position.TransformCoord(node.worldTransform);
 
 		// アニメーションイベントの当たり判定と接触する場合当たり判定を登録しない
@@ -46,7 +65,7 @@ void ModelCollider::Update(float elapsedTime)
 			continue;
 
 		collisionManager.RegisterSphereData(
-			GetActor().get(),
+			actor,
 			GetLayer(),
 			GetLayerMask(),
 			worldPosition,
@@ -61,6 +80,9 @@ void ModelCollider::Update(float elapsedTime)
 			continue;
 		auto& startNode = poseNodes[capsule.startNodeIndex];
 		auto& endNode = poseNodes[capsule.endNodeIndex];
+		Actor* actor = capsule.tagIndex != -1 ?
+			_tagActors[tagNames.at(capsule.tagIndex)].get() :
+			GetActor().get();
 		Vector3 worldStart = capsule.start.TransformCoord(startNode.worldTransform);
 		Vector3 worldEnd = capsule.end.TransformCoord(endNode.worldTransform);
 
@@ -74,7 +96,7 @@ void ModelCollider::Update(float elapsedTime)
 			continue;
 
 		collisionManager.RegisterCapsuleData(
-			GetActor().get(),
+			actor,
 			GetLayer(),
 			GetLayerMask(),
 			worldStart,
@@ -91,6 +113,7 @@ void ModelCollider::DebugRender(const RenderContext& rc)
 // GUI描画
 void ModelCollider::DrawGui()
 {
+	ImGui::Checkbox(u8"攻撃判定イベント", &_collAttackEvent);
 	_modelCollision.DrawGui(false);
 }
 // アニメーションイベントの当たり判定更新

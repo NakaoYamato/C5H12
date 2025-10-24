@@ -91,6 +91,11 @@ public:
 	/// カプセルデータ取得
 	/// </summary>
 	const std::vector<CapsuleData>& GetCapsuleDatas() const { return _capsuleDatas; }
+	/// <summary>
+	/// タグ名リスト取得
+	/// </summary>
+	/// <returns></returns>
+	const std::vector<std::string>& GetTags() const { return _tags; }
 #pragma endregion
 private:
 	std::weak_ptr<Model> _model;

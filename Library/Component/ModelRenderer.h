@@ -40,6 +40,7 @@ public:
 	const Vector4& GetColor()const { return _color; }
 	std::vector<Material>& GetMaterials() { return _materialMap; }
 	Material& GetMaterial(int index) { return _materialMap[index]; }
+	Material& GetMaterial(const std::string& name);
 
 	// ƒ‚ƒfƒ‹İ’è
 	void SetModel(std::weak_ptr<Model> model);

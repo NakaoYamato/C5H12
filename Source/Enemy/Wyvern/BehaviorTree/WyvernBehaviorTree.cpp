@@ -12,12 +12,9 @@
 #include <imgui.h>
 
 WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* owner) :
-	_stateMachine(stateMachine)
+	_stateMachine(stateMachine),
+	_owner(owner)
 {
-	// オーナーからコンポーネントを取得
-	_animator	= owner->GetComponent<Animator>().get();
-	_combatStatus = owner->GetComponent<CombatStatusController>().get();
-
 	_behaviorData = std::make_unique<BehaviorData<WyvernBehaviorTree>>();
 	_behaviorTree = std::make_unique<BehaviorTreeBase<WyvernBehaviorTree>>(this);
 
@@ -25,17 +22,50 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	auto rootNode = _behaviorTree->GetRoot();
 	{
 		// ダウン処理
-		auto downNode = rootNode->AddNode("Down", 6, SelectRule::Priority, std::make_shared<WyvernDownJudgment>(this), nullptr);
+		auto downNode = rootNode->AddNode("Down", 6, SelectRule::Priority, 
+			std::make_shared<WyvernStringEqualJudgment>(this, &_interruptionName, "Down"), nullptr);
 		{
 			downNode->AddNode("FallDown", 1, SelectRule::Non, std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
-			downNode->AddNode("LandDown", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Down"));
+			auto landDownNode = downNode->AddNode("LandDown", 0, SelectRule::Priority, nullptr, nullptr);
+			{
+				landDownNode->AddNode("DownLeft", 1, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, std::vector<std::string>{ "LeftWing", "LeftFoot" }),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Down", u8"DownLStart"));
+				landDownNode->AddNode("DownRight", 0, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, std::vector<std::string>{ "RightWing", "RightFoot" }),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Down", u8"DownRStart"));
+			}
 		}
 
 		// ダメージ処理
-		auto damageNode = rootNode->AddNode("Damage", 5, SelectRule::Priority, std::make_shared<WyvernDamageJudgment>(this), nullptr);
+		auto damageNode = rootNode->AddNode("Damage", 5, SelectRule::Priority,
+			std::make_shared<WyvernStringEqualJudgment>(this, &_interruptionName, "Damage"), nullptr);
 		{
 			damageNode->AddNode("FallDamage", 1, SelectRule::Non, std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
-			damageNode->AddNode("LandDamage", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Damage"));
+			auto landDamageNode = damageNode->AddNode("LandDamage", 0, SelectRule::Priority, nullptr, nullptr);
+			{
+				landDamageNode->AddNode("DamageHead", 6, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "Head"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageLeft"));
+				landDamageNode->AddNode("DamageBody", 5, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "Body"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageLeft"));
+				landDamageNode->AddNode("DamageLeft", 4, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "LeftWing"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageLeft"));
+				landDamageNode->AddNode("DamageBackLeft", 3, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "LeftFoot"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageBackLeft"));
+				landDamageNode->AddNode("DamageRight", 2, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "RightWing"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageRight"));
+				landDamageNode->AddNode("DamageBackRight", 1, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "RightFoot"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageBackRight"));
+				landDamageNode->AddNode("DamageTail", 0, SelectRule::Non,
+					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "Tail"),
+					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageBackRight"));
+			}
 		}
 
 		// 怒り移行
@@ -116,13 +146,24 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 // 開始処理
 void WyvernBehaviorTree::Start()
 {
+	// オーナーからコンポーネントを取得
+	_animator = _owner->GetComponent<Animator>().get();
+	_combatStatus = _owner->GetComponent<CombatStatusController>().get();
+	// 子供から部位コントローラー取得
+	for (auto& child : _owner->GetChildren())
+	{
+		auto bodyPartController = child->GetComponent<BodyPartController>();
+		if (bodyPartController)
+		{
+			_bodyPartControllers.push_back(bodyPartController.get());
+		}
+	}
 }
 // ビヘイビアツリー実行
 void WyvernBehaviorTree::Execute(float elapsedTime)
 {
 	// 被弾処理
-	if (GetStateMachine()->GetEnemy()->IsPerformDamageReaction() ||
-		GetStateMachine()->GetEnemy()->IsPerformDownReaction())
+	if (IsDamageInterruption())
 	{
 		// 推論
 		_activeNode = _behaviorTree->ActiveNodeInference(_behaviorData.get());
@@ -133,6 +174,10 @@ void WyvernBehaviorTree::Execute(float elapsedTime)
 	// 現在の実行ノードがなければ取得
 	if (_activeNode == nullptr)
 	{
+		// 割り込み処理名初期化
+		_interruptionName = "";
+		_bodyPartName = "";
+
 		// ターゲットを更新する
 		GetCombatStatus()->SetIsUpdateTarget(true);
 		GetCombatStatus()->Update(0.0f);
@@ -178,4 +223,36 @@ void WyvernBehaviorTree::DrawBehaviorTreeGui(BehaviorNodeBase<WyvernBehaviorTree
 		}
 		ImGui::TreePop();
 	}
+}
+
+// 被弾割り込み処理が発生しているか
+bool WyvernBehaviorTree::IsDamageInterruption()
+{
+	// ダウン中は処理しない
+	if (_interruptionName == "Down")
+		return false;
+
+	bool res = false;
+
+	// 各部位の判定を取得
+	for (auto bodyPartController : _bodyPartControllers)
+	{
+		if (bodyPartController->IsDown())
+		{
+			res = true;
+			_interruptionName = "Down";
+			_bodyPartName = bodyPartController->GetBodyPartName();
+		}
+
+		if (_interruptionName == "" && bodyPartController->IsStagger())
+		{
+			res = true;
+			_interruptionName = "Damage";
+			_bodyPartName = bodyPartController->GetBodyPartName();
+		}
+		bodyPartController->SetIsStagger(false);
+		bodyPartController->SetIsDown(false);
+	}
+
+	return res;
 }

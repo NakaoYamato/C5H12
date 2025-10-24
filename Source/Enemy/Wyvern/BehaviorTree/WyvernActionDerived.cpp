@@ -22,6 +22,27 @@ BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 }
 #pragma endregion
 
+#pragma region 指定のサブステートが完了するまで実行し続ける
+// 開始処理
+void WyvernCompleteSubStateAction::Enter()
+{
+	_owner->GetStateMachine()->ChangeState(_startStateName, _startSubStateName);
+}
+// 実行処理
+BehaviorActionState WyvernCompleteSubStateAction::Execute(float elapsedTime)
+{
+	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
+
+	if (currentStateName == _endStateName)
+	{
+		// ステートが終了ステートと同じなら成功
+		return BehaviorActionState::Complete;
+	}
+	// それ以外は実行中
+	return BehaviorActionState::Run;
+}
+#pragma endregion
+
 #pragma region 指定のステートを再生してすぐに終了する
 void WyvernOneAction::Enter()
 {

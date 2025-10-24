@@ -27,10 +27,22 @@ public:
 	const ModelCollision& GetModelCollision() const { return _modelCollision; }
 	bool IsCollAttackEvent() const { return _collAttackEvent; }
 
-	// タグごとのアクター取得
-	std::unordered_map<std::string, std::shared_ptr<Actor>>& GetTagActors()
+	// 部位ごとのアクター生成
+	Actor* CreateTagActor(const std::string& tag)
 	{
-		return _tagActors;
+		auto actor = GetActor()->GetScene()->RegisterActor<Actor>(
+			GetActor()->GetName() + tag,
+			GetActor()->GetTag()
+		);
+		actor->SetParent(GetActor().get());
+		_bodyPartActors[tag] = actor;
+		return actor.get();
+	}
+
+	// 部位ごとのアクター取得
+	std::unordered_map<std::string, std::weak_ptr<Actor>>& GetTagActors()
+	{
+		return _bodyPartActors;
 	}
 private:
 	// アニメーションイベントの当たり判定更新
@@ -56,8 +68,8 @@ private:
 private:
 	// モデル当たり判定情報
 	ModelCollision _modelCollision;
-	// 当たり判定タグごとのアクター
-	std::unordered_map<std::string, std::shared_ptr<Actor>> _tagActors;
+	// 部位ごとのアクター
+	std::unordered_map<std::string, std::weak_ptr<Actor>> _bodyPartActors;
 	// アニメータ
 	std::weak_ptr<Animator> _animator;
 	// 攻撃判定が出たかどうか

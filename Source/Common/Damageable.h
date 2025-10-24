@@ -36,6 +36,8 @@ public:
 	const Vector3& GetHitPosition() const { return _hitPosition; }
 	// 前フレームに受けたダメージ量
 	float GetLastDamage() const { return _lastDamage; }
+	// 総ダメージ量取得
+	float GetTotalDamage() const { return _totalDamage; }
 
 	// 無敵状態にする
 	void SetInvisible(float time) { _invisibleTimer = time; }
@@ -51,7 +53,7 @@ public:
 	void SetOnDamageCallback(std::function<void(float, Vector3)> callback) { _onDamageCallback = callback; }
 #pragma endregion
 
-private:
+protected:
 	// 無敵状態タイマー
 	float _invisibleTimer = 0.0f; 
 	// 現在のHP
@@ -62,6 +64,8 @@ private:
 	Vector3 _hitPosition = Vector3::Zero;
 	// 前フレームに受けたダメージ量
 	float _lastDamage = 0.0f;
+	// 総ダメージ量
+	float _totalDamage = 0.0f;
 
 	// ダメージを受ける判定のコールバック関数
 	std::function<bool(float, Vector3)> _takeableDamageCallback;

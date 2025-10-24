@@ -6,6 +6,7 @@
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/EffectController.h"
+#include "../../Library/Component/ModelRenderer.h"
 
 #include "../EnemyController.h"
 #include "WyvernController.h"
@@ -14,6 +15,7 @@
 
 #include "../../Source/Common/DamageableChild.h"
 #include "../../Source/Stage/EnvironmentDestroyer.h"
+#include "../BodyPartController.h"
 
 #include <imgui.h>
 
@@ -48,13 +50,38 @@ void WyvernActor::OnCreate()
 	auto modelCollider = AddCollider<ModelCollider>();
 	modelCollider->SetLayer(CollisionLayer::Hit);
 
-	// 子供オブジェクトにDamageableChildコンポーネントを追加
-	for (auto& child : GetChildren())
-	{
-		child->AddComponent<DamageableChild>(_damageable);
-		// 接触した地形を破壊するコンポーネントを追加
-		child->AddComponent<EnvironmentDestroyer>();
-	}
+	// コライダーを設定する子供オブジェクトを生成
+	// tag = 部位名
+	// bodyPartDurability = 部位耐久値
+	// staggerInterval = 部位怯み間隔
+	// staggerToDownCount = 部位ダウンまでの怯み回数(-1でダウンしない)
+	auto CreateParts = [&](const std::string& tag, float bodyPartDurability, float staggerInterval, int staggerToDownCount)
+		{
+			auto partActor = modelCollider->CreateTagActor(tag);
+			// 子供オブジェクトにコンポーネント追加
+			partActor->AddComponent<DamageableChild>(_damageable);
+			partActor->AddComponent<EnvironmentDestroyer>();
+			auto bodyPart = partActor->AddComponent<BodyPartController>();
+
+			bodyPart->Initialize(tag, bodyPartDurability, staggerInterval, staggerToDownCount);
+
+			return bodyPart;
+		};
+	auto headParts = CreateParts("Head", 20.0f, 5.0f, -1);
+	auto bodyParts = CreateParts("Body", 20.0f, 5.0f, -1);
+	auto tailParts = CreateParts("Tail", 20.0f, 5.0f, -1);
+	auto leftWingParts = CreateParts("LeftWing", 20.0f, 3.0f, 2);
+	auto rightWingParts = CreateParts("RightWing", 20.0f, 3.0f, 2);
+	auto leftFootParts = CreateParts("LeftFoot", 20.0f, 3.0f, 2);
+	auto rightFootParts = CreateParts("RightFoot", 20.0f, 3.0f, 2);
+
+	// 部位破壊時のコールバック設定
+	leftWingParts->SetOnDestroyCallback([&] {
+		// 翼のマテリアルを赤くする
+		auto modelRenderer = this->GetComponent<ModelRenderer>();
+		auto& material = modelRenderer->GetMaterial("Material #31");
+		material.SetColor("Diffuse", Vector4::Red);
+		});
 }
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)

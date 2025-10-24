@@ -598,93 +598,21 @@ void WyvernPursuitState::OnExit()
 #pragma endregion
 
 #pragma region ダメージを受ける
+WyvernDamageState::WyvernDamageState(WyvernStateMachine* owner) :
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontRight", u8"DamageFrontRight", 0.5f, false, false));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageRight", u8"DamageRight", 0.5f, false, false));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackRight", u8"DamageBackRight", 0.5f, false, false));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontLeft", u8"DamageFrontLeft", 0.5f, false, false));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageLeft", u8"DamageLeft", 0.5f, false, false));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackLeft", u8"DamageBackLeft", 0.5f, false, false));
+}
 void WyvernDamageState::OnEnter()
 {
-	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& hitPosition = _owner->GetDamageable()->GetHitPosition();
-	auto targetDirection = (hitPosition - position).Normalize();
-	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
-	// 被弾位置から右前、右、右後ろ、左前、左、左後ろのどこに被弾するか判定
-	float crossY = front.Cross(targetDirection).y;
-	float dot = front.Dot(targetDirection);
-	if (crossY > 0.0f)
-	{
-		// 右方向に被弾
-		if (dot > _frontAngleThreshold)
-		{
-			// 前方右に被弾
-			// アニメーション再生
-			_owner->GetAnimator()->PlayAnimation(
-				u8"DamageFrontRight",
-				false,
-				0.5f);
-			_owner->GetAnimator()->SetIsUseRootMotion(false);
-		}
-		else if (dot < _backAngleThreshold)
-		{
-			// 後方右に被弾
-			// アニメーション再生
-			_owner->GetAnimator()->PlayAnimation(
-				u8"DamageBackRight",
-				false,
-				0.5f);
-			_owner->GetAnimator()->SetIsUseRootMotion(false);
-			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
-			// アニメーションの回転量を反映させる
-			_applyRotation = true;
-		}
-		else
-		{
-			// 右方向に被弾
-			// アニメーション再生
-			_owner->GetAnimator()->PlayAnimation(
-				u8"DamageRight",
-				false,
-				0.5f);
-			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			// アニメーションの回転量を反映させる
-			_applyRotation = true;
-		}
-	}
-	else
-	{
-		// 左方向に被弾
-		if (dot > _frontAngleThreshold)
-		{
-			// 前方左に被弾
-			// アニメーション再生
-			_owner->GetAnimator()->PlayAnimation(
-				u8"DamageFrontLeft",
-				false,
-				0.5f);
-			_owner->GetAnimator()->SetIsUseRootMotion(false);
-		}
-		else if (dot < _backAngleThreshold)
-		{
-			// 後方左に被弾
-			// アニメーション再生
-			_owner->GetAnimator()->PlayAnimation(
-				u8"DamageBackLeft",
-				false,
-				0.5f);
-			_owner->GetAnimator()->SetIsUseRootMotion(false);
-			_owner->GetAnimator()->SetIsRemoveRootMovement(true);
-			// アニメーションの回転量を反映させる
-			_applyRotation = true;
-		}
-		else
-		{
-			// 左方向に被弾
-			// アニメーション再生
-			_owner->GetAnimator()->PlayAnimation(
-				u8"DamageLeft",
-				false,
-				0.5f);
-			_owner->GetAnimator()->SetIsUseRootMotion(true);
-			// アニメーションの回転量を反映させる
-			_applyRotation = true;
-		}
-	}
+	_owner->GetAnimator()->SetIsRemoveRootMovement(true);
+	// BehaviorTreeで遷移を制御
 }
 void WyvernDamageState::OnExecute(float elapsedTime)
 {
@@ -698,26 +626,19 @@ void WyvernDamageState::OnExecute(float elapsedTime)
 void WyvernDamageState::OnExit()
 {
 	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-	if (_applyRotation)
-	{
-		int rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
-		// 回転量の差分を求める
-		Quaternion q = _owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
+	int rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
+	// 回転量の差分を求める
+	Quaternion q = _owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
 
-		// 回転量をアクターに反映する
-		auto& transform = _owner->GetEnemy()->GetActor()->GetTransform();
-		Vector3 angle{};
-		// y値をyに設定
-		angle.y = -q.ToRollPitchYaw().y;
-		transform.AddAngle(angle);
-		transform.UpdateTransform(nullptr);
+	// 回転量をアクターに反映する
+	auto& transform = _owner->GetEnemy()->GetActor()->GetTransform();
+	Vector3 angle{};
+	// y値をyに設定
+	angle.y = -q.ToRollPitchYaw().y;
+	transform.AddAngle(angle);
+	transform.UpdateTransform(nullptr);
 
-		// フラグを下ろす
-		_applyRotation = false;
-		_owner->GetAnimator()->SetIsRemoveRootMovement(false);
-	}
-
-	_owner->GetAnimator()->SetIsUseRootMotion(false);
+	_owner->GetAnimator()->SetIsRemoveRootMovement(false);
 }
 #pragma endregion
 
@@ -809,22 +730,7 @@ WyvernDownState::WyvernDownState(WyvernStateMachine* owner) :
 }
 void WyvernDownState::OnEnter()
 {
-	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-	auto& hitPosition = _owner->GetDamageable()->GetHitPosition();
-	auto targetDirection = (hitPosition - position).Normalize();
-	auto front = _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ().Normalize();
-	// 被弾位置から左右判定
-	float crossY = front.Cross(targetDirection).y;
-	if (crossY > 0.0f)
-	{
-		// 右方向に被弾
-		ChangeSubState(u8"DownRStart");
-	}
-	else
-	{
-		// 左方向に被弾
-		ChangeSubState(u8"DownLStart");
-	}
+	// BehaviorTreeで遷移を制御
 }
 void WyvernDownState::OnExit()
 {

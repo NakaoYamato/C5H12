@@ -8,6 +8,8 @@ public:
 	DamageableChild(std::weak_ptr<Damageable> parent) : _parent(parent)
 	{
 	}
+	// 名前取得
+	const char* GetName() const override { return "DamageableChild"; }
 	virtual ~DamageableChild() = default;
 
 	// ダメージを与える

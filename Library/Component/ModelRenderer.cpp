@@ -133,6 +133,16 @@ void ModelRenderer::ChangeMaterialSRV(
 		}
 	}
 }
+Material& ModelRenderer::GetMaterial(const std::string& name)
+{
+	for (auto& material : _materialMap)
+	{
+		if (material.GetName() == name)
+			return material;
+	}
+	// ‘¶İ‚µ‚Ä‚¢‚È‚¢ê‡æ“ª‚ğ“n‚·
+	return _materialMap[0];
+}
 void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 {
 	_model = model;

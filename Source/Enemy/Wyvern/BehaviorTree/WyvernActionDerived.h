@@ -26,6 +26,31 @@ private:
 };
 #pragma endregion
 
+#pragma region 指定のサブステートが完了するまで実行し続ける
+class WyvernCompleteSubStateAction : public BehaviorActionBase<WyvernBehaviorTree>
+{
+public:
+	WyvernCompleteSubStateAction(
+		WyvernBehaviorTree* owner,
+		const char* startStateName,
+		const char* startSubStateName,
+		const char* endStateName = "Idle") :
+		BehaviorActionBase(owner),
+		_startStateName(startStateName),
+		_startSubStateName(startSubStateName),
+		_endStateName(endStateName) {
+	}
+	// 開始処理
+	void Enter()override;
+	// 実行処理
+	BehaviorActionState Execute(float elapsedTime) override;
+private:
+	const char* _startStateName = nullptr; // 実行するステート名
+	const char* _startSubStateName = nullptr; // 実行するサブステート名
+	const char* _endStateName = nullptr; // 終了判定のステート名
+};
+#pragma endregion
+
 #pragma region 指定のステートを再生してすぐに終了する
 class WyvernOneAction : public BehaviorActionBase<WyvernBehaviorTree>
 {

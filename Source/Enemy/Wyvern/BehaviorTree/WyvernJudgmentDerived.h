@@ -1,26 +1,40 @@
 #pragma once
 
 #include "../../Library/Algorithm/BehaviorTree/BehaviorJudgmentBase.h"
+#include "WyvernBehaviorTree.h"
+#include "../WyvernController.h"
+#include "../../EnemyController.h"
 
 // ‘O•ûéŒ¾
 class WyvernBehaviorTree;
 
-// downNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-class WyvernDownJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+// w’è‚Ìstring‚ª“Á’è‚Ì’l‚©”»’è
+class WyvernStringEqualJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
 {
 public:
-	WyvernDownJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
+	WyvernStringEqualJudgment(WyvernBehaviorTree* owner, std::string* target, const std::string& compare) :
+		BehaviorJudgmentBase(owner),
+		_target(target)
+	{
+		_compares.push_back(compare);
+	};
+	WyvernStringEqualJudgment(WyvernBehaviorTree* owner, std::string* target, std::vector<std::string> compares) :
+		BehaviorJudgmentBase(owner),
+		_target(target),
+		_compares(compares)
+	{
+	};
 	// ”»’è
-	bool Judgment() override;
-};
-
-// damageNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-class WyvernDamageJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
-{
-public:
-	WyvernDamageJudgment(WyvernBehaviorTree* owner) :BehaviorJudgmentBase(owner) {};
-	// ”»’è
-	bool Judgment() override;
+	bool Judgment() override
+	{
+		for (const auto& _compare : _compares)
+			if (*_target == _compare)
+				return true;
+		return false;
+	}
+private:
+	std::string* _target;
+	std::vector<std::string> _compares;
 };
 
 // alertNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è

@@ -6,7 +6,10 @@ bool DamageableChild::AddDamage(float damage, Vector3 hitPosition, bool networkD
 	// 親のDamageableにダメージを与える
 	if (auto parent = _parent.lock())
 	{
-		return parent->AddDamage(damage, hitPosition, networkData);
+		bool res = parent->AddDamage(damage, hitPosition, networkData);
+		if (res)
+			this->_totalDamage += damage;
+		return res;
 	}
 	return false;
 }

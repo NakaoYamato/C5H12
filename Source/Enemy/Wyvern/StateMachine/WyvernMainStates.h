@@ -289,7 +289,7 @@ public:
 class WyvernDamageState : public HierarchicalStateBase<WyvernStateMachine>
 {
 public:
-	WyvernDamageState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
+	WyvernDamageState(WyvernStateMachine* owner);
 	const char* GetName() const override { return "Damage"; };
 	// 開始処理
 	void OnEnter() override;
@@ -302,9 +302,6 @@ private:
 	const float _frontAngleThreshold = 0.8f;
 	// 後方向と判定する角度(cos値)
 	const float _backAngleThreshold = -0.3f;
-
-	// アニメーションの回転を適用するかどうか
-	bool _applyRotation = false;
 };
 #pragma endregion
 

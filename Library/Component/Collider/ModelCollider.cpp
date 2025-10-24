@@ -11,13 +11,11 @@ void ModelCollider::OnCreate()
 	// モデルの当たり判定情報を読み込む
 	_modelCollision.Load(GetActor()->GetModel());
 
-	// 当たり判定情報のタグ名から子供オブジェクトを生成
+	// 各部位のアクターを仮で設定
 	std::string actorName = GetActor()->GetName();
 	for (auto& tag : _modelCollision.GetTags())
 	{
-		auto tagActor = GetActor()->GetScene()->RegisterActor<Actor>(actorName + tag, GetActor()->GetTag());
-		tagActor->SetParent(GetActor().get());
-		_tagActors[tag] = tagActor;
+		_bodyPartActors[tag] = this->GetActor();
 	}
 }
 
@@ -51,7 +49,7 @@ void ModelCollider::Update(float elapsedTime)
 			continue;
 		auto& node = poseNodes[sphere.nodeIndex];
 		Actor* actor = sphere.tagIndex != -1 ? 
-			_tagActors[tagNames.at(sphere.tagIndex)].get() :
+			_bodyPartActors[tagNames.at(sphere.tagIndex)].lock().get() :
 			GetActor().get();
 		Vector3 worldPosition = sphere.position.TransformCoord(node.worldTransform);
 
@@ -80,7 +78,7 @@ void ModelCollider::Update(float elapsedTime)
 		auto& startNode = poseNodes[capsule.startNodeIndex];
 		auto& endNode = poseNodes[capsule.endNodeIndex];
 		Actor* actor = capsule.tagIndex != -1 ?
-			_tagActors[tagNames.at(capsule.tagIndex)].get() :
+			_bodyPartActors[tagNames.at(capsule.tagIndex)].lock().get() :
 			GetActor().get();
 		Vector3 worldStart = capsule.start.TransformCoord(startNode.worldTransform);
 		Vector3 worldEnd = capsule.end.TransformCoord(endNode.worldTransform);

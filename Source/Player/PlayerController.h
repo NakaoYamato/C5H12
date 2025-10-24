@@ -37,8 +37,6 @@ public:
 	void DelayedRender(const RenderContext& rc) override;
 	// GUI描画
 	void DrawGui() override;
-	// 接触時処理
-	void OnContactEnter(CollisionData& collisionData) override;
 
 #pragma region アクセサ
 	// キャラクターコントローラー取得
@@ -50,12 +48,6 @@ public:
 	{
 		return _damageable.lock();
 	}
-	// 攻撃力のセット
-	void SetATK(float atk) { _ATK = atk; }
-	// 基本攻撃力のセット
-	void SetBaseATK(float baseATK) { _BaseATK = baseATK; }
-	// ダメージ倍率のセット
-	void SetATKFactor(float atkFactor) { _ATKFactor = atkFactor; }
 #pragma endregion
 
 #pragma region アクセサ
@@ -122,14 +114,5 @@ private:
 	bool _isGuard = false;
 	bool _isDead = false;
 	bool _isUsingItem = false;
-#pragma endregion
-
-#pragma region 攻撃関係
-	// 最終攻撃力
-	float _ATK = 1.0f;
-	// 基本攻撃力
-	float _BaseATK = 1.0f;
-	// ダメージ倍率
-	float _ATKFactor = 1.0f;
 #pragma endregion
 };

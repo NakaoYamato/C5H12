@@ -5,12 +5,14 @@
 #include "EnemyController.h"
 #include "../../Library/Component/StateController.h"
 #include "../../Source/Network/NetworkReceiver.h"
+#include "../../Source/Common/DamageSender.h"
 #include "EnemyNetworkSender.h"
 
 void EnemyActor::OnCreate()
 {
 	_charactorController	= this->AddComponent<CharactorController>();
 	_damageable				= this->AddComponent<Damageable>();
+	auto damageSender		= this->AddComponent<DamageSender>();
 	_targetable				= this->AddComponent<Targetable>();
 	_combatStatus 			= this->AddComponent<CombatStatusController>();
 	auto roarController		= this->AddComponent<RoarController>();
@@ -63,5 +65,6 @@ void EnemyActor::OnCreate()
 			});
 	}
 
+	damageSender->SetHitEffectIndex(0/*TODO : enum‰»*/);
 	_targetable.lock()->SetFaction(Targetable::Faction::Enemy);
 }

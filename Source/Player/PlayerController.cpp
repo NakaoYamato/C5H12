@@ -72,9 +72,6 @@ void PlayerController::Update(float elapsedTime)
 {
 	auto animator = _animator.lock();
 
-	// UŒ‚—Í‚ÌXV
-	_ATK = _BaseATK * _ATKFactor;
-
 	_callInputBufferingEvent = false;
 	_callCancelAttackEvent = false;
 	_callCancelEvent = false;
@@ -138,30 +135,5 @@ void PlayerController::DelayedRender(const RenderContext& rc)
 // GUI•`‰æ
 void PlayerController::DrawGui()
 {
-	ImGui::DragFloat(u8"UŒ‚—Í",		&_ATK, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat(u8"Šî–{UŒ‚—Í", &_BaseATK, 0.1f, 0.0f, 100.0f);
-	ImGui::DragFloat(u8"UŒ‚”{—¦",	&_ATKFactor, 0.01f, 0.0f, 10.0f);
-
 	ImGui::Separator();
-}
-
-// ÚGŽžˆ—
-void PlayerController::OnContactEnter(CollisionData& collisionData)
-{
-	// UŒ‚”»’è
-	if (collisionData.myLayer == CollisionLayer::Attack)
-	{
-		// ƒ_ƒ[ƒW‚ð—^‚¦‚é
-		auto damageable = collisionData.other->GetComponent<Damageable>();
-		if (damageable != nullptr)
-		{
-			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
-			{
-				// ƒ_ƒ[ƒW‚ð—^‚¦‚½‚çƒqƒbƒgƒGƒtƒFƒNƒgÄ¶
-				_effectController.lock()->Play(PlayerController::EffectType::HitEffect, collisionData.hitPosition);
-				// Ž©g‚ÌƒwƒCƒg’l‚ð‘‚â‚·
-				_targetable.lock()->AddHateValue(_ATK);
-			}
-		}
-	}
 }

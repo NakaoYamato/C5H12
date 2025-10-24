@@ -8,6 +8,7 @@
 #include "../../Library/Component/Collider/ModelCollider.h"
 
 #include "../../Source/Common/Targetable.h"
+#include "../../Source/Common/DamageSender.h"
 #include "PlayerInput.h"
 #include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
@@ -31,43 +32,48 @@ void PlayerActor::OnCreate()
 	// コンポーネント追加
 	//auto modelRenderer		= AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
 	auto damageable				= this->AddComponent<Damageable>();
+	auto damageSender			= this->AddComponent<DamageSender>();
 	auto targetable				= this->AddComponent<Targetable>();
 	auto modelRenderer			= this->AddComponent<ModelRenderer>();
 	auto animator				= this->AddComponent<Animator>();
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto effectController		= this->AddComponent<EffectController>();
-	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(playerController.get(), animator.get(), effectController.get()));
+	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(this));
 	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
 
 	// エフェクト読み込み
-	effectController->LoadEffekseerEffect(PlayerController::EffectType::HitEffect, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
-	effectController->LoadEffekseerEffect(PlayerController::EffectType::Charge0, "./Data/Effect/Effekseer/Player/Charge.efk");
 	{
-		EffectController::EffekseerEffectData* effectData = 
-			((EffectController::EffekseerEffectData*)effectController->GetEffectData(PlayerController::EffectType::Charge0));
-		effectData->SetAllColor(Vector4::Yellow);
-		effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+		effectController->LoadEffekseerEffect(PlayerController::EffectType::HitEffect, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+		effectController->LoadEffekseerEffect(PlayerController::EffectType::Charge0, "./Data/Effect/Effekseer/Player/Charge.efk");
+		{
+			EffectController::EffekseerEffectData* effectData =
+				((EffectController::EffekseerEffectData*)effectController->GetEffectData(PlayerController::EffectType::Charge0));
+			effectData->SetAllColor(Vector4::Yellow);
+			effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+		}
+		effectController->LoadEffekseerEffect(PlayerController::EffectType::Charge1, "./Data/Effect/Effekseer/Player/Charge.efk");
+		{
+			EffectController::EffekseerEffectData* effectData =
+				((EffectController::EffekseerEffectData*)effectController->GetEffectData(PlayerController::EffectType::Charge1));
+			effectData->SetAllColor(Vector4::Orange);
+			effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+		}
+		effectController->LoadEffekseerEffect(PlayerController::EffectType::Charge2, "./Data/Effect/Effekseer/Player/Charge.efk");
+		{
+			EffectController::EffekseerEffectData* effectData =
+				((EffectController::EffekseerEffectData*)effectController->GetEffectData(PlayerController::EffectType::Charge2));
+			effectData->SetAllColor(Vector4::Red);
+			effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+		}
 	}
-	effectController->LoadEffekseerEffect(PlayerController::EffectType::Charge1, "./Data/Effect/Effekseer/Player/Charge.efk");
-	{
-		EffectController::EffekseerEffectData* effectData = 
-			((EffectController::EffekseerEffectData*)effectController->GetEffectData(PlayerController::EffectType::Charge1));
-		effectData->SetAllColor(Vector4::Orange);
-		effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
-	}
-	effectController->LoadEffekseerEffect(PlayerController::EffectType::Charge2, "./Data/Effect/Effekseer/Player/Charge.efk");
-	{
-		EffectController::EffekseerEffectData* effectData =
-			((EffectController::EffekseerEffectData*)effectController->GetEffectData(PlayerController::EffectType::Charge2));
-		effectData->SetAllColor(Vector4::Red);
-		effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
-	}
-	// プレイヤーが操作する場合は、プレイヤーコントローラーを追加
+
+	// プレイヤーが操作する場合は、プレイヤーインプットを追加
 	if (_isUserControlled)
 		this->AddComponent<PlayerInput>();
+
     // ネットワーク受信イベントの設定
 	if (networkReceiver)
 	{
@@ -121,10 +127,12 @@ void PlayerActor::OnCreate()
 	GetTransform().SetLengthScale(1.0f);
 	GetTransform().SetPositionY(1.0f);
 	damageable->SetMaxHealth(10.0f);
-	targetable->SetFaction(Targetable::Faction::Player);
+	damageSender->SetHitEffectIndex(PlayerController::EffectType::HitEffect);
 	// 操作対象でなければ攻撃力の倍率を0にしてダメージを与えられないようにする
 	if (!_isUserControlled)
-		playerController->SetATKFactor(0.0f);
+		damageSender->SetBaseATK(0.0f);
+
+	targetable->SetFaction(Targetable::Faction::Player);
 
 	capsuleCollider->SetStart(Vector3(0.0f, 0.0f, 0.0f));
 	capsuleCollider->SetEnd(Vector3(0.0f, 1.2f, 0.0f));

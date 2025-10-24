@@ -14,6 +14,7 @@ WyvernStateMachine::WyvernStateMachine(Actor* owner)
 	_wyvern = owner->GetComponent<WyvernController>().get();
 	_animator = owner->GetComponent<Animator>().get();
 	_damageable = owner->GetComponent<Damageable>().get();
+	_damageSender = owner->GetComponent<DamageSender>().get();
 	_combatStatus = owner->GetComponent<CombatStatusController>().get();
 	_roarController = owner->GetComponent<RoarController>().get();
 

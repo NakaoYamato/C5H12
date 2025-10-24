@@ -251,7 +251,7 @@ namespace Attack1SubState
             const std::string& nextSubStateName,
             const std::string& branchSubStateName,
             float animationBlendTime,
-            float ATK) :
+            float motionFactor) :
             PlayerSSB(stateMachine,
                 name,
                 animationName,
@@ -260,7 +260,7 @@ namespace Attack1SubState
                 true),
 			_nextSubStateName(nextSubStateName),
             _branchSubStateName(branchSubStateName),
-			_ATK(ATK)
+            _motionFactor(motionFactor)
         {
         }
 
@@ -271,12 +271,12 @@ namespace Attack1SubState
         {
             PlayerSSB::OnEnter();
             // UŒ‚ƒtƒ‰ƒO‚ð—§‚Ä‚é
-            _owner->GetPlayer()->SetBaseATK(_ATK);
+			_owner->GetDamageSender()->SetMotionFactor(_motionFactor);
         }
     private:
         std::string _nextSubStateName;
         std::string _branchSubStateName;
-        float _ATK = 1.0f;
+		float _motionFactor = 1.0f;
     };
     class ChargingAttackSubState final : public ComboSubState
     {

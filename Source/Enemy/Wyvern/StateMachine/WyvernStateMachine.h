@@ -6,6 +6,7 @@
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/CombatStatusController.h"
 #include "../../Source/Common/RoarController.h"
+#include "../../Source/Common/DamageSender.h"
 
 // ëOï˚êÈåæ
 class EnemyController;
@@ -36,6 +37,7 @@ public:
 	EnemyController* GetEnemy() { return _enemy; }
 	WyvernController* GetWyvern() { return _wyvern; }
 	Animator* GetAnimator() { return _animator; }
+	DamageSender* GetDamageSender() { return _damageSender; }
 	CombatStatusController* GetCombatStatus() { return _combatStatus; }
 	Damageable* GetDamageable() { return _damageable; }
 
@@ -59,6 +61,7 @@ private:
 	WyvernController* _wyvern = nullptr;
 	Animator* _animator = nullptr;
 	Damageable* _damageable = nullptr;
+	DamageSender* _damageSender = nullptr;
 	CombatStatusController* _combatStatus = nullptr;
 	RoarController* _roarController = nullptr;
 

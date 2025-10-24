@@ -291,6 +291,7 @@
     <ClCompile Include="Library\Terrain\TerrainTransparentWall.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
     <ClCompile Include="Source\Common\CombatStatusController.cpp" />
+    <ClCompile Include="Source\Common\DamageSender.cpp" />
     <ClCompile Include="Source\Common\RoarController.cpp" />
     <ClCompile Include="Source\Common\Targetable.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
@@ -532,6 +533,7 @@
     <ClInclude Include="Library\Terrain\TerrainTransparentWall.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
     <ClInclude Include="Source\Common\CombatStatusController.h" />
+    <ClInclude Include="Source\Common\DamageSender.h" />
     <ClInclude Include="Source\Common\RoarController.h" />
     <ClInclude Include="Source\Common\Targetable.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />

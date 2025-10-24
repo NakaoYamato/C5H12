@@ -22,8 +22,6 @@ public:
     void DelayedRender(const RenderContext& rc) override;
     // GUI•`‰æ
     void DrawGui() override;
-    // ÚGˆ—
-    void OnContactEnter(CollisionData& collisionData) override;
 
     // ƒ^[ƒQƒbƒg‚Æ‚ÌŠp“x
     float GetAngleToTarget(const Vector3& target);
@@ -36,7 +34,6 @@ public:
 #pragma region ƒAƒNƒZƒT
 	std::shared_ptr<CharactorController> GetCharactorController() const { return _charactorController.lock(); }
 
-	float GetATK() const { return _ATK; }
 	float GetAttackRange() const { return _attackRange; }
 	float GetNearAttackRange() const { return _nearAttackRange; }
 	float GetRotationSpeed() const { return _rotationSpeed; }
@@ -46,7 +43,6 @@ public:
 	float GetAngryTimer() const { return _angryTimer; }
 	bool IsAngry() const { return _isAngry; }
 
-	void SetATK(float atk) { _ATK = atk; }
 	void SetAttackRange(float attackRange) { _attackRange = attackRange; }
 	void SetNearAttackRange(float nearAttackRange) { _nearAttackRange = nearAttackRange; }
 	void SetRotationSpeed(float rotationSpeed) { _rotationSpeed = rotationSpeed; }
@@ -69,8 +65,6 @@ protected:
     std::weak_ptr<EffectController> _effectController;
     std::weak_ptr<Damageable> _damageable;
 
-	// UŒ‚—Í
-    float _ATK = 1.0f;
 	// UŒ‚”ÍˆÍ
     float _attackRange = 20.0f;
 	// ‹ßÚUŒ‚”ÍˆÍ

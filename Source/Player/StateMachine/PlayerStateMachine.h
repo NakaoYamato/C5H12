@@ -5,6 +5,8 @@
 #include "../../Library/Component/EffectController.h"
 #include "../../Library/Math/Vector.h"
 
+#include "../../Source/Common/DamageSender.h"
+
 // 前方宣言
 class PlayerController;
 class Animator;
@@ -13,7 +15,7 @@ class Animator;
 class PlayerStateMachine : public StateMachine
 {
 public:
-    PlayerStateMachine(PlayerController* player, Animator* animator, EffectController* effect);
+    PlayerStateMachine(Actor* owner);
     ~PlayerStateMachine() {}
 
 	// 開始処理
@@ -31,9 +33,10 @@ public:
 	void RotationMovement(float elapsedTime, float rotationSpeed = 1.0f);
 #pragma region アクセサ
 	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
-	PlayerController* GetPlayer() { return _player; }
-	Animator* GetAnimator() { return _animator; }
-	EffectController* GetEffect() { return _effect; }
+	PlayerController*	GetPlayer()			{ return _player; }
+	DamageSender*		GetDamageSender()	{ return _damageSender; }
+	Animator*			GetAnimator()		{ return _animator; }
+	EffectController*	GetEffect()			{ return _effect; }
 	// ステート変更
 	void ChangeState(const char* mainStateName, const char* subStateName) override;
     // ステート名取得
@@ -43,9 +46,10 @@ public:
 #pragma endregion
 private:
 	StateMachineBase<PlayerStateMachine> _stateMachine;
-	PlayerController* _player = nullptr;
-	Animator* _animator = nullptr;
-	EffectController* _effect = nullptr;
+	PlayerController*					_player = nullptr;
+	DamageSender*						_damageSender = nullptr;
+	Animator*							_animator = nullptr;
+	EffectController*					_effect = nullptr;
 };
 
 // プレイヤーのヒエラルキカルステートのベースクラス

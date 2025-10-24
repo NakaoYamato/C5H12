@@ -10,11 +10,14 @@
 
 #include <imgui.h>
 
-PlayerStateMachine::PlayerStateMachine(PlayerController* player, Animator* animator, EffectController* effect) :
-	_player(player),
-    _animator(animator),
-	_effect(effect)
+PlayerStateMachine::PlayerStateMachine(Actor* owner)
 {
+    // コンポーネント取得
+	_player = owner->GetComponent<PlayerController>().get();
+	_animator = owner->GetComponent<Animator>().get();
+	_effect = owner->GetComponent<EffectController>().get();
+	_damageSender = owner->GetComponent<DamageSender>().get();
+
     // ステート設定
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatIdleState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatTurnState>(this));

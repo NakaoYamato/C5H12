@@ -90,32 +90,10 @@ void EnemyController::DrawGui()
 	ImGui::Text(u8"“{‚èƒ^ƒCƒ}[: %.1f", _angryTimer);
 	ImGui::Separator();
 
-	ImGui::DragFloat(u8"UŒ‚—Í", &_ATK, 0.1f, 0.0f, 100.0f, "%.1f");
 	ImGui::DragFloat(u8"UŒ‚”ÍˆÍ", &_attackRange, 0.1f, 0.0f, 100.0f, "%.1f m");
 	ImGui::DragFloat(u8"‹ßÚUŒ‚”ÍˆÍ", &_nearAttackRange, 0.1f, 0.0f, 100.0f, "%.1f m");
 	ImGui::DragFloat(u8"‰ñ“]‘¬“x", &_rotationSpeed, 0.1f, 0.0f, 10.0f, "%.1f");
 	ImGui::DragFloat(u8"ƒ^[ƒQƒbƒg‚ÉŒü‚­Šp“x", &_lookAtRadian, 0.01f, 0.0f, DirectX::XM_PI, "%.1f rad");
-}
-// ÚGŽžˆ—
-void EnemyController::OnContactEnter(CollisionData& collisionData)
-{
-	// UŒ‚”»’è
-	if (collisionData.myLayer == CollisionLayer::Attack && collisionData.otherLayer == CollisionLayer::Hit)
-	{
-		// ƒ_ƒ[ƒW‚ð—^‚¦‚é
-		auto damageable = collisionData.other->GetComponent<Damageable>();
-		if (damageable != nullptr)
-		{
-			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
-			{
-				// ƒ_ƒ[ƒW‚ð—^‚¦‚½‚çƒqƒbƒgƒGƒtƒFƒNƒgÄ¶
-				if (_effectController.lock())
-				{
-					_effectController.lock()->Play(0, collisionData.hitPosition);
-				}
-			}
-		}
-	}
 }
 // Žw’èˆÊ’u‚Æ‚ÌŠp“x
 float EnemyController::GetAngleToTarget(const Vector3& target)

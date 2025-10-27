@@ -2,6 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/BehaviorController.h"
+#include "../../Library/Component/EffectController.h"
 #include "../EnemyController.h"
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Common/CombatStatusController.h"
@@ -39,6 +40,8 @@ private:
 	std::weak_ptr<CharactorController> _charactorController;
 	// エネミーコントローラー
 	std::weak_ptr<EnemyController> _enemyController;
+	// エフェクトコントローラー
+	std::weak_ptr<EffectController> _effectController;
 	// ビヘイビアコントローラー
 	std::weak_ptr<BehaviorController> _behaviorController;
 	// 戦闘状態
@@ -68,4 +71,12 @@ private:
 
 	// 突進攻撃の溜め時間
 	float _chargeAttackChargeTime = 1.0f;
+
+	// 口の炎エフェクトの再生間隔
+	float _mouthBreathEffectInterval = 0.1f;
+	float _mouthBreathEffectTimer = 0.0f;
+	// 口の炎エフェクト発生位置からのオフセット
+	Vector3 _mouthBreathEffectOffset = Vector3(0.0f, 80.0f, 0.0f);
+	// 頭のノードインデックス
+	int _headNodeIndex = -1;
 };

@@ -45,7 +45,10 @@ void WyvernActor::OnCreate()
 		std::make_shared<WyvernBehaviorTree>(stateMachine.get(), this)
 	);
 	auto effectController = this->AddComponent<EffectController>();
-	effectController->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+
+	// エフェクト読み込み
+	effectController->LoadEffekseerEffect(EffectType::HitEffect, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	effectController->LoadParticleEffect(EffectType::MouthBreathEffect, "./Data/Particle/Wyvern/AngryBreath.json");
 
 	// コライダー追加
 	auto modelCollider = AddCollider<ModelCollider>();

@@ -24,6 +24,11 @@ public:
 		Horn05,
 		Horn06,
 	};
+	enum EffectType
+	{
+		HitEffect,
+		MouthBreathEffect,
+	};
 
 	static const char* GetModelFilePath()
 	{

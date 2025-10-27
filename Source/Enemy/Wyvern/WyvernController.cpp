@@ -3,6 +3,7 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/Common/Damageable.h"
 #include "../EnemyController.h"
+#include "WyvernActor.h"
 #include <imgui.h>
 
 // 名前取得
@@ -10,6 +11,7 @@ void WyvernController::Start()
 {
 	_charactorController = GetActor()->GetComponent<CharactorController>();
 	_enemyController = GetActor()->GetComponent<EnemyController>();
+	_effectController = GetActor()->GetComponent<EffectController>();
 	_behaviorController = GetActor()->GetComponent<BehaviorController>();
 	_combatStatus = GetActor()->GetComponent<CombatStatusController>();
 	_damageable = GetActor()->GetComponent<Damageable>();
@@ -27,6 +29,10 @@ void WyvernController::Start()
 
 	// 初期スキン幅取得
 	_initialSkinWidth = _charactorController.lock()->GetSkinWidth();
+
+	// ワイバーンの頭の位置を取得
+	auto model = GetActor()->GetModel().lock();
+	_headNodeIndex = model->GetNodeIndex("Head");
 }
 // 更新処理
 void WyvernController::Update(float elapsedTime)
@@ -50,6 +56,20 @@ void WyvernController::Update(float elapsedTime)
 		_staminaController.lock()->SetIsStaminaRecover(true);
 	}
 
+	// 怒り状態
+	if (_enemyController.lock()->IsAngry())
+	{
+		// 口の中にエフェクト再生
+		_mouthBreathEffectTimer += elapsedTime;
+		if (_mouthBreathEffectTimer >= _mouthBreathEffectInterval)
+		{
+			_mouthBreathEffectTimer -= _mouthBreathEffectInterval;
+			auto model = GetActor()->GetModel().lock();
+			DirectX::XMFLOAT4X4 worldMatrix = model->GetPoseNodes()[_headNodeIndex].worldTransform;
+			_effectController.lock()->Play(WyvernActor::EffectType::MouthBreathEffect, _mouthBreathEffectOffset.TransformCoord(worldMatrix));
+		}
+	}
+
 	// 体力が初めて85%以下になったときに怒り移行
 	if (auto damageable = _damageable.lock())
 	{
@@ -71,4 +91,7 @@ void WyvernController::DrawGui()
 	ImGui::DragFloat(u8"飛行継続時間", &_flightDuration, 0.1f, 0.0f, 100.0f, "%.1f");
 	ImGui::Separator();
 	ImGui::DragFloat(u8"近接攻撃チャージ時間", &_chargeAttackChargeTime, 0.1f, 0.0f, 10.0f, "%.1f");
+	ImGui::Separator();
+	ImGui::DragFloat(u8"口炎エフェクト間隔", &_mouthBreathEffectInterval, 0.1f, 0.0f, 10.0f, "%.1f");
+	ImGui::DragFloat3(u8"口炎エフェクトオフセット", &_mouthBreathEffectOffset.x, 0.1f, -100.0f, 100.0f, "%.1f");
 }

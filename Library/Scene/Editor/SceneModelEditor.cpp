@@ -213,6 +213,18 @@ void SceneModelEditor::DrawModelGui()
         ImGui::Text(u8"カレントディレクトリ：%s", _currentDirectory.c_str());
         ImGui::Text(u8"相対パス：%s", _relativePath.c_str());
         ImGui::Separator();
+        if (ImGui::Button(u8"トランスフォームを適応"))
+        {
+			auto model = _modelActor.lock()->GetModel().lock();
+            if (model)
+            {
+                model->ApplyPoseToResource(Graphics::Instance().GetDevice());
+				// トランスフォームをリセット
+				_modelActor.lock()->GetTransform().Reset();
+            }
+        }
+
+        ImGui::Separator();
         ImGui::Checkbox(u8"ノード表示", &_showNode);
         ImGui::Checkbox(u8"当たり判定表示", &_showCollision);
         if (ImGui::Button(u8"モデル表示"))

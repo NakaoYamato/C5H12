@@ -42,3 +42,13 @@ void Transform::LookAt(const Vector3& worldDirection)
 	Quaternion q = Quaternion::LookAt(_position, GetAxisZ(), _position + worldDirection);
 	_angle = Quaternion::ToRollPitchYaw(q);
 }
+
+/// 値をリセット
+void Transform::Reset()
+{
+    _lengthScale = 1.0f;
+    _position = Vector3::Zero;
+    _scale = Vector3::One;
+    _angle = Vector3::Zero;
+    _transform = Matrix::Identity;
+}

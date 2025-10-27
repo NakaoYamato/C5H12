@@ -33,6 +33,9 @@ public:
 	// GUiの表示
 	void DrawGui();
 
+	// トランスフォームを適応
+	void ApplyPoseToResource(ID3D11Device* device);
+
 #pragma region アクセサ
 	// ノードの名前から番号を取得
 	int GetNodeIndex(const std::string& str)

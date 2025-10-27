@@ -9,6 +9,7 @@
 #include "ModelResourceManager.h"
 #include "../Graphics/GpuResourceManager.h"
 #include "../Math/Quaternion.h"
+#include "../Math/Matrix.h"
 
 #include "../DebugSupporter/DebugSupporter.h"
 
@@ -208,6 +209,107 @@ void Model::DrawGui()
         Debug::Renderer::AddVertex(z);
 
     }
+}
+
+// トランスフォームを適応
+void Model::ApplyPoseToResource(ID3D11Device* device)
+{
+    static DirectX::XMFLOAT4X4 boneTransforms[256];
+    auto Skinning = [&](const Vector4& v, float* boneWeights, uint32_t* boneIndices)
+        {
+            DirectX::XMVECTOR Result = DirectX::XMVectorZero();
+            DirectX::XMVECTOR V = DirectX::XMLoadFloat4(&v);
+            for (int i = 0; i < 4; ++i)
+            {
+                float weight = boneWeights[i];
+                if (weight == 0.0f)
+                    continue;
+                UINT index = boneIndices[i];
+                DirectX::XMMATRIX Bone = DirectX::XMLoadFloat4x4(&boneTransforms[index]);
+                DirectX::XMVECTOR Pos = DirectX::XMVector4Transform(V, Bone);
+                Result = DirectX::XMVectorAdd(Result, DirectX::XMVectorScale(Pos, weight));
+            }
+            Vector4 result;
+            DirectX::XMStoreFloat4(&result, Result);
+            return result;
+        };
+
+    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
+    {
+		// ボーン行列計算
+        if (mesh.bones.size() > 0)
+        {
+            for (size_t i = 0; i < mesh.bones.size(); ++i)
+            {
+                const ModelResource::Bone& bone = mesh.bones.at(i);
+                DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&_poseNodes[bone.nodeIndex].worldTransform);
+                DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+                DirectX::XMMATRIX Bone = Offset * World;
+                DirectX::XMStoreFloat4x4(&boneTransforms[i], Bone);
+            }
+        }
+        else
+        {
+            boneTransforms[0] = _poseNodes[mesh.nodeIndex].worldTransform;
+        }
+
+        for (auto& vertex : mesh.vertices)
+        {
+			Vector4 v = { vertex.position.x, vertex.position.y, vertex.position.z, 1.0f };
+            v = Skinning(v, &vertex.boneWeight.x, &vertex.boneIndex.x);
+			vertex.position = { v.x,v.y,v.z };
+            v = { vertex.normal.x, vertex.normal.y, vertex.normal.z, 0.0f };
+			v = Skinning(v, &vertex.boneWeight.x, &vertex.boneIndex.x);
+			vertex.normal = { v.x,v.y,v.z };
+            v = { vertex.tangent.x, vertex.tangent.y, vertex.tangent.z, vertex.tangent.w };
+            v = Skinning(v, &vertex.boneWeight.x, &vertex.boneIndex.x);
+            vertex.tangent = v;
+
+            vertex.boneWeight = { 1.0f,0.0f,0.0f,0.0f };
+            vertex.boneIndex = { 0,0,0,0 };
+        }
+    }
+    // ノードをルートノードのみにする
+    _resource->GetAddressNodes().resize(1);
+    _resource->GetAddressNodes()[0].parent = nullptr;
+    _resource->GetAddressNodes()[0].children.clear();
+
+    // ノードデータをコピー
+    _poseNodes.clear();
+    _poseNodes.resize(_resource->GetNodes().size());
+    for (size_t i = 0; i < _poseNodes.size(); ++i)
+    {
+        const ModelResource::Node& node = _resource->GetNodes().at(i);
+        ModelResource::Node& copyNode = _poseNodes.at(i);
+        // データをコピー
+        copyNode.name = node.name;
+        copyNode.parentIndex = node.parentIndex;
+        copyNode.position = node.position;
+        copyNode.rotation = node.rotation;
+        copyNode.scale = node.scale;
+    }
+
+	// ボーン情報削除
+    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
+    {
+		mesh.nodeIndex = 0;
+        mesh.bones.clear();
+    }
+
+    // 親、子供の再構築
+    for (size_t i = 0; i < _poseNodes.size(); ++i)
+    {
+        ModelResource::Node& copyNode = _poseNodes.at(i);
+
+        if (copyNode.parentIndex != -1)
+        {
+            copyNode.parent = &_poseNodes.at(copyNode.parentIndex);
+            _poseNodes.at(copyNode.parentIndex).children.emplace_back(&copyNode);
+        }
+    }
+
+    /// COMオブジェクト生成
+    CreateComObject(device, _filename.c_str());
 }
 
 void Model::ReSerialize()

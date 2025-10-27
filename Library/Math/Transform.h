@@ -21,6 +21,11 @@ public:
 	/// </summary>
 	/// <param name="worldDirection"></param>
 	void LookAt(const Vector3& worldDirection);
+
+	/// <summary>
+	/// 値をリセット
+	/// </summary>
+	void Reset();
 #pragma region アクセサ
 	/// <summary>
 	/// 座標取得(ローカル)

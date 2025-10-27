@@ -12,8 +12,9 @@ public:
 			owner,
 			u8"Idle03Shake",
 			0.5f,
-			false,
-			true
+			false,	// isLoop
+			false,	// isUsingRootMotion
+			true	// applyRotation
 			) {}
 	const char* GetName() const override { return "Idle"; };
 };
@@ -28,8 +29,9 @@ public:
 			owner,
 			u8"IdleCombat",
 			1.5f,
-			false,
-			false
+			false,	// isLoop
+			false,	// isUsingRootMotion
+			true	// applyRotation
 		) {}
 	const char* GetName() const override { return "Threat"; };
 	// 実行処理
@@ -46,8 +48,9 @@ public:
 			owner,
 			u8"Roar",
 			1.5f,
-			false,
-			false
+			false,	// isLoop
+			false,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "Roar"; };
@@ -68,8 +71,6 @@ public:
 	void OnExecute(float elapsedTime) override;
 	// 終了処理
 	void OnExit() override;
-private:
-	int _rootNodeIndex = -1;
 };
 #pragma endregion
 
@@ -82,8 +83,9 @@ public:
 			owner,
 			u8"WalkForward",
 			1.5f,
-			false,
-			true
+			false,	// isLoop
+			true,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "ToTarget"; };
@@ -160,8 +162,9 @@ public:
 			owner,
 			u8"AttackCharge",
 			1.5f,
-			false,
-			true
+			false,	// isLoop
+			true,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "ChargeAttack"; };
@@ -185,8 +188,9 @@ public:
 			owner,
 			u8"WalkBack",
 			1.5f,
-			false,
-			true
+			false,	// isLoop
+			true,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "BackStep"; };
@@ -204,8 +208,9 @@ public:
 			owner,
 			u8"AttackFireBreath",
 			1.5f,
-			false,
-			true
+			false,	// isLoop
+			false,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "BreathAttack"; };
@@ -229,8 +234,9 @@ public:
 			owner,
 			u8"AttackFireBall",
 			1.5f,
-			false,
-			true
+			false,	// isLoop
+			false,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "BallAttack"; };
@@ -253,8 +259,9 @@ public:
 			owner,
 			u8"AttackBackJumpBall",
 			1.5f,
-			false,
-			true
+			false,	// isLoop
+			true,	// isUsingRootMotion
+			true	// applyRotation
 		) {
 	}
 	const char* GetName() const override { return "BackJumpBallAttack"; };
@@ -326,6 +333,21 @@ class WyvernDeathState : public HierarchicalStateBase<WyvernStateMachine>
 public:
 	WyvernDeathState(WyvernStateMachine* owner) : HierarchicalStateBase(owner) {}
 	const char* GetName() const override { return "Death"; };
+	// 開始処理
+	void OnEnter() override;
+	// 実行処理
+	void OnExecute(float elapsedTime) override;
+	// 終了処理
+	void OnExit() override;
+};
+#pragma endregion
+
+#pragma region 位置調整
+class WyvernPositionAdjustState : public HierarchicalStateBase<WyvernStateMachine>
+{
+public:
+	WyvernPositionAdjustState(WyvernStateMachine* owner);
+	const char* GetName() const override { return "PositionAdjust"; };
 	// 開始処理
 	void OnEnter() override;
 	// 実行処理

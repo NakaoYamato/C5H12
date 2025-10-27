@@ -36,16 +36,15 @@ WyvernTurnState::WyvernTurnState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft90", u8"TurnLeft90", 0.5f, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft180", u8"TurnLeft180", 0.5f, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight90", u8"TurnRight90", 0.5f, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight180", u8"TurnRight180", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft90", u8"TurnLeft90", 0.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft180", u8"TurnLeft180", 0.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight90", u8"TurnRight90", 0.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight180", u8"TurnRight180", 0.5f, false, true, true));
 }
 
 void WyvernTurnState::OnEnter()
 {
 	_owner->GetAnimator()->SetIsRemoveRootMovement(true);
-	_rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
@@ -107,17 +106,6 @@ void WyvernTurnState::OnExecute(float elapsedTime)
 
 void WyvernTurnState::OnExit()
 {
-	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-	// 回転量の差分を求める
-	Quaternion q = _owner->GetAnimator()->RemoveRootRotation(_rootNodeIndex);
-
-	// 回転量をアクターに反映する
-	auto& transform = _owner->GetEnemy()->GetActor()->GetTransform();
-	Vector3 angle{};
-	// y値をyに設定
-	angle.y = -q.ToRollPitchYaw().y;
-	transform.AddAngle(angle);
-	transform.UpdateTransform(nullptr);
 	// フラグを下ろす
 	_owner->GetAnimator()->SetIsRemoveRootMovement(false);
 }
@@ -152,8 +140,8 @@ WyvernBiteAttackState::WyvernBiteAttackState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteLeft", u8"AttackBiteLeft", 0.5f, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteRight", u8"AttackBiteRight", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteLeft", u8"AttackBiteLeft", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteRight", u8"AttackBiteRight", 0.5f, false, false, true));
 }
 void WyvernBiteAttackState::OnEnter()
 {
@@ -193,8 +181,8 @@ WyvernClawAttackState::WyvernClawAttackState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistLeft", u8"AttackWingFistLeft", 0.5f, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistRight", u8"AttackWingFistRight", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistLeft", u8"AttackWingFistLeft", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistRight", u8"AttackWingFistRight", 0.5f, false, false, true));
 }
 void WyvernClawAttackState::OnEnter()
 {
@@ -317,8 +305,8 @@ WyvernTailAttackState::WyvernTailAttackState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailLeft", u8"AttackTailLeft", 0.5f, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailRight", u8"AttackTailRight", 0.5f, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailLeft", u8"AttackTailLeft", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailRight", u8"AttackTailRight", 0.5f, false, false, true));
 }
 void WyvernTailAttackState::OnEnter()
 {
@@ -602,12 +590,12 @@ WyvernDamageState::WyvernDamageState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontRight", u8"DamageFrontRight", 0.5f, false, false));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageRight", u8"DamageRight", 0.5f, false, false));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackRight", u8"DamageBackRight", 0.5f, false, false));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontLeft", u8"DamageFrontLeft", 0.5f, false, false));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageLeft", u8"DamageLeft", 0.5f, false, false));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackLeft", u8"DamageBackLeft", 0.5f, false, false));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontRight", u8"DamageFrontRight", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageRight", u8"DamageRight", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackRight", u8"DamageBackRight", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontLeft", u8"DamageFrontLeft", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageLeft", u8"DamageLeft", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackLeft", u8"DamageBackLeft", 0.5f, false, false, true));
 }
 void WyvernDamageState::OnEnter()
 {
@@ -625,19 +613,6 @@ void WyvernDamageState::OnExecute(float elapsedTime)
 }
 void WyvernDamageState::OnExit()
 {
-	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
-	int rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
-	// 回転量の差分を求める
-	Quaternion q = _owner->GetAnimator()->RemoveRootRotation(rootNodeIndex);
-
-	// 回転量をアクターに反映する
-	auto& transform = _owner->GetEnemy()->GetActor()->GetTransform();
-	Vector3 angle{};
-	// y値をyに設定
-	angle.y = -q.ToRollPitchYaw().y;
-	transform.AddAngle(angle);
-	transform.UpdateTransform(nullptr);
-
 	_owner->GetAnimator()->SetIsRemoveRootMovement(false);
 }
 #pragma endregion
@@ -753,4 +728,27 @@ void WyvernDeathState::OnExit()
 {
 	_owner->GetAnimator()->SetIsUseRootMotion(false);
 }
+#pragma endregion
+
+#pragma region 位置調整
+WyvernPositionAdjustState::WyvernPositionAdjustState(WyvernStateMachine* owner) : 
+	HierarchicalStateBase(owner)
+{
+	// サブステートを追加
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"WalkLeft", u8"WalkLeft", 1.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"WalkRight", u8"WalkRight", 1.5f, false, true, true));
+}
+
+void WyvernPositionAdjustState::OnEnter()
+{
+}
+
+void WyvernPositionAdjustState::OnExecute(float elapsedTime)
+{
+}
+
+void WyvernPositionAdjustState::OnExit()
+{
+}
+
 #pragma endregion

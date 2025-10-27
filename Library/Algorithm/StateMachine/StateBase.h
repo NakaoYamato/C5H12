@@ -36,7 +36,7 @@ public:
 	/// <summary>
 	/// 開始処理
 	/// </summary>
-	void Enter()
+	virtual void Enter()
 	{
 		OnEnter();
 	}
@@ -44,7 +44,7 @@ public:
 	/// 更新処理
 	/// </summary>
 	/// <param name="elapsedTime"></param>
-	void Execute(float elapsedTime)
+	virtual void Execute(float elapsedTime)
 	{
 		if (_subState)
 			_subState->OnExecute(elapsedTime);
@@ -53,7 +53,7 @@ public:
 	/// <summary>
 	/// 終了処理
 	/// </summary>
-	void Exit()
+	virtual void Exit()
 	{
 		if (_subState)
 			_subState->OnExit();

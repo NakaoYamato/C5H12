@@ -87,24 +87,30 @@ public:
 	WyvernHSB(WyvernStateMachine* stateMachine,
 		const std::string& animationName,
 		float blendSeconds,
-		bool isLoop,
-		bool isUsingRootMotion) :
+		bool isLoop = false,
+		bool isUsingRootMotion = false,
+		bool applyRotation = false) :
 		HierarchicalStateBase(stateMachine),
 		_animationName(animationName),
 		_blendSeconds(blendSeconds),
 		_isLoop(isLoop),
-		_isUsingRootMotion(isUsingRootMotion)
+		_isUsingRootMotion(isUsingRootMotion),
+		_applyRotation(applyRotation)
 	{
 	}
 	~WyvernHSB() override {}
 	virtual void OnEnter() override;
 	virtual void OnExecute(float elapsedTime) override {}
 	virtual void OnExit() override {}
+
+	virtual void Exit() override;
 private:
 	std::string _animationName = "";
 	float		_blendSeconds = 0.2f;
 	bool		_isLoop = false;
 	bool		_isUsingRootMotion = false;
+	bool 		_applyRotation = false;
+	int			_rootNodeIndex = -1;
 };
 
 // アニメーション再生のみの簡易サブステート
@@ -115,25 +121,29 @@ public:
 		const std::string& name,
 		const std::string& animationName,
 		float blendSeconds,
-		bool isLoop,
-		bool isUsingRootMotion) :
+		bool isLoop = false,
+		bool isUsingRootMotion = false,
+		bool applyRotation = false) :
 		StateBase(stateMachine),
 		_name(name),
 		_animationName(animationName),
 		_blendSeconds(blendSeconds),
 		_isLoop(isLoop),
-		_isUsingRootMotion(isUsingRootMotion)
+		_isUsingRootMotion(isUsingRootMotion),
+		_applyRotation(applyRotation)
 	{
 	}
 	const char* GetName() const override { return _name.c_str(); }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override {}
-	void OnExit() override {}
+	void OnExit() override;
 private:
 	std::string _name = "";
 	std::string _animationName = "";
 	float		_blendSeconds = 0.2f;
 	bool		_isLoop = false;
 	bool		_isUsingRootMotion = false;
+	bool 		_applyRotation = false;
+	int			_rootNodeIndex = -1;
 };
 #pragma endregion

@@ -266,13 +266,50 @@ const char* WyvernStateMachine::GetSubStateName()
 #pragma region ベースステート
 void WyvernHSB::OnEnter()
 {
+	_rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 	_owner->GetAnimator()->PlayAnimation(_animationName, _isLoop, _blendSeconds);
 	_owner->GetAnimator()->SetIsUseRootMotion(_isUsingRootMotion);
 }
 
+void WyvernHSB::Exit()
+{
+	if (_applyRotation)
+	{
+		// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+		// 回転量の差分を求める
+		Quaternion q = _owner->GetAnimator()->RemoveRootRotation(_rootNodeIndex);
+
+		// 回転量をアクターに反映する
+		auto& transform = _owner->GetEnemy()->GetActor()->GetTransform();
+		Vector3 angle{};
+		// y値をyに設定
+		angle.y = -q.ToRollPitchYaw().y;
+		transform.AddAngle(angle);
+		transform.UpdateTransform(nullptr);
+	}
+}
+
 void WyvernSSB::OnEnter()
 {
+	_rootNodeIndex = _owner->GetEnemy()->GetActor()->GetModel().lock()->GetNodeIndex("CG");
 	_owner->GetAnimator()->SetIsUseRootMotion(_isUsingRootMotion);
 	_owner->GetAnimator()->PlayAnimation(_animationName, _isLoop, _blendSeconds);
+}
+void WyvernSSB::OnExit()
+{
+	if (_applyRotation)
+	{
+		// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
+		// 回転量の差分を求める
+		Quaternion q = _owner->GetAnimator()->RemoveRootRotation(_rootNodeIndex);
+
+		// 回転量をアクターに反映する
+		auto& transform = _owner->GetEnemy()->GetActor()->GetTransform();
+		Vector3 angle{};
+		// y値をyに設定
+		angle.y = -q.ToRollPitchYaw().y;
+		transform.AddAngle(angle);
+		transform.UpdateTransform(nullptr);
+	}
 }
 #pragma endregion

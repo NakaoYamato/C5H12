@@ -165,6 +165,9 @@ void WyvernBehaviorTree::Execute(float elapsedTime)
 	// 被弾処理
 	if (IsDamageInterruption())
 	{
+		// 実行ノードがあれば終了処理
+		if (_activeNode != nullptr)
+			_activeNode->Exit();
 		// 推論
 		_activeNode = _behaviorTree->ActiveNodeInference(_behaviorData.get());
 		GetStateMachine()->GetEnemy()->SetPerformDamageReaction(false);

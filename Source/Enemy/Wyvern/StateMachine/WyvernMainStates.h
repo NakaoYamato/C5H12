@@ -11,7 +11,7 @@ public:
 		WyvernHSB(
 			owner,
 			u8"Idle03Shake",
-			0.5f,
+			1.5f,
 			false,	// isLoop
 			false,	// isUsingRootMotion
 			true	// applyRotation
@@ -82,7 +82,7 @@ public:
 		WyvernHSB(
 			owner,
 			u8"WalkForward",
-			1.5f,
+			3.0f,
 			false,	// isLoop
 			true,	// isUsingRootMotion
 			true	// applyRotation
@@ -161,7 +161,7 @@ public:
 		WyvernHSB(
 			owner,
 			u8"AttackCharge",
-			1.5f,
+			3.5f,
 			false,	// isLoop
 			true,	// isUsingRootMotion
 			true	// applyRotation
@@ -187,7 +187,7 @@ public:
 		WyvernHSB(
 			owner,
 			u8"WalkBack",
-			1.5f,
+			2.5f,
 			false,	// isLoop
 			true,	// isUsingRootMotion
 			true	// applyRotation

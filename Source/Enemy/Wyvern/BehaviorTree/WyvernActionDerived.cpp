@@ -5,16 +5,16 @@
 #pragma region 指定のステートが完了するまで実行し続ける
 void WyvernCompleteStateAction::Enter()
 {
-	_owner->GetStateMachine()->GetBase().ChangeState(_startStateName);
+	_owner->GetStateMachine()->GetBase().ChangeState(_stateName);
 }
 
 BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 {
 	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
 
-	if (currentStateName == _endStateName)
+	// 現在のステート名が異なっているなら成功
+	if (currentStateName != _stateName)
 	{
-		// ステートが終了ステートと同じなら成功
 		return BehaviorActionState::Complete;
 	}
 	// それ以外は実行中
@@ -26,16 +26,16 @@ BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 // 開始処理
 void WyvernCompleteSubStateAction::Enter()
 {
-	_owner->GetStateMachine()->ChangeState(_startStateName, _startSubStateName);
+	_owner->GetStateMachine()->ChangeState(_stateName, _subStateName);
 }
 // 実行処理
 BehaviorActionState WyvernCompleteSubStateAction::Execute(float elapsedTime)
 {
 	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
 
-	if (currentStateName == _endStateName)
+	// 現在のステート名が異なっているなら成功
+	if (currentStateName != _stateName)
 	{
-		// ステートが終了ステートと同じなら成功
 		return BehaviorActionState::Complete;
 	}
 	// それ以外は実行中

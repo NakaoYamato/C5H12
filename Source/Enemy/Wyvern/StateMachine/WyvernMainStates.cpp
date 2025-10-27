@@ -9,11 +9,10 @@
 #pragma region 威嚇
 void WyvernThreatState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 再び待機状態
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 #pragma endregion
@@ -22,11 +21,10 @@ void WyvernThreatState::OnExecute(float elapsedTime)
 // 実行処理
 void WyvernRoarState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 再び待機状態
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 #pragma endregion
@@ -36,10 +34,10 @@ WyvernTurnState::WyvernTurnState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft90", u8"TurnLeft90", 0.5f, false, true, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft180", u8"TurnLeft180", 0.5f, false, true, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight90", u8"TurnRight90", 0.5f, false, true, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight180", u8"TurnRight180", 0.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft90", u8"TurnLeft90", 1.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnLeft180", u8"TurnLeft180", 1.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight90", u8"TurnRight90", 1.5f, false, true, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"TurnRight180", u8"TurnRight180", 1.5f, false, true, true));
 }
 
 void WyvernTurnState::OnEnter()
@@ -99,9 +97,11 @@ void WyvernTurnState::OnEnter()
 
 void WyvernTurnState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき待機状態へ遷移
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
-		_owner->GetBase().ChangeState("Idle");
+	{
+		_owner->GetBase().EndState();
+	}
 }
 
 void WyvernTurnState::OnExit()
@@ -119,19 +119,20 @@ void WyvernToTargetState::OnExecute(float elapsedTime)
 	// ターゲット方向に回転
 	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
-	// 近接攻撃範囲内に入ったら待機状態へ遷移
+	// 近接攻撃範囲内に入ったらステートの終了
 	float attackRange = _owner->GetEnemy()->GetNearAttackRange();
 	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
 	if (length < attackRange)
 	{
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 		return;
 	}
 
-
-	// アニメーションが終了しているとき待機状態へ遷移
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
-		_owner->GetBase().ChangeState("Idle");
+	{
+		_owner->GetBase().EndState();
+	}
 }
 #pragma endregion
 
@@ -140,8 +141,8 @@ WyvernBiteAttackState::WyvernBiteAttackState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteLeft", u8"AttackBiteLeft", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteRight", u8"AttackBiteRight", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteLeft", u8"AttackBiteLeft", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackBiteRight", u8"AttackBiteRight", 1.5f, false, false, true));
 }
 void WyvernBiteAttackState::OnEnter()
 {
@@ -164,11 +165,10 @@ void WyvernBiteAttackState::OnEnter()
 }
 void WyvernBiteAttackState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 void WyvernBiteAttackState::OnExit()
@@ -181,8 +181,8 @@ WyvernClawAttackState::WyvernClawAttackState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistLeft", u8"AttackWingFistLeft", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistRight", u8"AttackWingFistRight", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistLeft", u8"AttackWingFistLeft", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackWingFistRight", u8"AttackWingFistRight", 1.5f, false, false, true));
 }
 void WyvernClawAttackState::OnEnter()
 {
@@ -289,11 +289,10 @@ void WyvernClawAttackState::OnExecute(float elapsedTime)
 		model->UpdateNodeTransform(armNord);
 	}
 
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 void WyvernClawAttackState::OnExit()
@@ -305,8 +304,8 @@ WyvernTailAttackState::WyvernTailAttackState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailLeft", u8"AttackTailLeft", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailRight", u8"AttackTailRight", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailLeft", u8"AttackTailLeft", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"AttackTailRight", u8"AttackTailRight", 1.5f, false, false, true));
 }
 void WyvernTailAttackState::OnEnter()
 {
@@ -331,11 +330,10 @@ void WyvernTailAttackState::OnEnter()
 }
 void WyvernTailAttackState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 void WyvernTailAttackState::OnExit()
@@ -363,8 +361,8 @@ void WyvernChargeAttackState::OnExecute(float elapsedTime)
 		auto toCurrentVecLenSq	= (currentPosition - _startPosition).LengthSq();
 		if (toCurrentVecLenSq >= toTargetVecLenSq)
 		{
-			// ターゲット位置を越しているなら待機状態へ遷移
-			_owner->GetBase().ChangeState("Idle");
+			// ターゲット位置を越しているならステートの終了
+			_owner->GetBase().EndState();
 			return;
 		}
 		else
@@ -393,11 +391,10 @@ void WyvernBackStepState::OnExecute(float elapsedTime)
 	// ターゲット方向に回転
 	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 #pragma endregion
@@ -434,11 +431,10 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 		_fireBreathActor.lock()->Remove();
 	}
 
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 void WyvernBreathAttackState::OnExit()
@@ -480,11 +476,11 @@ void WyvernFireBallAttackState::OnExecute(float elapsedTime)
 		// ターゲット方向に回転
 		_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 	}
-	// アニメーションが終了しているとき
+
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 
@@ -535,11 +531,10 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 		// ターゲット方向に回転
 		_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 	}
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 滞空状態へ遷移
-		_owner->GetBase().ChangeState("HoverIdle");
+		_owner->GetBase().EndState();
 	}
 }
 
@@ -572,9 +567,8 @@ void WyvernPursuitState::OnExecute(float elapsedTime)
 	float nearAttackRange = _owner->GetEnemy()->GetNearAttackRange();
 	if (targetDirection.Length() < nearAttackRange)
 	{
-		// 攻撃範囲内なら完了
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		// 攻撃範囲内ならステートの終了
+		_owner->GetBase().EndState();
 		return;
 	}
 }
@@ -590,12 +584,12 @@ WyvernDamageState::WyvernDamageState(WyvernStateMachine* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontRight", u8"DamageFrontRight", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageRight", u8"DamageRight", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackRight", u8"DamageBackRight", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontLeft", u8"DamageFrontLeft", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageLeft", u8"DamageLeft", 0.5f, false, false, true));
-	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackLeft", u8"DamageBackLeft", 0.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontRight", u8"DamageFrontRight", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageRight", u8"DamageRight", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackRight", u8"DamageBackRight", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageFrontLeft", u8"DamageFrontLeft", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageLeft", u8"DamageLeft", 1.5f, false, false, true));
+	RegisterSubState(std::make_unique<WyvernSSB>(owner, u8"DamageBackLeft", u8"DamageBackLeft", 1.5f, false, false, true));
 }
 void WyvernDamageState::OnEnter()
 {
@@ -604,11 +598,10 @@ void WyvernDamageState::OnEnter()
 }
 void WyvernDamageState::OnExecute(float elapsedTime)
 {
-	// アニメーションが終了しているとき
+	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 	{
-		// 待機状態へ遷移
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetBase().EndState();
 	}
 }
 void WyvernDamageState::OnExit()
@@ -683,10 +676,10 @@ namespace WyvernDownSubState
 		}
 		void OnExecute(float elapsedTime) override
 		{
-			// アニメーションが終了しているとき待機状態へ遷移
+			// アニメーションが終了しているときステートの終了
 			if (!_owner->GetAnimator()->IsPlayAnimation())
 			{
-				_owner->GetBase().ChangeState("Idle");
+				_owner->GetBase().EndState();
 			}
 		}
 	};

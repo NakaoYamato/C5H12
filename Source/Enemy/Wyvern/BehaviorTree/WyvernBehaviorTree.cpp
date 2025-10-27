@@ -72,7 +72,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 		auto angryNode = rootNode->AddNode("Angry", 4, SelectRule::Sequence, std::make_shared<WyvernAngryJudgment>(this), nullptr);
 		{
 			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
-			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack", "HoverIdle"));
+			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack"));
 		}
 		
 		// ‘Ø‹ó
@@ -82,13 +82,13 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			
 			auto nearNode = hoverNode->AddNode("HoverNear", 3, SelectRule::NoDuplicatesRandom, std::make_shared<WyvernHoverNearJudgment>(this), nullptr);
 			{
-				nearNode->AddNode("HoverClaw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverClawAttack", "HoverIdle"));
-				nearNode->AddNode("HoverTurn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverTurn", "HoverIdle"));
+				nearNode->AddNode("HoverClaw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverClawAttack"));
+				nearNode->AddNode("HoverTurn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverTurn"));
 			}
 
-			auto farNode = hoverNode->AddNode("HoverBall", 2, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverFireBallAttack", "HoverIdle"));
+			auto farNode = hoverNode->AddNode("HoverBall", 2, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverFireBallAttack"));
 
-			hoverNode->AddNode("HoverToTarget", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverToTarget", "HoverIdle"));
+			hoverNode->AddNode("HoverToTarget", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverToTarget"));
 			hoverNode->AddNode("HoverIdle", 0, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "HoverIdle", 2.0f));
 		}
 

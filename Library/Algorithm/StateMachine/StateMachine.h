@@ -18,7 +18,8 @@ public:
 	// 更新処理
 	virtual void Update(float elapsedTime)
 	{
-		_currentState->Execute(elapsedTime);
+		if (_currentState != nullptr)
+			_currentState->Execute(elapsedTime);
 	}
 	// ステート変更
 	virtual void ChangeState(std::string key)
@@ -35,6 +36,16 @@ public:
 #endif // _DEBUG
 		_currentState = _stateMap[key].get();
 		_currentState->Enter();
+	}
+	// ステートの終了
+	virtual void EndState()
+	{
+		if (_currentState != nullptr)
+		{
+			_currentState->Exit();
+			_previousStateName = _currentState->GetName();
+			_currentState = nullptr;
+		}
 	}
 	// ステート登録
 	virtual void RegisterState(std::shared_ptr<HierarchicalStateBase<T>> state)

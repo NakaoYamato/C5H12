@@ -11,18 +11,21 @@ class WyvernCompleteStateAction : public BehaviorActionBase<WyvernBehaviorTree>
 public:
 	WyvernCompleteStateAction(
 		WyvernBehaviorTree* owner,
-		const char* startStateName,
-		const char* endStateName = "Idle") :
+		const char* stateName,
+		float requiredStamina = 0.0f) :
 		BehaviorActionBase(owner),
-		_startStateName(startStateName),
-		_endStateName(endStateName) {}
+		_stateName(stateName),
+		_requiredStamina(requiredStamina)
+	{}
 	// 開始処理
 	void Enter()override;
 	// 実行処理
 	BehaviorActionState Execute(float elapsedTime) override;
 private:
-	const char* _startStateName = nullptr; // 実行するステート名
-	const char* _endStateName = nullptr; // 終了判定のステート名
+	// 実行するステート名
+	const char* _stateName = nullptr;
+	// 実行するためのスタミナ量
+	float _requiredStamina = 0.0f;
 };
 #pragma endregion
 
@@ -32,22 +35,25 @@ class WyvernCompleteSubStateAction : public BehaviorActionBase<WyvernBehaviorTre
 public:
 	WyvernCompleteSubStateAction(
 		WyvernBehaviorTree* owner,
-		const char* startStateName,
-		const char* startSubStateName,
-		const char* endStateName = "Idle") :
+		const char* stateName,
+		const char* subStateName,
+		float requiredStamina = 0.0f) :
 		BehaviorActionBase(owner),
-		_startStateName(startStateName),
-		_startSubStateName(startSubStateName),
-		_endStateName(endStateName) {
+		_stateName(stateName),
+		_subStateName(subStateName),
+		_requiredStamina(requiredStamina) {
 	}
 	// 開始処理
 	void Enter()override;
 	// 実行処理
 	BehaviorActionState Execute(float elapsedTime) override;
 private:
-	const char* _startStateName = nullptr; // 実行するステート名
-	const char* _startSubStateName = nullptr; // 実行するサブステート名
-	const char* _endStateName = nullptr; // 終了判定のステート名
+	// 実行するステート名
+	const char* _stateName = nullptr;
+	// 実行するサブステート名
+	const char* _subStateName = nullptr;
+	// 実行するためのスタミナ量
+	float _requiredStamina = 0.0f;
 };
 #pragma endregion
 

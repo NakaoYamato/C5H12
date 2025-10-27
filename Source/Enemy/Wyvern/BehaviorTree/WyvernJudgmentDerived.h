@@ -119,3 +119,19 @@ public:
 	// 判定
 	bool Judgment() override;
 };
+
+// スタミナが一定以上か判定
+class WyvernStaminaJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+public:
+	WyvernStaminaJudgment(WyvernBehaviorTree* owner, float requiredStamina) :
+		BehaviorJudgmentBase(owner),
+		_requiredStamina(requiredStamina) {
+	};
+	// 判定
+	bool Judgment() override {
+		return _owner->GetStaminaController()->GetStamina() >= _requiredStamina;
+	}
+private:
+	float _requiredStamina;
+};

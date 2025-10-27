@@ -7,7 +7,10 @@ void WyvernCompleteStateAction::Enter()
 {
 	_owner->GetStateMachine()->GetBase().ChangeState(_stateName);
 	// スタミナ消費
-	_owner->GetStaminaController()->ConsumeStamina(_requiredStamina, true);
+	if (_requiredStamina > 0.0f)
+		_owner->GetStaminaController()->ConsumeStamina(_requiredStamina, true);
+	else if (_requiredStamina < 0.0f)
+		_owner->GetStaminaController()->RecoverStamina(-_requiredStamina);
 }
 
 BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)

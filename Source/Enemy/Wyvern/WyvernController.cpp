@@ -13,6 +13,7 @@ void WyvernController::Start()
 	_behaviorController = GetActor()->GetComponent<BehaviorController>();
 	_combatStatus = GetActor()->GetComponent<CombatStatusController>();
 	_damageable = GetActor()->GetComponent<Damageable>();
+	_staminaController = GetActor()->GetComponent<StaminaController>();
 	// メタAI取得
 	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
 	if (metaAIActor)
@@ -39,11 +40,14 @@ void WyvernController::Update(float elapsedTime)
 	{
 		_charactorController.lock()->SetSkinWidth(_flightSkinWidth);
 		_flightTimer += elapsedTime;
+		// 空中時はスタミナが自動回復しない
+		_staminaController.lock()->SetIsStaminaRecover(false);
 	}
 	else
 	{
 		_charactorController.lock()->SetSkinWidth(_initialSkinWidth);
 		_flightTimer = 0.0f;
+		_staminaController.lock()->SetIsStaminaRecover(true);
 	}
 
 	// 体力が初めて85%以下になったときに怒り移行

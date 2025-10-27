@@ -6,6 +6,7 @@
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Common/CombatStatusController.h"
 #include "../../Source/Common/Damageable.h"
+#include "../../Source/Common/StaminaController.h"
 
 class WyvernController : public Component
 {
@@ -44,6 +45,8 @@ private:
 	std::weak_ptr<CombatStatusController> _combatStatus;
 	// ダメージ
 	std::weak_ptr<Damageable> _damageable;
+	// スタミナコントローラー
+	std::weak_ptr<StaminaController> _staminaController;
 	// メタAI
 	std::weak_ptr<MetaAI> _metaAI;
 	// 近接攻撃ができる角度

@@ -16,6 +16,11 @@ public:
 	static constexpr float AttackStaminaCost = 15.0f;
 	// ブレス攻撃の消費スタミナ
 	static constexpr float BreathAttackStaminaCost = 40.0f;
+	// 威嚇によるスタミナ回復量
+	static constexpr float ThreatStaminaRecover = 30.0f;
+
+	// 攻撃遷移時の必須スタミナ量
+	static constexpr float RequiredStaminaForAttack = 20.0f;
 
 public:
 	WyvernBehaviorTree(

@@ -73,6 +73,10 @@ bool WyvernConfrontJudgment::Judgment()
 // AttackNodeに遷移できるか判定
 bool WyvernAttackJudgment::Judgment()
 {
+	// スタミナが一定以下なら遷移しない
+	if (_owner->GetStaminaController()->GetStamina() < WyvernBehaviorTree::RequiredStaminaForAttack)
+		return false;
+
 	// 一定確率で遷移しない
 	// TODO : パラメータ化
 	if (std::rand() % 10 == 0)

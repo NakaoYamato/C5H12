@@ -33,7 +33,7 @@ bool StaminaController::ConsumeStamina(float amount, bool forcedExecution)
 {
 	if (_stamina >= amount || forcedExecution)
 	{
-		_stamina -= amount;
+		_stamina = std::clamp(_stamina - amount, 0.0f, _maxStamina);
 		return true;
 	}
 	return false;
@@ -42,9 +42,5 @@ bool StaminaController::ConsumeStamina(float amount, bool forcedExecution)
 // スタミナを回復する
 void StaminaController::RecoverStamina(float amount)
 {
-	_stamina += amount;
-	if (_stamina > _maxStamina)
-	{
-		_stamina = _maxStamina;
-	}
+	_stamina = std::clamp(_stamina + amount, 0.0f, _maxStamina);
 }

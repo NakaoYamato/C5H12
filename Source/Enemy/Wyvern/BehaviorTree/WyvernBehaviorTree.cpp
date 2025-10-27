@@ -108,7 +108,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 		// ’nãí“¬
 		auto battleNode = rootNode->AddNode("Battle", 2, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
 		{
-			auto confrontNode = battleNode->AddNode("Confront", 2, SelectRule::Priority,
+			auto confrontNode = battleNode->AddNode("Confront", 3, SelectRule::Priority,
 				std::make_shared<WyvernConfrontJudgment>(this), nullptr);
 			{
 				confrontNode->AddNode("ToTarget", 0, SelectRule::Non, 
@@ -117,7 +117,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn", MoveStaminaCost));
 			}
 
-			auto attackNode = battleNode->AddNode("Attack", 1, SelectRule::Priority,
+			auto attackNode = battleNode->AddNode("Attack", 2, SelectRule::Priority,
 				std::make_shared<WyvernAttackJudgment>(this), nullptr);
 			{
 				auto nearAttack = attackNode->AddNode("NearAttack", 1, SelectRule::NoDuplicatesRandom,
@@ -138,7 +138,12 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 					}
 				}
 			}
-			auto pursuitNode = battleNode->AddNode("Pursuit", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
+
+			auto pursuitNode = battleNode->AddNode("Pursuit", 1, SelectRule::Non, 
+				std::make_shared<WyvernStaminaJudgment>(this, 30.0f), std::make_shared<WyvernCompleteStateAction>(this, "Pursuit"));
+
+			auto threatNode = battleNode->AddNode("BattleThreat", 0, SelectRule::Non,
+				nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Threat", -ThreatStaminaRecover));
 		}
 
 		// Œx‰ú

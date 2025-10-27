@@ -73,6 +73,9 @@ public:
     //  srcとdstで保管処理
     //  t   : 経過時間(0.0f ~ 1.0f)
     static Vector2 Lerp(const Vector2& src, const Vector2& dst, float t, float (*Easing)(float) = nullptr);
+    //  srcとdstで保管処理
+    //  t   : 経過時間(0.0f ~ 1.0f)
+    static Vector2 Lerp(const Vector2& src, const Vector2& dst, float t, EasingType type);
 #pragma endregion
 
 #pragma region 関数
@@ -90,6 +93,11 @@ public:
 	Vector2 Lerp(const Vector2& dst, float t, float (*Easing)(float) = nullptr) const
 	{
 		return Lerp(*this, dst, t, Easing);
+	}
+    //  thisとdstで保管処理
+	Vector2 Lerp(const Vector2& dst, float t, EasingType type) const
+	{
+		return Lerp(*this, dst, t, type);
 	}
 #pragma endregion
 };
@@ -153,6 +161,9 @@ public:
     //  srcとdstで保管処理
     //  t   : 経過時間(0.0f ~ 1.0f)
     static Vector3 Lerp(const Vector3& src, const Vector3& dst, float t, float (*Easing)(float) = nullptr);
+    //  srcとdstで保管処理
+    //  t   : 経過時間(0.0f ~ 1.0f)
+    static Vector3 Lerp(const Vector3& src, const Vector3& dst, float t, EasingType type);
     //  Vector3をオイラー角で単位化
 	static Vector3 NormalizeEuler(const Vector3& v);
     //  Vector3を度数法に変換
@@ -216,6 +227,11 @@ public:
 	Vector3 Lerp(const Vector3& dst, float t, float (*Easing)(float) = nullptr) const
 	{
 		return Vector3::Lerp(*this, dst, t, Easing);
+	}
+    //  thisとdstで保管処理
+	Vector3 Lerp(const Vector3& dst, float t, EasingType type) const
+	{
+		return Vector3::Lerp(*this, dst, t, type);
 	}
     //  Vector3をオイラー角で単位化
 	Vector3 NormalizeEuler() const { return Vector3::NormalizeEuler(*this); }

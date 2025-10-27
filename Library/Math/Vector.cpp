@@ -109,6 +109,14 @@ Vector2 Vector2::Lerp(const Vector2& src, const Vector2& dst, float t, float(*Ea
         EasingLerp(src.y, dst.y, t, Easing)
     );
 }
+//  srcとdstで保管処理
+Vector2 Vector2::Lerp(const Vector2& src, const Vector2& dst, float t, EasingType type)
+{
+    return Vector2(
+        EasingLerp(src.x, dst.x, t, type),
+        EasingLerp(src.y, dst.y, t, type)
+    );
+}
 #pragma endregion
 #pragma endregion
 
@@ -236,6 +244,15 @@ Vector3 Vector3::Lerp(const Vector3& src, const Vector3& dst, float t, float(*Ea
         EasingLerp(src.x, dst.x, t, Easing),
         EasingLerp(src.y, dst.y, t, Easing),
         EasingLerp(src.z, dst.z, t, Easing)
+    );
+}
+//  srcとdstで保管処理
+Vector3 Vector3::Lerp(const Vector3& src, const Vector3& dst, float t, EasingType type)
+{
+    return Vector3(
+        EasingLerp(src.x, dst.x, t, type),
+        EasingLerp(src.y, dst.y, t, type),
+        EasingLerp(src.z, dst.z, t, type)
     );
 }
 //  Vector3をオイラー角で単位化

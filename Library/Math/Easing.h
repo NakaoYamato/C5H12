@@ -2,14 +2,41 @@
 #include <math.h>
 #include <cmath>
 
-// 補完処理
-inline float EasingLerp(float src, float dst, float t, float(*Easing)(float) = nullptr)
+/// <summary>
+/// イージングタイプ
+/// </summary>
+enum class EasingType
 {
-    float easingFactor = Easing != nullptr ?
-        Easing(t) :
-        t;
-    return src * (1.0f - easingFactor) + dst * easingFactor;
-}
+    InSine,
+    OutSine,
+    InOutSine,
+    InCubic,
+    OutCubic,
+    InOutCubic,
+    InCirc,
+    OutCirc,
+    InOutCirc,
+    InElastic,
+    OutElastic,
+    InOutElastic,
+    InQuad,
+    OutQuad,
+    InOutQuad,
+    InQuart,
+    OutQuart,
+    InOutQuart,
+    InExpo,
+    OutExpo,
+    InOutExpo,
+    InBack,
+    OutBack,
+    InOutBack,
+    InBounce,
+    OutBounce,
+    InOutBounce,
+};
+
+typedef float(*EasingFunc)(float);
 
 // https://easings.net/ja
 class Easings
@@ -17,6 +44,10 @@ class Easings
 public:
     static constexpr float PI = 3.14159265358979323846f;
 
+    // Gui描画
+    static void DrawGui(EasingType& type);
+
+    static EasingFunc GetFunc(EasingType type);
 public:
     static float InSine(float x)
     {
@@ -163,7 +194,7 @@ public:
         x = 1.0f - X;
         return ret;
     }
-    static float OutBounce(float& x)
+    static float OutBounce(float x)
     {
         const float n1 = 7.5625f;
         const float d1 = 2.75f;
@@ -181,7 +212,7 @@ public:
             return n1 * (x -= 2.625f / d1) * x + 0.984375f;
         }
     }
-    static float InOutBounce(float& x)
+    static float InOutBounce(float x)
     {
         if (x < 0.5f)
         {
@@ -199,3 +230,17 @@ public:
         }
     }
 };
+
+// 補完処理
+inline float EasingLerp(float src, float dst, float t, float(*Easing)(float) = nullptr)
+{
+    float easingFactor = Easing != nullptr ?
+        Easing(t) :
+        t;
+    return src * (1.0f - easingFactor) + dst * easingFactor;
+}
+
+inline float EasingLerp(float src, float dst, float t, EasingType type)
+{
+    return EasingLerp(src, dst, t, Easings::GetFunc(type));
+}

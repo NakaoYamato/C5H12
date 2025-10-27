@@ -112,9 +112,9 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 				std::make_shared<WyvernConfrontJudgment>(this), nullptr);
 			{
 				confrontNode->AddNode("ToTarget", 0, SelectRule::Non, 
-					nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget", MoveStaminaCost));
+					nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
 				confrontNode->AddNode("Turn", 1, SelectRule::Non, 
-					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn", MoveStaminaCost));
+					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn"));
 			}
 
 			auto attackNode = battleNode->AddNode("Attack", 2, SelectRule::Priority,

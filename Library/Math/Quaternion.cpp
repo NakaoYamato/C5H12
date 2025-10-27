@@ -105,35 +105,59 @@ Quaternion Quaternion::LookAt(const Quaternion& q, const DirectX::XMFLOAT3& posi
 	return Quaternion::Multiply(q, Q);
 }
 // 指定方向を向く
-Quaternion Quaternion::LookAt(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& front, const DirectX::XMFLOAT3& target)
+Quaternion Quaternion::LookAt(const DirectX::XMFLOAT3& position,
+	const DirectX::XMFLOAT3& target,
+	const DirectX::XMFLOAT3& up)
 {
-	Quaternion Q{};
-	// positionからtargetまでのベクトルと前方向のベクトルで回転軸を算出
-	DirectX::XMVECTOR Front = DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&front));
-	DirectX::XMVECTOR PosToTarget = DirectX::XMVectorSubtract(
-		DirectX::XMLoadFloat3(&target),
-		DirectX::XMLoadFloat3(&position)
-	);
-	PosToTarget = DirectX::XMVector3Normalize(PosToTarget);
-	DirectX::XMVECTOR Axis = DirectX::XMVector3Cross(Front, PosToTarget);
-	// 外積の計算が失敗しているなら前方向と指定方向が同じ
-	if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(Axis)) == 0.0f || DirectX::XMVector3IsNaN(Axis))
-	{
-		DirectX::XMStoreFloat4(&Q, DirectX::XMQuaternionNormalize(Axis));
-	}
-	else
-	{
-		Axis = DirectX::XMVector3Normalize(Axis);
-		// 回転角を求める
-		float angle = acosf(
-			DirectX::XMVectorGetX(
-				DirectX::XMVector3Dot(Front, PosToTarget)));
+	DirectX::XMVECTOR posVec = DirectX::XMLoadFloat3(&position);
+	DirectX::XMVECTOR targetVec = DirectX::XMLoadFloat3(&target);
+	DirectX::XMVECTOR upVec = DirectX::XMLoadFloat3(&up);
 
-		DirectX::XMStoreFloat4(&Q,
-			DirectX::XMQuaternionNormalize(DirectX::XMQuaternionRotationAxis(Axis, angle)));
+	// 新しいZ軸（前方）を計算 = (target - position) の正規化
+	DirectX::XMVECTOR zaxis = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(targetVec, posVec));
+
+	// 稀にpositionとtargetが全く同じ座標の場合
+	if (DirectX::XMVector3Equal(DirectX::XMVector3LengthSq(zaxis), DirectX::g_XMZero))
+	{
+		Quaternion q{};
+		DirectX::XMStoreFloat4(&q, DirectX::XMQuaternionIdentity());
+		return q;
 	}
 
-	return Q;
+	// 新しいX軸（右）を計算 = (up × zaxis) の正規化
+	DirectX::XMVECTOR xaxis = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(upVec, zaxis));
+	
+	// X軸の計算が失敗したかチェック（ベクトル長がほぼ0か）
+	if (DirectX::XMVector3Less(DirectX::XMVector3LengthSq(xaxis), DirectX::g_XMEpsilon))
+	{
+		// 代わりのX軸を (ワールドX軸 × zaxis) から計算
+		DirectX::XMVECTOR worldRight = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+		xaxis = DirectX::XMVector3Cross(worldRight, zaxis);
+
+		// もしzaxisがワールドX軸とも平行
+		if (DirectX::XMVector3Less(DirectX::XMVector3LengthSq(xaxis), DirectX::g_XMEpsilon))
+		{
+			// zaxisはX軸に平行だったので、ワールドY軸を使う
+			DirectX::XMVECTOR worldUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+			xaxis = DirectX::XMVector3Cross(worldUp, zaxis);
+		}
+	}
+
+	// 新しいY軸（上）を計算 = (zaxis × xaxis)
+	DirectX::XMVECTOR yaxis = DirectX::XMVector3Cross(zaxis, xaxis);
+
+	// 5. 3つの軸ベクトルから回転行列を構築
+	DirectX::XMMATRIX rotationMatrix;
+	rotationMatrix.r[0] = xaxis; // X軸
+	rotationMatrix.r[1] = yaxis; // Y軸
+	rotationMatrix.r[2] = zaxis; // Z軸
+	rotationMatrix.r[3] = DirectX::XMVECTOR{ 0, 0, 0, 1 }; // 4行目 (0, 0, 0, 1)
+
+	// 回転行列からクォータニオンを生成して返す
+    Quaternion q{};
+    DirectX::XMStoreFloat4(&q,
+        DirectX::XMQuaternionNormalize(DirectX::XMQuaternionRotationMatrix(rotationMatrix)));
+	return q;
 }
 // クォータニオンからオイラー角に変換
 DirectX::XMFLOAT3 Quaternion::ToRollPitchYaw(const Quaternion& q)

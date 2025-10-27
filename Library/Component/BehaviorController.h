@@ -43,4 +43,6 @@ private:
 	bool _isExecute = true;
 	// GUI表示フラグ
 	bool _isShowGui = false;
+    // デバッグ用ビヘイビアツリー実行フラグ
+    bool _isDebugExecute = true;
 };

@@ -204,6 +204,8 @@ void DebugRenderer::DrawCapsule(
 // カプセル描画
 void DebugRenderer::DrawCapsule(const Vector3& start, const Vector3& end, float radius, const Vector4& color)
 {
+    static const Vector3 up = Vector3::Normalize({ 0.0f,1.0f,0.01f });
+
 	// 始点、終点
 	{
 		DebugRenderer::DrawSphere(start, radius, color);
@@ -216,7 +218,8 @@ void DebugRenderer::DrawCapsule(const Vector3& start, const Vector3& end, float 
 		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&start));
 		// 回転行列作成
 		Vector3 target = end - start;
-		Quaternion q = Quaternion::LookAt(start, Quaternion::AxisY, end);
+        // メッシュがうえを向いているのでX軸で90度回転させてから目的方向を向く
+		Quaternion q = Quaternion::RotationAxisDegree(Quaternion::AxisX, 90.0f) * Quaternion::LookAt(start, end, up);
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q));
 		// 高さ
 		float length = Vector3::Length(target);
@@ -256,7 +259,7 @@ void DebugRenderer::DrawArrow(
 	const Vector4& color)
 {
 	// startからtargetまでの姿勢
-	Quaternion q = Quaternion::LookAt(start, Quaternion::AxisX, target);
+	Quaternion q = Quaternion::LookAt(start, target);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q));
 
 	{

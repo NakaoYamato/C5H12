@@ -14,6 +14,7 @@
 #include "BehaviorTree/WyvernBehaviorTree.h"
 
 #include "../../Source/Common/DamageableChild.h"
+#include "../../Source/Common/NodeShaker.h"
 #include "../../Source/Stage/EnvironmentDestroyer.h"
 #include "../BodyPartController.h"
 
@@ -59,25 +60,28 @@ void WyvernActor::OnCreate()
 	// bodyPartDurability = 部位耐久値
 	// staggerInterval = 部位怯み間隔
 	// staggerToDownCount = 部位ダウンまでの怯み回数(-1でダウンしない)
-	auto CreateParts = [&](const std::string& tag, float bodyPartDurability, float staggerInterval, int staggerToDownCount)
+	auto CreateParts = [&](const std::string& tag, const std::string& nodeName, float bodyPartDurability, float staggerInterval, int staggerToDownCount)
 		{
 			auto partActor = modelCollider->CreateTagActor(tag);
 			// 子供オブジェクトにコンポーネント追加
 			partActor->AddComponent<DamageableChild>(_damageable);
 			partActor->AddComponent<EnvironmentDestroyer>();
 			auto bodyPart = partActor->AddComponent<BodyPartController>();
+            auto nodeShaker = partActor->AddComponent<NodeShaker>();
 
 			bodyPart->Initialize(tag, bodyPartDurability, staggerInterval, staggerToDownCount);
+            nodeShaker->SetModel(model.lock());
+			nodeShaker->SetNodeIndex(model.lock()->GetNodeIndex(nodeName));
 
 			return bodyPart;
 		};
-	auto headParts = CreateParts("Head", 20.0f, 5.0f, -1);
-	auto bodyParts = CreateParts("Body", 20.0f, 5.0f, -1);
-	auto tailParts = CreateParts("Tail", 20.0f, 5.0f, -1);
-	auto leftWingParts = CreateParts("LeftWing", 20.0f, 3.0f, 2);
-	auto rightWingParts = CreateParts("RightWing", 20.0f, 3.0f, 2);
-	auto leftFootParts = CreateParts("LeftFoot", 20.0f, 3.0f, 2);
-	auto rightFootParts = CreateParts("RightFoot", 20.0f, 3.0f, 2);
+	auto headParts = CreateParts("Head", "Head", 20.0f, 5.0f, -1);
+	auto bodyParts = CreateParts("Body", "Spine", 20.0f, 5.0f, -1);
+	auto tailParts = CreateParts("Tail", "Tail01", 20.0f, 5.0f, -1);
+	auto leftWingParts = CreateParts("LeftWing", "L Clavicle", 20.0f, 3.0f, 2);
+	auto rightWingParts = CreateParts("RightWing", "R Clavicle", 20.0f, 3.0f, 2);
+	auto leftFootParts = CreateParts("LeftFoot", "L Thigh", 20.0f, 3.0f, 2);
+	auto rightFootParts = CreateParts("RightFoot", "R Thigh", 20.0f, 3.0f, 2);
 
 	// 部位破壊時のコールバック設定
 	leftWingParts->SetOnDestroyCallback([&] {

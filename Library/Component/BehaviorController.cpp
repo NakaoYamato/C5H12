@@ -16,7 +16,12 @@ void BehaviorController::Update(float elapsedTime)
 {
 	if (_isExecute && _behaviorTree)
 	{
+#ifdef _DEBUG
+		if (_isDebugExecute)
+			_behaviorTree->Execute(elapsedTime);
+#else
 		_behaviorTree->Execute(elapsedTime);
+#endif // _DEBUG
 	}
 
 #ifdef USE_IMGUI
@@ -38,6 +43,7 @@ void BehaviorController::DrawGui()
 	{
 		bool flag = _isExecute;
 		ImGui::Checkbox(u8"ビヘイビアツリーを実行する", &flag);
+		ImGui::Checkbox(u8"デバッグ用実行フラグ", &_isDebugExecute);
 		ImGui::Text(u8"現在の実行ノード: %s", _behaviorTree->GetActiveNodeName().c_str());
 		ImGui::Checkbox(u8"ビヘイビアツリーのGUIを表示する", &_isShowGui);
 	}

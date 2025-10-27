@@ -39,7 +39,7 @@ void Transform::DrawGui()
 /// 指定方向（ワールド空間）を向く
 void Transform::LookAt(const Vector3& worldDirection)
 {
-	Quaternion q = Quaternion::LookAt(_position, GetAxisZ(), _position + worldDirection);
+	Quaternion q = Quaternion::LookAt(_position, _position + worldDirection, GetAxisY());
 	_angle = Quaternion::ToRollPitchYaw(q);
 }
 

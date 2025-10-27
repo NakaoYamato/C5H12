@@ -50,8 +50,8 @@ public:
 		const DirectX::XMFLOAT3& target);
 	// 指定方向を向く
 	static Quaternion LookAt(const DirectX::XMFLOAT3& position,
-		const DirectX::XMFLOAT3& front,
-		const DirectX::XMFLOAT3& target);
+		const DirectX::XMFLOAT3& target,
+        const DirectX::XMFLOAT3& up = Quaternion::AxisY);
 	// クォータニオンからオイラー角に変換
 	static DirectX::XMFLOAT3 ToRollPitchYaw(const Quaternion& q);
 	// クォータニオンからオイラー角に変換

@@ -66,8 +66,8 @@ void SceneLookAtDebug::OnUpdate(float elapsedTime)
     //    _targetActor.lock()->GetTransform().GetPosition());
     headNode.rotation = Quaternion::LookAt(
         Vector3::Zero,
-        Vector3::Up,
-        Vector3::TransformCoord(_targetActor.lock()->GetTransform().GetPosition(), headParentInvTransform));
+        Vector3::TransformCoord(_targetActor.lock()->GetTransform().GetPosition(), headParentInvTransform),
+        Vector3::Up);
 
     // s—ñXV
     model->UpdateNodeTransform(&headNode);

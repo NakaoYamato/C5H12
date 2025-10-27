@@ -179,6 +179,7 @@
     <ClCompile Include="Library\Graphics\Texture.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
+    <ClCompile Include="Library\Math\Easing.cpp" />
     <ClCompile Include="Library\Math\MathF.cpp" />
     <ClCompile Include="Library\Math\Matrix.cpp" />
     <ClCompile Include="Library\Model\AnimationEvent.cpp" />

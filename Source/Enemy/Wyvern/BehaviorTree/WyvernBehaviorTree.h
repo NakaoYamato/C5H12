@@ -10,6 +10,14 @@
 class WyvernBehaviorTree : public BehaviorTree
 {
 public:
+	// 移動系の消費スタミナ
+	static constexpr float MoveStaminaCost = 10.0f;
+	// 攻撃系の消費スタミナ
+	static constexpr float AttackStaminaCost = 15.0f;
+	// ブレス攻撃の消費スタミナ
+	static constexpr float BreathAttackStaminaCost = 40.0f;
+
+public:
 	WyvernBehaviorTree(
 		WyvernStateMachine* stateMachine,
 		Actor* owner);
@@ -64,11 +72,4 @@ private:
 	std::string _interruptionName = "";
 	// 割り込み処理の部位の名前
 	std::string _bodyPartName = "";
-
-	// 移動系の消費スタミナ
-	const float MoveStaminaCost = 10.0f;	
-	// 攻撃系の消費スタミナ
-	const float AttackStaminaCost = 15.0f;
-	// ブレス攻撃の消費スタミナ
-	const float BreathAttackStaminaCost = 40.0f;
 };

@@ -122,6 +122,8 @@ bool WyvernHoverNearJudgment::Judgment()
 // 滞空終了判定
 bool WyvernHoverEndJudgment::Judgment()
 {
-	return _owner->GetStateMachine()->GetWyvern()->GetFlightTimer() >= _owner->GetStateMachine()->GetWyvern()->GetFlightDuration();
+	// 滞空時間が経過しているかスタミナが無いなら遷移
+	return _owner->GetStaminaController()->GetStamina() <= 0.0f ||
+		_owner->GetStateMachine()->GetWyvern()->GetFlightTimer() >= _owner->GetStateMachine()->GetWyvern()->GetFlightDuration();
 }
 

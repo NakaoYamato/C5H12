@@ -30,7 +30,7 @@ private:
 #pragma endregion
 
 #pragma region 指定のサブステートが完了するまで実行し続ける
-class WyvernCompleteSubStateAction : public BehaviorActionBase<WyvernBehaviorTree>
+class WyvernCompleteSubStateAction : public WyvernCompleteStateAction
 {
 public:
 	WyvernCompleteSubStateAction(
@@ -38,22 +38,14 @@ public:
 		const char* stateName,
 		const char* subStateName,
 		float requiredStamina = 0.0f) :
-		BehaviorActionBase(owner),
-		_stateName(stateName),
-		_subStateName(subStateName),
-		_requiredStamina(requiredStamina) {
+		WyvernCompleteStateAction(owner, stateName, requiredStamina),
+		_subStateName(subStateName) {
 	}
 	// 開始処理
 	void Enter()override;
-	// 実行処理
-	BehaviorActionState Execute(float elapsedTime) override;
 private:
-	// 実行するステート名
-	const char* _stateName = nullptr;
 	// 実行するサブステート名
 	const char* _subStateName = nullptr;
-	// 実行するためのスタミナ量
-	float _requiredStamina = 0.0f;
 };
 #pragma endregion
 
@@ -94,4 +86,8 @@ private:
 	float _time = 0.0f;
 	float _timer = 0.0f;
 };
+#pragma endregion
+
+#pragma region 攻撃
+typedef WyvernCompleteSubStateAction WyvernAttackAction;
 #pragma endregion

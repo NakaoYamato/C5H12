@@ -6,6 +6,8 @@
 void WyvernCompleteStateAction::Enter()
 {
 	_owner->GetStateMachine()->GetBase().ChangeState(_stateName);
+	// スタミナ消費
+	_owner->GetStaminaController()->ConsumeStamina(_requiredStamina, true);
 }
 
 BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
@@ -26,20 +28,10 @@ BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 // 開始処理
 void WyvernCompleteSubStateAction::Enter()
 {
-	_owner->GetStateMachine()->ChangeState(_stateName, _subStateName);
-}
-// 実行処理
-BehaviorActionState WyvernCompleteSubStateAction::Execute(float elapsedTime)
-{
-	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
-
-	// 現在のステート名が異なっているなら成功
-	if (currentStateName != _stateName)
-	{
-		return BehaviorActionState::Complete;
-	}
-	// それ以外は実行中
-	return BehaviorActionState::Run;
+	WyvernCompleteStateAction::Enter();
+	// サブステートも変更
+	if (_subStateName != nullptr)
+		_owner->GetStateMachine()->GetBase().ChangeSubState(_subStateName);
 }
 #pragma endregion
 

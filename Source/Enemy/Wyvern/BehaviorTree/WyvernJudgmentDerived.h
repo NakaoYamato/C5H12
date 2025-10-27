@@ -8,35 +8,6 @@
 // ‘O•ûéŒ¾
 class WyvernBehaviorTree;
 
-// w’è‚Ìstring‚ª“Á’è‚Ì’l‚©”»’è
-class WyvernStringEqualJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
-{
-public:
-	WyvernStringEqualJudgment(WyvernBehaviorTree* owner, std::string* target, const std::string& compare) :
-		BehaviorJudgmentBase(owner),
-		_target(target)
-	{
-		_compares.push_back(compare);
-	};
-	WyvernStringEqualJudgment(WyvernBehaviorTree* owner, std::string* target, std::vector<std::string> compares) :
-		BehaviorJudgmentBase(owner),
-		_target(target),
-		_compares(compares)
-	{
-	};
-	// ”»’è
-	bool Judgment() override
-	{
-		for (const auto& _compare : _compares)
-			if (*_target == _compare)
-				return true;
-		return false;
-	}
-private:
-	std::string* _target;
-	std::vector<std::string> _compares;
-};
-
 // alertNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 class WyvernAlertJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
 {

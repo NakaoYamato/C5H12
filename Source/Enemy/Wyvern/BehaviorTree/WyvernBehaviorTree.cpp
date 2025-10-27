@@ -11,6 +11,8 @@
 #include "../../External/magic_enum/include/magic_enum/magic_enum.hpp"
 #include <imgui.h>
 
+typedef BehaviorCallbackJudgment<WyvernBehaviorTree> WyvernCallbackJudgment;
+
 WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* owner) :
 	_stateMachine(stateMachine),
 	_owner(owner)
@@ -23,47 +25,49 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 	{
 		// ダウン処理
 		auto downNode = rootNode->AddNode("Down", 6, SelectRule::Priority, 
-			std::make_shared<WyvernStringEqualJudgment>(this, &_interruptionName, "Down"), nullptr);
+			std::make_shared<WyvernCallbackJudgment>(this, [&](){ return _interruptionName == "Down"; }), nullptr);
 		{
-			downNode->AddNode("FallDown", 1, SelectRule::Non, std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
+			downNode->AddNode("FallDown", 1, SelectRule::Non, 
+				std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
 			auto landDownNode = downNode->AddNode("LandDown", 0, SelectRule::Priority, nullptr, nullptr);
 			{
 				landDownNode->AddNode("DownLeft", 1, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, std::vector<std::string>{ "LeftWing", "LeftFoot" }),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "LeftWing" || _bodyPartName == "LeftFoot"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Down", u8"DownLStart"));
 				landDownNode->AddNode("DownRight", 0, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, std::vector<std::string>{ "RightWing", "RightFoot" }),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "RightWing" || _bodyPartName == "RightFoot"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Down", u8"DownRStart"));
 			}
 		}
 
 		// ダメージ処理
 		auto damageNode = rootNode->AddNode("Damage", 5, SelectRule::Priority,
-			std::make_shared<WyvernStringEqualJudgment>(this, &_interruptionName, "Damage"), nullptr);
+			std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _interruptionName == "Damage"; }), nullptr);
 		{
-			damageNode->AddNode("FallDamage", 1, SelectRule::Non, std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
+			damageNode->AddNode("FallDamage", 1, SelectRule::Non, 
+				std::make_shared<WyvernFlightJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HitFall"));
 			auto landDamageNode = damageNode->AddNode("LandDamage", 0, SelectRule::Priority, nullptr, nullptr);
 			{
 				landDamageNode->AddNode("DamageHead", 6, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "Head"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "Head"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageLeft"));
 				landDamageNode->AddNode("DamageBody", 5, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "Body"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "Body"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageLeft"));
 				landDamageNode->AddNode("DamageLeft", 4, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "LeftWing"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "LeftWing"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageLeft"));
 				landDamageNode->AddNode("DamageBackLeft", 3, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "LeftFoot"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "LeftFoot"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageBackLeft"));
 				landDamageNode->AddNode("DamageRight", 2, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "RightWing"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "RightWing"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageRight"));
 				landDamageNode->AddNode("DamageBackRight", 1, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "RightFoot"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "RightFoot"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageBackRight"));
 				landDamageNode->AddNode("DamageTail", 0, SelectRule::Non,
-					std::make_shared<WyvernStringEqualJudgment>(this, &_bodyPartName, "Tail"),
+					std::make_shared<WyvernCallbackJudgment>(this, [&]() { return _bodyPartName == "Tail"; }),
 					std::make_shared<WyvernCompleteSubStateAction>(this, "Damage", u8"DamageBackRight"));
 			}
 		}
@@ -71,52 +75,66 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 		// 怒り移行
 		auto angryNode = rootNode->AddNode("Angry", 4, SelectRule::Sequence, std::make_shared<WyvernAngryJudgment>(this), nullptr);
 		{
-			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
-			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackJumpBallAttack"));
+			angryNode->AddNode("AngryRoar", 1, SelectRule::Non, nullptr,
+				std::make_shared<WyvernCompleteStateAction>(this, "Roar"));
+			angryNode->AddNode("AngryBackJumpBall", 2, SelectRule::Non, nullptr, 
+				std::make_shared<WyvernAttackAction>(this, "BackJumpBallAttack", nullptr, 0.0f));
 		}
 		
 		// 滞空
 		auto hoverNode = rootNode->AddNode("Hover", 3, SelectRule::Priority, std::make_shared<WyvernFlightJudgment>(this), nullptr);
 		{
-			hoverNode->AddNode("HoverEnd", 4, SelectRule::Non, std::make_shared<WyvernHoverEndJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Land"));
+			hoverNode->AddNode("HoverEnd", 4, SelectRule::Non,
+				std::make_shared<WyvernHoverEndJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Land"));
 			
-			auto nearNode = hoverNode->AddNode("HoverNear", 3, SelectRule::NoDuplicatesRandom, std::make_shared<WyvernHoverNearJudgment>(this), nullptr);
+			auto nearNode = hoverNode->AddNode("HoverNear", 3, SelectRule::NoDuplicatesRandom,
+				std::make_shared<WyvernHoverNearJudgment>(this), nullptr);
 			{
-				nearNode->AddNode("HoverClaw", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverClawAttack"));
-				nearNode->AddNode("HoverTurn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverTurn"));
+				nearNode->AddNode("HoverClaw", 1, SelectRule::Non,
+					nullptr, std::make_shared<WyvernAttackAction>(this, "HoverClawAttack", nullptr, AttackStaminaCost));
+				nearNode->AddNode("HoverTurn", 1, SelectRule::Non, 
+					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverTurn", MoveStaminaCost));
 			}
 
-			auto farNode = hoverNode->AddNode("HoverBall", 2, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverFireBallAttack"));
+			auto farNode = hoverNode->AddNode("HoverBall", 2, SelectRule::Non,
+				std::make_shared<WyvernAttackJudgment>(this), std::make_shared<WyvernAttackAction>(this, "HoverFireBallAttack", nullptr, BreathAttackStaminaCost));
 
-			hoverNode->AddNode("HoverToTarget", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverToTarget"));
-			hoverNode->AddNode("HoverIdle", 0, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "HoverIdle", 2.0f));
+			hoverNode->AddNode("HoverToTarget", 1, SelectRule::Non, 
+				nullptr, std::make_shared<WyvernCompleteStateAction>(this, "HoverToTarget", MoveStaminaCost));
+			hoverNode->AddNode("HoverIdle", 0, SelectRule::Non,
+				nullptr, std::make_shared<WyvernTimerAction>(this, "HoverIdle", 2.0f));
 		}
 
 		// 地上戦闘
 		auto battleNode = rootNode->AddNode("Battle", 2, SelectRule::Priority, std::make_shared<WyvernBattleJudgment>(this), nullptr);
 		{
-			auto confrontNode = battleNode->AddNode("Confront", 2, SelectRule::Priority, std::make_shared<WyvernConfrontJudgment>(this), nullptr);
+			auto confrontNode = battleNode->AddNode("Confront", 2, SelectRule::Priority,
+				std::make_shared<WyvernConfrontJudgment>(this), nullptr);
 			{
-				confrontNode->AddNode("ToTarget", 0, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
-				confrontNode->AddNode("Turn", 1, SelectRule::Non, std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn"));
+				confrontNode->AddNode("ToTarget", 0, SelectRule::Non, 
+					nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget", MoveStaminaCost));
+				confrontNode->AddNode("Turn", 1, SelectRule::Non, 
+					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn", MoveStaminaCost));
 			}
 
-			auto attackNode = battleNode->AddNode("Attack", 1, SelectRule::Priority, std::make_shared<WyvernAttackJudgment>(this), nullptr);
+			auto attackNode = battleNode->AddNode("Attack", 1, SelectRule::Priority,
+				std::make_shared<WyvernAttackJudgment>(this), nullptr);
 			{
-				auto nearAttack = attackNode->AddNode("NearAttack", 1, SelectRule::NoDuplicatesRandom, std::make_shared<WyvernNearAttackJudgment>(this), nullptr);
+				auto nearAttack = attackNode->AddNode("NearAttack", 1, SelectRule::NoDuplicatesRandom,
+					std::make_shared<WyvernNearAttackJudgment>(this), nullptr);
 				{
-					nearAttack->AddNode("Bite", 4, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BiteAttack"));
-					nearAttack->AddNode("Claw", 4, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ClawAttack"));
-					nearAttack->AddNode("Tail", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "TailAttack"));
-					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackStep"));
+					nearAttack->AddNode("Bite", 4, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "BiteAttack", nullptr, AttackStaminaCost));
+					nearAttack->AddNode("Claw", 4, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "ClawAttack", nullptr, AttackStaminaCost));
+					nearAttack->AddNode("Tail", 2, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "TailAttack", nullptr, AttackStaminaCost));
+					nearAttack->AddNode("BackStep", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackStep", MoveStaminaCost));
 				}
 				auto farAttack = attackNode->AddNode("FarAttack", 0, SelectRule::NoDuplicatesRandom, nullptr, nullptr);
 				{
-					farAttack->AddNode("Ball", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BallAttack"));
+					farAttack->AddNode("Ball", 2, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "BallAttack", nullptr, BreathAttackStaminaCost));
 					auto chargeNode = farAttack->AddNode("Charge", 2, SelectRule::Sequence, nullptr, nullptr);
 					{
 						chargeNode->AddNode("Alignment", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "BackStep", GetStateMachine()->GetWyvern()->GetChargeAttackChargeTime()));
-						chargeNode->AddNode("ChargeAttack", 2, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ChargeAttack"));
+						chargeNode->AddNode("ChargeAttack", 2, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "ChargeAttack", nullptr, AttackStaminaCost));
 					}
 				}
 			}

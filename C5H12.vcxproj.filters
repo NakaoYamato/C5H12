@@ -642,9 +642,6 @@
     <ClCompile Include="Library\Component\EffectController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Model\AnimationCurve.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Enemy\Wyvern\Ball\WyvernBallActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1380,9 +1377,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\EffectController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\Model\AnimationCurve.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Enemy\Wyvern\Ball\WyvernBallActor.h">

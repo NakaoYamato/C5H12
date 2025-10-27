@@ -88,7 +88,6 @@ void Animator::DebugRender(const RenderContext& rc)
 // GUI描画
 void Animator::DrawGui()
 {
-    _curve.DrawGui();
     auto& animations = _model.lock()->GetResource()->GetAddressAnimations();
     static const char* optionNames[] =
     {
@@ -111,6 +110,7 @@ void Animator::DrawGui()
     if (ImGui::Combo(u8"ルートモーションオプション", &option, optionNames, _countof(optionNames)))
         _rootMotionOption = static_cast<RootMotionOption>(option);
     ImGui::DragFloat3(u8"移動量オフセット", &_rootOffset.x, 0.01f, -100.0f, 100.0f);
+
     if (_animationIndex >= 0)
     {
         auto& currentAnimation = animations[_animationIndex];
@@ -119,6 +119,8 @@ void Animator::DrawGui()
         ImGui::Separator();
     }
     ImGui::DragFloat(u8"ブレンド時間", &_blendSeconds, 0.01f);
+    ImGui::DragFloat(u8"再生速度", &_animationSpeed, 0.01f);
+
     if (ImGui::Button(u8"再生"))
     {
         if (_animationIndex != -1)
@@ -128,6 +130,7 @@ void Animator::DrawGui()
     ImGui::Checkbox(u8"ループ", &_isLoop);
     ImGui::SameLine();
     ImGui::Checkbox(u8"ポーズ", &_isPaused);
+
     if (ImGui::TreeNode(u8"アニメーション"))
     {
 
@@ -216,7 +219,7 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
         return;
 
     // 経過時間
-    _animationTimer += elapsedTime;
+    _animationTimer += _animationSpeed * elapsedTime;
     // 再生時間が終端時間を超えた時
     const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(_animationIndex);
     if (_animationTimer >= animation.secondsLength)

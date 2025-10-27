@@ -3,7 +3,6 @@
 #include "Component.h"
 #include "../../Library/Model/Model.h"
 #include "../../Library/Model/AnimationEvent.h"
-#include "../../Library/Model/AnimationCurve.h"
 
 class Animator : public Component
 {
@@ -111,16 +110,57 @@ public:
 		if (_animationIndex == -1) return 0.0f;
 		return _model.lock()->GetResource()->GetAnimations().at(_animationIndex).secondsLength;
 	}
-
+	/// <summary>
+	/// アニメーション速度取得
+	/// </summary>
+	/// <returns></returns>
+	float GetAnimationSpeed() const { return _animationSpeed; }
+	/// <summary>
+	/// アニメーションが再生されているか
+	/// </summary>
+	/// <returns></returns>
 	bool IsPlaying() const { return _isPlaying; }
+	/// <summary>
+	/// ループ再生するか
+	/// </summary>
+	/// <returns></returns>
 	bool IsLoop() const { return _isLoop; }
+	/// <summary>
+	/// ポーズ中か
+	/// </summary>
+	/// <returns></returns>
 	bool IsPaused() const { return _isPaused; }
+	/// <summary>
+	/// ブレンド処理をするか
+	/// </summary>
+	/// <returns></returns>
 	bool IsBlending() const { return _isBlending; }
+	/// <summary>
+	/// ルートモーションを使うか
+	/// </summary>
+	/// <returns></returns>
 	bool IsUseRootMotion() const { return _useRootMotion; }
+	/// <summary>
+	/// ルートモーション使用時にルートの移動量を取り除くか
+	/// </summary>
+	/// <returns></returns>
 	bool IsRemoveRootMovement() const { return _removeRootMovement; }
+	/// <summary>
+	/// ルートモーション使用時にルートの回転量を取り除くか
+	/// </summary>
+	/// <returns></returns>
 	bool IsRemoveRootRotation() const { return _removeRootRotation; }
+	/// <summary>
+	/// ルートモーションの設定取得
+	/// </summary>
+	/// <returns></returns>
 	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
 
+	/// <summary>
+	/// アニメーション速度設定
+	/// </summary>
+	/// <param name="speed"></param>
+	void SetAnimationSpeed(float speed) { _animationSpeed = speed; }
 	/// <summary>
 	///	ルートモーションで使うノード番号設定
 	/// </summary>
@@ -131,14 +171,40 @@ public:
 	/// </summary>
 	/// <param name="key"></param>
 	void SetRootNodeIndex(const std::string& key);
+	/// <summary>
+	/// ルートモーションの設定
+	/// </summary>
+	/// <param name="option"></param>
 	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
-	void SetIsPlaying(bool isPlaying) { _isPlaying = isPlaying; }
+	/// <summary>
+	/// ループ再生設定
+	/// </summary>
+	/// <param name="isLoop"></param>
 	void SetIsLoop(bool isLoop) { _isLoop = isLoop; }
+	/// <summary>
+	/// ポーズ設定
+	/// </summary>
+	/// <param name="isPaused"></param>
 	void SetIsPaused(bool isPaused) { _isPaused = isPaused; }
+	/// <summary>
+	/// ルートモーション使用設定
+	/// </summary>
+	/// <param name="isUseRootMotion"></param>
 	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
+	/// <summary>
+	/// ルートモーションでルートの移動量を取り除くか設定
+	/// </summary>
+	/// <param name="isRemoveRootMovement"></param>
 	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
+	/// <summary>
+	/// ルートモーションでルートの回転量を取り除くか設定
+	/// </summary>
+	/// <param name="isRemoveRootRotation"></param>
 	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
-
+	/// <summary>
+	/// ルートモーションのオフセット設定
+	/// </summary>
+	/// <param name="offset"></param>
 	void SetRootOffset(const Vector3& offset) { _rootOffset = offset; }
 
 	/// <summary>
@@ -194,6 +260,7 @@ private:
 	RootMotionOption _rootMotionOption = RootMotionOption::None;
 
 	float	_animationTimer = 0.0f;
+	float	_animationSpeed = 1.0f;
 	float	_blendTimer = 0.0f;
 	float	_blendEndTime = -1.0f;
 
@@ -208,8 +275,6 @@ private:
 	Vector3	_rootOffset		= Vector3::Zero;
 	Vector3	_rootMovement	= Vector3::Zero;
 #pragma endregion
-
-	AnimationCurve _curve;
 
 #pragma region イベント
 	AnimationEvent _animationEvent{};

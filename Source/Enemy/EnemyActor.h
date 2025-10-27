@@ -7,6 +7,7 @@
 #include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/CombatStatusController.h"
 #include "../../Source/Common/RoarController.h"
+#include "../../Source/Common/StaminaController.h"
 
 class EnemyActor : public Actor
 {
@@ -20,4 +21,5 @@ protected:
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<Targetable> _targetable;
 	std::weak_ptr<CombatStatusController> _combatStatus;
+	std::weak_ptr<StaminaController> _staminaController;
 };

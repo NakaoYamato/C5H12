@@ -16,6 +16,8 @@ void EnemyActor::OnCreate()
 	_targetable				= this->AddComponent<Targetable>();
 	_combatStatus 			= this->AddComponent<CombatStatusController>();
 	auto roarController		= this->AddComponent<RoarController>();
+	_staminaController = this->AddComponent<StaminaController>();
+
 	auto networkReceiver	= this->AddComponent<NetworkReceiver>();
 	auto networkSender		= this->AddComponent<EnemyNetworkSender>();
 	// ネットワーク受信イベントの設定

@@ -9,12 +9,14 @@ void Damageable::Start()
 	ResetHealth(_maxHealth);
 }
 // 更新処理
-void Damageable::Update(float elapsedTime)
+void Damageable::LateUpdate(float elapsedTime)
 {
 	if (_invisibleTimer > 0.0f)
 		_invisibleTimer -= elapsedTime;
 	// 前フレームに受けたダメージ量をリセット
 	_lastDamage = 0.0f;
+	// 前フレームの体力を保存
+	_prevHealth = _health;
 }
 // Gui描画
 void Damageable::DrawGui()
@@ -29,6 +31,7 @@ void Damageable::ResetHealth(float maxHealth)
 {
 	_maxHealth = maxHealth;
 	_health = _maxHealth;
+	_prevHealth = _health;
 }
 // ダメージを与える
 bool Damageable::AddDamage(float damage, Vector3 hitPosition, bool networkData)

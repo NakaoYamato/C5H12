@@ -149,6 +149,7 @@ void WyvernBehaviorTree::Start()
 	// オーナーからコンポーネントを取得
 	_animator = _owner->GetComponent<Animator>().get();
 	_combatStatus = _owner->GetComponent<CombatStatusController>().get();
+	_staminaController = _owner->GetComponent<StaminaController>().get();
 	// 子供から部位コントローラー取得
 	for (auto& child : _owner->GetChildren())
 	{

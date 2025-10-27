@@ -12,6 +12,7 @@ void WyvernController::Start()
 	_enemyController = GetActor()->GetComponent<EnemyController>();
 	_behaviorController = GetActor()->GetComponent<BehaviorController>();
 	_combatStatus = GetActor()->GetComponent<CombatStatusController>();
+	_damageable = GetActor()->GetComponent<Damageable>();
 	// ƒƒ^AIŽæ“¾
 	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
 	if (metaAIActor)
@@ -43,6 +44,15 @@ void WyvernController::Update(float elapsedTime)
 	{
 		_charactorController.lock()->SetSkinWidth(_initialSkinWidth);
 		_flightTimer = 0.0f;
+	}
+
+	// ‘Ì—Í‚ª‰‚ß‚Ä85%ˆÈ‰º‚É‚È‚Á‚½‚Æ‚«‚É“{‚èˆÚs
+	if (auto damageable = _damageable.lock())
+	{
+		if (damageable->GetHealth() <= 85.0f && !_enemyController.lock()->IsAngry())
+		{
+			_enemyController.lock()->SetIsAngry(true);
+		}
 	}
 }
 // GUI•`‰æ

@@ -294,6 +294,7 @@
     <ClCompile Include="Source\Common\DamageableChild.cpp" />
     <ClCompile Include="Source\Common\DamageSender.cpp" />
     <ClCompile Include="Source\Common\RoarController.cpp" />
+    <ClCompile Include="Source\Common\StaminaController.cpp" />
     <ClCompile Include="Source\Common\Targetable.cpp" />
     <ClCompile Include="Source\Enemy\BodyPartController.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
@@ -539,6 +540,7 @@
     <ClInclude Include="Source\Common\DamageableChild.h" />
     <ClInclude Include="Source\Common\DamageSender.h" />
     <ClInclude Include="Source\Common\RoarController.h" />
+    <ClInclude Include="Source\Common\StaminaController.h" />
     <ClInclude Include="Source\Common\Targetable.h" />
     <ClInclude Include="Source\Enemy\BodyPartController.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />

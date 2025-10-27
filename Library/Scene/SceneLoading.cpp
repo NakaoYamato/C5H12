@@ -38,7 +38,7 @@ void SceneLoading::Update(float elapsedTime)
 	{
 		GetTextRenderer().Draw(
 			FontType::MSGothic,
-			"Complete!",
+			"Space‚ÅŠJŽn",
 			_completeTextPosition,
 			_completeTextColor,
 			0.0f,

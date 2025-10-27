@@ -33,13 +33,13 @@ public:
 	// サブステート名取得
 	const char* GetSubStateName() override;
 
-	StateMachineBase<WyvernStateMachine>& GetBase() { return _stateMachine; }
-	EnemyController* GetEnemy() { return _enemy; }
-	WyvernController* GetWyvern() { return _wyvern; }
-	Animator* GetAnimator() { return _animator; }
-	DamageSender* GetDamageSender() { return _damageSender; }
-	CombatStatusController* GetCombatStatus() { return _combatStatus; }
-	Damageable* GetDamageable() { return _damageable; }
+	StateMachineBase<WyvernStateMachine>&	GetBase() { return _stateMachine; }
+	EnemyController*						GetEnemy() { return _enemy; }
+	WyvernController*						GetWyvern() { return _wyvern; }
+	Animator*								GetAnimator() { return _animator; }
+	DamageSender*							GetDamageSender() { return _damageSender; }
+	CombatStatusController*					GetCombatStatus() { return _combatStatus; }
+	Damageable*								GetDamageable() { return _damageable; }
 
 	// ブレス攻撃のグローバル位置を設定
 	const Vector3& GetBreathGlobalPosition() const { return _breathGlobalPosition; }
@@ -56,14 +56,14 @@ public:
 #pragma endregion
 
 private:
-	StateMachineBase<WyvernStateMachine> _stateMachine;
-	EnemyController* _enemy = nullptr;
-	WyvernController* _wyvern = nullptr;
-	Animator* _animator = nullptr;
-	Damageable* _damageable = nullptr;
-	DamageSender* _damageSender = nullptr;
-	CombatStatusController* _combatStatus = nullptr;
-	RoarController* _roarController = nullptr;
+	StateMachineBase<WyvernStateMachine>	_stateMachine;
+	EnemyController*						_enemy = nullptr;
+	WyvernController*						_wyvern = nullptr;
+	Animator*								_animator = nullptr;
+	Damageable*								_damageable = nullptr;
+	DamageSender*							_damageSender = nullptr;
+	CombatStatusController*					_combatStatus = nullptr;
+	RoarController*							_roarController = nullptr;
 
 	// ブレス攻撃のグローバル位置
 	Vector3 _breathGlobalPosition = Vector3::Zero;

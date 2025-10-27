@@ -4,6 +4,7 @@
 #include "../../Library/Component/BehaviorController.h"
 #include "../StateMachine/WyvernStateMachine.h"
 #include "../../Source/Common/CombatStatusController.h"
+#include "../../Source/Common/StaminaController.h"
 #include "../../Source/Enemy/BodyPartController.h"
 
 class WyvernBehaviorTree : public BehaviorTree
@@ -29,6 +30,8 @@ public:
 	Animator* GetAnimator() { return _animator; }
 	// 戦闘状態を取得	
 	CombatStatusController* GetCombatStatus() { return _combatStatus; }
+	// スタミナコントローラーを取得
+	StaminaController* GetStaminaController() { return _staminaController; }
 
 	// 割り込み処理の名前取得
 	const std::string& GetInterruptionName() const { return _interruptionName; }
@@ -54,6 +57,7 @@ private:
 	WyvernStateMachine*		_stateMachine = nullptr;
 	Animator*				_animator = nullptr;
 	CombatStatusController*	_combatStatus = nullptr;
+	StaminaController*		_staminaController = nullptr;
 	std::vector<BodyPartController*> _bodyPartControllers;
 
 	// 割り込み処理の名前

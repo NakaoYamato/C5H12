@@ -43,26 +43,6 @@ BehaviorActionState WyvernCompleteSubStateAction::Execute(float elapsedTime)
 }
 #pragma endregion
 
-#pragma region 指定のステートを再生してすぐに終了する
-void WyvernOneAction::Enter()
-{
-	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
-	// 現在のステートが実行するステートと同じなら何もしない
-	if (currentStateName == _stateName)
-	{
-		return;
-	}
-	// ステートを変更
-	_owner->GetStateMachine()->GetBase().ChangeState(_stateName);
-}
-
-BehaviorActionState WyvernOneAction::Execute(float elapsedTime)
-{
-	// すぐに終了
-	return BehaviorActionState::Complete;
-}
-#pragma endregion
-
 #pragma region 咆哮アクション
 // 終了処理
 void WyvernRoarAction::Exit()

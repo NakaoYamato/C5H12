@@ -14,7 +14,7 @@ public:
 	// 開始処理
 	void Start() override;
 	// 更新処理
-	void Update(float elapsedTime) override;
+	void LateUpdate(float elapsedTime) override;
 	// Gui描画
 	void DrawGui() override;
 
@@ -26,6 +26,8 @@ public:
 #pragma region アクセサ
 	// ヘルス取得
 	float GetHealth() const { return _health; }
+	// 前フレームのヘルス取得
+	float GetPrevHealth() const { return _prevHealth; }
 	// 最大ヘルス取得
 	float GetMaxHealth() const { return _maxHealth; }
 	// 無敵時間か
@@ -58,6 +60,8 @@ protected:
 	float _invisibleTimer = 0.0f; 
 	// 現在のHP
 	float _health = 100.0f;
+	// 前フレームのHP
+	float _prevHealth = 100.0f;
 	// 最大HP
 	float _maxHealth = 100.0f;
 	// 被弾位置

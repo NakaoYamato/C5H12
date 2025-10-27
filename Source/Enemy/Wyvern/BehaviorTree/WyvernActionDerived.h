@@ -51,24 +51,7 @@ private:
 };
 #pragma endregion
 
-#pragma region 指定のステートを再生してすぐに終了する
-class WyvernOneAction : public BehaviorActionBase<WyvernBehaviorTree>
-{
-public:
-	WyvernOneAction(WyvernBehaviorTree* owner, const char* stateName) :
-		BehaviorActionBase(owner),
-		_stateName(stateName) {
-	}
-	// 開始処理
-	void Enter() override;
-	// 実行処理
-	BehaviorActionState Execute(float elapsedTime) override;
-private:
-	const char* _stateName = nullptr; // 実行するステート名
-};
-#pragma endregion
-
-#pragma region 咆哮アクション
+#pragma region 咆哮
 class WyvernRoarAction : public WyvernCompleteStateAction
 {
 public:

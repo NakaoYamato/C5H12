@@ -255,9 +255,7 @@ void WyvernBehaviorTree::DrawBehaviorTreeGui(BehaviorNodeBase<WyvernBehaviorTree
 // 被弾割り込み処理が発生しているか
 bool WyvernBehaviorTree::IsDamageInterruption()
 {
-	// ダウン中は処理しない
-	if (_interruptionName == "Down")
-		return false;
+	std::string prevInterruptionName = _interruptionName;
 
 	bool res = false;
 
@@ -280,6 +278,10 @@ bool WyvernBehaviorTree::IsDamageInterruption()
 		bodyPartController->SetIsStagger(false);
 		bodyPartController->SetIsDown(false);
 	}
+	
+	// ダウン中は処理しない
+	if (prevInterruptionName == "Down")
+		return false;
 
 	return res;
 }

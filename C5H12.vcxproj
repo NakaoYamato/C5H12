@@ -292,6 +292,7 @@
     <ClCompile Include="Source\Common\CombatStatusController.cpp" />
     <ClCompile Include="Source\Common\DamageableChild.cpp" />
     <ClCompile Include="Source\Common\DamageSender.cpp" />
+    <ClCompile Include="Source\Common\NodeShaker.cpp" />
     <ClCompile Include="Source\Common\RoarController.cpp" />
     <ClCompile Include="Source\Common\StaminaController.cpp" />
     <ClCompile Include="Source\Common\Targetable.cpp" />
@@ -537,6 +538,7 @@
     <ClInclude Include="Source\Common\CombatStatusController.h" />
     <ClInclude Include="Source\Common\DamageableChild.h" />
     <ClInclude Include="Source\Common\DamageSender.h" />
+    <ClInclude Include="Source\Common\NodeShaker.h" />
     <ClInclude Include="Source\Common\RoarController.h" />
     <ClInclude Include="Source\Common\StaminaController.h" />
     <ClInclude Include="Source\Common\Targetable.h" />

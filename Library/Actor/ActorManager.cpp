@@ -212,7 +212,7 @@ void ActorManager::DrawGui()
 				for (auto& actor : _updateActors[i])
 				{
 					// 親が存在するなら親の方で表示されているのでスキップ
-					if (actor->GetParent()) break;
+					if (actor->GetParent()) continue;
 
 					DrawActorGui(actor);
 				}

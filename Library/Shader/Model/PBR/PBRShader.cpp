@@ -50,6 +50,8 @@ void PBRShader::Update(const RenderContext& rc,
 	cbMesh.metalness = pbrFactor.z;
 	if (auto it = material->GetParameterF1("metalnessFactor"))
 		cbMesh.metalness *= *it;
+	if (auto value = material->GetParameterI1("decalMask"))
+		cbMesh.decalMask = *value;
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
@@ -92,5 +94,6 @@ Material::ParameterMap PBRShader::GetParameterMap() const
 	Material::ParameterMap p;
 	p["roughnessFactor"] = 1.0f;
 	p["metalnessFactor"] = 1.0f;
+	p["decalMask"] = 0;
     return p;
 }

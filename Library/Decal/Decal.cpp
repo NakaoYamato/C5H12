@@ -42,4 +42,5 @@ void Decal::DrawGui(ID3D11Device* device)
 			nullptr);
 	}
 	ImGui::ColorEdit4("Color", &_color.x);
+	ImGui::InputInt("Decal Mask", &decalMask);
 }

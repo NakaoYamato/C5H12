@@ -684,6 +684,9 @@
     <ClCompile Include="Library\Math\Easing.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\Test\SceneWyvernDecalDebug.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1424,6 +1427,9 @@
     <ClInclude Include="Source\Common\NodeShaker.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Scene\Test\SceneWyvernDecalDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1463,6 +1469,7 @@
     <None Include="HLSL\CBuffer\B2\Model\PhongMeshCB.hlsli" />
     <None Include="HLSL\CBuffer\B3\LightCB.hlsli" />
     <None Include="HLSL\CBuffer\B2\Model\PBRMeshCB.hlsli" />
+    <None Include="HLSL\Decal\DecalTextureResource.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />

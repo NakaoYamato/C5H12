@@ -28,6 +28,9 @@ private:
 		DirectX::XMFLOAT4		Ka;// アンビエント
 		DirectX::XMFLOAT4		Kd;// ディフューズ
 		DirectX::XMFLOAT4		Ks;// スペキュラー
+
+		int decalMask = 0;
+		float dummy[3];
 	};
 
 	VertexShader 	_vertexShader;

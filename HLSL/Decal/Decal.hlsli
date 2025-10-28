@@ -7,30 +7,56 @@ struct PS_OUT
     float4 worldNormal : SV_TARGET1;
 };
 
-inline float2 GetDecalTexcoord(float2 svPosition, 
+struct DecalDecodeData
+{
+    float2 gbufferTexcoord;
+    float2 cubeTexcoord;
+    float depth;
+    float3 worldPosition;
+};
+
+inline DecalDecodeData GetDecalTexcoord(float2 svPosition,
 Texture2D<float> gbufferDepth, 
 SamplerState samplerState, 
 row_major float4x4 invViewProjection,
 row_major float4x4 invWorld)
 {
+    DecalDecodeData res;
+    
     // スクリーン情報からGBuffer参照用UV座標を算出
     float2 screenSize;
     gbufferDepth.GetDimensions(screenSize.x, screenSize.y);
-    float2 gbufferTexcoord = svPosition.xy / screenSize;
+    res.gbufferTexcoord = svPosition.xy / screenSize;
     
     // 深度値からワールド座標を算出
-    float depth = gbufferDepth.Sample(samplerState, gbufferTexcoord).x;
-    float4 position = float4(gbufferTexcoord.x * 2.0f - 1.0f, gbufferTexcoord.y * -2.0f + 1.0f, depth, 1);
+    res.depth = gbufferDepth.Sample(samplerState, res.gbufferTexcoord).x;
+    float4 position = float4(res.gbufferTexcoord.x * 2.0f - 1.0f, res.gbufferTexcoord.y * -2.0f + 1.0f, res.depth, 1);
     position = mul(position, invViewProjection);
-    float3 worldPosition = position.xyz / position.w;
+    res.worldPosition = position.xyz / position.w;
     
     // キューブ基準の空間の座標に変換してデカールのUV座標に変換
-    float4 cubeTexturePosition = mul(float4(worldPosition, 1), invWorld);
+    float4 cubeTexturePosition = mul(float4(res.worldPosition, 1), invWorld);
     cubeTexturePosition /= cubeTexturePosition.w;
     clip(abs(cubeTexturePosition.x) > 1.0f ? -1 : 1);
     clip(abs(cubeTexturePosition.y) > 1.0f ? -1 : 1);
     clip(abs(cubeTexturePosition.z) > 0.5f ? -1 : 1);
     cubeTexturePosition.x = cubeTexturePosition.x * 0.5f + 0.5f;
     cubeTexturePosition.y = cubeTexturePosition.y * -0.5f + 0.5f;
-    return cubeTexturePosition.xy;    
+    res.cubeTexcoord = cubeTexturePosition.xy;
+    return res;
+}
+
+inline void DecalMask(float2 gbufferTexcoord,
+Texture2D<float4> gbufferParameter,
+SamplerState samplerState,
+int mask)
+{
+    if (mask == 0)
+    {
+        return;
+    }
+    
+    float4 parameter = gbufferParameter.Sample(samplerState, gbufferTexcoord);
+    if (mask != (int)parameter.x)
+        discard;
 }

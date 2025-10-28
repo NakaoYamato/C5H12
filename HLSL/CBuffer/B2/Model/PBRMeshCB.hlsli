@@ -8,7 +8,8 @@ cbuffer MESH_CONSTANT_BUFFER : register(b2)
     
     float roughnessFactor;
     float metalnessFactor;
-    float2 dummy;
+    int decalMask;
+    float dummy;
 }
 
 #endif  //  __PBR_MESH_CONSTANT_BUFFER_H__

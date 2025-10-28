@@ -44,5 +44,6 @@ PS_GB_OUT main(VS_OUT pin)
     N,
     0.5f,
     emissiveColor.rgb, 
-    0.5f);
+    0.5f,
+    float4(decalMask, 0, 0, 0));
 }

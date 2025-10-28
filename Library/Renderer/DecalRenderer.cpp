@@ -88,14 +88,16 @@ void DecalRenderer::Draw(std::string shaderName, Decal* decal, const DirectX::XM
 			decal->GetColorSRV().GetAddressOf(),
 			decal->GetNormalSRV().GetAddressOf(),
 			&world,
-			decal->GetColor()
+			decal->GetColor(),
+			decal->GetDecalMask()
 		});
 }
 // 描画申請
 void DecalRenderer::Draw(std::string shaderName, 
 	ID3D11ShaderResourceView** colorSRV, ID3D11ShaderResourceView** normalSRV,
 	const DirectX::XMFLOAT4X4& world, 
-	const Vector4& color)
+	const Vector4& color,
+	int mask)
 {
 	// 描画情報を追加
 	_drawInfos.push_back(
@@ -104,7 +106,8 @@ void DecalRenderer::Draw(std::string shaderName,
 			colorSRV,
 			normalSRV,
 			&world,
-			color
+			color,
+			mask
 		});
 }
 // 描画処理
@@ -125,6 +128,7 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 	// GBufferの色情報、深度情報をRTに設定しながら使うとエラーが出るので
 	// 対策としてSRVのコピーを作成する
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyColorSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyParameterSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyDepthStencilSRV;
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -137,6 +141,12 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 			gbuffer->GetRenderTargetSRV(GBUFFER_COLOR_MAP_INDEX).Get(),
 			&srvDesc,
 			copyColorSRV.ReleaseAndGetAddressOf()
+		);
+		GpuResourceManager::CreateShaderResourceViewCopy(
+			device, dc,
+			gbuffer->GetRenderTargetSRV(GBUFFER_PARAMETER_MAP_INDEX).Get(),
+			&srvDesc,
+			copyParameterSRV.ReleaseAndGetAddressOf()
 		);
 		srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
 		GpuResourceManager::CreateShaderResourceViewCopy(
@@ -186,6 +196,7 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 
 		// シェーダー内でGBufferのテクスチャの色、ワールド座標を取得するために送信
 		dc->PSSetShaderResources(GBUFFER_COLOR_SRV_INDEX, 1, copyColorSRV.GetAddressOf());
+		dc->PSSetShaderResources(GBUFFER_PARAMETER_SRV_INDEX, 1, copyParameterSRV.GetAddressOf());
 		dc->PSSetShaderResources(GBUFFER_DEPTH_SRV_INDEX, 1, copyDepthStencilSRV.GetAddressOf());
 		// 情報の設定
 		{
@@ -208,6 +219,7 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 				// ボックスの向きを保存
 				decalConstant.direction = Vector3(Vector3::Up).TransformNormal(World).Normalize();
 				decalConstant.direction.w = 0;
+				decalConstant.decalMask = drawInfo.decalMask;
 			}
 			dc->UpdateSubresource(_decalConstantBuffer.Get(), 0, 0, &decalConstant, 0, 0);
 			dc->VSSetConstantBuffers(DECAL_CONSTANT_INDEX, 1, _decalConstantBuffer.GetAddressOf());

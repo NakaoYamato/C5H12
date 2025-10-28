@@ -7,6 +7,9 @@ cbuffer MESH_CONSTANT_BUFFER : register(b2)
     float4 Ka;
     float4 Kd;
     float4 Ks;
+    
+    int decalMask;
+    float3 dummy;
 }
 
 #endif  //  __PHONG_MESH_CONSTANT_BUFFER_H__

@@ -45,6 +45,8 @@ void PhongShader::Update(const RenderContext& rc,
 	cbMesh.Ka = material->GetColor("Ambient");
 	cbMesh.Kd = material->GetColor("Diffuse");
 	cbMesh.Ks = material->GetColor("Specular");
+	if (auto value = material->GetParameterI1("decalMask"))
+		cbMesh.decalMask = *value;
 	dc->UpdateSubresource(_meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
 	// シェーダーリソースビュー設定
@@ -85,8 +87,10 @@ void PhongShader::End(const RenderContext& rc)
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
+// パラメータのkey取得
 Material::ParameterMap PhongShader::GetParameterMap() const
 {
 	Material::ParameterMap p;
+	p["decalMask"] = 0;
 	return p;
 }

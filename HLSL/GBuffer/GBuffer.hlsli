@@ -4,7 +4,7 @@ struct PS_GB_OUT
     float4 baseColor      : SV_TARGET0;
     float4 worldNormal    : SV_TARGET1;
     float4 emissiveColor  : SV_TARGET2;
-    float4 parameter      : SV_TARGET3;
+    float4 parameter      : SV_TARGET3; // X: デカールマスク
     
     // depthはDepthStencilViewとして存在
     //float depth             : SV_TARGET5;
@@ -27,6 +27,25 @@ float roughness)
     output.worldNormal.a = metallic;
     output.emissiveColor.rgb = emissiveColor;
     output.emissiveColor.a = specular;
+    return output;
+}
+PS_GB_OUT CreateOutputData(
+float3 baseColor,
+float specular,
+float3 worldNormal,
+float metallic,
+float3 emissiveColor,
+float roughness,
+float4 parameter)
+{
+    PS_GB_OUT output = (PS_GB_OUT) 0;
+    output.baseColor.rgb = baseColor;
+    output.baseColor.a = roughness;
+    output.worldNormal.xyz = worldNormal;
+    output.worldNormal.a = metallic;
+    output.emissiveColor.rgb = emissiveColor;
+    output.emissiveColor.a = specular;
+    output.parameter = parameter;
     return output;
 }
 
@@ -61,6 +80,7 @@ struct GBufferData
     float metallic;
     float roughness;
     float depth;
+    float4 parameter;
 };
 
 //  GBufferテクスチャ受け渡し用構造体
@@ -103,6 +123,7 @@ GBufferData DecodeGBuffer(Texture2D textures[_TEXTURE_MAX], SamplerState state, 
     ret.roughness = baseMapData.a;
     ret.metallic = normalMapData.a;
     ret.specular = emissiveMapData.a;
+    ret.parameter = parameterMapData;
     ret.depth = depth;
     return ret;
 }

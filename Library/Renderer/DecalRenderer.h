@@ -23,6 +23,8 @@ public:
 		const DirectX::XMFLOAT4X4*	world = nullptr;
 		// 色
 		Vector4						color = Vector4::White;
+		// デカールのマスク
+		int							decalMask = 0;
 	};
 	// デカールの定数バッファ
 	struct DecalConstants
@@ -31,6 +33,9 @@ public:
 		DirectX::XMFLOAT4X4 inverseTransform{};
 		Vector4				color = Vector4::White;
 		Vector4				direction{};
+
+		int decalMask = 0;
+		int padding[3]{};
 	};
 	// ジオメトリの頂点データ
 	struct GeometryVertex
@@ -50,7 +55,8 @@ public:
 	static constexpr UINT DECAL_COLOR_SRV_INDEX = 0;
 	static constexpr UINT DECAL_NORMAL_SRV_INDEX = 1;
 	static constexpr UINT GBUFFER_COLOR_SRV_INDEX = 2;
-	static constexpr UINT GBUFFER_DEPTH_SRV_INDEX = 3;
+	static constexpr UINT GBUFFER_PARAMETER_SRV_INDEX = 3;
+	static constexpr UINT GBUFFER_DEPTH_SRV_INDEX = 4;
 	static constexpr UINT DECAL_CONSTANT_INDEX = 2;
 #pragma endregion
 
@@ -71,7 +77,8 @@ public:
 		ID3D11ShaderResourceView** colorSRV,
 		ID3D11ShaderResourceView** normalSRV,
 		const DirectX::XMFLOAT4X4& world,
-		const Vector4& color = Vector4::White);
+		const Vector4& color = Vector4::White,
+		int mask = 0);
 	// 描画処理
 	void Render(GBuffer* gbuffer, ID3D11Device* device, const RenderContext& rc);
 	// シェーダ名の取得

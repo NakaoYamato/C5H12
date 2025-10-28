@@ -29,7 +29,8 @@ private:
 
 		float roughness;
 		float metalness;
-		float dummy[2];
+		int decalMask = 0;
+		float dummy;
 	};
 
 	VertexShader 	_vertexShader;

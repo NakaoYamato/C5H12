@@ -51,5 +51,6 @@ PS_GB_OUT main(VS_OUT pin)
     N,
     metalness,
     emissiveColor.rgb,
-    roughness);
+    roughness,
+    float4(decalMask, 0, 0, 0));
 }

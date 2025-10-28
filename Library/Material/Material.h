@@ -76,15 +76,30 @@ public:
 	// パラメータ取得
 	const VariantType&								GetParameter(const std::string& key) const { return _parameters.at(key); }
 	// パラメータ(int1)取得　失敗でnullptr
-	const int*										GetParameterI1(const std::string& key) const { return std::get_if<int>(&_parameters.at(key)); }
+	const int*										GetParameterI1(const std::string& key) const { 
+		if (_parameters.find(key) == _parameters.end()) return nullptr;
+		return std::get_if<int>(&_parameters.at(key)); 
+	}
 	// パラメータ(float1)取得　失敗でnullptr
-	const float*									GetParameterF1(const std::string& key) const { return std::get_if<float>(&_parameters.at(key)); }
+	const float*									GetParameterF1(const std::string& key) const {
+		if (_parameters.find(key) == _parameters.end()) return nullptr;
+		return std::get_if<float>(&_parameters.at(key)); 
+	}
 	// パラメータ(Vector2)取得　失敗でnullptr
-	const Vector2*									GetParameterF2(const std::string& key) const { return std::get_if<Vector2>(&_parameters.at(key)); }
+	const Vector2*									GetParameterF2(const std::string& key) const {
+		if (_parameters.find(key) == _parameters.end()) return nullptr;
+		return std::get_if<Vector2>(&_parameters.at(key)); 
+	}
 	// パラメータ(Vector3)取得　失敗でnullptr
-	const Vector3*									GetParameterF3(const std::string& key) const { return std::get_if<Vector3>(&_parameters.at(key)); }
+	const Vector3*									GetParameterF3(const std::string& key) const {
+		if (_parameters.find(key) == _parameters.end()) return nullptr; 
+		return std::get_if<Vector3>(&_parameters.at(key)); 
+	}
 	// パラメータ(Vector4)取得　失敗でnullptr
-	const Vector4*									GetParameterF4(const std::string& key) const { return std::get_if<Vector4>(&_parameters.at(key)); }
+	const Vector4*									GetParameterF4(const std::string& key) const {
+		if (_parameters.find(key) == _parameters.end()) return nullptr; 
+		return std::get_if<Vector4>(&_parameters.at(key)); 
+	}
 	// ブレンドタイプ取得
 	BlendType										GetBlendType() const { return _blendType; }
 	// シェーダー名取得

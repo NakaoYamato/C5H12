@@ -332,6 +332,7 @@
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneGryphusDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
+    <ClCompile Include="Source\Scene\Test\SceneWyvernDecalDebug.cpp" />
     <ClCompile Include="Source\Stage\EnvironmentDestroyer.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\Title\TitleMediator.cpp" />
@@ -580,6 +581,7 @@
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Scene\Test\SceneGryphusDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />
+    <ClInclude Include="Source\Scene\Test\SceneWyvernDecalDebug.h" />
     <ClInclude Include="Source\Stage\EnvironmentDestroyer.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Title\TitleMediator.h" />
@@ -633,6 +635,7 @@
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
     <None Include="HLSL\Decal\Decal.hlsli" />
     <None Include="HLSL\Decal\DecalGeometry.hlsli" />
+    <None Include="HLSL\Decal\DecalTextureResource.hlsli" />
     <None Include="HLSL\Define\SamplerStateDefine.hlsli" />
     <None Include="HLSL\Function\Noise.hlsli" />
     <None Include="HLSL\Function\ShadingFunctions.hlsli" />

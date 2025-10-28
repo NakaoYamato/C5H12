@@ -16,10 +16,12 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() { return _colorSRV; }
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetNormalSRV() { return _normalSRV; }
 	const Vector4& GetColor() const { return _color; }
+	int GetDecalMask() const { return decalMask; }
 #pragma endregion
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _colorSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _normalSRV;
 	Vector4 _color = Vector4::White; // デカールの色
+	int		decalMask = 0;// デカールのマスク
 };

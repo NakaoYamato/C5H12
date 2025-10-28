@@ -2,7 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Actor/Terrain/TerrainActor.h"
-
+#include "../../Library/Actor/ModelAttach/ModelAttachActor.h"
 // コンポーネント
 #include "../../Library/Component/DecalController.h"
 
@@ -57,6 +57,15 @@ void SceneWyvernDecalDebug::OnInitialize()
     {
         auto wyvern = RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
         wyvern->GetTransform().SetPosition(Vector3(0.0f, 5.0f, 20.0f));
+
+        {
+			auto decal = RegisterActor<ModelAttachActor>("WyvernDecal", ActorTag::Enemy);
+            auto model = wyvern->GetModel().lock();
+			decal->Initialize(wyvern.get(), &model->GetPoseNodes()[model->GetNodeIndex("L Clavicle")]);
+            decal->AddComponent<DecalController>(
+                L"./Data/Texture/Decal/gun_holes.png",
+                L"./Data/Texture/Decal/NormalMap.png");
+        }
     }
     AddCompletionLoading(CompletionLoadingRate);
 }

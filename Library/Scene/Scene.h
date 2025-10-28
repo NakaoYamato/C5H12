@@ -150,6 +150,11 @@ public:
 	// 経過時間取得
 	float GetTime() const { return _time; }
 
+	// 画面サイズ取得
+	float GetScreenWidth() const;
+	// 画面サイズ取得
+	float GetScreenHeight() const;
+
 	// グリッド表示フラグ取得
 	void SetShowGrid(bool show) { _showGrid = show; }
 	// 準備完了しているか

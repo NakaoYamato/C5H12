@@ -517,3 +517,15 @@ void Scene::SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const 
 {
     _skyMap = std::make_unique<SkyMap>(Graphics::Instance().GetDevice(), filename, diffuseIEM, specularIDM);
 }
+
+// 画面サイズ取得
+float Scene::GetScreenWidth() const
+{
+    return Graphics::Instance().GetScreenWidth();
+}
+
+// 画面サイズ取得
+float Scene::GetScreenHeight() const
+{
+    return Graphics::Instance().GetScreenHeight();
+}

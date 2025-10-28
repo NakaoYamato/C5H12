@@ -18,10 +18,8 @@ void PlayerCameraController::Start()
     DirectX::XMStoreFloat3(&front, Front);
     // 初期設定
     _currentFocus = _playerActor->GetTransform().GetPosition();
-    _currentFocus.y += _cameraOffsetY;
+    _currentFocus.y += _focusVerticalOffset;
     GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
-
-	_focusNodeIndex = _playerActor->GetModel().lock()->GetNodeIndex("pelvis");
 }
 
 void PlayerCameraController::Update(float elapsedTime)
@@ -40,9 +38,9 @@ void PlayerCameraController::Update(float elapsedTime)
     DirectX::XMVECTOR Up = Transform.r[1];
     DirectX::XMVECTOR Front = Transform.r[2];
     Vector3 front{}, right{}, up{};
-    DirectX::XMStoreFloat3(&front, Front);
-    DirectX::XMStoreFloat3(&right, Right);
-    DirectX::XMStoreFloat3(&up, Up);
+    DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(Front));
+    DirectX::XMStoreFloat3(&right, DirectX::XMVector3Normalize(Right));
+    DirectX::XMStoreFloat3(&up, DirectX::XMVector3Normalize(Up));
 
     // 入力情報を取得
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
@@ -56,16 +54,22 @@ void PlayerCameraController::Update(float elapsedTime)
         angle.y += DirectX::XM_2PI;
     // X軸回転
     angle.x -= moveY * 0.5f;
-    if (angle.x > DirectX::XMConvertToRadians(89.9f))
-        angle.x = DirectX::XMConvertToRadians(89.9f);
-    else if (angle.x < -DirectX::XMConvertToRadians(89.9f))
-        angle.x = -DirectX::XMConvertToRadians(89.9f);
+    if (angle.x > _angleXLimitHigh)
+        angle.x = _angleXLimitHigh;
+    else if (angle.x < _angleXLimitLow)
+        angle.x = _angleXLimitLow;
     GetActor()->GetTransform().SetAngle(angle);
 
-    //Vector3 newFocus = _playerActor->GetTransform().GetPosition();
-    auto& focusNode = _playerActor->GetModel().lock()->GetPoseNodes().at(_focusNodeIndex);
-    Vector3 newFocus = Vector3::TransformCoord(focusNode.position, focusNode.parent->worldTransform);
-    newFocus.y += _cameraOffsetY;
+    Vector3 newFocus = _playerActor->GetTransform().GetPosition();
+    // オフセット処理
+    newFocus.y += _focusVerticalOffset;
+    // 下から見るときはオフセットの影響を薄くする
+	float lookingUpValue = angle.x - _lookingUpStartAngle;
+    float horizontalRate = lookingUpValue < 0.0f ?
+        1.0f - std::clamp(std::fabsf(lookingUpValue / _lookingUpAngleValue), 0.0f, 1.0f) :
+        1.0f;
+    newFocus.x += horizontalRate * right.x * _focusHorizontalOffset;
+    newFocus.z += horizontalRate * right.z * _focusHorizontalOffset;
 
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
     Vector3 newEye = newFocus - front * _cameraDistance;
@@ -90,11 +94,11 @@ void PlayerCameraController::Update(float elapsedTime)
     // 補完処理
     Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * elapsedTime);
     Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * elapsedTime);
-    //eye = newEye;
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 
     _currentFocus = focus;
+	_currentEye = eye;
     GetActor()->GetTransform().SetPosition(eye);
 	// マウスの位置を画面内に修正
     _Mouse->ClipCursorInWindow();
@@ -108,8 +112,15 @@ void PlayerCameraController::FixedUpdate()
 
 void PlayerCameraController::DrawGui()
 {
+	ImGui::DragFloat(u8"X軸上限角度(度)", &_angleXLimitHigh, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+	ImGui::DragFloat(u8"X軸下限角度(度)", &_angleXLimitLow, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+
+	ImGui::DragFloat(u8"見上げ開始角度(度)", &_lookingUpStartAngle, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+	ImGui::DragFloat(u8"見上げ角度値(度)", &_lookingUpAngleValue, 1.0f, 0.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+
     ImGui::DragFloat(u8"カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat(u8"オフセット", &_cameraOffsetY, 0.1f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"垂直方向のオフセット", &_focusVerticalOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"水平方向のオフセット", &_focusHorizontalOffset, 0.01f, -10.0f, 10.0f);
     ImGui::DragFloat(u8"注視点補完速度", &_focusLerpSpeed, 0.1f, 0.01f, 20.0f);
     ImGui::DragFloat(u8"視点補完速度", &_eyeLerpSpeed, 0.1f, 0.01f, 20.0f);
     ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);

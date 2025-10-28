@@ -29,15 +29,23 @@ public:
 private:
     PlayerActor* _playerActor;
 
-    // カメラの注視点のなるノード番号
-	int _focusNodeIndex = -1;
     Vector3 _currentFocus{};
+    Vector3 _currentEye{};
 
-    float _cameraOffsetY = 1.0f;
+	// X軸の回転制限
+	float _angleXLimitHigh = DirectX::XMConvertToRadians(80.0f);
+    float _angleXLimitLow = -DirectX::XMConvertToRadians(80.0f);
+
+	float _lookingUpStartAngle = DirectX::XMConvertToRadians(15.0f);
+	float _lookingUpAngleValue = DirectX::XMConvertToRadians(35.0f);
+
+    float _focusVerticalOffset = 1.4f;
+	float _focusHorizontalOffset = 1.47f;
+
 	float _focusLerpSpeed = 5.0f;
 	float _eyeLerpSpeed = 10.0f;
 
-    float _cameraDistance = 6.0f;
+    float _cameraDistance = 4.3f;
     float _horizontalMovePower = 6.0f;
     float _verticalMovePower = 3.0f;
     float _cameraRadius = 0.1f;

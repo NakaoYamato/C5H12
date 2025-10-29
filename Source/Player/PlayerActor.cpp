@@ -9,9 +9,11 @@
 
 #include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/DamageSender.h"
+#include "../../Source/Common/StaminaController.h"
 #include "PlayerInput.h"
 #include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
+#include "UI/PlayerStaminaUIController.h"
 
 #include "Weapon/Warrior/PlayerShieldActor.h"
 #include "Weapon/Warrior/PlayerSwordActor.h"
@@ -33,6 +35,7 @@ void PlayerActor::OnCreate()
 	//auto modelRenderer		= AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
 	auto damageable				= this->AddComponent<Damageable>();
 	auto damageSender			= this->AddComponent<DamageSender>();
+    auto staminaController = this->AddComponent<StaminaController>();
 	auto targetable				= this->AddComponent<Targetable>();
 	auto modelRenderer			= this->AddComponent<ModelRenderer>();
 	auto animator				= this->AddComponent<Animator>();
@@ -40,9 +43,22 @@ void PlayerActor::OnCreate()
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto effectController		= this->AddComponent<EffectController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(this));
-	auto hpUIController			= this->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
+
+	// UI生成
+	{
+        auto hpUIActor = this->_scene->RegisterActor<UIActor>(GetName() + std::string(u8"HPUI"), ActorTag::UI);
+		hpUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 50.0f));
+		auto hpUIController = hpUIActor->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
+
+		if (_isUserControlled)
+		{
+			auto staminaUIActor = this->_scene->RegisterActor<UIActor>(GetName() + std::string(u8"StaminaUI"), ActorTag::UI);
+			staminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 100.0f));
+			auto staminaUIController = staminaUIActor->AddComponent<PlayerStaminaUIController>(staminaController);
+		}
+	}
 
 	// エフェクト読み込み
 	{
@@ -128,6 +144,7 @@ void PlayerActor::OnCreate()
 	GetTransform().SetPositionY(1.0f);
 	damageable->SetMaxHealth(10.0f);
 	damageSender->SetHitEffectIndex(PlayerController::EffectType::HitEffect);
+    staminaController->SetStaminaRecoverSpeed(10.0f);
 	// 操作対象でなければ攻撃力の倍率を0にしてダメージを与えられないようにする
 	if (!_isUserControlled)
 		damageSender->SetBaseATK(0.0f);

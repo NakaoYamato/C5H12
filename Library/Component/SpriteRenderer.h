@@ -25,7 +25,7 @@ public:
 	// GUI•`‰æ
 	void DrawGui() override;
 	// ‰æ‘œ“Ç‚İ‚İ
-	void LoadTexture(const std::string& spriteName, const wchar_t* filename, Sprite::CenterAlignment alignment);
+	void LoadTexture(const std::string& spriteName, const wchar_t* filename, Sprite::CenterAlignment alignment = Sprite::CenterAlignment::CenterCenter);
 	// ‰æ‘œ‚Æ‚Ì“–‚½‚è”»’è
 	bool IsHit(const std::string& name, const Vector2& pos) const;
 
@@ -36,6 +36,8 @@ public:
 	const Vector2& GetTexSize(const std::string& name)const { return _sprites.at(name).GetTexSize(); }
 	const Vector2& GetCenter(const std::string& name)const { return _sprites.at(name).GetCenter(); }
 	const Vector4& GetColor(const std::string& name)const { return _sprites.at(name).GetColor(); }
+    DepthState GetDepthState(const std::string& name) const { return _sprites.at(name).GetDepthState(); }
+    int GetStencil(const std::string& name) const { return _sprites.at(name).GetStencil(); }
 
 	void SetCenterAlignment(const std::string& name, Sprite::CenterAlignment alignment) {
 		_sprites.at(name).SetCenterAlignment(alignment);
@@ -45,6 +47,8 @@ public:
 	void SetTexSize(const std::string& name, const Vector2& s) { _sprites.at(name).SetTexSize(s); }
 	void SetCenter(const std::string& name, const Vector2& c) { _sprites.at(name).SetCenter(c); }
 	void SetColor(const std::string& name, const Vector4& c) { _sprites.at(name).SetColor(c); }
+    void SetDepthState(const std::string& name, DepthState ds) { _sprites.at(name).SetDepthState(ds); }
+    void SetStencil(const std::string& name, int stencil) { _sprites.at(name).SetStencil(stencil); }
 #pragma endregion
 
 protected:
@@ -57,4 +61,5 @@ private:
 	RectTransform* _myRectTransform = nullptr;
 
 	std::unordered_map<std::string, Sprite> _sprites;
+    std::vector<std::string> _spriteDrawOrder;
 };

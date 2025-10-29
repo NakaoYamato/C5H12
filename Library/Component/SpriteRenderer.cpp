@@ -31,9 +31,16 @@ void SpriteRenderer::Update(float elapsedTime)
 // 3D•`‰æŒã‚Ì•`‰æˆ—
 void SpriteRenderer::DelayedRender(const RenderContext& rc)
 {
-	for (auto& [name, spriteData] : _sprites)
+	// ƒXƒeƒ“ƒVƒ‹‚ðƒNƒŠƒA
+	rc.deviceContext->ClearDepthStencilView(rc.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	for (const auto& spriteName : _spriteDrawOrder)
 	{
-		SpriteRender(name, rc);
+		if (_sprites.find(spriteName) == _sprites.end())
+            continue;
+        auto& spriteData = _sprites.at(spriteName);
+
+		SpriteRender(spriteName, rc);
 
 		if (GetActor()->IsDrawingDebug() && !Debug::Input::IsActive(DebugInput::BTN_F7))
 		{
@@ -41,9 +48,8 @@ void SpriteRenderer::DelayedRender(const RenderContext& rc)
 			GetActor()->GetScene()->GetPrimitive()->Circle(rc.deviceContext,
 				spriteData.GetRectTransform().GetWorldPosition(),
 				5.0f);
-
 		}
-	}
+    }
 }
 // GUI•`‰æ
 void SpriteRenderer::DrawGui()
@@ -69,6 +75,7 @@ void SpriteRenderer::LoadTexture(const std::string& spriteName,
 	Sprite::CenterAlignment alignment)
 {
 	_sprites[spriteName].LoadTexture(filename, alignment);
+    _spriteDrawOrder.push_back(spriteName);
 }
 // ‰æ‘œ‚Æ‚Ì“–‚½‚è”»’è
 bool SpriteRenderer::IsHit(const std::string& name, const Vector2& pos) const

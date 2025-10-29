@@ -30,9 +30,20 @@ void Sprite::DrawGui()
 		"RIGHT_CENTER",
 		"RIGHT_DOWN"
 	};
+	static const char* DepthStateNames[] = {
+		"TestAndWrite",
+        "TestOnly",
+        "WriteOnly",
+        "NoTestNoWrite",
+        "SpriteMask",
+        "SpriteApplyMask",
+    };
 
 	if (ImGui::Combo(u8"中心位置", reinterpret_cast<int*>(&_centerAlignment), AlignmentNames, IM_ARRAYSIZE(AlignmentNames)))
 		RecalcCenter(_centerAlignment);
+	ImGui::Separator();
+	ImGui::Combo(u8"デプスステート", reinterpret_cast<int*>(&_depthState), DepthStateNames, IM_ARRAYSIZE(DepthStateNames));
+    ImGui::DragInt(u8"ステンシル値", &_stencil, 1, 0, 255);        
 	ImGui::Separator();
 
 	_rectTransform.DrawGui();
@@ -121,6 +132,7 @@ void Sprite::Render(const RenderContext& rc)
 	if (!_sprite)
 		return;
 
+	rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(_depthState), static_cast<UINT8>(_stencil));
 	_sprite->Render(rc.deviceContext,
 		_rectTransform.GetWorldPosition(),
 		_rectTransform.GetWorldScale(),

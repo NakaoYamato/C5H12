@@ -50,6 +50,8 @@ public:
 	const Vector2& GetTexSize()const { return _texSize; }
 	const Vector2& GetCenter()const { return _center; }
 	const Vector4& GetColor()const { return _color; }
+    DepthState GetDepthState() const { return _depthState; }
+	int GetStencil() const { return _stencil; }
 
 	void SetCenterAlignment(CenterAlignment alignment) {
 		_centerAlignment = alignment;
@@ -59,6 +61,8 @@ public:
 	void SetTexSize(const Vector2& s) { _texSize = s; }
 	void SetCenter(const Vector2& c) { _center = c; }
 	void SetColor(const Vector4& c) { _color = c; }
+	void SetDepthState(DepthState depthState) { _depthState = depthState; }
+    void SetStencil(UINT8 stencil) { _stencil = stencil; }
 #pragma endregion
 private:
 	std::unique_ptr<SpriteResource> _sprite;
@@ -69,4 +73,7 @@ private:
 	Vector2			_texSize = Vector2::Zero;
 	Vector2			_center = Vector2::Zero;
 	Vector4			_color = Vector4::White;
+
+    DepthState		_depthState = DepthState::TestAndWrite;
+	int				_stencil = 0;
 };

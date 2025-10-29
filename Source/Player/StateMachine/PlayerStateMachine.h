@@ -6,6 +6,7 @@
 #include "../../Library/Math/Vector.h"
 
 #include "../../Source/Common/DamageSender.h"
+#include "../../Source/Common/StaminaController.h"
 
 // 前方宣言
 class PlayerController;
@@ -35,6 +36,7 @@ public:
 	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
 	PlayerController*	GetPlayer()			{ return _player; }
 	DamageSender*		GetDamageSender()	{ return _damageSender; }
+    StaminaController* GetStaminaController() { return _staminaController; }
 	Animator*			GetAnimator()		{ return _animator; }
 	EffectController*	GetEffect()			{ return _effect; }
 	// ステート変更
@@ -48,6 +50,7 @@ private:
 	StateMachineBase<PlayerStateMachine> _stateMachine;
 	PlayerController*					_player = nullptr;
 	DamageSender*						_damageSender = nullptr;
+    StaminaController*					_staminaController = nullptr;
 	Animator*							_animator = nullptr;
 	EffectController*					_effect = nullptr;
 };

@@ -266,7 +266,7 @@ namespace NonCombatRunSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// 移動方向に向く
-			_owner->RotationMovement(elapsedTime);
+			_owner->RotationMovement(_owner->GetPlayer()->GetDashRotationFactor() * elapsedTime);
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlayAnimation())
 				_owner->GetStateMachine().ChangeSubState("Running");
@@ -296,7 +296,7 @@ namespace NonCombatRunSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// 移動方向に向く
-			_owner->RotationMovement(elapsedTime);
+			_owner->RotationMovement(_owner->GetPlayer()->GetDashRotationFactor() * elapsedTime);
 			// 入力が一定時間ないなら終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
 			{
@@ -358,7 +358,7 @@ namespace NonCombatRunSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// 移動方向に向く
-			_owner->RotationMovement(elapsedTime);
+			_owner->RotationMovement(_owner->GetPlayer()->GetDashRotationFactor() * elapsedTime);
 			// 移動があれば遷移
 			if (_owner->GetPlayer()->IsMoving())
 				_owner->GetStateMachine().ChangeSubState("Running");
@@ -450,10 +450,24 @@ void PlayerNonCombatRunState::OnEnter()
 	// フラグを立てる
 	_owner->GetPlayer()->SetIsMoving(true);
 	ChangeSubState("RunStart");
+
+    // スタミナ自動回復を停止
+    _owner->GetStaminaController()->SetIsStaminaRecover(false);
 }
 
 void PlayerNonCombatRunState::OnExecute(float elapsedTime)
 {
+	// スタミナ消費
+	_owner->GetStaminaController()->ConsumeStamina(
+		_owner->GetPlayer()->GetDashStaminaConsume() * elapsedTime,
+		true);
+
+	// スタミナが尽きたら遷移
+	if (_owner->GetStaminaController()->GetStamina() <= 0.0f)
+	{
+		_owner->GetStateMachine().ChangeState("Idle");
+    }
+
 	// ダッシュ入力がなければ歩きへ遷移
 	if (!_owner->GetPlayer()->IsDash())
 	{
@@ -482,6 +496,8 @@ void PlayerNonCombatRunState::OnExit()
 {
 	// フラグをおろす
 	_owner->GetPlayer()->SetIsMoving(false);
+	// スタミナ自動回復を再開
+	_owner->GetStaminaController()->SetIsStaminaRecover(true);
 }
 #pragma endregion
 
@@ -531,6 +547,13 @@ void PlayerNonCombatEvadeState::OnEnter()
 		directionType = static_cast<Player8WayHSB::Direction>(index);
 	}
 	ChangeSubState(directionType);
+
+	// スタミナ自動回復を停止
+	_owner->GetStaminaController()->SetIsStaminaRecover(false);
+	// スタミナ消費
+	_owner->GetStaminaController()->ConsumeStamina(
+		_owner->GetPlayer()->GetEvadeStaminaConsume(),
+		true);
 }
 
 void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
@@ -550,6 +573,11 @@ void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
 		else if (_owner->GetPlayer()->IsGuard())
 			_owner->GetStateMachine().ChangeState("CombatGuard");
 	}
+}
+void PlayerNonCombatEvadeState::OnExit()
+{
+	// スタミナ自動回復を再開
+	_owner->GetStaminaController()->SetIsStaminaRecover(true);
 }
 #pragma endregion
 

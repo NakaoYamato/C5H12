@@ -41,7 +41,7 @@ public:
 	const char* GetName() const override { return "CombatEvade"; }
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override;
-	void OnExit() override {}
+	void OnExit() override;
 };
 #pragma endregion
 

@@ -9,27 +9,25 @@ void PlayerHealthUIController::Start()
 {
 	// シーンからCanvasMediatorを取得
 	_canvasMediator = GetActor()->GetScene()->GetActorManager().FindByClass<CanvasMediator>(ActorTag::UI);
-	// ユーザーが操作するプレイヤーのHPUIの場合は、CanvasMediatorに登録
-	if (_isUserControlled && _canvasMediator.lock())
+	if (_canvasMediator.lock())
 	{
-		_canvasMediator.lock()->SetUserHealthUI(this);
-	}
-	// ユーザーが操作しないプレイヤーのHPUIの場合は、CanvasMediatorに登録
-	else if (!_isUserControlled && _canvasMediator.lock())
-	{
-		_canvasMediator.lock()->AddOtherUserHealthUI(this);
-	}
+		// 親設定
+		GetActor()->SetParent(_canvasMediator.lock().get());
+		// ユーザーが操作するプレイヤーのHPUIの場合は、CanvasMediatorに登録
+		if (_isUserControlled)
+			_canvasMediator.lock()->SetUserHealthUI(this);
+		// ユーザーが操作しないプレイヤーのHPUIの場合は、CanvasMediatorに登録
+		else
+			_canvasMediator.lock()->AddOtherUserHealthUI(this);
+    }
 	// 画像読み込み
-	LoadTexture(FrameSprite, L"Data/Texture/UI/Frame.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(MaskSprite, L"Data/Texture/UI/Mask.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(GaugeSprite, L"Data/Texture/UI/HPGauge.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/DamageGauge.png", Sprite::CenterAlignment::LeftCenter);
-	// 初期位置を設定
-	GetRectTransform(FrameSprite).SetLocalPosition(InitialPosition);
-	GetRectTransform(MaskSprite).SetLocalPosition(InitialPosition);
-	GetRectTransform(GaugeSprite).SetLocalPosition(InitialPosition);
-	GetRectTransform(DamageGaugeSprite).SetLocalPosition(InitialPosition);
+	LoadTexture(FrameSprite, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(MaskSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 
+    SetColor(GaugeSprite, Vector4::Green);
+    SetColor(DamageGaugeSprite, Vector4::Red);
 }
 // 削除処理
 void PlayerHealthUIController::OnDelete()
@@ -60,7 +58,7 @@ void PlayerHealthUIController::Update(float elapsedTime)
 			GetRectTransform(DamageGaugeSprite).GetWorldScale().x,
 			GetRectTransform(GaugeSprite).GetWorldScale().x,
 			_damageGaugeScaleSpeed * elapsedTime);
-		GetRectTransform(DamageGaugeSprite).SetLocalScale(Vector2(damageGaugeScaleX, InitialPosition.y)); // ダメージゲージの横幅を変更
+		GetRectTransform(DamageGaugeSprite).SetLocalScale(Vector2(damageGaugeScaleX, 1.0f)); // ダメージゲージの横幅を変更
 	}
 }
 // GUI描画

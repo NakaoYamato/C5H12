@@ -85,6 +85,12 @@ public:
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
+
+    float GetDashRotationFactor() const { return _dashRotationFactor; }
+
+    float GetDashStaminaConsume() const { return _dashStaminaConsume; }
+    float GetEvadeStaminaConsume() const { return _evadeStaminaConsume; }
+    float GetGuardStaminaConsume() const { return _guardStaminaConsume; }
 #pragma endregion
 
 private:
@@ -115,4 +121,14 @@ private:
 	bool _isDead = false;
 	bool _isUsingItem = false;
 #pragma endregion
+
+	// ダッシュ時の回転補正値
+	float _dashRotationFactor = 0.7f;
+
+	// ダッシュ時消費スタミナ(s)
+    float _dashStaminaConsume = 5.0f;
+	// 回避時消費スタミナ(一回当たり)
+    float _evadeStaminaConsume = 10.0f;
+	// ガード時消費スタミナ(一回当たり)
+    float _guardStaminaConsume = 10.0f;
 };

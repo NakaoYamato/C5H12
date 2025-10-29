@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Library/Actor/Actor.h"
+#include "../../Library/Actor/UI/UIActor.h"
 #include "../../Library/Scene/Scene.h"
 
 #include "../../Library/Component/SpriteRenderer.h"
@@ -13,7 +13,7 @@ class UIController;
 /// <summary>
 /// 2D描画を管理するメディエーター
 /// </summary>
-class CanvasMediator : public Actor
+class CanvasMediator : public UIActor
 {
 public:
 	~CanvasMediator() override {};

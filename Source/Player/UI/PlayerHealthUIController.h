@@ -34,9 +34,6 @@ private:
 	const std::string GaugeSprite	= "Gauge";
 	const std::string DamageGaugeSprite	= "DamageGauge";
 
-	// 初期位置
-	const Vector2 InitialPosition = Vector2(50.0f, 40.0f);
-
 	// ダメージゲージのスケール速度
 	float _damageGaugeScaleSpeed = 5.0f;
 };

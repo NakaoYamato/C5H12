@@ -213,6 +213,13 @@ void PlayerGreatSwordEvadeState::OnEnter()
         directionType = static_cast<Player8WayHSB::Direction>(index);
     }
     ChangeSubState(directionType);
+
+    // スタミナ自動回復を停止
+    _owner->GetStaminaController()->SetIsStaminaRecover(false);
+    // スタミナ消費
+    _owner->GetStaminaController()->ConsumeStamina(
+        _owner->GetPlayer()->GetEvadeStaminaConsume(),
+        true);
 }
 void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
 {
@@ -235,6 +242,11 @@ void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
         else if (_owner->GetPlayer()->IsGuard())
             _owner->GetStateMachine().ChangeState("CombatGuard");
     }
+}
+void PlayerGreatSwordEvadeState::OnExit()
+{
+    // スタミナ自動回復を再開
+    _owner->GetStaminaController()->SetIsStaminaRecover(true);
 }
 #pragma endregion
 
@@ -653,6 +665,10 @@ namespace GuardSubState
             {
                 charactorController->SetIsPushable(false);
             }
+            // スタミナ消費
+            _owner->GetStaminaController()->ConsumeStamina(
+                _owner->GetPlayer()->GetGuardStaminaConsume(),
+                true);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -688,9 +704,15 @@ void PlayerGreatSwordGuardState::OnEnter()
     _owner->GetAnimator()->SetIsUseRootMotion(true);
     // 初期サブステート設定
     ChangeSubState("GuardStart");
+    // スタミナ自動回復を停止
+    _owner->GetStaminaController()->SetIsStaminaRecover(false);
 }
 void PlayerGreatSwordGuardState::OnExecute(float elapsedTime)
 {
+    // スタミナが尽きたら遷移
+    if (_owner->GetStaminaController()->GetStamina() <= 0.0f)
+        _owner->GetStateMachine().ChangeState("CombatIdle");
+
     // 移動方向に向く
     _owner->RotationMovement(elapsedTime);
 
@@ -707,6 +729,8 @@ void PlayerGreatSwordGuardState::OnExit()
 {
     // フラグを下ろす
     _owner->GetPlayer()->SetIsGuard(false);
+    // スタミナ自動回復を再開
+    _owner->GetStaminaController()->SetIsStaminaRecover(true);
 }
 #pragma endregion
 

@@ -17,6 +17,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_animator = owner->GetComponent<Animator>().get();
 	_effect = owner->GetComponent<EffectController>().get();
 	_damageSender = owner->GetComponent<DamageSender>().get();
+    _staminaController = owner->GetComponent<StaminaController>().get();
 
     // ステート設定
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatIdleState>(this));

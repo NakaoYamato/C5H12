@@ -26,15 +26,15 @@ void RectTransform::UpdateTransform(const RectTransform* parent)
 /// デバッグGUI表示
 void RectTransform::DrawGui()
 {
-	ImGui::DragFloat2(u8"位置",			&_localPosition.x, 0.1f, -1000.0f, 1000.0f);
-	ImGui::DragFloat2(u8"スケール",		&_localScale.x, 0.01f, 0.01f, 1000.0f);
+	ImGui::DragFloat2(u8"位置",			&_localPosition.x, 0.1f);
+	ImGui::DragFloat2(u8"スケール",		&_localScale.x, 0.01f);
 	float angleDegree = DirectX::XMConvertToDegrees(_localAngle);
-	ImGui::DragFloat(u8"角度",				&angleDegree, 1.0f);
+	ImGui::DragFloat(u8"角度",				&angleDegree, 0.1f);
 	_localAngle = DirectX::XMConvertToRadians(angleDegree);
 	ImGui::Separator();
 
-	ImGui::DragFloat2(u8"ワールド位置", &_worldPosition.x, 0.1f, -1000.0f, 1000.0f);
-	ImGui::DragFloat2(u8"ワールドスケール", &_worldScale.x, 0.01f, 0.01f, 1000.0f);
+	ImGui::DragFloat2(u8"ワールド位置", &_worldPosition.x, 0.1f);
+	ImGui::DragFloat2(u8"ワールドスケール", &_worldScale.x, 0.01f);
 	angleDegree = DirectX::XMConvertToDegrees(_worldAngle);
 	ImGui::DragFloat(u8"ワールド角度", &angleDegree, 1.0f);
 }

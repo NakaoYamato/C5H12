@@ -2,11 +2,18 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
+#include "../../Source/InGame/UI/TimerUIController.h"
+
 #include <imgui.h>
 
 // 生成時処理
 void CanvasMediator::OnCreate()
 {
+
+	// タイマー生成
+    auto timerUIActor = GetScene()->RegisterActor<UIActor>("TimerUI", ActorTag::UI);
+    timerUIActor->SetParent(this);
+    auto timerUIController = timerUIActor->AddComponent<TimerUIController>();
 }
 // 開始時処理
 void CanvasMediator::OnStart()

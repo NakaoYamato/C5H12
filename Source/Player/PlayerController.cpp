@@ -141,4 +141,9 @@ void PlayerController::DelayedRender(const RenderContext& rc)
 void PlayerController::DrawGui()
 {
 	ImGui::Separator();
+    ImGui::DragFloat(u8"ダッシュ回転速度係数", &_dashRotationFactor, 0.1f, 0.0f, 20.0f);
+	ImGui::Separator();
+    ImGui::DragFloat(u8"ダッシュスタミナ消費量", &_dashStaminaConsume, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"回避スタミナ消費量", &_evadeStaminaConsume, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"ガードスタミナ消費量", &_guardStaminaConsume, 0.1f, 0.0f, 100.0f);
 }

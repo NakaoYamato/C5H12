@@ -123,6 +123,20 @@ public:
 };
 #pragma endregion
 
+#pragma region ダウン
+class PlayerGreatSwordDownState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerGreatSwordDownState(PlayerStateMachine* stateMachine);
+	~PlayerGreatSwordDownState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "CombatDown"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override {}
+	void OnExit() override;
+};
+#pragma endregion
+
 #pragma region 納刀
 class PlayerGreatSwordToNonCombatState  final : public PlayerHSB
 {

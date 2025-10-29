@@ -27,6 +27,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatToCombatState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerNonCombatHitState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerNonCombatHitKnockDownState>(this));
+	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDownState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDeathState>(this));
 
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordIdleState>(this));
@@ -37,6 +38,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordGuardState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordHitState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordHitKnockDownState>(this));
+    _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordDownState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordToNonCombatState>(this));
 }
 

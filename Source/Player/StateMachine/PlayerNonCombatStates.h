@@ -114,6 +114,20 @@ public:
 };
 #pragma endregion
 
+#pragma region ダウン
+class PlayerNonCombatDownState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerNonCombatDownState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatDownState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Down"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override {}
+	void OnExit() override;
+};
+#pragma endregion
+
 #pragma region 死亡
 class PlayerNonCombatDeathState   final : public PlayerHSB
 {

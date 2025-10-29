@@ -153,6 +153,7 @@
     <ClCompile Include="Library\2D\SpriteResource.cpp" />
     <ClCompile Include="Library\Actor\ModelAttach\ModelAttachActor.cpp" />
     <ClCompile Include="Library\Actor\Terrain\TerrainActor.cpp" />
+    <ClCompile Include="Library\Actor\UI\UIActor.cpp" />
     <ClCompile Include="Library\Audio\AudioLoader.cpp" />
     <ClCompile Include="Library\Audio\AudioResource.cpp" />
     <ClCompile Include="Library\Audio\AudioSystem.cpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="Library\Math\Easing.cpp" />
     <ClCompile Include="Library\Math\MathF.cpp" />
     <ClCompile Include="Library\Math\Matrix.cpp" />
+    <ClCompile Include="Library\Math\RectTransform.cpp" />
     <ClCompile Include="Library\Model\AnimationEvent.cpp" />
     <ClCompile Include="Library\Model\Model.cpp" />
     <ClCompile Include="Library\2D\SkyMap.cpp" />
@@ -331,6 +333,7 @@
     <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneGryphusDebug.cpp" />
+    <ClCompile Include="Source\Scene\Test\SceneUIDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDecalDebug.cpp" />
     <ClCompile Include="Source\Stage\EnvironmentDestroyer.cpp" />
@@ -379,6 +382,7 @@
     <ClInclude Include="Library\2D\SpriteResource.h" />
     <ClInclude Include="Library\Actor\ModelAttach\ModelAttachActor.h" />
     <ClInclude Include="Library\Actor\Terrain\TerrainActor.h" />
+    <ClInclude Include="Library\Actor\UI\UIActor.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorActionBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorData.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorJudgmentBase.h" />
@@ -415,6 +419,7 @@
     <ClInclude Include="Library\Material\Material.h" />
     <ClInclude Include="Library\Math\MathF.h" />
     <ClInclude Include="Library\Math\Matrix.h" />
+    <ClInclude Include="Library\Math\RectTransform.h" />
     <ClInclude Include="Library\Model\AnimationEvent.h" />
     <ClInclude Include="Library\Model\Model.h" />
     <ClInclude Include="Library\2D\SkyMap.h" />
@@ -580,6 +585,7 @@
     <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Scene\Test\SceneGryphusDebug.h" />
+    <ClInclude Include="Source\Scene\Test\SceneUIDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDecalDebug.h" />
     <ClInclude Include="Source\Stage\EnvironmentDestroyer.h" />

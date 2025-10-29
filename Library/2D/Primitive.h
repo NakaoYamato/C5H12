@@ -62,7 +62,7 @@ public:
     void Circle(ID3D11DeviceContext* context,
         const Vector2& center, 
         float radius,
-        const Vector2& scale = Vector2::Zero, 
+        const Vector2& scale = Vector2::One, 
         float angle = (0.0f),
         const Vector4& color = Vector4::White,
         int n = CircleMaxPolygonal) const;

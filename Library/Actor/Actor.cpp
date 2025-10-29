@@ -221,10 +221,7 @@ void Actor::DrawGui()
 	}
 
 	// トランスフォーム
-	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		_transform.DrawGui();
-	}
+	DrawTransformGui();
 
 	static ImGuiTabBarFlags tab_bar_flags =
 		ImGuiTabBarFlags_AutoSelectNewTabs |
@@ -363,6 +360,14 @@ void Actor::UpdateModelTransform()
 void Actor::UpdateTransform()
 {
 	_transform.UpdateTransform(_parent ? &_parent->GetTransform().GetMatrix() : nullptr);
+}
+/// トランスフォームGUI描画
+void Actor::DrawTransformGui()
+{
+	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		_transform.DrawGui();
+	}
 }
 /// ギズモ描画
 void Actor::DrawGuizmo()

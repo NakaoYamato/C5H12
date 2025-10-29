@@ -3,23 +3,23 @@
 #include "Vector.h"
 #include "Quaternion.h"
 
-class Matrix : public DirectX::XMFLOAT4X4
+class Matrix4X4 : public DirectX::XMFLOAT4X4
 {
 public:
-	Matrix() : DirectX::XMFLOAT4X4()
+	Matrix4X4() : DirectX::XMFLOAT4X4()
 	{
 		DirectX::XMStoreFloat4x4(this, DirectX::XMMatrixIdentity());
 	};
-	Matrix(const DirectX::XMFLOAT4X4& m) : DirectX::XMFLOAT4X4(m) {};
-	Matrix(const DirectX::XMMATRIX& m)
+	Matrix4X4(const DirectX::XMFLOAT4X4& m) : DirectX::XMFLOAT4X4(m) {};
+	Matrix4X4(const DirectX::XMMATRIX& m)
 	{
 		DirectX::XMStoreFloat4x4(this, m);
 	}
-	~Matrix() {};
+	~Matrix4X4() {};
 
 #pragma region 演算子オーバーロード
-	Matrix operator=(const Matrix&);
-	Matrix operator*(const Matrix&) const;
+	Matrix4X4 operator=(const Matrix4X4&);
+	Matrix4X4 operator*(const Matrix4X4&) const;
 #pragma endregion
 
 #pragma region 静的メンバ変数
@@ -34,63 +34,63 @@ public:
 
 #pragma region 静的メンバ関数
 	// 平行移動行列取得
-	static Matrix Translation(float x, float y, float z)
+	static Matrix4X4 Translation(float x, float y, float z)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixTranslation(x, y, z));
 		return m;
 	}
 	// 拡大縮小行列取得
-	static Matrix Scaling(float sx, float sy, float sz)
+	static Matrix4X4 Scaling(float sx, float sy, float sz)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixScaling(sx, sy, sz));
 		return m;
 	}
 	// 回転行列取得(X軸回転)
-	static Matrix RotationX(float radian)
+	static Matrix4X4 RotationX(float radian)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixRotationX(radian));
 		return m;
 	}
 	// 回転行列取得(Y軸回転)
-	static Matrix RotationY(float radian)
+	static Matrix4X4 RotationY(float radian)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixRotationY(radian));
 		return m;
 	}
 	// 回転行列取得(Z軸回転)
-	static Matrix RotationZ(float radian)
+	static Matrix4X4 RotationZ(float radian)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixRotationZ(radian));
 		return m;
 	}
 	// 回転行列取得(オイラー回転 ZXY)
-	static Matrix RotationRollPitchYaw(float pitch, float yaw, float roll)
+	static Matrix4X4 RotationRollPitchYaw(float pitch, float yaw, float roll)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll));
 		return m;
 	}
 	// 回転行列取得(クォータニオン)
-	static Matrix RotationQuaternion(const DirectX::XMFLOAT4& q)
+	static Matrix4X4 RotationQuaternion(const DirectX::XMFLOAT4& q)
 	{
-		Matrix m;
+		Matrix4X4 m;
 		DirectX::XMStoreFloat4x4(&m, DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q)));
 		return m;
 	}
 	// 逆行列取得
-	static Matrix Inverse(const Matrix& m)
+	static Matrix4X4 Inverse(const Matrix4X4& m)
 	{
-		Matrix result;
+		Matrix4X4 result;
 		DirectX::XMStoreFloat4x4(&result, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&m)));
 		return result;
 	}
 	// 行列分解
-	static void Decompose(const Matrix& m, Vector3& scale, Quaternion& rotation, Vector3& translation)
+	static void Decompose(const Matrix4X4& m, Vector3& scale, Quaternion& rotation, Vector3& translation)
 	{
 		DirectX::XMVECTOR s, r, t;
 		DirectX::XMMatrixDecompose(&s, &r, &t, DirectX::XMLoadFloat4x4(&m));
@@ -104,7 +104,7 @@ public:
 		translation = Vector3(ft);
 	}
 	// 行列分解
-	static void Decompose(const Matrix& m, Vector3& scale, Vector3& rotation, Vector3& translation)
+	static void Decompose(const Matrix4X4& m, Vector3& scale, Vector3& rotation, Vector3& translation)
 	{
 		DirectX::XMVECTOR s, r, t;
 		DirectX::XMMatrixDecompose(&s, &r, &t, DirectX::XMLoadFloat4x4(&m));
@@ -118,12 +118,12 @@ public:
 		translation = Vector3(ft);
 	}
 	// 変換行列作成
-	static Matrix CreateTransform(const Vector3& scale, const Vector3& angle, const Vector3& position)
+	static Matrix4X4 CreateTransform(const Vector3& scale, const Vector3& angle, const Vector3& position)
 	{
 		DirectX::XMMATRIX T = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3(&position));
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
 		DirectX::XMMATRIX S = DirectX::XMMatrixScalingFromVector(DirectX::XMLoadFloat3(&scale));
-		Matrix m{};
+		Matrix4X4 m{};
 		DirectX::XMStoreFloat4x4(&m, S * R * T);
 		return m;
 	}
@@ -131,19 +131,19 @@ public:
 
 #pragma region 関数
 	// 逆行列取得
-	Matrix Inverse() const
+	Matrix4X4 Inverse() const
 	{
-		return Matrix::Inverse(*this);
+		return Matrix4X4::Inverse(*this);
 	}
 	// 行列分解
 	void Decompose(Vector3& scale, Quaternion& rotation, Vector3& translation) const
 	{
-		Matrix::Decompose(*this, scale, rotation, translation);
+		Matrix4X4::Decompose(*this, scale, rotation, translation);
 	}
 	// 行列分解
 	void Decompose(Vector3& scale, Vector3& rotation, Vector3& translation) const
 	{
-		Matrix::Decompose(*this, scale, rotation, translation);
+		Matrix4X4::Decompose(*this, scale, rotation, translation);
 	}
 	DirectX::XMMATRIX ToXMMATRIX() const
 	{

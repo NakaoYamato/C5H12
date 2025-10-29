@@ -5,7 +5,7 @@
 // ƒMƒYƒ‚•`‰æ
 void ModelAttachActor::DrawGuizmo()
 {
-	Matrix transform = _transform.GetMatrix();
+	Matrix4X4 transform = _transform.GetMatrix();
 	if (Debug::Guizmo(GetScene()->GetMainCamera()->GetView(), GetScene()->GetMainCamera()->GetProjection(),
 		&transform))
 	{

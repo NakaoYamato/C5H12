@@ -11,7 +11,7 @@ void ResultToTitleUI::Start()
 	LoadTexture("Button",
 		L"./Data/Texture/Result/ToTitle.png",
 		Sprite::CenterAlignment::CenterCenter);
-	SetPosition("Button", Vector2(640.0f, 550.0f)); // 初期位置を設定
+	GetRectTransform("Button").SetLocalPosition(Vector2(640.0f, 550.0f)); // 初期位置を設定
 }
 // 更新処理
 void ResultToTitleUI::Update(float elapsedTime)
@@ -22,7 +22,7 @@ void ResultToTitleUI::Update(float elapsedTime)
 	if (IsHit("Button", mousePos))
 	{
 		// マウスカーソルが当たっている場合、拡大
-		SetScale("Button", Vector2(1.1f, 1.1f));
+		GetRectTransform("Button").SetLocalPosition(Vector2(1.1f, 1.1f));
 		// 入力処理
 		if (_INPUT_RELEASED("OK"))
 		{
@@ -32,7 +32,7 @@ void ResultToTitleUI::Update(float elapsedTime)
 	}
 	else
 	{
-		SetScale("Button", Vector2::One);
+		GetRectTransform("Button").SetLocalPosition(Vector2::One);
 	}
 }
 // GUI描画

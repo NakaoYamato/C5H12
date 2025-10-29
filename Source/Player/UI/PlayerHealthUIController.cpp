@@ -21,13 +21,15 @@ void PlayerHealthUIController::Start()
 	}
 	// 画像読み込み
 	LoadTexture(FrameSprite, L"Data/Texture/UI/Frame.png", Sprite::CenterAlignment::LeftCenter);
-	SetPosition(FrameSprite, InitialPosition); // 初期位置を設定
 	LoadTexture(MaskSprite, L"Data/Texture/UI/Mask.png", Sprite::CenterAlignment::LeftCenter);
-	SetPosition(MaskSprite, InitialPosition); // 初期位置を設定
 	LoadTexture(GaugeSprite, L"Data/Texture/UI/HPGauge.png", Sprite::CenterAlignment::LeftCenter);
-	SetPosition(GaugeSprite, InitialPosition); // 初期位置を設定
 	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/DamageGauge.png", Sprite::CenterAlignment::LeftCenter);
-	SetPosition(DamageGaugeSprite, InitialPosition); // 初期位置を設定
+	// 初期位置を設定
+	GetRectTransform(FrameSprite).SetLocalPosition(InitialPosition);
+	GetRectTransform(MaskSprite).SetLocalPosition(InitialPosition);
+	GetRectTransform(GaugeSprite).SetLocalPosition(InitialPosition);
+	GetRectTransform(DamageGaugeSprite).SetLocalPosition(InitialPosition);
+
 }
 // 削除処理
 void PlayerHealthUIController::OnDelete()
@@ -44,19 +46,21 @@ void PlayerHealthUIController::OnDelete()
 // 更新処理
 void PlayerHealthUIController::Update(float elapsedTime)
 {
+	SpriteRenderer::Update(elapsedTime);
+
 	// HPに応じてスケールを変更
 	if (_damageable.lock())
 	{
 		float healthRatio = _damageable.lock()->GetHealth() / _damageable.lock()->GetMaxHealth();
 		healthRatio = std::clamp(healthRatio, 0.0f, 1.0f); // 0.0fから1.0fの範囲に制限
-		SetScale(GaugeSprite, Vector2(healthRatio, 1.0f)); // HPに応じて横幅を変更
+		GetRectTransform(GaugeSprite).SetLocalScale(Vector2(healthRatio, 1.0f)); // HPに応じて横幅を変更
 
 		// ダメージゲージのスケールを更新
 		float damageGaugeScaleX = EasingLerp(
-			GetScale(DamageGaugeSprite).x,
-			GetScale(GaugeSprite).x,
+			GetRectTransform(DamageGaugeSprite).GetWorldScale().x,
+			GetRectTransform(GaugeSprite).GetWorldScale().x,
 			_damageGaugeScaleSpeed * elapsedTime);
-		SetScale(DamageGaugeSprite, Vector2(damageGaugeScaleX, InitialPosition.y)); // ダメージゲージの横幅を変更
+		GetRectTransform(DamageGaugeSprite).SetLocalScale(Vector2(damageGaugeScaleX, InitialPosition.y)); // ダメージゲージの横幅を変更
 	}
 }
 // GUI描画
@@ -67,21 +71,24 @@ void PlayerHealthUIController::DrawGui()
 	UIController::DrawGui();
 }
 
-void PlayerHealthUIController::DrawUI(const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale)
+void PlayerHealthUIController::DrawUI(const RenderContext& rc)
 {
 	const RenderState* renderState = rc.renderState;
 	// フレーム部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-	SpriteRender(FrameSprite, rc, offset, offsetScale);
+	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+	SpriteRender(FrameSprite, rc);
+
+	// ステンシルをクリア
+	rc.deviceContext->ClearDepthStencilView(rc.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// マスク部分の描画
 	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteMask), 1);
-	SpriteRender(MaskSprite, rc, offset, offsetScale);
+	SpriteRender(MaskSprite, rc);
 
 	// ゲージ部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteApplyMask), 0);
-	SpriteRender(DamageGaugeSprite, rc, offset, offsetScale);
-	SpriteRender(GaugeSprite, rc, offset, offsetScale);
+	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteApplyMask), 1);
+	SpriteRender(DamageGaugeSprite, rc);
+	SpriteRender(GaugeSprite, rc);
 	
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 }

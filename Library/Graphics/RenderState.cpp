@@ -253,7 +253,7 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-		desc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+		desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 		desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;

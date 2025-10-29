@@ -52,6 +52,9 @@ namespace RunSubState
             // 移動していなければ終了に遷移
             else if (!_owner->GetPlayer()->IsMoving())
                 _owner->GetStateMachine().ChangeSubState("RunStop");
+            // 納刀移行
+            else if (_owner->GetPlayer()->IsUsingItem() || _owner->GetPlayer()->IsDash())
+                _owner->GetStateMachine().ChangeSubState("RunToNonCombat");
         }
     };
 	// 走りループ
@@ -843,5 +846,101 @@ void PlayerGreatSwordToNonCombatState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!_owner->GetAnimator()->IsPlayAnimation())
         _owner->GetStateMachine().ChangeState("Idle");
+}
+#pragma endregion
+
+#pragma region ダウン
+namespace PlayerGreatSwordDownSubState
+{
+    class DownStartSubState : public PlayerSSB
+    {
+    public:
+        DownStartSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "DownStart",
+                u8"HitCombatLargeDeath",
+                0.2f,
+                false,
+                true)
+        {
+        }
+        ~DownStartSubState() override {}
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションが終了していて、移動入力があれば遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+            {
+                if (_owner->GetPlayer()->IsMoving())
+                {
+                    _owner->GetStateMachine().ChangeSubState("DownEnd");
+                    return;
+                }
+            }
+        }
+    };
+    class DownEndSubState : public PlayerSSB
+    {
+    public:
+        DownEndSubState(PlayerStateMachine* stateMachine) :
+            PlayerSSB(stateMachine,
+                "DownEnd",
+                u8"GetUpCombat",
+                0.2f,
+                false,
+                true)
+        {
+        }
+        ~DownEndSubState() override {}
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションが終了していたら遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+                _owner->GetStateMachine().ChangeState("Idle");
+            // キャンセルイベントが呼ばれたら
+            if (_owner->GetPlayer()->CallCancelEvent())
+            {
+                // 移動移行
+                if (_owner->GetPlayer()->IsMoving())
+                    _owner->GetStateMachine().ChangeState("CombatRun");
+                // ガード移行
+                else if (_owner->GetPlayer()->IsGuard())
+                    _owner->GetStateMachine().ChangeState("CombatGuard");
+            }
+        }
+    };
+}
+PlayerGreatSwordDownState::PlayerGreatSwordDownState(PlayerStateMachine* stateMachine) :
+    HierarchicalStateBase(stateMachine)
+{
+    RegisterSubState(std::make_shared<PlayerGreatSwordDownSubState::DownStartSubState>(stateMachine));
+    RegisterSubState(std::make_shared<PlayerGreatSwordDownSubState::DownEndSubState>(stateMachine));
+}
+
+void PlayerGreatSwordDownState::OnEnter()
+{
+    // ダメージを受けた方向を向く
+    auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	_owner->GetPlayer()->GetActor()->GetTransform().LookAt(hitPosition);
+    // XZ回転量をリセット
+    _owner->GetPlayer()->GetActor()->GetTransform().SetAngleX(0.0f);
+    _owner->GetPlayer()->GetActor()->GetTransform().SetAngleZ(0.0f);
+
+    ChangeSubState("DownStart");
+    // モーション中は押し出されないようにする
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(false);
+    }
+}
+
+void PlayerGreatSwordDownState::OnExit()
+{
+    // 押し出されれるようにする
+    auto charactorController = _owner->GetPlayer()->GetCharactorController();
+    if (charactorController != nullptr)
+    {
+        charactorController->SetIsPushable(true);
+    }
 }
 #pragma endregion

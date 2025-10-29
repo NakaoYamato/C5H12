@@ -20,7 +20,7 @@ void SceneLoading::Initialize()
 
 	// ロードバーの読み込み
 	_sprites["LoadingBar"].LoadTexture(L"./Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-	_sprites["LoadingBar"].SetPosition(Vector2(870.0f, 40.0f));
+	_sprites["LoadingBar"].GetRectTransform().SetLocalPosition(Vector2(870.0f, 40.0f));
 }
 //終了化 
 void SceneLoading::Finalize()
@@ -34,6 +34,8 @@ void SceneLoading::Finalize()
 //更新処理
 void SceneLoading::Update(float elapsedTime)
 {
+	_sprites["LoadingBar"].GetRectTransform().UpdateTransform();
+
 	if (_nextScene->IsReady())
 	{
 		GetTextRenderer().Draw(
@@ -71,7 +73,7 @@ void SceneLoading::Update(float elapsedTime)
 		_loadingBarWidth,
 		std::clamp(_nextScene->GetCompletionLoading(), 0.0f, 1.0f),
 		_loadingBarSpeed * elapsedTime);
-	_sprites["LoadingBar"].SetScale(Vector2(_loadingBarWidth, 1.0f));
+	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(_loadingBarWidth, 1.0f));
 }
 //描画処理
 void SceneLoading::Render()
@@ -119,7 +121,7 @@ void SceneLoading::Render()
 	{
 		// フレーム部分の描画
 		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-		_sprites["LoadingBar"].Render(rc, Vector2::Zero, Vector2::One);
+		_sprites["LoadingBar"].Render(rc);
 
 		// マスク部分の描画
 		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteMask), 1);

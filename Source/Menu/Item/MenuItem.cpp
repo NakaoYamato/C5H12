@@ -30,12 +30,12 @@ void MenuItem::Render(Scene* scene, const RenderContext& rc, const Vector2& offs
 	// ƒAƒCƒeƒ€‚Ì•`‰æˆ—‚ðŽÀ‘•
 	for (auto& [name, sprite] : _sprites)
 	{
-		sprite.Render(rc, offset, offsetScale);
+		sprite.Render(rc);
 	}
 	scene->GetTextRenderer().Draw(
 		FontType::MSGothic,
 		_menuName.c_str(),
-		(*_sprites.begin()).second.GetPosition() + offset,
+		(*_sprites.begin()).second.GetRectTransform().GetWorldPosition() + offset,
 		IsActive() ? IsOpen() ? Vector4::Green : Vector4::Red : Vector4::White,
 		0.0f,
 		_textOffset,

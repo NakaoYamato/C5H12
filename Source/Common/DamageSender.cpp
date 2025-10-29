@@ -54,6 +54,9 @@ void DamageSender::OnContact(CollisionData& collisionData)
 		auto damageable = collisionData.other->GetComponent<Damageable>();
 		if (damageable != nullptr)
 		{
+			// 攻撃力計算
+			CalculateATK(1.0f/*TODO : 肉質実装*/);
+
 			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
 			{
 				// ダメージを与えたらヒットエフェクト再生

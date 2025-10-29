@@ -8,7 +8,7 @@ TitleToOnlineItem::TitleToOnlineItem(TitleMediator* titleMediator, const std::st
 	_sprites["Button"].LoadTexture(
 		L"./Data/Texture/Title/ToOnline.png",
 		Sprite::CenterAlignment::CenterCenter);
-	_sprites["Button"].SetPosition(Vector2(600.0f, 400.0f));
+	_sprites["Button"].GetRectTransform().SetLocalPosition(Vector2(600.0f, 400.0f));
 }
 // 更新処理
 void TitleToOnlineItem::Update(float elapsedTime)
@@ -19,7 +19,7 @@ void TitleToOnlineItem::Update(float elapsedTime)
 	if (_sprites["Button"].IsHit(mousePos))
 	{
 		// マウスカーソルが当たっている場合、拡大
-		_sprites["Button"].SetScale(Vector2(1.1f, 1.1f));
+		_sprites["Button"].GetRectTransform().SetLocalScale(Vector2(1.1f, 1.1f));
 		// 入力処理
 		if (_INPUT_RELEASED("OK"))
 		{
@@ -31,11 +31,11 @@ void TitleToOnlineItem::Update(float elapsedTime)
 	else
 	{
 		// マウスカーソルが離れた場合、元のサイズに戻す
-		_sprites["Button"].SetScale(Vector2::One);
+		_sprites["Button"].GetRectTransform().SetLocalScale(Vector2::One);
 	}
 }
 // 描画
 void TitleToOnlineItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["Button"].Render(rc, Vector2::Zero, Vector2::One);
+	_sprites["Button"].Render(rc);
 }

@@ -18,6 +18,7 @@ const UINT ModelCBIndex = 1; // モデル用定数バッファのインデックス
 struct RenderContext
 {
 	ID3D11DeviceContext* deviceContext = nullptr;
+	ID3D11DepthStencilView* depthStencilView = nullptr;
 	const RenderState* renderState = nullptr;
 	const Camera* camera = nullptr;
 	// ライト情報

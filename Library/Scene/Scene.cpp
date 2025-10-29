@@ -21,6 +21,7 @@ void Scene::Initialize()
 
     // レンダーコンテキスト初期化
     _renderContext.deviceContext = dc;
+    _renderContext.depthStencilView = graphics.GetDepthStencilView();
     _renderContext.renderState = Graphics::Instance().GetRenderState();
     _renderContext.camera = GetMainCamera();
     _renderContext.lightDirection = Vector4::Right;
@@ -207,6 +208,7 @@ void Scene::Render()
     // レンダーコンテキスト作成
     RenderContext& rc = GetRenderContext();
     rc.deviceContext = dc;
+	rc.depthStencilView = dsv;
     rc.renderState = graphics.GetRenderState();
     rc.camera = GetMainCamera();
     rc.lightDirection = Vector4::Right;
@@ -241,6 +243,8 @@ void Scene::Render()
     GBuffer* gBuffer = graphics.GetGBuffer();
     if (graphics.RenderingDeferred())
     {
+        rc.depthStencilView = gBuffer->GetDepthStencilView().Get();
+
         // レンダーステート設定
         dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
@@ -273,6 +277,8 @@ void Scene::Render()
     FrameBuffer* renderFrame = graphics.GetFrameBuffer(_RENDER_FRAME_INDEX);
     renderFrame->ClearAndActivate(dc, Vector4::Zero, 1.0f);
     {
+        rc.depthStencilView = renderFrame->GetDSV().Get();
+
         // 空の描画
         if (_skyMap)
         {
@@ -358,6 +364,8 @@ void Scene::Render()
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
     if (cascadedShadowMap->IsCreateShadow())
     {
+        rc.depthStencilView = nullptr;
+
         cascadedShadowMap->ClearAndActivate(rc);
         {
             // ゲームオブジェクトの影描画処理
@@ -379,6 +387,8 @@ void Scene::Render()
     FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(_APPLY_SHADOW_FRAME_INDEX);
     modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
+        rc.depthStencilView = modelAndShadowRenderFrame->GetDSV().Get();
+
         // 影の描画
         // cascadedShadowMapにある深度情報から
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
@@ -408,6 +418,8 @@ void Scene::Render()
     FrameBuffer* sceneFrame = graphics.GetFrameBuffer(_SCENE_FRAME_INDEX);
     sceneFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
+        rc.depthStencilView = sceneFrame->GetDSV().Get();
+
         //--------------------------------------------------------------------------------------
         // ポストエフェクトの処理
         PostProcessManager::Instance().ApplyEffect(rc,
@@ -416,17 +428,6 @@ void Scene::Render()
         // ポストエフェクトの処理終了
         //--------------------------------------------------------------------------------------
 
-        // サンプラーステート設定
-        {
-            ID3D11SamplerState* samplerStates[] =
-            {
-                renderState->GetSamplerState(SamplerState::PointWrap),
-                renderState->GetSamplerState(SamplerState::PointClamp),
-                renderState->GetSamplerState(SamplerState::LinearWrap),
-                renderState->GetSamplerState(SamplerState::LinearClamp)
-            };
-            dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-        }
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
         // バックバッファに描画
         _textureRenderer.Blit(
@@ -437,7 +438,7 @@ void Scene::Render()
 
         // レンダーステート設定
         dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
         dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
         // 3D描画後の描画処理

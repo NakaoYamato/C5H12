@@ -42,9 +42,17 @@ void PlayerController::Start()
 					isCombat = true;
 			}
 
-			if (damage >= 2.0f)
+			if (damage >= 5.0f)
 			{
 				// ‘å‚«‚­‚Ì‚¯‚¼‚é
+				if (isCombat)
+					_stateMachine.lock()->ChangeState("CombatDown", nullptr);
+				else
+					_stateMachine.lock()->ChangeState("Down", nullptr);
+			}
+			else if (damage >= 2.0f)
+			{
+				// ’†‚­‚ç‚¢‚É‚Ì‚¯‚¼‚é
 				if (isCombat)
 					_stateMachine.lock()->ChangeState("CombatHitKnockDown", nullptr);
 				else

@@ -695,3 +695,97 @@ void PlayerNonCombatHitKnockDownState::OnExit()
 	}
 }
 #pragma endregion
+
+#pragma region ダウン
+namespace PlayerNonCombatDownSubState
+{
+	class DownStartSubState : public PlayerSSB
+	{
+	public:
+		DownStartSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"DownStart",
+				u8"HitLargeDeath",
+				1.2f,
+				false,
+				true)
+		{
+		}
+		~DownStartSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していて、移動入力があれば遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+			{
+				if (_owner->GetPlayer()->IsMoving())
+				{
+					_owner->GetStateMachine().ChangeSubState("DownEnd");
+					return;
+				}
+			}
+		}
+	};
+	class DownEndSubState : public PlayerSSB
+	{
+	public:
+		DownEndSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"DownEnd",
+				u8"GetUp",
+				1.2f,
+				false,
+				true)
+		{
+		}
+		~DownEndSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+				_owner->GetStateMachine().ChangeState("Idle");
+			// キャンセルイベントが呼ばれたら
+			if (_owner->GetPlayer()->CallCancelEvent())
+			{
+				// 移動移行
+				if (_owner->GetPlayer()->IsMoving())
+					_owner->GetStateMachine().ChangeState("Walk");
+				// ガード移行
+				else if (_owner->GetPlayer()->IsGuard())
+					_owner->GetStateMachine().ChangeState("CombatGuard");
+			}
+		}
+	};
+}
+PlayerNonCombatDownState::PlayerNonCombatDownState(PlayerStateMachine* stateMachine) :
+	HierarchicalStateBase(stateMachine)
+{
+	RegisterSubState(std::make_shared<PlayerNonCombatDownSubState::DownStartSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatDownSubState::DownEndSubState>(stateMachine));
+}
+void PlayerNonCombatDownState::OnEnter()
+{
+	// ダメージを受けた方向を向く
+	auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	_owner->GetPlayer()->GetActor()->GetTransform().LookAt(hitPosition);
+	// XZ回転量をリセット
+	_owner->GetPlayer()->GetActor()->GetTransform().SetAngleX(0.0f);
+	_owner->GetPlayer()->GetActor()->GetTransform().SetAngleZ(0.0f);
+
+	ChangeSubState("DownStart");
+	// モーション中は押し出されないようにする
+	auto charactorController = _owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(false);
+	}
+}
+void PlayerNonCombatDownState::OnExit()
+{
+	// 押し出されれるようにする
+	auto charactorController = _owner->GetPlayer()->GetCharactorController();
+	if (charactorController != nullptr)
+	{
+		charactorController->SetIsPushable(true);
+	}
+}
+#pragma endregion

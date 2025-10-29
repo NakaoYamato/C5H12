@@ -243,12 +243,12 @@ public:
 	/// 親設定
 	/// </summary>
 	/// <param name="parent"></param>
-	void SetParent(Actor* parent);
+	virtual void SetParent(Actor* parent);
 	/// <summary>
 	/// 子追加
 	/// </summary>
 	/// <param name="child"></param>
-	void AddChild(std::shared_ptr<Actor> child);
+	virtual void AddChild(std::shared_ptr<Actor> child);
 
 	Actor* GetParent() { return _parent; }
 	const std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }
@@ -316,6 +316,10 @@ protected:
 	/// </summary>
 	/// <param name="rc"></param>
 	virtual void OnDelayedRender(const RenderContext& rc) {};
+	/// <summary>
+	/// トランスフォームGUI描画
+	/// </summary>
+	virtual void DrawTransformGui();
 	/// <summary>
 	/// ギズモ描画
 	/// </summary>

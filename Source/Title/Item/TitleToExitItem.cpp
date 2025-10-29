@@ -10,7 +10,7 @@ TitleToExitItem::TitleToExitItem(TitleMediator* titleMediator, const std::string
 	_sprites["Button"].LoadTexture(
 		L"./Data/Texture/Title/Exit.png",
 		Sprite::CenterAlignment::CenterCenter);
-	_sprites["Button"].SetPosition(Vector2(1150.0f, 80.0f));
+	_sprites["Button"].GetRectTransform().SetLocalPosition(Vector2(1150.0f, 80.0f));
 
 	// アクティブ状態にする
 	_isActive = true;
@@ -29,7 +29,7 @@ void TitleToExitItem::Update(float elapsedTime)
 	if (_sprites["Button"].IsHit(mousePos))
 	{
 		// マウスカーソルが当たっている場合、拡大
-		_sprites["Button"].SetScale(Vector2(1.1f, 1.1f));
+		_sprites["Button"].GetRectTransform().SetLocalScale(Vector2(1.1f, 1.1f));
 		// 入力処理
 		if (_INPUT_RELEASED("OK"))
 		{
@@ -40,13 +40,13 @@ void TitleToExitItem::Update(float elapsedTime)
 	else
 	{
 		// マウスカーソルが離れた場合、元のサイズに戻す
-		_sprites["Button"].SetScale(Vector2::One);
+		_sprites["Button"].GetRectTransform().SetLocalScale(Vector2::One);
 	}
 }
 // 描画
 void TitleToExitItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["Button"].Render(rc, Vector2::Zero, Vector2::One);
+	_sprites["Button"].Render(rc);
 }
 // コマンドを実行
 void TitleToExitItem::ExecuteCommand(const TitleMediator::CommandData& commandData)

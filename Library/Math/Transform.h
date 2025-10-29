@@ -10,10 +10,15 @@ public:
 	Transform() {}
 	~Transform() {}
 
-	// 行列の更新
+	/// <summary>
+	/// 行列の更新
+	/// </summary>
+	/// <param name="parent"></param>
 	void UpdateTransform(const DirectX::XMFLOAT4X4* parent);
 
-	// デバッグGUI表示
+	/// <summary>
+	/// デバッグGUI表示
+	/// </summary>
 	void DrawGui();
 
 	/// <summary>
@@ -46,12 +51,12 @@ public:
 	/// 行列取得(ワールド)
 	/// </summary>
 	/// <returns></returns>
-	const Matrix& GetMatrix()const { return _transform; }
+	const Matrix4X4& GetMatrix()const { return _transform; }
     /// <summary>
     /// 逆行列取得(ワールド)
     /// </summary>
     /// <returns></returns>
-	Matrix GetMatrixInverse()const
+	Matrix4X4 GetMatrixInverse()const
     {
         return _transform.Inverse();
     }
@@ -101,5 +106,5 @@ private:
 	Vector3 _scale		= Vector3::One;
 	Vector3 _angle		= Vector3::Zero;
 
-	Matrix _transform = Matrix::Identity;
+	Matrix4X4 _transform = Matrix4X4::Identity;
 };

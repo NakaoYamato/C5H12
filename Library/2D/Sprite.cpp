@@ -12,6 +12,13 @@ Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 // GUI描画
 void Sprite::DrawGui()
 {
+	if (_sprite)
+	{
+		ImGui::Image(_sprite->GetSRV().Get(),
+			ImVec2(100, 100));
+	}
+	ImGui::Separator();
+
 	static const char* AlignmentNames[] = {
 		"LEFT_UP",
 		"LEFT_CENTER",
@@ -26,41 +33,47 @@ void Sprite::DrawGui()
 
 	if (ImGui::Combo(u8"中心位置", reinterpret_cast<int*>(&_centerAlignment), AlignmentNames, IM_ARRAYSIZE(AlignmentNames)))
 		RecalcCenter(_centerAlignment);
+	ImGui::Separator();
 
-	ImGui::DragFloat2(u8"位置", &_position.x, 0.1f, -1000.0f, 1000.0f);
-	ImGui::DragFloat2(u8"スケール", &_scale.x, 0.01f, 0.01f, 1000.0f);
+	_rectTransform.DrawGui();
+	ImGui::Separator();
+
 	ImGui::DragFloat2(u8"画像位置", &_texPos.x, 0.01f, 0.01f, 1000.0f);
 	ImGui::DragFloat2(u8"画像サイズ", &_texSize.x, 0.01f, 0.01f, 1000.0f);
 	ImGui::DragFloat2(u8"中心", &_center.x, 0.01f, -1000.0f, 1000.0f);
-	ImGui::DragFloat(u8"角度", &_angle, 0.1f, -360.0f, 360.0f);
 	ImGui::ColorEdit4(u8"色", &_color.x);
 }
 // 画像読み込み
 void Sprite::LoadTexture(const wchar_t* filename, CenterAlignment alignment)
 {
 	_sprite = std::make_unique<SpriteResource>(Graphics::Instance().GetDevice(), filename);
-	_texSize = _sprite->GetTextureSize();
+	SetTexSize(_sprite->GetTextureSize());
 	RecalcCenter(alignment);
 }
 // 画像との当たり判定
 bool Sprite::IsHit(const Vector2& pos) const
 {
+	auto& position = _rectTransform.GetWorldPosition();
+	auto& scale = _rectTransform.GetWorldScale();
+	auto& center = GetCenter();
+	auto& texSize = GetTexSize();
+
 	Vector2 aabbHalfSize{};
 	{
-		aabbHalfSize.x = _texSize.x * _scale.x / 2.0f;
-		aabbHalfSize.y = _texSize.y * _scale.y / 2.0f;
+		aabbHalfSize.x = texSize.x * scale.x / 2.0f;
+		aabbHalfSize.y = texSize.y * scale.y / 2.0f;
 	}
 	Vector2 aabbCenter{};
 	{
 		// centerの値から左上の座標を求める
-		aabbCenter.x = _position.x - (_center.x / _texSize.x) * aabbHalfSize.x * 2.0f;
-		aabbCenter.y = _position.y - (_center.y / _texSize.y) * aabbHalfSize.y * 2.0f;
+		aabbCenter.x = position.x - (center.x / texSize.x) * aabbHalfSize.x * 2.0f;
+		aabbCenter.y = position.y - (center.y / texSize.y) * aabbHalfSize.y * 2.0f;
 	}
 	aabbCenter += aabbHalfSize;
 
 	return Collision2D::IntersectPointVsAABB(pos, aabbCenter, aabbHalfSize);
+	// 中心位置を再計算
 }
-// 中心位置を再計算
 void Sprite::RecalcCenter(CenterAlignment alignment)
 {
 	switch (alignment)
@@ -97,18 +110,23 @@ void Sprite::RecalcCenter(CenterAlignment alignment)
 		break;
 	}
 }
+// トランスフォーム更新
+void Sprite::UpdateTransform(RectTransform* parent)
+{
+	_rectTransform.UpdateTransform(parent);
+}
 // スプライト描画
-void Sprite::Render(const RenderContext& rc, const Vector2& offset, const Vector2& offsetScale)
+void Sprite::Render(const RenderContext& rc)
 {
 	if (!_sprite)
 		return;
 
 	_sprite->Render(rc.deviceContext,
-		_position + offset,
-		{ _scale.x * offsetScale.x, _scale.y * offsetScale.y },
-		_texPos,
-		_texSize,
-		_center,
-		DirectX::XMConvertToRadians(_angle),
-		_color);
+		_rectTransform.GetWorldPosition(),
+		_rectTransform.GetWorldScale(),
+		GetTexPos(),
+		GetTexSize(),
+		GetCenter(),
+		_rectTransform.GetWorldAngle(),
+		GetColor());
 }

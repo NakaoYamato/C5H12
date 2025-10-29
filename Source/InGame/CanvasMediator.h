@@ -87,8 +87,5 @@ public:
     /// <param name="rc"></param>
     /// <param name="offset"></param>
     /// <param name="offsetScale"></param>
-    virtual void DrawUI(
-        const RenderContext& rc,
-        const Vector2& offset,
-        const Vector2& offsetScale) = 0;
+    virtual void DrawUI(const RenderContext& rc) = 0;
 };

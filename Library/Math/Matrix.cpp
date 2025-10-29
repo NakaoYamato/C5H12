@@ -1,6 +1,6 @@
 #include "Matrix.h"
 
-Matrix Matrix::operator=(const Matrix& m)
+Matrix4X4 Matrix4X4::operator=(const Matrix4X4& m)
 {
 	this->m[0][0] = m.m[0][0];
 	this->m[0][1] = m.m[0][1];
@@ -21,12 +21,12 @@ Matrix Matrix::operator=(const Matrix& m)
 	return *this;
 }
 
-Matrix Matrix::operator*(const Matrix& m) const
+Matrix4X4 Matrix4X4::operator*(const Matrix4X4& m) const
 {
 	DirectX::XMMATRIX mat1 = DirectX::XMLoadFloat4x4(this);
 	DirectX::XMMATRIX mat2 = DirectX::XMLoadFloat4x4(&m);
 	DirectX::XMMATRIX result = DirectX::XMMatrixMultiply(mat1, mat2);
-	Matrix ret;
+	Matrix4X4 ret;
 	DirectX::XMStoreFloat4x4(&ret, result);
 	return ret;
 }

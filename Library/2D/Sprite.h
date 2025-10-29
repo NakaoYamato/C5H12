@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/2D/SpriteResource.h"
+#include "../../Library/Math/RectTransform.h"
 #include "../../Library/Math/Easing.h"
 #include "../../Library/Graphics/RenderContext.h"
 
@@ -22,15 +23,16 @@ public:
 		RightCenter,
 		RightDown,
 	};
+
 public:
 	Sprite() = default;
 	Sprite(const wchar_t* filename, CenterAlignment alignment = CenterAlignment::CenterCenter);
 	~Sprite() = default;
+
+	// トランスフォーム更新
+	virtual void UpdateTransform(RectTransform* parent = nullptr);
 	// 描画
-	virtual void Render(
-		const RenderContext& rc,
-		const Vector2& offset,
-		const Vector2& offsetScale);
+	virtual void Render(const RenderContext& rc);
 	// GUI描画
 	void DrawGui();
 	// 画像読み込み
@@ -41,35 +43,30 @@ public:
 	void RecalcCenter(CenterAlignment alignment);
 
 #pragma region アクセサ
-	CenterAlignment GetCenterAlignment() const { return _centerAlignment; }
-	const Vector2& GetPosition()const { return _position; }
-	const Vector2& GetScale()const { return _scale; }
+	RectTransform& GetRectTransform() { return _rectTransform; }
+
+	CenterAlignment GetCenterAlignment()const { return _centerAlignment; }
 	const Vector2& GetTexPos()const { return _texPos; }
 	const Vector2& GetTexSize()const { return _texSize; }
 	const Vector2& GetCenter()const { return _center; }
-	float          GetAngle()const { return _angle; }
 	const Vector4& GetColor()const { return _color; }
 
 	void SetCenterAlignment(CenterAlignment alignment) {
 		_centerAlignment = alignment;
 		RecalcCenter(alignment);
 	}
-	void SetPosition(const Vector2& p) { _position = p; }
-	void SetScale(const Vector2& s) { _scale = s; }
 	void SetTexPos(const Vector2& p) { _texPos = p; }
 	void SetTexSize(const Vector2& s) { _texSize = s; }
 	void SetCenter(const Vector2& c) { _center = c; }
-	void SetAngle(float a) { _angle = a; }
 	void SetColor(const Vector4& c) { _color = c; }
 #pragma endregion
 private:
 	std::unique_ptr<SpriteResource> _sprite;
-	CenterAlignment					_centerAlignment = CenterAlignment::CenterCenter;
-	Vector2							_position	= Vector2::Zero;
-	Vector2							_scale		= Vector2::One;
-	Vector2							_texPos		= Vector2::Zero;
-	Vector2							_texSize	= Vector2::Zero;
-	Vector2							_center		= Vector2::Zero;
-	float							_angle		= 0.0f;
-	Vector4							_color		= Vector4::White;
+	RectTransform _rectTransform;
+
+	CenterAlignment	_centerAlignment = CenterAlignment::CenterCenter;
+	Vector2			_texPos = Vector2::Zero;
+	Vector2			_texSize = Vector2::Zero;
+	Vector2			_center = Vector2::Zero;
+	Vector4			_color = Vector4::White;
 };

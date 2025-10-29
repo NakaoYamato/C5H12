@@ -6,7 +6,7 @@ void Transform::UpdateTransform(const DirectX::XMFLOAT4X4* parent)
 {
     DirectX::XMMATRIX C{ DirectX::XMMatrixScaling(_lengthScale, _lengthScale,_lengthScale) };
 
-	DirectX::XMMATRIX M = Matrix::CreateTransform(
+	DirectX::XMMATRIX M = Matrix4X4::CreateTransform(
 		_scale,
 		_angle,
 		_position
@@ -50,5 +50,5 @@ void Transform::Reset()
     _position = Vector3::Zero;
     _scale = Vector3::One;
     _angle = Vector3::Zero;
-    _transform = Matrix::Identity;
+    _transform = Matrix4X4::Identity;
 }

@@ -8,7 +8,7 @@ TitleToOfflineItem::TitleToOfflineItem(TitleMediator* titleMediator, const std::
 	_sprites["Button"].LoadTexture(
 		L"./Data/Texture/Title/ToOffline.png",
 		Sprite::CenterAlignment::CenterCenter);
-	_sprites["Button"].SetPosition(Vector2(600.0f, 600.0f));
+	_sprites["Button"].GetRectTransform().SetLocalPosition(Vector2(600.0f, 600.0f));
 }
 // 更新処理
 void TitleToOfflineItem::Update(float elapsedTime)
@@ -19,7 +19,7 @@ void TitleToOfflineItem::Update(float elapsedTime)
 	if (_sprites["Button"].IsHit(mousePos))
 	{
 		// マウスカーソルが当たっている場合、拡大
-		_sprites["Button"].SetScale(Vector2(1.1f, 1.1f));
+		_sprites["Button"].GetRectTransform().SetLocalScale(Vector2(1.1f, 1.1f));
 		// 入力処理
 		if (_INPUT_RELEASED("OK"))
 		{
@@ -31,11 +31,11 @@ void TitleToOfflineItem::Update(float elapsedTime)
 	else
 	{
 		// マウスカーソルが離れた場合、元のサイズに戻す
-		_sprites["Button"].SetScale(Vector2::One);
+		_sprites["Button"].GetRectTransform().SetLocalScale(Vector2::One);
 	}
 }
 // 描画
 void TitleToOfflineItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["Button"].Render(rc, Vector2::Zero, Vector2::One);
+	_sprites["Button"].Render(rc);
 }

@@ -21,10 +21,7 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
-	void DrawUI(
-		const RenderContext& rc,
-		const Vector2& offset,
-		const Vector2& offsetScale)override;
+	void DrawUI(const RenderContext& rc)override;
 private:
 	// ユーザーが操作するプレイヤーか
 	const bool _isUserControlled = true;

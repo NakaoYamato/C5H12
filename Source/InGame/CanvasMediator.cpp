@@ -30,18 +30,16 @@ void CanvasMediator::OnDelayedRender(const RenderContext& rc)
 	// HPUIÇÃï`âÊ
 	if (_userHealthUI)
 	{
-		_userHealthUI->DrawUI(rc, Vector2::Zero, Vector2::One);
+		_userHealthUI->DrawUI(rc);
 	}
 	float index = 1.0f;
 	for (auto& controller : _otherUserHealthUI)
 	{
-		controller->DrawUI(rc, _healthUIInterval * index, _healthUIScale);
+		controller->DrawUI(rc);
 		index += 1.0f;
 	}
 }
 // GUIï`âÊ
 void CanvasMediator::OnDrawGui()
 {
-	ImGui::DragFloat2(u8"HPUIä‘äu", &_healthUIInterval.x, 0.1f, -1000.0f, 1000.0f);
-	ImGui::DragFloat2(u8"HPUIÉXÉPÅ[Éã", &_healthUIScale.x, 0.01f, 0.01f, 10.0f);
 }

@@ -21,12 +21,15 @@ void PlayerStaminaUIController::Start()
 		spriteRenderer->LoadTexture(FrameSpr, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
 		spriteRenderer->LoadTexture(MaskSpr, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 		spriteRenderer->LoadTexture(GaugeSpr, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+		spriteRenderer->LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
 
         spriteRenderer->SetDepthState(MaskSpr, DepthState::SpriteMask);
 		spriteRenderer->SetStencil(MaskSpr, 1);
         spriteRenderer->SetDepthState(GaugeSpr, DepthState::SpriteApplyMask);
 		spriteRenderer->SetStencil(GaugeSpr, 1);
 		spriteRenderer->SetColor(GaugeSpr, Vector4::Yellow);
+		spriteRenderer->SetColor(GaugeEndSprite, Vector4::Yellow);
+        spriteRenderer->GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(2.0f, 4.0f));
     }
 }
 
@@ -40,6 +43,10 @@ void PlayerStaminaUIController::Update(float elapsedTime)
         float rate = staminaController->GetStamina() / staminaController->GetMaxStamina();
         rate = std::clamp(rate, 0.0f, 1.0f);
 		spriteRenderer->GetRectTransform(MaskSpr).SetLocalScale(Vector2(rate, 1.0f));
+
+		// æ’[Ý’è
+		float posX = MathF::Lerp(_gaugeEndEndX, _gaugeEndStartX, rate);
+		spriteRenderer->GetRectTransform(GaugeEndSprite).SetLocalPosition(Vector2(posX, 1.0f));
 	}
 }
 

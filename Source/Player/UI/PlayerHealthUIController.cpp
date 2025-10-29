@@ -25,9 +25,12 @@ void PlayerHealthUIController::Start()
 	LoadTexture(MaskSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
 
     SetColor(GaugeSprite, Vector4::Green);
+    SetColor(GaugeEndSprite, Vector4::Green);
     SetColor(DamageGaugeSprite, Vector4::Red);
+	GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(2.0f, 4.0f));
 }
 // 削除処理
 void PlayerHealthUIController::OnDelete()
@@ -59,6 +62,10 @@ void PlayerHealthUIController::Update(float elapsedTime)
 			GetRectTransform(GaugeSprite).GetWorldScale().x,
 			_damageGaugeScaleSpeed * elapsedTime);
 		GetRectTransform(DamageGaugeSprite).SetLocalScale(Vector2(damageGaugeScaleX, 1.0f)); // ダメージゲージの横幅を変更
+
+		// 先端設定
+		float posX = MathF::Lerp(_gaugeEndEndX, _gaugeEndStartX, healthRatio);
+		GetRectTransform(GaugeEndSprite).SetLocalPosition(Vector2(posX, 1.0f));
 	}
 }
 // GUI描画
@@ -89,4 +96,5 @@ void PlayerHealthUIController::DrawUI(const RenderContext& rc)
 	SpriteRender(GaugeSprite, rc);
 	
 	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+	SpriteRender(GaugeEndSprite, rc);
 }

@@ -32,8 +32,14 @@ private:
 	const std::string FrameSprite	= "Frame";
 	const std::string MaskSprite	= "Mask";
 	const std::string GaugeSprite	= "Gauge";
+	const std::string GaugeEndSprite	= "GaugeEnd";
 	const std::string DamageGaugeSprite	= "DamageGauge";
 
 	// ダメージゲージのスケール速度
 	float _damageGaugeScaleSpeed = 5.0f;
+
+	// ゲージ先端の開始地点
+    float _gaugeEndStartX = 440.0f;
+	// ゲージ先端の終了地点
+    float _gaugeEndEndX = 44.0f;
 };

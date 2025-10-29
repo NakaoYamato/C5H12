@@ -87,6 +87,7 @@ bool Sprite::IsHit(const Vector2& pos) const
 }
 void Sprite::RecalcCenter(CenterAlignment alignment)
 {
+	_centerAlignment = alignment;
 	switch (alignment)
 	{
 	case LeftUp:

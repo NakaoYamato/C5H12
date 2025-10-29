@@ -27,4 +27,10 @@ private:
     const std::string FrameSpr = "Frame";
     const std::string MaskSpr = "Mask";
     const std::string GaugeSpr = "Gauge";
+    const std::string GaugeEndSprite = "GaugeEnd";
+
+    // ゲージ先端の開始地点
+    float _gaugeEndStartX = 440.0f;
+    // ゲージ先端の終了地点
+    float _gaugeEndEndX = 44.0f;
 };

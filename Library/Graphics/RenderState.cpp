@@ -225,7 +225,7 @@ RenderState::RenderState(ID3D11Device* device)
 		D3D11_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = TRUE;
 		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-		desc.DepthFunc = D3D11_COMPARISON_NEVER;
+		desc.DepthFunc = D3D;
 		desc.StencilEnable = TRUE;
 		desc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
 		desc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;

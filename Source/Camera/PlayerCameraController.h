@@ -40,12 +40,12 @@ private:
 	float _lookingUpAngleValue = DirectX::XMConvertToRadians(35.0f);
 
     float _focusVerticalOffset = 1.4f;
-	float _focusHorizontalOffset = 1.47f;
+	float _focusHorizontalOffset = 0.47f;
 
 	float _focusLerpSpeed = 5.0f;
 	float _eyeLerpSpeed = 10.0f;
 
-    float _cameraDistance = 4.3f;
+    float _cameraDistance = 5.5f;
     float _horizontalMovePower = 6.0f;
     float _verticalMovePower = 3.0f;
     float _cameraRadius = 0.1f;

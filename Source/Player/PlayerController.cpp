@@ -19,15 +19,15 @@ void PlayerController::Start()
 	_damageable.lock()->SetTakeableDamageCallback(
 		[&](float damage, Vector3 hitPosition) -> bool
 		{
-			Vector3 vec = hitPosition - GetActor()->GetTransform().GetPosition();
-			Vector3 front = GetActor()->GetTransform().GetAxisZ();
+			Vector3 vec = hitPosition - GetActor()->GetTransform().GetPosition().Normalize();
+			Vector3 front = GetActor()->GetTransform().GetAxisZ().Normalize();
 			// プレイヤーがガード状態ならダメージを受けない
-			if (_stateMachine.lock()->GetStateName() == "Guard" &&
-				vec.Dot(front) > 0.0f)
+			if (_stateMachine.lock()->GetStateName() == "CombatGuard" &&
+				vec.Dot(front) > -0.5f)
 			{
 				// ガード成功
 				//_stateMachine.lock()->GetStateMachine().ChangeSubState("GuardHit");
-				_stateMachine.lock()->ChangeState("GuardHit", nullptr);
+				_stateMachine.lock()->GetStateMachine().ChangeSubState("GuardHit");
 				return false;
 			}
 			return true;

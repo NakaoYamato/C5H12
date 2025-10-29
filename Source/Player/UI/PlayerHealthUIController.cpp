@@ -71,17 +71,20 @@ void PlayerHealthUIController::DrawUI(const RenderContext& rc, const Vector2& of
 {
 	const RenderState* renderState = rc.renderState;
 	// フレーム部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	SpriteRender(FrameSprite, rc, offset, offsetScale);
+
+	// ステンシルをクリア
+	rc.deviceContext->ClearDepthStencilView(rc.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// マスク部分の描画
 	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteMask), 1);
 	SpriteRender(MaskSprite, rc, offset, offsetScale);
 
 	// ゲージ部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteApplyMask), 0);
+	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteApplyMask), 1);
 	SpriteRender(DamageGaugeSprite, rc, offset, offsetScale);
 	SpriteRender(GaugeSprite, rc, offset, offsetScale);
 	
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
+	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 }

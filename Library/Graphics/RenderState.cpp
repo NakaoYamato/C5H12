@@ -225,7 +225,7 @@ RenderState::RenderState(ID3D11Device* device)
 		D3D11_DEPTH_STENCIL_DESC desc{};
 		desc.DepthEnable = TRUE;
 		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-		desc.DepthFunc = D3D;
+		desc.DepthFunc = D3D11_COMPARISON_NEVER;
 		desc.StencilEnable = TRUE;
 		desc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
 		desc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
@@ -253,7 +253,7 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-		desc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+		desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 		desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 		desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;

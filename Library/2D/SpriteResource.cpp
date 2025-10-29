@@ -27,10 +27,10 @@ SpriteResource::SpriteResource(ID3D11Device* device,
 	// 頂点情報のセット
 	Vertex vertices[]
 	{
-		{{-1.0f,+1.0f,0}, Vector4::White ,Vector2::Zero		},
-		{{+1.0f,+1.0f,0}, Vector4::White ,Vector2::XOneYZero},
-		{{-1.0f,-1.0f,0}, Vector4::White ,Vector2::XZeroYOne},
-		{{+1.0f,-1.0f,0}, Vector4::White ,Vector2::One		},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::Zero		},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::XOneYZero},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::XZeroYOne},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::One		},
 	};
 
 	// 頂点バッファオブジェクトの生成
@@ -75,10 +75,10 @@ SpriteResource::SpriteResource(ID3D11Device* device,
 	// 頂点情報のセット
 	Vertex vertices[]
 	{
-		{{-1.0f,+1.0f,0}, Vector4::White ,Vector2::Zero		},
-		{{+1.0f,+1.0f,0}, Vector4::White ,Vector2::XOneYZero},
-		{{-1.0f,-1.0f,0}, Vector4::White ,Vector2::XZeroYOne},
-		{{+1.0f,-1.0f,0}, Vector4::White ,Vector2::One		},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::Zero		},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::XOneYZero},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::XZeroYOne},
+		{{0.0f,0.0f,0}, Vector4::White ,Vector2::One		},
 	};
 
 	// 頂点バッファオブジェクトの生成
@@ -155,12 +155,12 @@ void SpriteResource::Render(ID3D11DeviceContext* dc,
 	dc->RSGetViewports(&numViewports, &viewport);
 
 	// 引数から各頂点の位置の計算
-	// (x0, y0) *----* (x1, y1)
+	// (x0, y0) *----* (x2, y2)
 	//			|	/|
 	//			|  / |
 	//			| /	 |
 	//			|/   |
-	// (x2, y2) *----* (x3, y3) 
+	// (x1, y1) *----* (x3, y3) 
 
 	// 切り取りサイズ判定
 	float tw = texSize.x;
@@ -173,8 +173,8 @@ void SpriteResource::Render(ID3D11DeviceContext* dc,
 
 	Vertex vertices[4] = {};
 	vertices[0] = { Vector3(0.0f, 0.0f, 0), color, Vector2::Zero		};
-	vertices[1] = { Vector3(1.0f, 0.0f, 0), color, Vector2::XOneYZero	};
-	vertices[2] = { Vector3(0.0f, 1.0f, 0), color, Vector2::XZeroYOne	};
+	vertices[1] = { Vector3(0.0f, 1.0f, 0), color, Vector2::XZeroYOne	};
+	vertices[2] = { Vector3(1.0f, 0.0f, 0), color, Vector2::XOneYZero	};
 	vertices[3] = { Vector3(1.0f, 1.0f, 0), color, Vector2::One			};
 
 	const float sinValue = sinf(angle);

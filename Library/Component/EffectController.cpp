@@ -47,10 +47,10 @@ void EffectController::EffekseerEffectData::Play()
     effekseerManager->SetScale(handle, scale.x, scale.y, scale.z);
 	effekseerManager->SetAllColor(handle,
 		Effekseer::Color(
-			static_cast<uint8_t>(color.x * 255.0f),
-			static_cast<uint8_t>(color.y * 255.0f),
-			static_cast<uint8_t>(color.z * 255.0f),
-			static_cast<uint8_t>(color.w * 255.0f)));
+			static_cast<uint8_t>(colorFactor * color.x * 255.0f),
+			static_cast<uint8_t>(colorFactor * color.y * 255.0f),
+			static_cast<uint8_t>(colorFactor * color.z * 255.0f),
+			static_cast<uint8_t>(colorFactor * color.w * 255.0f)));
 }
 
 void EffectController::EffekseerEffectData::Stop()
@@ -97,10 +97,24 @@ void EffectController::EffekseerEffectData::SetAllColor(const Vector4& color)
 		Effekseer::ManagerRef effekseerManager = owner->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
 		effekseerManager->SetAllColor(handle, 
 			Effekseer::Color(
-				static_cast<uint8_t>(color.x * 255.0f), 
-				static_cast<uint8_t>(color.y * 255.0f), 
-				static_cast<uint8_t>(color.z * 255.0f), 
-				static_cast<uint8_t>(color.w * 255.0f)));
+				static_cast<uint8_t>(colorFactor * color.x * 255.0f), 
+				static_cast<uint8_t>(colorFactor * color.y * 255.0f), 
+				static_cast<uint8_t>(colorFactor * color.z * 255.0f), 
+				static_cast<uint8_t>(colorFactor * color.w * 255.0f)));
+	}
+}
+void EffectController::EffekseerEffectData::SetColorFactor(float f)
+{
+	colorFactor = f;
+	if (handle != -1)
+	{
+		Effekseer::ManagerRef effekseerManager = owner->GetScene()->GetEffekseerEffectManager().GetEffekseerManager();
+		effekseerManager->SetAllColor(handle,
+			Effekseer::Color(
+				static_cast<uint8_t>(colorFactor * color.x * 255.0f),
+				static_cast<uint8_t>(colorFactor * color.y * 255.0f),
+				static_cast<uint8_t>(colorFactor * color.z * 255.0f),
+				static_cast<uint8_t>(colorFactor * color.w * 255.0f)));
 	}
 }
 void EffectController::EffekseerEffectData::DrawGui()
@@ -110,6 +124,7 @@ void EffectController::EffekseerEffectData::DrawGui()
 	{
 		SetAllColor(color);
 	}
+	ImGui::DragFloat(u8"ëSëÃêFï‚ê≥íl", &colorFactor, 0.1f);
 }
 #pragma endregion
 

@@ -87,7 +87,7 @@ void WyvernActor::OnCreate()
 	leftWingParts->SetOnDestroyCallback([&] {
 		// —ƒ‚Ìƒ}ƒeƒŠƒAƒ‹‚ðÔ‚­‚·‚é
 		auto modelRenderer = this->GetComponent<ModelRenderer>();
-		auto& material = modelRenderer->GetMaterial("Material #31");
+		auto& material = modelRenderer->GetMaterial("LWing_M");
 		material.SetColor("Diffuse", Vector4::Red);
 		});
 }

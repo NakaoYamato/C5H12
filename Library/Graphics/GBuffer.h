@@ -36,7 +36,7 @@ public:
 	struct CbFog
 	{
 		Vector4 fogColor = Vector4::Gray; // フォグの色
-		Vector2 fogRange = Vector2(0.1f, 300.0f); // フォグの開始距離と終了距離
+		Vector2 fogRange = Vector2(40.0f, 300.0f); // フォグの開始距離と終了距離
 		Vector2 fogPadding{};
 	};
 	struct SSRConstants

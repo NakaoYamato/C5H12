@@ -32,7 +32,7 @@ public:
 
 	static const char* GetModelFilePath()
 	{
-		return "./Data/Model/Enemy/Dragons/Kuzar the Magnificent.fbx";
+		return "./Data/Model/Enemy/Dragons/Wyvern.fbx";
 	}
 public:
 	WyvernActor() {}

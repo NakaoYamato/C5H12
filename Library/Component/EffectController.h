@@ -61,11 +61,13 @@ public:
 		void SetRotation(const Vector3& rotation) override;
 		void SetScale(const Vector3& scale) override;
 		void SetAllColor(const Vector4& color);
+		void SetColorFactor(float f);
 		void DrawGui() override;
 	private:
 		Effekseer::EffectRef effekseerEffect;
 		Effekseer::Handle handle = -1;
 		Vector4 color = Vector4::White;
+		float colorFactor = 1.0f;
 	};
 	// パーティクルエフェクトデータ
 	class ParticleEffectData : public EffectData

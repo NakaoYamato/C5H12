@@ -9,13 +9,13 @@ public:
     struct Constants
     {
         // カラーフィルター
-        float hueShift = 5.0f; // 色相調整
-        float saturation = 1.15f; // 彩度調整
-        float brightness = 1.0f; // 明度調整
+        float hueShift = 7.0f; // 色相調整
+        float saturation = 1.5f; // 彩度調整
+        float brightness = 1.25f; // 明度調整
         float colorFilterDummy = 0.0f;
         
         // トーンマッピング
-        float exposure{ 2.0f };     // 補正値
+        float exposure{ 2.76f };     // 補正値
         int toneType = 0;           // 使用するトーンタイプ
         DirectX::XMFLOAT2 tonemappingDummy;
 

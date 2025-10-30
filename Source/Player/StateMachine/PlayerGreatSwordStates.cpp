@@ -266,7 +266,8 @@ namespace Attack1SubState
             const std::string& nextSubStateName,
             const std::string& branchSubStateName,
             float animationBlendTime,
-            float motionFactor) :
+            float motionFactor,
+            float animationSpeed = 1.0f) :
             PlayerSSB(stateMachine,
                 name,
                 animationName,
@@ -275,7 +276,8 @@ namespace Attack1SubState
                 true),
 			_nextSubStateName(nextSubStateName),
             _branchSubStateName(branchSubStateName),
-            _motionFactor(motionFactor)
+            _motionFactor(motionFactor),
+            _animationSpeed(animationSpeed)
         {
         }
 
@@ -287,16 +289,32 @@ namespace Attack1SubState
             PlayerSSB::OnEnter();
             // 攻撃フラグを立てる
 			_owner->GetDamageSender()->SetMotionFactor(_motionFactor);
+            _owner->GetAnimator()->SetAnimationSpeed(_animationSpeed);
         }
-    private:
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションが終了していたら遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+            {
+                // 攻撃からIdleに遷移
+                _owner->GetStateMachine().ChangeState("CombatIdle");
+            }
+        }
+        void OnExit() override
+        {
+            PlayerSSB::OnExit();
+            _owner->GetAnimator()->SetAnimationSpeed(1.0f);
+        }
+    protected:
         std::string _nextSubStateName;
         std::string _branchSubStateName;
 		float _motionFactor = 1.0f;
+        float _animationSpeed = 1.0f;
     };
-    class ChargingAttackSubState final : public ComboSubState
+    class ChargeSubState : public ComboSubState
     {
     public:
-        ChargingAttackSubState(PlayerStateMachine* stateMachine,
+        ChargeSubState(PlayerStateMachine* stateMachine,
             const std::string& name,
             const std::string& animationName,
             const std::string& nextSubStateName,
@@ -317,51 +335,54 @@ namespace Attack1SubState
         {
             ComboSubState::OnEnter();
             _chargingTimer = 0.0f;
-            _isCharging = true;
             _chargeStage = 1;
         }
         void OnExecute(float elapsedTime) override
         {
-            // チャージ中の処理
-            if (_owner->GetPlayer()->CallChargingEvent() && _isCharging)
+            // 攻撃キーを押し続けている時
+            if (_owner->GetPlayer()->IsHoldingAttackKey())
             {
-                if (_owner->GetPlayer()->IsHoldingAttackKey())
-                {
-                    _chargingTimer += elapsedTime;
-                    // アニメーションを止める
-                    _owner->GetAnimator()->SetIsPaused(true);
+                _chargingTimer += elapsedTime;
 
-                    if (_chargeStage <= _chargeStageMax && _chargingTimer > _chargeStageTimer * _chargeStage)
+                if (_chargeStage <= _chargeStageMax && _chargingTimer > _chargeStageTimer * _chargeStage)
+                {
+                    // リムライト処理
+                    _owner->GetPlayer()->SetChargeLevel(_chargeStage);
+                    _owner->GetPlayer()->StartChargeEffectRimLight();
+
+                    // 各チャージエフェクト停止
+                    _owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
+                    _owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);
+                    _owner->GetEffect()->Stop(PlayerController::EffectType::Charge2);
+                    // エフェクト再生
+                    PlayerController::EffectType effectType = PlayerController::EffectType::Charge0;
+                    switch (_chargeStage)
                     {
-                        // リムライト処理
-                        _owner->GetPlayer()->SetChargeLevel(_chargeStage);
-						_owner->GetPlayer()->StartChargeEffectRimLight();
-
-                        // 各チャージエフェクト停止
-						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
-						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);
-						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge2);
-						// エフェクト再生
-						PlayerController::EffectType effectType = PlayerController::EffectType::Charge0;
-                        switch (_chargeStage)
-                        {
-						case 1: effectType = PlayerController::EffectType::Charge0; break;
-						case 2: effectType = PlayerController::EffectType::Charge1; break;
-						case 3: effectType = PlayerController::EffectType::Charge2; break;
-                        }
-                        _owner->GetEffect()->Play(effectType,
-                            _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset);
-
-                        // チャージステージを上げる
-                        _chargeStage++;
+                    case 1: effectType = PlayerController::EffectType::Charge0; break;
+                    case 2: effectType = PlayerController::EffectType::Charge1; break;
+                    case 3: effectType = PlayerController::EffectType::Charge2; break;
                     }
+                    _owner->GetEffect()->Play(effectType,
+                        _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset);
+
+                    // チャージステージを上げる
+                    _chargeStage++;
                 }
-                else
+                
+                // 突進遷移
+                if (_owner->GetPlayer()->IsSpecialAttack())
                 {
-                    _isCharging = false;
-                    // アニメーションを再開
-                    _owner->GetAnimator()->SetIsPaused(false);
+                    // 攻撃2のほうに遷移
+                    _owner->GetStateMachine().ChangeState("CombatAttack2");
+                    _owner->GetStateMachine().ChangeSubState(GetBranchStateName());
                 }
+            }
+            // 離したとき
+            else
+            {
+                auto& subState = GetNextStateName();
+                // 次のサブステートへ遷移
+                _owner->GetStateMachine().ChangeSubState(subState);
             }
             // エフェクトの位置を更新
             Vector3 position = _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset;
@@ -372,49 +393,62 @@ namespace Attack1SubState
         void OnExit() override
         {
             ComboSubState::OnExit();
-            // アニメーションを再開
-            _owner->GetAnimator()->SetIsPaused(false);
         }
     private:
         float _chargingTimer = 0.0f;
         float _chargeStageTimer = 1.0f;
         int _chargeStage = 1;
         int _chargeStageMax = 3;
-        bool _isCharging = true;
 
-		Vector3 _effectOffset = Vector3(0.0f, 0.5f, 0.0f);
+        Vector3 _effectOffset = Vector3(0.0f, 0.5f, 0.0f);
     };
 }
 PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
 {
     // サブステート登録
-    RegisterSubState(std::make_shared<Attack1SubState::ChargingAttackSubState>(stateMachine,
-        "ComboAttack1",
-        "ComboAttack02_02",
-        "ComboAttack2",
-        "ComboAttack1",
+    RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
+        "ChargeAttack01Start",
+        "ChargeAttack01Loop",
+        "ChargeAttack01End",
+        "AttackTackle",
         1.0f,
         1.0f));
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ComboAttack2",
-        "ComboAttack03_01",
-        "ComboAttack3",
-        "ComboAttack1",
-        0.5f,
-        1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ChargingAttackSubState>(stateMachine,
-        "ComboAttack3",
-        "ComboAttack01_02",
-        "ComboAttack4",
-        "ComboAttack1",
+        "ChargeAttack01End",
+        "ChargeAttack01End",
+        "ChargeAttack02Start",
+        "SpinningAttack",
+        1.0f,
+        1.0f,
+        1.5f));
+    RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
+        "ChargeAttack02Start",
+        "ChargeAttack02Loop",
+        "ChargeAttack02End",
+        "AttackTackle",
         1.0f,
         1.0f));
-    RegisterSubState(std::make_shared<Attack1SubState::ChargingAttackSubState>(stateMachine,
-        "ComboAttack4",
-        "ComboAttack04_02",
+    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
+        "ChargeAttack02End",
+        "ChargeAttack02End",
+        "ChargeAttack03Start",
+        "SpinningAttack",
+        1.0f,
+        1.0f,
+        1.5f));
+    RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
+        "ChargeAttack03Start",
+        "ChargeAttack03Loop",
+        "ChargeAttack03End",
+        "AttackTackle",
+        1.0f,
+        1.0f));
+    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
+        "ChargeAttack03End",
+        "ChargeAttack03End",
         "",
-        "ComboAttack1",
+        "",
         1.0f,
         1.0f));
 }
@@ -423,7 +457,7 @@ void PlayerGreatSwordAttack1State::OnEnter()
 {
     _owner->GetAnimator()->SetIsUseRootMotion(true);
     // 初期サブステート設定
-    ChangeSubState("ComboAttack1");
+    ChangeSubState("ChargeAttack01Start");
     // 先行入力遷移先をクリア
     _nextStateName = "";
 }
@@ -483,26 +517,86 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
         if (!_nextStateName.empty())
             _owner->GetStateMachine().ChangeState(_nextStateName);
     }
-
-    // アニメーションが終了していたら遷移
-    if (!_owner->GetAnimator()->IsPlayAnimation())
-    {
-        // 攻撃からIdleに遷移
-        _owner->GetStateMachine().ChangeState("CombatIdle");
-    }
 }
 #pragma endregion
 
 #pragma region 攻撃2
+namespace Attack2SubState
+{
+    class TackleSubState : public Attack1SubState::ComboSubState
+    {
+    public:
+        TackleSubState(PlayerStateMachine* stateMachine,
+            const std::string& name,
+            const std::string& animationName,
+            const std::string& nextSubStateName,
+            float animationBlendTime,
+            float motionFactor) :
+            Attack1SubState::ComboSubState(stateMachine,
+                name,
+                animationName,
+                nextSubStateName,
+                "",
+                animationBlendTime,
+                motionFactor)
+        {
+        }
+        void OnEnter() override
+        {
+            ComboSubState::OnEnter();
+            // 攻撃フラグを立てる
+            _owner->GetDamageSender()->SetMotionFactor(_motionFactor);
+            // 直前のサブステートの名前から次のサブステートを決定
+            auto& str = _owner->GetStateMachine().GetPreviousSubStateName();
+            if (str == "ChargeAttack01Start")
+            {
+                // 前方突進攻撃
+                _branchSubStateName = "ChargeAttack02Start";
+            }
+            if (str == "ChargeAttack02Start")
+            {
+                // 前方突進攻撃
+                _branchSubStateName = "ChargeAttack03Start";
+            }
+            if (str == "ChargeAttack03Start")
+            {
+                // 前方突進攻撃
+                _branchSubStateName = "ChargeAttack03Start";
+            }
+        }
+        void OnExecute(float elapsedTime) override
+        {
+            // アニメーションが終了していたら遷移
+            if (!_owner->GetAnimator()->IsPlayAnimation())
+            {
+                // 攻撃からIdleに遷移
+                _owner->GetStateMachine().ChangeState("CombatIdle");
+            }
+            // 攻撃キーを押し続けている時
+            if (_owner->GetPlayer()->CallCancelAttackEvent() && _owner->GetPlayer()->IsHoldingAttackKey())
+            {
+                // 攻撃1のほうに遷移
+                _owner->GetStateMachine().ChangeState("CombatAttack1");
+                _owner->GetStateMachine().ChangeSubState(_branchSubStateName);
+            }
+        }
+    };
+}
 PlayerGreatSwordAttack2State::PlayerGreatSwordAttack2State(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
 {
     // サブステート登録
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ComboAttack1",
-        "ComboAttack04_01",
+        "SpinningAttack",
+        "SpinningAttack",
         "",
-        "ComboAttack2",
+        "ChargeAttack01Start",
+        0.3f,
+        1.0f));
+    RegisterSubState(std::make_shared<Attack2SubState::TackleSubState>(stateMachine,
+        "AttackTackle",
+        "AttackTackle",
+        "",
         0.3f,
         1.0f));
 }
@@ -511,7 +605,7 @@ void PlayerGreatSwordAttack2State::OnEnter()
 {
     _owner->GetAnimator()->SetIsUseRootMotion(true);
     // 初期サブステート設定
-    ChangeSubState("ComboAttack1");
+    ChangeSubState("SpinningAttack");
     // 先行入力遷移先をクリア
     _nextStateName = "";
 }

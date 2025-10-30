@@ -28,6 +28,7 @@ public:
 		{
 			_currentState->Exit();
 			_previousStateName = _currentState->GetName();
+			_previousSubStateName = _currentState->GetSubStateName();
 		}
 
 #ifdef _DEBUG
@@ -44,6 +45,7 @@ public:
 		{
 			_currentState->Exit();
 			_previousStateName = _currentState->GetName();
+			_previousSubStateName = _currentState->GetSubStateName();
 			_currentState = nullptr;
 		}
 	}
@@ -75,7 +77,10 @@ public:
 	// ステートマップ取得
 	HierarchicalStateMap& GetStateMap() { return _stateMap; }
 	// 前のステート名取得
-	std::string GetPreviousStateName() const { return _previousStateName; }
+	const std::string& GetPreviousStateName() const { return _previousStateName; }
+	// 前のサブステート名取得
+	const std::string& GetPreviousSubStateName() const { return _previousSubStateName; }
+
 protected:
 	// ステートのマップ
 	HierarchicalStateMap _stateMap;
@@ -84,4 +89,6 @@ protected:
 	HierarchicalStateBase<T>* _currentState = nullptr;
 	// 前のステート名
 	std::string _previousStateName = "";
+    // 前のサブステート名
+    std::string _previousSubStateName = "";
 };

@@ -793,7 +793,9 @@ PlayerNonCombatDownState::PlayerNonCombatDownState(PlayerStateMachine* stateMach
 void PlayerNonCombatDownState::OnEnter()
 {
 	// ダメージを受けた方向を向く
-	auto& hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	Vector3 hitPosition = _owner->GetPlayer()->GetDamageable()->GetHitPosition();
+	if (auto damageSender = _owner->GetPlayer()->GetDamageable()->GetLastDamageActor())
+		hitPosition = damageSender->GetTransform().GetPosition();
 	_owner->GetPlayer()->GetActor()->GetTransform().LookAt(hitPosition);
 	// XZ回転量をリセット
 	_owner->GetPlayer()->GetActor()->GetTransform().SetAngleX(0.0f);

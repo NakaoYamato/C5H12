@@ -146,6 +146,9 @@ WyvernBiteAttackState::WyvernBiteAttackState(WyvernStateMachine* owner) :
 }
 void WyvernBiteAttackState::OnEnter()
 {
+	// UŒ‚—ÍÝ’è
+	_owner->GetDamageSender()->SetMotionFactor(MotionAttackFactor);
+
 	// ƒ^[ƒQƒbƒgÀ•W‚©‚ç¶‘O‰E‚Ì‚Ç‚±‚ÉUŒ‚‚·‚é‚©”»’è
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
@@ -186,6 +189,9 @@ WyvernClawAttackState::WyvernClawAttackState(WyvernStateMachine* owner) :
 }
 void WyvernClawAttackState::OnEnter()
 {
+	// UŒ‚—ÍÝ’è
+	_owner->GetDamageSender()->SetMotionFactor(MotionAttackFactor);
+
 	auto model = _owner->GetEnemy()->GetActor()->GetModel().lock();
 	// ƒ^[ƒQƒbƒgÀ•W‚©‚ç¶‘O‰E‚Ì‚Ç‚±‚ÉUŒ‚‚·‚é‚©”»’è
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
@@ -309,6 +315,9 @@ WyvernTailAttackState::WyvernTailAttackState(WyvernStateMachine* owner) :
 }
 void WyvernTailAttackState::OnEnter()
 {
+	// UŒ‚—ÍÝ’è
+	_owner->GetDamageSender()->SetMotionFactor(MotionAttackFactor);
+
 	// ƒ^[ƒQƒbƒgÀ•W‚©‚ç¶‘O‰E‚Ì‚Ç‚±‚ÉUŒ‚‚·‚é‚©”»’è
 	auto& position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
@@ -347,6 +356,8 @@ void WyvernChargeAttackState::OnEnter()
 	WyvernHSB::OnEnter();
 	_owner->GetAnimator()->SetRootMotionOption(Animator::RootMotionOption::UseOffset);
 	_startPosition = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+	// UŒ‚—ÍÝ’è
+	_owner->GetDamageSender()->SetMotionFactor(MotionAttackFactor);
 }
 
 void WyvernChargeAttackState::OnExecute(float elapsedTime)

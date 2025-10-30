@@ -59,6 +59,8 @@ void DamageSender::OnContact(CollisionData& collisionData)
 
 			if (damageable->AddDamage(_ATK, collisionData.hitPosition))
 			{
+				damageable->SetLastDamageActor(GetActor());
+
 				// ダメージを与えたらヒットエフェクト再生
 				if (_effectController.lock() && _hitEffectIndex != -1)
 					_effectController.lock()->Play(_hitEffectIndex, collisionData.hitPosition);

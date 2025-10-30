@@ -40,6 +40,8 @@ public:
 	float GetLastDamage() const { return _lastDamage; }
 	// 総ダメージ量取得
 	float GetTotalDamage() const { return _totalDamage; }
+	// 最後にダメージを与えてきたアクター取得
+    std::shared_ptr<Actor> GetLastDamageActor() const { return _lastDamageActor.lock(); }
 
 	// 無敵状態にする
 	void SetInvisible(float time) { _invisibleTimer = time; }
@@ -53,6 +55,8 @@ public:
 	void SetTakeableDamageCallback(std::function<bool(float, Vector3)> callback) { _takeableDamageCallback = callback; }
 	// ダメージを受けたときのコールバック関数を設定
 	void SetOnDamageCallback(std::function<void(float, Vector3)> callback) { _onDamageCallback = callback; }
+	// 最後にダメージを与えてきたアクターを設定
+    void SetLastDamageActor(std::shared_ptr<Actor> actor) { _lastDamageActor = actor; }
 #pragma endregion
 
 protected:
@@ -75,4 +79,7 @@ protected:
 	std::function<bool(float, Vector3)> _takeableDamageCallback;
 	// ダメージを受けたときのコールバック関数
 	std::function<void(float, Vector3)> _onDamageCallback;
+
+    // 最後にダメージを与えてきたアクター
+    std::weak_ptr<Actor> _lastDamageActor;
 };

@@ -106,6 +106,8 @@ public:
 	void OnExecute(float elapsedTime) override;
 	// èIóπèàóù
 	void OnExit() override;
+private:
+    static constexpr float MotionAttackFactor = 1.0f;
 };
 #pragma endregion
 
@@ -135,6 +137,8 @@ private:
 	float _lerpTimer		= 0.0f;
 	float _startLerpSpeed	= 10.0f;
 	float _endLerpSpeed		= 15.0f;
+private:
+	static constexpr float MotionAttackFactor = 2.0f;
 };
 #pragma endregion
 
@@ -150,6 +154,8 @@ public:
 	void OnExecute(float elapsedTime) override;
 	// èIóπèàóù
 	void OnExit() override;
+private:
+	static constexpr float MotionAttackFactor = 5.0f;
 };
 #pragma endregion
 
@@ -176,6 +182,8 @@ public:
 	void OnExit() override;
 private:
 	Vector3 _startPosition = Vector3::Zero;
+private:
+	static constexpr float MotionAttackFactor = 5.0f;
 };
 #pragma endregion
 

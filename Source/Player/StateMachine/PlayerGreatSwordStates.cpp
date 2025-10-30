@@ -333,6 +333,10 @@ namespace Attack1SubState
 
                     if (_chargeStage <= _chargeStageMax && _chargingTimer > _chargeStageTimer * _chargeStage)
                     {
+                        // リムライト処理
+                        _owner->GetPlayer()->SetChargeLevel(_chargeStage);
+						_owner->GetPlayer()->StartChargeEffectRimLight();
+
                         // 各チャージエフェクト停止
 						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
 						_owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);

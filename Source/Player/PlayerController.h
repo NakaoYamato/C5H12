@@ -4,6 +4,7 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/Animator.h"
 #include "../../Library/Component/EffectController.h"
+#include "../../Library/Component/ModelRenderer.h"
 
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/Targetable.h"
@@ -73,6 +74,7 @@ public:
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
 	bool IsUsingItem() const { return _isUsingItem; }
+	int GetChargeLevel() const { return _chargeLevel; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
 	void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
@@ -85,12 +87,19 @@ public:
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
+	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
 
     float GetDashRotationFactor() const { return _dashRotationFactor; }
 
     float GetDashStaminaConsume() const { return _dashStaminaConsume; }
     float GetEvadeStaminaConsume() const { return _evadeStaminaConsume; }
     float GetGuardStaminaConsume() const { return _guardStaminaConsume; }
+
+	// 溜め演出時のリムライト表示
+	void StartChargeEffectRimLight()
+	{
+		_chargeEffectRimLightTimer = _chargeEffectRimLightTimeMax;
+	}
 #pragma endregion
 
 private:
@@ -98,6 +107,8 @@ private:
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<EffectController> _effectController;
+	std::weak_ptr<ModelRenderer> _modelRenderer;
+
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<Targetable> _targetable;
 
@@ -120,6 +131,9 @@ private:
 	bool _isGuard = false;
 	bool _isDead = false;
 	bool _isUsingItem = false;
+
+	// 溜め段階
+	int _chargeLevel = 0;
 #pragma endregion
 
 	// ダッシュ時の回転補正値
@@ -131,4 +145,12 @@ private:
     float _evadeStaminaConsume = 10.0f;
 	// ガード時消費スタミナ(一回当たり)
     float _guardStaminaConsume = 10.0f;
+
+	// 溜め演出時のリムライト表示時間
+	float _chargeEffectRimLightTimer = 0.0f;
+	float _chargeEffectRimLightTimeMax = 0.5f;
+	// 溜め段階のリムライトカラー
+	Vector4 _chargeEffectRimLightColor1 = Vector4::Yellow;
+	Vector4 _chargeEffectRimLightColor2 = Vector4(1.0f, 50.0f / 255.0f, 0.0f, 1.0f);
+	Vector4 _chargeEffectRimLightColor3 = Vector4::Red;
 };

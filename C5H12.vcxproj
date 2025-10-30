@@ -277,6 +277,7 @@
     <ClCompile Include="Library\Shader\Model\Grass\GrassShader.cpp" />
     <ClCompile Include="Library\Shader\Model\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Model\Phong\PhongShader.cpp" />
+    <ClCompile Include="Library\Shader\Model\Player\PlayerShader.cpp" />
     <ClCompile Include="Library\Shader\Model\Ramp\RampShader.cpp" />
     <ClCompile Include="Library\Graphics\Shader.cpp" />
     <ClCompile Include="Library\Shader\Model\Test\TestShader.cpp" />
@@ -528,6 +529,7 @@
     <ClInclude Include="Library\Shader\Model\ModelShaderBase.h" />
     <ClInclude Include="Library\Shader\Model\PBR\PBRShader.h" />
     <ClInclude Include="Library\Shader\Model\Phong\PhongShader.h" />
+    <ClInclude Include="Library\Shader\Model\Player\PlayerShader.h" />
     <ClInclude Include="Library\Shader\Model\Ramp\RampShader.h" />
     <ClInclude Include="Library\Graphics\Shader.h" />
     <ClInclude Include="Library\Shader\Model\Test\TestShader.h" />
@@ -789,6 +791,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Model\PhysicalBasedRendering\PhysicalBasedRenderingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Model\Player\PlayerGBPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

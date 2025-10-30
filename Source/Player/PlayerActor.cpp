@@ -142,6 +142,17 @@ void PlayerActor::OnCreate()
 	// パラメータ設定
 	GetTransform().SetLengthScale(1.0f);
 	GetTransform().SetPositionY(1.0f);
+
+	for (auto& material : modelRenderer->GetMaterials())
+	{
+		material.SetShaderName("Player");
+		// シェーダー変更時はパラメータも初期化
+		material.SetParameterMap(GetScene()->GetMeshRenderer().GetShaderParameterKey(
+			modelRenderer->GetRenderType(),
+			"Player",
+			true));
+	}
+
 	damageable->SetMaxHealth(10.0f);
 	damageSender->SetHitEffectIndex(PlayerController::EffectType::HitEffect);
     staminaController->SetStaminaRecoverSpeed(10.0f);

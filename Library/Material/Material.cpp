@@ -118,25 +118,25 @@ void Material::DrawParameterMapGui()
 		{
 			float* value = std::get_if<float>(&parameter);
 			if (value)
-				ImGui::DragFloat(key.c_str(), value);
+				ImGui::DragFloat(key.c_str(), value, 0.1f);
 		}
 		else if (std::holds_alternative<Vector2>(parameter))
 		{
 			Vector2* value = std::get_if<Vector2>(&parameter);
 			if (value)
-				ImGui::DragFloat2(key.c_str(), &value->x);
+				ImGui::DragFloat2(key.c_str(), &value->x, 0.1f);
 		}
 		else if (std::holds_alternative<Vector3>(parameter))
 		{
 			Vector3* value = std::get_if<Vector3>(&parameter);
 			if (value)
-				ImGui::DragFloat3(key.c_str(), &value->x);
+				ImGui::DragFloat3(key.c_str(), &value->x, 0.1f);
 		}
 		else if (std::holds_alternative<Vector4>(parameter))
 		{
 			Vector4* value = std::get_if<Vector4>(&parameter);
 			if (value)
-				ImGui::DragFloat4(key.c_str(), &value->x);
+				ImGui::DragFloat4(key.c_str(), &value->x, 0.1f);
 		}
 	}
 }

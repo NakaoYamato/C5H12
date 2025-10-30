@@ -6,6 +6,7 @@
 #include "../../Shader/Model/Grass/GrassShader.h"
 #include "../../Shader/Model/PBR/PBRShader.h"
 #include "../../Shader/Model/Test/TestShader.h"
+#include "../../Shader/Model/Player/PlayerShader.h"
 
 #include "../../Shader/Model/CascadedShadowMap/CascadedShadowMapShader.h"
 
@@ -62,6 +63,9 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
 					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
 					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingGBPS.cso",
+					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
+				
+				shaderMap["Player"] = std::make_unique<PlayerShader>(device,
 					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
 
 				shaderMap["Test"] = std::make_unique<TestShader>(device,

@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;.\Server\Define;.\External\mrs_2.0.0\mrs\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;.\Server\Define;.\External\mrs_2.0.0\mrs\include;.\Library\ImGui\imgui-node-editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;.\Server\Define;.\External\mrs_2.0.0\mrs\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Library\ImGui\imgui-docking;.\Library\ImGui\ImGuizmo;.\External\cereal-master\include;.\External\assimp\include;.\External\stb;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\EccNetworkLib\Include;.\Server\Define;.\External\mrs_2.0.0\mrs\include;.\Library\ImGui\imgui-node-editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -178,6 +178,10 @@
     <ClCompile Include="Library\Exporter\Exporter.cpp" />
     <ClCompile Include="Library\Graphics\ConstantBuffer.cpp" />
     <ClCompile Include="Library\Graphics\Texture.cpp" />
+    <ClCompile Include="Library\ImGui\imgui-node-editor\crude_json.cpp" />
+    <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_canvas.cpp" />
+    <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_node_editor.cpp" />
+    <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_node_editor_api.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
     <ClCompile Include="Library\Math\Easing.cpp" />
@@ -418,6 +422,12 @@
     <ClInclude Include="Library\Graphics\ConstantBuffer.h" />
     <ClInclude Include="Library\Graphics\Texture.h" />
     <ClInclude Include="Library\ImGui\imgui-docking\Mygui.h" />
+    <ClInclude Include="Library\ImGui\imgui-node-editor\crude_json.h" />
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_bezier_math.h" />
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_canvas.h" />
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_extra_math.h" />
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor.h" />
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
     <ClInclude Include="Library\Material\Material.h" />
     <ClInclude Include="Library\Math\MathF.h" />
@@ -672,6 +682,9 @@
     <None Include="HLSL\Terrain\Grass\TerrainGrass.hlsli" />
     <None Include="HLSL\Terrain\Shadow\TerrainShadow.hlsli" />
     <None Include="HLSL\Terrain\Terrain.hlsli" />
+    <None Include="Library\ImGui\imgui-node-editor\imgui_bezier_math.inl" />
+    <None Include="Library\ImGui\imgui-node-editor\imgui_extra_math.inl" />
+    <None Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.inl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugGridRendererVS.hlsl">

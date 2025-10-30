@@ -5,6 +5,7 @@
 #include <debugapi.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
+#include <imgui_node_editor.h>
 #include <mutex>
 
 #include "../../Library/Graphics/Graphics.h"
@@ -21,6 +22,7 @@ namespace Debug
 	std::mutex                 _debugMutex;
 
     bool _showDemoGui = false;
+    bool _showNodeDemoGui = false;
     bool _showCameraGui = false;
     bool _useGuizmo = false;
 
@@ -412,6 +414,8 @@ namespace Debug
 
                 ImGui::Checkbox(u8"IMGUIデモ", &_showDemoGui);
 
+                ImGui::Checkbox(u8"IMGUI Nodeデモ", &_showNodeDemoGui);
+
                 if (ImGui::BeginMenu(u8"ギズモ"))
                 {
                     static const char* operationNames[] =
@@ -484,6 +488,41 @@ namespace Debug
         if (_showDemoGui)
         {
             ImGui::ShowDemoWindow();
+        }
+
+        if (_showNodeDemoGui)
+        {
+            namespace ne = ax::NodeEditor;
+            // エディタ描画の開始
+            ImGui::Begin("Behavior Tree Editor", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            ne::Begin("BehaviorTreeSpace");
+
+
+            // 例: ノード 1 を描画
+            ne::BeginNode(1);
+            ImGui::Text("Root Node");
+            // ノード内の入出力ピンを定義
+            ne::BeginPin(101, ne::PinKind::Output);
+            ImGui::Text("->");
+            ne::EndPin();
+            ne::EndNode();
+
+            // 例: ノード 2 を描画
+            ne::BeginNode(2);
+            ImGui::Text("Child Node");
+            ne::BeginPin(201, ne::PinKind::Input);
+            ImGui::Text("<-");
+            ne::EndPin();
+            ne::EndNode();
+
+            // 例: リンク (接続線) の描画
+            ne::Link(301, 101, 201); // LinkId 301, Output Pin 101, Input Pin 201 を接続
+
+
+            // エディタ描画の終了
+            ne::End();
+
+            ImGui::End();
         }
     }
     DebugInput* GetDebugInput()

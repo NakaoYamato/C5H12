@@ -4,6 +4,7 @@
 #include "./ImGuizmo/ImGuizmo.h"
 
 HWND ImGuiManager::hWnd;
+ax::NodeEditor::EditorContext* ImGuiManager::editorContext = nullptr;
 
 void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc,
 	bool* isPaused, void (*setPause)(bool), int maxThreads)
@@ -31,6 +32,10 @@ void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceConte
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_::ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.5f);
 
+	ax::NodeEditor::Config config;
+	// config.SettingsFile = "BehaviorTree.json"; // 状態保存ファイル名
+	editorContext = ax::NodeEditor::CreateEditor(&config);
+	ax::NodeEditor::SetCurrentEditor(editorContext);
 
 	ProfileInitialize(isPaused, setPause, maxThreads);
 
@@ -39,6 +44,8 @@ void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceConte
 
 void ImGuiManager::Uninitialize()
 {
+	// 6. エディタコンテキストの破棄 (アプリケーション終了時に一度だけ)
+	ax::NodeEditor::DestroyEditor(editorContext);
 	ProfileShutdown();
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();

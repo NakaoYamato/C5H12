@@ -17,6 +17,11 @@
 #include "./imgui-docking/imgui_stdlib.h"
 #pragma warning(pop)
 
+#define IMGUI_NODE_EDITOR_IMPLEMENTATION
+#include "../imgui-node-editor/imgui_node_editor.h"
+
+
+
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern ImWchar glyphRangesJapanese[];
 
@@ -41,6 +46,8 @@ public:
 
 private:
 	static HWND hWnd;
+
+	static ax::NodeEditor::EditorContext* editorContext;
 
 	static void DockSpace();
 };

@@ -705,6 +705,18 @@
     <ClCompile Include="Library\Shader\Model\Player\PlayerShader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\ImGui\imgui-node-editor\crude_json.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_canvas.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_node_editor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_node_editor_api.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1466,6 +1478,24 @@
     <ClInclude Include="Library\Shader\Model\Player\PlayerShader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\ImGui\imgui-node-editor\crude_json.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_bezier_math.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_canvas.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_extra_math.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1506,6 +1536,15 @@
     <None Include="HLSL\CBuffer\B3\LightCB.hlsli" />
     <None Include="HLSL\CBuffer\B2\Model\PBRMeshCB.hlsli" />
     <None Include="HLSL\Decal\DecalTextureResource.hlsli" />
+    <None Include="Library\ImGui\imgui-node-editor\imgui_bezier_math.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="Library\ImGui\imgui-node-editor\imgui_extra_math.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.inl">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />

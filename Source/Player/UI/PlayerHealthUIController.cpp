@@ -22,15 +22,32 @@ void PlayerHealthUIController::Start()
     }
 	// 画像読み込み
 	LoadTexture(FrameSprite, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(MaskSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(MaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(DamageGaugeMaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
 
+	SetDepthState(MaskSprite, DepthState::SpriteMask);
+	SetStencil(MaskSprite, 1);
+	GetRectTransform(MaskSprite).SetLocalPosition(Vector2(_maskStartPosX, 0.0f));
+	GetRectTransform(MaskSprite).SetLocalScale(Vector2(_maskStartScaleX, 1.0f));
+
+	SetDepthState(GaugeSprite, DepthState::SpriteApplyMask);
+	SetStencil(GaugeSprite, 1);
     SetColor(GaugeSprite, Vector4::Green);
-    SetColor(GaugeEndSprite, Vector4::Green);
+
+	SetDepthState(DamageGaugeMaskSprite, DepthState::SpriteMask);
+	SetStencil(DamageGaugeMaskSprite, 2);
+	GetRectTransform(DamageGaugeMaskSprite).SetLocalPosition(Vector2(_maskStartPosX, 0.0f));
+	GetRectTransform(DamageGaugeMaskSprite).SetLocalScale(Vector2(_maskStartScaleX, 1.0f));
+
+	SetDepthState(DamageGaugeSprite, DepthState::SpriteApplyMask);
+	SetStencil(DamageGaugeSprite, 2);
     SetColor(DamageGaugeSprite, Vector4::Red);
+
 	GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(2.0f, 4.0f));
+	SetColor(GaugeEndSprite, Vector4::Green);
 }
 // 削除処理
 void PlayerHealthUIController::OnDelete()
@@ -54,18 +71,27 @@ void PlayerHealthUIController::Update(float elapsedTime)
 	{
 		float healthRatio = _damageable.lock()->GetHealth() / _damageable.lock()->GetMaxHealth();
 		healthRatio = std::clamp(healthRatio, 0.0f, 1.0f); // 0.0fから1.0fの範囲に制限
-		GetRectTransform(GaugeSprite).SetLocalScale(Vector2(healthRatio, 1.0f)); // HPに応じて横幅を変更
+		GetRectTransform(MaskSprite).SetLocalScale(Vector2(_maskStartScaleX * healthRatio, 1.0f)); // HPに応じて横幅を変更
 
 		// ダメージゲージのスケールを更新
 		float damageGaugeScaleX = EasingLerp(
-			GetRectTransform(DamageGaugeSprite).GetWorldScale().x,
-			GetRectTransform(GaugeSprite).GetWorldScale().x,
+			GetRectTransform(DamageGaugeMaskSprite).GetWorldScale().x,
+			GetRectTransform(MaskSprite).GetWorldScale().x,
 			_damageGaugeScaleSpeed * elapsedTime);
-		GetRectTransform(DamageGaugeSprite).SetLocalScale(Vector2(damageGaugeScaleX, 1.0f)); // ダメージゲージの横幅を変更
+		GetRectTransform(DamageGaugeMaskSprite).SetLocalScale(Vector2(damageGaugeScaleX, 1.0f)); // ダメージゲージの横幅を変更
 
 		// 先端設定
 		float posX = MathF::Lerp(_gaugeEndEndX, _gaugeEndStartX, healthRatio);
 		GetRectTransform(GaugeEndSprite).SetLocalPosition(Vector2(posX, 1.0f));
+
+		if (healthRatio >= 1.0f)
+		{
+			GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(0.0f, 0.0f));
+		}
+		else
+		{
+			GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(2.0f, 4.0f));
+		}
 	}
 }
 // GUI描画
@@ -79,20 +105,12 @@ void PlayerHealthUIController::DrawGui()
 void PlayerHealthUIController::DrawUI(const RenderContext& rc)
 {
 	const RenderState* renderState = rc.renderState;
-	// フレーム部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	SpriteRender(FrameSprite, rc);
 
-	// ステンシルをクリア
-	rc.deviceContext->ClearDepthStencilView(rc.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	// マスク部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteMask), 1);
-	SpriteRender(MaskSprite, rc);
-
-	// ゲージ部分の描画
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteApplyMask), 1);
+	SpriteRender(DamageGaugeMaskSprite, rc);
 	SpriteRender(DamageGaugeSprite, rc);
+
+	SpriteRender(MaskSprite, rc);
 	SpriteRender(GaugeSprite, rc);
 	
 	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);

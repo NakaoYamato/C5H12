@@ -29,6 +29,11 @@ private:
     const std::string GaugeSpr = "Gauge";
     const std::string GaugeEndSprite = "GaugeEnd";
 
+    // マスクの開始地点
+    float _maskStartPosX = 44.0f;
+    // マスクの開始スケール
+    float _maskStartScaleX = 25.37f;
+
     // ゲージ先端の開始地点
     float _gaugeEndStartX = 440.0f;
     // ゲージ先端の終了地点

@@ -50,12 +50,14 @@ void PlayerActor::OnCreate()
 	{
         auto hpUIActor = this->_scene->RegisterActor<UIActor>(GetName() + std::string(u8"HPUI"), ActorTag::UI);
 		hpUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 50.0f));
+		hpUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
 		auto hpUIController = hpUIActor->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
 
 		if (_isUserControlled)
 		{
 			auto staminaUIActor = this->_scene->RegisterActor<UIActor>(GetName() + std::string(u8"StaminaUI"), ActorTag::UI);
-			staminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 100.0f));
+			staminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 74.0f));
+			staminaUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
 			auto staminaUIController = staminaUIActor->AddComponent<PlayerStaminaUIController>(staminaController);
 		}
 	}

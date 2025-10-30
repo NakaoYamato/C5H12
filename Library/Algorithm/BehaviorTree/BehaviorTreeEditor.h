@@ -2,6 +2,9 @@
 
 #include "BehaviorTree.h"
 
+#include "../../Library/Exporter/Exporter.h"
+
+#include <unordered_map>
 #include <imgui.h>
 #include <imgui_node_editor.h>
 // imgui-node-editor の名前空間エイリアス
@@ -12,6 +15,9 @@ class BehaviorTreeEditor
 {
 private:
     ne::EditorContext* _editorContext = nullptr;
+
+    std::string _filename = "";
+    std::unordered_map<size_t, ImVec2> _nodePositions;
 
     // 以前の Vertical (Y) Spacing を Horizontal (X) Spacing に使用
     const float HorizontalSpacing = 250.0f; // 階層間の水平距離
@@ -70,8 +76,7 @@ private:
     float DrawNodeRecursive(
         BehaviorNodeBase<T>* node,
         BehaviorNodeBase<T>* activeNode,
-        ImVec2 position,
-        bool isInitialDraw
+        ImVec2 position
     )
     {
         if (node == nullptr) return position.y;
@@ -83,9 +88,19 @@ private:
 
         // 2. 初期位置の設定 (初回のみ)
         // Y軸の配置は子ノードの位置に影響を与えるため、初回は固定
-        if (isInitialDraw && ne::GetNodePosition(nodeId).x == FLT_MAX)
+        if (ne::GetNodePosition(nodeId).x == FLT_MAX)
         {
-            ne::SetNodePosition(nodeId, position);
+            if (_nodePositions.find((size_t)nodeId) == _nodePositions.end())
+            {
+                // 初回描画時の位置を設定
+                _nodePositions[(size_t)nodeId] = position;
+            }
+            ne::SetNodePosition(nodeId, _nodePositions[(size_t)nodeId]);
+        }
+        else
+        {
+            // 位置情報を保存
+            _nodePositions[(size_t)nodeId] = ne::GetNodePosition(nodeId);
         }
 
         // 3. ノードの描画 (色分けロジックは以前と同じ)
@@ -93,23 +108,29 @@ private:
         bool isRunning = (node == activeNode);
         bool hasAction = node->HasAction();
         bool hasJudgment = (node->GetJudgment() != nullptr);
-        ImU32 nodeColor = IM_COL32(50, 50, 50, 200);
+
+        ImVec4 bgColor = ImVec4(50 / 255.0f, 50 / 255.0f, 50 / 255.0f, 200 / 255.0f); // デフォルト (複合ノード)
+        ImVec4 borderColor = ImVec4(100 / 255.0f, 100 / 255.0f, 100 / 255.0f, 255 / 255.0f); // デフォルトの枠線
 
         if (hasAction) {
-            nodeColor = IM_COL32(30, 100, 30, 200); // 行動ノード (緑)
+            bgColor = ImVec4(30 / 255.0f, 100 / 255.0f, 30 / 255.0f, 200 / 255.0f); // 行動ノード (緑)
         }
         else if (hasJudgment) {
-            nodeColor = IM_COL32(30, 30, 100, 200); // 判定ノード (青)
-        }
-        if (isRunning) {
-            nodeColor = IM_COL32(200, 100, 30, 200); // 実行中 (オレンジ)
+            bgColor = ImVec4(30 / 255.0f, 30 / 255.0f, 100 / 255.0f, 200 / 255.0f); // 判定ノード (青)
         }
 
-        ne::BeginNode(nodeId);
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, nodeColor);
+        // 実行中のノードはハイライト (最優先)
+        if (isRunning) {
+            bgColor = ImVec4(200 / 255.0f, 100 / 255.0f, 30 / 255.0f, 200 / 255.0f); // 実行中 (オレンジ)
+            borderColor = ImVec4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f); // 白い枠線で強調
+        }
+        ne::PushStyleColor(ne::StyleColor_NodeBg, bgColor);
+        ne::PushStyleColor(ne::StyleColor_NodeBorder, borderColor);
+        // 実行中のノードは枠線を太くして強調
         if (isRunning) {
             ne::PushStyleVar(ne::StyleVar_NodeBorderWidth, 3.0f);
         }
+        ne::BeginNode(nodeId);
 
         // --- 入力ピン (左側に配置) ---
         if (node->GetParent() != nullptr)
@@ -142,11 +163,12 @@ private:
             ne::EndPin();
         }
 
+        ne::EndNode();
+
         if (isRunning) {
             ne::PopStyleVar(1);
         }
-        ImGui::PopStyleColor(1);
-        ne::EndNode();
+        ne::PopStyleColor(2); // NodeBg と NodeBorder を Pop
 
         // 4. 子ノードの描画とリンクの作成
         if (node->GetChild(0) != nullptr)
@@ -177,7 +199,7 @@ private:
                 ne::PinId childInputPinId = GetPinId(child, 2);
 
                 // 子ノードを再帰的に描画
-                lastChildY = DrawNodeRecursive(child, activeNode, childPosition, isInitialDraw);
+                lastChildY = DrawNodeRecursive(child, activeNode, childPosition);
 
                 // リンクの描画 (親の出力ピン -> 子の入力ピン)
                 ne::Link((ne::LinkId)((size_t)outputPinId + (size_t)i), outputPinId, childInputPinId);
@@ -196,7 +218,7 @@ public:
     BehaviorTreeEditor()
     {
         ne::Config config;
-        config.SettingsFile = "Test.json"; // 状態保存ファイル名
+        config.SettingsFile = ""; // imgui側で保存しない
         _editorContext = ne::CreateEditor(&config);
     }
 
@@ -207,6 +229,8 @@ public:
         {
             ne::DestroyEditor(_editorContext);
         }
+
+        SaveFile();
     }
 
     //--------------------------------------------------------------------------------
@@ -238,15 +262,51 @@ public:
         //ノード位置の初回設定フラグを決定
         ne::NodeId rootId = GetNodeId(tree->GetRoot().get());
 
-        bool isInitialDraw = (ne::GetNodePosition(rootId).x == FLT_MAX);
-
         // ルートノードの初期位置を設定 (画面左端、垂直方向の中央付近)
         ImVec2 rootPosition = ImVec2(50.0f, 300.0f);
 
         // 初回描画フラグを true に設定
-        DrawNodeRecursive(tree->GetRoot().get(), activeNode, rootPosition, isInitialDraw);
+        DrawNodeRecursive(tree->GetRoot().get(), activeNode, rootPosition);
 
         ne::End();
         ImGui::End();
     }
+
+    void LoadFile(const std::string& filename)
+    {
+        _filename = filename;
+
+        nlohmann::json jsonData;
+        if (Exporter::LoadJsonFile(_filename, &jsonData))
+        {
+            size_t size = jsonData["Size"].get<std::size_t>();
+            for (size_t i = 0; i < size; ++i)
+            {
+                size_t nodeId = jsonData["NodeId_" + std::to_string(i)].get<std::size_t>();
+                float posX = jsonData["NodePosX_" + std::to_string(i)].get<float>();
+                float posY = jsonData["NodePosY_" + std::to_string(i)].get<float>();
+                _nodePositions[nodeId] = ImVec2(posX, posY);
+                ne::SetNodePosition(nodeId, ImVec2(posX, posY));
+            }
+        }
+    }
+
+    void SaveFile()
+    {
+        if (_filename.empty()) return;
+
+        nlohmann::json jsonData;
+        jsonData["Size"] = _nodePositions.size();
+        size_t index = 0;
+        for (auto& [nodeId, pos] : _nodePositions)
+        {
+            jsonData["NodeId_" + std::to_string(index)] = nodeId;
+            jsonData["NodePosX_" + std::to_string(index)] = pos.x;
+            jsonData["NodePosY_" + std::to_string(index)] = pos.y;
+            ++index;
+        }
+        // ファイルのシリアライズ処理
+        Exporter::SaveJsonFile(_filename, jsonData);
+    }
+
 };

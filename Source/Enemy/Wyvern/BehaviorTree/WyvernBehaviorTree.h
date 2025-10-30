@@ -80,5 +80,5 @@ private:
 	// Š„‚è‚İˆ—‚Ì•”ˆÊ‚Ì–¼‘O
 	std::string _bodyPartName = "";
 
-    BehaviorTreeEditor<WyvernBehaviorTree> _behaviorTreeEditor;
+	BehaviorTreeEditor<WyvernBehaviorTree> _behaviorTreeEditor;
 };

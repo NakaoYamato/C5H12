@@ -165,6 +165,8 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			scoutNode->AddNode("Idle", 2, SelectRule::Non, nullptr, nullptr);
 		}
 	}
+
+	_behaviorTreeEditor.LoadFile("./Data/Debug/Behavior/Wyvern.json");
 }
 // ŠJnˆ—
 void WyvernBehaviorTree::Start()

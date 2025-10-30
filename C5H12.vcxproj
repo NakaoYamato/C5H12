@@ -395,6 +395,7 @@
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorJudgmentBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorNodeBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTreeEditor.h" />
     <ClInclude Include="Library\Algorithm\EventBus\EventBus.h" />
     <ClInclude Include="Library\Audio\AudioLoader.h" />
     <ClInclude Include="Library\Audio\AudioResource.h" />

@@ -81,6 +81,7 @@ public:
 			return nullptr;
 		return _children.at(0);
 	}
+    size_t GetChildrenSize() { return _children.size(); }
 	// 兄弟ノードゲッター
 	NodeTempPtr GetSibling() { return _sibling; }
 	// 階層番号ゲッター

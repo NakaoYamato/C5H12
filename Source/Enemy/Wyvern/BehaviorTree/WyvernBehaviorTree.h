@@ -7,6 +7,8 @@
 #include "../../Source/Common/StaminaController.h"
 #include "../../Source/Enemy/BodyPartController.h"
 
+#include "../../Library/Algorithm/BehaviorTree/BehaviorTreeEditor.h"
+
 class WyvernBehaviorTree : public BehaviorTree
 {
 public:
@@ -77,4 +79,6 @@ private:
 	std::string _interruptionName = "";
 	// Š„‚è‚İˆ—‚Ì•”ˆÊ‚Ì–¼‘O
 	std::string _bodyPartName = "";
+
+    BehaviorTreeEditor<WyvernBehaviorTree> _behaviorTreeEditor;
 };

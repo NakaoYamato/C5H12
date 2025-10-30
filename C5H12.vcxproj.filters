@@ -1496,6 +1496,9 @@
     <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTreeEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

@@ -230,26 +230,7 @@ void WyvernBehaviorTree::DrawBehaviorTreeGui(BehaviorNodeBase<WyvernBehaviorTree
 {
 	if (node == nullptr)
 		return;
-
-	if (ImGui::TreeNode(node->GetName().c_str()))
-	{
-		ImGui::Text(u8"選択ルール: %s", nameof::nameof_enum(node->GetSelectRule()).data());
-		ImGui::Text(u8"判定処理: %s", node->GetJudgment() ? u8"あり" : u8"なし");
-		ImGui::Text(u8"実行処理: %s", node->GetAction() ? u8"あり" : u8"なし");
-		auto parent = node->GetParent();
-		ImGui::Text(u8"親: %s", parent != nullptr ? parent->GetName().c_str() : u8"なし");
-		auto sibling = node->GetSibling();
-		ImGui::Text(u8"兄弟: %s", sibling != nullptr ? sibling->GetName().c_str() : u8"なし");
-		// 子どものGUI描画
-		for (int i = 0;; i++)
-		{
-			auto child = node->GetChild(i);
-			if (child == nullptr)
-				break;
-			DrawBehaviorTreeGui(node->GetChild(i).get());
-		}
-		ImGui::TreePop();
-	}
+    _behaviorTreeEditor.Draw(_behaviorTree.get(), _activeNode);
 }
 
 // 被弾割り込み処理が発生しているか

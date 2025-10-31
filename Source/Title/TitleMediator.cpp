@@ -6,6 +6,9 @@
 #include "../../Source/Title/Item/TitleToExitItem.h"
 #include "../../Source/Title/Item/TitleToOnlineSettingItem.h"
 
+#include "../../Library/Input/Input.h"
+#include "../../Source/Scene/Game/SceneGame.h"
+
 #include <imgui.h>
 
 #pragma region コマンド名
@@ -39,6 +42,20 @@ void TitleMediator::OnCreate()
 // 遅延更新処理
 void TitleMediator::OnLateUpdate(float elapsedTime)
 {
+	static std::string NetworkAddress = "127.0.0.1";
+	if (ImGui::Begin(u8"設定"))
+	{
+		ImGui::InputText(u8"ネットワークアドレス", &NetworkAddress);
+		if (ImGui::Button(u8"決定"))
+		{
+			// ゲームシーンに移行
+			SceneGame::NetworkEnabled = true;
+			SceneGame::NetworkAddress = NetworkAddress;
+			SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Game");
+		}
+	}
+	ImGui::End();
+
 	// コマンドの処理
 	for (auto& command : _commandList)
 	{

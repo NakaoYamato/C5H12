@@ -119,10 +119,12 @@ void WyvernToTargetState::OnExecute(float elapsedTime)
 	// ターゲット方向に回転
 	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
+	// ターゲット方向に向いているか判定
+	float angle = _owner->GetEnemy()->GetAngleToTarget(targetPosition);
 	// 近接攻撃範囲内に入ったらステートの終了
 	float attackRange = _owner->GetEnemy()->GetNearAttackRange();
 	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
-	if (length < attackRange)
+	if (length < attackRange && angle < _owner->GetEnemy()->GetLookAtRadian() / 2.0f)
 	{
 		_owner->GetBase().EndState();
 		return;

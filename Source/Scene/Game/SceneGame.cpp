@@ -85,10 +85,6 @@ void SceneGame::OnInitialize()
 
     // ó\Çﬂì«Ç›çûÇﬁÉÇÉfÉã
     _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::GetModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, PlayerSwordActor::GetModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, PlayerShieldActor::GetModelFilePath()));
     _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::GetModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, GryphusActor::GetModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, WeakActor::GetModelFilePath()));
     AddCompletionLoading(CompletionLoadingRate);
 }

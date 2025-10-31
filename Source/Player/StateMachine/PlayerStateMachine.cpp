@@ -144,14 +144,14 @@ void PlayerStateMachine::ChangeState(const char* mainStateName, const char* subS
 const char* PlayerStateMachine::GetStateName()
 {
 	if (!_stateMachine.GetState())
-        return nullptr;
+        return "";
     return _stateMachine.GetState()->GetName();
 }
 
 const char* PlayerStateMachine::GetSubStateName()
 {
     if (!_stateMachine.GetState())
-        return nullptr;
+        return"";
     return _stateMachine.GetState()->GetSubStateName();
 }
 

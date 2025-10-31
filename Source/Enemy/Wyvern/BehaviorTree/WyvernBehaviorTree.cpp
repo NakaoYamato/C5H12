@@ -90,8 +90,8 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			auto nearNode = hoverNode->AddNode("HoverNear", 3, SelectRule::NoDuplicatesRandom,
 				std::make_shared<WyvernHoverNearJudgment>(this), nullptr);
 			{
-				nearNode->AddNode("HoverClaw", 1, SelectRule::Non,
-					nullptr, std::make_shared<WyvernAttackAction>(this, "HoverClawAttack", nullptr, AttackStaminaCost));
+				//nearNode->AddNode("HoverClaw", 1, SelectRule::Non,
+				//	nullptr, std::make_shared<WyvernAttackAction>(this, "HoverClawAttack", nullptr, AttackStaminaCost));
 				nearNode->AddNode("HoverTurn", 1, SelectRule::Non, 
 					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "HoverTurn", MoveStaminaCost));
 			}
@@ -111,8 +111,11 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			auto confrontNode = battleNode->AddNode("Confront", 3, SelectRule::Priority,
 				std::make_shared<WyvernConfrontJudgment>(this), nullptr);
 			{
-				confrontNode->AddNode("ToTarget", 0, SelectRule::Non, 
-					nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
+				auto toTargetNode = confrontNode->AddNode("ToTarget", 0, SelectRule::Random, nullptr, nullptr);
+				{
+					toTargetNode->AddNode("ToTarget", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "ToTarget"));
+					toTargetNode->AddNode("ToBack", 1, SelectRule::Non, nullptr, std::make_shared<WyvernCompleteStateAction>(this, "BackStep"));
+				}
 				confrontNode->AddNode("Turn", 1, SelectRule::Non, 
 					std::make_shared<WyvernTurnJudgment>(this), std::make_shared<WyvernCompleteStateAction>(this, "Turn"));
 			}

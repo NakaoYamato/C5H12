@@ -28,7 +28,7 @@ void TimerUIController::Start()
     // ƒpƒ‰ƒ[ƒ^İ’è
     if (auto uiActor = dynamic_cast<UIActor*>(this->GetActor().get()))
     {
-        uiActor->GetRectTransform().SetLocalPosition(Vector2(1800.0f, 300.0f));
+        uiActor->GetRectTransform().SetLocalPosition(Vector2(1800.0f, 200.0f));
         uiActor->GetRectTransform().SetLocalScale(Vector2(0.15f, 0.15f));
     }
 }

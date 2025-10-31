@@ -161,7 +161,9 @@
     <ClCompile Include="Library\Audio\SourceVoice.cpp" />
     <ClCompile Include="Library\Audio\SubmixVoice.cpp" />
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
+    <ClCompile Include="Library\Component\AnimatorCamera.cpp" />
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
+    <ClCompile Include="Library\Component\CameraEventReceiver.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
     <ClCompile Include="Library\Component\EffectController.cpp" />
@@ -405,7 +407,9 @@
     <ClInclude Include="Library\Audio\SubmixVoice.h" />
     <ClInclude Include="Library\Audio\VoiceRecorder\VoiceRecorder.h" />
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
+    <ClInclude Include="Library\Component\AnimatorCamera.h" />
     <ClInclude Include="Library\Component\BehaviorController.h" />
+    <ClInclude Include="Library\Component\CameraEventReceiver.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\DecalController.h" />
     <ClInclude Include="Library\Component\EffectController.h" />

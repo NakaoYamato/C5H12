@@ -143,6 +143,10 @@ public:
 	virtual Camera* GetMainCamera() {
 		return &_camera;
 	}
+	// カメラアクター取得
+	virtual std::shared_ptr<Actor> GetMainCameraActor() {
+		return _mainCameraActor.lock();
+	}
 
 	// スカイマップ設定
 	void SetSkyMap(const wchar_t* filename, const wchar_t* diffuseIEM, const wchar_t* specularIDM);
@@ -185,6 +189,7 @@ private:
 
 #pragma region シーン必須オブジェクト
 	std::weak_ptr<LightController>	_directionalLight;
+	std::weak_ptr<Actor>			_mainCameraActor;
 #pragma endregion
 
 	Camera							_camera = {};

@@ -8,6 +8,7 @@
 
 #include "../../Library/Component/Light/LightController.h"
 #include "../../Library/Actor/Camera/MainCamera.h"
+#include "../../Library/Component/CameraEventReceiver.h"
 
 #include <imgui.h>
 
@@ -71,7 +72,8 @@ void Scene::Initialize()
         light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(60.0f));
     }
     {
-        auto mainCamera = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::DrawContextParameter);
+        _mainCameraActor = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::DrawContextParameter);
+		_mainCameraActor.lock()->AddComponent<CameraEventReceiver>();
     }
 
     OnInitialize();

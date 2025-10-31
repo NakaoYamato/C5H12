@@ -7,6 +7,9 @@
 
 void PlayerCameraController::Start()
 {
+    _stateController = _playerActor->GetComponent<StateController>();
+	_cameraEventReceiver = GetActor()->GetScene()->GetMainCameraActor()->GetComponent<CameraEventReceiver>();
+
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform =
@@ -22,11 +25,24 @@ void PlayerCameraController::Start()
     GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
 }
 
-void PlayerCameraController::Update(float elapsedTime)
+void PlayerCameraController::LateUpdate(float elapsedTime)
 {
     // F4を押していたらデバッグ用カメラ起動中
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
         return;
+
+    // 抜刀状態か確認
+	bool isCombat = false;
+	{
+		if (std::string(_stateController.lock()->GetStateName()).find("Combat") != std::string::npos)
+			isCombat = true;
+	}
+
+	float focusVerticalOffset = isCombat ? _combatFocusVerticalOffset : _focusVerticalOffset;
+	float focusHorizontalOffset = isCombat ? _combatFocusHorizontalOffset : _focusHorizontalOffset;
+	float focusLerpSpeed = isCombat ? _combatFocusLerpSpeed : _focusLerpSpeed;
+	float eyeLerpSpeed = isCombat ? _combatEyeLerpSpeed : _eyeLerpSpeed;
+	float cameraDistance = isCombat ? _combatCameraDistance : _cameraDistance;
 
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
@@ -62,20 +78,30 @@ void PlayerCameraController::Update(float elapsedTime)
 
     Vector3 newFocus = _playerActor->GetTransform().GetPosition();
     // オフセット処理
-    newFocus.y += _focusVerticalOffset;
+    newFocus.y += focusVerticalOffset;
     // 下から見るときはオフセットの影響を薄くする
 	float lookingUpValue = angle.x - _lookingUpStartAngle;
     float horizontalRate = lookingUpValue < 0.0f ?
         1.0f - std::clamp(std::fabsf(lookingUpValue / _lookingUpAngleValue), 0.0f, 1.0f) :
         1.0f;
-    newFocus.x += horizontalRate * right.x * _focusHorizontalOffset;
-    newFocus.z += horizontalRate * right.z * _focusHorizontalOffset;
+    newFocus.x += horizontalRate * right.x * focusHorizontalOffset;
+    newFocus.z += horizontalRate * right.z * focusHorizontalOffset;
 
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
-    Vector3 newEye = newFocus - front * _cameraDistance;
+    Vector3 newEye = newFocus - front * cameraDistance;
+
+	if (_cameraEventReceiver.lock())
+	{
+		// カメライベント受信者が存在するならオフセットを加算
+		const Vector3& eyeOffset = _cameraEventReceiver.lock()->GetEyeOffset();
+		// カメラの角度に合わせてオフセットを変換
+		newEye += right * eyeOffset.x;
+		newEye += up * eyeOffset.y;
+		newEye += front * eyeOffset.z;
+	}
 
     // 新しい視点とステージの当たり判定
-    float distance = _cameraDistance;
+    float distance = cameraDistance;
     Vector3 hitPosition{}, hitNormal{};
     Actor* hitActor = nullptr;
 	if (GetActor()->GetScene()->GetCollisionManager().SphereCast(
@@ -92,8 +118,8 @@ void PlayerCameraController::Update(float elapsedTime)
 	}
 
     // 補完処理
-    Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * elapsedTime);
-    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * elapsedTime);
+    Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, focusLerpSpeed * elapsedTime);
+    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, eyeLerpSpeed * elapsedTime);
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 
@@ -126,4 +152,11 @@ void PlayerCameraController::DrawGui()
     ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"垂直入力補正値", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"カメラの半径", &_cameraRadius, 0.01f, 0.01f, 1.0f);
+    ImGui::Separator();
+
+	ImGui::DragFloat(u8"抜刀時注視点垂直オフセット", &_combatFocusVerticalOffset, 0.01f, -10.0f, 10.0f);
+	ImGui::DragFloat(u8"抜刀時注視点水平オフセット", &_combatFocusHorizontalOffset, 0.01f, -10.0f, 10.0f);
+	ImGui::DragFloat(u8"抜刀時注視点補完速度", &_combatFocusLerpSpeed, 0.1f, 0.01f, 20.0f);
+	ImGui::DragFloat(u8"抜刀時視点補完速度", &_combatEyeLerpSpeed, 0.1f, 0.01f, 20.0f);
+	ImGui::DragFloat(u8"抜刀時カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
 }

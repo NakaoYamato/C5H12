@@ -3,6 +3,7 @@
 #include "../../Scene/Scene.h"
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
+#include "../../Library/Component/AnimatorCamera.h"
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/EffectController.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
@@ -39,6 +40,7 @@ void PlayerActor::OnCreate()
 	auto targetable				= this->AddComponent<Targetable>();
 	auto modelRenderer			= this->AddComponent<ModelRenderer>();
 	auto animator				= this->AddComponent<Animator>();
+	auto animatorCamera			= this->AddComponent<AnimatorCamera>();
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto effectController		= this->AddComponent<EffectController>();

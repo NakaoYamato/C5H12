@@ -45,11 +45,14 @@ public:
 	void SetTipColor(const Vector4& v) { this->_tipColor = v; }
 	void ResetTrialPos() { _trailPositions.clear(); }
 private:
+	void Draw(const RenderContext& rc, const std::vector<LocusPoint>& positions, Material* material);
+private:
 	std::vector<LocusPoint> _trailPositions;
 	Vector4					_rootColor = { 1, 1, 1, 0.5f };
 	Vector4					_tipColor = { 1.0f, 0.8f, 0.8f, 0.5f };
     float					_catmullRom = 3.0f; // Catmull-Romスプラインのパラメータ
     bool					_splineInterpolation = true; // スプライン補間を使用するかどうか
 	// マテリアル
+	Material				_distortionMaterial;
 	Material				_material;
 };

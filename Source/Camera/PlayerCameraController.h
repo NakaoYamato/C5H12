@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Library/Component/StateController.h"
 #include "../../Library/Camera/Camera.h"
+#include "../../Library/Component/CameraEventReceiver.h"
 
 #include "../../Source/Player/PlayerActor.h"
 
@@ -20,7 +22,7 @@ public:
     // 開始処理
     void Start() override;
     // 更新処理
-    void Update(float elapsedTime) override;
+    void LateUpdate(float elapsedTime) override;
 	// 固定間隔更新処理
     void FixedUpdate() override;
     // GUI描画
@@ -28,6 +30,9 @@ public:
 
 private:
     PlayerActor* _playerActor;
+
+	std::weak_ptr<StateController> _stateController;
+	std::weak_ptr<CameraEventReceiver> _cameraEventReceiver;
 
     Vector3 _currentFocus{};
     Vector3 _currentEye{};
@@ -49,4 +54,15 @@ private:
     float _horizontalMovePower = 6.0f;
     float _verticalMovePower = 3.0f;
     float _cameraRadius = 0.1f;
+
+#pragma region 抜刀状態のパラメータ
+	float _combatFocusVerticalOffset = 1.5f;
+	float _combatFocusHorizontalOffset = 0.3f;
+
+	float _combatFocusLerpSpeed = 7.0f;
+	float _combatEyeLerpSpeed = 10.0f;
+	float _combatCameraDistance = 5.0f;
+
+#pragma endregion
+
 };

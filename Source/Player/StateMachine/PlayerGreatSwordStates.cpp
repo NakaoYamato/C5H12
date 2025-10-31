@@ -257,9 +257,6 @@ namespace Attack1SubState
     class ComboSubState : public PlayerSSB
     {
     public:
-        static constexpr float ATK = 1.0f;
-
-    public:
         ComboSubState(PlayerStateMachine* stateMachine,
             const std::string& name,
             const std::string& animationName,
@@ -320,14 +317,15 @@ namespace Attack1SubState
             const std::string& nextSubStateName,
             const std::string& branchSubStateName,
             float animationBlendTime,
-            float ATK) :
+            float animationSpeed = 1.0f) :
             ComboSubState(stateMachine,
                 name,
                 animationName,
                 nextSubStateName,
                 branchSubStateName,
                 animationBlendTime,
-                ATK)
+                0.0f,
+                animationSpeed)
         {
         }
 
@@ -344,29 +342,43 @@ namespace Attack1SubState
             {
                 _chargingTimer += elapsedTime;
 
-                if (_chargeStage <= _chargeStageMax && _chargingTimer > _chargeStageTimer * _chargeStage)
+                if (_chargingTimer > _chargeStageTimer * _chargeStage)
                 {
-                    // リムライト処理
-                    _owner->GetPlayer()->SetChargeLevel(_chargeStage);
-                    _owner->GetPlayer()->StartChargeEffectRimLight();
-
-                    // 各チャージエフェクト停止
-                    _owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
-                    _owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);
-                    _owner->GetEffect()->Stop(PlayerController::EffectType::Charge2);
-                    // エフェクト再生
-                    PlayerController::EffectType effectType = PlayerController::EffectType::Charge0;
-                    switch (_chargeStage)
+                    if (_chargeStage <= _chargeStageMax)
                     {
-                    case 1: effectType = PlayerController::EffectType::Charge0; break;
-                    case 2: effectType = PlayerController::EffectType::Charge1; break;
-                    case 3: effectType = PlayerController::EffectType::Charge2; break;
-                    }
-                    _owner->GetEffect()->Play(effectType,
-                        _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset);
+                        // リムライト処理
+                        _owner->GetPlayer()->SetChargeLevel(_chargeStage);
+                        _owner->GetPlayer()->StartChargeEffectRimLight();
 
-                    // チャージステージを上げる
-                    _chargeStage++;
+                        // 各チャージエフェクト停止
+                        _owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
+                        _owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);
+                        _owner->GetEffect()->Stop(PlayerController::EffectType::Charge2);
+                        // エフェクト再生
+                        PlayerController::EffectType effectType = PlayerController::EffectType::Charge0;
+                        switch (_chargeStage)
+                        {
+                        case 1: effectType = PlayerController::EffectType::Charge0; break;
+                        case 2: effectType = PlayerController::EffectType::Charge1; break;
+                        case 3: effectType = PlayerController::EffectType::Charge2; break;
+                        }
+                        _owner->GetEffect()->Play(effectType,
+                            _owner->GetPlayer()->GetActor()->GetTransform().GetWorldPosition() + _effectOffset);
+
+						if (_chargeStage > _chargeStageMax)
+						{
+                            _chargingTimer = _chargeStageTimer * _chargeStage;
+						}
+                        else
+                        {
+                            // チャージステージを上げる
+                            _chargeStage++;
+                        }
+                    }
+                    else
+                    {
+                        _chargingTimer = _chargeStageTimer * _chargeStage;
+                    }
                 }
                 
                 // 突進遷移
@@ -389,6 +401,15 @@ namespace Attack1SubState
             _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge0)->SetPosition(position);
             _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge1)->SetPosition(position);
             _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge2)->SetPosition(position);
+
+            // カメラ
+			_owner->GetCameraEventReceiver()->AddOnUpdateCallback([&](float elapsedTime, CameraEventReceiver* receiver)
+				{
+                    float rate = (_chargingTimer - (_chargeStage - 1) * _chargeStageTimer) / _chargeStageTimer;
+                    _owner->GetCameraEventReceiver()->AddEyeOffset(
+                        Vector3::Lerp(_cameraEyeStartOffset, _cameraEyeEndOffset, rate, EasingType::InSine));
+					return true;
+				});
         }
         void OnExit() override
         {
@@ -401,6 +422,9 @@ namespace Attack1SubState
         int _chargeStageMax = 3;
 
         Vector3 _effectOffset = Vector3(0.0f, 0.5f, 0.0f);
+
+        Vector3 _cameraEyeStartOffset = Vector3(0.0f, 0.0f, 0.5f);
+        Vector3 _cameraEyeEndOffset = Vector3(0.0f, -0.05f, 0.6f);
     };
 }
 PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* stateMachine) :
@@ -413,7 +437,7 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "ChargeAttack01End",
         "AttackTackle",
         1.0f,
-        1.0f));
+        0.7f));
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
         "ChargeAttack01End",
         "ChargeAttack01End",
@@ -421,14 +445,14 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "SpinningAttack",
         1.0f,
         1.0f,
-        1.5f));
+        1.0f));
     RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
         "ChargeAttack02Start",
         "ChargeAttack02Loop",
         "ChargeAttack02End",
         "AttackTackle",
         1.0f,
-        1.0f));
+        0.7f));
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
         "ChargeAttack02End",
         "ChargeAttack02End",
@@ -436,21 +460,22 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "SpinningAttack",
         1.0f,
         1.0f,
-        1.5f));
+        1.0f));
     RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
         "ChargeAttack03Start",
         "ChargeAttack03Loop",
         "ChargeAttack03End",
         "AttackTackle",
         1.0f,
-        1.0f));
+        0.7f));
     RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
         "ChargeAttack03End",
         "ChargeAttack03End",
         "",
         "",
         1.0f,
-        1.0f));
+        1.0f,
+        0.8f));
 }
 
 void PlayerGreatSwordAttack1State::OnEnter()
@@ -531,14 +556,16 @@ namespace Attack2SubState
             const std::string& animationName,
             const std::string& nextSubStateName,
             float animationBlendTime,
-            float motionFactor) :
+            float motionFactor,
+            float animationSpeed = 1.0f) :
             Attack1SubState::ComboSubState(stateMachine,
                 name,
                 animationName,
                 nextSubStateName,
                 "",
                 animationBlendTime,
-                motionFactor)
+                motionFactor,
+                animationSpeed)
         {
         }
         void OnEnter() override
@@ -592,13 +619,15 @@ PlayerGreatSwordAttack2State::PlayerGreatSwordAttack2State(PlayerStateMachine* s
         "",
         "ChargeAttack01Start",
         0.3f,
-        1.0f));
+        1.0f,
+        0.7f));
     RegisterSubState(std::make_shared<Attack2SubState::TackleSubState>(stateMachine,
         "AttackTackle",
         "AttackTackle",
         "",
         0.3f,
-        1.0f));
+        1.0f,
+        0.7f));
 }
 
 void PlayerGreatSwordAttack2State::OnEnter()

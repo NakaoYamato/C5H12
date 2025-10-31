@@ -86,6 +86,8 @@ public:
 	// ステート名取得
 	const char* GetName() const override { return "ToCombat"; }
 	void OnExecute(float elapsedTime) override;
+private:
+	float _waitAttackTime = 0.1f;
 };
 #pragma endregion
 

@@ -18,6 +18,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_effect = owner->GetComponent<EffectController>().get();
 	_damageSender = owner->GetComponent<DamageSender>().get();
     _staminaController = owner->GetComponent<StaminaController>().get();
+    _cameraEventReceiver = owner->GetScene()->GetMainCameraActor()->GetComponent<CameraEventReceiver>().get();
 
     // ステート設定
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatIdleState>(this));

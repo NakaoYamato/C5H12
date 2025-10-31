@@ -584,10 +584,13 @@ void PlayerNonCombatEvadeState::OnExit()
 #pragma region ”²“
 void PlayerNonCombatToCombatState::OnExecute(float elapsedTime)
 {
-	// UŒ‚‚ð‚à‚¤ˆê“x‰Ÿ‚µ‚Ä‚¢‚é‚È‚çUŒ‚‚Ö‘JˆÚ
-	if (_owner->GetPlayer()->IsAttack())
-		_owner->GetStateMachine().ChangeState("CombatAttack1");
+	if (_owner->GetAnimator()->GetAnimationTimer() > _waitAttackTime)
+	{
+		// UŒ‚‚ð‚à‚¤ˆê“x‰Ÿ‚µ‚Ä‚¢‚é‚È‚çUŒ‚‚Ö‘JˆÚ
+		if (_owner->GetPlayer()->IsAttack() || _owner->GetPlayer()->IsHoldingAttackKey())
+			_owner->GetStateMachine().ChangeState("CombatAttack1");
 
+	}
 	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ªI—¹‚µ‚Ä‚¢‚½‚ç‘JˆÚ
 	if (!_owner->GetAnimator()->IsPlayAnimation())
 		_owner->GetStateMachine().ChangeState("CombatIdle");

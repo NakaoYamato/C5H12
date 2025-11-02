@@ -8,6 +8,10 @@
 #include "Model.h"
 #include "ModelCollision.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <ImSequencer.h>
+
 class AnimationEvent
 {
 public:
@@ -83,6 +87,9 @@ public:
 	void DrawGui(bool canEdit = true);
 	// 指定したEventDataのGUI描画
 	void DrawGui(const std::string& animName, bool canEdit = true);
+
+	void DrawGui(const std::string& animName, float currentAnimTime, bool canEdit);
+
 	/// <summary>
 	/// メッセージリストの編集GUI描画
 	/// </summary>
@@ -159,5 +166,44 @@ private:
 
 	// モデルのノード名
 	std::vector<const char*> _nodeNames;
+
+private:
+	// ImSequencer::SequenceInterface の実装
+	class AnimationSequencer : public ImSequencer::SequenceInterface
+	{
+	public:
+		AnimationSequencer(EventDataMap& data,
+			const std::vector<std::string>& messageList,
+			const std::vector<const char*>& nodeNames,
+			bool canEdit,
+			int* selectedEntry,
+			std::vector<int>* startFrames, 
+			std::vector<int>* endFrames);
+		
+		// ImSequencer::SequenceInterface の仮想関数
+		virtual int GetFrameMin() const override { return 0; }
+		// フレーム数を適切な値に設定する必要があります。ここでは仮に1000としていますが、
+		// 実際はアニメーションの長さ（秒数）とフレームレートから計算すべきです。
+		virtual int GetFrameMax() const override { return 1000; }
+		virtual int GetItemCount() const override { return (int)m_data.size(); }
+
+		virtual void Get(int index, int** start, int** end, int* type, unsigned int* color) override;
+
+		virtual const char* GetItemLabel(int index) const override;
+		virtual int GetItemTypeCount() const override;
+		virtual const char* GetItemTypeName(int typeIndex) const override;
+	private:
+		EventDataMap& m_data; // 参照としてイベントデータを持つ
+		const std::vector<std::string>& m_messageList;
+		const std::vector<const char*>& m_nodeNames;
+		bool m_canEdit;
+		int* m_selectedEntry;
+		// *** 追加: DrawGuiから渡されるフレームバッファへのポインター ***
+		std::vector<int>* m_startFrames;
+		std::vector<int>* m_endFrames;
+		// イベントタイプ名と色
+		static const char* EventTypeNames[];
+		static unsigned int EventTypeColors[];
+	};
 };
 

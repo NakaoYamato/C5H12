@@ -257,7 +257,7 @@ void SceneModelEditor::DrawAnimationEventGui()
         {
             if (ImGui::TreeNode(u8"現在のアニメーション判定"))
             {
-                _animationEvent.DrawGui(_animator.lock()->GetAnimationName());
+                _animationEvent.DrawGui(_animator.lock()->GetAnimationName(), _animator.lock()->GetAnimationTimer(), true);
 
                 ImGui::TreePop();
             }

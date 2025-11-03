@@ -26,6 +26,138 @@ std::map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> GpuReso
 
 bool GpuResourceManager::_isDrawShaderGui = false;
 
+// ファイル階層を表すツリーノード
+struct FileNode
+{
+	// 子ノード (次のパス要素 -> ノード)
+	std::map<std::string, FileNode> children;
+
+	// このノードがファイル（シェーダー）そのものを表す場合、
+	// 元のフルパスを保持する
+	std::string fullPath;
+	bool isFile = false;
+};
+/**
+ * @brief パス文字列をディレクトリ/ファイル名に分割する
+ * @param path ファイルパス (例: "Data/Shader/Test.hlsl")
+ * @return パスの各要素 (例: {"Data", "Shader", "Test.hlsl"})
+ */
+std::vector<std::string> SplitPath(const std::string& pathStr)
+{
+	std::vector<std::string> parts;
+	// std::filesystem::path を使うと、/ と \ の両方に自動対応できる
+	std::filesystem::path path(pathStr);
+
+	for (const auto& part : path)
+	{
+		parts.push_back(part.string());
+	}
+	return parts;
+}
+
+/**
+ * @brief シェーダーマップからファイルツリー構造を構築する
+ * @param shaderMap シェーダーのマップ
+ * @param prefixToRemove GUIで非表示にしたい先頭のプレフィックス (例: ".Data/Shader/HLSL")
+ */
+template<typename TShaderMap>
+FileNode BuildFileTree(const TShaderMap& shaderMap, const std::vector<std::string>& prefixToRemoves = std::vector<std::string>())
+{
+	FileNode root;
+
+	for (const auto& [filepathStr, shader] : shaderMap)
+	{
+		std::string displayPathStr = filepathStr;
+
+		for (auto& prefixToRemove : prefixToRemoves)
+		{
+			size_t prefixLength = prefixToRemove.length();
+
+			// C++17 での "starts_with" の代替
+			if (!prefixToRemove.empty() && displayPathStr.rfind(prefixToRemove, 0) == 0)
+			{
+				size_t actualPrefixLength = prefixLength;
+				// プレフィックスの直後のスラッシュも削除 (例: ".Data/Shader/HLSL/")
+				if (displayPathStr.length() > prefixLength &&
+					(displayPathStr[prefixLength] == '/' || displayPathStr[prefixLength] == '\\'))
+				{
+					actualPrefixLength++;
+				}
+				// プレフィックスを除いた部分パスを取得
+				displayPathStr = displayPathStr.substr(actualPrefixLength);
+			}
+		}
+
+		// 表示用パスを分割
+		std::vector<std::string> parts = SplitPath(displayPathStr);
+		FileNode* currentNode = &root;
+
+		for (size_t i = 0; i < parts.size(); ++i)
+		{
+			const std::string& part = parts[i];
+			if (part.empty()) continue; // 空のパス要素はスキップ
+
+			currentNode = &currentNode->children[part];
+
+			if (i == parts.size() - 1)
+			{
+				// ノードがファイルの場合
+				currentNode->isFile = true;
+				// ★再コンパイル用に元のフルパスを保存
+				currentNode->fullPath = filepathStr;
+			}
+		}
+	}
+	return root;
+}
+
+/**
+ * @brief ImGuiでツリーを再帰的に描画する
+ * @param node 描画するツリーのノード
+ * @param recompileFunc 再コンパイルボタンが押されたときに呼ぶ関数(const char* path)
+ */
+template<typename ReCompileFunc>
+void RenderShaderTree(const FileNode& node, ReCompileFunc recompileFunc)
+{
+	// 子ノードをイテレート (std::mapなのでキーでソート済み)
+	for (const auto& [name, childNode] : node.children)
+	{
+		if (childNode.isFile)
+		{
+			// ノードがファイルの場合:
+			// ImGui::TreeNodeFlags_Leaf を指定して「葉」であることを示す
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+			ImGui::TreeNodeEx(name.c_str(), flags);
+
+			// ファイルノードの横にボタンを配置
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+			{
+				// (オプション) ダブルクリックで再コンパイル
+				recompileFunc(childNode.fullPath.c_str());
+			}
+
+			// ボタンを同じ行に表示
+			ImGui::SameLine();
+			// IDが重複しないように、フルパスをIDとしてプッシュする
+			ImGui::PushID(childNode.fullPath.c_str());
+			if (ImGui::SmallButton(u8"再コンパイル"))
+			{
+				recompileFunc(childNode.fullPath.c_str());
+			}
+			ImGui::PopID();
+		}
+		else
+		{
+			// ノードがディレクトリの場合:
+			if (ImGui::TreeNode(name.c_str())) // ディレクトリ名をノードとして
+			{
+				RenderShaderTree(childNode, recompileFunc); // 再帰呼び出し
+				ImGui::TreePop();
+			}
+		}
+	}
+}
+
 // Gui描画
 void GpuResourceManager::DrawGui(ID3D11Device* device)
 {
@@ -40,36 +172,36 @@ void GpuResourceManager::DrawGui(ID3D11Device* device)
 		ImGui::EndMainMenuBar();
 	}
 
+	const std::vector<std::string>& prefixToRemoves = { ".", "Data", "Shader", "HLSL" };
+
 	if (_isDrawShaderGui)
 	{
 		if (ImGui::Begin(u8"シェーダリソース"))
 		{
-			ImGui::Text(u8"頂点シェーダー");
-			for (auto& [filepath, vertexShader] : vertexShaderMap)
+			if (ImGui::TreeNode(u8"頂点シェーダー"))
 			{
-				if (ImGui::TreeNode(filepath.c_str()))
-				{
-					if (ImGui::Button(u8"再コンパイル"))
-					{
-						GpuResourceManager::ReCompileVertexShader(device, filepath.c_str());
-					}
+				// 頂点シェーダーのツリーを構築
+				FileNode vsTreeRoot = BuildFileTree(vertexShaderMap, prefixToRemoves);
 
-					ImGui::TreePop();
-				}
+				// ツリーを描画 (ラムダで再コンパイル処理を渡す)
+				RenderShaderTree(vsTreeRoot, [&](const char* path) {
+					GpuResourceManager::ReCompileVertexShader(device, path);
+					});
+
+				ImGui::TreePop();
 			}
-			ImGui::Separator();
 
-			ImGui::Text(u8"ピクセルシェーダ");
-			for (auto& [filepath, pixelShader] : pixelShaderMap)
+			if (ImGui::TreeNode(u8"ピクセルシェーダ"))
 			{
-				if (ImGui::TreeNode(filepath.c_str()))
-				{
-					if (ImGui::Button(u8"再コンパイル"))
-					{
-						GpuResourceManager::ReCompilePixelShader(device, filepath.c_str());
-					}
-					ImGui::TreePop();
-				}
+				// ピクセルシェーダーのツリーを構築
+				FileNode psTreeRoot = BuildFileTree(pixelShaderMap, prefixToRemoves);
+
+				// ツリーを描画
+				RenderShaderTree(psTreeRoot, [&](const char* path) {
+					GpuResourceManager::ReCompilePixelShader(device, path);
+					});
+
+				ImGui::TreePop();
 			}
 		}
 		ImGui::End();
@@ -701,43 +833,76 @@ void GpuResourceManager::RestoreStateCache(ID3D11DeviceContext* dc)
     cachedRS.Reset();
     cachedBS.Reset();
 }
-
-class IncludeHandler : public ID3DInclude
-{
+// ID3DIncludeインターフェースを実装するカスタムクラス
+class ShaderIncludeHandler : public ID3DInclude {
 public:
-	HRESULT __stdcall Open(
-		D3D_INCLUDE_TYPE IncludeType,    // インクルードの種類
-		LPCSTR pFileName,                // インクルードファイル名
-		LPCVOID pParentData,             // 親データ（無視）
-		LPCVOID* ppData,                 // ファイル内容を格納するポインタ
-		UINT* pBytes                     // ファイルサイズを格納するポインタ
-	) override
+	// ベースとなるディレクトリ（検索の基点）を保持する
+	std::filesystem::path m_baseDirectory;
+
+	ShaderIncludeHandler(const std::filesystem::path& baseDir)
+		: m_baseDirectory(baseDir) {
+	}
+
+	// #include が見つかったときに呼び出される
+	HRESULT STDMETHODCALLTYPE Open(
+		D3D_INCLUDE_TYPE IncludeType, // インクルードのタイプ (ローカルかシステムか)
+		LPCSTR           pFileName,   // インクルードするファイル名 (例: "../Define/SamplerStateDefine.hlsli")
+		LPCVOID          pParentData, // 親ファイルデータ (今回は使わない)
+		LPCVOID* ppData,      // [out] 読み込んだファイルデータへのポインタを格納する
+		UINT* pBytes)       // [out] 読み込んだデータのバイト数を格納する
 	{
-		std::ifstream file(pFileName, std::ios::binary);
-		if (!file.is_open())
-		{
-			return E_FAIL; // ファイルが開けない場合
+		// pFileName は相対パス (例: "../Define/SamplerStateDefine.hlsli")
+		// ベースディレクトリと組み合わせてフルパスを作成する
+
+		// std::filesystem を使ってパスを正規化・結合する
+		// (m_baseDirectory / pFileName) でパスを結合し、canonicalで絶対パスに解決
+		try {
+			std::filesystem::path filePath = std::filesystem::canonical(m_baseDirectory / pFileName);
+
+			if (!std::filesystem::exists(filePath)) {
+				// ファイルが見つからない
+				return E_FAIL;
+			}
+
+			// ファイルをバイナリとして読み込む
+			std::ifstream file(filePath, std::ios::binary | std::ios::ate);
+			if (!file.is_open()) {
+				return E_FAIL;
+			}
+
+			std::streamsize size = file.tellg();
+			file.seekg(0, std::ios::beg);
+
+			// 読み込んだデータを格納するバッファをヒープに確保
+			// (このメモリは Close() メソッドで解放される)
+			char* buffer = new char[size];
+			if (!file.read(buffer, size)) {
+				delete[] buffer; // 読み込み失敗
+				return E_FAIL;
+			}
+
+			// 出力ポインタに設定
+			*ppData = buffer;
+			*pBytes = static_cast<UINT>(size);
+
+			return S_OK;
 		}
-
-		file.seekg(0, std::ios::end);
-		size_t fileSize = file.tellg();
-		file.seekg(0, std::ios::beg);
-
-		auto buffer = new char[fileSize]; // ファイルデータをバッファに格納
-		file.read(buffer, fileSize);
-		file.close();
-
-		*ppData = buffer;
-		*pBytes = static_cast<UINT>(fileSize);
-		return S_OK;
+		catch (const std::filesystem::filesystem_error& e) {
+			// パス解決エラーなど
+			OutputDebugStringA(e.what());
+			return E_FAIL;
+		}
 	}
 
-	HRESULT __stdcall Close(LPCVOID pData) override
+	// Open() で読み込みが終わった後に呼び出される
+	HRESULT STDMETHODCALLTYPE Close(LPCVOID pData) // Open() で *ppData に設定したポインタ
 	{
-		delete[] static_cast<const char*>(pData); // バッファを解放
+		// Open() で確保したメモリを解放する
+		char* buffer = (char*)pData;
+		delete[] buffer;
 		return S_OK;
 	}
-}includeHandler;
+};
 
 // 頂点シェーダーを再コンパイルする関数
 bool GpuResourceManager::ReCompileVertexShader(
@@ -768,10 +933,18 @@ bool GpuResourceManager::ReCompileVertexShader(
 	Microsoft::WRL::ComPtr<ID3DBlob> outBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 
+	// shaderPath (例: "Data/Shader/PrimitiveRendererPS.hlsl") の
+	// 親ディレクトリ (例: "Data/Shader/") を取得する
+	std::filesystem::path baseDir = std::filesystem::path(replacePath).parent_path();
+
+	// カスタムハンドラを作成
+	std::unique_ptr<ShaderIncludeHandler> includeHandler =
+		std::make_unique<ShaderIncludeHandler>(baseDir);
+
 	HRESULT hr = D3DCompileFromFile(
 		path.c_str(),
 		nullptr,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		includeHandler.get(),
 		"main",
 		"vs_5_0",
 		compileFlags,
@@ -803,7 +976,9 @@ bool GpuResourceManager::ReCompileVertexShader(
 		return false;
 	}
 
-
+	Debug::Output::String(L"頂点シェーダーの再コンパイル成功:");
+	Debug::Output::String(replacePath.c_str());
+	Debug::Output::String("\n");
 	return true;
 }
 
@@ -836,10 +1011,18 @@ bool GpuResourceManager::ReCompilePixelShader(
 	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 
+	// shaderPath (例: "Data/Shader/PrimitiveRendererPS.hlsl") の
+	// 親ディレクトリ (例: "Data/Shader/") を取得する
+	std::filesystem::path baseDir = std::filesystem::path(replacePath).parent_path();
+
+	// カスタムハンドラを作成
+	std::unique_ptr<ShaderIncludeHandler> includeHandler =
+		std::make_unique<ShaderIncludeHandler>(baseDir);
+
 	HRESULT hr = D3DCompileFromFile(
 		path.c_str(),
 		nullptr,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		includeHandler.get(),
 		"main",
 		"ps_5_0",
 		compileFlags,
@@ -869,5 +1052,8 @@ bool GpuResourceManager::ReCompilePixelShader(
 		return false;
 	}
 
+	Debug::Output::String(L"ピクセルシェーダーの再コンパイル成功:");
+	Debug::Output::String(replacePath.c_str());
+	Debug::Output::String("\n");
 	return true;
 }

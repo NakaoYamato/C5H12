@@ -257,16 +257,13 @@ void SceneModelEditor::DrawAnimationEventGui()
         {
             if (ImGui::TreeNode(u8"現在のアニメーション判定"))
             {
-                _animationEvent.DrawGui(_animator.lock()->GetAnimationName(), _animator.lock()->GetAnimationTimer(), true);
+                _animationEvent.DrawGui(_animator.lock()->GetAnimationName(), 
+                    _animator.lock()->GetAnimationTimer(),
+					_animator.lock()->GetAnimationEndTime(),
+                    true);
 
                 ImGui::TreePop();
             }
-        }
-        if (ImGui::TreeNode(u8"すべてのアニメーション判定"))
-        {
-            _animationEvent.DrawGui();
-
-            ImGui::TreePop();
         }
         if (ImGui::Button(u8"判定の書き出し"))
         {

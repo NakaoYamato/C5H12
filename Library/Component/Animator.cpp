@@ -195,13 +195,29 @@ void Animator::DrawGui()
 
     if (ImGui::TreeNode(u8"イベント"))
     {
-        // メッセージリストの編集
-        _animationEvent.DrawMassageListGui(false);
-        ImGui::Separator();
+        if (ImGui::TreeNode(u8"メッセージリスト"))
+        {
+            // メッセージリストの編集
+            _animationEvent.DrawMassageListGui();
+            ImGui::TreePop();
+        }
+        ImGui::Text(u8"アニメーション判定");
         if (GetAnimationIndex() != -1)
-            _animationEvent.DrawGui(GetAnimationName(), false);
-        else
-            _animationEvent.DrawGui(false);
+        {
+            if (ImGui::TreeNode(u8"現在のアニメーション判定"))
+            {
+                _animationEvent.DrawGui(GetAnimationName(),
+                    GetAnimationTimer(),
+                    GetAnimationEndTime(),
+                    true);
+
+                ImGui::TreePop();
+            }
+        }
+        if (ImGui::Button(u8"判定の書き出し"))
+        {
+            _animationEvent.Serialize(_model.lock()->GetFilename());
+        }
 
         ImGui::TreePop();
     }

@@ -410,18 +410,31 @@ namespace ImSequencer
                     sequence->Get(movingEntry, &start, &end, NULL, NULL);
                     if (selectedEntry)
                         *selectedEntry = movingEntry;
-                    int & l = *start;
-                    int & r = *end;
-                    if (movingPart & 1)
+                    int& l = *start;
+                    int& r = *end;
+                    int frameMin = sequence->GetFrameMin();
+                    int frameMax = sequence->GetFrameMax();
+
+                    if (movingPart & 1) // 開始フレームの移動
                         l += diffFrame;
-                    if (movingPart & 2)
+                    if (movingPart & 2) // 終了フレームの移動
                         r += diffFrame;
-                    if (l < 0)
+
+                    // 境界チェック (AnimationEvent.cppから修正できないため、ImSequencer.cppの修正として提案)
+                    if (l < frameMin) // 最小フレームを下回るのを防ぐ
                     {
                         if (movingPart & 2)
-                            r -= l;
-                        l = 0;
+                            r -= (l - frameMin); // 全体移動の場合、終了フレームも補正
+                        l = frameMin;
                     }
+                    if (r > frameMax) // 最大フレームを上回るのを防ぐ
+                    {
+                        if (movingPart & 1)
+                            l -= (r - frameMax); // 全体移動の場合、開始フレームも補正
+                        r = frameMax;
+                    }
+
+                    // 最小幅の保証（開始 > 終了にならないように）
                     if (movingPart & 1 && l > r)
                         l = r;
                     if (movingPart & 2 && r < l)

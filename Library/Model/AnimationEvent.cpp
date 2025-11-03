@@ -2,7 +2,10 @@
 
 #include <filesystem>
 #include <fstream>
+
 #include <imgui.h>
+#include <imgui_internal.h>
+#include <ImSequencer.h>
 
 #include "../DebugSupporter/DebugSupporter.h"
 #include "SerializeFunction.h"
@@ -12,6 +15,100 @@ std::vector<int> s_endFrames;
 
 // データのバージョン管理
 CEREAL_CLASS_VERSION(AnimationEvent, 0)
+
+namespace AnimationEventGuiHelper
+{
+    // ImSequencer::SequenceInterface の実装
+    class AnimationSequencer : public ImSequencer::SequenceInterface
+    {
+    public:
+        AnimationSequencer(AnimationEvent::EventDataMap& data,
+            const std::vector<std::string>& messageList,
+            const std::vector<const char*>& nodeNames,
+            bool canEdit,
+            int* selectedEntry,
+			int frameMax,
+            std::vector<int>* startFrames,
+            std::vector<int>* endFrames)
+            : _data(data)
+            , _messageList(messageList)
+            , _nodeNames(nodeNames)
+            , _canEdit(canEdit)
+            , _selectedEntry(selectedEntry)
+			, _frameMax(frameMax)
+            , _startFrames(startFrames)
+            , _endFrames(endFrames)
+        {
+        }
+
+        virtual int GetFrameMin() const override { return 0; }
+        virtual int GetFrameMax() const override { return _frameMax; }
+        virtual int GetItemCount() const override { return (int)_data.size(); }
+
+        virtual void Get(int index, int** start, int** end, int* type, unsigned int* color) override
+        {
+            if (_startFrames && _startFrames->size() > (size_t)index)
+            {
+                if (start)
+                    *start = &(*_startFrames)[index];
+                if (end)
+                    *end = &(*_endFrames)[index];
+            }
+            // else の処理 (エラーハンドリング) は省略
+
+            if (type)
+            {
+                auto& eventData = _data[index];
+                *type = (int)eventData.eventType;
+            }
+
+            if (color)
+            {
+                auto& eventData = _data[index];
+                *color = EventTypeColors[(int)eventData.eventType];
+            }
+        }
+
+        virtual const char* GetItemLabel(int index) const override
+        {
+            // ラベルはイベントタイプ名とインデックスの組み合わせ
+            static std::string label;
+            label = std::to_string(index) + ": " + EventTypeNames[(int)_data[index].eventType];
+            return label.c_str();
+        }
+        virtual int GetItemTypeCount() const override
+        {
+            return (int)AnimationEvent::EventType::EventTypeEnd;
+        }
+        virtual const char* GetItemTypeName(int typeIndex) const override
+        {
+            return EventTypeNames[typeIndex];
+        }
+    private:
+        AnimationEvent::EventDataMap& _data; // 参照としてイベントデータを持つ
+        const std::vector<std::string>& _messageList;
+        const std::vector<const char*>& _nodeNames;
+		const int _frameMax = 10000;
+        bool _canEdit;
+        int* _selectedEntry;
+        // DrawGuiから渡されるフレームバッファへのポインター
+        std::vector<int>* _startFrames;
+        std::vector<int>* _endFrames;
+        // イベントタイプ名と色
+        const char* EventTypeNames[3] =
+        {
+            u8"Flag",
+            u8"Hit",
+            u8"Attack",
+        };
+        unsigned int EventTypeColors[3] =
+        {
+            0xFF00FF00, // Green for Flag
+            0xFF0000FF, // Blue for Hit
+            0xFFFF0000, // Red for Attack
+        };
+    };
+}
 
 void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageList, const std::vector<const char*>& nodeNames, bool canEdit)
 {
@@ -39,8 +136,8 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageL
     case AnimationEvent::EventType::Flag:
         if (messageList.size() != 0)
 			ImGui::Combo(u8"メッセージ", &messageIndex, messageList.data(), (int)messageList.size());
-        //ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
-        //ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
+        ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
+        ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
         ImGui::DragFloat3(u8"position", &position.x, 0.1f);
         break;
     case AnimationEvent::EventType::Hit:
@@ -56,8 +153,8 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageL
         ImGui::Combo(u8"ノード", &nodeIndex, nodeNames.data(), (int)nodeNames.size());
         if (messageList.size() != 0)
             ImGui::Combo(u8"ヒット時のメッセージ", &messageIndex, messageList.data(), (int)messageList.size());
-        //ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
-        //ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
+        ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
+        ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
 
         switch (shapeType)
         {
@@ -182,99 +279,34 @@ void AnimationEvent::DebugRender(const std::string& animName, float animElapsedT
     }
 }
 
-// GUI描画
-void AnimationEvent::DrawGui(bool canEdit)
+/// GUI描画
+void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime, float endAnimTime, bool canEdit)
 {
-    if (_model.expired())
-        return;
-
-    for (auto& [animName, datas] : _data)
-    {
-        // アニメーション毎のキーフレームGUI
-        if (ImGui::TreeNode(animName.c_str()))
-        {
-            DrawGui(animName, canEdit);
-            ImGui::Separator();
-
-            ImGui::TreePop();
-        }
-    }
-}
-
-// 指定したEventDataのGUI描画
-void AnimationEvent::DrawGui(const std::string& animName, bool canEdit)
-{
-    if (_model.expired())
-        return;
-
-    auto& keyframes = _data[animName];
-
-    if (canEdit)
-    {
-        if (ImGui::Button(u8"キーフレーム追加"))
-        {
-            keyframes.push_back(AnimationEvent::EventData());
-        }
-    }
-
-    std::vector<const char*> messageList;
-	messageList.reserve(_messageList.size());
-	for (auto& message : _messageList)
-	{
-		messageList.push_back(message.c_str());
-	}
-
-    int index = 0;
-    for (auto& keyframe : keyframes)
-    {
-        if (ImGui::TreeNode(std::to_string(index).c_str()))
-        {
-            // 各キーフレームGUI
-            keyframe.DrawGui(messageList, _nodeNames, canEdit);
-
-            if (canEdit)
-            {
-                if (ImGui::Button(u8"削除"))
-                {
-                    // 削除で配列が変更されているのでbreakで処理を強制終了させている
-                    keyframes.erase(keyframes.begin() + index);
-                    ImGui::TreePop();
-                    break;
-                }
-            }
-
-            ImGui::TreePop();
-        }
-        index++;
-    }
-}
-
-void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime, bool canEdit)
-{
-    if (_model.expired())
-        return;
-
-    auto& keyframes = _data[animName];
-
-    if (canEdit)
-    {
-        if (ImGui::Button(u8"キーフレーム追加"))
-        {
-            keyframes.push_back(AnimationEvent::EventData());
-        }
-    }
-
-    // ... 既存の currentSelectedEntry 管理 (animationSelectedEntry) ...
     static std::unordered_map<std::string, int> animationSelectedEntry;
-    int& currentSelectedEntry = animationSelectedEntry[animName];
-
     // シーケンサーオプションの設定
-    int options = ImSequencer::SEQUENCER_EDIT_ALL;
-    // 秒数をフレームに変換 (仮に60FPS)
-    static const float FPS = 60.0f;
+    static const int options = ImSequencer::SEQUENCER_EDIT_ALL;
+    static const float FPS = 60.0f;// 秒数をフレームに変換
     static int currentFrame = 0; // currentFrameをstaticのまま使用
     static bool expanded = true;
     static int firstFrame = 0; // firstFrameをstaticのまま使用
+    static const float ItemHeight = 20.f; // ImSequencer.cpp内の ItemHeight = 20
+    static const float HeaderHeight = ItemHeight;
+    static const float ScrollBarHeight = 14.f; // ImSequencer.cpp内の scrollBarHeight = 14
+
+    if (_model.lock() == nullptr)
+        return;
+
+    auto& keyframes = _data[animName];
+
+    if (canEdit)
+    {
+        if (ImGui::Button(u8"キーフレーム追加"))
+        {
+            keyframes.push_back(AnimationEvent::EventData());
+        }
+    }
+
+    int& currentSelectedEntry = animationSelectedEntry[animName];
 
     currentFrame = (int)(currentAnimTime * FPS);
 
@@ -285,10 +317,7 @@ void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime,
     {
         s_startFrames[i] = (int)(keyframes[i].startSeconds * FPS);
         s_endFrames[i] = (int)(keyframes[i].endSeconds * FPS);
-    }// *** 修正: シーケンサーの縦幅を計算し、ImGuiのグループで確保 ***
-    const float ItemHeight = 20.f; // ImSequencer.cpp内の ItemHeight = 20
-    const float HeaderHeight = ItemHeight;
-    const float ScrollBarHeight = 14.f; // ImSequencer.cpp内の scrollBarHeight = 14
+    }
 
     float totalCustomHeight = 0.f;
     for (size_t i = 0; i < keyframes.size(); ++i)
@@ -306,9 +335,15 @@ void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime,
     ImGui::BeginChild("SequencerContainer", ImVec2(0, requiredHeight), true, ImGuiWindowFlags_NoScrollbar); // X方向は利用可能幅、Y方向は計算した高さ
 
     // シーケンサーインターフェースを実装したクラスのインスタンスを生成
-    // *** 修正: s_startFrames, s_endFrames のアドレスを渡します ***
-    AnimationSequencer sequencer(keyframes, _messageList, _nodeNames, canEdit, &currentSelectedEntry, &s_startFrames, &s_endFrames);
-
+    AnimationEventGuiHelper::AnimationSequencer sequencer(
+        keyframes,
+        _messageList,
+        _nodeNames,
+        canEdit, 
+        &currentSelectedEntry,
+		(int)(FPS * endAnimTime),
+        &s_startFrames,
+        &s_endFrames);
 
     // シーケンサーの描画
     ImGui::PushID(animName.c_str());
@@ -346,6 +381,13 @@ void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime,
     // Get()関数で渡した静的バッファから値を読み取って書き戻します
     for (size_t i = 0; i < keyframes.size(); ++i)
     {
+        // 開始フレームが終了フレームを超えないように、最小幅を1フレームとします。
+        if (s_startFrames[i] > s_endFrames[i])
+        {
+            // 開始フレーム編集時: l=r となる
+            // 終了フレーム編集時: r=l となる
+            s_endFrames[i] = s_startFrames[i];
+        }
         // フレーム -> float 秒数 に変換して EventData を更新
         keyframes[i].startSeconds = (float)s_startFrames[i] / FPS;
         keyframes[i].endSeconds = (float)s_endFrames[i] / FPS;
@@ -457,85 +499,3 @@ AnimationEvent::EventDataMap AnimationEvent::GetCurrentEventData(const std::stri
     return result;
 }
 #pragma endregion
-
-// AnimationSequencer の静的メンバの定義 (C++のEventTypeに対応)
-const char* AnimationEvent::AnimationSequencer::EventTypeNames[] =
-{
-    u8"Flag",
-    u8"Hit",
-    u8"Attack",
-};
-
-// イベントタイプに対応する色を定義
-unsigned int AnimationEvent::AnimationSequencer::EventTypeColors[] =
-{
-    0xFF00FF00, // Green for Flag
-    0xFF0000FF, // Blue for Hit
-    0xFFFF0000, // Red for Attack
-};
-
-AnimationEvent::AnimationSequencer::AnimationSequencer(EventDataMap& data,
-    const std::vector<std::string>& messageList,
-    const std::vector<const char*>& nodeNames,
-    bool canEdit,
-    int* selectedEntry,
-    std::vector<int>* startFrames, // *** 追加 ***
-    std::vector<int>* endFrames) // *** 追加 ***
-    : m_data(data)
-    , m_messageList(messageList)
-    , m_nodeNames(nodeNames)
-    , m_canEdit(canEdit)
-    , m_selectedEntry(selectedEntry)
-    , m_startFrames(startFrames) // *** 初期化 ***
-    , m_endFrames(endFrames) // *** 初期化 ***
-{
-}
-
-void AnimationEvent::AnimationSequencer::Get(int index, int** start, int** end, int* type, unsigned int* color)
-{
-    // フレームレートはここでは不要
-    // static const float FPS = 60.0f; // 削除
-
-    // Get()が呼ばれる前に m_startFrames/m_endFrames の初期化とリサイズが
-    // DrawGuiで保証されているため、ここでは安全に参照できます。
-
-    // *** 修正: メンバ変数 m_startFrames/m_endFrames を利用します ***
-    if (m_startFrames && m_startFrames->size() > (size_t)index)
-    {
-        if (start)
-            *start = &(*m_startFrames)[index];
-        if (end)
-            *end = &(*m_endFrames)[index];
-    }
-    // else の処理 (エラーハンドリング) は省略
-
-    if (type)
-    {
-        auto& eventData = m_data[index];
-        *type = (int)eventData.eventType;
-    }
-
-    if (color)
-    {
-        auto& eventData = m_data[index];
-        *color = EventTypeColors[(int)eventData.eventType];
-    }
-}
-
-const char* AnimationEvent::AnimationSequencer::GetItemLabel(int index) const
-{
-    // ラベルはイベントタイプ名とインデックスの組み合わせ
-    static std::string label;
-    label = std::to_string(index) + ": " + EventTypeNames[(int)m_data[index].eventType];
-    return label.c_str();
-}
-
-int AnimationEvent::AnimationSequencer::GetItemTypeCount() const
-{
-    return (int)EventType::EventTypeEnd;
-}
-
-const char* AnimationEvent::AnimationSequencer::GetItemTypeName(int typeIndex) const
-{
-    return EventTypeNames[typeIndex];
-}

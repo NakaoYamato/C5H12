@@ -24,6 +24,7 @@ void SceneModelEditor::OnInitialize()
     _animator = _modelActor.lock()->AddComponent<Animator>();
 
     _animator.lock()->SetDrawEventDebugGui(true);
+    _animator.lock()->SetDrawAnimationCurveGui(true);
 
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;

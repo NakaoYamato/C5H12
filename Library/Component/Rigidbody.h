@@ -127,6 +127,9 @@ private:
 	Vector3				_accumulatedForce = {};		//力のアキュムレータ
 	Vector3				_accumulatedTorque = {};	//トルクアキュムレータ
 
+	Vector3				_gravity = { 0.0f, -9.81f, 0.0f };//重力加速度
+	float				_gravityScale = 1.0f;		//重力スケール
+
 	// 抗力係数
 	float _dragCoefficient = 0.5f;
 	float _restitution		= 0.5f;//反発係数	
@@ -140,4 +143,5 @@ private:
 	bool				_isMovable = true;			// 移動可能か
 	bool				_isRotatable = true;		// 回転可能か
 	bool				_isStandstill = false;		// 静止中か
+	bool				_useGravity = true;         // 重力を受けるか
 };

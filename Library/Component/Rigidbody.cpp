@@ -13,6 +13,13 @@ void Rigidbody::Start()
 // 更新処理
 void Rigidbody::Update(float elapsedTime)
 {
+	// 重力適応
+	if (_useGravity)
+	{
+		DirectX::XMVECTOR gravity = DirectX::XMVectorSet(0.0f, -9.81f * _gravityScale, 0.0f, 0.0f);
+		AddForce(gravity);
+	}
+
 	/// 速度更新
     UpdateVelocity(elapsedTime);
 }
@@ -36,10 +43,19 @@ void Rigidbody::DrawGui()
 	ImGui::DragFloat3(u8"前のフレームの角速度", &_oldAngularVelocity.x, 0.01f);
 
 	ImGui::Separator();
+	ImGui::DragFloat(u8"重力影響度", &_gravityScale, 0.01f);
+
+	ImGui::Separator();
 	ImGui::DragFloat(u8"慣性質量", &_inertialMass, 0.01f);
 	ImGui::DragFloat(u8"抗力係数", &_dragCoefficient, 0.01f);
 	ImGui::DragFloat(u8"静止摩擦係数", &_staticFriction, 0.01f);
 	ImGui::DragFloat(u8"動摩擦係数", &_dynamicFriction, 0.01f);
+
+	ImGui::Separator();
+	ImGui::Checkbox(u8"可動オブジェクト", &_isMovable);
+	ImGui::Checkbox(u8"回転可能", &_isRotatable);
+	ImGui::Checkbox(u8"停止中", &_isStandstill);
+	ImGui::Checkbox(u8"重力を受けるか", &_useGravity);
 }
 // 接触の解消処理
 void Rigidbody::OnContact(CollisionData& collisionData)
@@ -174,12 +190,41 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 	// 自身のRigidbody
 	auto body0 = this;
 
+	Vector3 body1OldPosition;
+	Vector3 body1OldLinearVelocity;
+	Vector3 body1OldAngularVelocity;
+	Vector3 body1LinearVelocity;
+	Vector3 body1AngularVelocity;
+	float body1Mass;
+	float body1InverseMass;
+	DirectX::XMMATRIX body1InverseInertiaTensor;
+
 	// 衝突しているオブジェクトのRigidbodyを取得
 	auto body1 = collisionData.other->GetComponent<Rigidbody>();
 	if (body1 == nullptr)
 	{
-		// TODO : 衝突しているオブジェクトにRigidbodyがない場合の処理
-		return;
+		body1OldPosition = collisionData.other->GetTransform().GetPosition();
+		body1OldLinearVelocity = {};
+		body1OldAngularVelocity = {};
+		body1LinearVelocity = {};
+		body1AngularVelocity = {};
+		body1Mass = FLT_MAX;
+		body1InverseMass = 0.0f;
+		body1InverseInertiaTensor = DirectX::XMMatrixIdentity();
+		body1InverseInertiaTensor.r[0].m128_f32[0] = FLT_EPSILON;
+		body1InverseInertiaTensor.r[1].m128_f32[1] = FLT_EPSILON;
+		body1InverseInertiaTensor.r[2].m128_f32[2] = FLT_EPSILON;
+	}
+	else
+	{
+		body1OldPosition = body1->_oldPosition;
+		body1OldLinearVelocity = body1->_oldLinearVelocity;
+		body1OldAngularVelocity = body1->_oldAngularVelocity;
+		body1LinearVelocity = body1->_linearVelocity;
+		body1AngularVelocity = body1->_angularVelocity;
+		body1Mass = body1->_inertialMass;
+		body1InverseMass = body1->InverseMass();
+		body1InverseInertiaTensor = body1->InverseInertiaTensor(true);
 	}
 
 	float vrel = 0;
@@ -191,7 +236,7 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 	DirectX::XMVECTOR pointVec = DirectX::XMLoadFloat3(&collisionData.hitPosition);
 
 	ra = DirectX::XMVectorSubtract(pointVec, DirectX::XMLoadFloat3(&body0->_oldPosition));
-	rb = DirectX::XMVectorSubtract(pointVec, DirectX::XMLoadFloat3(&body1->_oldPosition));
+	rb = DirectX::XMVectorSubtract(pointVec, DirectX::XMLoadFloat3(&body1OldPosition));
 
 	//(8-1)
 	DirectX::XMVECTOR pdota;
@@ -201,8 +246,8 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 
 	//(8-2)
 	DirectX::XMVECTOR pdotb;
-	pdotb = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&body1->_oldLinearVelocity),
-		DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&body1->_oldAngularVelocity),
+	pdotb = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&body1OldLinearVelocity),
+		DirectX::XMVector3Cross(DirectX::XMLoadFloat3(&body1OldAngularVelocity),
 			rb));
 
 	//(8-3)
@@ -215,7 +260,7 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 
 	float denominator = 0;
 	float term1 = body0->InverseMass();
-	float term2 = body1->InverseMass();
+	float term2 = body1InverseMass;
 
 	DirectX::XMVECTOR ta, tb;
 	ta = DirectX::XMVector3Dot(normalVec,
@@ -224,7 +269,7 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 			ra));
 	tb = DirectX::XMVector3Dot(normalVec,
 		DirectX::XMVector3Cross(
-			DirectX::XMVector3TransformCoord(DirectX::XMVector3Cross(rb, normalVec), body1->InverseInertiaTensor()),
+			DirectX::XMVector3TransformCoord(DirectX::XMVector3Cross(rb, normalVec), body1InverseInertiaTensor),
 			rb));
 
 
@@ -240,32 +285,40 @@ void Rigidbody::ContactResolve(CollisionData& collisionData)
 	DirectX::XMStoreFloat3(&body0->_linearVelocity, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&body0->_linearVelocity),
 		DirectX::XMVectorScale(impulse, body0->InverseMass())));
 	assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&body0->_linearVelocity)));
-	DirectX::XMStoreFloat3(&body1->_linearVelocity, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&body1->_linearVelocity),
-		DirectX::XMVectorScale(impulse, body1->InverseMass())));
-	assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&body1->_linearVelocity)));
+	DirectX::XMStoreFloat3(&body1LinearVelocity, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&body1LinearVelocity),
+		DirectX::XMVectorScale(impulse, body1InverseMass)));
+	assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&body1LinearVelocity)));
 
 	DirectX::XMStoreFloat3(&body0->_angularVelocity, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&body0->_angularVelocity),
 		DirectX::XMVector3TransformCoord(DirectX::XMVector3Cross(ra, impulse), body0->InverseInertiaTensor())));
 	assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&body0->_angularVelocity)));
-	DirectX::XMStoreFloat3(&body1->_angularVelocity, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&body1->_angularVelocity),
-		DirectX::XMVector3TransformCoord(DirectX::XMVector3Cross(rb, impulse), body1->InverseInertiaTensor())));
-	assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&body1->_angularVelocity)));
+	DirectX::XMStoreFloat3(&body1AngularVelocity, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&body1AngularVelocity),
+		DirectX::XMVector3TransformCoord(DirectX::XMVector3Cross(rb, impulse), body1InverseInertiaTensor)));
+	assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&body1AngularVelocity)));
 
 	//めり込み量の解決
 	{
-		auto deno = body0->_inertialMass + body1->_inertialMass;
+		auto deno = body0->_inertialMass + body1Mass;
+
 		Vector3 position = body0->GetActor()->GetTransform().GetPosition();
 		DirectX::XMStoreFloat3(&position, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&position),
-			DirectX::XMVectorScale(normalVec, collisionData.penetration * (body1->_inertialMass / deno))));
+			DirectX::XMVectorScale(normalVec, collisionData.penetration * (body1Mass / deno))));
 		assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&position)));
 		body0->GetActor()->GetTransform().SetPosition(position);
 
-		position = body1->GetActor()->GetTransform().GetPosition();
-		DirectX::XMStoreFloat3(&position, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&position),
-			DirectX::XMVectorScale(normalVec, collisionData.penetration * (body0->_inertialMass / deno))));
-		assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&position)));
-		body1->GetActor()->GetTransform().SetPosition(position);
+		if (body1 != nullptr)
+		{
+			position = body1->GetActor()->GetTransform().GetPosition();
+			DirectX::XMStoreFloat3(&position, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&position),
+				DirectX::XMVectorScale(normalVec, collisionData.penetration * (body0->_inertialMass / deno))));
+			assert(!DirectX::XMVector3IsNaN(DirectX::XMLoadFloat3(&position)));
+			body1->GetActor()->GetTransform().SetPosition(position);
+		}
 	}
+
+	// body1がnullptrならここで終了
+	if (body1 == nullptr)
+		return;
 
 	// 摩擦の計算
 	// https://qiita.com/k5o/items/119d8fbdbd56e01c81db

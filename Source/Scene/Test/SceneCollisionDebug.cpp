@@ -23,11 +23,13 @@ void SceneCollisionDebug::OnInitialize()
     {
         auto stage = RegisterActor<Actor>("Stage", ActorTag::Stage);
 
-        stage->LoadModel("./Data/Model/Stage/Land/Land.fbx");
+        auto model = stage->LoadModel("./Data/Model/Stage/Land/Land.fbx");
         stage->GetTransform().SetPositionY(-2.7f);
         stage->GetTransform().SetLengthScale(0.1f);
-        auto modelCont = stage->AddComponent<ModelRenderer>();
+        stage->GetTransform().UpdateTransform(nullptr);
+		model.lock()->UpdateTransform(model.lock()->GetPoseNodes(), stage->GetTransform().GetMatrix());
 
+        auto modelCont = stage->AddComponent<ModelRenderer>();
         modelCont->SetRenderType(ModelRenderType::Static);
 
 		stage->AddCollider<MeshCollider>();

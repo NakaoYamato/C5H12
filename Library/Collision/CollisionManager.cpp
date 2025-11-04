@@ -81,6 +81,15 @@ void CollisionManager::Update()
 						SphereVsCapsule(sphereA, capsule, collisionDataMap);
 					}
 				}));
+
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				std::to_string(jobResults.size()).c_str(),
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					// 球Vsメッシュ
+					SphereVsMesh(sphereA, collisionDataMap);
+				}));
 		}
 
 		// ボックスの当たり判定

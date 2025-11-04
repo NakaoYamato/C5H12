@@ -35,8 +35,6 @@ private:
 	void DrawMenuBarGui();
 	// モデルGUI描画
 	void DrawModelGui();
-	// アニメーションイベントGUI描画
-	void DrawAnimationEventGui();
 	// モデル当たり判定GUI描画
 	void DrawModelColliderGui();
 	// アニメーション編集GUI描画

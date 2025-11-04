@@ -236,6 +236,10 @@ public:
 	/// <returns></returns>
 	AnimationEvent& GetAnimationEvent() { return _animationEvent; }
 #pragma endregion
+
+#pragma region デバッグ用
+	void SetDrawEventDebugGui(bool draw) { _drawEventDebugGui = draw; }
+#pragma endregion
 private:
     /// <summary>
     /// ルートモーション計算
@@ -287,5 +291,6 @@ private:
 	std::vector<const char*> _nodeNames;
 
 	float	_blendSeconds = 0.0f;
+	bool	_drawEventDebugGui = false;
 #pragma endregion
 };

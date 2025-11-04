@@ -84,7 +84,8 @@ public:
 	/// <param name="currentAnimTime">現在のアニメーション経過時間</param>
 	/// <param name="endAnimTime">現在のアニメーションの終了時間</param>
 	/// <param name="canEdit">編集可能か</param>
-	void DrawGui(const std::string& animName, 
+	/// <returns>経過時間を編集したら-1以外が帰る</returns>
+	float DrawGui(const std::string& animName, 
 		float currentAnimTime,
 		float endAnimTime,
 		bool canEdit);

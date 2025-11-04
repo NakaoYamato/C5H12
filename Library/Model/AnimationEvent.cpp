@@ -73,7 +73,24 @@ namespace AnimationEventGuiHelper
         {
             // ラベルはイベントタイプ名とインデックスの組み合わせ
             static std::string label;
-            label = std::to_string(index) + ": " + EventTypeNames[(int)_data[index].eventType];
+            switch (_data[index].eventType)
+            {
+			case AnimationEvent::EventType::Flag:
+                if (_data[index].messageIndex >= 0 &&
+                    _data[index].messageIndex < (int)_messageList.size())
+                {
+                    label = std::to_string(index) + ": " + _messageList[_data[index].messageIndex];
+                }
+                else
+                {
+					label = std::to_string(index) + ": " + EventTypeNames[(int)_data[index].eventType];
+                }
+                break;
+            default:
+                label = std::to_string(index) + ": " + EventTypeNames[(int)_data[index].eventType];
+                break;
+            }
+
             return label.c_str();
         }
         virtual int GetItemTypeCount() const override
@@ -131,13 +148,15 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageL
         if (ImGui::Combo(u8"判定の種類", &type, EventTypeNames, _countof(EventTypeNames)))
             eventType = static_cast<EventType>(type);
     }
+    
+    if (messageList.size() != 0)
+        ImGui::Combo(u8"メッセージ", &messageIndex, messageList.data(), (int)messageList.size());
+    ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f, 0.0f, endSeconds);
+    ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f, startSeconds);
+
     switch (eventType)
     {
     case AnimationEvent::EventType::Flag:
-        if (messageList.size() != 0)
-			ImGui::Combo(u8"メッセージ", &messageIndex, messageList.data(), (int)messageList.size());
-        ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
-        ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
         ImGui::DragFloat3(u8"position", &position.x, 0.1f);
         break;
     case AnimationEvent::EventType::Hit:
@@ -151,10 +170,6 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageL
         }
         // nodeの選択
         ImGui::Combo(u8"ノード", &nodeIndex, nodeNames.data(), (int)nodeNames.size());
-        if (messageList.size() != 0)
-            ImGui::Combo(u8"ヒット時のメッセージ", &messageIndex, messageList.data(), (int)messageList.size());
-        ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f);
-        ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f);
 
         switch (shapeType)
         {
@@ -280,7 +295,7 @@ void AnimationEvent::DebugRender(const std::string& animName, float animElapsedT
 }
 
 /// GUI描画
-void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime, float endAnimTime, bool canEdit)
+float AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime, float endAnimTime, bool canEdit)
 {
     static std::unordered_map<std::string, int> animationSelectedEntry;
     // シーケンサーオプションの設定
@@ -294,7 +309,7 @@ void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime,
     static const float ScrollBarHeight = 14.f; // ImSequencer.cpp内の scrollBarHeight = 14
 
     if (_model.lock() == nullptr)
-        return;
+        return -1.0f;
 
     auto& keyframes = _data[animName];
 
@@ -352,6 +367,22 @@ void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime,
 
     ImGui::EndChild(); // 確保した領域の終了
 
+    // シーケンサーで変更されたフレーム位置をEventDataの秒数に反映
+    // Get()関数で渡した静的バッファから値を読み取って書き戻します
+    for (size_t i = 0; i < keyframes.size(); ++i)
+    {
+        // 開始フレームが終了フレームを超えないように、最小幅を1フレームとします。
+        if (s_startFrames[i] > s_endFrames[i])
+        {
+            // 開始フレーム編集時: l=r となる
+            // 終了フレーム編集時: r=l となる
+            s_endFrames[i] = s_startFrames[i];
+        }
+        // フレーム -> float 秒数 に変換して EventData を更新
+        keyframes[i].startSeconds = (float)s_startFrames[i] / FPS;
+        keyframes[i].endSeconds = (float)s_endFrames[i] / FPS;
+    }
+
     // シーケンサーの後に EventData の詳細 GUI を描画
     if (canEdit && currentSelectedEntry >= 0 && currentSelectedEntry < keyframes.size())
     {
@@ -377,21 +408,10 @@ void AnimationEvent::DrawGui(const std::string& animName, float currentAnimTime,
         ImGui::Unindent();
     }
 
-    // シーケンサーで変更されたフレーム位置をEventDataの秒数に反映
-    // Get()関数で渡した静的バッファから値を読み取って書き戻します
-    for (size_t i = 0; i < keyframes.size(); ++i)
-    {
-        // 開始フレームが終了フレームを超えないように、最小幅を1フレームとします。
-        if (s_startFrames[i] > s_endFrames[i])
-        {
-            // 開始フレーム編集時: l=r となる
-            // 終了フレーム編集時: r=l となる
-            s_endFrames[i] = s_startFrames[i];
-        }
-        // フレーム -> float 秒数 に変換して EventData を更新
-        keyframes[i].startSeconds = (float)s_startFrames[i] / FPS;
-        keyframes[i].endSeconds = (float)s_endFrames[i] / FPS;
-    }
+    if (currentFrame != (int)(currentAnimTime * FPS))
+		return static_cast<float>(currentFrame) / FPS;
+
+    return -1.0f;
 }
 
 /// メッセージリストの編集GUI描画

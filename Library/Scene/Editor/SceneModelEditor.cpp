@@ -23,6 +23,8 @@ void SceneModelEditor::OnInitialize()
     _modelRenderer = _modelActor.lock()->AddComponent<ModelRenderer>();
     _animator = _modelActor.lock()->AddComponent<Animator>();
 
+    _animator.lock()->SetDrawEventDebugGui(true);
+
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
 
@@ -105,8 +107,6 @@ void SceneModelEditor::DrawGui()
 {
     // モデルのGUI描画
     DrawModelGui();
-    // アニメーションイベントGUI描画
-    DrawAnimationEventGui();
     // モデル当たり判定GUI描画
     DrawModelColliderGui();
     // アニメーション編集GUI描画
@@ -236,39 +236,6 @@ void SceneModelEditor::DrawModelGui()
         ImGui::ColorEdit4(u8"頂点の色", &_vertexPointColor.x);
 
         ImGui::ColorEdit4(u8"ノードの色", &_nodeColor.x);
-    }
-    ImGui::End();
-}
-
-// アニメーションイベントGUI描画
-void SceneModelEditor::DrawAnimationEventGui()
-{
-    if (ImGui::Begin(u8"アニメーションイベント"))
-    {
-        if (ImGui::TreeNode(u8"メッセージリスト"))
-        {
-            // メッセージリストの編集
-            _animationEvent.DrawMassageListGui();
-            ImGui::TreePop();
-        }
-        ImGui::Separator();
-        ImGui::Text(u8"アニメーション判定");
-        if (_animator.lock()->GetAnimationIndex() != -1)
-        {
-            if (ImGui::TreeNode(u8"現在のアニメーション判定"))
-            {
-                _animationEvent.DrawGui(_animator.lock()->GetAnimationName(), 
-                    _animator.lock()->GetAnimationTimer(),
-					_animator.lock()->GetAnimationEndTime(),
-                    true);
-
-                ImGui::TreePop();
-            }
-        }
-        if (ImGui::Button(u8"判定の書き出し"))
-        {
-            _animationEvent.Serialize(_filepath.c_str());
-        }
     }
     ImGui::End();
 }

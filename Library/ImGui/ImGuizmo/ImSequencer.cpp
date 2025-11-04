@@ -107,7 +107,7 @@ namespace ImSequencer
         }
         framePixelWidthTarget = ImClamp(framePixelWidthTarget, 0.1f, 50.f);
 
-        framePixelWidth = ImLerp(framePixelWidth, framePixelWidthTarget, 0.33f);
+        framePixelWidth = ImLerp(framePixelWidth, framePixelWidthTarget, 1.0f);
 
         frameCount = sequence->GetFrameMax() - sequence->GetFrameMin();
         if (visibleFrameCount >= frameCount && firstFrame)
@@ -258,9 +258,10 @@ namespace ImSequencer
             for (int i = 0; i < sequenceCount; i++)
             {
                 int type;
-                sequence->Get(i, NULL, NULL, &type, NULL);
+                unsigned int color;
+                sequence->Get(i, NULL, NULL, &type, &color);
                 ImVec2 tpos(contentMin.x + 3, contentMin.y + i * ItemHeight + 2 + customHeight);
-                draw_list->AddText(tpos, 0xFFFFFFFF, sequence->GetItemLabel(i));
+                draw_list->AddText(tpos, color, sequence->GetItemLabel(i));
 
                 if (sequenceOptions&SEQUENCER_DEL)
                 {

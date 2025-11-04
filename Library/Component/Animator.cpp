@@ -193,33 +193,48 @@ void Animator::DrawGui()
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNode(u8"イベント"))
-    {
-        if (ImGui::TreeNode(u8"メッセージリスト"))
-        {
-            // メッセージリストの編集
-            _animationEvent.DrawMassageListGui();
-            ImGui::TreePop();
-        }
-        ImGui::Text(u8"アニメーション判定");
-        if (GetAnimationIndex() != -1)
-        {
-            if (ImGui::TreeNode(u8"現在のアニメーション判定"))
-            {
-                _animationEvent.DrawGui(GetAnimationName(),
-                    GetAnimationTimer(),
-                    GetAnimationEndTime(),
-                    true);
+	ImGui::Checkbox(u8"イベント情報を表示", &_drawEventDebugGui);
 
+    if (_drawEventDebugGui)
+    {
+        if (ImGui::Begin(u8"イベント情報", &_drawEventDebugGui))
+        {
+            if (ImGui::TreeNode(u8"メッセージリスト"))
+            {
+                // メッセージリストの編集
+                _animationEvent.DrawMassageListGui();
                 ImGui::TreePop();
             }
-        }
-        if (ImGui::Button(u8"判定の書き出し"))
-        {
-            _animationEvent.Serialize(_model.lock()->GetFilename());
-        }
+            ImGui::Text(u8"アニメーション判定");
+            if (GetAnimationIndex() != -1)
+            {
+                if (ImGui::TreeNode(u8"現在のアニメーション判定"))
+                {
+                    float result = _animationEvent.DrawGui(GetAnimationName(),
+                        GetAnimationTimer(),
+                        GetAnimationEndTime(),
+                        true);
 
-        ImGui::TreePop();
+                    if (result != -1.0f)
+                    {
+                        // フレームが変更されたらアニメーション時間を更新
+                        SetIsPaused(false);
+                        PlayAnimation(
+                            GetAnimationIndex(),
+                            IsLoop());
+                        Update(result);
+                        SetIsPaused(true);
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+            if (ImGui::Button(u8"判定の書き出し"))
+            {
+                _animationEvent.Serialize(_model.lock()->GetFilename());
+            }
+        }
+        ImGui::End();
     }
 }
 

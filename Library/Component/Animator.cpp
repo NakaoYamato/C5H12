@@ -194,6 +194,7 @@ void Animator::DrawGui()
     }
 
 	ImGui::Checkbox(u8"イベント情報を表示", &_drawEventDebugGui);
+	ImGui::Checkbox(u8"アニメーションカーブを表示", &_drawAnimationCurveGui);
 
     if (_drawEventDebugGui)
     {
@@ -208,25 +209,20 @@ void Animator::DrawGui()
             ImGui::Text(u8"アニメーション判定");
             if (GetAnimationIndex() != -1)
             {
-                if (ImGui::TreeNode(u8"現在のアニメーション判定"))
+                float result = _animationEvent.DrawGui(GetAnimationName(),
+                    GetAnimationTimer(),
+                    GetAnimationEndTime(),
+                    true);
+
+                if (result != -1.0f)
                 {
-                    float result = _animationEvent.DrawGui(GetAnimationName(),
-                        GetAnimationTimer(),
-                        GetAnimationEndTime(),
-                        true);
-
-                    if (result != -1.0f)
-                    {
-                        // フレームが変更されたらアニメーション時間を更新
-                        SetIsPaused(false);
-                        PlayAnimation(
-                            GetAnimationIndex(),
-                            IsLoop());
-                        Update(result);
-                        SetIsPaused(true);
-                    }
-
-                    ImGui::TreePop();
+                    // フレームが変更されたらアニメーション時間を更新
+                    SetIsPaused(false);
+                    PlayAnimation(
+                        GetAnimationIndex(),
+                        IsLoop());
+                    Update(result);
+                    SetIsPaused(true);
                 }
             }
             if (ImGui::Button(u8"判定の書き出し"))
@@ -236,6 +232,33 @@ void Animator::DrawGui()
         }
         ImGui::End();
     }
+
+	if (_drawAnimationCurveGui)
+	{
+		if (ImGui::Begin(u8"アニメーションカーブ", &_drawAnimationCurveGui))
+		{
+            if (GetAnimationIndex() != -1)
+            {
+                float result = _animationCurve.DrawGui(GetAnimationName(),
+                    GetAnimationTimer(),
+                    GetAnimationEndTime());
+
+                if (result != -1.0f)
+                {
+                    // フレームが変更されたらアニメーション時間を更新
+                    PlayAnimation(
+                        GetAnimationIndex(),
+                        IsLoop());
+                    Update(result);
+                }
+            }
+            if (ImGui::Button(u8"書き出し"))
+            {
+                _animationCurve.Serialize(_model.lock()->GetFilename());
+            }
+		}
+		ImGui::End();
+	}
 }
 
 #pragma region アニメーション制御
@@ -249,10 +272,13 @@ void Animator::UpdateAnimSeconds(float elapsedTime)
     if (_isPaused)
         return;
 
-    // 経過時間
-    _animationTimer += _animationSpeed * elapsedTime;
     // 再生時間が終端時間を超えた時
     const ModelResource::Animation& animation = _model.lock()->GetResource()->GetAnimations().at(_animationIndex);
+    // 経過時間
+	// アニメーションカーブから速度補正取得
+	float speedRate = _animationCurve.Evaluate(GetAnimationName(), _animationTimer / animation.secondsLength);
+    _animationTimer += speedRate * _animationSpeed * elapsedTime;
+
     if (_animationTimer >= animation.secondsLength)
     {
         if (_isLoop)
@@ -468,6 +494,9 @@ void Animator::ResetModel(std::shared_ptr<Model> model)
 
     // アニメーションイベント読み込み
 	_animationEvent.Load(model);
+
+	// アニメーションカーブ読み込み
+	_animationCurve.Load(model);
 }
 
 /// アニメーション名から番号取得

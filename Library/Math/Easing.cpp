@@ -7,6 +7,7 @@
 void Easings::DrawGui(EasingType& type)
 {
     const char* items[] = {
+        "Linear",
         "InSine",
         "OutSine",
         "InOutSine",
@@ -46,6 +47,8 @@ EasingFunc Easings::GetFunc(EasingType type)
 {
     switch (type)
     {
+	case EasingType::Linear:
+		return Easings::Linear;
     case EasingType::InSine:
         return Easings::InSine;
     case EasingType::OutSine:

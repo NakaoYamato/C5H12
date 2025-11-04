@@ -3,6 +3,10 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <string>
+
+#include "../../Library/Math/Vector.h"
+#include "Model.h"
 
 // カーブ全体のデータを管理するクラス
 class AnimationCurve
@@ -11,85 +15,113 @@ public:
     // キーフレームを表す構造体
     struct Keyframe
     {
-        float time;  // X軸 (0.0 ~ 1.0)
-        float value; // Y軸 (速度倍率)
+        float time = 0.0f;  // X軸 (0.0 ~ 1.0)
+        float value = 1.0f; // Y軸 (速度倍率)
+
+        bool lockTime = false;
+        bool lockValue = false;
+        
+        EasingType easingType = EasingType::Linear;
 
         // 時間でソートできるように比較演算子をオーバーロード
         bool operator<(const Keyframe& other) const {
             return time < other.time;
         }
+
+        // シリアライズ
+        template<class T>
+        void serialize(T& archive, const std::uint32_t version);
+    };
+
+	// カーブデータ本体
+    struct CurveData
+    {
+        /// <summary>
+        /// 特定の時間におけるカーブの値を取得する
+        /// </summary>
+        /// <param name="t">特定の時間</param>
+        /// <returns>カーブの値</returns>
+        float Evaluate(float t) const;
+
+        /// <summary>
+        /// キーフレームを追加し、時間順にソートする
+        /// </summary>
+        /// <param name="time">追加する時間</param>
+        /// <param name="value">値</param>
+        /// <param name="lockTime">時間のロック</param>
+        /// <param name="lockValue">値のロック</param>
+        Keyframe* AddKeyframe(float time, float value, bool lockTime = false, bool lockValue = false);
+
+        /// <summary>
+        /// 指定したインデックスのキーフレームを削除
+        /// </summary>
+        /// <param name="keyPtr"></param>
+        void RemoveKeyframe(Keyframe* keyPtr);
+
+        /// <summary>
+        /// ドラッグ中にキーフレームの順序が変わる可能性があるため、ソートを公開
+        /// </summary>
+        void SortKeyframes();
+
+		std::string animationName;
+		std::vector<Keyframe> keyframes;
+		// シリアライズ
+		template<class T>
+		void serialize(T& archive, const std::uint32_t version);
     };
 
 public:
-    // 特定の時間におけるカーブの値を取得する
-    float Evaluate(float t) const
-    {
-        // キーがなければデフォルト値 (例: 1.0) を返す
-        if (m_keyframes.empty()) {
-            return 1.0f;
-        }
+	AnimationCurve() = default;
+	~AnimationCurve() = default;
 
-        // 最初のキーより前なら、最初のキーの値を返す
-        if (t <= m_keyframes.front().time) {
-            return m_keyframes.front().value;
-        }
+    /// <summary>
+    /// モデル情報読み込み
+    /// </summary>
+    /// <param name="modelResource"></param>
+    void Load(std::shared_ptr<Model> model);
 
-        // 最後のキーより後なら、最後のキーの値を返す
-        if (t >= m_keyframes.back().time) {
-            return m_keyframes.back().value;
-        }
-
-        // 2点間の線形補間
-        for (size_t i = 0; i < m_keyframes.size() - 1; ++i) {
-            if (t >= m_keyframes[i].time && t <= m_keyframes[i + 1].time) {
-                const Keyframe& start = m_keyframes[i];
-                const Keyframe& end = m_keyframes[i + 1];
-
-                // 2点間のtの進行度を計算
-                float segmentT = (t - start.time) / (end.time - start.time);
-
-                // 線形補間 (Lerp)
-                return start.value + (end.value - start.value) * segmentT;
-            }
-        }
-
-        return 1.0f; // 安全策
+    /// <summary>
+    /// 特定の時間におけるカーブの値を取得する
+    /// </summary>
+    /// <param name="animationName">アニメーション名</param>
+    /// <param name="t">特定の時間</param>
+    /// <returns>カーブの値</returns>
+    float Evaluate(const std::string& animationName, float t) const {
+		return _data.at(animationName).Evaluate(t);
     }
 
-    // キーフレームを追加し、時間順にソートする
-    void AddKeyframe(float time, float value)
-    {
-        m_keyframes.push_back({ time, value });
-        std::sort(m_keyframes.begin(), m_keyframes.end());
+    std::vector<Keyframe>& GetKeyframes(const std::string& animationName) {
+		return _data[animationName].keyframes;
     }
 
-    // 指定したインデックスのキーフレームを削除
-    void RemoveKeyframe(int index) {
-        if (index >= 0 && index < m_keyframes.size()) {
-            m_keyframes.erase(m_keyframes.begin() + index);
-        }
-    }
+    /// <summary>
+    /// GUI描画
+    /// </summary>
+    /// <param name="animationName">アニメーション名</param>
+	/// <param name="currentAnimTime">現在のアニメーション経過時間</param>
+	/// <param name="endAnimTime">現在のアニメーションの終了時間</param>
+	/// <returns>経過時間を編集したら-1以外を返す</returns>
+    float DrawGui(const std::string& animationName,
+        float currentAnimTime,
+        float endAnimTime);
 
-    // ドラッグ中にキーフレームの順序が変わる可能性があるため、ソートを公開
-    void SortKeyframes() {
-        std::sort(m_keyframes.begin(), m_keyframes.end());
-    }
+#pragma region ファイル操作
+    /// <summary>
+    /// データ書き出し
+    /// </summary>
+    /// <param name="filename"></param>
+    /// <returns>失敗したらfalse</returns>
+    bool Serialize(const char* filename);
 
-    // 指定された値に最も近いキーフレームのインデックスを探す (追加時に使用)
-    int FindKeyframeIndex(float time, float value) {
-        for (int i = 0; i < m_keyframes.size(); ++i) {
-            if (std::abs(m_keyframes[i].time - time) < 1e-6 &&
-                std::abs(m_keyframes[i].value - value) < 1e-6) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    std::vector<Keyframe>& GetKeyframes() {
-        return m_keyframes;
-    }
-
+    /// <summary>
+    /// データ読み込み
+    /// </summary>
+    /// <param name="filename"></param>
+    /// <returns>失敗したらfalse</returns>
+    bool Deserialize(const char* filename);
+#pragma endregion
 private:
-    std::vector<Keyframe> m_keyframes;
+    // key		: アニメーション名
+    // Value	: カーブデータ 
+    std::unordered_map<std::string, CurveData> _data;
 };

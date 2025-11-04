@@ -22,7 +22,7 @@ namespace AnimationEventGuiHelper
     class AnimationSequencer : public ImSequencer::SequenceInterface
     {
     public:
-        AnimationSequencer(AnimationEvent::EventDataMap& data,
+        AnimationSequencer(AnimationEvent::EventDataList& data,
             const std::vector<std::string>& messageList,
             const std::vector<const char*>& nodeNames,
             bool canEdit,
@@ -102,7 +102,7 @@ namespace AnimationEventGuiHelper
             return EventTypeNames[typeIndex];
         }
     private:
-        AnimationEvent::EventDataMap& _data; // 参照としてイベントデータを持つ
+        AnimationEvent::EventDataList& _data; // 参照としてイベントデータを持つ
         const std::vector<std::string>& _messageList;
         const std::vector<const char*>& _nodeNames;
 		const int _frameMax = 10000;
@@ -506,9 +506,9 @@ bool AnimationEvent::Deserialize(const char* filename)
 
 #pragma region アクセサ
 /// アニメーション名と経過時間からイベントデータを取得
-AnimationEvent::EventDataMap AnimationEvent::GetCurrentEventData(const std::string& animName, float animElapsedTime)
+AnimationEvent::EventDataList AnimationEvent::GetCurrentEventData(const std::string& animName, float animElapsedTime)
 {
-    EventDataMap result;
+    EventDataList result;
     for (auto& event : _data[animName])
     {
         if (event.startSeconds <= animElapsedTime && animElapsedTime <= event.endSeconds)

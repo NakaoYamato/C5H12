@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "../../Library/Model/Model.h"
 #include "../../Library/Model/AnimationEvent.h"
+#include "../../Library/Model/AnimationCurve.h"
 
 class Animator : public Component
 {
@@ -239,6 +240,7 @@ public:
 
 #pragma region デバッグ用
 	void SetDrawEventDebugGui(bool draw) { _drawEventDebugGui = draw; }
+	void SetDrawAnimationCurveGui(bool draw) { _drawAnimationCurveGui = draw; }
 #pragma endregion
 private:
     /// <summary>
@@ -284,6 +286,10 @@ private:
 	AnimationEvent _animationEvent{};
 #pragma endregion
 
+#pragma region 再生速度カーブ
+	AnimationCurve _animationCurve;
+#pragma endregion
+
 
 #pragma region デバッグ用
 	std::vector<int> _displayAnimationIndices;
@@ -292,5 +298,6 @@ private:
 
 	float	_blendSeconds = 0.0f;
 	bool	_drawEventDebugGui = false;
+	bool	_drawAnimationCurveGui = false;
 #pragma endregion
 };

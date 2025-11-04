@@ -7,6 +7,7 @@
 /// </summary>
 enum class EasingType
 {
+    Linear,
     InSine,
     OutSine,
     InOutSine,
@@ -49,6 +50,10 @@ public:
 
     static EasingFunc GetFunc(EasingType type);
 public:
+	static float Linear(float x)
+	{
+		return x;
+	}
     static float InSine(float x)
     {
         return (1 - cosf((x * PI) / 2.0f));

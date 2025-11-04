@@ -15,6 +15,7 @@ enum class CollisionLayer : unsigned int
 	Attack		= 1 << 1,
 	Hit			= 1 << 2,
 	Stage		= 1 << 3,
+	Effect		= 1 << 4,
 
 	CollisionLayerMAX,
 };

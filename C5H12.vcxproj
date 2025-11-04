@@ -169,6 +169,7 @@
     <ClCompile Include="Library\Component\EffectController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
     <ClCompile Include="Library\Component\LocusRenderer.cpp" />
+    <ClCompile Include="Library\Component\StageEffectEmitter.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
     <ClCompile Include="Library\Component\StateController.cpp" />
@@ -416,6 +417,7 @@
     <ClInclude Include="Library\Component\EffectController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
     <ClInclude Include="Library\Component\LocusRenderer.h" />
+    <ClInclude Include="Library\Component\StageEffectEmitter.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainCollider.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
     <ClInclude Include="Library\Component\StateController.h" />

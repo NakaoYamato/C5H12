@@ -10,6 +10,7 @@ void PlayerGreatSwordActor::OnCreate()
 
 	// コンポーネント追加
 	auto modelRenderer = AddComponent<ModelRenderer>();
+	_collider = AddCollider<SphereCollider>();
 
 	GetTransform().SetPosition(Vector3(-3.6f, 1.7f, 0.8f));
 	GetTransform().SetScale(Vector3(1.5f, 1.5f, 1.5f));
@@ -17,6 +18,13 @@ void PlayerGreatSwordActor::OnCreate()
 
 	_locusRootLocalPosition = Vector3(0.0f, -20.0f, 0.0f);
 	_locusTipLocalPosition = Vector3(0.0f, -130.0f, 0.0f);
+
+	_collider.lock()->SetActive(false);
+	_collider.lock()->SetTrigger(true);
+	_collider.lock()->SetLayer(CollisionLayer::Effect);
+	_collider.lock()->SetLayerMask(GetCollisionLayerMask(CollisionLayer::Stage));
+	_collider.lock()->SetPosition(Vector3(0.0f, -100.0f, 0.0f));
+	_collider.lock()->SetRadius(0.3f);
 }
 
 // 開始時処理
@@ -62,5 +70,17 @@ void PlayerGreatSwordActor::OnUpdate(float elapsedTime)
 		{
 			material.SetParameter("bodyColor", color);
 		}
+	}
+
+	// 攻撃判定がある時だけ地面とのエフェクトの当たり判定を有効にする
+	if (_ownerModelCollider.lock()->IsCollAttackEvent())
+	{
+		_collider.lock()->SetActive(true);
+	}
+	else
+	{
+		_collider.lock()->SetActive(false);
+		// 接触情報クリア
+		this->GetLastContactActors().clear();
 	}
 }

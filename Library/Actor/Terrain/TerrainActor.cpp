@@ -4,6 +4,8 @@
 #include "../../Library/Component/Terrain/TerrainController.h"
 #include "../../Library/Component/Terrain/TerrainCollider.h"
 
+#include "../../Library/Component/StageEffectEmitter.h"
+
 // ¶¬Žžˆ—
 void TerrainActor::OnCreate()
 {
@@ -11,5 +13,12 @@ void TerrainActor::OnCreate()
     GetTransform().UpdateTransform(nullptr);
 
     this->AddComponent<TerrainController>(_terrainPath);
-    this->AddCollider<TerrainCollider>();
+	auto effect = this->AddComponent<EffectController>();
+	this->AddComponent<StageEffectEmitter>();
+
+	effect->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+
+    auto collider = this->AddCollider<TerrainCollider>();
+
+	collider->SetLayer(CollisionLayer::Stage);
 }

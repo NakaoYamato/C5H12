@@ -529,6 +529,9 @@ void CollisionManager::SetDataByCollider()
 {
 	for (auto& sphere : _sphereColliders)
 	{
+		if (!sphere->IsActive())
+			continue;
+
 		Transform& transform = sphere->GetActor()->GetTransform();
 		_sphereDatas.push_back(
 			SphereData(
@@ -541,6 +544,9 @@ void CollisionManager::SetDataByCollider()
 	}
 	for (auto& box : _boxColliders)
 	{
+		if (!box->IsActive())
+			continue;
+
 		Transform& transform = box->GetActor()->GetTransform();
 		_boxDatas.push_back(
 			BoxData(
@@ -554,6 +560,9 @@ void CollisionManager::SetDataByCollider()
 	}
 	for (auto& capsule : _capsuleColliders)
 	{
+		if (!capsule->IsActive())
+			continue;
+
 		Transform& transform = capsule->GetActor()->GetTransform();
 		_capsuleDatas.push_back(
 			CapsuleData(

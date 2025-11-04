@@ -2,6 +2,7 @@
 
 #include "../WeaponActor.h"
 #include "../../Library/Component/ModelRenderer.h"
+#include "../../Library/Component/Collider/SphereCollider.h"
 
 class PlayerGreatSwordActor : public WeaponActor
 {
@@ -22,6 +23,7 @@ public:
 private:
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<ModelRenderer> _parentModelRenderer;
+	std::weak_ptr<SphereCollider> _collider;
 
 	float _rimLightFactor = 10.0f;
 };

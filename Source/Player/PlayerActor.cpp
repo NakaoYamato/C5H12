@@ -20,6 +20,8 @@
 #include "Weapon/Warrior/PlayerSwordActor.h"
 #include "Weapon/GreatSword/PlayerGreatSwordActor.h"
 
+#include "Armor/ArmorActor.h"
+
 #include "../../Source/Camera/PlayerCameraController.h"
 
 #include "../../Source/Network/NetworkReceiver.h"
@@ -194,6 +196,43 @@ void PlayerActor::OnCreate()
 		const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("weapon_r")));
 		sword->Initialize(this, rightHandNode);
 		_swordActor = sword;
+	}
+
+	// 防具生成
+	{
+		auto head = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Head"), ActorTag::Player);
+		head->SetParent(this);
+		head->LoadModel("./Data/Model/Player/Armors/Head/Head.fbx");
+		// コンポーネント追加
+		auto modelRenderer = head->AddComponent<ModelRenderer>();
+	}
+	{
+		auto chest = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Chest"), ActorTag::Player);
+		chest->SetParent(this);
+		chest->LoadModel("./Data/Model/Player/Armors/Chest/Chest.fbx");
+		// コンポーネント追加
+		auto modelRenderer = chest->AddComponent<ModelRenderer>();
+	}
+	{
+		auto arm = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Arm"), ActorTag::Player);
+		arm->SetParent(this);
+		arm->LoadModel("./Data/Model/Player/Armors/Arm/Arm.fbx");
+		// コンポーネント追加
+		auto modelRenderer = arm->AddComponent<ModelRenderer>();
+	}
+	{
+		auto Waist = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Waist"), ActorTag::Player);
+		Waist->SetParent(this);
+		Waist->LoadModel("./Data/Model/Player/Armors/Waist/Waist.fbx");
+		// コンポーネント追加
+		auto modelRenderer = Waist->AddComponent<ModelRenderer>();
+	}
+	{
+		auto Leg = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Leg"), ActorTag::Player);
+		Leg->SetParent(this);
+		Leg->LoadModel("./Data/Model/Player/Armors/Leg/Leg.fbx");
+		// コンポーネント追加
+		auto modelRenderer = Leg->AddComponent<ModelRenderer>();
 	}
 
 	// カメラ作成

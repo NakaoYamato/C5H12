@@ -272,6 +272,7 @@
     <ClCompile Include="Library\Graphics\GpuResourceManager.cpp" />
     <ClCompile Include="Library\Model\ModelResourceManager.cpp" />
     <ClCompile Include="Library\Model\ModelResource.cpp" />
+    <ClCompile Include="Library\Resource\ResourceManager.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneDecalEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneModelEditor.cpp" />
     <ClCompile Include="Library\Scene\Editor\SceneParticleEditor.cpp" />
@@ -338,6 +339,7 @@
     <ClCompile Include="Source\InGame\InputMediator.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
+    <ClCompile Include="Source\Player\Armor\ArmorActor.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
@@ -534,6 +536,8 @@
     <ClInclude Include="Library\Model\ModelResourceManager.h" />
     <ClInclude Include="Library\Model\ModelResource.h" />
     <ClInclude Include="Library\Model\SerializeFunction.h" />
+    <ClInclude Include="Library\Resource\ResourceBase.h" />
+    <ClInclude Include="Library\Resource\ResourceManager.h" />
     <ClInclude Include="Library\Scene\Editor\SceneDecalEditor.h" />
     <ClInclude Include="Library\Scene\Editor\SceneModelEditor.h" />
     <ClInclude Include="Library\Scene\Editor\SceneParticleEditor.h" />
@@ -604,6 +608,8 @@
     <ClInclude Include="Source\Menu\MenuMediator.h" />
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />
+    <ClInclude Include="Source\Player\Armor\ArmorActor.h" />
+    <ClInclude Include="Source\Player\Armor\ArmorData.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />

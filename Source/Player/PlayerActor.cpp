@@ -20,7 +20,7 @@
 #include "Weapon/Warrior/PlayerSwordActor.h"
 #include "Weapon/GreatSword/PlayerGreatSwordActor.h"
 
-#include "Armor/ArmorActor.h"
+#include "../../Source/Armor/ArmorActor.h"
 
 #include "../../Source/Camera/PlayerCameraController.h"
 

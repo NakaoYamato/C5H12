@@ -729,13 +729,16 @@
     <ClCompile Include="Library\Component\StageEffectEmitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\Armor\ArmorActor.cpp">
+    <ClCompile Include="Source\Armor\ArmorActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Resource\ResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Shader\Model\ModelShaderResource.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Armor\ArmorManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1532,10 +1535,10 @@
     <ClInclude Include="Library\Component\StageEffectEmitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\Armor\ArmorActor.h">
+    <ClInclude Include="Source\Armor\ArmorActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\Armor\ArmorData.h">
+    <ClInclude Include="Source\Armor\ArmorData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Resource\ResourceManager.h">
@@ -1548,6 +1551,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Shader\ShaderResourceBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Armor\ArmorManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

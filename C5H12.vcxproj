@@ -303,6 +303,7 @@
     <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
     <ClCompile Include="Library\Terrain\TerrainTransparentWall.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
+    <ClCompile Include="Source\Armor\ArmorManager.cpp" />
     <ClCompile Include="Source\Common\CombatStatusController.cpp" />
     <ClCompile Include="Source\Common\DamageableChild.cpp" />
     <ClCompile Include="Source\Common\DamageSender.cpp" />
@@ -340,7 +341,7 @@
     <ClCompile Include="Source\InGame\InputMediator.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
-    <ClCompile Include="Source\Player\Armor\ArmorActor.cpp" />
+    <ClCompile Include="Source\Armor\ArmorActor.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
@@ -572,6 +573,7 @@
     <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />
     <ClInclude Include="Library\Terrain\TerrainTransparentWall.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
+    <ClInclude Include="Source\Armor\ArmorManager.h" />
     <ClInclude Include="Source\Common\CombatStatusController.h" />
     <ClInclude Include="Source\Common\DamageableChild.h" />
     <ClInclude Include="Source\Common\DamageSender.h" />
@@ -611,8 +613,8 @@
     <ClInclude Include="Source\Menu\MenuMediator.h" />
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />
-    <ClInclude Include="Source\Player\Armor\ArmorActor.h" />
-    <ClInclude Include="Source\Player\Armor\ArmorData.h" />
+    <ClInclude Include="Source\Armor\ArmorActor.h" />
+    <ClInclude Include="Source\Armor\ArmorData.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />

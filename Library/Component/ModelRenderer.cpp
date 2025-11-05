@@ -133,11 +133,12 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 	_materialMap.clear();
 	_materialMap = _model.lock()->GetMaterials();
 	// ƒpƒ‰ƒ[ƒ^‚Ìæ“¾
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 	for (auto& material : _materialMap)
 	{
 		bool isDeferred = Graphics::Instance().RenderingDeferred() && material.GetBlendType() != BlendType::Alpha;
 
-		material.SetParameterMap(GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+		material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
 			_renderType,
 			material.GetShaderName(),
 			isDeferred));

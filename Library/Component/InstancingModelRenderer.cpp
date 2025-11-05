@@ -4,6 +4,7 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Shader/Model/ModelShaderResource.h"
 
 // 生成時処理
 void InstancingModelRenderer::OnCreate()
@@ -32,27 +33,15 @@ void InstancingModelRenderer::CastShadow(const RenderContext& rc)
 // GUI描画
 void InstancingModelRenderer::DrawGui()
 {
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+
 	ImGui::ColorEdit4("color", &_color.x);
 	ImGui::Separator();
-	// 使用可能なシェーダー取得
-	auto activeShaderTypes = GetActor()->GetScene()->GetMeshRenderer().GetInstancingShaderNames();
+
 	if (ImGui::TreeNode(_material.GetName().c_str()))
 	{
 		// シェーダー変更GUI
-		if (ImGui::TreeNode(u8"シェーダー変更"))
-		{
-			auto shaderType = _material.GetShaderName();
-			for (auto& activeShaderType : activeShaderTypes)
-			{
-				bool active = activeShaderType == shaderType;
-				if (ImGui::RadioButton(activeShaderType, active))
-				{
-					// シェーダー変更
-					ChangeShader(activeShaderType);
-				}
-			}
-			ImGui::TreePop();
-		}
+		modelShaderResource->DrawInstancingMaterialEditGui(&_material);
 		ImGui::Separator();
 
 		// マテリアルのGUI描画
@@ -64,9 +53,10 @@ void InstancingModelRenderer::DrawGui()
 // シェーダー変更
 void InstancingModelRenderer::ChangeShader(const std::string& shaderName)
 {
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 	_material.SetShaderName(shaderName);
 	// シェーダー変更時はパラメータも初期化
-	_material.SetParameterMap(GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
+	_material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
 		ModelRenderType::Instancing,
 		shaderName,
 		false));

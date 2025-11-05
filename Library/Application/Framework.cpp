@@ -10,6 +10,7 @@
 #include "../PostProcess/PostProcessManager.h"
 #include "../JobSystem/JobSystem.h"
 #include "../Scene/SceneManager.h"
+#include "../Resource/ResourceManager.h"
 
 #include <Dbt.h>
 
@@ -303,6 +304,9 @@ void Framework::Render()
 
         // ジョブシステムのGUI描画
         JobSystem::Instance().DrawGui();
+
+		// リソース管理クラスのGui描画
+		ResourceManager::Instance().DrawGui();
 
         // デバッグのGui描画
         Debug::DrawGui();

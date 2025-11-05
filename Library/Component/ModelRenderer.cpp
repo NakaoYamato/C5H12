@@ -5,6 +5,7 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Library/Shader/Model/ModelShaderResource.h"
 
 // 生成時処理
 void ModelRenderer::OnCreate()
@@ -55,6 +56,7 @@ void ModelRenderer::DrawGui()
 		u8"DynamicBoneModel",
 		u8"StaticBoneModel",
 	};
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 
 	ImGui::ColorEdit4("color", &_color.x);
 	ImGui::Separator();
@@ -68,33 +70,12 @@ void ModelRenderer::DrawGui()
 	{
 		for (auto& material : _materialMap)
 		{
-			bool isDeferred = Graphics::Instance().RenderingDeferred() && material.GetBlendType() != BlendType::Alpha;
-
-			// 使用可能なシェーダー取得
-			auto activeShaderTypes = isDeferred ?
-				GetActor()->GetScene()->GetMeshRenderer().GetDeferredShaderNames(_renderType) :
-				GetActor()->GetScene()->GetMeshRenderer().GetForwardShaderNames(_renderType);
 			if (ImGui::TreeNode(material.GetName().c_str()))
 			{
-				// シェーダー変更GUI
-				if (ImGui::TreeNode(u8"シェーダー変更"))
-				{
-					auto shaderType = material.GetShaderName();
-					for (auto& activeShaderType : activeShaderTypes)
-					{
-						bool active = activeShaderType == shaderType;
-						if (ImGui::RadioButton(activeShaderType, active))
-						{
-							material.SetShaderName(activeShaderType);
-							// シェーダー変更時はパラメータも初期化
-							material.SetParameterMap(GetActor()->GetScene()->GetMeshRenderer().GetShaderParameterKey(
-								_renderType,
-								activeShaderType,
-								isDeferred));
-						}
-					}
-					ImGui::TreePop();
-				}
+				modelShaderResource->DrawMaterialEditGui(
+					&material,
+					_renderType,
+					Graphics::Instance().RenderingDeferred());
 				ImGui::Separator();
 
 				// マテリアルのGUI描画

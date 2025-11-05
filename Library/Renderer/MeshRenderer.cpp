@@ -1,13 +1,6 @@
 #include "MeshRenderer.h"
 
 #include "../Graphics/GpuResourceManager.h"
-#include "../../Shader/Model/Phong/PhongShader.h"
-#include "../../Shader/Model/Ramp/RampShader.h"
-#include "../../Shader/Model/Grass/GrassShader.h"
-#include "../../Shader/Model/PBR/PBRShader.h"
-#include "../../Shader/Model/Test/TestShader.h"
-#include "../../Shader/Model/Player/PlayerShader.h"
-
 #include "../../Shader/Model/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include "../../Library/Algorithm/Converter.h"
@@ -31,167 +24,9 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 		sizeof(StaticBoneCB),
 		_staticBoneCB.GetAddressOf());
 
-	// インプットレイアウト
-	D3D11_INPUT_ELEMENT_DESC modelInputDesc[]
-	{
-		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0, D3D11_APPEND_ALIGNED_ELEMENT},
-		{"WEIGHTS",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT},
-		{"BONES",0,DXGI_FORMAT_R32G32B32A32_UINT,0,D3D11_APPEND_ALIGNED_ELEMENT},
-		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT},
-		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT},
-		{"TANGENT",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT},
-	};
-
-	// シェーダー作成
-	{
-		// デファードレンダリング用
-		{
-			{
-				// DynamicBoneModel
-				const size_t type = static_cast<int>(ModelRenderType::Dynamic);
-				ShaderMap& shaderMap = _deferredShaders[type];
-
-				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Ramp"] = std::make_unique<RampShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-				
-				shaderMap["Player"] = std::make_unique<PlayerShader>(device,
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/HLSL/Model/Test/TestGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-			}
-			{
-				// StaticBoneModel
-				const size_t type = static_cast<int>(ModelRenderType::Static);
-				ShaderMap& shaderMap = _deferredShaders[type];
-
-				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Ramp"] = std::make_unique<RampShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/HLSL/Model/Test/TestGBPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-			}
-			{
-				// InstancingModel
-				// デファードでは描画しない
-			}
-		}
-
-		// フォワードレンダリング用
-		{
-			{
-				// DynamicBoneModel
-				const size_t type = static_cast<int>(ModelRenderType::Dynamic);
-				ShaderMap& shaderMap = _forwardShaders[type];
-
-				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",
-					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/HLSL/Model/Test/TestPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-			}
-			{
-				// StaticBoneModel
-				const size_t type = static_cast<int>(ModelRenderType::Static);
-				ShaderMap& shaderMap = _forwardShaders[type];
-
-				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-				shaderMap["PhongAlpha"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongAlphaPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["PBR"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
-					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-				shaderMap["PBRAlpha"] = std::make_unique<PBRShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",
-					"./Data/Shader/HLSL/Model/PhysicalBasedRendering/PhysicalBasedRenderingAlphaPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongBatchingVS.cso",// フォンシェーダーと同じ処理
-					"./Data/Shader/HLSL/Model/Test/TestPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-			}
-			{
-				// InstancingModel
-				const size_t type = static_cast<int>(ModelRenderType::Instancing);
-				ShaderMap& shaderMap = _forwardShaders[type];
-
-				shaderMap["Phong"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongInstancedVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-				shaderMap["PhongAlpha"] = std::make_unique<PhongShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongInstancedVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongAlphaPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-				shaderMap["Test"] = std::make_unique<TestShader>(device,
-					"./Data/Shader/HLSL/Model/Phong/PhongInstancedVS.cso",
-					"./Data/Shader/HLSL/Model/Test/TestPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-				shaderMap["Grass"] = std::make_unique<GrassShader>(device,
-					"./Data/Shader/HLSL/Model/Grass/GrassInstancedVS.cso",
-					"./Data/Shader/HLSL/Model/Phong/PhongAlphaPS.cso",
-					modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-
-			}
-		}
-
-		// カスケードシャドウマップ用
-		_cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)] =
-			std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-		_cascadedSMShader[static_cast<int>(ModelRenderType::Static)] =
-			std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowBatchingVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-		_cascadedSMShader[static_cast<int>(ModelRenderType::Instancing)] =
-			std::make_unique<CascadedShadowMapShader>(device,
-				"./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowInstancedVS.cso",
-				modelInputDesc, static_cast<UINT>(_countof(modelInputDesc)));
-	}
+	// リソースを初期化
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+	modelShaderResource->Initialize(device);
 
 	// インスタンシング描画用バッファ作成
 	{
@@ -324,7 +159,8 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 	else
 		dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
-	auto shaders = writeGBuffer ? _deferredShaders : _forwardShaders;
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+	auto shaders = modelShaderResource->GetShaderMap(writeGBuffer);
 
 	// ボーンの影響度があるモデルの描画
 	{
@@ -432,7 +268,8 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 			return lhs.distance > rhs.distance;
 		});
 
-	auto shaders = _forwardShaders;
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+	auto shaders = modelShaderResource->GetShaderMap(false);
 
 	for (auto& alphaDrawInfo : _alphaDrawInfomap)
 	{
@@ -522,7 +359,8 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 		dc->PSSetConstantBuffers(ModelCBIndex, 1, _dynamicBoneCB.GetAddressOf());
 
 		// 不透明描画処理
-		auto* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Dynamic)].get();
+		auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+		auto* shader = modelShaderResource->GetCascadedSMShader(ModelRenderType::Dynamic);
 		shader->Begin(rc);
 		for (auto& drawInfomap : _dynamicInfomap)
 		{
@@ -580,7 +418,8 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 		dc->PSSetConstantBuffers(ModelCBIndex, 1, _staticBoneCB.GetAddressOf());
 
 		// 不透明描画処理
-		auto* shader = _cascadedSMShader[static_cast<int>(ModelRenderType::Static)].get();
+		auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+		auto* shader = modelShaderResource->GetCascadedSMShader(ModelRenderType::Static);
 		shader->Begin(rc);
 		for (auto& drawInfomap : _staticInfomap)
 		{
@@ -617,62 +456,6 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 
 	// インスタンシングモデルの描画
 	//Helper::RenderInstancing(rc);
-}
-
-
-/// デファードレンダリングで使用可能なシェーダーを取得
-std::vector<const char*> MeshRenderer::GetDeferredShaderNames(ModelRenderType type)
-{
-	std::vector<const char*> shaderTypes;
-	for (auto& [name, shader] : _deferredShaders[static_cast<int>(type)])
-	{
-		// shaderがnullptrの時はスキップ
-		if (shader == nullptr)
-			continue;
-		shaderTypes.push_back(name.c_str());
-	}
-	return shaderTypes;
-}
-
-/// フォワードレンダリングで使用可能なシェーダーを取得
-std::vector<const char*> MeshRenderer::GetForwardShaderNames(ModelRenderType type)
-{
-	std::vector<const char*> shaderTypes;
-	for (auto& [name, shader] : _forwardShaders[static_cast<int>(type)])
-	{
-		// shaderがnullptrの時はスキップ
-		if (shader == nullptr)
-			continue;
-		shaderTypes.push_back(name.c_str());
-	}
-	return shaderTypes;
-}
-
-/// インスタンシング描画で使用可能なシェーダーを取得
-std::vector<const char*> MeshRenderer::GetInstancingShaderNames()
-{
-	std::vector<const char*> shaderTypes;
-	for (auto& [name, shader] : _forwardShaders[static_cast<int>(ModelRenderType::Instancing)])
-	{
-		// shaderがnullptrの時はスキップ
-		if (shader == nullptr)
-			continue;
-		shaderTypes.push_back(name.c_str());
-	}
-	return shaderTypes;
-}
-
-/// typeとkeyからパラメータのkeyを取得
-Material::ParameterMap MeshRenderer::GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred)
-{
-	if (deferred)
-	{
-		return _deferredShaders[static_cast<int>(type)][key]->GetParameterMap();
-	}
-	else
-	{
-		return _forwardShaders[static_cast<int>(type)][key]->GetParameterMap();
-	}
 }
 
 // インスタンシングモデルの描画
@@ -753,7 +536,8 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 	// 描画処理
 	for (auto& [shaderName, drawInfo] : _instancingInfoMap)
 	{
-		auto* shader = _forwardShaders[static_cast<int>(ModelRenderType::Instancing)][drawInfo.material->GetShaderName()].get();
+		auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+		auto* shader = modelShaderResource->GetShaderMap(false)[static_cast<int>(ModelRenderType::Instancing)][drawInfo.material->GetShaderName()].get();
 		shader->Begin(rc);
 
 		DrawModel(drawInfo, shader);

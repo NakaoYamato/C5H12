@@ -27,6 +27,8 @@
 #include "../../Source/Network/NetworkReceiver.h"
 #include "PlayerNetworkSender.h"
 
+#include "../../Library/Shader/Model/ModelShaderResource.h"
+
 // 生成時処理
 void PlayerActor::OnCreate()
 {
@@ -149,11 +151,12 @@ void PlayerActor::OnCreate()
 	GetTransform().SetLengthScale(1.0f);
 	GetTransform().SetPositionY(1.0f);
 
+	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 	for (auto& material : modelRenderer->GetMaterials())
 	{
 		material.SetShaderName("Player");
 		// シェーダー変更時はパラメータも初期化
-		material.SetParameterMap(GetScene()->GetMeshRenderer().GetShaderParameterKey(
+		material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
 			modelRenderer->GetRenderType(),
 			"Player",
 			true));

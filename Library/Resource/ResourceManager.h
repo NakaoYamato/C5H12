@@ -2,6 +2,7 @@
 
 #include "ResourceBase.h"
 
+#include <cassert>
 #include <unordered_map>
 #include <memory>
 
@@ -42,11 +43,13 @@ public:
 	template<class T>
 	std::shared_ptr<T> GetResourceAs(const std::string& name)
 	{
-		auto resource = GetResource(name);
+		auto resource = std::dynamic_pointer_cast<T>(_resourceMap[name]);
 		if (resource)
 		{
-			return std::dynamic_pointer_cast<T>(resource);
+			return resource;
 		}
+		// エラー通知
+		assert(!"ResourceManager::GetResourceAs(): 指定の型のリソースが見つかりませんでした");
 		return nullptr;
 	}
 	
@@ -62,6 +65,9 @@ public:
 				return resource;
 			}
 		}
+		// エラー通知
+		assert(!"ResourceManager::GetResourceAs(): 指定の型のリソースが見つかりませんでした");
+		return nullptr;
 	}
 
 	// 登録
@@ -74,9 +80,15 @@ public:
 		_resourceMap[resource->GetName()] = resource;
 	}
 
+	// Gui描画
+	void DrawGui();
+
 private:
 	// リソースマップ
 	std::unordered_map<std::string, std::shared_ptr<ResourceBase>> _resourceMap;
+
+	// デバッグGUI表示フラグ
+	bool _drawGUI = false;
 };
 
 template<class T>

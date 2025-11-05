@@ -284,6 +284,7 @@
     <ClCompile Include="Library\Scene\Test\SceneInstancingModelDebug.cpp" />
     <ClCompile Include="Library\Shader\Model\CascadedShadowMap\CascadedShadowMapShader.cpp" />
     <ClCompile Include="Library\Shader\Model\Grass\GrassShader.cpp" />
+    <ClCompile Include="Library\Shader\Model\ModelShaderResource.cpp" />
     <ClCompile Include="Library\Shader\Model\PBR\PBRShader.cpp" />
     <ClCompile Include="Library\Shader\Model\Phong\PhongShader.cpp" />
     <ClCompile Include="Library\Shader\Model\Player\PlayerShader.cpp" />
@@ -550,6 +551,7 @@
     <ClInclude Include="Library\Shader\Model\CascadedShadowMap\CascadedShadowMapShader.h" />
     <ClInclude Include="Library\Shader\Model\Grass\GrassShader.h" />
     <ClInclude Include="Library\Shader\Model\ModelShaderBase.h" />
+    <ClInclude Include="Library\Shader\Model\ModelShaderResource.h" />
     <ClInclude Include="Library\Shader\Model\PBR\PBRShader.h" />
     <ClInclude Include="Library\Shader\Model\Phong\PhongShader.h" />
     <ClInclude Include="Library\Shader\Model\Player\PlayerShader.h" />
@@ -559,6 +561,7 @@
     <ClInclude Include="Library\Shader\Primitive\Locus\LocusPrimitiveShader.h" />
     <ClInclude Include="Library\Shader\Primitive\PrimitiveShaderBase.h" />
     <ClInclude Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.h" />
+    <ClInclude Include="Library\Shader\ShaderResourceBase.h" />
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h" />

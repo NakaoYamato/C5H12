@@ -17,4 +17,8 @@ public:
 	virtual bool LoadFromFile() = 0;
 	// ƒtƒ@ƒCƒ‹•Û‘¶
 	virtual bool SaveToFile() = 0;
+
+	// Gui•`‰æ
+	virtual void DrawGui() {}
+
 };

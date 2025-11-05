@@ -40,11 +40,12 @@ void PlayerGreatSwordActor::OnStart()
 	// リムライト初期化
 	if (_modelRenderer.lock())
 	{
+		auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 		for (auto& material : _modelRenderer.lock()->GetMaterials())
 		{
 			material.SetShaderName("Player");
 			// シェーダー変更時はパラメータも初期化
-			material.SetParameterMap(GetScene()->GetMeshRenderer().GetShaderParameterKey(
+			material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
 				_modelRenderer.lock()->GetRenderType(),
 				"Player",
 				true));

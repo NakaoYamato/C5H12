@@ -15,8 +15,18 @@ void Material::DrawGui()
 		u8"Opaque",
 		u8"Alpha",
 	};
+	static std::vector<const char*> shaderNames;
+	for (size_t i = 0; i < static_cast<int>(ShaderType::Model); ++i)
+	{
+		shaderNames.push_back(ToString<ShaderType>(i).c_str());
+	}
 
 	ImGui::Text((u8"マテリアル名:" + _name).c_str());
+	ImGui::Separator();
+
+	int sId = static_cast<int>(_shaderType);
+	if (ImGui::Combo(u8"シェーダータイプ", &sId, shaderNames.data(), (int)shaderNames.size()))
+		SetShaderType(static_cast<ShaderType>(sId));
 	ImGui::Separator();
 
 	int bId = static_cast<int>(_blendType);

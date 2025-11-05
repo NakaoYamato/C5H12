@@ -20,6 +20,13 @@ enum class BlendType
 	BlendTypeMax
 };
 
+enum class ShaderType
+{
+	Model,
+	Primitive,
+	Sprite,
+};
+
 class Material
 {
 public:
@@ -69,6 +76,8 @@ public:
 #pragma region アクセサ
 	// マテリアル名取得
 	const std::string&								GetName() const { return _name; }
+	// シェーダータイプ取得
+	ShaderType										GetShaderType() const { return _shaderType; }
 	// 色取得
 	const Vector4&									GetColor(const std::string& key) const { return _colors.at(key); }
 	// テクスチャ情報取得
@@ -107,6 +116,8 @@ public:
 
 	// マテリアル名設定
 	void SetName(const std::string& name) { _name = name; }
+	// シェーダータイプ設定
+	void SetShaderType(ShaderType type) { _shaderType = type; }
 	// 色設定
 	void SetColor(const std::string& key, const Vector4& color) { _colors[key] = color; }
 	// テクスチャ設定
@@ -141,6 +152,7 @@ private:
 
 private:
 	std::string		_name;
+	ShaderType		_shaderType = ShaderType::Model;
 	ColorMap		_colors;
 	TextureMap		_textureDatas;
 	ParameterMap	_parameters;

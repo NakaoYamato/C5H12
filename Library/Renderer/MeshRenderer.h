@@ -7,18 +7,7 @@
 #include "../Model/Model.h"
 #include "../Material/Material.h"
 #include "../Shader/Model/ModelShaderBase.h"
-
-/// <summary>
-/// モデルタイプ
-/// </summary>
-enum class ModelRenderType
-{
-    Dynamic,   // 骨の影響度がある(アニメーション等)
-    Static,    // 骨の影響度がない(ステージ等のボーンがないモデル用)
-    Instancing,// GPUインスタンシング使用
-
-    ModelRenderTypeMax
-};
+#include "../../Library/Shader/Model/ModelShaderResource.h"
 
 class MeshRenderer
 {
@@ -165,37 +154,6 @@ public:
     /// <param name="rc"></param>
     void CastShadow(const RenderContext& rc);
 
-    /// <summary>
-    /// デファードレンダリングで使用可能なシェーダーを取得
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="deferred"></param>
-    /// <returns></returns>
-    std::vector<const char*> GetDeferredShaderNames(ModelRenderType type);
-
-    /// <summary>
-    /// フォワードレンダリングで使用可能なシェーダーを取得
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="deferred"></param>
-    /// <returns></returns>
-    std::vector<const char*> GetForwardShaderNames(ModelRenderType type);
-
-    /// <summary>
-	/// インスタンシング描画で使用可能なシェーダーを取得
-    /// </summary>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    std::vector<const char*> GetInstancingShaderNames();
-
-    /// <summary>
-    /// typeとkeyからパラメータのkeyを取得
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="key"></param>
-    /// <returns></returns>
-    Material::ParameterMap GetShaderParameterKey(ModelRenderType type, std::string key, bool deferred);
-
 private:
     // インスタンシングモデルの描画
     void RenderInstancing(const RenderContext& rc);
@@ -211,12 +169,6 @@ private:
     // サイズが大きいく関数内で定義するとスタック警告がでるため静的に確保
     DynamicBoneCB		_cbDynamicSkeleton{};
     StaticBoneCB		_cbStaticSkeleton{};
-
-    // シェーダーの配列
-    using ShaderMap = std::unordered_map<std::string, std::unique_ptr<ModelShaderBase>>;
-    ShaderMap                   _deferredShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
-    ShaderMap                   _forwardShaders[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
-    std::unique_ptr<ModelShaderBase> _cascadedSMShader[static_cast<int>(ModelRenderType::ModelRenderTypeMax)];
 
     // 各モデルタイプのInfo
 	// Key : シェーダー名

@@ -36,6 +36,9 @@ public:
 	// トランスフォームを適応
 	void ApplyPoseToResource(ID3D11Device* device);
 
+	// 不要ノードの削除
+	void RemoveUnusedNodes();
+
 #pragma region アクセサ
 	// ノードの名前から番号を取得
 	int GetNodeIndex(const std::string& str)

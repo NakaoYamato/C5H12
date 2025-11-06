@@ -312,6 +312,12 @@ void Model::ApplyPoseToResource(ID3D11Device* device)
     CreateComObject(device, _filename.c_str());
 }
 
+// 不要ボーンの削除
+void Model::RemoveUnusedNodes()
+{
+
+}
+
 void Model::ReSerialize()
 {
     _resource->Serialize(_filename.c_str());

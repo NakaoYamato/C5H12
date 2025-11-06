@@ -14,9 +14,10 @@ enum class ArmorType
 
 struct ArmorData
 {
-	std::string name;						// 防具の名前
-	std::string modelFilePath;				// モデルファイルのパス
-	std::vector<std::string> hiddenNodes;	// 非表示にするノードの名前リスト
-	ArmorType type;							// 防具の種類
-	float defense;							// 防御力
+	std::string name = "";					// 防具の名前
+	std::string modelFilePath = "";			// モデルファイルのパス
+	std::vector<std::string> hiddenMeshes;	// 非表示にするメッシュの名前リスト
+	ArmorType type = ArmorType::Head;		// 防具の種類
+	float defense = 0.0f;					// 防御力
+	int rarity = 0;							// レア度
 };

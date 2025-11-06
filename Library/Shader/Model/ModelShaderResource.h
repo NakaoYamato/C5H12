@@ -26,9 +26,9 @@ public:
 	~ModelShaderResource() override {}
 
 	// 名前取得
-	const std::string& GetName() const override { return _name; }
+	std::string GetName() const override { return _name; }
 	// ファイルパス取得
-	const std::string& GetFilePath() const override { return _filePath; }
+	std::string GetFilePath() const override { return _filePath; }
 	// ファイル読み込み
 	bool LoadFromFile() override { return false; }
 	// ファイル保存

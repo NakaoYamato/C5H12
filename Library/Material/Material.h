@@ -25,6 +25,8 @@ enum class ShaderType
 	Model,
 	Primitive,
 	Sprite,
+
+	ShaderTypeMax
 };
 
 class Material

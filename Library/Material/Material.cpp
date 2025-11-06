@@ -16,7 +16,7 @@ void Material::DrawGui()
 		u8"Alpha",
 	};
 	static std::vector<const char*> shaderNames;
-	for (size_t i = 0; i < static_cast<int>(ShaderType::Model); ++i)
+	for (size_t i = 0; i < static_cast<int>(ShaderType::ShaderTypeMax); ++i)
 	{
 		shaderNames.push_back(ToString<ShaderType>(i).c_str());
 	}

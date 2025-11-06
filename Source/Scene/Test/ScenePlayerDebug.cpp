@@ -10,6 +10,7 @@
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Enemy/Weak/WeakActor.h"
 #include "../../Source/Enemy/Gryphus/GryphusActor.h"
+#include "../../Source/Stage/Props/Chest/ChestActor.h"
 
 #include "../../InGame/InputMediator.h"
 #include "../../InGame/CanvasMediator.h"
@@ -17,7 +18,7 @@
 
 void ScenePlayerDebug::OnInitialize()
 {
-	static const float CompletionLoadingRate = 1.0f / 9.0f;
+	static const float CompletionLoadingRate = 1.0f / 10.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -37,6 +38,10 @@ void ScenePlayerDebug::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+    }
+    AddCompletionLoading(CompletionLoadingRate);
+    {
+        auto Chest = RegisterActor<ChestActor>("Chest", ActorTag::Stage);
     }
     //{
     //    auto stage1 = RegisterActor<StageActor>("Stage1", ActorTag::Stage, 1, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, -50.0f));

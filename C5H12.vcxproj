@@ -352,6 +352,7 @@
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDecalDebug.cpp" />
     <ClCompile Include="Source\Stage\EnvironmentDestroyer.cpp" />
+    <ClCompile Include="Source\Stage\Props\Chest\ChestActor.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\Title\TitleMediator.cpp" />
     <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
@@ -625,6 +626,7 @@
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDecalDebug.h" />
     <ClInclude Include="Source\Stage\EnvironmentDestroyer.h" />
+    <ClInclude Include="Source\Stage\Props\Chest\ChestActor.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Title\TitleMediator.h" />
     <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />

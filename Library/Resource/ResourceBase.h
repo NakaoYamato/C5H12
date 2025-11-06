@@ -9,9 +9,9 @@ public:
 	virtual ~ResourceBase() {}
 
 	// 名前取得
-	virtual const std::string& GetName() const = 0;
+	virtual std::string GetName() const = 0;
 	// ファイルパス取得
-	virtual const std::string& GetFilePath() const = 0;
+	virtual std::string GetFilePath() const = 0;
 
 	// ファイル読み込み
 	virtual bool LoadFromFile() = 0;

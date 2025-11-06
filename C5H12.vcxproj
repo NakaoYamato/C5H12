@@ -355,6 +355,7 @@
     <ClCompile Include="Source\Stage\Props\Chest\ChestActor.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestController.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestInput.cpp" />
+    <ClCompile Include="Source\Stage\Props\Chest\UI\ChestUIActor.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\Title\TitleMediator.cpp" />
     <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
@@ -631,6 +632,7 @@
     <ClInclude Include="Source\Stage\Props\Chest\ChestActor.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestController.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestInput.h" />
+    <ClInclude Include="Source\Stage\Props\Chest\UI\ChestUIActor.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Title\TitleMediator.h" />
     <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />

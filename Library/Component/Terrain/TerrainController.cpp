@@ -235,4 +235,8 @@ void TerrainController::CreateEnvironment(int layoutID)
     auto actor = GetActor()->GetScene()->RegisterActor<Actor>(name, ActorTag::Stage);
     actor->AddComponent<TerrainEnvironmentController>(_terrain, layoutID, GetActor()->GetTransform().GetMatrix());
 	_environmentObjects.push_back(actor);
+	// 親子関係設定
+	actor->SetParent(GetActor().get());
+    // 親のトランスフォームを反映しない
+    actor->SetInheritParentTransform(false);
 }

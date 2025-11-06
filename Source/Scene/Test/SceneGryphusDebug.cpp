@@ -8,7 +8,7 @@
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Gryphus/GryphusActor.h"
 
-#include "../../InGame/InputMediator.h"
+#include "../../InGame/InputManager.h"
 #include "../../InGame/CanvasMediator.h"
 #include "../../Menu/MenuMediator.h"
 
@@ -26,7 +26,7 @@ void SceneGryphusDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto inputMediator = RegisterActor<InputMediator>("InputMediator", ActorTag::DrawContextParameter);
+        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::DrawContextParameter);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

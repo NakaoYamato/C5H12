@@ -39,6 +39,9 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
+	// 接触処理
+	void OnContact(CollisionData& collisionData) override;
+
 #pragma region アクセサ
 	// キャラクターコントローラー取得
 	std::shared_ptr<CharactorController> GetCharactorController()
@@ -74,6 +77,7 @@ public:
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
 	bool IsUsingItem() const { return _isUsingItem; }
+	bool IsSelect()	const { return _isSelect; }
 	int GetChargeLevel() const { return _chargeLevel; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
@@ -87,6 +91,7 @@ public:
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
+	void SetIsSelect(bool isSelect) { _isSelect = isSelect; }
 	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
 
     float GetDashRotationFactor() const { return _dashRotationFactor; }
@@ -131,6 +136,7 @@ private:
 	bool _isGuard = false;
 	bool _isDead = false;
 	bool _isUsingItem = false;
+	bool _isSelect = false;
 
 	// 溜め段階
 	int _chargeLevel = 0;

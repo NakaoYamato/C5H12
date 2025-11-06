@@ -15,7 +15,7 @@
 #include "../../Source/Enemy/Weak/WeakActor.h"
 #include "../../Source/Stage/StageController.h"
 
-#include "../../InGame/InputMediator.h"
+#include "../../InGame/InputManager.h"
 #include "../../InGame/CanvasMediator.h"
 #include "../../Menu/MenuMediator.h"
 
@@ -41,7 +41,7 @@ void SceneGame::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto inputMediator = RegisterActor<InputMediator>("InputMediator", ActorTag::DrawContextParameter);
+        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::DrawContextParameter);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

@@ -2,6 +2,9 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Component/ModelRenderer.h"
+#include "../../Library/Component/Collider/SphereCollider.h"
+#include "ChestController.h"
+#include "ChestInput.h"
 
 // 生成時処理
 void ChestActor::OnCreate()
@@ -11,6 +14,23 @@ void ChestActor::OnCreate()
 
 	// コンポーネント追加
 	this->AddComponent<ModelRenderer>();
+	this->AddComponent<ChestInput>();
+	auto controller = this->AddComponent<ChestController>();
+
+	// コライダー追加
+	auto bodyCollider = this->AddCollider<SphereCollider>();
+	auto judgeCollider = this->AddCollider<SphereCollider>();
+
+	// パラメータ設定
+	GetTransform().SetScale(2.0f);
+	bodyCollider->SetLayer(CollisionLayer::Stage);
+	bodyCollider->SetTrigger(false);
+	bodyCollider->SetPosition(Vector3(0.0f, 0.3f, 0.0f));
+	bodyCollider->SetRadius(1.0f);
+	judgeCollider->SetLayer(CollisionLayer::Stage);
+	judgeCollider->SetTrigger(true);
+	judgeCollider->SetPosition(Vector3(0.0f, 0.3f, 0.0f));
+	judgeCollider->SetRadius(2.0f);
 
 	// 蓋生成
 	auto top = GetScene()->RegisterActor<Actor>(std::string(GetName()) + "Top", GetTag());

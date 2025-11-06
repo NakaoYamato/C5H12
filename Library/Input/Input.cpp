@@ -15,6 +15,7 @@ Input::Input()
 	_buttonActionMap["Action2"] = { {InputType::XboxPad,XINPUT_GAMEPAD_B}, {InputType::Mouse,VK_RBUTTON}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_RIGHT} };
 	_buttonActionMap["Guard"] = { {InputType::Mouse,VK_XBUTTON2}, {InputType::DirectPad, DIRECTPAD_BUTTON_R2} };
 	_buttonActionMap["Use"] = { {InputType::Keyboard, 'E'}, {InputType::XboxPad, XINPUT_GAMEPAD_X}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_LEFT} };
+	_buttonActionMap["Select"] = { {InputType::Keyboard, 'F'}, {InputType::XboxPad, XINPUT_GAMEPAD_A}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_DOWN} };
 	_buttonActionMap["Menu"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::XboxPad,XINPUT_GAMEPAD_START}, {InputType::DirectPad, DIRECTPAD_BUTTON_START} };
 
 	_buttonActionMap["Up"] = { {InputType::Keyboard, 'W'}, {InputType::Keyboard, VK_UP}, {InputType::XboxPad,XINPUT_GAMEPAD_DPAD_UP}, {InputType::DirectPad, DIRECTPAD_BUTTON_L_UP} };

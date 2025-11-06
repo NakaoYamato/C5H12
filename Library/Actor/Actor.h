@@ -230,12 +230,14 @@ public:
 	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
 	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
 	void SetIsDrawingHierarchy(bool b) { this->_isDrawingHierarchy = b; }
+	void SetInheritParentTransform(bool b) { this->_isInheritParentTransform = b; }
 
 	bool IsActive()const { return _isActive; }
 	bool IsShowing()const { return _isShowing; }
 	bool IsDrawingDebug()const { return _isDrawingDebug; }
 	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
 	bool IsDrawingHierarchy()const { return _isDrawingHierarchy; }
+	bool IsInheritParentTransform()const { return _isInheritParentTransform; }
 #pragma endregion
 
 #pragma region 親子関係
@@ -377,5 +379,7 @@ protected:
 	bool				_isUsingGuizmo = true;
 	// ヒエラルキー描画フラグ
 	bool 				_isDrawingHierarchy = false;
+	// 親のトランスフォームを反映するか
+	bool				_isInheritParentTransform = true;
 #pragma endregion
 };

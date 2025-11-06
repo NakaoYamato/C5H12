@@ -1,6 +1,5 @@
 #include "PlayerInput.h"
 
-#include "../../Library/Input/Input.h"
 #include "../../Library/Scene/Scene.h"
 
 #include <imgui.h>
@@ -8,21 +7,12 @@
 // 開始処理
 void PlayerInput::Start()
 {
-	if (FindInputMediator())
-	{
-		_inputMediator.lock()->ReceiveCommand(nullptr, InputMediator::CommandType::StartGame, "");
-	}
-
 	_playerController = GetActor()->GetComponent<PlayerController>();
 }
 
 // 更新処理
-void PlayerInput::Update(float elapsedTime)
+void PlayerInput::OnUpdate(float elapsedTime)
 {
-	// 起動状態でなければ処理しない
-	if (!IsActive())
-		return;
-
 	auto playerController = _playerController.lock();
 	if (playerController == nullptr)
 		return;
@@ -60,40 +50,16 @@ void PlayerInput::Update(float elapsedTime)
 	playerController->SetIsEvade(_INPUT_TRIGGERD("Evade"));
 
 	playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));
+	playerController->SetIsSelect(_INPUT_PRESSED("Select"));
 
 	// メニュー画面起動入力
 	if (_INPUT_TRIGGERD("Menu"))
 	{
-		if (_inputMediator.lock())
-		{
-			_inputMediator.lock()->ReceiveCommand(this, InputMediator::CommandType::OpenMenu, "");
-		}
+		_inputManager->SwitchInput("MenuInput");
 	}
 }
 
 // GUI描画
 void PlayerInput::DrawGui()
 {
-}
-
-// Mediatorから命令を受信
-void PlayerInput::ReceiveCommandFromOther(InputMediator::CommandType commandType, const std::string& command)
-{
-	switch (commandType)
-	{
-	case InputMediator::CommandType::StartGame:
-		// ゲーム開始の命令を受け取った場合、アクティブにする
-		SetActive(true);
-		break;
-	case InputMediator::CommandType::OpenMenu:
-		// メニュー画面を開く命令を受け取った場合、非アクティブにする
-		SetActive(false);
-		break;
-	case InputMediator::CommandType::CloseMenu:
-		// メニュー画面を閉じる命令を受け取った場合、アクティブにする
-		SetActive(true);
-		break;
-	default:
-		break;
-	}
 }

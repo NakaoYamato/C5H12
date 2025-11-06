@@ -218,6 +218,7 @@ void Actor::DrawGui()
 		ImGui::Checkbox(u8"Show", &_isShowing);
 		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
 		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
+		ImGui::Checkbox(u8"InheritParentTransform", &_isInheritParentTransform);
 	}
 
 	// トランスフォーム
@@ -359,7 +360,7 @@ void Actor::UpdateModelTransform()
 /// トランスフォーム更新
 void Actor::UpdateTransform()
 {
-	_transform.UpdateTransform(_parent ? &_parent->GetTransform().GetMatrix() : nullptr);
+	_transform.UpdateTransform((GetParent() && _isInheritParentTransform) ? &GetParent()->GetTransform().GetMatrix() : nullptr);
 }
 /// トランスフォームGUI描画
 void Actor::DrawTransformGui()
@@ -379,7 +380,7 @@ void Actor::DrawGuizmo()
 		// 単位を考慮した行列から位置、回転、スケールを取得
 		DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&transform);
 		DirectX::XMMATRIX InvC = DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixScaling(_transform.GetLengthScale(), _transform.GetLengthScale(),_transform.GetLengthScale()));
-		DirectX::XMMATRIX InvP = DirectX::XMMatrixInverse(nullptr, _parent ? DirectX::XMLoadFloat4x4(&_parent->GetTransform().GetMatrix()) : DirectX::XMMatrixIdentity());
+		DirectX::XMMATRIX InvP = DirectX::XMMatrixInverse(nullptr, GetParent() ? DirectX::XMLoadFloat4x4(&GetParent()->GetTransform().GetMatrix()) : DirectX::XMMatrixIdentity());
 		M = InvC * M * InvP;
 		DirectX::XMVECTOR S, R, T;
 		DirectX::XMMatrixDecompose(&S, &R, &T, M);

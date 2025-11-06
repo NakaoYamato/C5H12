@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/InGame/InputMediator.h"
+#include "../../Source/InGame/InputManager.h"
 #include "PlayerController.h"
 
 class PlayerInput : public InputControllerBase
@@ -10,16 +10,16 @@ public:
 	~PlayerInput() override {}
 
 	// 名前取得
-	const char* GetName() const override { return InputMediator::PlayerInputName; }
+	const char* GetName() const override { return "PlayerInput"; }
 	// 開始処理
 	void Start() override;
-	// 更新処理
-	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
 
-	// 他のInputControllerから命令を受信
-	void ReceiveCommandFromOther(InputMediator::CommandType commandType, const std::string& command) override;
+protected:
+	// 更新時処理
+	void OnUpdate(float elapsedTime)  override;
+
 private:
 	std::weak_ptr<PlayerController> _playerController;
 };

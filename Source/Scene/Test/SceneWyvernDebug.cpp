@@ -8,7 +8,7 @@
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
-#include "../../InGame/InputMediator.h"
+#include "../../InGame/InputManager.h"
 #include "../../InGame/CanvasMediator.h"
 #include "../../Menu/MenuMediator.h"
 
@@ -26,7 +26,7 @@ void SceneWyvernDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto inputMediator = RegisterActor<InputMediator>("InputMediator", ActorTag::DrawContextParameter);
+        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::DrawContextParameter);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

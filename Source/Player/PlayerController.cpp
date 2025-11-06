@@ -3,6 +3,8 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/Enemy/EnemyController.h" 
 
+#include "../../Source/Stage/Props/Chest/ChestController.h"
+
 #include <imgui.h>
 
 void PlayerController::Start()
@@ -202,4 +204,19 @@ void PlayerController::DrawGui()
 	ImGui::DragFloat(u8"溜め段階2リムライトカラー強度", &_chargeEffectRimLightColor2.w, 0.01f, 0.0f, 10.0f);
 	ImGui::ColorEdit3(u8"溜め段階3リムライトカラー", &_chargeEffectRimLightColor3.x);
 	ImGui::DragFloat(u8"溜め段階3リムライトカラー強度", &_chargeEffectRimLightColor3.w, 0.01f, 0.0f, 10.0f);
+}
+
+// 接触処理
+void PlayerController::OnContact(CollisionData& collisionData)
+{
+	if (collisionData.otherLayer == CollisionLayer::Stage &&
+		collisionData.otherIsTrigger)
+	{
+		auto chestController = collisionData.other->GetComponent<ChestController>();
+		if (chestController)
+		{
+			if (IsSelect())
+				chestController->Open();
+		}
+	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Source/InGame/InputMediator.h"
+#include "../../Source/InGame/InputManager.h"
 
 class MenuInput : public InputControllerBase
 {
@@ -19,15 +19,9 @@ public:
 	MenuInput() {}
 	~MenuInput() override {}
 	// 名前取得
-	const char* GetName() const override { return InputMediator::MenuInputName; }
-	// 開始処理
-	void Start() override;
-	// 更新処理
-	void Update(float elapsedTime) override;
+	const char* GetName() const override { return "MenuInput"; }
 	// GUI描画
 	void DrawGui() override;
-	// 他のInputControllerから命令を受信
-	void ReceiveCommandFromOther(InputMediator::CommandType commandType, const std::string& command) override;
 	// 入力状態を取得
 	bool IsInput(InputType inputType) const
 	{
@@ -35,6 +29,10 @@ public:
 	}
 	// メニュー画面入力を終了
 	void CloseMenu();
+protected:
+	// 更新時処理
+	void OnUpdate(float elapsedTime)  override;
+
 private:
 	// 現在の入力状態をビットフラグで保持
 	int _inputFlags = 0;

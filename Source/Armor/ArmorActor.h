@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/Actor/ModelAttach/ModelAttachActor.h"
+#include "../../Library/Component/ModelRenderer.h"
 #include "ArmorManager.h"
 
 class ArmorActor : public Actor
@@ -13,6 +14,8 @@ public:
 	~ArmorActor()override {}
 	// 生成時処理
 	void OnCreate() override;
+	// 開始時処理
+	void OnStart() override;
 	// Updateのあとによばれる更新時処理
 	void OnLateUpdate(float elapsedTime)  override;
 	// GUI描画処理
@@ -28,4 +31,7 @@ protected:
 	ArmorType _type;
 	int _armorIndex = 0;
 	ArmorData* _armorData = nullptr;
+
+	// 親のモデルレンダラー
+	std::weak_ptr<ModelRenderer> _parentModelRenderer;
 };

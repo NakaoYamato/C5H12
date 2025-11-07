@@ -34,11 +34,17 @@ void ModelRenderer::Render(const RenderContext& rc)
 	const ModelResource* resource = _model.lock()->GetResource();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
+		Material* material = &_materialMap.at(mesh.materialIndex);
+
+		// 描画チェック
+		if (_hiddenMeshMap[material->GetName()])
+			continue;
+
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
 			&mesh,
 			_model.lock().get(),
 			_color, 
-			&_materialMap.at(mesh.materialIndex),
+			material,
 			_renderType);
 	}
 }
@@ -50,11 +56,17 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 	const ModelResource* resource = _model.lock()->GetResource();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
+		Material* material = &_materialMap.at(mesh.materialIndex);
+
+		// 描画チェック
+		if (_hiddenMeshMap[material->GetName()])
+			continue;
+
 		GetActor()->GetScene()->GetMeshRenderer().DrawShadow(
 			&mesh, 
 			_model.lock().get(),
 			Vector4::White,
-			&_materialMap.at(mesh.materialIndex),
+			material,
 			_renderType);
 	}
 }
@@ -93,6 +105,20 @@ void ModelRenderer::DrawGui()
 				ImGui::TreePop();
 			}
 		}
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
+	if (ImGui::TreeNode(u8"メッシュ非表示リスト"))
+	{
+		for (auto& pair : _hiddenMeshMap)
+		{
+			bool hidden = pair.second;
+			if (ImGui::Checkbox(pair.first.c_str(), &hidden))
+			{
+				pair.second = hidden;
+			}
+		}
+
 		ImGui::TreePop();
 	}
 	ImGui::Separator();
@@ -152,6 +178,8 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 			_renderType,
 			material.GetShaderName(),
 			isDeferred));
+
+		_hiddenMeshMap[material.GetName()] = false;
 	}
 }
 

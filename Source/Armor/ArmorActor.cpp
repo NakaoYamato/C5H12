@@ -6,15 +6,23 @@
 
 void ArmorActor::OnCreate()
 {
+	// コンポーネント追加
+	auto modelRenderer = this->AddComponent<ModelRenderer>();
+}
+
+void ArmorActor::OnStart()
+{
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
 	if (armorManager == nullptr)
 		return;
 
+	auto parent = GetParent();
+	if (parent == nullptr)
+		return;
+	_parentModelRenderer = parent->GetComponent<ModelRenderer>();
+
 	// データ構築
 	BuildData(armorManager.get(), _armorIndex);
-
-	// コンポーネント追加
-	auto modelRenderer = this->AddComponent<ModelRenderer>();
 }
 
 // Updateのあとによばれる更新時処理
@@ -55,6 +63,9 @@ void ArmorActor::OnDrawGui()
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
 	if (armorManager == nullptr)
 		return;
+	auto parentModelRenderer = _parentModelRenderer.lock();
+	if (parentModelRenderer == nullptr)
+		return;
 
 	static ImGuiTabBarFlags tab_bar_flags =
 		ImGuiTabBarFlags_AutoSelectNewTabs |
@@ -67,7 +78,39 @@ void ArmorActor::OnDrawGui()
 			ImGui::Text(u8"選択中の防具Index: %d", _armorIndex);
 			if (_armorData != nullptr)
 			{
+				if (ImGui::TreeNode(u8"非表示メッシュ"))
+				{
+					for (auto& [name, flag] : parentModelRenderer->GetHiddenMeshMap())
+					{
+						bool hidden = false;
 
+						// 現在の非表示メッシュリストに存在するか
+						auto str = 
+							std::find(_armorData->hiddenMeshes.begin(), _armorData->hiddenMeshes.end(), name);
+						if (str != _armorData->hiddenMeshes.end())
+						{
+							hidden = true;
+						}
+
+						if (ImGui::Checkbox(name.c_str(), &hidden))
+						{
+							// 非表示メッシュリストに存在するなら削除
+							if (str != _armorData->hiddenMeshes.end())
+							{
+								_armorData->hiddenMeshes.erase(str);
+								parentModelRenderer->SetMeshHidden(name, false);
+							}
+							// 存在しないなら追加
+							else
+							{
+								_armorData->hiddenMeshes.push_back(name);
+								parentModelRenderer->SetMeshHidden(name, true);
+							}
+						}
+					}
+
+					ImGui::TreePop();
+				}
 			}
 
 			ImGui::Separator();
@@ -106,6 +149,20 @@ void ArmorActor::UpdateModelTransform()
 // データ構築
 void ArmorActor::BuildData(ArmorManager* manager, int index)
 {
+	auto parentModelRenderer = _parentModelRenderer.lock();
+	if (parentModelRenderer == nullptr)
+		return;
+
+	// 以前の非表示メッシュ解除
+	if (_armorData != nullptr)
+	{
+		for (auto& name : _armorData->hiddenMeshes)
+		{
+			parentModelRenderer->SetMeshHidden(name, false);
+		}
+
+	}
+
 	_armorIndex = index;
 	_armorData = manager->GetArmorData(_type, _armorIndex);
 	if (_armorData == nullptr)
@@ -116,4 +173,10 @@ void ArmorActor::BuildData(ArmorManager* manager, int index)
 	}
 	// モデル読み込み
 	LoadModel(_armorData->modelFilePath.c_str());
+
+	// 非表示メッシュ設定
+	for (auto& name : _armorData->hiddenMeshes)
+	{
+		parentModelRenderer->SetMeshHidden(name, true);
+	}
 }

@@ -24,6 +24,7 @@ void SceneArmorEditor::OnInitialize()
     player->LoadModel(PlayerActor::GetModelFilePath());
 	// コンポーネント追加
 	player->AddComponent<ModelRenderer>();
+	player->AddComponent<Animator>();
 
 	// 防具生成
 	{

@@ -101,8 +101,8 @@ void ArmorManager::DrawGui()
 			{
 				if (ImGui::TreeNode(std::to_string(index).c_str()))
 				{
-					ImGui::InputText("Name", &data.name);
-					ImGui::Text("Model File Path:");
+					ImGui::InputText(u8"名前", &data.name);
+					ImGui::Text(u8"ファイルパス:");
 					ImGui::SameLine();
 					ImGui::Text(data.modelFilePath.c_str());
 					ImGui::SameLine();
@@ -128,8 +128,24 @@ void ArmorManager::DrawGui()
 							}
 						}
 					}
-					ImGui::InputFloat("Defense", &data.defense);
-					ImGui::InputInt("Rarity", &data.rarity);
+					ImGui::InputFloat(u8"防御力", &data.defense);
+					ImGui::InputInt(u8"レア度", &data.rarity);
+					if (ImGui::TreeNode(u8"非表示メッシュ"))
+					{
+						size_t hiddenMeshIndex = 0;
+						for (auto& meshName : data.hiddenMeshes)
+						{
+							ImGui::InputText((u8"非表示メッシュ" + std::to_string(hiddenMeshIndex)).c_str(), &meshName);
+							ImGui::SameLine();
+							if (ImGui::Button((u8"削除##hiddenMesh" + std::to_string(hiddenMeshIndex)).c_str()))
+							{
+								data.hiddenMeshes.erase(data.hiddenMeshes.begin() + hiddenMeshIndex);
+								break;
+							}
+							hiddenMeshIndex++;
+						}
+						ImGui::TreePop();
+					}
 
 					if (ImGui::Button(u8"削除"))
 					{
@@ -140,6 +156,7 @@ void ArmorManager::DrawGui()
 
 					ImGui::TreePop();
 				}
+				index++;
 			}
 
 			ImGui::TreePop();

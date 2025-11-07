@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Source/InGame/InputManager.h"
-#include "../UI/ChestUIController.h"
+#include "../UI/Chest/ChestUIController.h"
 
 class ChestInput : public InputControllerBase
 {

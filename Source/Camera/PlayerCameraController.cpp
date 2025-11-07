@@ -8,6 +8,7 @@
 void PlayerCameraController::Start()
 {
     _stateController = _playerActor->GetComponent<StateController>();
+	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 	_cameraEventReceiver = GetActor()->GetScene()->GetMainCameraActor()->GetComponent<CameraEventReceiver>();
 
     Vector3 angle = GetActor()->GetTransform().GetAngle();
@@ -30,6 +31,20 @@ void PlayerCameraController::LateUpdate(float elapsedTime)
     // F4を押していたらデバッグ用カメラ起動中
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
         return;
+
+    // 入力情報を取得
+    float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
+    float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
+
+	if (auto inputManager = _inputManager.lock())
+	{
+		// カメラを動かせないなら入力値を無効化
+        if (!inputManager->CanMoveCamera())
+        {
+			moveX = 0.0f;
+			moveY = 0.0f;
+        }
+	}
 
     // 抜刀状態か確認
 	bool isCombat = false;
@@ -57,10 +72,6 @@ void PlayerCameraController::LateUpdate(float elapsedTime)
     DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(Front));
     DirectX::XMStoreFloat3(&right, DirectX::XMVector3Normalize(Right));
     DirectX::XMStoreFloat3(&up, DirectX::XMVector3Normalize(Up));
-
-    // 入力情報を取得
-    float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
-    float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
 
     // Y軸回転
     angle.y += moveX * 0.5f;

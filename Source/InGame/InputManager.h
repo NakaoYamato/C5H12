@@ -28,6 +28,9 @@ public:
 	// 入力の切り替え
 	void SwitchInput(const std::string& nextInputName);
 
+	// カメラを動かせるかどうか
+	bool CanMoveCamera() const;
+
 private:
 	// 入力コントローラー群
 	std::unordered_map<std::string, InputControllerRef> _inputControllers;
@@ -63,6 +66,11 @@ public:
 	{
 		return _isActive;
 	}
+	bool CanMoveCamera() const
+	{
+		return _canMoveCamera;
+	}
+
 	void SetActive(bool isActive)
 	{
 		_isActive = isActive;
@@ -70,6 +78,10 @@ public:
 	void SetInputManager(InputManager* inputManager)
 	{
 		_inputManager = inputManager;
+	}
+	void SetCanMoveCamera(bool canMove)
+	{
+		_canMoveCamera = canMove;
 	}
 #pragma endregion
 
@@ -82,4 +94,6 @@ protected:
 	InputManager* _inputManager = nullptr;
 	// 起動状態
 	bool _isActive = false;
+	// カメラを動かすかどうか
+	bool _canMoveCamera = true;
 };

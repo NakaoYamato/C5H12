@@ -8,6 +8,9 @@
 // 開始処理
 void ChestInput::Start()
 {
+	// カメラは動かせない
+	SetCanMoveCamera(false);
+
 	// キャンバスからチェストUIを取得
 	if (auto canvas = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI))
 	{
@@ -44,6 +47,15 @@ void ChestInput::OnEnd()
 // 更新時処理
 void ChestInput::OnUpdate(float elapsedTime)
 {
+	auto chestUIController = _chestUIController.lock();
+	if (!chestUIController)
+		return;
+
+	if (_INPUT_TRIGGERD("Up"))
+		chestUIController->AddIndex(-1);
+	if (_INPUT_TRIGGERD("Down"))
+		chestUIController->AddIndex(+1);
+
 	// 前の入力コントローラーに戻す
 	if (_INPUT_TRIGGERD("Menu"))
 	{

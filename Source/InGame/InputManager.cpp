@@ -99,6 +99,16 @@ void InputManager::SwitchInput(const std::string& nextInputName)
 	_currentInputControllerName = nextInputName;
 }
 
+// ƒJƒƒ‰‚ğ“®‚©‚¹‚é‚©‚Ç‚¤‚©
+bool InputManager::CanMoveCamera() const
+{
+	if (_inputControllers.find(_currentInputControllerName) != _inputControllers.end())
+	{
+		return _inputControllers.at(_currentInputControllerName)->CanMoveCamera();
+	}
+	return false;
+}
+
 // ¶¬ˆ—
 void InputControllerBase::OnCreate()
 {

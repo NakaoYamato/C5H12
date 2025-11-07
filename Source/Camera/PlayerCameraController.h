@@ -6,6 +6,7 @@
 #include "../../Library/Component/CameraEventReceiver.h"
 
 #include "../../Source/Player/PlayerActor.h"
+#include "../../Source/InGame/InputManager.h"
 
 /// <summary>
 /// プレイヤーカメラコントローラー
@@ -30,6 +31,7 @@ public:
 
 private:
     PlayerActor* _playerActor;
+	std::weak_ptr<InputManager> _inputManager;
 
 	std::weak_ptr<StateController> _stateController;
 	std::weak_ptr<CameraEventReceiver> _cameraEventReceiver;

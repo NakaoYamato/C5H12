@@ -338,7 +338,8 @@
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
     <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
-    <ClCompile Include="Source\InGame\UI\ChestUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Chest\State\ChestSelectStateUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
@@ -611,7 +612,8 @@
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
     <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
-    <ClInclude Include="Source\InGame\UI\ChestUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Chest\State\ChestSelectStateUIController.h" />
     <ClInclude Include="Source\InGame\UI\TimerUIController.h" />
     <ClInclude Include="Source\InGame\InputManager.h" />
     <ClInclude Include="Source\Menu\MenuMediator.h" />

@@ -22,7 +22,7 @@ class Scene;
 /// </summary>
 enum class ActorTag
 {
-	DrawContextParameter,	// •`‰æ‚Ì‘O€”õ
+	System,	// •`‰æ‚Ì‘O€”õ
 	Stage,
 	Player,
 	Enemy,

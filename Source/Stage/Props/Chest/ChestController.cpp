@@ -1,11 +1,26 @@
 #include "ChestController.h"
 
+#include "../../Library/Scene/Scene.h"
+
 #include <imgui.h>
 
 // 初期化処理
 void ChestController::Start()
 {
-	_chestInput = GetActor()->GetComponent<ChestInput>();
+	// 入力マネージャーの子供からチェスト入力コンポーネント取得
+	if (auto inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System))
+	{
+		for (auto& child : inputManager->GetChildren())
+		{
+			auto chestInput = child->GetComponent<ChestInput>();
+			if (chestInput)
+			{
+				_chestInput = chestInput;
+				break;
+			}
+		}
+	}
+
 	// 子供のアクター取得
 	for (auto& child : GetActor()->GetChildren())
 	{
@@ -49,15 +64,16 @@ void ChestController::DrawGui()
 	ImGui::DragFloat(u8"開く速度(度/s)", &_angleSpeed, 1.0f, 1.0f, 360.0f);
 }
 
-void ChestController::Open()
+bool ChestController::Open()
 {
 	auto chestInput = _chestInput.lock();
 	if (!chestInput)
-		return;
+		return false;
 
 	if (chestInput->IsActive())
-		return;
+		return false;
 
 	chestInput->Swich();
+	return true;
 }
 

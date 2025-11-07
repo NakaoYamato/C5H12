@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../Source/InGame/CanvasMediator.h"
+#include "../../Source/InGame/InGameCanvasActor.h"
 #include "../../Source/Common/Damageable.h"
 
-class PlayerHealthUIController : public UIController
+class PlayerHealthUIController : public SpriteRenderer
 {
 public:
 	PlayerHealthUIController(bool isUserControlled, std::shared_ptr<Damageable> damageable) :
@@ -14,18 +14,13 @@ public:
 	const char* GetName() const override { return "PlayerHPUIController"; }
 	// 開始処理
 	void Start() override;
-	// 削除処理
-	void OnDelete() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
-
-	void DrawUI(const RenderContext& rc)override;
 private:
 	// ユーザーが操作するプレイヤーか
 	const bool _isUserControlled = true;
-	std::weak_ptr<CanvasMediator> _canvasMediator;
 	std::weak_ptr<Damageable> _damageable;
 
 	// 各種スプライトの名前

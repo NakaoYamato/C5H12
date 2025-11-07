@@ -7,25 +7,18 @@
 // 開始処理
 void PlayerHealthUIController::Start()
 {
-	// シーンからCanvasMediatorを取得
-	_canvasMediator = GetActor()->GetScene()->GetActorManager().FindByClass<CanvasMediator>(ActorTag::UI);
-	if (_canvasMediator.lock())
+	// シーンからInGameCanvasActorを取得
+	if (auto canvas = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI))
 	{
 		// 親設定
-		GetActor()->SetParent(_canvasMediator.lock().get());
-		// ユーザーが操作するプレイヤーのHPUIの場合は、CanvasMediatorに登録
-		if (_isUserControlled)
-			_canvasMediator.lock()->SetUserHealthUI(this);
-		// ユーザーが操作しないプレイヤーのHPUIの場合は、CanvasMediatorに登録
-		else
-			_canvasMediator.lock()->AddOtherUserHealthUI(this);
+		GetActor()->SetParent(canvas.get());
     }
 	// 画像読み込み
 	LoadTexture(FrameSprite, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(MaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(DamageGaugeMaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(MaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
+	LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
 	LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
 
 	SetDepthState(MaskSprite, DepthState::SpriteMask);
@@ -48,18 +41,6 @@ void PlayerHealthUIController::Start()
 
 	GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(2.0f, 4.0f));
 	SetColor(GaugeEndSprite, Vector4::Green);
-}
-// 削除処理
-void PlayerHealthUIController::OnDelete()
-{
-	if (_canvasMediator.lock())
-	{
-		// ユーザーが操作しないプレイヤーのHPUIの場合は、CanvasMediatorから削除
-		if (!_isUserControlled)
-		{
-			_canvasMediator.lock()->RemoveOtherUserHealthUI(this);
-		}
-	}
 }
 // 更新処理
 void PlayerHealthUIController::Update(float elapsedTime)
@@ -97,22 +78,7 @@ void PlayerHealthUIController::Update(float elapsedTime)
 // GUI描画
 void PlayerHealthUIController::DrawGui()
 {
-	ImGui::Text(u8"キャンバス: %s", _canvasMediator.lock() ? u8"有効" : u8"無効");
 	ImGui::DragFloat(u8"ダメージゲージスケール速度", &_damageGaugeScaleSpeed, 0.1f, 0.0f, 10.0f);
-	UIController::DrawGui();
-}
-
-void PlayerHealthUIController::DrawUI(const RenderContext& rc)
-{
-	const RenderState* renderState = rc.renderState;
-	SpriteRender(FrameSprite, rc);
-
-	SpriteRender(DamageGaugeMaskSprite, rc);
-	SpriteRender(DamageGaugeSprite, rc);
-
-	SpriteRender(MaskSprite, rc);
-	SpriteRender(GaugeSprite, rc);
-	
-	rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-	SpriteRender(GaugeEndSprite, rc);
+	ImGui::Separator();
+	SpriteRenderer::DrawGui();
 }

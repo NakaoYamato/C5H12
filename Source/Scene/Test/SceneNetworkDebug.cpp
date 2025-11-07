@@ -7,7 +7,7 @@
 #include "../../Library/Actor/Terrain/TerrainActor.h"
 
 #include "../../Source/AI/MetaAI.h"
-#include "../../InGame/CanvasMediator.h"
+#include "../../InGame/InGameCanvasActor.h"
 
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
@@ -23,17 +23,17 @@ void SceneNetworkDebug::OnInitialize()
 
     // オブジェクト作成
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
         metaAI->AddComponent<MetaAI>();
     }
     {
-        auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
+        auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::System);
     }
     {
         auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
     }
     {
-        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
+        auto canvas = RegisterActor<InGameCanvasActor>("Canvas", ActorTag::UI);
     }
 
     // 予め読み込むモデル

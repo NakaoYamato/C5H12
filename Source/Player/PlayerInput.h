@@ -16,6 +16,9 @@ public:
 	// GUI•`‰æ
 	void DrawGui() override;
 
+	// I—¹ˆ—
+	void OnEnd() override;
+
 protected:
 	// XVˆ—
 	void OnUpdate(float elapsedTime)  override;

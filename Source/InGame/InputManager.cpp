@@ -1,7 +1,19 @@
 #include "InputManager.h"
 
 #include "../../Library/Scene/Scene.h"
+
+#include "Input/ChestInput.h"
+
 #include <imgui.h>
+
+// 生成時処理
+void InputManager::OnCreate()
+{
+	// チェスト用入力コントローラー登録
+	auto chestInputController = GetScene()->RegisterActor<Actor>("ChestInput", ActorTag::System);
+	chestInputController->SetParent(this);
+	auto chestInput = chestInputController->AddComponent<ChestInput>();
+}
 
 // 開始関数
 void InputManager::OnStart()
@@ -23,6 +35,7 @@ void InputManager::OnPreUpdate(float elapsedTime)
 			if (name == _nextInputControllerName)
 			{
 				controller->SetActive(true);
+				controller->OnExecute();
 			}
 			else
 			{
@@ -76,6 +89,13 @@ void InputManager::SwitchInput(const std::string& nextInputName)
 {
 	_inputControllerHistory.push_back(_currentInputControllerName);
 	_nextInputControllerName = nextInputName;
+	if (!_currentInputControllerName.empty() &&
+		_inputControllers[_currentInputControllerName] != nullptr)
+	{
+		_inputControllers[_currentInputControllerName]->OnEnd();
+		_inputControllers[_currentInputControllerName]->SetActive(false);
+	}
+
 	_currentInputControllerName = nextInputName;
 }
 
@@ -83,7 +103,7 @@ void InputManager::SwitchInput(const std::string& nextInputName)
 void InputControllerBase::OnCreate()
 {
 	// InputManagerを探す
-	auto manager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::DrawContextParameter);
+	auto manager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 	if (manager != nullptr)
 	{
 		_inputManager = manager.get();

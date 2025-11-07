@@ -207,7 +207,7 @@ void PlayerActor::OnCreate()
 	// ƒJƒƒ‰ì¬
 	if (_isUserControlled)
 	{
-		auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::DrawContextParameter);
+		auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
         camera->AddComponent<PlayerCameraController>(this);
 	}
 }

@@ -337,7 +337,8 @@
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
-    <ClCompile Include="Source\InGame\CanvasMediator.cpp" />
+    <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
+    <ClCompile Include="Source\InGame\UI\ChestUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
@@ -355,8 +356,7 @@
     <ClCompile Include="Source\Stage\EnvironmentDestroyer.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestActor.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestController.cpp" />
-    <ClCompile Include="Source\Stage\Props\Chest\ChestInput.cpp" />
-    <ClCompile Include="Source\Stage\Props\Chest\UI\ChestUIActor.cpp" />
+    <ClCompile Include="Source\InGame\Input\ChestInput.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\Title\TitleMediator.cpp" />
     <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
@@ -610,7 +610,8 @@
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
-    <ClInclude Include="Source\InGame\CanvasMediator.h" />
+    <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
+    <ClInclude Include="Source\InGame\UI\ChestUIController.h" />
     <ClInclude Include="Source\InGame\UI\TimerUIController.h" />
     <ClInclude Include="Source\InGame\InputManager.h" />
     <ClInclude Include="Source\Menu\MenuMediator.h" />
@@ -631,8 +632,7 @@
     <ClInclude Include="Source\Stage\EnvironmentDestroyer.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestActor.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestController.h" />
-    <ClInclude Include="Source\Stage\Props\Chest\ChestInput.h" />
-    <ClInclude Include="Source\Stage\Props\Chest\UI\ChestUIActor.h" />
+    <ClInclude Include="Source\InGame\Input\ChestInput.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Title\TitleMediator.h" />
     <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />

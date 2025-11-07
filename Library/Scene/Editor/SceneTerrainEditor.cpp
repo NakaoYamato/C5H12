@@ -14,7 +14,7 @@ void SceneTerrainEditor::OnInitialize()
     // デバッグカメラをオンにする
     Debug::GetDebugInput()->buttonData |= DebugInput::BTN_F4;
 
-	auto deformerActor = RegisterActor<Actor>(u8"TerrainDeformer", ActorTag::DrawContextParameter);
+	auto deformerActor = RegisterActor<Actor>(u8"TerrainDeformer", ActorTag::System);
     deformerActor->AddComponent<TerrainDeformer>();
 
     auto stage0 = RegisterActor<TerrainActor>("Stage0", 

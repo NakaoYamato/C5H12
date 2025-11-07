@@ -9,7 +9,7 @@
 void CombatStatusController::Start()
 {	
 	// ƒƒ^AIŽæ“¾
-	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
+	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
 	if (metaAIActor)
 	{
 		_metaAI = metaAIActor->GetComponent<MetaAI>();

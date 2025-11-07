@@ -63,3 +63,25 @@ void PlayerInput::OnUpdate(float elapsedTime)
 void PlayerInput::DrawGui()
 {
 }
+
+// 終了時処理
+void PlayerInput::OnEnd()
+{
+	auto playerController = _playerController.lock();
+	if (playerController == nullptr)
+		return;
+
+	// 入力状態リセット
+	playerController->SetMovement(Vector2::Zero);
+	playerController->SetIsMoving(false);
+	playerController->SetIsDash(false);
+	playerController->SetIsGuard(false);
+
+	playerController->SetIsAttack(false);
+	playerController->SetIsHoldingAttackKey(false);
+	playerController->SetIsSpecialAttack(false);
+	playerController->SetIsEvade(false);
+
+	playerController->SetIsUsingItem(false);
+	playerController->SetIsSelect(false);
+}

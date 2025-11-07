@@ -11,7 +11,7 @@
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 #include "../../InGame/InputManager.h"
-#include "../../InGame/CanvasMediator.h"
+#include "../../InGame/InGameCanvasActor.h"
 #include "../../Menu/MenuMediator.h"
 
 void SceneWyvernDecalDebug::OnInitialize()
@@ -23,12 +23,12 @@ void SceneWyvernDecalDebug::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
 
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
         metaAI->AddComponent<MetaAI>();
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::DrawContextParameter);
+        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::System);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
@@ -51,7 +51,7 @@ void SceneWyvernDecalDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
+        auto canvas = RegisterActor<InGameCanvasActor>("Canvas", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

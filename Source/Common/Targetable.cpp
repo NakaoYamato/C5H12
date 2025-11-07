@@ -11,7 +11,7 @@
 void Targetable::Start()
 {
 	// ƒƒ^AI‚ğæ“¾
-	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
+	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
 	if (metaAIActor)
 	{
 		// ƒƒ^AI‚É“o˜^

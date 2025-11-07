@@ -18,7 +18,7 @@ void GryphusActor::OnCreate()
     auto model = LoadModel(GetModelFilePath());
 
     // ƒƒ^AIŽæ“¾
-    auto metaAIActor = GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::DrawContextParameter);
+    auto metaAIActor = GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
     std::shared_ptr<MetaAI> metaAI = metaAIActor->GetComponent<MetaAI>();
 
     GetTransform().SetLengthScale(0.1f);

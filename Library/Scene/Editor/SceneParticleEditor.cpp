@@ -8,7 +8,7 @@
 void SceneParticleEditor::OnInitialize()
 {
 	// パーティクル用アクター生成
-	auto particleActor = RegisterActor<Actor>(u8"ParticleEmiter", ActorTag::DrawContextParameter);
+	auto particleActor = RegisterActor<Actor>(u8"ParticleEmiter", ActorTag::System);
 	auto effectController = particleActor->AddComponent<EffectController>();
 	effectController->LoadParticleEffect(0, u8"./Data/Particle/ParticleEmiter.json");
 	((EffectController::ParticleEffectData*)effectController->GetEffectData(0))->SetShowEditorGui(true);

@@ -4,7 +4,6 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/SphereCollider.h"
 #include "ChestController.h"
-#include "ChestInput.h"
 
 // 生成時処理
 void ChestActor::OnCreate()
@@ -14,7 +13,6 @@ void ChestActor::OnCreate()
 
 	// コンポーネント追加
 	this->AddComponent<ModelRenderer>();
-	this->AddComponent<ChestInput>();
 	auto controller = this->AddComponent<ChestController>();
 
 	// コライダー追加

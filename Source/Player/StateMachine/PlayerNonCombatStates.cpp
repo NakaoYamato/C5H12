@@ -209,7 +209,8 @@ PlayerNonCombatWalkState::PlayerNonCombatWalkState(PlayerStateMachine* stateMach
 void PlayerNonCombatWalkState::OnEnter()
 {
 	// フラグを立てる
-	_owner->GetPlayer()->SetIsMoving(true);
+	// TODO : ネットワークの処理修正
+	//_owner->GetPlayer()->SetIsMoving(true);
 	ChangeSubState("WalkStart");
 }
 
@@ -243,6 +244,7 @@ void PlayerNonCombatWalkState::OnExecute(float elapsedTime)
 void PlayerNonCombatWalkState::OnExit()
 {
 	// フラグをおろす
+	// TODO : ネットワークの処理修正
 	_owner->GetPlayer()->SetIsMoving(false);
 }
 #pragma endregion
@@ -448,7 +450,8 @@ PlayerNonCombatRunState::PlayerNonCombatRunState(PlayerStateMachine* stateMachin
 void PlayerNonCombatRunState::OnEnter()
 {
 	// フラグを立てる
-	_owner->GetPlayer()->SetIsMoving(true);
+	// TODO : ネットワークの処理修正
+	//_owner->GetPlayer()->SetIsMoving(true);
 	ChangeSubState("RunStart");
 
     // スタミナ自動回復を停止
@@ -495,6 +498,7 @@ void PlayerNonCombatRunState::OnExecute(float elapsedTime)
 void PlayerNonCombatRunState::OnExit()
 {
 	// フラグをおろす
+	// TODO : ネットワークの処理修正
 	_owner->GetPlayer()->SetIsMoving(false);
 	// スタミナ自動回復を再開
 	_owner->GetStaminaController()->SetIsStaminaRecover(true);

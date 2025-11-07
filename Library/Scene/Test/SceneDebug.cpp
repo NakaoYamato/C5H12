@@ -37,7 +37,7 @@ void SceneDebug::OnInitialize()
             ImGuiControl::Profiler::Color::Blue,
             [&]()
             {
-                std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight0", ActorTag::DrawContextParameter);
+                std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight0", ActorTag::System);
                 light->AddComponent<PointLightController>();
             }
         ));
@@ -106,19 +106,19 @@ void SceneDebug::OnInitialize()
     else
     {
         {
-            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight0", ActorTag::DrawContextParameter);
+            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight0", ActorTag::System);
             light->AddComponent<PointLightController>();
         }
         {
-            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight1", ActorTag::DrawContextParameter);
+            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight1", ActorTag::System);
             light->AddComponent<PointLightController>();
         }
         {
-            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight2", ActorTag::DrawContextParameter);
+            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight2", ActorTag::System);
             light->AddComponent<PointLightController>();
         }
         {
-            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight3", ActorTag::DrawContextParameter);
+            std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"PointLight3", ActorTag::System);
             light->AddComponent<PointLightController>();
         }
         {

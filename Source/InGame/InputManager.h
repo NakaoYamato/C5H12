@@ -11,6 +11,9 @@ class InputManager : public Actor
 {
 public:
 	~InputManager() override {}
+
+	// 生成時処理
+	void OnCreate() override;
 	// 開始関数
 	void OnStart() override;
 	// 更新前処理
@@ -48,6 +51,10 @@ public:
 	void OnCreate() override;
 	// 更新処理
 	void Update(float elapsedTime) final override;
+	// 起動時関数
+	virtual void OnExecute() {}
+	// 終了時処理
+	virtual void OnEnd() {}
 
 	// この入力に切り替える
 	void Swich();

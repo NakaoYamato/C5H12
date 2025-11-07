@@ -13,7 +13,7 @@
 #include "../../Source/Stage/Props/Chest/ChestActor.h"
 
 #include "../../InGame/InputManager.h"
-#include "../../InGame/CanvasMediator.h"
+#include "../../InGame/InGameCanvasActor.h"
 #include "../../Menu/MenuMediator.h"
 
 void ScenePlayerDebug::OnInitialize()
@@ -28,12 +28,12 @@ void ScenePlayerDebug::OnInitialize()
 
     // オブジェクト作成
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
 		metaAI->AddComponent<MetaAI>();
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::DrawContextParameter);
+        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::System);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
@@ -67,7 +67,7 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
+        auto canvas = RegisterActor<InGameCanvasActor>("Canvas", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
     //{

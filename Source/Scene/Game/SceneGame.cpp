@@ -14,7 +14,7 @@
 #include "../../Source/Stage/StageController.h"
 
 #include "../../InGame/InputManager.h"
-#include "../../InGame/CanvasMediator.h"
+#include "../../InGame/InGameCanvasActor.h"
 #include "../../Menu/MenuMediator.h"
 
 // ネットワーク有効フラグ
@@ -34,16 +34,16 @@ void SceneGame::OnInitialize()
 
     // オブジェクト作成
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::DrawContextParameter);
+        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
         metaAI->AddComponent<MetaAI>();
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::DrawContextParameter);
+        auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::System);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::DrawContextParameter);
+        auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::System);
 		// サーバー開始
 		if (NetworkEnabled)
 		{
@@ -77,7 +77,7 @@ void SceneGame::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto canvas = RegisterActor<CanvasMediator>("CanvasMediator", ActorTag::UI);
+        auto canvas = RegisterActor<InGameCanvasActor>("Canvas", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
 

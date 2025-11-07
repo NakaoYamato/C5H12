@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Source/InGame/InputManager.h"
+#include "../UI/ChestUIController.h"
 
 class ChestInput : public InputControllerBase
 {
@@ -9,9 +10,20 @@ public:
 	~ChestInput() override {}
 	// 名前取得
 	const char* GetName() const override { return "ChestInput"; }
+	// 開始処理
+	void Start() override;
 	// GUI描画
 	void DrawGui() override;
+
+	// 起動時関数
+	void OnExecute() override;
+	// 終了時関数
+	void OnEnd() override;
+
 protected:
 	// 更新時処理
 	void OnUpdate(float elapsedTime)  override;
+
+private:
+	std::weak_ptr<ChestUIController> _chestUIController;
 };

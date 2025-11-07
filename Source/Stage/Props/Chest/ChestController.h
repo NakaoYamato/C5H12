@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
-#include "ChestInput.h"
+#include "../../Source/InGame/Input/ChestInput.h"
 
 class ChestController : public Component
 {
@@ -18,7 +18,7 @@ public:
 	void DrawGui() override;
 
 	// ŠJ‚­ˆ—
-	void Open();
+	bool Open();
 private:
 	std::weak_ptr<Actor> _topActor;
 	std::weak_ptr<ChestInput> _chestInput;

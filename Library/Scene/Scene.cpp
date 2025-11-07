@@ -66,13 +66,13 @@ void Scene::Initialize()
     // 必須オブジェクト生成
     ActorManager& actorManager = GetActorManager();
     {
-        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::DrawContextParameter);
+        std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::System);
         _directionalLight = light->AddComponent<LightController>();
 		light->GetTransform().SetPositionY(1.0f);
         light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(60.0f));
     }
     {
-        _mainCameraActor = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::DrawContextParameter);
+        _mainCameraActor = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::System);
 		_mainCameraActor.lock()->AddComponent<CameraEventReceiver>();
     }
 

@@ -16,6 +16,16 @@ void ModelRenderer::OnCreate()
 		SetModel(GetActor()->GetModel());
 	}
 }
+// 遅延更新処理
+void ModelRenderer::LateUpdate(float elapsedTime)
+{
+	// モデルが設定されていないときにアクターのモデルを検索
+	if (GetActor()->GetModel().lock() && !_model.lock().get())
+	{
+		// モデルが存在するならセット
+		SetModel(GetActor()->GetModel());
+	}
+}
 // 描画処理
 void ModelRenderer::Render(const RenderContext& rc)
 {

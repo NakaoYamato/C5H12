@@ -106,12 +106,6 @@ void ModelResource::Load(std::string filename)
         // ボーンの構築
         BuildBone(_meshes, _nodes);
 
-        // メッシュのノード構築
-        for (Mesh& mesh : _meshes)
-        {
-            mesh.node = &_nodes.at(mesh.nodeIndex);
-        }
-
         return;
     }
     else
@@ -833,8 +827,6 @@ void ModelResource::TraverseMesh(std::vector<Mesh>& meshes,
 
         // ノードの番号設定
         mesh.nodeIndex = _nodeIndexMap[aNode];
-        // 参照ノード設定
-        mesh.node = &nodes.at(mesh.nodeIndex);
     }
 
     // 子ノードの探査

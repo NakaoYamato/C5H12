@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <imgui.h>
+#include <Mygui.h>
 
 #include "../../Library/Math/Quaternion.h"
 #include "../../Library/Graphics/Graphics.h"
@@ -223,6 +224,15 @@ void SceneModelEditor::DrawModelGui()
 				// トランスフォームをリセット
 				_modelActor.lock()->GetTransform().Reset();
             }
+        }
+        ImGui::Separator();
+        if (ImGui::Button(u8"不要ノードの削除"))
+        {
+			auto model = _modelActor.lock()->GetModel().lock();
+			if (model)
+			{
+				model->RemoveUnusedNodes(Graphics::Instance().GetDevice());
+			}
         }
 
         ImGui::Separator();
@@ -526,22 +536,22 @@ void SceneModelEditor::DrawTextureGui()
 
                 for (auto& [key, textureData] : modelMaterial.textureDatas)
                 {
-                    ImGui::Text("%s", key.c_str());
+                    ImGui::Text(u8"%s", key.c_str());
                     ImGui::SameLine();
 
-                    ImGui::Text("%s", textureData.filename.c_str());
+                    ImGui::Text(u8"%s", textureData.filename.c_str());
                     if (const auto& srv = materials[index].GetTextureData(key).Get())
                         ImGui::Image(srv, { textureSize,textureSize });
                     ImGui::PushID(&textureData.filename);
                     ImGui::SameLine();
 
-                    if (ImGui::Button("..."))
+                    if (ImGui::Button(u8"..."))
                     {
                         // ダイアログを開く
                         std::string filepath;
                         std::string currentDirectory;
                         const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
-                        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, filter);
+                        Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
                         // ファイルを選択したら
                         if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
                         {
@@ -552,7 +562,7 @@ void SceneModelEditor::DrawTextureGui()
                             materials[index].LoadTexture(key, path.c_str());
                         }
                     }
-                    if (ImGui::Button("削除"))
+                    if (ImGui::Button(u8"削除"))
                     {
                         // テクスチャを削除
                         textureData.filename = "";

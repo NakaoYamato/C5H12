@@ -318,6 +318,12 @@ void Actor::Remove()
 /// ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İ
 std::weak_ptr<Model> Actor::LoadModel(const char* filename)
 {
+	if (filename == "")
+	{
+		_model.reset();
+		return std::weak_ptr<Model>();
+	}
+
 	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
 	return _model;
 }

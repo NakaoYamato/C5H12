@@ -37,7 +37,7 @@ public:
 	void ApplyPoseToResource(ID3D11Device* device);
 
 	// 不要ノードの削除
-	void RemoveUnusedNodes();
+	void RemoveUnusedNodes(ID3D11Device* device);
 
 #pragma region アクセサ
 	// ノードの名前から番号を取得
@@ -66,6 +66,11 @@ public:
 	void ReSerialize();
 
 protected:
+	/// <summary>
+	/// ノードデータのコピー
+	/// </summary>
+	void CopyNodes();
+
 	/// <summary>
 	/// COMオブジェクト生成
 	/// </summary>

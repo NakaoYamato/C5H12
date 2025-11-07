@@ -103,7 +103,6 @@ public:
 		int materialIndex = 0;
 
 		int nodeIndex = 0;
-		Node* node = nullptr;
 
 		std::vector<Bone> bones;
 
@@ -204,7 +203,7 @@ public:
 
 	// デシリアライズ
 	void Deserialize(const char* filename);
-private:
+
 #pragma region 読み込み
 	// ノードの読み込み
 	void LoadNodes(std::vector<Node>& nodes);

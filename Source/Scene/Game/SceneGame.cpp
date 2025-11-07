@@ -8,8 +8,6 @@
 
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Player/Weapon/Warrior/PlayerSwordActor.h"
-#include "../../Source/Player/Weapon/Warrior/PlayerShieldActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Enemy/Gryphus/GryphusActor.h"
 #include "../../Source/Enemy/Weak/WeakActor.h"

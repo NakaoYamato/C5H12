@@ -225,12 +225,6 @@
     <ClCompile Include="Library\PostProcess\FXAA\FXAA.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\Weapon\Warrior\PlayerSwordActor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Player\Weapon\Warrior\PlayerShieldActor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Player\PlayerInput.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -753,6 +747,9 @@
     <ClCompile Include="Source\Stage\Props\Chest\UI\ChestUIActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\Editor\SceneArmorEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -990,12 +987,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\PostProcess\FXAA\FXAA.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Player\Weapon\Warrior\PlayerSwordActor.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Player\Weapon\Warrior\PlayerShieldActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Player\Weapon\WeaponActor.h">
@@ -1578,6 +1569,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Stage\Props\Chest\UI\ChestUIActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Scene\Editor\SceneArmorEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

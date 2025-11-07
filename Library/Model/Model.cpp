@@ -3,6 +3,7 @@
 #include <sstream>
 #include <functional>
 #include <filesystem>
+#include <set>
 #include <imgui.h>
 
 #include "../HRTrace.h"
@@ -24,30 +25,7 @@ Model::Model(ID3D11Device* device, const char* filename)
     _filename = _resource->GetSerializePath();
 
     // ノードデータをコピー
-    _poseNodes.resize(_resource->GetNodes().size());
-    for (size_t i = 0; i < _poseNodes.size(); ++i)
-    {
-        const ModelResource::Node& node = _resource->GetNodes().at(i);
-        ModelResource::Node& copyNode = _poseNodes.at(i);
-        // データをコピー
-        copyNode.name = node.name;
-        copyNode.parentIndex = node.parentIndex;
-        copyNode.position = node.position;
-        copyNode.rotation = node.rotation;
-        copyNode.scale = node.scale;
-    }
-
-    // 親、子供の再構築
-    for (size_t i = 0; i < _poseNodes.size(); ++i)
-    {
-        ModelResource::Node& copyNode = _poseNodes.at(i);
-
-        if (copyNode.parentIndex != -1)
-        {
-            copyNode.parent = &_poseNodes.at(copyNode.parentIndex);
-            _poseNodes.at(copyNode.parentIndex).children.emplace_back(&copyNode);
-        }
-    }
+    CopyNodes();
 
     Debug::Output::String(L"FBXモデルの読み込み成功\n");
     Debug::Output::String("\t");
@@ -185,7 +163,7 @@ void Model::DrawGui()
         }
     }
 
-    if (_debugNodeIndex != -1)
+    if (_debugNodeIndex != -1 && _debugNodeIndex < _poseNodes.size())
     {
         DirectX::XMFLOAT4X4 worldTransform = _poseNodes[_debugNodeIndex].worldTransform;
         //worldTransform._11 = 1.0f;
@@ -274,7 +252,178 @@ void Model::ApplyPoseToResource(ID3D11Device* device)
     _resource->GetAddressNodes()[0].parent = nullptr;
     _resource->GetAddressNodes()[0].children.clear();
 
+    // ボーン情報削除
+    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
+    {
+        mesh.nodeIndex = 0;
+        mesh.bones.clear();
+    }
+
     // ノードデータをコピー
+    CopyNodes();
+
+    /// COMオブジェクト生成
+    CreateComObject(device, _filename.c_str());
+}
+
+// 不要ボーンの削除
+void Model::RemoveUnusedNodes(ID3D11Device* device)
+{
+    // 必須ノードをマーク
+    std::vector<bool> isNodeRequired(_resource->GetAddressNodes().size(), false);
+
+    // メッシュ自体がアタッチされているノードをマーク
+    for (const ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
+    {
+        if (mesh.nodeIndex >= 0)
+        {
+            isNodeRequired[mesh.nodeIndex] = true;
+        }
+    }
+
+    // 頂点ウェイトが0より大きいボーンインデックスを収集し、
+    // そのボーンが参照するノードをマーク
+    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
+    {
+        // このメッシュで実際に使用されている「ローカルボーンインデックス」のセット
+        std::set<uint32_t> usedMeshBoneIndices;
+        for (const ModelResource::Vertex& v : mesh.vertices)
+        {
+            if (v.boneWeight.x > 0.0f) usedMeshBoneIndices.insert(v.boneIndex.x);
+            if (v.boneWeight.y > 0.0f) usedMeshBoneIndices.insert(v.boneIndex.y);
+            if (v.boneWeight.z > 0.0f) usedMeshBoneIndices.insert(v.boneIndex.z);
+            if (v.boneWeight.w > 0.0f) usedMeshBoneIndices.insert(v.boneIndex.w);
+        }
+
+        // 使用されているローカルボーンが参照する「グローバルノードインデックス」をマーク
+        for (uint32_t localBoneIndex : usedMeshBoneIndices)
+        {
+            if (localBoneIndex < mesh.bones.size())
+            {
+                const ModelResource::Bone& bone = mesh.bones[localBoneIndex];
+                if (bone.nodeIndex >= 0)
+                {
+                    isNodeRequired[bone.nodeIndex] = true;
+                }
+            }
+        }
+    }
+
+    // 必須ノードの「親」をすべて必須としてマーク（階層を維持するため）
+    for (size_t i = 0; i < _resource->GetAddressNodes().size(); ++i)
+    {
+        if (isNodeRequired[i])
+        {
+            int parentIdx = _resource->GetAddressNodes()[i].parentIndex;
+            while (parentIdx != -1 && !isNodeRequired[parentIdx])
+            {
+                isNodeRequired[parentIdx] = true;
+                parentIdx = _resource->GetAddressNodes()[parentIdx].parentIndex;
+            }
+        }
+    }
+
+    // ノードの再マッピングテーブルを作成し、_nodes を再構築
+    std::vector<ModelResource::Node> newNodes;
+    // oldToNewNodeIndex[古いインデックス] = 新しいインデックス (不要なノードは -1)
+    std::vector<int> oldToNewNodeIndex(_resource->GetAddressNodes().size(), -1);
+    int newIndex = 0;
+
+    for (size_t i = 0; i < _resource->GetAddressNodes().size(); ++i)
+    {
+        if (isNodeRequired[i])
+        {
+            oldToNewNodeIndex[i] = newIndex;
+            newNodes.push_back(_resource->GetAddressNodes()[i]); // この時点では古い parentIndex が入っている
+            newIndex++;
+        }
+    }
+
+    //ステップ 3: すべての参照インデックスを更新
+    for (ModelResource::Node& node : newNodes)
+    {
+        if (node.parentIndex != -1)
+        {
+            node.parentIndex = oldToNewNodeIndex[node.parentIndex];
+            _ASSERT_EXPR_A(node.parentIndex != -1, "Parent node was pruned, hierarchy is broken!");
+        }
+		// 子供情報は後で再構築するのでクリアしておく
+		node.children.clear();
+    }
+
+    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
+    {
+        // メッシュのノードインデックスを更新
+        mesh.nodeIndex = oldToNewNodeIndex[mesh.nodeIndex];
+        _ASSERT_EXPR_A(mesh.nodeIndex != -1, "Mesh node was pruned!");
+
+        // ボーンの再構築
+        std::vector<ModelResource::Bone> newMeshBones;
+        // oldToNewMeshBoneIndex[古いローカルボーンインデックス] = 新しいローカルボーンインデックス
+        std::vector<uint32_t> oldToNewMeshBoneIndex(mesh.bones.size(), (uint32_t)-1);
+        uint32_t newMeshBoneIdx = 0;
+
+        for (size_t i = 0; i < mesh.bones.size(); ++i)
+        {
+            ModelResource::Bone& oldBone = mesh.bones[i];
+            // このボーンが参照するノードが「必須ノード」として残っているか確認
+            if (oldToNewNodeIndex[oldBone.nodeIndex] != -1)
+            {
+                // 必須ノードだったので、新しいボーンリストに追加
+                oldBone.nodeIndex = oldToNewNodeIndex[oldBone.nodeIndex]; // グローバルノードインデックスを更新
+                newMeshBones.push_back(oldBone);
+
+                oldToNewMeshBoneIndex[i] = newMeshBoneIdx; // マッピングテーブルを更新
+                newMeshBoneIdx++;
+            }
+        }
+        // メッシュのボーンリストを入れ替え
+        mesh.bones = std::move(newMeshBones);
+
+        // 頂点の boneIndex を更新
+        for (ModelResource::Vertex& v : mesh.vertices)
+        {
+            // ウェイトが 0 のインデックスは参照先が不定でも問題ないため、
+            // 安全のために 0 (通常はルートボーン等) に設定する。
+            v.boneIndex.x = (v.boneWeight.x > 0.0f) ? oldToNewMeshBoneIndex[v.boneIndex.x] : 0;
+            v.boneIndex.y = (v.boneWeight.y > 0.0f) ? oldToNewMeshBoneIndex[v.boneIndex.y] : 0;
+            v.boneIndex.z = (v.boneWeight.z > 0.0f) ? oldToNewMeshBoneIndex[v.boneIndex.z] : 0;
+            v.boneIndex.w = (v.boneWeight.w > 0.0f) ? oldToNewMeshBoneIndex[v.boneIndex.w] : 0;
+
+            // ウェイトが 0 より大きいのに、マッピング先が -1 (pruned) だったらアサーション
+            // (ステップ 1-2 のロジックが正しければ、これは発生しない)
+            if (v.boneWeight.x > 0.0f) _ASSERT_EXPR_A(v.boneIndex.x != (uint32_t)-1, "Vertex weighted to a pruned bone!");
+            if (v.boneWeight.y > 0.0f) _ASSERT_EXPR_A(v.boneIndex.y != (uint32_t)-1, "Vertex weighted to a pruned bone!");
+            if (v.boneWeight.z > 0.0f) _ASSERT_EXPR_A(v.boneIndex.z != (uint32_t)-1, "Vertex weighted to a pruned bone!");
+            if (v.boneWeight.w > 0.0f) _ASSERT_EXPR_A(v.boneIndex.w != (uint32_t)-1, "Vertex weighted to a pruned bone!");
+        }
+    }
+
+    // ノードリストを入れ替え
+    _resource->GetAddressNodes().clear();
+	_resource->GetAddressNodes() = std::move(newNodes);
+
+    // ノードポインタ（parent, children）を再構築
+    _resource->BuildNode(_resource->GetAddressNodes());
+
+    // メッシュ内のボーンポインタ（bone.node）を再構築
+    _resource->BuildBone(_resource->GetAddressMeshes(), _resource->GetAddressNodes());
+
+    // ノードデータをコピー
+    CopyNodes();
+
+    // COMオブジェクト生成
+    CreateComObject(device, _filename.c_str());
+}
+
+void Model::ReSerialize()
+{
+    _resource->Serialize(_filename.c_str());
+}
+
+/// ノードデータのコピー
+void Model::CopyNodes()
+{
     _poseNodes.clear();
     _poseNodes.resize(_resource->GetNodes().size());
     for (size_t i = 0; i < _poseNodes.size(); ++i)
@@ -289,13 +438,6 @@ void Model::ApplyPoseToResource(ID3D11Device* device)
         copyNode.scale = node.scale;
     }
 
-	// ボーン情報削除
-    for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
-    {
-		mesh.nodeIndex = 0;
-        mesh.bones.clear();
-    }
-
     // 親、子供の再構築
     for (size_t i = 0; i < _poseNodes.size(); ++i)
     {
@@ -307,20 +449,6 @@ void Model::ApplyPoseToResource(ID3D11Device* device)
             _poseNodes.at(copyNode.parentIndex).children.emplace_back(&copyNode);
         }
     }
-
-    /// COMオブジェクト生成
-    CreateComObject(device, _filename.c_str());
-}
-
-// 不要ボーンの削除
-void Model::RemoveUnusedNodes()
-{
-
-}
-
-void Model::ReSerialize()
-{
-    _resource->Serialize(_filename.c_str());
 }
 
 /// COMオブジェクト生成

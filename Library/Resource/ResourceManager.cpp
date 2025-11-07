@@ -27,6 +27,14 @@ void ResourceManager::DrawGui()
 				if (ImGui::TreeNode(name.c_str()))
 				{
 					ImGui::Text("FilePath: %s", resource->GetFilePath().c_str());
+					if (ImGui::Button(u8"“Ç‚Ýž‚Ý"))
+					{
+						resource->LoadFromFile();
+					}
+					if (ImGui::Button(u8"•Û‘¶"))
+					{
+						resource->SaveToFile();
+					}
 					ImGui::Separator();
 
 					resource->DrawGui();

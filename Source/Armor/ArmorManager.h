@@ -22,9 +22,16 @@ public:
 	// Gui描画
 	void DrawGui() override;
 
+	// 防具データ取得
+	std::vector<ArmorData>& GetArmorDataList(ArmorType type) { return _armorDataMap[type]; }
+	// 防具データ取得
+	ArmorData* GetArmorData(ArmorType type, size_t index);
+
 private:
 	std::string _filePath = "./Data/Resource/ArmorManager.json";
-	std::vector<ArmorData> _armorDataList;
+	std::unordered_map<ArmorType, std::vector<ArmorData>> _armorDataMap;
+
+	int _selectedAddTypeIndex = 0;
 };
 
 // リソース設定

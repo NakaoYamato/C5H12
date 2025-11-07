@@ -10,7 +10,7 @@ namespace ImGui
 {
 	static const char* DDSTextureFilter = "Texture Files(*.dds)\0*.dds;\0All Files(*.*)\0*.*;\0\0";
 	static const char* JsonFilter = "Json Files(*.json)\0*.json;\0All Files(*.*)\0*.*;\0\0";
-	static const char* TextureFilter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
+	static const char* TextureFilter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif;*.jpeg)\0*.dds;*.png;*.tga;*.jpg;*.tif;*.jpeg;\0All Files(*.*)\0*.*;\0\0";
 	static const char* ModelFilter = "Model Files(*.fbx;*.obj)\0*.fbx;*.obj;\0All Files(*.*)\0*.*;\0\0";
 
 	/// <summary>

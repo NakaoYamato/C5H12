@@ -17,6 +17,8 @@ public:
 
 	// ¶¬ˆ—
 	void OnCreate()override;
+	// ’x‰„XVˆ—
+	void LateUpdate(float elapsedTime) override;
 	// •`‰æˆ—
 	void Render(const RenderContext& rc) override;
 	// ‰e•`‰æ

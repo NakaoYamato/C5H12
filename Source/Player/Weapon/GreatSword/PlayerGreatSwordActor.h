@@ -9,7 +9,7 @@ class PlayerGreatSwordActor : public WeaponActor
 public:
 	static const char* GetModelFilePath()
 	{
-		return "./Data/Model/Player/GreatSword/Weapon/Marcus' sword1.fbx";
+		return "./Data/Model/Player/Weapon/Marcus' sword1.fbx";
 	}
 public:
 	~PlayerGreatSwordActor()override {}

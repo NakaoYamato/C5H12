@@ -45,7 +45,7 @@ void ChestUIController::Update(float elapsedTime)
     case ChestUIController::SelectMenu:
         // indexÇÃêßå¿
         if (_index < 0)
-            _index = SelectMenuOption::ArmorOption;
+            _index = SelectMenuOption::TestOption;
 		else if (_index >= SelectMenuOption::MaxOption)
 			_index = SelectMenuOption::ItemOption;
 

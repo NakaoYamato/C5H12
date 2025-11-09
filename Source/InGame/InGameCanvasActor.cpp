@@ -4,6 +4,7 @@
 
 #include "../../Source/InGame/UI/TimerUIController.h"
 #include "../../Source/InGame/UI/Chest/ChestUIController.h"
+#include "../../Source/InGame/UI/Chest/State/ChestSelectStateUIController.h"
 
 // ¶¬Žžˆ—
 void InGameCanvasActor::OnCreate()
@@ -21,6 +22,7 @@ void InGameCanvasActor::OnCreate()
 	{
 		auto SelectState = GetScene()->RegisterActor<UIActor>("ChestSelectStateUI", ActorTag::UI);
 		SelectState->SetParent(chestUIActor.get());
+        SelectState->AddComponent<ChestSelectStateUIController>();
 
 		auto ItemState = GetScene()->RegisterActor<UIActor>("ChestItemStateUI", ActorTag::UI);
 		ItemState->SetParent(chestUIActor.get());

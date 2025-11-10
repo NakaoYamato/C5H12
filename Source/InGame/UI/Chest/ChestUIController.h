@@ -2,6 +2,9 @@
 
 #include "../../Library/Component/SpriteRenderer.h"
 
+#include "Menu/ChestSelectMenuController.h"
+#include "Menu/ChestArmorMenuController.h"
+
 class ChestUIController : public Component
 {
 public:
@@ -10,15 +13,6 @@ public:
 		SelectMenu,
 		ItemMenu,
 		ArmorMenu,
-	};
-
-	enum SelectMenuOption
-	{
-		ItemOption,
-		ArmorOption,
-		TestOption,
-
-		MaxOption,
 	};
 
 public:
@@ -39,31 +33,37 @@ public:
 	// ステート初期化
 	void InitState();
 
-	// index加算
-	void AddIndex(int val) { _index += val; }
+	// インデックス追加
+	void AddIndex(int val);
 	// 次へ進む
 	void NextState();
 	// 前の状態へ戻る
 	void PreviousState();
 
+	// チェストUIを開く
+	void Open();
+
+	// チェストUIを閉じる
+	void Close();
+
+	// チェスト前位置設定
+	void SetChestFrontPosition(const Vector3& pos) { _chestFrontPosition = pos; }
+	// チェスト回転角度Y設定
+	void SetChestAngleY(float angleY) { _chestAngleY = angleY; }
+
 private:
-	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 
-	// 各種スプライトの名前
-	const std::string ItemBackSpr = "ItemBack";
-	const std::string ArmorBackSpr = "ArmorBack";
-	const std::string TestBackSpr = "TestBack";
-	const std::string FrontSpr = "Front";
 
-	// テキストパラメータ
-	Vector2 _textOffset = Vector2(-200.0f, -20.0f);
-	Vector2 _textOrigin = Vector2::Zero;
-	Vector2 _textScale = Vector2::One;
+private:
+	std::weak_ptr<ChestSelectMenuController> _selectUI;
+	std::weak_ptr<ChestArmorMenuController> _armorUI;
 
 	// メニュー状態
 	State _state = State::SelectMenu;
 
-	int _index = 0;
+	float _fadeTime = 0.5f;
+	bool _toArmorMenu = false;
 
-	const float BackPositionInterval = 102.0f;
+	Vector3 _chestFrontPosition{};
+	float _chestAngleY = 0.0f;
 };

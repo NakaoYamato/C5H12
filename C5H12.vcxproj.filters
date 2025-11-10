@@ -750,7 +750,10 @@
     <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\InGame\UI\Chest\State\ChestSelectStateUIController.cpp">
+    <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1577,7 +1580,13 @@
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\InGame\UI\Chest\State\ChestSelectStateUIController.h">
+    <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\2D\Fade.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

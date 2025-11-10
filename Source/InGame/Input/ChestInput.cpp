@@ -20,7 +20,7 @@ void ChestInput::Start()
 			if (chestUIController)
 			{
 				_chestUIController = chestUIController;
-				_chestUIController.lock()->GetActor()->SetIsActive(false);
+				_chestUIController.lock()->Close();
 				break;
 			}
 		}
@@ -35,13 +35,13 @@ void ChestInput::DrawGui()
 // 起動時関数
 void ChestInput::OnExecute()
 {
-	_chestUIController.lock()->GetActor()->SetIsActive(true);
+	_chestUIController.lock()->Open();
 }
 
 // 終了時関数
 void ChestInput::OnEnd()
 {
-	_chestUIController.lock()->GetActor()->SetIsActive(false);
+	_chestUIController.lock()->Close();
 }
 
 // 更新時処理
@@ -55,9 +55,13 @@ void ChestInput::OnUpdate(float elapsedTime)
 		chestUIController->AddIndex(-1);
 	if (_INPUT_TRIGGERD("Down"))
 		chestUIController->AddIndex(+1);
+	if (_INPUT_TRIGGERD("Select"))
+		chestUIController->NextState();
+	if (_INPUT_TRIGGERD("Back"))
+		chestUIController->PreviousState();
 
 	// 前の入力コントローラーに戻す
-	if (_INPUT_TRIGGERD("Menu"))
+	if (!chestUIController->GetActor()->IsActive())
 	{
 		_inputManager->SwitchPreviousInput();
 	}

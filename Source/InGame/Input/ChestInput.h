@@ -20,6 +20,7 @@ public:
 	// I—¹ŠÖ”
 	void OnEnd() override;
 
+	std::weak_ptr<ChestUIController> GetChestUIController() const { return _chestUIController; }
 protected:
 	// XVˆ—
 	void OnUpdate(float elapsedTime)  override;

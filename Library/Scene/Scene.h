@@ -6,6 +6,7 @@
 #include "../../Library/Graphics/RenderContext.h"
 #include "../../Library/2D/SkyMap.h"
 #include "../../Library/2D/Primitive.h"
+#include "../../Library/2D/Fade.h"
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Renderer/TextRenderer.h"
@@ -139,6 +140,10 @@ public:
 	std::shared_ptr<LightController> GetDirectionalLight() {
 		return _directionalLight.lock();
 	}
+	// フェード情報取得
+	Fade* GetFade() {
+		return &_fade;
+	}
 	// カメラ取得
 	virtual Camera* GetMainCamera() {
 		return &_camera;
@@ -153,6 +158,9 @@ public:
 
 	// 経過時間取得
 	float GetTime() const { return _time; }
+
+	// フェードイン時間設定
+	void SetFadeInTime(float time) { _fadeInTime = time; }
 
 	// 画面サイズ取得
 	float GetScreenWidth() const;
@@ -192,6 +200,7 @@ private:
 	std::weak_ptr<Actor>			_mainCameraActor;
 #pragma endregion
 
+	Fade 							_fade;
 	Camera							_camera = {};
 	RenderContext					_renderContext;
 	MeshRenderer					_meshRenderer;
@@ -208,6 +217,8 @@ private:
 
 	// 経過時間
 	float							_time = 0.0f;
+	// フェードイン時間
+	float							_fadeInTime = 1.0f;
 
 	// ロード進捗率
 	float							_completionLoading = 0.0f;

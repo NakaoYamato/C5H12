@@ -4,7 +4,8 @@
 
 #include "../../Source/InGame/UI/TimerUIController.h"
 #include "../../Source/InGame/UI/Chest/ChestUIController.h"
-#include "../../Source/InGame/UI/Chest/State/ChestSelectStateUIController.h"
+#include "../../Source/InGame/UI/Chest/Menu/ChestSelectMenuController.h"
+#include "../../Source/InGame/UI/Chest/Menu/ChestArmorMenuController.h"
 
 // 生成時処理
 void InGameCanvasActor::OnCreate()
@@ -17,17 +18,17 @@ void InGameCanvasActor::OnCreate()
 	// チェスト生成
 	auto chestUIActor = GetScene()->RegisterActor<UIActor>("ChestUI", ActorTag::UI);
 	chestUIActor->SetParent(this);
-	chestUIActor->GetRectTransform().SetLocalPosition(Vector2(1500.0f, 170.0f));
 	chestUIActor->AddComponent<ChestUIController>();
 	{
 		auto SelectState = GetScene()->RegisterActor<UIActor>("ChestSelectStateUI", ActorTag::UI);
 		SelectState->SetParent(chestUIActor.get());
-        SelectState->AddComponent<ChestSelectStateUIController>();
+        SelectState->AddComponent<ChestSelectMenuController>();
 
 		auto ItemState = GetScene()->RegisterActor<UIActor>("ChestItemStateUI", ActorTag::UI);
 		ItemState->SetParent(chestUIActor.get());
 
 		auto ArmorState = GetScene()->RegisterActor<UIActor>("ChestArmorStateUI", ActorTag::UI);
 		ArmorState->SetParent(chestUIActor.get());
+		ArmorState->AddComponent<ChestArmorMenuController>();
 	}
 }

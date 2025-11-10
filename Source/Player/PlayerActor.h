@@ -18,6 +18,9 @@ public:
 	// 生成時処理
 	void OnCreate() override;
 
+	// ユーザーが操作するプレイヤーか
+	bool IsUserControlled() const { return _isUserControlled; }
+
 private:
 	// ユーザーが操作するプレイヤーか
 	const bool _isUserControlled = true;

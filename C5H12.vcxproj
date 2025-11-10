@@ -339,7 +339,8 @@
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
     <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp" />
-    <ClCompile Include="Source\InGame\UI\Chest\State\ChestSelectStateUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
@@ -396,6 +397,7 @@
     <ClCompile Include="Source\Title\Item\TitleToOnlineSettingItem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Library\2D\Fade.h" />
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
     <ClInclude Include="Library\2D\SpriteResource.h" />
@@ -613,7 +615,8 @@
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
     <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
-    <ClInclude Include="Source\InGame\UI\Chest\State\ChestSelectStateUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.h" />
+    <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.h" />
     <ClInclude Include="Source\InGame\UI\TimerUIController.h" />
     <ClInclude Include="Source\InGame\InputManager.h" />
     <ClInclude Include="Source\Menu\MenuMediator.h" />

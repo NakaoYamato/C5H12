@@ -47,6 +47,7 @@ public:
 	void SetTexSize(const std::string& name, const Vector2& s) { _sprites.at(name).SetTexSize(s); }
 	void SetCenter(const std::string& name, const Vector2& c) { _sprites.at(name).SetCenter(c); }
 	void SetColor(const std::string& name, const Vector4& c) { _sprites.at(name).SetColor(c); }
+	void SetColorAlpha(const std::string& name, float a) { _sprites.at(name).SetColor(Vector4(_sprites.at(name).GetColor().x, _sprites.at(name).GetColor().y, _sprites.at(name).GetColor().z, a)); }
     void SetDepthState(const std::string& name, DepthState ds) { _sprites.at(name).SetDepthState(ds); }
     void SetStencil(const std::string& name, int stencil) { _sprites.at(name).SetStencil(stencil); }
 #pragma endregion

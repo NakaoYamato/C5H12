@@ -86,6 +86,9 @@ void Scene::Initialize()
 
 	// コリジョンの初期化
     _collisionManager.Setup();
+
+    // フェード開始
+	_fade.Start(Fade::Type::FadeIn, _fadeInTime);
 }
 
 // 終了化
@@ -116,6 +119,9 @@ void Scene::Update(float elapsedTime)
 
 	// パーティクルの更新
 	_particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+
+    // フェード更新
+	_fade.Update(elapsedTime);
 
 	// 時間の更新
 	_time += elapsedTime;
@@ -448,6 +454,16 @@ void Scene::Render()
 
         // テキスト描画
         _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+
+		// フェード描画
+		Vector4 fadeColor = Vector4::Black;
+		fadeColor.w = _fade.GetAlpha();
+        _primitive->Rect(dc,
+            Vector2::Zero,
+            Vector2(screenWidth, screenHeight),
+            Vector2::Zero,
+            0.0f,
+            fadeColor);
 
         OnRender();
     }

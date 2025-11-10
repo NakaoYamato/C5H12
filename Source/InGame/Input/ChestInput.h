@@ -16,9 +16,9 @@ public:
 	void DrawGui() override;
 
 	// ‹N“®ŠÖ”
-	void OnExecute() override;
+	void OnEntry() override;
 	// I—¹ŠÖ”
-	void OnEnd() override;
+	void OnExit() override;
 
 	std::weak_ptr<ChestUIController> GetChestUIController() const { return _chestUIController; }
 protected:

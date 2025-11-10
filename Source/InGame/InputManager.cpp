@@ -35,7 +35,7 @@ void InputManager::OnPreUpdate(float elapsedTime)
 			if (name == _nextInputControllerName)
 			{
 				controller->SetActive(true);
-				controller->OnExecute();
+				controller->OnEntry();
 			}
 			else
 			{
@@ -92,7 +92,7 @@ void InputManager::SwitchInput(const std::string& nextInputName)
 	if (!_currentInputControllerName.empty() &&
 		_inputControllers[_currentInputControllerName] != nullptr)
 	{
-		_inputControllers[_currentInputControllerName]->OnEnd();
+		_inputControllers[_currentInputControllerName]->OnExit();
 		_inputControllers[_currentInputControllerName]->SetActive(false);
 	}
 

@@ -19,8 +19,8 @@
 #include "../../Library/Collision/CollisionManager.h"
 #include "../../Library/Effekseer/EffekseerEffectManager.h"
 
+#include "../../Library/Actor/Camera/MainCamera.h"
 #include "../../Library/Component/Light/LightController.h"
-#include "../../Library/Camera/Camera.h"
 
 #pragma region 定義
 #define _RENDER_FRAME_INDEX         0
@@ -149,7 +149,7 @@ public:
 		return &_camera;
 	}
 	// カメラアクター取得
-	virtual std::shared_ptr<Actor> GetMainCameraActor() {
+	virtual std::shared_ptr<MainCamera> GetMainCameraActor() {
 		return _mainCameraActor.lock();
 	}
 
@@ -197,7 +197,7 @@ private:
 
 #pragma region シーン必須オブジェクト
 	std::weak_ptr<LightController>	_directionalLight;
-	std::weak_ptr<Actor>			_mainCameraActor;
+	std::weak_ptr<MainCamera>		_mainCameraActor;
 #pragma endregion
 
 	Fade 							_fade;

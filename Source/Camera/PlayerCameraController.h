@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Library/Component/Component.h"
+#include "../../Library/Component/CameraControllerBase.h"
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Camera/Camera.h"
 #include "../../Library/Component/CameraEventReceiver.h"
@@ -13,7 +13,7 @@
 /// Transform.Position == eye
 /// Transform.Rotation == camera angle
 /// </summary>
-class PlayerCameraController : public Component
+class PlayerCameraController : public CameraControllerBase
 {
 public:
     PlayerCameraController(PlayerActor* playerActor) : _playerActor(playerActor) {}
@@ -22,12 +22,11 @@ public:
     const char* GetName() const override { return "PlayerCameraController"; }
     // 開始処理
     void Start() override;
-    // 更新処理
-    void LateUpdate(float elapsedTime) override;
-	// 固定間隔更新処理
-    void FixedUpdate() override;
     // GUI描画
     void DrawGui() override;
+
+    // 更新時処理
+    void OnUpdate(float elapsedTime) override;
 
 private:
     PlayerActor* _playerActor;
@@ -64,7 +63,6 @@ private:
 	float _combatFocusLerpSpeed = 7.0f;
 	float _combatEyeLerpSpeed = 10.0f;
 	float _combatCameraDistance = 5.0f;
-
 #pragma endregion
 
 };

@@ -207,7 +207,12 @@ void PlayerActor::OnCreate()
 	// ƒJƒƒ‰ì¬
 	if (_isUserControlled)
 	{
-		auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
-        camera->AddComponent<PlayerCameraController>(this);
+		if (!GetScene()->GetMainCameraActor()->IsControllerRegistered("PlayerCameraController"))
+		{
+			auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
+			camera->AddComponent<PlayerCameraController>(this);
+
+			GetScene()->GetMainCameraActor()->SwitchController("PlayerCameraController");
+		}
 	}
 }

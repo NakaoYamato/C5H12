@@ -55,9 +55,9 @@ public:
 	// 更新処理
 	void Update(float elapsedTime) final override;
 	// 起動時関数
-	virtual void OnExecute() {}
+	virtual void OnEntry() {}
 	// 終了時処理
-	virtual void OnEnd() {}
+	virtual void OnExit() {}
 
 	// この入力に切り替える
 	void Swich();

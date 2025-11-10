@@ -7,7 +7,6 @@
 #include "../../Library/Graphics/GpuResourceManager.h"
 
 #include "../../Library/Component/Light/LightController.h"
-#include "../../Library/Actor/Camera/MainCamera.h"
 #include "../../Library/Component/CameraEventReceiver.h"
 
 #include <imgui.h>
@@ -89,6 +88,9 @@ void Scene::Initialize()
 
     // フェード開始
 	_fade.Start(Fade::Type::FadeIn, _fadeInTime);
+
+	// アクターマネージャーの開始関数を呼び出し
+    _actorManager.Start();
 }
 
 // 終了化

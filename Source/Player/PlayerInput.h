@@ -17,7 +17,7 @@ public:
 	void DrawGui() override;
 
 	// I—¹ˆ—
-	void OnEnd() override;
+	void OnExit() override;
 
 protected:
 	// XVˆ—

@@ -26,7 +26,33 @@ void PlayerCameraController::Start()
     GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
 }
 
-void PlayerCameraController::LateUpdate(float elapsedTime)
+void PlayerCameraController::DrawGui()
+{
+	ImGui::DragFloat(u8"X軸上限角度(度)", &_angleXLimitHigh, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+	ImGui::DragFloat(u8"X軸下限角度(度)", &_angleXLimitLow, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+
+	ImGui::DragFloat(u8"見上げ開始角度(度)", &_lookingUpStartAngle, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+	ImGui::DragFloat(u8"見上げ角度値(度)", &_lookingUpAngleValue, 1.0f, 0.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
+
+    ImGui::DragFloat(u8"カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"垂直方向のオフセット", &_focusVerticalOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"水平方向のオフセット", &_focusHorizontalOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"注視点補完速度", &_focusLerpSpeed, 0.1f, 0.01f, 20.0f);
+    ImGui::DragFloat(u8"視点補完速度", &_eyeLerpSpeed, 0.1f, 0.01f, 20.0f);
+    ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"垂直入力補正値", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat(u8"カメラの半径", &_cameraRadius, 0.01f, 0.01f, 1.0f);
+    ImGui::Separator();
+
+	ImGui::DragFloat(u8"抜刀時注視点垂直オフセット", &_combatFocusVerticalOffset, 0.01f, -10.0f, 10.0f);
+	ImGui::DragFloat(u8"抜刀時注視点水平オフセット", &_combatFocusHorizontalOffset, 0.01f, -10.0f, 10.0f);
+	ImGui::DragFloat(u8"抜刀時注視点補完速度", &_combatFocusLerpSpeed, 0.1f, 0.01f, 20.0f);
+	ImGui::DragFloat(u8"抜刀時視点補完速度", &_combatEyeLerpSpeed, 0.1f, 0.01f, 20.0f);
+	ImGui::DragFloat(u8"抜刀時カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
+}
+
+// 更新時処理
+void PlayerCameraController::OnUpdate(float elapsedTime)
 {
     // F4を押していたらデバッグ用カメラ起動中
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
@@ -36,28 +62,28 @@ void PlayerCameraController::LateUpdate(float elapsedTime)
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
     float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
 
-	if (auto inputManager = _inputManager.lock())
-	{
-		// カメラを動かせないなら入力値を無効化
+    if (auto inputManager = _inputManager.lock())
+    {
+        // カメラを動かせないなら入力値を無効化
         if (!inputManager->CanMoveCamera())
         {
-			moveX = 0.0f;
-			moveY = 0.0f;
+            moveX = 0.0f;
+            moveY = 0.0f;
         }
-	}
+    }
 
     // 抜刀状態か確認
-	bool isCombat = false;
-	{
-		if (std::string(_stateController.lock()->GetStateName()).find("Combat") != std::string::npos)
-			isCombat = true;
-	}
+    bool isCombat = false;
+    {
+        if (std::string(_stateController.lock()->GetStateName()).find("Combat") != std::string::npos)
+            isCombat = true;
+    }
 
-	float focusVerticalOffset = isCombat ? _combatFocusVerticalOffset : _focusVerticalOffset;
-	float focusHorizontalOffset = isCombat ? _combatFocusHorizontalOffset : _focusHorizontalOffset;
-	float focusLerpSpeed = isCombat ? _combatFocusLerpSpeed : _focusLerpSpeed;
-	float eyeLerpSpeed = isCombat ? _combatEyeLerpSpeed : _eyeLerpSpeed;
-	float cameraDistance = isCombat ? _combatCameraDistance : _cameraDistance;
+    float focusVerticalOffset = isCombat ? _combatFocusVerticalOffset : _focusVerticalOffset;
+    float focusHorizontalOffset = isCombat ? _combatFocusHorizontalOffset : _focusHorizontalOffset;
+    float focusLerpSpeed = isCombat ? _combatFocusLerpSpeed : _focusLerpSpeed;
+    float eyeLerpSpeed = isCombat ? _combatEyeLerpSpeed : _eyeLerpSpeed;
+    float cameraDistance = isCombat ? _combatCameraDistance : _cameraDistance;
 
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
@@ -91,7 +117,7 @@ void PlayerCameraController::LateUpdate(float elapsedTime)
     // オフセット処理
     newFocus.y += focusVerticalOffset;
     // 下から見るときはオフセットの影響を薄くする
-	float lookingUpValue = angle.x - _lookingUpStartAngle;
+    float lookingUpValue = angle.x - _lookingUpStartAngle;
     float horizontalRate = lookingUpValue < 0.0f ?
         1.0f - std::clamp(std::fabsf(lookingUpValue / _lookingUpAngleValue), 0.0f, 1.0f) :
         1.0f;
@@ -101,32 +127,32 @@ void PlayerCameraController::LateUpdate(float elapsedTime)
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
     Vector3 newEye = newFocus - front * cameraDistance;
 
-	if (_cameraEventReceiver.lock())
-	{
-		// カメライベント受信者が存在するならオフセットを加算
-		const Vector3& eyeOffset = _cameraEventReceiver.lock()->GetEyeOffset();
-		// カメラの角度に合わせてオフセットを変換
-		newEye += right * eyeOffset.x;
-		newEye += up * eyeOffset.y;
-		newEye += front * eyeOffset.z;
-	}
+    if (_cameraEventReceiver.lock())
+    {
+        // カメライベント受信者が存在するならオフセットを加算
+        const Vector3& eyeOffset = _cameraEventReceiver.lock()->GetEyeOffset();
+        // カメラの角度に合わせてオフセットを変換
+        newEye += right * eyeOffset.x;
+        newEye += up * eyeOffset.y;
+        newEye += front * eyeOffset.z;
+    }
 
     // 新しい視点とステージの当たり判定
     float distance = cameraDistance;
     Vector3 hitPosition{}, hitNormal{};
     Actor* hitActor = nullptr;
-	if (GetActor()->GetScene()->GetCollisionManager().SphereCast(
+    if (GetActor()->GetScene()->GetCollisionManager().SphereCast(
         newFocus, -front.Normalize(),
-        _cameraRadius, 
+        _cameraRadius,
         &distance,
         &hitPosition,
         &hitNormal,
         &hitActor))
-	{
+    {
         // 密接していなければdistanceを使う
         if (distance > 0.0f)
             newEye = newFocus - front * distance;
-	}
+    }
 
     // 補完処理
     Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, focusLerpSpeed * elapsedTime);
@@ -135,39 +161,9 @@ void PlayerCameraController::LateUpdate(float elapsedTime)
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 
     _currentFocus = focus;
-	_currentEye = eye;
+    _currentEye = eye;
     GetActor()->GetTransform().SetPosition(eye);
-	// マウスの位置を画面内に修正
+    // マウスの位置を画面内に修正
     _Mouse->ClipCursorInWindow();
     _Mouse->UpdatePosition();
-}
-
-// 固定間隔更新処理
-void PlayerCameraController::FixedUpdate()
-{
-}
-
-void PlayerCameraController::DrawGui()
-{
-	ImGui::DragFloat(u8"X軸上限角度(度)", &_angleXLimitHigh, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
-	ImGui::DragFloat(u8"X軸下限角度(度)", &_angleXLimitLow, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
-
-	ImGui::DragFloat(u8"見上げ開始角度(度)", &_lookingUpStartAngle, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
-	ImGui::DragFloat(u8"見上げ角度値(度)", &_lookingUpAngleValue, 1.0f, 0.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
-
-    ImGui::DragFloat(u8"カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat(u8"垂直方向のオフセット", &_focusVerticalOffset, 0.01f, -10.0f, 10.0f);
-    ImGui::DragFloat(u8"水平方向のオフセット", &_focusHorizontalOffset, 0.01f, -10.0f, 10.0f);
-    ImGui::DragFloat(u8"注視点補完速度", &_focusLerpSpeed, 0.1f, 0.01f, 20.0f);
-    ImGui::DragFloat(u8"視点補完速度", &_eyeLerpSpeed, 0.1f, 0.01f, 20.0f);
-    ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat(u8"垂直入力補正値", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
-    ImGui::DragFloat(u8"カメラの半径", &_cameraRadius, 0.01f, 0.01f, 1.0f);
-    ImGui::Separator();
-
-	ImGui::DragFloat(u8"抜刀時注視点垂直オフセット", &_combatFocusVerticalOffset, 0.01f, -10.0f, 10.0f);
-	ImGui::DragFloat(u8"抜刀時注視点水平オフセット", &_combatFocusHorizontalOffset, 0.01f, -10.0f, 10.0f);
-	ImGui::DragFloat(u8"抜刀時注視点補完速度", &_combatFocusLerpSpeed, 0.1f, 0.01f, 20.0f);
-	ImGui::DragFloat(u8"抜刀時視点補完速度", &_combatEyeLerpSpeed, 0.1f, 0.01f, 20.0f);
-	ImGui::DragFloat(u8"抜刀時カメラ距離", &_cameraDistance, 0.1f, 0.0f, 100.0f);
 }

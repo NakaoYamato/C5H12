@@ -159,5 +159,11 @@ void DebugCamera::DrawGui()
     ImGui::DragFloat("movePower", &_movePower, 0.01f);
     ImGui::DragFloat("targetMovePower", &_targetMovePower, 0.01f);
     ImGui::DragFloat("zoomPower", &_zoomPower, 0.01f);
-    CameraControllerBase::DrawGui();
+    ImGui::DragFloat3("target", &_target.x);
+    ImGui::DragFloat3("eye", &_eye.x);
+    Vector3 deg = Vector3::ToDegrees(_angle);
+    if (ImGui::DragFloat3("angle", &deg.x))
+    {
+        _angle = Vector3::ToRadians(deg);
+    }
 }

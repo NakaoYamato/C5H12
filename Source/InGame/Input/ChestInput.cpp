@@ -33,13 +33,13 @@ void ChestInput::DrawGui()
 }
 
 // ‹N“®ŽžŠÖ”
-void ChestInput::OnExecute()
+void ChestInput::OnEntry()
 {
 	_chestUIController.lock()->Open();
 }
 
 // I—¹ŽžŠÖ”
-void ChestInput::OnEnd()
+void ChestInput::OnExit()
 {
 	_chestUIController.lock()->Close();
 }

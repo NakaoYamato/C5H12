@@ -1,5 +1,9 @@
 #include "MainCamera.h"
+
 #include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Component/CameraControllerBase.h"
+
+#include "../../Source/Camera/PlayerCameraController.h"
 
 #include "../../Scene/Scene.h"
 // 生成時処理
@@ -21,16 +25,25 @@ void MainCamera::OnCreate()
 	);
 }
 
-// 開始関数
-void MainCamera::OnStart()
-{
-
-}
-
 // 更新処理
 void MainCamera::OnUpdate(float elapsedTime)
 {
-
+	if (!_nextCameraControllerName.empty())
+	{
+		for (auto& [name, controller] : _cameraControllers)
+		{
+			if (name == _nextCameraControllerName)
+			{
+				controller->SetActive(true);
+				controller->OnEntry();
+			}
+			else
+			{
+				controller->SetActive(false);
+			}
+		}
+		_nextCameraControllerName.clear();
+	}
 }
 
 // GUI描画
@@ -55,4 +68,34 @@ void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vecto
 void MainCamera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ)
 {
 	GetScene()->GetMainCamera()->SetPerspectiveFov(fovY, aspect, nearZ, farZ);
+}
+
+// コントローラーの登録
+void MainCamera::RegisterCameraController(CameraControllerRef controller)
+{
+	_cameraControllers[controller->GetName()] = controller;
+}
+
+// コントローラーの登録
+void MainCamera::SwitchPreviousController()
+{
+	if (_cameraControllers.size() == 0)
+		return;
+	std::string lastInput = _cameraControllerHistory.back();
+	SwitchController(lastInput);
+}
+
+// コントローラーの登録
+void MainCamera::SwitchController(const std::string& nextControllerName)
+{
+	_cameraControllerHistory.push_back(_currentCameraControllerName);
+	_nextCameraControllerName = nextControllerName;
+	if (!_currentCameraControllerName.empty() &&
+		_cameraControllers[_currentCameraControllerName] != nullptr)
+	{
+		_cameraControllers[_currentCameraControllerName]->OnExit();
+		_cameraControllers[_currentCameraControllerName]->SetActive(false);
+	}
+
+	_currentCameraControllerName = nextControllerName;
 }

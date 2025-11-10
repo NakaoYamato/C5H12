@@ -8,11 +8,9 @@
 #include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/Graphics/Graphics.h"
 
-// 更新処理
-void ActorManager::Update(float elapsedTime)
+// 開始関数呼び出し
+void ActorManager::Start()
 {
-	//----------------------------------------------------------------
-	// 開始関数の呼び出し
 	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 	{
 		for (auto& actor : _startActors[i])
@@ -22,9 +20,17 @@ void ActorManager::Update(float elapsedTime)
 		}
 		_startActors[i].clear();
 	}
-	//----------------------------------------------------------------
+}
 
+// 更新処理
+void ActorManager::Update(float elapsedTime)
+{
 	//----------------------------------------------------------------
+	// 開始関数の呼び出し
+	//----------------------------------------------------------------
+	Start();
+	//----------------------------------------------------------------
+	
 	// 更新処理
 	if (JobSystem::Instance().UseMultiThread())
 	{

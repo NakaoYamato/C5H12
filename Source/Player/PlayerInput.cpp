@@ -65,7 +65,7 @@ void PlayerInput::DrawGui()
 }
 
 // I—¹ˆ—
-void PlayerInput::OnEnd()
+void PlayerInput::OnExit()
 {
 	auto playerController = _playerController.lock();
 	if (playerController == nullptr)

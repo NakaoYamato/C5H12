@@ -17,6 +17,8 @@ public:
 	ActorManager() {}
 	~ActorManager() {}
 
+	// 開始関数呼び出し
+	void Start();
 	// 更新処理
 	void Update(float elapsedTime);
 	// 遅延更新処理

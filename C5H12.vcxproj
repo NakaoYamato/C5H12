@@ -163,6 +163,7 @@
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
     <ClCompile Include="Library\Component\AnimatorCamera.cpp" />
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
+    <ClCompile Include="Library\Component\CameraControllerBase.cpp" />
     <ClCompile Include="Library\Component\CameraEventReceiver.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
@@ -202,7 +203,6 @@
     <ClCompile Include="Library\Application\Framework.cpp" />
     <ClCompile Include="Library\Application\Main.cpp" />
     <ClCompile Include="Library\Camera\Camera.cpp" />
-    <ClCompile Include="Library\Camera\CameraController.cpp" />
     <ClCompile Include="Library\Collision\CollisionManager.cpp" />
     <ClCompile Include="Library\Collision\CollisionMath.cpp" />
     <ClCompile Include="Library\Component\Animator.cpp" />
@@ -421,6 +421,7 @@
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\AnimatorCamera.h" />
     <ClInclude Include="Library\Component\BehaviorController.h" />
+    <ClInclude Include="Library\Component\CameraControllerBase.h" />
     <ClInclude Include="Library\Component\CameraEventReceiver.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
     <ClInclude Include="Library\Component\DecalController.h" />
@@ -463,7 +464,6 @@
     <ClInclude Include="Library\Algorithm\StateMachine\StateMachine.h" />
     <ClInclude Include="Library\Application\Framework.h" />
     <ClInclude Include="Library\Camera\Camera.h" />
-    <ClInclude Include="Library\Camera\CameraController.h" />
     <ClInclude Include="Library\Collision\CollisionManager.h" />
     <ClInclude Include="Library\Collision\CollisionMath.h" />
     <ClInclude Include="Library\Component\Animator.h" />

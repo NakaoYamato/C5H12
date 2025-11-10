@@ -14,6 +14,8 @@ public:
 	virtual void OnEntry() {}
 	// 終了時処理
 	virtual void OnExit() {}
+	// Gui描画
+	virtual void DrawGui() override;
 
 	// このコントローラーに切り替える
 	void Swich();

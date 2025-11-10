@@ -76,8 +76,8 @@ bool ChestController::Open()
 	chestInput->Swich();
 	if (auto chestUI = chestInput->GetChestUIController().lock())
 	{
-		chestUI->SetChestFrontPosition(GetActor()->GetTransform().GetPosition() - GetActor()->GetTransform().GetAxisZ());
-		chestUI->SetChestAngleY(GetActor()->GetTransform().GetAngle().y);
+		// 使用中のチェストアクター設定
+		chestUI->SetChestActor(GetActor());
 	}
 
 	return true;

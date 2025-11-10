@@ -6,6 +6,9 @@
 #include "../../Source/Camera/PlayerCameraController.h"
 
 #include "../../Scene/Scene.h"
+
+#include <imgui.h>
+
 // 生成時処理
 void MainCamera::OnCreate()
 {
@@ -49,7 +52,24 @@ void MainCamera::OnUpdate(float elapsedTime)
 // GUI描画
 void MainCamera::OnDrawGui()
 {
+	static ImGuiTabBarFlags tab_bar_flags =
+		ImGuiTabBarFlags_AutoSelectNewTabs |
+		ImGuiTabBarFlags_Reorderable |
+		ImGuiTabBarFlags_FittingPolicyResizeDown;
+	if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+	{
+		if (ImGui::BeginTabItem(u8"カメラマネージャー"))
+		{
+			int index = 0;
+			for (auto& history : _cameraControllerHistory)
+			{
+				ImGui::Text((std::to_string(index++) + ": " + history.c_str()).c_str());
+			}
+			ImGui::EndTabItem();
+		}
 
+		ImGui::EndTabBar();
+	}
 }
 
 void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vector3& up)

@@ -28,6 +28,9 @@ void PlayerCameraController::Start()
 
 void PlayerCameraController::DrawGui()
 {
+    CameraControllerBase::DrawGui();
+    ImGui::Separator();
+
 	ImGui::DragFloat(u8"X軸上限角度(度)", &_angleXLimitHigh, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
 	ImGui::DragFloat(u8"X軸下限角度(度)", &_angleXLimitLow, 1.0f, -90.0f, 90.0f, "%.1f", ImGuiSliderFlags_None);
 
@@ -54,10 +57,6 @@ void PlayerCameraController::DrawGui()
 // 更新時処理
 void PlayerCameraController::OnUpdate(float elapsedTime)
 {
-    // F4を押していたらデバッグ用カメラ起動中
-    if (Debug::Input::IsActive(DebugInput::BTN_F4))
-        return;
-
     // 入力情報を取得
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
     float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;

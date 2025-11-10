@@ -5,6 +5,8 @@
 #include "Menu/ChestSelectMenuController.h"
 #include "Menu/ChestArmorMenuController.h"
 
+#include "../../Source/Camera/ChangeArmorCamera.h"
+
 class ChestUIController : public Component
 {
 public:
@@ -13,6 +15,9 @@ public:
 		SelectMenu,
 		ItemMenu,
 		ArmorMenu,
+
+		ToArmorMenu,
+		FromArmorMenu,
 	};
 
 public:
@@ -46,24 +51,23 @@ public:
 	// チェストUIを閉じる
 	void Close();
 
-	// チェスト前位置設定
-	void SetChestFrontPosition(const Vector3& pos) { _chestFrontPosition = pos; }
-	// チェスト回転角度Y設定
-	void SetChestAngleY(float angleY) { _chestAngleY = angleY; }
-
+	// 使用中のチェストアクター設定
+	void SetChestActor(const std::shared_ptr<Actor>& actor) { _chestActor = actor; }
 private:
-
+	void UpdateToArmorMenu(float elapsedTime);
+	void UpdateFromArmorMenu(float elapsedTime);
 
 private:
 	std::weak_ptr<ChestSelectMenuController> _selectUI;
 	std::weak_ptr<ChestArmorMenuController> _armorUI;
 
+	std::weak_ptr<ChangeArmorCamera> _changeArmorCamera;
+
 	// メニュー状態
 	State _state = State::SelectMenu;
 
-	float _fadeTime = 0.5f;
-	bool _toArmorMenu = false;
+	float _fadeTime = 0.4f;
 
-	Vector3 _chestFrontPosition{};
-	float _chestAngleY = 0.0f;
+	// 使用中のチェストアクター
+	std::weak_ptr<Actor> _chestActor;
 };

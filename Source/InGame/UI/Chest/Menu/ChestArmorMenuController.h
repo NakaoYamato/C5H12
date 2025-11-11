@@ -102,7 +102,7 @@ private:
 
 	Vector2 _armorSprPositionInterval = Vector2(140.0f, 140.0f);
 	int _armorSprColumnNum = 5;
-	int _armorSprRowNum = 6;
+	int _armorSprRowNum = 5;
 
 	int _selectArmorColumnIndex = 0;
 	int _selectArmorRowIndex = 0;

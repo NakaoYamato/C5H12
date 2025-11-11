@@ -61,8 +61,8 @@ void Input::Initialize(HWND hwnd, HINSTANCE instance)
 /// 更新処理
 void Input::Update()
 {
+	// 直前の入力情報を保存
 	_lastInput = _currentInput;
-
 
 	// ウィンドウがアクティブかどうかを確認
 	if (GetForegroundWindow() != _hwnd)
@@ -103,10 +103,15 @@ void Input::Update()
 			const std::unordered_map<int, BOOL>* inputState = inputStates[static_cast<int>(inputInfo.type)];
 			// 要素があるかチェック
 			assert(inputState->find(inputInfo.buttonID) != inputState->end());
+
 			isPressed = inputState->at(inputInfo.buttonID);
 
 			if (isPressed == TRUE)
+			{
+				// どのデバイスが最後に入力されたかを保存
+				_currentInputDevice = inputInfo.type;
 				break;
+			}
 		}
 
 		_currentInput[mapInfo.first] = isPressed;
@@ -133,7 +138,11 @@ void Input::Update()
 			moved = movedParameter->at(movedInfo.buttonID);
 
 			if (moved != 0.0f)
+			{
+				// どのデバイスが最後に入力されたかを保存
+				_currentInputDevice = movedInfo.type;
 				break;
+			}
 		}
 
 		_currentMovedParameter[mapInfo.first] = moved;
@@ -159,6 +168,13 @@ void Input::DrawGui()
 	{
 		if (ImGui::Begin(u8"入力情報"))
 		{
+			ImGui::Text(u8"現在の入力デバイス:%s",
+				_currentInputDevice == InputType::Keyboard ? u8"キーボード" :
+				_currentInputDevice == InputType::XboxPad ? u8"ゲームパッド" :
+				_currentInputDevice == InputType::Mouse ? u8"マウス" :
+				_currentInputDevice == InputType::DirectPad ? u8"ダイレクトパッド" : u8"不明");
+			ImGui::Separator();
+
 			if (ImGui::TreeNode(u8"押下情報"))
 			{
 				for (auto& [str, flag] : _currentInput)

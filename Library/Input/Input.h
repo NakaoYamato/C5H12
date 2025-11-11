@@ -99,6 +99,12 @@ public:
 	/// <returns></returns>
 	float IsValue(const std::string& action)const;
 
+	/// <summary>
+	/// 現在の入力デバイス取得
+	/// </summary>
+	/// <returns></returns>
+	InputType GetCurrentInputDevice() const { return _currentInputDevice; }
+
 	void ClearMapData();
 public:
 	// アクセサ(基本使わない)
@@ -129,6 +135,9 @@ private:
 	std::unique_ptr<MouseInput>		_mouseInput;
 	// DirectInputの入力監視クラス(ウィンドウのハンドル、インスタンスが必要なため動的に確保)
 	std::unique_ptr<DirectInput>	_directInput;
+
+	// 現在の入力デバイス
+	InputType _currentInputDevice = InputType::Keyboard;
 
 	// ウィンドウのハンドル
 	HWND _hwnd{};

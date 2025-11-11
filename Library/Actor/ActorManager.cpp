@@ -184,7 +184,7 @@ void ActorManager::DrawGui()
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
 			// Žq‹Ÿ‚ª‚¢‚é‚È‚ç–îˆó•\Ž¦
 			if (actor->GetChildren().size() > 0)
-				nodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+				nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
 			
 			if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
 			{

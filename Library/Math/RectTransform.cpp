@@ -11,8 +11,15 @@ void RectTransform::UpdateTransform(const RectTransform* parent)
 		float cos = cosf(parent->_worldAngle);
 		_worldPosition.x = parent->_worldPosition.x + _localPosition.x * cos - _localPosition.y * sin;
 		_worldPosition.y = parent->_worldPosition.y + _localPosition.x * sin + _localPosition.y * cos;
-		_worldScale.x = parent->_worldScale.x * _localScale.x;
-		_worldScale.y = parent->_worldScale.y * _localScale.y;
+		if (_reflectParentScale)
+		{
+			_worldScale.x = parent->_worldScale.x * _localScale.x;
+			_worldScale.y = parent->_worldScale.y * _localScale.y;
+		}
+		else
+		{
+			_worldScale = _localScale;
+		}
 		_worldAngle = parent->_worldAngle + _localAngle;
 	}
 	else

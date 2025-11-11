@@ -12,6 +12,7 @@
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/StaminaController.h"
 #include "PlayerInput.h"
+#include "PlayerArmorController.h"
 #include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
 #include "UI/PlayerStaminaUIController.h"
@@ -38,13 +39,14 @@ void PlayerActor::OnCreate()
 	//auto modelRenderer		= AddComponent<ModelRenderer>("./Data/Model/Player/2025_03_25.fbx");
 	auto damageable				= this->AddComponent<Damageable>();
 	auto damageSender			= this->AddComponent<DamageSender>();
-    auto staminaController = this->AddComponent<StaminaController>();
+    auto staminaController		= this->AddComponent<StaminaController>();
 	auto targetable				= this->AddComponent<Targetable>();
 	auto modelRenderer			= this->AddComponent<ModelRenderer>();
 	auto animator				= this->AddComponent<Animator>();
 	auto animatorCamera			= this->AddComponent<AnimatorCamera>();
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
+	auto armorController		= this->AddComponent<PlayerArmorController>();
 	auto effectController		= this->AddComponent<EffectController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(this));
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
@@ -184,24 +186,49 @@ void PlayerActor::OnCreate()
 
 	// ñhãÔê∂ê¨
 	{
-		auto head = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Head"), ActorTag::Player, ArmorType::Head);
+		auto head = this->_scene->RegisterActor<ArmorActor>(
+			GetName() + std::string(u8"Head"), 
+			ActorTag::Player,
+			ArmorType::Head,
+			armorController->GetArmorIndex(ArmorType::Head));
 		head->SetParent(this);
+		armorController->SetArmorActor(ArmorType::Head, head);
 	}
 	{
-		auto chest = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Chest"), ActorTag::Player, ArmorType::Chest);
+		auto chest = this->_scene->RegisterActor<ArmorActor>(
+			GetName() + std::string(u8"Chest"), 
+			ActorTag::Player, 
+			ArmorType::Chest,
+			armorController->GetArmorIndex(ArmorType::Chest));
 		chest->SetParent(this);
+		armorController->SetArmorActor(ArmorType::Chest, chest);
 	}
 	{
-		auto arm = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Arm"), ActorTag::Player, ArmorType::Arm);
+		auto arm = this->_scene->RegisterActor<ArmorActor>(
+			GetName() + std::string(u8"Arm"),
+			ActorTag::Player,
+			ArmorType::Arm,
+			armorController->GetArmorIndex(ArmorType::Arm));
 		arm->SetParent(this);
+		armorController->SetArmorActor(ArmorType::Arm, arm);
 	}
 	{
-		auto Waist = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Waist"), ActorTag::Player, ArmorType::Waist);
+		auto Waist = this->_scene->RegisterActor<ArmorActor>(
+			GetName() + std::string(u8"Waist"),
+			ActorTag::Player,
+			ArmorType::Waist,
+			armorController->GetArmorIndex(ArmorType::Waist));
 		Waist->SetParent(this);
+		armorController->SetArmorActor(ArmorType::Waist, Waist);
 	}
 	{
-		auto Leg = this->_scene->RegisterActor<ArmorActor>(GetName() + std::string(u8"Leg"), ActorTag::Player, ArmorType::Leg);
+		auto Leg = this->_scene->RegisterActor<ArmorActor>(
+			GetName() + std::string(u8"Leg"), 
+			ActorTag::Player,
+			ArmorType::Leg,
+			armorController->GetArmorIndex(ArmorType::Leg));
 		Leg->SetParent(this);
+		armorController->SetArmorActor(ArmorType::Leg, Leg);
 	}
 
 	// ÉJÉÅÉâçÏê¨

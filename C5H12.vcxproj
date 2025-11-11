@@ -346,6 +346,7 @@
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
     <ClCompile Include="Source\Armor\ArmorActor.cpp" />
+    <ClCompile Include="Source\Player\PlayerArmorController.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
@@ -626,6 +627,7 @@
     <ClInclude Include="Source\Network\NetworkSender.h" />
     <ClInclude Include="Source\Armor\ArmorActor.h" />
     <ClInclude Include="Source\Armor\ArmorData.h" />
+    <ClInclude Include="Source\Player\PlayerArmorController.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />

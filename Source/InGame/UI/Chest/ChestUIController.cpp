@@ -40,6 +40,9 @@ void ChestUIController::Start()
 // 更新処理
 void ChestUIController::Update(float elapsedTime)
 {
+    // 入力処理
+	UpdateInput();
+
     switch (_state)
     {
     case ChestUIController::SelectMenu:
@@ -88,86 +91,6 @@ void ChestUIController::InitState()
     _state = State::SelectMenu;
 }
 
-// インデックス追加
-void ChestUIController::AddIndex(int val)
-{
-    auto selectUI = _selectUI.lock();
-    auto armorUI = _armorUI.lock();
-    if (!selectUI || !armorUI)
-        return;
-
-    switch (_state)
-    {
-    case ChestUIController::SelectMenu:
-        selectUI->AddIndex(val);
-        break;
-    case ChestUIController::ItemMenu:
-        break;
-    case ChestUIController::ArmorMenu:
-        armorUI->AddIndex(val);
-        break;
-    default:
-        break;
-    }
-}
-
-// 次へ進む
-void ChestUIController::NextState()
-{
-	auto selectUI = _selectUI.lock();
-	auto armorUI = _armorUI.lock();
-	if (!selectUI || !armorUI)
-		return;
-
-    switch (_state)
-    {
-    case ChestUIController::SelectMenu:
-        switch (selectUI->GetSelectIndex())
-        {
-        case ChestSelectMenuController::SelectMenuOption::ItemOption:
-            break;
-        case ChestSelectMenuController::SelectMenuOption::ArmorOption:
-            GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, _fadeTime);
-            selectUI->GetActor()->SetIsActive(false);
-
-			_state = ChestUIController::ToArmorMenu;
-            break;
-        case ChestSelectMenuController::SelectMenuOption::TestOption:
-            break;
-        }
-        break;
-    case ChestUIController::ItemMenu:
-        break;
-    case ChestUIController::ArmorMenu:
-        break;
-    }
-}
-
-// 前の状態へ戻る
-void ChestUIController::PreviousState()
-{
-    auto selectUI = _selectUI.lock();
-    auto armorUI = _armorUI.lock();
-    if (!selectUI || !armorUI)
-        return;
-
-    switch (_state)
-    {
-    case ChestUIController::SelectMenu:
-        // UIを閉じる
-        Close();
-        break;
-    case ChestUIController::ItemMenu:
-        break;
-    case ChestUIController::ArmorMenu:
-        GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, _fadeTime);
-        armorUI->GetActor()->SetIsActive(false);
-
-        _state = ChestUIController::FromArmorMenu;
-        break;
-    }
-}
-
 // チェストUIを開く
 void ChestUIController::Open()
 {
@@ -177,6 +100,18 @@ void ChestUIController::Open()
     {
         selectUI->GetActor()->SetIsActive(true);
 		selectUI->ResetIndex();
+    }
+
+	// プレイヤーを探す
+    auto& players = GetActor()->GetScene()->GetActorManager().FindByTag(ActorTag::Player);
+    for (auto& player : players)
+    {
+        auto playerActor = std::dynamic_pointer_cast<PlayerActor>(player);
+        if (playerActor && playerActor->IsUserControlled())
+        {
+			_playerActor = playerActor;
+			break;
+        }
     }
 }
 
@@ -194,6 +129,107 @@ void ChestUIController::Close()
 	_chestActor.reset();
 }
 
+// 入力処理
+void ChestUIController::UpdateInput()
+{
+    switch (_state)
+    {
+    case ChestUIController::SelectMenu:
+		SelectInput();
+        break;
+    case ChestUIController::ItemMenu:
+        break;
+    case ChestUIController::ArmorMenu:
+        ArmorMenuInput();
+        break;
+    }
+
+	_inputState = InputState::None;
+}
+
+// Selectメニューの入力処理
+void ChestUIController::SelectInput()
+{
+    auto selectUI = _selectUI.lock();
+    auto armorUI = _armorUI.lock();
+    if (!selectUI || !armorUI)
+        return;
+
+    switch (_inputState)
+    {
+    case ChestUIController::InputState::Up:
+        selectUI->AddIndex(-1);
+        break;
+    case ChestUIController::InputState::Down:
+        selectUI->AddIndex(1);
+        break;
+    case ChestUIController::InputState::Select:
+        switch (selectUI->GetSelectIndex())
+        {
+        case ChestSelectMenuController::SelectMenuOption::ItemOption:
+            break;
+        case ChestSelectMenuController::SelectMenuOption::ArmorOption:
+            GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, _fadeTime);
+            selectUI->GetActor()->SetIsActive(false);
+
+            _state = ChestUIController::ToArmorMenu;
+            break;
+        case ChestSelectMenuController::SelectMenuOption::TestOption:
+            break;
+        }
+        break;
+    case ChestUIController::InputState::Back:
+        // UIを閉じる
+        Close();
+        break;
+    }
+}
+
+// Armorメニューの入力処理
+void ChestUIController::ArmorMenuInput()
+{
+    auto selectUI = _selectUI.lock();
+    auto armorUI = _armorUI.lock();
+    if (!selectUI || !armorUI)
+        return;
+
+    switch (_inputState)
+    {
+    case ChestUIController::InputState::Up:
+        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
+            armorUI->AddSelectArmorRowIndex(-1);
+        else
+            armorUI->AddIndex(-1);
+        break;
+    case ChestUIController::InputState::Down:
+        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
+            armorUI->AddSelectArmorRowIndex(+1);
+        else
+            armorUI->AddIndex(1);
+        break;
+    case ChestUIController::InputState::Left:
+        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
+            armorUI->AddSelectArmorColumnIndex(-1);
+        break;
+    case ChestUIController::InputState::Right:
+        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
+            armorUI->AddSelectArmorColumnIndex(+1);
+        break;
+    case ChestUIController::InputState::Select:
+        armorUI->NextState();
+        break;
+    case ChestUIController::InputState::Back:
+        if (armorUI->PreviousState())
+        {
+            GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, _fadeTime);
+            armorUI->GetActor()->SetIsActive(false);
+
+            _state = ChestUIController::FromArmorMenu;
+        }
+        break;
+    }
+}
+
 void ChestUIController::UpdateToArmorMenu(float elapsedTime)
 {
     if (!GetActor()->GetScene()->GetFade()->IsFading())
@@ -201,22 +237,24 @@ void ChestUIController::UpdateToArmorMenu(float elapsedTime)
         GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, _fadeTime);
         auto armorUI = _armorUI.lock();
         armorUI->GetActor()->SetIsActive(true);
+        // プレイヤーの防具コントローラー設定
+		if (auto player = _playerActor.lock())
+		{
+			auto playerArmorController = player->GetComponent<PlayerArmorController>();
+			armorUI->SetPlayerArmorController(playerArmorController);
+		}
+
         auto chestActor = _chestActor.lock();
 
         _state = ChestUIController::ArmorMenu;
 
         // プレイヤーをチェストの前に移動、回転させる
-        auto& players = GetActor()->GetScene()->GetActorManager().FindByTag(ActorTag::Player);
-        for (auto& player : players)
-        {
-            auto playerActor = std::dynamic_pointer_cast<PlayerActor>(player);
-            if (playerActor && playerActor->IsUserControlled())
-            {
-                playerActor->GetTransform().SetPosition(
-                    chestActor->GetTransform().GetWorldPosition() - chestActor->GetTransform().GetAxisZ());
-                playerActor->GetTransform().SetAngleY(chestActor->GetTransform().GetAngle().y + DirectX::XMConvertToRadians(180.0f));
-            }
-        }
+		if (auto player = _playerActor.lock())
+		{
+            player->GetTransform().SetPosition(
+                chestActor->GetTransform().GetWorldPosition() - chestActor->GetTransform().GetAxisZ());
+            player->GetTransform().SetAngleY(chestActor->GetTransform().GetAngle().y + DirectX::XMConvertToRadians(180.0f));
+		}
 		// カメラをチェスト用に切り替え
 		if (auto changeArmorCamera = _changeArmorCamera.lock())
 		{

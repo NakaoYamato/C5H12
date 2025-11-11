@@ -20,18 +20,19 @@ public:
 	void OnLateUpdate(float elapsedTime)  override;
 	// GUI描画処理
 	void OnDrawGui() override;
-private:
-	// モデルのトランスフォーム更新
-	void UpdateModelTransform() override;
 
 	// データ構築
 	void BuildData(ArmorManager* manager, int index);
+private:
+	// モデルのトランスフォーム更新
+	void UpdateModelTransform() override;
 
 protected:
 	ArmorType _type;
 	int _armorIndex = 0;
 	ArmorData* _armorData = nullptr;
 
+	std::weak_ptr<ModelRenderer> _modelRenderer;
 	// 親のモデルレンダラー
 	std::weak_ptr<ModelRenderer> _parentModelRenderer;
 };

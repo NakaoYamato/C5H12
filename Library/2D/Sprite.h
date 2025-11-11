@@ -61,6 +61,7 @@ public:
 	void SetTexSize(const Vector2& s) { _texSize = s; }
 	void SetCenter(const Vector2& c) { _center = c; }
 	void SetColor(const Vector4& c) { _color = c; }
+	void SetColorAlpha(float a) { SetColor(Vector4(GetColor().x, GetColor().y, GetColor().z, a)); }
 	void SetDepthState(DepthState depthState) { _depthState = depthState; }
     void SetStencil(UINT8 stencil) { _stencil = stencil; }
 #pragma endregion

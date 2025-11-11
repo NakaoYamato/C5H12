@@ -28,7 +28,7 @@ public:
 	// インデックス追加
 	void AddIndex(int val);
 	// リセット
-	void ResetIndex() { _index = SelectMenuOption::ItemOption; }
+	void ResetIndex();
 
 	SelectMenuOption GetSelectIndex() const { return _index; }
 

@@ -24,6 +24,7 @@ public:
 private:
 	std::weak_ptr<Actor> _chestActor;
 
+	float _cameraOffsetX = -0.5f;
 	float _cameraOffsetY = 1.0f;
 	float _cameraLength = 2.5f;
 };

@@ -21,6 +21,8 @@ bool ArmorManager::LoadFromFile()
 		for (auto& [type, dataVec] : _armorDataMap)
 		{
 			std::string typeName = ToString<ArmorType>(static_cast<size_t>(type));
+			if (!jsonData.contains(typeName + "Size"))
+				continue;
 			size_t size = jsonData[typeName + "Size"].get<std::size_t>();
 			for (size_t i = 0; i < size; ++i)
 			{

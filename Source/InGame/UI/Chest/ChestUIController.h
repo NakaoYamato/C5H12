@@ -20,6 +20,18 @@ public:
 		FromArmorMenu,
 	};
 
+	enum class InputState
+	{
+		None,
+
+		Up,
+		Down,
+		Left,
+		Right,
+		Select,
+		Back,
+	};
+
 public:
 	ChestUIController() {}
 	~ChestUIController() override {}
@@ -38,13 +50,6 @@ public:
 	// ステート初期化
 	void InitState();
 
-	// インデックス追加
-	void AddIndex(int val);
-	// 次へ進む
-	void NextState();
-	// 前の状態へ戻る
-	void PreviousState();
-
 	// チェストUIを開く
 	void Open();
 
@@ -53,7 +58,17 @@ public:
 
 	// 使用中のチェストアクター設定
 	void SetChestActor(const std::shared_ptr<Actor>& actor) { _chestActor = actor; }
+	// 入力値設定
+	void SetInputState(InputState inputState) { _inputState = inputState; }
 private:
+	// 入力処理
+	void UpdateInput();
+
+	// Selectメニューの入力処理
+	void SelectInput();
+	// Armorメニューの入力処理
+	void ArmorMenuInput();
+
 	void UpdateToArmorMenu(float elapsedTime);
 	void UpdateFromArmorMenu(float elapsedTime);
 
@@ -65,9 +80,13 @@ private:
 
 	// メニュー状態
 	State _state = State::SelectMenu;
+	// 入力値
+	InputState _inputState = InputState::None;
 
 	float _fadeTime = 0.4f;
 
 	// 使用中のチェストアクター
 	std::weak_ptr<Actor> _chestActor;
+	// プレイヤーアクター
+	std::weak_ptr<Actor> _playerActor;
 };

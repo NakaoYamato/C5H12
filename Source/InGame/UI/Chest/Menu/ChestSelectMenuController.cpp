@@ -107,3 +107,15 @@ void ChestSelectMenuController::AddIndex(int val)
 
     spriteRenderer->GetRectTransform(FrontSpr).SetLocalPosition(position);
 }
+
+// リセット
+void ChestSelectMenuController::ResetIndex()
+{
+    _index = SelectMenuOption::ItemOption;
+	if (auto spriteRenderer = _spriteRenderer.lock())
+	{
+		// 背景位置更新
+		Vector2 position = spriteRenderer->GetRectTransform(ItemBackSpr).GetLocalPosition();
+		spriteRenderer->GetRectTransform(FrontSpr).SetLocalPosition(position);
+	}
+}

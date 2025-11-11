@@ -52,13 +52,17 @@ void ChestInput::OnUpdate(float elapsedTime)
 		return;
 
 	if (_INPUT_TRIGGERD("Up"))
-		chestUIController->AddIndex(-1);
+		chestUIController->SetInputState(ChestUIController::InputState::Up);
 	if (_INPUT_TRIGGERD("Down"))
-		chestUIController->AddIndex(+1);
+		chestUIController->SetInputState(ChestUIController::InputState::Down);
+	if (_INPUT_TRIGGERD("Left"))
+		chestUIController->SetInputState(ChestUIController::InputState::Left);
+	if (_INPUT_TRIGGERD("Right"))
+		chestUIController->SetInputState(ChestUIController::InputState::Right);
 	if (_INPUT_TRIGGERD("Select"))
-		chestUIController->NextState();
+		chestUIController->SetInputState(ChestUIController::InputState::Select);
 	if (_INPUT_TRIGGERD("Back"))
-		chestUIController->PreviousState();
+		chestUIController->SetInputState(ChestUIController::InputState::Back);
 
 	// 前の入力コントローラーに戻す
 	if (!chestUIController->GetActor()->IsActive())

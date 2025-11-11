@@ -7,7 +7,7 @@
 void ArmorActor::OnCreate()
 {
 	// コンポーネント追加
-	auto modelRenderer = this->AddComponent<ModelRenderer>();
+	_modelRenderer = this->AddComponent<ModelRenderer>();
 }
 
 void ArmorActor::OnStart()
@@ -54,6 +54,25 @@ void ArmorActor::OnLateUpdate(float elapsedTime)
 		node.scale = parentNode.scale;
 		node.localTransform = parentNode.localTransform;
 		node.worldTransform = parentNode.worldTransform;
+	}
+
+	// プレイヤーのマテリアル情報を反映
+	Vector4 color = *_parentModelRenderer.lock()->GetMaterials().at(0).GetParameterF4("bodyColor");
+	for (auto& material : _modelRenderer.lock()->GetMaterials())
+	{
+		// マテリアルをプレイヤーと同じものにする
+		if (material.GetShaderName() != "Player")
+		{
+			auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+			material.SetShaderName("Player");
+			// シェーダー変更時はパラメータも初期化
+			material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
+				_modelRenderer.lock()->GetRenderType(),
+				"Player",
+				true));
+		}
+
+		material.SetParameter("bodyColor", color);
 	}
 }
 

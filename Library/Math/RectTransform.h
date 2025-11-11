@@ -30,10 +30,12 @@ public:
 	const Vector2&	GetWorldPosition()const		{ return _worldPosition; }
 	const Vector2&	GetWorldScale()const		{ return _worldScale; }
 	float			GetWorldAngle()const		{ return _worldAngle; }
+	bool			GetReflectParentScale()const { return _reflectParentScale; }
 
 	void SetLocalPosition(const Vector2& p) { _localPosition = p; }
 	void SetLocalScale(const Vector2& s)	{ _localScale = s; }
 	void SetLocalAngle(float a)				{ _localAngle = a; }
+	void SetReflectParentScale(bool reflect) { _reflectParentScale = reflect; }
 #pragma endregion
 private:
 	Vector2			_localPosition		= Vector2::Zero;
@@ -43,4 +45,7 @@ private:
 	Vector2 	   _worldPosition		= Vector2::Zero;
 	Vector2        _worldScale			= Vector2::One;
 	float          _worldAngle			= 0.0f;
+
+	// 親のスケールを反映するか
+	bool			_reflectParentScale = true;
 };

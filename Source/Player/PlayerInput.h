@@ -2,6 +2,7 @@
 
 #include "../../Source/InGame/InputManager.h"
 #include "PlayerController.h"
+#include "../../Source/InGame/UI/Item/ItemUIController.h"
 
 class PlayerInput : public InputControllerBase
 {
@@ -25,4 +26,5 @@ protected:
 
 private:
 	std::weak_ptr<PlayerController> _playerController;
+	std::weak_ptr<ItemUIController> _itemUIController;
 };

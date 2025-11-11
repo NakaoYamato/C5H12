@@ -84,7 +84,6 @@ void ArmorManager::DrawGui()
 		"Leg"
 	};
 
-	ImGui::Separator();
 	ImGui::Combo("AddType", &_selectedAddTypeIndex, ArmorTypeNames, _countof(ArmorTypeNames));
 	if (ImGui::Button("Add"))
 	{

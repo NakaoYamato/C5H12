@@ -3,9 +3,13 @@
 #include "../../Library/Graphics/Graphics.h"
 
 #include "../../Source/InGame/UI/TimerUIController.h"
+
 #include "../../Source/InGame/UI/Chest/ChestUIController.h"
 #include "../../Source/InGame/UI/Chest/Menu/ChestSelectMenuController.h"
 #include "../../Source/InGame/UI/Chest/Menu/ChestArmorMenuController.h"
+
+#include "../../Source/InGame/UI/Item/ItemUIController.h"
+#include "../../Source/InGame/UI/Item/Slider/ItemSliderController.h"
 
 // ¶¬Žžˆ—
 void InGameCanvasActor::OnCreate()
@@ -30,5 +34,16 @@ void InGameCanvasActor::OnCreate()
 		auto ArmorState = GetScene()->RegisterActor<UIActor>("ChestArmorStateUI", ActorTag::UI);
 		ArmorState->SetParent(chestUIActor.get());
 		ArmorState->AddComponent<ChestArmorMenuController>();
+	}
+
+	// ƒAƒCƒeƒ€UI¶¬
+	auto itemUIActor = GetScene()->RegisterActor<UIActor>("ItemUI", ActorTag::UI);
+	itemUIActor->GetRectTransform().SetLocalPosition(Vector2(1600.0f, 940.0f));
+	itemUIActor->SetParent(this);
+	itemUIActor->AddComponent<ItemUIController>();
+	{
+		auto itemSliderActor = GetScene()->RegisterActor<UIActor>("ItemSliderUI", ActorTag::UI);
+		itemSliderActor->SetParent(itemUIActor.get());
+		itemSliderActor->AddComponent<ItemSliderController>();
 	}
 }

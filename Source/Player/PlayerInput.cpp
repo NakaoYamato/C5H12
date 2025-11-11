@@ -1,6 +1,7 @@
 #include "PlayerInput.h"
 
 #include "../../Library/Scene/Scene.h"
+#include "../../Source/InGame/InGameCanvasActor.h"
 
 #include <imgui.h>
 
@@ -8,6 +9,18 @@
 void PlayerInput::Start()
 {
 	_playerController = GetActor()->GetComponent<PlayerController>();
+
+	// アイテムUIコントローラー取得
+	auto canvasActor = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI);
+	for (auto& child : canvasActor->GetChildren())
+	{
+		auto itemUIController = child->GetComponent<ItemUIController>();
+		if (itemUIController)
+		{
+			_itemUIController = itemUIController;
+			break;
+		}
+	}
 }
 
 // 更新処理
@@ -15,6 +28,9 @@ void PlayerInput::OnUpdate(float elapsedTime)
 {
 	auto playerController = _playerController.lock();
 	if (playerController == nullptr)
+		return;
+	auto itemUIController = _itemUIController.lock();
+	if (itemUIController == nullptr)
 		return;
 
 	// 入力処理
@@ -49,8 +65,24 @@ void PlayerInput::OnUpdate(float elapsedTime)
 	playerController->SetIsSpecialAttack(_INPUT_TRIGGERD("Action2"));
 	playerController->SetIsEvade(_INPUT_TRIGGERD("Evade"));
 
-	playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));
-	playerController->SetIsSelect(_INPUT_PRESSED("Select"));
+	// アイテムスライダー処理
+	if (_INPUT_PRESSED("ItemSelect"))
+	{
+		if (_INPUT_TRIGGERD("ItemSelect"))
+		{
+			itemUIController->Open(nullptr, 0);
+		}
+	}
+	else
+	{
+		if (itemUIController->IsOpen())
+		{
+			itemUIController->Close();
+		}
+
+		playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));
+		playerController->SetIsSelect(_INPUT_PRESSED("Select"));
+	}
 
 	// メニュー画面起動入力
 	if (_INPUT_TRIGGERD("Menu"))

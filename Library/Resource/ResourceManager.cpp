@@ -2,6 +2,15 @@
 
 #include <imgui.h>
 
+// ‰Šú‰»
+void ResourceManager::Initialize()
+{
+	for (auto& [name, resource] : _resourceMap)
+	{
+		resource->Initialize();
+	}
+}
+
 // Gui•`‰æ
 void ResourceManager::DrawGui()
 {

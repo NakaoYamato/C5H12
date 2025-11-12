@@ -522,7 +522,10 @@ void Scene::DrawGui()
 	_collisionManager.DrawGui();
 
 	// パーティクルのGui表示
-	_particleRenderer.DrawGui();
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        _particleRenderer.DrawGui(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
+    }
 
 	// テレインレンダラーのGui表示
 	_terrainRenderer.DrawGui();

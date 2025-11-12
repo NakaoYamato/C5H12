@@ -387,9 +387,6 @@
     <ClCompile Include="Library\Exporter\Exporter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Particle\ParticleCanvas.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Particle\ParticleEmiter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -772,6 +769,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Player\PlayerItemController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\2D\Canvas.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1199,9 +1199,6 @@
     <ClInclude Include="Library\Exporter\Exporter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Particle\ParticleCanvas.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Library\Particle\ParticleEmiter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1626,6 +1623,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Player\PlayerItemController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\2D\Canvas.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

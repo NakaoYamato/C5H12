@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/Resource/ResourceManager.h"
+#include "../../Library/2D/Canvas.h"
 #include "ItemData.h"
 
 class ItemManager : public ResourceBase
@@ -8,6 +9,9 @@ class ItemManager : public ResourceBase
 public:
 	ItemManager() = default;
 	~ItemManager() override {}
+
+	// ‰Šú‰»ˆ—
+	bool Initialize() override;
 
 	// –¼‘Oæ“¾
 	std::string GetName() const override { return "ItemManager"; }
@@ -28,6 +32,7 @@ public:
 
 private:
 	std::string _filePath = "./Data/Resource/ItemManager.json";
+	std::unique_ptr<Canvas> _itemIconCanvas;
 	std::vector<ItemData> _itemDataList;
 
 	int _selectedAddTypeIndex = 0;

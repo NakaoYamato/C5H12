@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Library/Particle/ParticleDefine.h"
-#include "../../Library/Particle/ParticleCanvas.h"
+#include "../../Library/2D/Canvas.h"
 
 class ParticleRenderer
 {
@@ -148,17 +148,20 @@ public:
 	/// <summary>
 	/// GUI描画
 	/// </summary>
-	void DrawGui();
+	void DrawGui(ID3D11Device* device,
+		ID3D11DeviceContext* dc);
 
 	/// <summary>
 	/// テクスチャデータの登録
 	/// </summary>
+	/// <param name="device"></param>
 	/// <param name="dc"></param>
 	/// <param name="key"></param>
 	/// <param name="filepath"></param>
 	/// <param name="split"></param>
 	/// <returns></returns>
-	ParticleCanvas::TextureData RegisterTextureData(ID3D11DeviceContext* dc, 
+	Canvas::TextureData RegisterTextureData(ID3D11Device* device, 
+		ID3D11DeviceContext* dc,
 		const std::string& key,
 		const std::wstring& filepath,
 		DirectX::XMUINT2 split = DirectX::XMUINT2(1, 1));
@@ -167,15 +170,15 @@ public:
 	/// </summary>
 	/// <param name="key"></param>
 	/// <returns></returns>
-	ParticleCanvas::TextureData GetTextureData(const std::string& key) const;
+	Canvas::TextureData GetTextureData(const std::string& key) const;
 	/// <summary>
 	/// テクスチャデータのコンテナ取得
 	/// </summary>
 	/// <returns></returns>
-	std::unordered_map<std::string, ParticleCanvas::TextureData>& GetTextureDatas() { return _textureDatas; }
+	std::unordered_map<std::string, Canvas::TextureData>& GetTextureDatas() { return _textureDatas; }
 private:
-	std::unique_ptr<ParticleCanvas> _particleCanvas;
-	std::unordered_map<std::string, ParticleCanvas::TextureData> _textureDatas;
+	std::unique_ptr<Canvas> _particleCanvas;
+	std::unordered_map<std::string, Canvas::TextureData> _textureDatas;
 
 	UINT _numParticles{};
 	UINT _numEmitParticles{};

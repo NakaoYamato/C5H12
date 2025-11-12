@@ -174,14 +174,15 @@ void ParticleRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc,
 	GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/Particle/Render/ComputeParticleRenderPS.cso", _pixelShader.GetAddressOf());
 
 	// キャンバス作成
-	_particleCanvas = std::make_unique<ParticleCanvas>();
+	_particleCanvas = std::make_unique<Canvas>(device);
+	_particleCanvas->SetUseOriginalTextureScale(true);
 
 	// 画像読み込み
-	RegisterTextureData(dc, "Breath", L"./Data/Texture/Particle/AdobeStock_255896219.png", { 3,2 });
-	RegisterTextureData(dc, "Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
-	RegisterTextureData(dc, "Breath2", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753233552.png", { 3,2 });
-	RegisterTextureData(dc, "Breath3", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753234506.png", { 3,2 });
-	RegisterTextureData(dc, "Smoke", L"./Data/Texture/Particle/Smoke.png", { 2,2 });
+	RegisterTextureData(device, dc, "Breath", L"./Data/Texture/Particle/AdobeStock_255896219.png", { 3,2 });
+	RegisterTextureData(device, dc, "Test", L"./Data/Texture/Particle/particle256x256.png", { 4,4 });
+	RegisterTextureData(device, dc, "Breath2", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753233552.png", { 3,2 });
+	RegisterTextureData(device, dc, "Breath3", L"./Data/Texture/Particle/DM0N4p2f6nXdX9v1753233487_1753234506.png", { 3,2 });
+	RegisterTextureData(device, dc, "Smoke", L"./Data/Texture/Particle/Smoke.png", { 2,2 });
 }
 
 /// パーティクル生成
@@ -204,8 +205,8 @@ void ParticleRenderer::Update(ID3D11DeviceContext* dc, float elapsedTime)
 		// 定数バッファ更新
 		CommonConstants constant{};
 		constant.elapsedTime = elapsedTime;
-		constant.canvasSize.x = static_cast<float>(ParticleCanvas::CanvasWidth);
-		constant.canvasSize.y = static_cast<float>(ParticleCanvas::CanvasHeight);
+		constant.canvasSize.x = static_cast<float>(_particleCanvas->GetCanvasScale().x);
+		constant.canvasSize.y = static_cast<float>(_particleCanvas->GetCanvasScale().y);
 		constant.systemNumParticles = _numParticles;
 		constant.totalEmitCount = static_cast<UINT>(_emitParticles.size());
 		dc->UpdateSubresource(_commonConstantBuffer.Get(), 0, nullptr, &constant, 0, 0);
@@ -367,7 +368,8 @@ void ParticleRenderer::Render(ID3D11DeviceContext* dc)
 }
 
 /// GUI描画
-void ParticleRenderer::DrawGui()
+void ParticleRenderer::DrawGui(ID3D11Device* device,
+	ID3D11DeviceContext* dc)
 {
 	// メニューバー
 	if (ImGui::BeginMainMenuBar())
@@ -384,14 +386,15 @@ void ParticleRenderer::DrawGui()
 	{
 		if (ImGui::Begin(u8"パーティクル"))
 		{
-			_particleCanvas->DrawGui();
+			_particleCanvas->DrawGui(device, dc);
 		}
 		ImGui::End();
 	}
 }
 
 /// テクスチャの登録
-ParticleCanvas::TextureData ParticleRenderer::RegisterTextureData(
+Canvas::TextureData ParticleRenderer::RegisterTextureData(
+	ID3D11Device* device,
 	ID3D11DeviceContext* dc,
 	const std::string& key, 
 	const std::wstring& filepath,
@@ -404,19 +407,19 @@ ParticleCanvas::TextureData ParticleRenderer::RegisterTextureData(
 		return it->second;
 	}
 	// テクスチャのロード
-	_textureDatas[key] = _particleCanvas->Load(dc, filepath.c_str(), split);
+	_textureDatas[key] = _particleCanvas->Load(device, dc, filepath.c_str(), split);
 	// ロードしたテクスチャ情報を返す
 	return _textureDatas[key];
 }
 
 /// テクスチャデータの取得
-ParticleCanvas::TextureData ParticleRenderer::GetTextureData(const std::string& key) const
+Canvas::TextureData ParticleRenderer::GetTextureData(const std::string& key) const
 {
 	// キーが存在しない場合はエラー
 	if (_textureDatas.find(key) == _textureDatas.end())
 	{
 		_ASSERT_EXPR(false, L"テクスチャが登録されていません");
-		return ParticleCanvas::TextureData();
+		return Canvas::TextureData();
 	}
 
 	return _textureDatas.at(key);

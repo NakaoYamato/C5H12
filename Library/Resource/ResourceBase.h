@@ -13,6 +13,9 @@ public:
 	// ファイルパス取得
 	virtual std::string GetFilePath() const = 0;
 
+	// 初期化処理
+	virtual bool Initialize() { return true; }
+
 	// ファイル読み込み
 	virtual bool LoadFromFile() = 0;
 	// ファイル保存

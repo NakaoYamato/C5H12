@@ -182,6 +182,9 @@ bool Framework::Initialize() const
     // 入力監視クラスの初期化
     Input::Instance().Initialize(_hwnd, _hInstance);
 
+    // リソースの初期化
+    ResourceManager::Instance().Initialize();
+
     // シーンの初期化
     SceneManager::Instance().Initialize();
 

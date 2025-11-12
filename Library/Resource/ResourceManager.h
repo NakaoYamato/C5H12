@@ -39,6 +39,9 @@ public:
 		return instance;
 	}
 
+	// 初期化
+	void Initialize();
+
 	// リソース取得(型指定)
 	template<class T>
 	std::shared_ptr<T> GetResourceAs(const std::string& name)

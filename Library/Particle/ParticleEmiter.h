@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../Library/Particle/ParticleCanvas.h"
 #include "../../Library/Particle/ParticleDefine.h"
 #include "../../Library/Renderer/ParticleRenderer.h"
 

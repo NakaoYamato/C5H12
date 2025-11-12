@@ -8,6 +8,18 @@
 
 #include <Mygui.h>
 
+// 初期化処理
+bool ItemManager::Initialize()
+{
+	_itemIconCanvas = std::make_unique<Canvas>(
+		Graphics::Instance().GetDevice(),
+		DirectX::XMUINT2(1280, 1280),
+		Vector2(128.0f, 128.0f));
+	_itemIconCanvas->SetFilePath("./Data/Resource/ItemIconCanvas.png");
+
+	return true;
+}
+
 // ファイル読み込み
 bool ItemManager::LoadFromFile()
 {
@@ -133,6 +145,36 @@ void ItemManager::DrawGui()
 			ImGui::TreePop();
 		}
 		index++;
+	}
+
+	if (ImGui::TreeNode(u8"アイコンキャンバス"))
+	{
+		{
+			std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+
+			if (ImGui::Button(u8"アイコン追加"))
+			{
+				// ダイアログを開く
+				std::string filepath;
+				std::string currentDirectory;
+				Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
+				// ファイルを選択したら
+				if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+				{
+					ToWString(filepath);
+					_itemIconCanvas->Load(
+						Graphics::Instance().GetDevice(),
+						Graphics::Instance().GetDeviceContext(),
+						ToWString(filepath).c_str(),
+						{ 1,1 });
+				}
+			}
+
+			_itemIconCanvas->DrawGui(
+				Graphics::Instance().GetDevice(),
+				Graphics::Instance().GetDeviceContext());
+		}
+		ImGui::TreePop();
 	}
 }
 

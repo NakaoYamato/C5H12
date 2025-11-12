@@ -148,6 +148,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Library\2D\Canvas.cpp" />
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
     <ClCompile Include="Library\2D\SpriteResource.cpp" />
@@ -249,7 +250,6 @@
     <ClCompile Include="Library\Model\ModelCollision.cpp" />
     <ClCompile Include="Library\Network\ClientAssignment.cpp" />
     <ClCompile Include="Library\Particle\ParticleEmiter.cpp" />
-    <ClCompile Include="Library\Particle\ParticleCanvas.cpp" />
     <ClCompile Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.cpp" />
     <ClCompile Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.cpp" />
     <ClCompile Include="Library\PostProcess\DepthOfField\DepthOfField.cpp" />
@@ -403,6 +403,7 @@
     <ClCompile Include="Source\Title\Item\TitleToOnlineSettingItem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Library\2D\Canvas.h" />
     <ClInclude Include="Library\2D\Fade.h" />
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
@@ -525,7 +526,6 @@
     <ClInclude Include="Library\Model\ModelCollision.h" />
     <ClInclude Include="Library\Network\ClientAssignment.h" />
     <ClInclude Include="Library\Particle\ParticleEmiter.h" />
-    <ClInclude Include="Library\Particle\ParticleCanvas.h" />
     <ClInclude Include="Library\Particle\ParticleDefine.h" />
     <ClInclude Include="Library\PostProcess\CascadedShadowMap\CascadedShadowMap.h" />
     <ClInclude Include="Library\PostProcess\ChromaticAberration\ChromaticAberration.h" />

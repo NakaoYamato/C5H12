@@ -16,6 +16,9 @@ bool ItemManager::Initialize()
 		DirectX::XMUINT2(1280, 1280),
 		Vector2(128.0f, 128.0f));
 	_itemIconCanvas->SetFilePath("./Data/Resource/ItemIconCanvas.png");
+	_itemIconCanvas->Deserialize(
+		Graphics::Instance().GetDevice(),
+		Graphics::Instance().GetDeviceContext());
 
 	return true;
 }
@@ -33,9 +36,10 @@ bool ItemManager::LoadFromFile()
 		for (size_t i = 0; i < size; ++i)
 		{
 			ItemData data;
-			data.name = jsonData["ItemDataList" + std::to_string(i) + "name"].get<std::string>();
-			data.type = static_cast<ItemType>(jsonData["ItemDataList" + std::to_string(i) + "type"].get<int>());
-			data.rarity = jsonData["ItemDataList" + std::to_string(i) + "rarity"].get<int>();
+			data.name		= jsonData["ItemDataList" + std::to_string(i) + "name"].get<std::string>();
+			data.iconIndex	= jsonData["ItemDataList" + std::to_string(i) + "iconIndex"].get<int>();
+			data.type		= static_cast<ItemType>(jsonData["ItemDataList" + std::to_string(i) + "type"].get<int>());
+			data.rarity		= jsonData["ItemDataList" + std::to_string(i) + "rarity"].get<int>();
 			_itemDataList.push_back(data);
 		}
 		return true;
@@ -51,6 +55,7 @@ bool ItemManager::SaveToFile()
 	for (size_t i = 0; i < _itemDataList.size(); ++i)
 	{
 		jsonData["ItemDataList" + std::to_string(i) + "name"] = _itemDataList[i].name;
+		jsonData["ItemDataList" + std::to_string(i) + "iconIndex"] = _itemDataList[i].iconIndex;
 		jsonData["ItemDataList" + std::to_string(i) + "type"] = static_cast<int>(_itemDataList[i].type);
 		jsonData["ItemDataList" + std::to_string(i) + "rarity"] = _itemDataList[i].rarity;
 	}
@@ -87,51 +92,26 @@ void ItemManager::DrawGui()
 		if (ImGui::TreeNode(std::to_string(index).c_str()))
 		{
 			ImGui::InputText(u8"名前", &data.name);
-			ImGui::Text(u8"テクスチャファイルパス: %ls", data.textureFilePath.c_str());
-			ImGui::SameLine();
-			if (ImGui::Button("..."))
+			if (ImGui::InputInt(u8"アイコン番号", &data.iconIndex))
+				data.iconIndex = std::clamp<int>(data.iconIndex, -1, _itemIconTextureIndex - 1);
+
+			if (_itemIconTextureMap.find(data.iconIndex) != _itemIconTextureMap.end())
 			{
-				// ダイアログを開く
-				std::string filepath;
-				std::string currentDirectory;
-				Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
-				// ファイルを選択したら
-				if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-				{
-					try
-					{
-						// 相対パス取得
-						std::filesystem::path path =
-							std::filesystem::relative(filepath, currentDirectory);
-						data.textureFilePath = path.wstring();
-					}
-					catch (...)
-					{
-						data.textureFilePath = ToWString(filepath);
-					}
-				}
-			}
-			if (!data.textureFilePath.empty())
-			{
-				Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv = TextureCache[data.textureFilePath];
-				if (srv.Get() == nullptr)
-				{
-					// テクスチャ読み込み
-					GpuResourceManager::LoadTextureFromFile(
-						Graphics::Instance().GetDevice(),
-						data.textureFilePath.c_str(),
-						&srv, nullptr);
-				}
+				auto& textureData = _itemIconTextureMap[data.iconIndex];
+				const float canvasScaleX = static_cast<float>(_itemIconCanvas->GetCanvasScale().x);
+				const float canvasScaleY = static_cast<float>(_itemIconCanvas->GetCanvasScale().y);
+				ImVec2 uv0, uv1;
+				uv0.x = textureData.texPosition.x / canvasScaleX;
+				uv0.y = textureData.texPosition.y / canvasScaleY;
+				uv1.x = (textureData.texPosition.x + textureData.texSize.x) / canvasScaleX;
+				uv1.y = (textureData.texPosition.y + textureData.texSize.y) / canvasScaleY;
 				// テクスチャ表示
-				if (srv)
-				{
-					ImGui::Image(
-						srv.Get(),
-						ImVec2(64.0f, 64.0f),
-						ImVec2(0.0f, 0.0f),
-						ImVec2(1.0f, 1.0f), 
-						ImVec4(data.color.x, data.color.y, data.color.z, data.color.w));
-				}
+				ImGui::Image(
+					_itemIconCanvas->GetColorSRV().Get(),
+					ImVec2(64.0f, 64.0f),
+					uv0,
+					uv1,
+					ImVec4(data.color.x, data.color.y, data.color.z, data.color.w));
 			}
 			ImGui::ColorEdit4(u8"表示色", &data.color.x);
 			ImGui::Combo(u8"種類", reinterpret_cast<int*>(&data.type), ItemTypeNames.data(), static_cast<int>(ItemType::ItemTypeMax));
@@ -147,34 +127,32 @@ void ItemManager::DrawGui()
 		index++;
 	}
 
-	if (ImGui::TreeNode(u8"アイコンキャンバス"))
+	ImGui::Separator();
 	{
+		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+
+		if (ImGui::Button(u8"アイコン追加"))
 		{
-			std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-
-			if (ImGui::Button(u8"アイコン追加"))
+			// ダイアログを開く
+			std::string filepath;
+			std::string currentDirectory;
+			Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
+			// ファイルを選択したら
+			if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
 			{
-				// ダイアログを開く
-				std::string filepath;
-				std::string currentDirectory;
-				Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
-				// ファイルを選択したら
-				if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-				{
-					ToWString(filepath);
-					_itemIconCanvas->Load(
-						Graphics::Instance().GetDevice(),
-						Graphics::Instance().GetDeviceContext(),
-						ToWString(filepath).c_str(),
-						{ 1,1 });
-				}
+				ToWString(filepath);
+				_itemIconTextureMap[_itemIconTextureIndex] = _itemIconCanvas->Load(
+					Graphics::Instance().GetDevice(),
+					Graphics::Instance().GetDeviceContext(),
+					ToWString(filepath).c_str(),
+					{ 1,1 });
+				_itemIconTextureIndex++;
 			}
-
-			_itemIconCanvas->DrawGui(
-				Graphics::Instance().GetDevice(),
-				Graphics::Instance().GetDeviceContext());
 		}
-		ImGui::TreePop();
+
+		_itemIconCanvas->DrawGui(
+			Graphics::Instance().GetDevice(),
+			Graphics::Instance().GetDeviceContext());
 	}
 }
 

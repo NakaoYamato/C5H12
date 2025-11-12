@@ -33,6 +33,9 @@ public:
 private:
 	std::string _filePath = "./Data/Resource/ItemManager.json";
 	std::unique_ptr<Canvas> _itemIconCanvas;
+	std::unordered_map<int, Canvas::TextureData> _itemIconTextureMap;
+	int _itemIconTextureIndex = 0;
+
 	std::vector<ItemData> _itemDataList;
 
 	int _selectedAddTypeIndex = 0;

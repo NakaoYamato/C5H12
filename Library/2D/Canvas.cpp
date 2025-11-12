@@ -85,19 +85,19 @@ Canvas::TextureData Canvas::Load(ID3D11Device* device,
 	// 次のテクスチャの位置を更新
 	if (_isUseOriginalTextureScale)
 	{
-		if (_nextTexPos.x + sprite.GetTextureSize().x + textureData.texSize.x > static_cast<float>(_canvasScale.x))
+		_nextTexPos.y += textureData.texSize.y;
+	}
+	else
+	{
+		if (_nextTexPos.x + _textureScale.x > static_cast<float>(_canvasScale.x))
 		{
 			_nextTexPos.x = 0.0f;
 			_nextTexPos.y += sprite.GetTextureSize().y;
 		}
 		else
 		{
-			_nextTexPos.x += sprite.GetTextureSize().x;
+			_nextTexPos.x += _textureScale.x;
 		}
-	}
-	else
-	{
-		_nextTexPos.y += textureData.texSize.y;
 	}
 
 	// ロードしたテクスチャ情報を保存
@@ -118,14 +118,13 @@ void Canvas::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 
 		for (auto& [name, data] : _textureMap)
 		{
-			ImGui::Text("%ls : Pos(%.1f, %.1f) Size(%.1f, %.1f) Split(%d, %d)",
-				name.c_str(),
-				data.texPosition.x,
-				data.texPosition.y,
-				data.texSize.x,
-				data.texSize.y,
-				data.texSplit.x,
-				data.texSplit.y);
+			if (ImGui::TreeNode(ToString(name).c_str()))
+			{
+				ImGui::Text("Position: (%.1f, %.1f)", data.texPosition.x, data.texPosition.y);
+				ImGui::Text("Size: (%.1f, %.1f)", data.texSize.x, data.texSize.y);
+				ImGui::Text("Split: (%d, %d)", data.texSplit.x, data.texSplit.y);
+				ImGui::TreePop();
+			}
 		}
 
 		ImGui::InputText(u8"エクスポート先", &_filepath);
@@ -162,6 +161,11 @@ bool Canvas::Deserialize(ID3D11Device* device,
 {
 	SpriteResource sprite(device, ToWString(_filepath).c_str());
 
+	// 現在使用しているステートのキャッシュを保存
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState>  cachedRS;
+	dc->RSGetState(cachedRS.GetAddressOf());
+
+	dc->RSSetState(_rasterizerState.Get());
 	// フレームバッファ開始
 	_canvasBuffer->Clear(dc, Vector4::Zero);
 	_canvasBuffer->Activate(dc);
@@ -169,5 +173,8 @@ bool Canvas::Deserialize(ID3D11Device* device,
 	sprite.Render(dc, Vector2::Zero);
 	//　フレームバッファ停止
 	_canvasBuffer->Deactivate(dc);
+	// 保存してあるステートのキャッシュを復元
+	dc->RSSetState(cachedRS.Get());
+
 	return true;
 }

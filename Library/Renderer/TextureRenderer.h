@@ -8,16 +8,50 @@
 #include <memory>
 
 #include "../../Library/2D/SpriteResource.h"
+#include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/Graphics/Texture.h"
+#include "../../Library/Material/Material.h"
 #include "../Math/Vector.h"
 
 class TextureRenderer
 {
+public:
+	struct Vertex
+	{
+		Vector3 position{};
+		Vector4 color{};
+		Vector2 texcoord{};
+	};
+
 public:
 	/// <summary>
 	/// èâä˙âª
 	/// </summary>
 	/// <param name="device"></param>
 	void Initialize(ID3D11Device* device);
+
+	void Render(const RenderContext& rc,
+		ID3D11ShaderResourceView*const* srv,
+		const D3D11_TEXTURE2D_DESC& textureDesc,
+		const Vector2& position = Vector2::Zero,
+		const Vector2& scale = Vector2::One,
+		const Vector2& texPos = Vector2::Zero,
+		const Vector2& texSize = Vector2::Zero,
+		const Vector2& center = Vector2::Zero,
+		float			angle = 0.0f,
+		const Vector4& color = Vector4::White,
+		Material* material = nullptr);
+
+	void Render(const RenderContext& rc,
+		Texture*		texture,
+		const Vector2&	position = Vector2::Zero,
+		const Vector2&	scale = Vector2::One,
+		const Vector2&	texPos = Vector2::Zero,
+		const Vector2&	texSize = Vector2::Zero,
+		const Vector2&	center = Vector2::Zero,
+		float			angle = 0.0f,
+		const Vector4&	color = Vector4::White,
+		Material*		material = nullptr);
 
 	/// <summary>
 	/// FullscreenQuadÇÃë„ÇÌÇË
@@ -34,5 +68,5 @@ public:
 		ID3D11PixelShader* pixelShader = nullptr);
 
 private:
-	std::unique_ptr<SpriteResource>			_fullscreenQuad;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>		_vertexBuffer;
 };

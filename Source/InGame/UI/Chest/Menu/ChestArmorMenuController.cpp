@@ -163,6 +163,7 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
 	if (!armorManager)
 		return;
+    auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
 
     auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
 
@@ -225,17 +226,17 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
                 if (armorData)
                 {
                     _armorBackSprite->SetColorAlpha(1.0f);
-                    _armorBackSprite->Render(rc);
+                    _armorBackSprite->Render(rc, textureRenderer);
 
                     _armorSprites[static_cast<int>(_selectType)]->SetColor(armorData->GetRarityColor(armorData->rarity));
                     _armorSprites[static_cast<int>(_selectType)]->GetRectTransform().SetLocalPosition(position);
                     _armorSprites[static_cast<int>(_selectType)]->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
-                    _armorSprites[static_cast<int>(_selectType)]->Render(rc);
+                    _armorSprites[static_cast<int>(_selectType)]->Render(rc, textureRenderer);
                 }
                 else
                 {
                     _armorBackSprite->SetColorAlpha(0.5f);
-                    _armorBackSprite->Render(rc);
+                    _armorBackSprite->Render(rc, textureRenderer);
                 }
 
 			}
@@ -247,7 +248,7 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
             position.y = _armorSprPositionInterval.y * _selectArmorRowIndex;
             _armorFrontSprite->GetRectTransform().SetLocalPosition(position);
             _armorFrontSprite->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
-            _armorFrontSprite->Render(rc);
+            _armorFrontSprite->Render(rc, textureRenderer);
         }
         break;
     }

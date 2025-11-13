@@ -774,6 +774,15 @@
     <ClCompile Include="Library\2D\Canvas.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Shader\Sprite\SpriteShaderResource.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1628,6 +1637,18 @@
     <ClInclude Include="Library\2D\Canvas.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Shader\Sprite\SpriteShaderBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Sprite\SpriteShaderResource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1766,5 +1787,6 @@
     <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowVS.hlsl" />
     <FxCompile Include="HLSL\PrimitiveRenderer\Locus\PlayerSwordLocusPS.hlsl" />
     <FxCompile Include="HLSL\Model\Player\PlayerGBPS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\SpriteScrollPS.hlsl" />
   </ItemGroup>
 </Project>

@@ -63,7 +63,6 @@ void PhongShader::Update(const RenderContext& rc,
 
 void PhongShader::End(const RenderContext& rc)
 {
-	//ShaderBase::End(rc);
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// シェーダー設定解除

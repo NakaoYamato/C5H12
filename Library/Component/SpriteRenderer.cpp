@@ -91,5 +91,6 @@ bool SpriteRenderer::IsHit(const std::string& name, const Vector2& pos) const
 void SpriteRenderer::SpriteRender(const std::string& spriteName, 
 	const RenderContext& rc)
 {
-	_sprites[spriteName].Render(rc);
+	auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
+	_sprites[spriteName].Render(rc, textureRenderer);
 }

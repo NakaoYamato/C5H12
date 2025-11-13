@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../../Library/2D/SpriteResource.h"
+#include "../../Library/Material/Material.h"
 #include "../../Library/Math/RectTransform.h"
 #include "../../Library/Math/Easing.h"
 #include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/Renderer/TextureRenderer.h"
 
 #include <string>
 #include <memory>
@@ -32,7 +33,7 @@ public:
 	// トランスフォーム更新
 	virtual void UpdateTransform(RectTransform* parent = nullptr);
 	// 描画
-	virtual void Render(const RenderContext& rc);
+	void Render(const RenderContext& rc, TextureRenderer& renderer);
 	// GUI描画
 	void DrawGui();
 	// 画像読み込み
@@ -43,7 +44,9 @@ public:
 	void RecalcCenter(CenterAlignment alignment);
 
 #pragma region アクセサ
-	RectTransform& GetRectTransform() { return _rectTransform; }
+	Texture&		GetTexture() { return _sprite; }
+	RectTransform&	GetRectTransform() { return _rectTransform; }
+	Material&		GetMaterial() { return _material; }
 
 	CenterAlignment GetCenterAlignment()const { return _centerAlignment; }
 	const Vector2& GetTexPos()const { return _texPos; }
@@ -66,8 +69,9 @@ public:
     void SetStencil(UINT8 stencil) { _stencil = stencil; }
 #pragma endregion
 private:
-	std::unique_ptr<SpriteResource> _sprite;
-	RectTransform _rectTransform;
+	Texture			_sprite;
+	RectTransform	_rectTransform;
+	Material		_material;
 
 	CenterAlignment	_centerAlignment = CenterAlignment::CenterCenter;
 	Vector2			_texPos = Vector2::Zero;

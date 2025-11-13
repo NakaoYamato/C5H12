@@ -37,5 +37,5 @@ void TitleToOfflineItem::Update(float elapsedTime)
 // •`‰æ
 void TitleToOfflineItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["Button"].Render(rc);
+	_sprites["Button"].Render(rc, scene->GetTextureRenderer());
 }

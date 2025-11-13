@@ -2,6 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Collision/CollisionMath.h"
+#include "../../Library/Shader/Sprite/SpriteShaderResource.h"
 
 #include <imgui.h>
 
@@ -12,10 +13,18 @@ Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 // GUI描画
 void Sprite::DrawGui()
 {
-	if (_sprite)
+	if (_sprite.Get())
 	{
-		ImGui::Image(_sprite->GetSRV().Get(),
+		ImGui::Image(_sprite.Get(),
 			ImVec2(100, 100));
+	}
+	ImGui::Separator();
+	if (ImGui::TreeNode(u8"マテリアル"))
+	{
+		auto spriteShaderResource = ResourceManager::Instance().GetResourceAs<SpriteShaderResource>();
+		spriteShaderResource->DrawMaterialEditGui(&_material);
+		_material.DrawGui();
+		ImGui::TreePop();
 	}
 	ImGui::Separator();
 
@@ -57,9 +66,16 @@ void Sprite::DrawGui()
 // 画像読み込み
 void Sprite::LoadTexture(const wchar_t* filename, CenterAlignment alignment)
 {
-	_sprite = std::make_unique<SpriteResource>(Graphics::Instance().GetDevice(), filename);
-	SetTexSize(_sprite->GetTextureSize());
+	_sprite.Load(Graphics::Instance().GetDevice(), filename);
+	SetTexSize(_sprite.GetTextureSize());
 	RecalcCenter(alignment);
+	// デフォルトマテリアル設定
+	_material.SetShaderType(ShaderType::Sprite);
+	// パラメータの取得
+	auto spriteShaderResource = ResourceManager::Instance().GetResourceAs<SpriteShaderResource>();
+	_material.SetShaderName("Simple");
+	_material.SetParameterMap(
+		spriteShaderResource->GetShaderParameterKey("Simple"));
 }
 // 画像との当たり判定
 bool Sprite::IsHit(const Vector2& pos) const
@@ -127,19 +143,21 @@ void Sprite::UpdateTransform(RectTransform* parent)
 {
 	_rectTransform.UpdateTransform(parent);
 }
-// スプライト描画
-void Sprite::Render(const RenderContext& rc)
+// 描画
+void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer)
 {
-	if (!_sprite)
+	if (_sprite.Get() == nullptr)
 		return;
 
 	rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(_depthState), static_cast<UINT8>(_stencil));
-	_sprite->Render(rc.deviceContext,
-		_rectTransform.GetWorldPosition(),
-		_rectTransform.GetWorldScale(),
+	renderer.Render(rc,
+		&GetTexture(),
+		GetRectTransform().GetWorldPosition(),
+		GetRectTransform().GetWorldScale(),
 		GetTexPos(),
 		GetTexSize(),
 		GetCenter(),
-		_rectTransform.GetWorldAngle(),
-		GetColor());
+		GetRectTransform().GetWorldAngle(),
+		GetColor(),
+		&GetMaterial());
 }

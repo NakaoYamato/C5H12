@@ -15,17 +15,24 @@ void Material::DrawGui()
 		u8"Opaque",
 		u8"Alpha",
 	};
-	static std::vector<const char*> shaderNames;
-	for (size_t i = 0; i < static_cast<int>(ShaderType::ShaderTypeMax); ++i)
+	static std::vector<char> shaderNames;
+	if (shaderNames.empty())
 	{
-		shaderNames.push_back(ToString<ShaderType>(i).c_str());
+		for (size_t i = 0; i < static_cast<int>(ShaderType::ShaderTypeMax); ++i)
+		{
+			for (auto& name : ToString<ShaderType>(i))
+			{
+				shaderNames.push_back(name);
+			}
+			shaderNames.push_back('\0');
+		}
 	}
 
 	ImGui::Text((u8"マテリアル名:" + _name).c_str());
 	ImGui::Separator();
 
 	int sId = static_cast<int>(_shaderType);
-	if (ImGui::Combo(u8"シェーダータイプ", &sId, shaderNames.data(), (int)shaderNames.size()))
+	if (ImGui::Combo(u8"シェーダータイプ", &sId, shaderNames.data(), static_cast<int>(ShaderType::ShaderTypeMax)))
 		SetShaderType(static_cast<ShaderType>(sId));
 	ImGui::Separator();
 

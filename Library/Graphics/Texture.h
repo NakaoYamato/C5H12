@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/Graphics/GpuResourceManager.h"
+#include "../../Library/Math/Vector.h"
 
 class Texture
 {
@@ -31,6 +32,14 @@ public:
 
 	// 読み込んだテクスチャの2Dテクスチャ情報を取得
 	const D3D11_TEXTURE2D_DESC& GetTexture2DDesc() const { return _texture2dDesc; }
+	/// <summary>
+	/// SRVの大きさ取得
+	/// </summary>
+	/// <returns></returns>
+	const Vector2 GetTextureSize()
+	{
+		return Vector2(static_cast<float>(_texture2dDesc.Width), static_cast<float>(_texture2dDesc.Height));
+	}
 private:
 	std::wstring										_filepath{};
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	_textureSRV{};

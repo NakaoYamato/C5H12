@@ -46,7 +46,7 @@ void TitleToExitItem::Update(float elapsedTime)
 // 描画
 void TitleToExitItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["Button"].Render(rc);
+	_sprites["Button"].Render(rc, scene->GetTextureRenderer());
 }
 // コマンドを実行
 void TitleToExitItem::ExecuteCommand(const TitleMediator::CommandData& commandData)

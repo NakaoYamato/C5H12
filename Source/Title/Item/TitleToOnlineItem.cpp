@@ -37,5 +37,5 @@ void TitleToOnlineItem::Update(float elapsedTime)
 // •`‰æ
 void TitleToOnlineItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["Button"].Render(rc);
+	_sprites["Button"].Render(rc, scene->GetTextureRenderer());
 }

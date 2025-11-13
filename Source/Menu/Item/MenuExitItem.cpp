@@ -36,7 +36,7 @@ void MenuExitItem::Render(Scene* scene, const RenderContext& rc, const Vector2& 
 	// ƒAƒCƒeƒ€‚Ì•`‰æˆ—‚ðŽÀ‘•
 	for (auto& [name, sprite] : _sprites)
 	{
-		sprite.Render(rc);
+		sprite.Render(rc, scene->GetTextureRenderer());
 	}
 	scene->GetTextRenderer().Draw(
 		FontType::MSGothic,

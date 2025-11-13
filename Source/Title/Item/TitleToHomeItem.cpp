@@ -38,5 +38,5 @@ void TitleToHomeItem::Update(float elapsedTime)
 // •`‰æ
 void TitleToHomeItem::Render(Scene* scene, const RenderContext& rc)
 {
-	_sprites["StartButton"].Render(rc);
+	_sprites["StartButton"].Render(rc, scene->GetTextureRenderer());
 }

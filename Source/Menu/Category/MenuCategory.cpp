@@ -57,7 +57,7 @@ void MenuCategory::Render(Scene* scene, const RenderContext& rc, const Vector2& 
 	// スプライトの描画処理を実装
 	for (auto& [name, sprite] : _sprites)
 	{
-		sprite.Render(rc);
+		sprite.Render(rc, scene->GetTextureRenderer());
 	}
 
 	scene->GetTextRenderer().Draw(

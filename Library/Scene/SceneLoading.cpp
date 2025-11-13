@@ -14,6 +14,7 @@ void SceneLoading::Initialize()
 	// レンダラー作成
 	{
 		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		GetTextureRenderer().Initialize(Graphics::Instance().GetDevice());
 		GetTextRenderer().Initialize(Graphics::Instance().GetDevice(),
 			Graphics::Instance().GetDeviceContext());
 	}
@@ -121,7 +122,7 @@ void SceneLoading::Render()
 	{
 		// フレーム部分の描画
 		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-		_sprites["LoadingBar"].Render(rc);
+		_sprites["LoadingBar"].Render(rc, GetTextureRenderer());
 
 		// マスク部分の描画
 		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteMask), 1);

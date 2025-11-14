@@ -30,8 +30,6 @@ public:
 private:
 	std::string _filePath = "./Data/Resource/ArmorManager.json";
 	std::unordered_map<ArmorType, std::vector<ArmorData>> _armorDataMap;
-
-	int _selectedAddTypeIndex = 0;
 };
 
 // ƒŠƒ\[ƒXİ’è

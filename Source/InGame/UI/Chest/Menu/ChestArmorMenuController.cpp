@@ -4,13 +4,13 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Algorithm/Converter.h"
 
-#include "../../Source/Armor/ArmorManager.h"
-
 #include <imgui.h>
 
 // 開始処理
 void ChestArmorMenuController::Start()
 {
+    _userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
+
     _spriteRenderer = this->GetActor()->GetComponent<SpriteRenderer>();
 
     if (auto spriteRenderer = _spriteRenderer.lock())
@@ -129,19 +129,19 @@ void ChestArmorMenuController::Update(float elapsedTime)
                 armorType = ArmorType::Leg;
                 break;
             }
-            size_t armorIndex = playerArmorController->GetArmorIndex(armorType);
-            auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
-            if (!armorManager)
+            int armorIndex = playerArmorController->GetArmorIndex(armorType);
+			auto userDataManager = _userDataManager.lock();
+            if (!userDataManager)
                 return;
-            auto armorData = armorManager->GetArmorData(armorType, armorIndex);
-            if (!armorData)
+            auto armorUserData = userDataManager->GetAcquiredArmorData(armorType, armorIndex);
+            if (!armorUserData || !armorUserData->GetBaseData())
             {
                 // データがないなら透明にする
                 spriteRenderer->SetColorAlpha(name, 0.0f);
             }
             else
             {
-                spriteRenderer->SetColor(name, armorData->GetRarityColor(armorData->rarity));
+                spriteRenderer->SetColor(name, armorUserData->GetBaseData()->GetRarityColor(armorUserData->GetBaseData()->rarity));
             }
         };
     SetColor(HeadSpr, SelectType::Head);
@@ -160,9 +160,9 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
         return;
-	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
-	if (!armorManager)
-		return;
+    auto userDataManager = _userDataManager.lock();
+    if (!userDataManager)
+        return;
     auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
 
     auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
@@ -194,26 +194,26 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
         {
 			for (int r = 0; r < _armorSprRowNum; ++r)
 			{
-                size_t index = r * _armorSprColumnNum + c;
-                ArmorData* armorData = nullptr;
+                int index = r * _armorSprColumnNum + c;
+				UserDataManager::ArmorUserData* armorUserData = nullptr;
                 switch (_selectType)
                 {
                 case ChestArmorMenuController::SelectType::Weapon:
                     break;
                 case ChestArmorMenuController::SelectType::Head:
-                    armorData = armorManager->GetArmorData(ArmorType::Head, index);
+                    armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Head, index);
                     break;
                 case ChestArmorMenuController::SelectType::Chest:
-					armorData = armorManager->GetArmorData(ArmorType::Chest, index);
+                    armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Chest, index);
                     break;
                 case ChestArmorMenuController::SelectType::Arm:
-                    armorData = armorManager->GetArmorData(ArmorType::Arm, index);
+                    armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Arm, index);
                     break;
                 case ChestArmorMenuController::SelectType::Waist:
-                    armorData = armorManager->GetArmorData(ArmorType::Waist, index);
+                    armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Waist, index);
                     break;
                 case ChestArmorMenuController::SelectType::Leg:
-                    armorData = armorManager->GetArmorData(ArmorType::Leg, index);
+                    armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Leg, index);
                     break;
                 }
 
@@ -223,6 +223,7 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
                 _armorBackSprite->GetRectTransform().SetLocalPosition(position);
                 _armorBackSprite->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
 
+                ArmorData* armorData = armorUserData ? armorUserData->GetBaseData() : nullptr;
                 if (armorData)
                 {
                     _armorBackSprite->SetColorAlpha(1.0f);
@@ -364,6 +365,9 @@ void ChestArmorMenuController::AddSelectArmorRowIndex(int val)
 // 次へ進む
 void ChestArmorMenuController::NextState()
 {
+    auto userDataManager = _userDataManager.lock();
+    if (!userDataManager)
+        return;
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
         return;
@@ -406,7 +410,12 @@ void ChestArmorMenuController::NextState()
     case State::SelectArmor:
 		// 防具変更
 		armorIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
-		playerArmorController->SetArmorIndex(armorType, static_cast<int>(armorIndex));
+		// 現在装備中の防具と同じなら脱ぐ
+		if (armorIndex == static_cast<size_t>(playerArmorController->GetArmorIndex(armorType)))
+            playerArmorController->SetArmorIndex(armorType, -1);
+		// 選択中のマスに対応する防具が存在するか確認
+        else if (armorIndex < static_cast<int>(userDataManager->GetAcquiredArmorDataList(armorType).size()))
+            playerArmorController->SetArmorIndex(armorType, static_cast<int>(armorIndex));
         break;
     }
 }
@@ -476,19 +485,19 @@ void ChestArmorMenuController::SetPlayerArmorController(const std::shared_ptr<Pl
                 armorType = ArmorType::Leg;
                 break;
             }
-            size_t armorIndex = controller->GetArmorIndex(armorType);
-            auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
-            if (!armorManager)
-				return;
-            auto armorData = armorManager->GetArmorData(armorType, armorIndex);
-            if (!armorData)
+            int armorIndex = controller->GetArmorIndex(armorType);
+            auto userDataManager = _userDataManager.lock();
+            if (!userDataManager)
+                return;
+            auto armorUserData = userDataManager->GetAcquiredArmorData(armorType, armorIndex);
+            if (!armorUserData || !armorUserData->GetBaseData())
             {
                 // データがないなら透明にする
                 spriteRenderer->SetColorAlpha(name, 0.0f);
             }
             else
             {
-                spriteRenderer->SetColor(name, armorData->GetRarityColor(armorData->rarity));
+                spriteRenderer->SetColor(name, armorUserData->GetBaseData()->GetRarityColor(armorUserData->GetBaseData()->rarity));
             }
         };
 	SetColor(HeadSpr, SelectType::Head);

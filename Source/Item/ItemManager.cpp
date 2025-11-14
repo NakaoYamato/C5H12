@@ -35,12 +35,26 @@ bool ItemManager::LoadFromFile()
 		size_t size = jsonData["ItemDataListSize"].get<std::size_t>();
 		for (size_t i = 0; i < size; ++i)
 		{
+			auto& sub = jsonData["ItemDataList" + std::to_string(i)]; 
 			ItemData data;
-			data.name		= jsonData["ItemDataList" + std::to_string(i) + "name"].get<std::string>();
-			data.iconIndex	= jsonData["ItemDataList" + std::to_string(i) + "iconIndex"].get<int>();
-			data.type		= static_cast<ItemType>(jsonData["ItemDataList" + std::to_string(i) + "type"].get<int>());
-			data.rarity		= jsonData["ItemDataList" + std::to_string(i) + "rarity"].get<int>();
+			data.Load(sub);
 			_itemDataList.push_back(data);
+		}
+		if (jsonData.contains("ItemIconTextureIndex"))
+			_itemIconTextureIndex = jsonData["ItemIconTextureIndex"].get<int>();
+		if (jsonData.contains("ItemIconTextureMapSize"))
+		{
+			size_t mapSize = jsonData["ItemIconTextureMapSize"].get<std::size_t>();
+			for (size_t i = 0; i < mapSize; ++i)
+			{
+				Canvas::TextureData textureData;
+				auto& sub = jsonData["ItemIconTextureMapKey" + std::to_string(i)];
+				textureData.texPosition.x = sub["texPositionX"].get<float>();
+				textureData.texPosition.y = sub["texPositionY"].get<float>();
+				textureData.texSize.x = sub["texSizeX"].get<float>();
+				textureData.texSize.y = sub["texSizeY"].get<float>();
+				_itemIconTextureMap[static_cast<int>(i)] = textureData;
+			}
 		}
 		return true;
 	}
@@ -54,10 +68,18 @@ bool ItemManager::SaveToFile()
 	jsonData["ItemDataListSize"] = _itemDataList.size();
 	for (size_t i = 0; i < _itemDataList.size(); ++i)
 	{
-		jsonData["ItemDataList" + std::to_string(i) + "name"] = _itemDataList[i].name;
-		jsonData["ItemDataList" + std::to_string(i) + "iconIndex"] = _itemDataList[i].iconIndex;
-		jsonData["ItemDataList" + std::to_string(i) + "type"] = static_cast<int>(_itemDataList[i].type);
-		jsonData["ItemDataList" + std::to_string(i) + "rarity"] = _itemDataList[i].rarity;
+		auto& sub = jsonData["ItemDataList" + std::to_string(i)];
+		_itemDataList[i].Load(sub);
+	}
+	jsonData["ItemIconTextureIndex"]	= _itemIconTextureIndex;
+	jsonData["ItemIconTextureMapSize"]	= _itemIconTextureMap.size();
+	for (const auto& [key, value] : _itemIconTextureMap)
+	{
+		auto& sub = jsonData["ItemIconTextureMapKey" + std::to_string(key)];
+		sub["texPositionX"] = value.texPosition.x;
+		sub["texPositionY"] = value.texPosition.y;
+		sub["texSizeX"]		= value.texSize.x;
+		sub["texSizeY"]		= value.texSize.y;
 	}
 	return Exporter::SaveJsonFile(_filePath, jsonData);
 }

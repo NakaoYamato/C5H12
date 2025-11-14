@@ -26,17 +26,9 @@ bool ArmorManager::LoadFromFile()
 			size_t size = jsonData[typeName + "Size"].get<std::size_t>();
 			for (size_t i = 0; i < size; ++i)
 			{
+				auto& sub = jsonData[typeName + std::to_string(i)];
 				ArmorData data;
-				data.name			= jsonData[typeName + std::to_string(i) + "name"].get<std::string>();
-				data.modelFilePath	= jsonData[typeName + std::to_string(i) + "modelFilePath"].get<std::string>();
-				size_t hiddenMeshesSize = jsonData[typeName + std::to_string(i) + "hiddenMeshesSize"].get<std::size_t>();
-				for (size_t j = 0; j < hiddenMeshesSize; ++j)
-				{
-					data.hiddenMeshes.push_back(jsonData[typeName + std::to_string(i) + "hiddenMesh" + std::to_string(j)].get<std::string>());
-				}
-				data.type		= static_cast<ArmorType>(jsonData[typeName + std::to_string(i) + "type"].get<int>());
-				data.defense	= jsonData[typeName + std::to_string(i) + "defense"].get<float>();
-				data.rarity		= jsonData[typeName + std::to_string(i) + "rarity"].get<int>();
+				data.Load(sub);
 				dataVec.push_back(data);
 			}
 		}
@@ -57,16 +49,8 @@ bool ArmorManager::SaveToFile()
 		jsonData[typeName + "Size"] = dataVec.size();
 		for (size_t i = 0; i < dataVec.size(); ++i)
 		{
-			jsonData[typeName + std::to_string(i) + "name"]				= dataVec[i].name;
-			jsonData[typeName + std::to_string(i) + "modelFilePath"]	= dataVec[i].modelFilePath;
-			jsonData[typeName + std::to_string(i) + "hiddenMeshesSize"] = dataVec[i].hiddenMeshes.size();
-			for (size_t j = 0; j < dataVec[i].hiddenMeshes.size(); ++j)
-			{
-				jsonData[typeName + std::to_string(i) + "hiddenMesh" + std::to_string(j)] = dataVec[i].hiddenMeshes[j];
-			}
-			jsonData[typeName + std::to_string(i) + "type"]		= static_cast<int>(dataVec[i].type);
-			jsonData[typeName + std::to_string(i) + "defense"]	= dataVec[i].defense;
-			jsonData[typeName + std::to_string(i) + "rarity"]	= dataVec[i].rarity;
+			auto& sub = jsonData[typeName + std::to_string(i)];
+			dataVec[i].Save(sub);
 		}
 	}
 	return Exporter::SaveJsonFile(_filePath, jsonData);
@@ -75,82 +59,28 @@ bool ArmorManager::SaveToFile()
 // Gui描画
 void ArmorManager::DrawGui()
 {
-	static const char* ArmorTypeNames[] =
+	for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
 	{
-		"Head",
-		"Chest",
-		"Arm",
-		"Waist",
-		"Leg"
-	};
-
-	ImGui::Combo("AddType", &_selectedAddTypeIndex, ArmorTypeNames, _countof(ArmorTypeNames));
-	if (ImGui::Button("Add"))
-	{
-		ArmorData data;
-		data.type = static_cast<ArmorType>(_selectedAddTypeIndex);
-		_armorDataMap[data.type].push_back(data);
-	}
-	ImGui::Separator();
-
-	for (auto& [type, dataVec] : _armorDataMap)
-	{
-		if (ImGui::TreeNode(ToString<ArmorType>(static_cast<size_t>(type)).c_str()))
+		if (ImGui::TreeNode(ToString<ArmorType>(i).c_str()))
 		{
+			if (ImGui::Button("Add"))
+			{
+				ArmorData data;
+				data.type = static_cast<ArmorType>(i);
+				_armorDataMap[data.type].push_back(data);
+			}
+			ImGui::Separator();
+
 			int index = 0;
-			for (auto& data : dataVec)
+			for (auto& data : _armorDataMap[static_cast<ArmorType>(i)])
 			{
 				if (ImGui::TreeNode(std::to_string(index).c_str()))
 				{
-					ImGui::InputText(u8"名前", &data.name);
-					ImGui::Text(u8"ファイルパス:");
-					ImGui::SameLine();
-					ImGui::Text(data.modelFilePath.c_str());
-					ImGui::SameLine();
-					if (ImGui::Button("..."))
-					{
-						// ダイアログを開く
-						std::string filepath;
-						std::string currentDirectory;
-						Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::ModelFilter);
-						// ファイルを選択したら
-						if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
-						{
-							try
-							{
-								// 相対パス取得
-								std::filesystem::path path =
-									std::filesystem::relative(filepath, currentDirectory);
-								data.modelFilePath = path.u8string();
-							}
-							catch (...)
-							{
-								data.modelFilePath = filepath;
-							}
-						}
-					}
-					ImGui::InputFloat(u8"防御力", &data.defense);
-					ImGui::InputInt(u8"レア度", &data.rarity);
-					if (ImGui::TreeNode(u8"非表示メッシュ"))
-					{
-						size_t hiddenMeshIndex = 0;
-						for (auto& meshName : data.hiddenMeshes)
-						{
-							ImGui::InputText((u8"非表示メッシュ" + std::to_string(hiddenMeshIndex)).c_str(), &meshName);
-							ImGui::SameLine();
-							if (ImGui::Button((u8"削除##hiddenMesh" + std::to_string(hiddenMeshIndex)).c_str()))
-							{
-								data.hiddenMeshes.erase(data.hiddenMeshes.begin() + hiddenMeshIndex);
-								break;
-							}
-							hiddenMeshIndex++;
-						}
-						ImGui::TreePop();
-					}
+					data.DrawGui();
 
 					if (ImGui::Button(u8"削除"))
 					{
-						dataVec.erase(dataVec.begin() + index);
+						_armorDataMap[static_cast<ArmorType>(i)].erase(_armorDataMap[static_cast<ArmorType>(i)].begin() + index);
 						ImGui::TreePop();
 						break;
 					}

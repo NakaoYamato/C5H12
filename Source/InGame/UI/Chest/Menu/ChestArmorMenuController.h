@@ -64,6 +64,8 @@ private:
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 	// プレイヤー防具コントローラー
 	std::weak_ptr<PlayerArmorController> _playerArmorController;
+	// ユーザーデータマネージャー
+	std::weak_ptr<UserDataManager> _userDataManager;
 
 	// 各種スプライトの名前
 	const std::string BackSpr = "Back";

@@ -2,7 +2,8 @@
 
 #include "../../Library/Actor/ModelAttach/ModelAttachActor.h"
 #include "../../Library/Component/ModelRenderer.h"
-#include "ArmorManager.h"
+
+#include "../../Source/User/UserDataManager.h"
 
 class ArmorActor : public Actor
 {
@@ -22,7 +23,7 @@ public:
 	void OnDrawGui() override;
 
 	// データ構築
-	void BuildData(ArmorManager* manager, int index);
+	void BuildData(ArmorData* data, int index);
 private:
 	// モデルのトランスフォーム更新
 	void UpdateModelTransform() override;
@@ -30,9 +31,10 @@ private:
 protected:
 	ArmorType _type;
 	int _armorIndex = 0;
-	ArmorData* _armorData = nullptr;
 
 	std::weak_ptr<ModelRenderer> _modelRenderer;
 	// 親のモデルレンダラー
 	std::weak_ptr<ModelRenderer> _parentModelRenderer;
+	// ユーザーデータマネージャー
+	std::weak_ptr<UserDataManager> _userDataManager;
 };

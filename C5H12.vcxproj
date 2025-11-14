@@ -404,6 +404,7 @@
     <ClCompile Include="Source\Title\Item\TitleToOfflineItem.cpp" />
     <ClCompile Include="Source\Title\Item\TitleToOnlineItem.cpp" />
     <ClCompile Include="Source\Title\Item\TitleToOnlineSettingItem.cpp" />
+    <ClCompile Include="Source\User\UserDataManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Canvas.h" />
@@ -694,6 +695,7 @@
     <ClInclude Include="Source\Title\Item\TitleToOfflineItem.h" />
     <ClInclude Include="Source\Title\Item\TitleToOnlineItem.h" />
     <ClInclude Include="Source\Title\Item\TitleToOnlineSettingItem.h" />
+    <ClInclude Include="Source\User\UserDataManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\CBuffer\B0\SceneCB.hlsli" />

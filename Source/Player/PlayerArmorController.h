@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 
-#include "../../Source/Armor/ArmorManager.h"
+#include "../../Source/User/UserDataManager.h"
 #include "../../Source/Armor/ArmorActor.h"
 
 class PlayerArmorController : public Component
@@ -20,7 +20,7 @@ public:
 	void DrawGui() override;
 
 	// 防具インデックス取得
-	int GetArmorIndex(ArmorType type) const { return _armorIndices[static_cast<int>(type)]; }
+	int GetArmorIndex(ArmorType type) const;
 	// 防具インデックス設定
 	void SetArmorIndex(ArmorType type, int index);
 	// 防具アクター取得
@@ -29,15 +29,13 @@ public:
 	void SetArmorActor(ArmorType type, std::shared_ptr<ArmorActor> actor) { _armorActors[static_cast<int>(type)] = actor; }
 private:
 #pragma region ファイル
-	void LoadArmorData();
 	void SaveArmorData();
 #pragma endregion
 
 private:
 	std::string _filePath = "./Data/Resource/PlayerArmorData.json";
-
-	// 各部位の参照インデックス
-	int _armorIndices[static_cast<int>(ArmorType::Leg) + 1] = { 0, 0, 0, 0, 0 };
 	// 各部位のアクター参照
 	std::weak_ptr<ArmorActor> _armorActors[static_cast<int>(ArmorType::Leg) + 1];
+	// ユーザーデータマネージャー
+	std::weak_ptr<UserDataManager> _userDataManager;
 };

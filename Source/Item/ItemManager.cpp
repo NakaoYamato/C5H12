@@ -1,7 +1,5 @@
 #include "ItemManager.h"
 
-#include "../../Library/Exporter/Exporter.h"
-#include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
 #include "../../Library/2D/SpriteResource.h"
@@ -19,6 +17,10 @@ bool ItemManager::Initialize()
 	_itemIconCanvas->Deserialize(
 		Graphics::Instance().GetDevice(),
 		Graphics::Instance().GetDeviceContext());
+
+	_overlayIconTexture.Load(
+		Graphics::Instance().GetDevice(),
+		ToWString("./Data/Texture/UI/Item/OverlayIcons.png").c_str());
 
 	return true;
 }
@@ -69,7 +71,7 @@ bool ItemManager::SaveToFile()
 	for (size_t i = 0; i < _itemDataList.size(); ++i)
 	{
 		auto& sub = jsonData["ItemDataList" + std::to_string(i)];
-		_itemDataList[i].Load(sub);
+		_itemDataList[i].Save(sub);
 	}
 	jsonData["ItemIconTextureIndex"]	= _itemIconTextureIndex;
 	jsonData["ItemIconTextureMapSize"]	= _itemIconTextureMap.size();
@@ -88,7 +90,6 @@ bool ItemManager::SaveToFile()
 void ItemManager::DrawGui()
 {
 	static std::vector<char> ItemTypeNames;
-	static std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> TextureCache;
 	if (ItemTypeNames.empty())
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ItemType::ItemTypeMax); ++i)
@@ -113,37 +114,10 @@ void ItemManager::DrawGui()
 	{
 		if (ImGui::TreeNode(std::to_string(index).c_str()))
 		{
-			ImGui::InputText(u8"名前", &data.name);
-			if (ImGui::InputInt(u8"アイコン番号", &data.iconIndex))
-				data.iconIndex = std::clamp<int>(data.iconIndex, -1, _itemIconTextureIndex - 1);
+			// アイテムアイコンGui描画
+			DrawItemIconGui(data.iconIndex, data.overlayIconIndex, data.color);
+			data.DrawGui(_itemIconTextureIndex);
 
-			if (_itemIconTextureMap.find(data.iconIndex) != _itemIconTextureMap.end())
-			{
-				auto& textureData = _itemIconTextureMap[data.iconIndex];
-				const float canvasScaleX = static_cast<float>(_itemIconCanvas->GetCanvasScale().x);
-				const float canvasScaleY = static_cast<float>(_itemIconCanvas->GetCanvasScale().y);
-				ImVec2 uv0, uv1;
-				uv0.x = textureData.texPosition.x / canvasScaleX;
-				uv0.y = textureData.texPosition.y / canvasScaleY;
-				uv1.x = (textureData.texPosition.x + textureData.texSize.x) / canvasScaleX;
-				uv1.y = (textureData.texPosition.y + textureData.texSize.y) / canvasScaleY;
-				// テクスチャ表示
-				ImGui::Image(
-					_itemIconCanvas->GetColorSRV().Get(),
-					ImVec2(64.0f, 64.0f),
-					uv0,
-					uv1,
-					ImVec4(data.color.x, data.color.y, data.color.z, data.color.w));
-			}
-			ImGui::ColorEdit4(u8"表示色", &data.color.x);
-			ImGui::Combo(u8"種類", reinterpret_cast<int*>(&data.type), ItemTypeNames.data(), static_cast<int>(ItemType::ItemTypeMax));
-			ImGui::InputInt(u8"レア度", &data.rarity);
-			if (ImGui::Button(u8"削除"))
-			{
-				_itemDataList.erase(_itemDataList.begin() + index);
-				ImGui::TreePop();
-				break;
-			}
 			ImGui::TreePop();
 		}
 		index++;
@@ -175,6 +149,59 @@ void ItemManager::DrawGui()
 		_itemIconCanvas->DrawGui(
 			Graphics::Instance().GetDevice(),
 			Graphics::Instance().GetDeviceContext());
+
+		ImGui::Text(u8"オーバーレイアイコン");
+		ImGui::Image(_overlayIconTexture.Get(),
+			ImVec2(
+				64.0f * _overlayIconTexture.GetTextureSize().x / _overlayIconTexture.GetTextureSize().y,
+				64.0f));
+	}
+}
+
+// アイテムアイコンGui描画
+void ItemManager::DrawItemIconGui(int selectedIconIndex, int overlayIconIndex, const Vector4& color)
+{
+	if (_itemIconTextureMap.find(selectedIconIndex) != _itemIconTextureMap.end())
+	{
+		// 描画開始位置取得
+		ImVec2 startPos = ImGui::GetCursorScreenPos();
+
+		auto& textureData = _itemIconTextureMap[selectedIconIndex];
+		const float canvasScaleX = static_cast<float>(_itemIconCanvas->GetCanvasScale().x);
+		const float canvasScaleY = static_cast<float>(_itemIconCanvas->GetCanvasScale().y);
+		ImVec2 uv0, uv1;
+		uv0.x = textureData.texPosition.x / canvasScaleX;
+		uv0.y = textureData.texPosition.y / canvasScaleY;
+		uv1.x = (textureData.texPosition.x + textureData.texSize.x) / canvasScaleX;
+		uv1.y = (textureData.texPosition.y + textureData.texSize.y) / canvasScaleY;
+		// テクスチャ表示
+		ImGui::Image(
+			_itemIconCanvas->GetColorSRV().Get(),
+			ImVec2(64.0f, 64.0f),
+			uv0,
+			uv1,
+			ImVec4(color.x, color.y, color.z, color.w));
+		// 次のウィジェット位置取得
+		ImVec2 nextWidgetPos = ImGui::GetCursorScreenPos();
+
+		// オーバーレイ描画
+		if (overlayIconIndex >= 0)
+		{
+			float overlayUvX0 = static_cast<float>(overlayIconIndex % 8) * (1.0f / 8.0f);
+			float overlayUvY0 = 0.0f;
+			float overlayUvX1 = overlayUvX0 + (1.0f / 8.0f);
+			float overlayUvY1 = 1.0f;
+			ImGui::SetCursorScreenPos(startPos);
+			ImGui::Image(
+				_overlayIconTexture.Get(),
+				ImVec2(64.0f, 64.0f),
+				ImVec2(overlayUvX0, overlayUvY0),
+				ImVec2(overlayUvX1, overlayUvY1),
+				ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+			// ウィジェット位置を戻す
+			ImGui::SetCursorScreenPos(nextWidgetPos);
+		}
 	}
 }
 

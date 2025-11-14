@@ -2,6 +2,7 @@
 
 #include "../../Library/Resource/ResourceManager.h"
 #include "../../Library/2D/Canvas.h"
+#include "../../Library/Graphics/Texture.h"
 #include "ItemData.h"
 
 class ItemManager : public ResourceBase
@@ -24,17 +25,22 @@ public:
 
 	// Gui描画
 	void DrawGui() override;
+	// アイテムアイコンGui描画
+	void DrawItemIconGui(int selectedIconIndex, int overlayIconIndex, const Vector4& color);
 
 	// アイテムデータ取得
 	std::vector<ItemData>& GetItemDataList() { return _itemDataList; }
 	// アイテムデータ取得
 	ItemData* GetItemData(size_t index);
 
+	int GetItemIconTextureIndex() const { return _itemIconTextureIndex; }
+
 private:
 	std::string _filePath = "./Data/Resource/ItemManager.json";
 	std::unique_ptr<Canvas> _itemIconCanvas;
 	std::unordered_map<int, Canvas::TextureData> _itemIconTextureMap;
 	int _itemIconTextureIndex = 0;
+	Texture _overlayIconTexture;
 
 	std::vector<ItemData> _itemDataList;
 

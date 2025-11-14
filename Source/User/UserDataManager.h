@@ -15,21 +15,31 @@ public:
 		int			experience		= 0;				// 防具経験値
 		Vector4		color			= Vector4::White;	// 防具カラー
 
+		// マネージャーから元データ取得
 		inline ArmorData* GetBaseData() const;
+		// Gui描画
 		inline void DrawGui();
 	};
 
 	struct ItemUserData
 	{
 		int			index			= 0;	// アイテムデータインデックス
-		int			quantity		= 1;	// アイテム所持数
+		int			quantity		= 0;	// アイテム所持数
 		float		acquisitionTime = 0.0f;	// アイテム入手時刻
 
+		// マネージャーから元データ取得
 		inline ItemData* GetBaseData() const;
+		// Gui描画
 		inline void DrawGui();
 	};
 
 	static constexpr int MaxPouchItemCount = 20;
+	struct PouchItemData
+	{
+		int			pouchIndex	= 0;	// ポーチ内インデックス
+		int			itemIndex	= -1;	// アイテムデータインデックス
+		int 		quantity	= 0;	// アイテム所持数
+	};
 
 public:
 	UserDataManager() = default;
@@ -38,6 +48,10 @@ public:
 	std::string GetName() const override { return "UserDataManager"; }
 	// ファイルパス取得
 	std::string GetFilePath() const override { return _filePath; };
+
+	// 初期化処理
+	bool Initialize();
+
 	// ファイル読み込み
 	bool LoadFromFile() override;
 	// ファイル保存
@@ -59,19 +73,39 @@ public:
 	void SetEquippedArmorIndex(ArmorType type, int index);
 #pragma endregion
 
+#pragma region アイテム
+	// アイテムデータ取得
+	ItemUserData* GetAcquiredItemData(int index);
+	// アイテムの所持状況取得
+	std::unordered_map<int, ItemUserData>& GetAcquiredItemDataMap() { return _acquiredItemMap; }
+	// アイテムポーチ内の全アイテムインデックス取得
+	PouchItemData* GetPouchItems() { return _pouchItems; }
+	// アイテムポーチ内のアイテムインデックス取得
+	int GetPouchItemIndex(int pouchIndex) const;
+
+	// アイテムポーチ内のアイテムインデックス変更
+	void SetPouchItemIndex(int pouchIndex, int itemIndex);
+#pragma endregion
+
+private:
+	// 防具Gui描画
+	void DrawAromrGui();
+	// アイテムGui描画
+	void DrawItemGui();
+
 private:
 	std::string _filePath = "./Data/Resource/UserData/UserDataManager.json";
 
 	// 所持しているすべての防具
 	std::unordered_map<ArmorType, std::vector<ArmorUserData>> _acquiredArmorMap;
-	// 所持しているすべてのアイテム
-	std::vector<ItemUserData> _acquiredItemList;
+	// すべてのアイテムの所持状況
+	std::unordered_map<int, ItemUserData> _acquiredItemMap;
 
 	// 装備中の防具インデックス
 	int _equippedArmorIndices[static_cast<int>(ArmorType::Leg) + 1] = { -1, -1, -1, -1, -1 };
 
-	// アイテムポーチ内のアイテムインデックス
-	int _itemPouchIndices[MaxPouchItemCount] = { -1 };
+	// アイテムポーチ内のアイテム
+	PouchItemData _pouchItems[MaxPouchItemCount];
 };
 
 // リソース設定

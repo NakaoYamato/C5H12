@@ -4,6 +4,7 @@
 
 #include <Mygui.h>
 
+// マネージャーから元データ取得
 inline ArmorData* UserDataManager::ArmorUserData::GetBaseData() const
 {
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
@@ -12,6 +13,7 @@ inline ArmorData* UserDataManager::ArmorUserData::GetBaseData() const
 	return armorManager->GetArmorData(type, index);
 }
 
+// Gui描画
 inline void UserDataManager::ArmorUserData::DrawGui()
 {
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
@@ -38,6 +40,7 @@ inline void UserDataManager::ArmorUserData::DrawGui()
 	}
 }
 
+// マネージャーから元データ取得
 inline ItemData* UserDataManager::ItemUserData::GetBaseData() const
 {
 	auto itemManager = ResourceManager::Instance().GetResourceAs<ItemManager>("ItemManager");
@@ -46,8 +49,55 @@ inline ItemData* UserDataManager::ItemUserData::GetBaseData() const
 	return itemManager->GetItemData(index);
 }
 
+// Gui描画
 inline void UserDataManager::ItemUserData::DrawGui()
 {
+	auto itemManager = ResourceManager::Instance().GetResourceAs<ItemManager>("ItemManager");
+	if (!itemManager)
+		return;
+
+	ItemData* baseData = GetBaseData();
+	if (baseData)
+	{
+		// アイテムアイコンGui描画
+		itemManager->DrawItemIconGui(baseData->iconIndex, baseData->overlayIconIndex, baseData->color);
+		ImGui::SameLine();
+		ImGui::Text(baseData->name.c_str());
+	}
+
+	ImGui::InputInt(u8"所持数", &quantity);
+	ImGui::DragFloat(u8"入手時間", &acquisitionTime, 0.1f);
+	if (baseData)
+	{
+		if (ImGui::TreeNode((std::string("Base") + std::to_string(index)).c_str()))
+		{
+			baseData->DrawGui(itemManager->GetItemIconTextureIndex());
+			ImGui::TreePop();
+		}
+	}
+}
+
+// 初期化処理
+bool UserDataManager::Initialize()
+{
+	auto itemManager = ResourceManager::Instance().GetResourceAs<ItemManager>("ItemManager");
+	if (!itemManager)
+		return false;
+
+	// アイテムの情報読み込み
+	for (int i = 0; i < static_cast<int>(itemManager->GetItemDataList().size()); ++i)
+	{
+		// 要素が存在しなければ追加
+		if (_acquiredItemMap.find(i) == _acquiredItemMap.end())
+		{
+			ItemUserData data;
+			data.index = i;
+			data.quantity = 0;
+			_acquiredItemMap[i] = data;
+		}
+	}
+
+	return true;
 }
 
 // ファイル読み込み
@@ -85,18 +135,18 @@ bool UserDataManager::LoadFromFile()
 				dataVec.push_back(data);
 			}
 		}
-		_acquiredItemList.clear();
+
 		if (!jsonData.contains("AcquiredItemListSize"))
 			return false;
-		size_t itemListSize = jsonData["AcquiredItemListSize"].get<std::size_t>();
-		for (size_t i = 0; i < itemListSize; ++i)
+		int itemListSize = static_cast<int>(jsonData["AcquiredItemListSize"].get<std::size_t>());
+		for (int i = 0; i < itemListSize; ++i)
 		{
 			auto& sub = jsonData["AcquiredItemList" + std::to_string(i)];
 			ItemUserData data;
 			data.index				= sub.value("index", data.index);
 			data.quantity			= sub.value("quantity", data.quantity);
 			data.acquisitionTime	= sub.value("acquisitionTime", data.acquisitionTime);
-			_acquiredItemList.push_back(data);
+			_acquiredItemMap[i] = data;
 		}
 		for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
 		{
@@ -106,13 +156,14 @@ bool UserDataManager::LoadFromFile()
 				_equippedArmorIndices[i] = jsonData[key].get<int>();
 			}
 		}
-		for (size_t i = 0; i < MaxPouchItemCount; ++i)
+		for (int i = 0; i < MaxPouchItemCount; ++i)
 		{
-			std::string key = "ItemPouchIndex" + std::to_string(i);
-			if (jsonData.contains(key))
-			{
-				_itemPouchIndices[i] = jsonData[key].get<int>();
-			}
+			auto& sub = jsonData["PouchItem" + std::to_string(i)];
+			_pouchItems[i].pouchIndex = i;
+			if (!sub.is_object())
+				continue;
+			_pouchItems[i].itemIndex = sub.value("itemIndex", -1);
+			_pouchItems[i].quantity = sub.value("quantity", 0);
 		}
 		return true;
 	}
@@ -141,13 +192,13 @@ bool UserDataManager::SaveToFile()
 			sub["colorW"]			= dataVec[i].color.w;
 		}
 	}
-	jsonData["AcquiredItemListSize"] = _acquiredItemList.size();
-	for (size_t i = 0; i < _acquiredItemList.size(); ++i)
+	jsonData["AcquiredItemListSize"] = _acquiredItemMap.size();
+	for (int i = 0; i < static_cast<int>(_acquiredItemMap.size()); ++i)
 	{
 		auto& sub = jsonData["AcquiredItemList" + std::to_string(i)];
-		sub["index"]			= _acquiredItemList[i].index;
-		sub["quantity"]			= _acquiredItemList[i].quantity;
-		sub["acquisitionTime"]	= _acquiredItemList[i].acquisitionTime;
+		sub["index"]			= _acquiredItemMap[i].index;
+		sub["quantity"]			= _acquiredItemMap[i].quantity;
+		sub["acquisitionTime"]	= _acquiredItemMap[i].acquisitionTime;
 	}
 
 	for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
@@ -157,7 +208,9 @@ bool UserDataManager::SaveToFile()
 
 	for (size_t i = 0; i < MaxPouchItemCount; ++i)
 	{
-		jsonData["ItemPouchIndex" + std::to_string(i)] = _itemPouchIndices[i];
+		auto& sub = jsonData["PouchItem" + std::to_string(i)];
+		sub["itemIndex"]	= _pouchItems[i].itemIndex;
+		sub["quantity"]		= _pouchItems[i].quantity;
 	}
 
 	return Exporter::SaveJsonFile(_filePath, jsonData);
@@ -165,6 +218,126 @@ bool UserDataManager::SaveToFile()
 
 // Gui描画
 void UserDataManager::DrawGui()
+{
+	if (ImGui::TreeNode(u8"防具GUI"))
+	{
+		// 防具Gui描画
+		DrawAromrGui();
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode(u8"アイテムGUI"))
+	{
+		// アイテムGui描画
+		DrawItemGui();
+		ImGui::TreePop();
+	}
+}
+
+#pragma region 防具
+// 防具データ取得
+UserDataManager::ArmorUserData* UserDataManager::GetAcquiredArmorData(ArmorType type, int index)
+{
+	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
+	if (!armorManager)
+		return nullptr;
+
+	// 範囲チェック
+	if (index < 0 || index >= _acquiredArmorMap[type].size())
+		return nullptr;
+
+	return &_acquiredArmorMap[type][index];
+}
+
+// 装備中の防具データ取得
+UserDataManager::ArmorUserData* UserDataManager::GetEquippedArmorData(ArmorType type)
+{
+	return GetAcquiredArmorData(
+		type,
+		_equippedArmorIndices[static_cast<int>(type)]);
+}
+
+// 所持している防具データリスト取得
+std::vector<UserDataManager::ArmorUserData>& UserDataManager::GetAcquiredArmorDataList(ArmorType type)
+{
+	return _acquiredArmorMap[type];
+}
+
+// 装備中の防具インデックス取得
+int UserDataManager::GetEquippedArmorIndex(ArmorType type) const
+{
+	return _equippedArmorIndices[static_cast<int>(type)];
+}
+
+// 装備中の防具インデックス変更
+void UserDataManager::SetEquippedArmorIndex(ArmorType type, int index)
+{
+	_equippedArmorIndices[static_cast<int>(type)] = index;
+}
+#pragma endregion
+
+#pragma region アイテム
+// アイテムデータ取得
+UserDataManager::ItemUserData* UserDataManager::GetAcquiredItemData(int index)
+{
+	return nullptr;
+}
+
+// アイテムポーチ内のアイテムインデックス取得
+int UserDataManager::GetPouchItemIndex(int pouchIndex) const
+{
+	return 0;
+}
+
+// アイテムポーチ内のアイテムインデックス変更
+void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
+{
+	// 範囲チェック
+	if (pouchIndex < 0 || pouchIndex >= MaxPouchItemCount)
+		return;
+	// 変更がない場合は処理しない
+	if (_pouchItems[pouchIndex].itemIndex == itemIndex)
+		return;
+
+	// 変更先がポーチに含めないアイテムの場合は次のアイテムに変更
+	if (_acquiredItemMap[itemIndex].GetBaseData() &&
+		!_acquiredItemMap[itemIndex].GetBaseData()->isInPouch)
+		return SetPouchItemIndex(pouchIndex, 
+			_pouchItems[pouchIndex].itemIndex < itemIndex ?
+			itemIndex + 1 :
+			itemIndex - 1);
+
+	// 空にする場合
+	if (itemIndex >= _acquiredItemMap.size() || itemIndex == -1)
+	{
+		_pouchItems[pouchIndex].itemIndex = -1;
+		return;
+	}
+
+	// そのアイテムがセットできるか判定
+	for (int i = 0; i < MaxPouchItemCount; ++i)
+	{
+		if (i == pouchIndex)
+			continue;
+
+		// 他のポーチスロットと重複している場合は次のアイテムに変更
+		if (_pouchItems[i].itemIndex == itemIndex)
+		{
+			// 最初からチェックし直す
+			return SetPouchItemIndex(pouchIndex,
+				_pouchItems[pouchIndex].itemIndex < itemIndex ?
+				itemIndex + 1 :
+				itemIndex - 1);
+		}
+	}
+	// 問題なければ変更
+	_pouchItems[pouchIndex].itemIndex = itemIndex;
+	// 所持数初期化
+	_pouchItems[pouchIndex].quantity = 0;
+}
+#pragma endregion
+
+// 防具Gui描画
+void UserDataManager::DrawAromrGui()
 {
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
 	if (!armorManager)
@@ -228,42 +401,69 @@ void UserDataManager::DrawGui()
 	}
 }
 
-// 防具データ取得
-UserDataManager::ArmorUserData* UserDataManager::GetAcquiredArmorData(ArmorType type, int index)
+// アイテムGui描画
+void UserDataManager::DrawItemGui()
 {
-	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
-	if (!armorManager)
-		return nullptr;
+	auto itemManager = ResourceManager::Instance().GetResourceAs<ItemManager>("ItemManager");
+	if (!itemManager)
+		return;
 
-	// 範囲チェック
-	if (index < 0 || index >= _acquiredArmorMap[type].size())
-		return nullptr;
+	if (ImGui::TreeNode(u8"アイテム所持状況"))
+	{
+		for (auto& [index, userData] : _acquiredItemMap)
+		{
+			std::string label = "Item" + std::to_string(index);
+			if (auto baseData = userData.GetBaseData())
+			{
+				label += ":" + baseData->name;
+			}
 
-	return &_acquiredArmorMap[type][index];
-}
+			if (ImGui::TreeNode(label.c_str()))
+			{
+				userData.DrawGui();
+				ImGui::TreePop();
+			}
+		}
+		ImGui::TreePop();
+	}
 
-// 装備中の防具データ取得
-UserDataManager::ArmorUserData* UserDataManager::GetEquippedArmorData(ArmorType type)
-{
-	return GetAcquiredArmorData(
-		type,
-		_equippedArmorIndices[static_cast<int>(type)]);
-}
+	if (ImGui::TreeNode(u8"アイテムポーチ内のアイテムインデックス"))
+	{
+		for (int i = 0; i < MaxPouchItemCount; ++i)
+		{
+			ImGui::PushID(static_cast<int>(i));
 
-// 所持している防具データリスト取得
-std::vector<UserDataManager::ArmorUserData>& UserDataManager::GetAcquiredArmorDataList(ArmorType type)
-{
-	return _acquiredArmorMap[type];
-}
+			static float ItemWidth = 100.0f;
+			ImGui::SetNextItemWidth(ItemWidth);
+			int itemIndex = _pouchItems[i].itemIndex;
+			if (ImGui::InputInt((u8"ポーチスロット" + std::to_string(i)).c_str(), &itemIndex))
+				SetPouchItemIndex(i, itemIndex);
 
-// 装備中の防具インデックス取得
-int UserDataManager::GetEquippedArmorIndex(ArmorType type) const
-{
-	return _equippedArmorIndices[static_cast<int>(type)];
-}
+			auto baseData = _pouchItems[i].itemIndex != -1 ?
+				_acquiredItemMap[_pouchItems[i].itemIndex].GetBaseData() : nullptr;
+			if (baseData)
+			{
+				ImGui::SameLine();
+				ImGui::Text(u8":%s", baseData->name.c_str());
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(ItemWidth);
+				// 最大所持数制限
+				if (baseData->maxCountInpouch == -1)
+				{
+					ImGui::Text(u8"所持数:無限");
+					_pouchItems[i].quantity = -1;
+				}
+				else
+				{
+					ImGui::InputInt(u8"所持数", &_pouchItems[i].quantity);
+					_pouchItems[i].quantity = std::clamp(
+						_pouchItems[i].quantity, 0,
+						baseData->maxCountInpouch);
+				}
+			}
 
-// 装備中の防具インデックス変更
-void UserDataManager::SetEquippedArmorIndex(ArmorType type, int index)
-{
-	_equippedArmorIndices[static_cast<int>(type)] = index;
+			ImGui::PopID();
+		}
+		ImGui::TreePop();
+	}
 }

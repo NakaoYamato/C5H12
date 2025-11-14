@@ -429,25 +429,35 @@ void UserDataManager::DrawItemGui()
 
 	if (ImGui::TreeNode(u8"アイテムポーチ内のアイテムインデックス"))
 	{
+		static float ColumnWidths[4] = { 0.0f, 250.0f, 180.0f, 200.0f };
+
+		ImGui::Columns(4, "my_columns_id", true);
+		ImGui::SetColumnWidth(0, ColumnWidths[0]);
+		ImGui::SetColumnWidth(1, ColumnWidths[1]);
+		ImGui::SetColumnWidth(2, ColumnWidths[2]);
+		ImGui::SetColumnWidth(3, ColumnWidths[3]);
+
 		for (int i = 0; i < MaxPouchItemCount; ++i)
 		{
 			ImGui::PushID(static_cast<int>(i));
 
-			static float ItemWidth = 100.0f;
-			ImGui::SetNextItemWidth(ItemWidth);
+			// ポーチスロット番号
+			ImGui::NextColumn();
 			int itemIndex = _pouchItems[i].itemIndex;
 			if (ImGui::InputInt((u8"ポーチスロット" + std::to_string(i)).c_str(), &itemIndex))
 				SetPouchItemIndex(i, itemIndex);
 
 			auto baseData = _pouchItems[i].itemIndex != -1 ?
 				_acquiredItemMap[_pouchItems[i].itemIndex].GetBaseData() : nullptr;
+
+			// アイテム名表示
+			ImGui::NextColumn();
+			ImGui::Text(u8":%s", baseData ? baseData->name.c_str() : "None");
+
+			// 所持数
+			ImGui::NextColumn();
 			if (baseData)
 			{
-				ImGui::SameLine();
-				ImGui::Text(u8":%s", baseData->name.c_str());
-				ImGui::SameLine();
-				ImGui::SetNextItemWidth(ItemWidth);
-				// 最大所持数制限
 				if (baseData->maxCountInpouch == -1)
 				{
 					ImGui::Text(u8"所持数:無限");
@@ -462,8 +472,12 @@ void UserDataManager::DrawItemGui()
 				}
 			}
 
+			ImGui::NextColumn();
 			ImGui::PopID();
 		}
+
+		ImGui::Columns(1);
+
 		ImGui::TreePop();
 	}
 }

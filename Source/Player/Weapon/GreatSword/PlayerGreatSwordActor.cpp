@@ -24,7 +24,7 @@ void PlayerGreatSwordActor::OnCreate()
 	_collider.lock()->SetLayer(CollisionLayer::Effect);
 	_collider.lock()->SetLayerMask(GetCollisionLayerMask(CollisionLayer::Stage));
 	_collider.lock()->SetPosition(Vector3(0.0f, -100.0f, 0.0f));
-	_collider.lock()->SetRadius(0.3f);
+	_collider.lock()->SetRadius(0.5f);
 }
 
 // ŠJnˆ—

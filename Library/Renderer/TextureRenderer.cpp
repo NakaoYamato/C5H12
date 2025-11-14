@@ -42,13 +42,13 @@ void TextureRenderer::Initialize(ID3D11Device* device)
 void TextureRenderer::Render(
 	const RenderContext& rc,
 	ID3D11ShaderResourceView* const* srv,
-	const D3D11_TEXTURE2D_DESC& textureDesc,
-	const Vector2& position,
+	const Vector2& textureBaseSize,
+	const Vector2& position, 
 	const Vector2& scale,
 	const Vector2& texPos,
-	const Vector2& texSize,
+	const Vector2& texSize, 
 	const Vector2& center,
-	float angle,
+	float angle, 
 	const Vector4& color,
 	Material* material)
 {
@@ -75,8 +75,8 @@ void TextureRenderer::Render(
 	float th = texSize.y;
 	if (texSize.x == 0.0f && texSize.y == 0.0f)
 	{
-		tw = static_cast<float>(textureDesc.Width);
-		th = static_cast<float>(textureDesc.Height);
+		tw = static_cast<float>(textureBaseSize.x);
+		th = static_cast<float>(textureBaseSize.y);
 	}
 
 	Vertex vertices[4] = {};
@@ -115,8 +115,8 @@ void TextureRenderer::Render(
 		vertices[i].texcoord.x = (std::min)(vertices[i].texcoord.x, UV_ADJUST);
 		vertices[i].texcoord.y = (std::min)(vertices[i].texcoord.y, UV_ADJUST);
 
-		vertices[i].texcoord.x = (texPos.x + vertices[i].texcoord.x * tw) / textureDesc.Width;
-		vertices[i].texcoord.y = (texPos.y + vertices[i].texcoord.y * th) / textureDesc.Height;
+		vertices[i].texcoord.x = (texPos.x + vertices[i].texcoord.x * tw) / textureBaseSize.x;
+		vertices[i].texcoord.y = (texPos.y + vertices[i].texcoord.y * th) / textureBaseSize.y;
 	}
 
 	D3D11_MAPPED_SUBRESOURCE msr;
@@ -150,6 +150,35 @@ void TextureRenderer::Render(
 	dc->Draw(4, 0);
 
 	shader->End(rc);
+}
+
+void TextureRenderer::Render(
+	const RenderContext& rc,
+	ID3D11ShaderResourceView* const* srv,
+	const D3D11_TEXTURE2D_DESC& textureDesc,
+	const Vector2& position,
+	const Vector2& scale,
+	const Vector2& texPos,
+	const Vector2& texSize,
+	const Vector2& center,
+	float angle,
+	const Vector4& color,
+	Material* material)
+{
+	Vector2 texS{};
+	texS.x = static_cast<float>(textureDesc.Width);
+	texS.y = static_cast<float>(textureDesc.Height);
+	Render(rc,
+		srv,
+		texS,
+		position,
+		scale,
+		texPos,
+		texSize,
+		center,
+		angle,
+		color,
+		material);
 }
 
 void TextureRenderer::Render(

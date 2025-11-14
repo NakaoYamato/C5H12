@@ -30,6 +30,46 @@ public:
 	/// <param name="device"></param>
 	void Initialize(ID3D11Device* device);
 
+	/// <summary>
+	/// •`‰æ
+	/// </summary>
+	/// <param name="rc"></param>
+	/// <param name="srv"></param>
+	/// <param name="textureBaseSize"></param>
+	/// <param name="position"></param>
+	/// <param name="scale"></param>
+	/// <param name="texPos"></param>
+	/// <param name="texSize"></param>
+	/// <param name="center"></param>
+	/// <param name="angle"></param>
+	/// <param name="color"></param>
+	/// <param name="material"></param>
+	void Render(const RenderContext& rc,
+		ID3D11ShaderResourceView* const* srv,
+		const Vector2& textureBaseSize,
+		const Vector2& position = Vector2::Zero,
+		const Vector2& scale = Vector2::One,
+		const Vector2& texPos = Vector2::Zero,
+		const Vector2& texSize = Vector2::Zero,
+		const Vector2& center = Vector2::Zero,
+		float			angle = 0.0f,
+		const Vector4& color = Vector4::White,
+		Material* material = nullptr);
+
+	/// <summary>
+	/// •`‰æ
+	/// </summary>
+	/// <param name="rc"></param>
+	/// <param name="srv"></param>
+	/// <param name="textureDesc"></param>
+	/// <param name="position"></param>
+	/// <param name="scale"></param>
+	/// <param name="texPos"></param>
+	/// <param name="texSize"></param>
+	/// <param name="center"></param>
+	/// <param name="angle"></param>
+	/// <param name="color"></param>
+	/// <param name="material"></param>
 	void Render(const RenderContext& rc,
 		ID3D11ShaderResourceView*const* srv,
 		const D3D11_TEXTURE2D_DESC& textureDesc,
@@ -42,6 +82,19 @@ public:
 		const Vector4& color = Vector4::White,
 		Material* material = nullptr);
 
+	/// <summary>
+	/// •`‰æ
+	/// </summary>
+	/// <param name="rc"></param>
+	/// <param name="texture"></param>
+	/// <param name="position"></param>
+	/// <param name="scale"></param>
+	/// <param name="texPos"></param>
+	/// <param name="texSize"></param>
+	/// <param name="center"></param>
+	/// <param name="angle"></param>
+	/// <param name="color"></param>
+	/// <param name="material"></param>
 	void Render(const RenderContext& rc,
 		Texture*		texture,
 		const Vector2&	position = Vector2::Zero,

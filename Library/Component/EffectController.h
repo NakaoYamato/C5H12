@@ -113,9 +113,9 @@ public:
 	// エフェクトデータ取得
 	EffectData* GetEffectData(UINT id);
 	// Effekseerエフェクト読み込み
-	void LoadEffekseerEffect(UINT id, const std::string& filepath);
+	EffekseerEffectData* LoadEffekseerEffect(UINT id, const std::string& filepath);
 	// パーティクルエフェクト読み込み
-	void LoadParticleEffect(UINT id, const std::string& filepath);
+	ParticleEffectData* LoadParticleEffect(UINT id, const std::string& filepath);
 
 private:
 	std::unordered_map<UINT, std::unique_ptr<EffectData>> _effectMap;

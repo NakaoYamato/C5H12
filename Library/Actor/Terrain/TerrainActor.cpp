@@ -16,7 +16,9 @@ void TerrainActor::OnCreate()
 	auto effect = this->AddComponent<EffectController>();
 	this->AddComponent<StageEffectEmitter>();
 
-	effect->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
+	auto dustEffect = effect->LoadEffekseerEffect(0, "./Data/Effect/Effekseer/Stage/DustCloud.efk");
+	dustEffect->SetScale(Vector3(0.25f, 0.5f, 0.25f));
+	dustEffect->SetAllColor(Vector4(139.0f / 255.0f, 112.0f / 255.0f, 91.0f / 255.0f, 1.0f));
 
     auto collider = this->AddCollider<TerrainCollider>();
 

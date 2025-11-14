@@ -318,21 +318,23 @@ EffectController::EffectData* EffectController::GetEffectData(UINT id)
 }
 
 // Effekseerエフェクト読み込み
-void EffectController::LoadEffekseerEffect(UINT id, const std::string& filepath)
+EffectController::EffekseerEffectData* EffectController::LoadEffekseerEffect(UINT id, const std::string& filepath)
 {
 	if (_effectMap.find(id) == _effectMap.end())
 	{
 		_effectMap[id] = std::make_unique<EffekseerEffectData>(GetActor().get());
 		_effectMap[id]->Load(filepath);
 	}
+	return static_cast<EffekseerEffectData*>(_effectMap[id].get());
 }
 
 // パーティクルエフェクト読み込み
-void EffectController::LoadParticleEffect(UINT id, const std::string& filepath)
+EffectController::ParticleEffectData* EffectController::LoadParticleEffect(UINT id, const std::string& filepath)
 {
 	if (_effectMap.find(id) == _effectMap.end())
 	{
 		_effectMap[id] = std::make_unique<ParticleEffectData>(GetActor().get());
 		_effectMap[id]->Load(filepath);
 	}
+	return static_cast<ParticleEffectData*>(_effectMap[id].get());
 }

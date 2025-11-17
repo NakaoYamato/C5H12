@@ -68,6 +68,7 @@ void SpriteRenderer::DrawGui()
 			ImGui::TreePop();
 		}
 	}
+	ImGui::DragFloat(u8"‘S‘Ì“§–¾“x", &_overallAlpha, 0.01f, 0.0f, 1.0f);
 }
 // ‰æ‘œ“Ç‚Ýž‚Ý
 void SpriteRenderer::LoadTexture(const std::string& spriteName,
@@ -92,5 +93,5 @@ void SpriteRenderer::SpriteRender(const std::string& spriteName,
 	const RenderContext& rc)
 {
 	auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
-	_sprites[spriteName].Render(rc, textureRenderer);
+	_sprites[spriteName].Render(rc, textureRenderer, _overallAlpha);
 }

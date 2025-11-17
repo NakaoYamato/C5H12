@@ -7,6 +7,8 @@ void TextRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc)
 {
 	_spriteBatch = std::make_unique<DirectX::SpriteBatch>(dc);
 	_spriteFonts[static_cast<int>(FontType::MSGothic)] = std::make_unique<DirectX::SpriteFont>(device, L"./Data/Font/MSGothic.spritefont");
+
+	_fontScale[static_cast<int>(FontType::MSGothic)] = 60.0f;
 }
 
 /// テキスト描画
@@ -18,13 +20,17 @@ void TextRenderer::Draw(FontType type,
 	const Vector2& origin,
 	const Vector2& scale)
 {
+	// 文字数取得
+	float length = static_cast<float>(wcslen(text));
+
 	TextDrawData drawData;
 	drawData.type = type;
 	drawData.text = text;
 	drawData.position = position;
 	drawData.color = color;
 	drawData.rotation = rotation;
-	drawData.origin = origin;
+	drawData.origin.x = origin.x * length * _fontScale[static_cast<int>(type)];
+	drawData.origin.y = origin.x * length;
 	drawData.scale = scale;
 	// 描画するテキストデータを保持
 	_textDrawDatas.push_back(drawData);

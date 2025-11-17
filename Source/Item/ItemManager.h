@@ -32,8 +32,16 @@ public:
 	std::vector<ItemData>& GetItemDataList() { return _itemDataList; }
 	// アイテムデータ取得
 	ItemData* GetItemData(size_t index);
-
+	// アイテムアイコンテクスチャインデックス取得
 	int GetItemIconTextureIndex() const { return _itemIconTextureIndex; }
+	// キャンバス取得
+	Canvas* GetItemIconCanvas() { return _itemIconCanvas.get(); }
+	// アイコン番号からUV取得
+	Canvas::TextureData* GetItemIconTextureData(int iconIndex);
+	// オーバーレイアイコンテクスチャ取得
+	Texture* GetOverlayIconTexture() { return &_overlayIconTexture; }
+	// オーバーレイアイコンテクスチャのUV取得
+	Canvas::TextureData GetOverlayIconTextureData(int overlayIconIndex);
 
 private:
 	std::string _filePath = "./Data/Resource/ItemManager.json";

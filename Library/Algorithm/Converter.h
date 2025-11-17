@@ -23,6 +23,13 @@ std::string ToString(const std::wstring& str);
 std::wstring ToWString(const std::string& str);
 
 /// <summary>
+/// UTF-8•¶Žš—ñ‚©‚çUTF-16•¶Žš—ñ‚Ö•ÏŠ·
+/// </summary>
+/// <param name="str"></param>
+/// <returns></returns>
+std::wstring ToUtf16(const std::string& str);
+
+/// <summary>
 /// enum‚ðstring‚É•ÏŠ·
 /// </summary>
 /// <param name="index"></param>

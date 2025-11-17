@@ -74,14 +74,21 @@ public:
 #pragma endregion
 
 #pragma region アイテム
+	// ポーチの整理
+	void SortPouchItems();
+
+	// アイテムポーチの最大所持数取得
+	static int GetMaxPouchItemCount() { return MaxPouchItemCount; }
 	// アイテムデータ取得
 	ItemUserData* GetAcquiredItemData(int index);
 	// アイテムの所持状況取得
 	std::unordered_map<int, ItemUserData>& GetAcquiredItemDataMap() { return _acquiredItemMap; }
 	// アイテムポーチ内の全アイテムインデックス取得
 	PouchItemData* GetPouchItems() { return _pouchItems; }
-	// アイテムポーチ内のアイテムインデックス取得
-	int GetPouchItemIndex(int pouchIndex) const;
+	// アイテムポーチ内のアイテム取得
+	PouchItemData* GetPouchItem(int pouchIndex);
+	// アイテムポーチ内の最後のアイテムポーチ取得
+	PouchItemData* GetLastPouchItem();
 
 	// アイテムポーチ内のアイテムインデックス変更
 	void SetPouchItemIndex(int pouchIndex, int itemIndex);
@@ -106,6 +113,8 @@ private:
 
 	// アイテムポーチ内のアイテム
 	PouchItemData _pouchItems[MaxPouchItemCount];
+	// 空のポーチアイテムデータ
+	PouchItemData _emptyPouchItemData;
 };
 
 // リソース設定

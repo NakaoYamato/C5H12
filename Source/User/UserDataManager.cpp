@@ -97,6 +97,10 @@ bool UserDataManager::Initialize()
 		}
 	}
 
+	_emptyPouchItemData.pouchIndex = -1;
+	_emptyPouchItemData.itemIndex = -1;
+	_emptyPouchItemData.quantity = 0;
+
 	return true;
 }
 
@@ -276,16 +280,62 @@ void UserDataManager::SetEquippedArmorIndex(ArmorType type, int index)
 #pragma endregion
 
 #pragma region アイテム
+// ポーチの整理
+void UserDataManager::SortPouchItems()
+{
+	// 空データを詰める
+	for (int i = 0; i < MaxPouchItemCount - 1; ++i)
+	{
+		if (_pouchItems[i].itemIndex != -1)
+			continue;
+		for (int j = i + 1; j < MaxPouchItemCount; ++j)
+		{
+			if (_pouchItems[j].itemIndex == -1)
+				continue;
+			_pouchItems[i] = _pouchItems[j];
+			_pouchItems[j].itemIndex = -1;
+			_pouchItems[j].quantity = 0;
+			break;
+		}
+	}
+}
+
 // アイテムデータ取得
 UserDataManager::ItemUserData* UserDataManager::GetAcquiredItemData(int index)
 {
-	return nullptr;
+	return &_acquiredItemMap[index];
 }
 
 // アイテムポーチ内のアイテムインデックス取得
-int UserDataManager::GetPouchItemIndex(int pouchIndex) const
+UserDataManager::PouchItemData* UserDataManager::GetPouchItem(int pouchIndex)
 {
-	return 0;
+	auto lastPouchItem = GetLastPouchItem();
+	int maxCount = lastPouchItem->pouchIndex + 1;
+	int index = pouchIndex % maxCount;
+	if (index < 0)
+		index += maxCount;
+
+	if (index == lastPouchItem->pouchIndex)
+		return &_emptyPouchItemData;
+
+	return &_pouchItems[index];
+}
+
+// アイテムポーチ内の最後のアイテムポーチ取得
+UserDataManager::PouchItemData* UserDataManager::GetLastPouchItem()
+{
+	// 先頭のポーチが空の場合は先頭を返す
+	if (_pouchItems[0].itemIndex == -1)
+		return &_pouchItems[0];
+
+	for (int i = 1; i < MaxPouchItemCount; i++)
+	{
+		if (_pouchItems[i].itemIndex == -1)
+			return &_pouchItems[i - 1];
+	}
+
+	// 全てデータがあるの場合は最後のポーチを返す
+	return &_pouchItems[MaxPouchItemCount - 1];
 }
 
 // アイテムポーチ内のアイテムインデックス変更
@@ -430,6 +480,7 @@ void UserDataManager::DrawItemGui()
 	if (ImGui::TreeNode(u8"アイテムポーチ内のアイテムインデックス"))
 	{
 		static float ColumnWidths[4] = { 0.0f, 250.0f, 180.0f, 200.0f };
+		static float InputWidth = 100.0f;
 
 		ImGui::Columns(4, "my_columns_id", true);
 		ImGui::SetColumnWidth(0, ColumnWidths[0]);
@@ -443,6 +494,7 @@ void UserDataManager::DrawItemGui()
 
 			// ポーチスロット番号
 			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(InputWidth);
 			int itemIndex = _pouchItems[i].itemIndex;
 			if (ImGui::InputInt((u8"ポーチスロット" + std::to_string(i)).c_str(), &itemIndex))
 				SetPouchItemIndex(i, itemIndex);
@@ -452,7 +504,7 @@ void UserDataManager::DrawItemGui()
 
 			// アイテム名表示
 			ImGui::NextColumn();
-			ImGui::Text(u8":%s", baseData ? baseData->name.c_str() : "None");
+			ImGui::Text(u8"%s", baseData ? baseData->name.c_str() : "None");
 
 			// 所持数
 			ImGui::NextColumn();
@@ -465,6 +517,7 @@ void UserDataManager::DrawItemGui()
 				}
 				else
 				{
+					ImGui::SetNextItemWidth(InputWidth);
 					ImGui::InputInt(u8"所持数", &_pouchItems[i].quantity);
 					_pouchItems[i].quantity = std::clamp(
 						_pouchItems[i].quantity, 0,
@@ -474,6 +527,10 @@ void UserDataManager::DrawItemGui()
 
 			ImGui::NextColumn();
 			ImGui::PopID();
+
+			// このポーチにアイテムが設定されていないなら終了
+			if (_pouchItems[i].itemIndex == -1)
+				break;
 		}
 
 		ImGui::Columns(1);

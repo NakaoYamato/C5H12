@@ -11,6 +11,7 @@
 #include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/StaminaController.h"
+#include "PlayerItemController.h"
 #include "PlayerInput.h"
 #include "PlayerArmorController.h"
 #include "StateMachine/PlayerStateMachine.h"
@@ -47,6 +48,7 @@ void PlayerActor::OnCreate()
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto armorController		= this->AddComponent<PlayerArmorController>();
+	auto itemController			= this->AddComponent<PlayerItemController>();
 	auto effectController		= this->AddComponent<EffectController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(this));
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();

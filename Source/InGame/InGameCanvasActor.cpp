@@ -38,7 +38,8 @@ void InGameCanvasActor::OnCreate()
 
 	// ƒAƒCƒeƒ€UI¶¬
 	auto itemUIActor = GetScene()->RegisterActor<UIActor>("ItemUI", ActorTag::UI);
-	itemUIActor->GetRectTransform().SetLocalPosition(Vector2(1600.0f, 940.0f));
+	itemUIActor->GetRectTransform().SetLocalPosition(Vector2(1800.0f, 940.0f));
+	itemUIActor->GetRectTransform().SetLocalScale(Vector2(0.8f, 0.8f));
 	itemUIActor->SetParent(this);
 	itemUIActor->AddComponent<ItemUIController>();
 	{

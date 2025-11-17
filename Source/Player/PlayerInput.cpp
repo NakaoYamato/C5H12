@@ -1,26 +1,13 @@
 #include "PlayerInput.h"
 
 #include "../../Library/Scene/Scene.h"
-#include "../../Source/InGame/InGameCanvasActor.h"
-
 #include <imgui.h>
 
 // 開始処理
 void PlayerInput::Start()
 {
 	_playerController = GetActor()->GetComponent<PlayerController>();
-
-	// アイテムUIコントローラー取得
-	auto canvasActor = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI);
-	for (auto& child : canvasActor->GetChildren())
-	{
-		auto itemUIController = child->GetComponent<ItemUIController>();
-		if (itemUIController)
-		{
-			_itemUIController = itemUIController;
-			break;
-		}
-	}
+	_playerItemController = GetActor()->GetComponent<PlayerItemController>();
 }
 
 // 更新処理
@@ -29,8 +16,8 @@ void PlayerInput::OnUpdate(float elapsedTime)
 	auto playerController = _playerController.lock();
 	if (playerController == nullptr)
 		return;
-	auto itemUIController = _itemUIController.lock();
-	if (itemUIController == nullptr)
+	auto playerItemController = _playerItemController.lock();
+	if (playerItemController == nullptr)
 		return;
 
 	// 入力処理
@@ -68,16 +55,29 @@ void PlayerInput::OnUpdate(float elapsedTime)
 	// アイテムスライダー処理
 	if (_INPUT_PRESSED("ItemSelect"))
 	{
-		if (_INPUT_TRIGGERD("ItemSelect"))
+		if (playerItemController->IsClosed())
 		{
-			itemUIController->Open(nullptr, 0);
+			playerItemController->Open();
+		}
+
+		if (playerItemController->IsOpen())
+		{
+			float mouseWheel = _INPUT_VALUE("MouseOldWheel");
+			if (mouseWheel > 0.0f)
+			{
+				playerItemController->AddIndex(-1);
+			}
+			else if (mouseWheel < 0.0f)
+			{
+				playerItemController->AddIndex(1);
+			}
 		}
 	}
 	else
 	{
-		if (itemUIController->IsOpen())
+		if (playerItemController->IsOpen())
 		{
-			itemUIController->Close();
+			playerItemController->Close();
 		}
 
 		playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));

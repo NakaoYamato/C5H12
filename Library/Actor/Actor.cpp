@@ -327,6 +327,11 @@ std::weak_ptr<Model> Actor::LoadModel(const char* filename)
 	_model = std::make_unique<Model>(Graphics::Instance().GetDevice(), filename);
 	return _model;
 }
+void Actor::SetIsActive(bool b)
+{
+	this->_isActive = b;
+	ChangedActive(b);
+}
 #pragma region 親子関係
 /// 親設定
 void Actor::SetParent(Actor* parent)
@@ -398,5 +403,19 @@ void Actor::DrawGuizmo()
 		_transform.SetScale(s);
 		_transform.SetAngle(r);
 	}
+}
+/// 起動フラグが変化したときの処理
+void Actor::ChangedActive(bool isActive)
+{
+	// 各コンポーネントの起動フラグ変化処理
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		component->OnChangedActive(isActive);
+	}
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		collider->OnChangedActive(isActive);
+	}
+	OnChangedActive(isActive);
 }
 #pragma endregion

@@ -38,6 +38,7 @@ public:
 	const Vector4& GetColor(const std::string& name)const { return _sprites.at(name).GetColor(); }
     DepthState GetDepthState(const std::string& name) const { return _sprites.at(name).GetDepthState(); }
     int GetStencil(const std::string& name) const { return _sprites.at(name).GetStencil(); }
+	float GetOverallAlpha() const { return _overallAlpha; }
 
 	void SetCenterAlignment(const std::string& name, Sprite::CenterAlignment alignment) {
 		_sprites.at(name).SetCenterAlignment(alignment);
@@ -50,6 +51,7 @@ public:
 	void SetColorAlpha(const std::string& name, float a) { _sprites.at(name).SetColorAlpha(a); }
     void SetDepthState(const std::string& name, DepthState ds) { _sprites.at(name).SetDepthState(ds); }
     void SetStencil(const std::string& name, int stencil) { _sprites.at(name).SetStencil(stencil); }
+	void SetOverallAlpha(float a) { _overallAlpha = a; }
 #pragma endregion
 
 protected:
@@ -63,4 +65,7 @@ private:
 
 	std::unordered_map<std::string, Sprite> _sprites;
     std::vector<std::string> _spriteDrawOrder;
+
+	// ‘S‘Ì“§–¾“x
+	float _overallAlpha = 1.0f;
 };

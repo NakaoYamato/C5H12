@@ -72,6 +72,11 @@ public:
 	/// <param name="collisionData">接触情報</param>
 	virtual void OnContactEnter(CollisionData& collisionData) {}
 	/// <summary>
+	/// 起動フラグが変化したときの処理
+	/// </summary>
+	/// <param name="isActive">変化後の値</param>
+	virtual void OnChangedActive(bool isActive) {}
+	/// <summary>
 	/// GUI描画
 	/// </summary>
 	virtual void DrawGui() {}

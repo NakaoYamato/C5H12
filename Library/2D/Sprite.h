@@ -34,6 +34,8 @@ public:
 	virtual void UpdateTransform(RectTransform* parent = nullptr);
 	// •`‰æ
 	void Render(const RenderContext& rc, TextureRenderer& renderer);
+	// •`‰æ
+	void Render(const RenderContext& rc, TextureRenderer& renderer, float alpha);
 	// GUI•`‰æ
 	void DrawGui();
 	// ‰æ‘œ“Ç‚İ‚İ

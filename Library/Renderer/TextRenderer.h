@@ -78,7 +78,7 @@ public:
 	/// <param name="position">描画位置（スクリーン座標）</param>
 	/// <param name="color">色</param>
 	/// <param name="rotation">回転量</param>
-	/// <param name="origin"></param>
+	/// <param name="origin">0~1</param>
 	/// <param name="scale"></param>
 	void Draw(FontType type,
 		const char* text,
@@ -95,7 +95,7 @@ public:
 	/// <param name="position"></param>
 	/// <param name="color"></param>
 	/// <param name="rotation"></param>
-	/// <param name="origin"></param>
+	/// <param name="origin">0~1</param>
 	/// <param name="scale"></param>
 	void Draw3D(FontType type,
 		const wchar_t* text,
@@ -134,4 +134,6 @@ private:
 	std::vector<TextDrawData> _textDrawDatas;
 	// 描画する3Dテキストデータ
 	std::vector<Text3DDrawData> _text3DDrawDatas;
+	// 各フォントの大きさ
+	float _fontScale[static_cast<int>(FontType::FontTypeMax)]{};
 };

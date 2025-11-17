@@ -146,9 +146,17 @@ void Sprite::UpdateTransform(RectTransform* parent)
 // •`‰æ
 void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer)
 {
+	Render(rc, renderer, 1.0f);
+}
+
+// •`‰æ
+void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer, float alpha)
+{
 	if (_sprite.Get() == nullptr)
 		return;
 
+	Vector4 color = GetColor();
+	color.w *= alpha;
 	rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(_depthState), static_cast<UINT8>(_stencil));
 	renderer.Render(rc,
 		&GetTexture(),
@@ -158,6 +166,6 @@ void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer)
 		GetTexSize(),
 		GetCenter(),
 		GetRectTransform().GetWorldAngle(),
-		GetColor(),
+		color,
 		&GetMaterial());
 }

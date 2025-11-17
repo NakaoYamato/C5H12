@@ -214,3 +214,25 @@ ItemData* ItemManager::GetItemData(size_t index)
 	}
 	return nullptr;
 }
+
+// アイコン番号からUV取得
+Canvas::TextureData* ItemManager::GetItemIconTextureData(int iconIndex)
+{
+	if (_itemIconTextureMap.find(iconIndex) == _itemIconTextureMap.end())
+		return nullptr;
+	return &_itemIconTextureMap[iconIndex];
+}
+
+// オーバーレイアイコンテクスチャのUV取得
+Canvas::TextureData ItemManager::GetOverlayIconTextureData(int overlayIconIndex)
+{
+	Canvas::TextureData textureData;
+	if (overlayIconIndex < 0 || overlayIconIndex >= 8)
+		return textureData;
+	const float uvWidth = 1.0f / 8.0f;
+	textureData.texPosition.x = static_cast<float>(overlayIconIndex) * uvWidth;
+	textureData.texPosition.y = 0.0f;
+	textureData.texSize.x = uvWidth;
+	textureData.texSize.y = 1.0f;
+	return textureData;
+}

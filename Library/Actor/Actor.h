@@ -225,7 +225,7 @@ public:
 #pragma endregion
 
 #pragma region フラグ関係
-	void SetIsActive(bool b) { this->_isActive = b; }
+	void SetIsActive(bool b);
 	void SetIsShowing(bool b) { this->_isShowing = b; }
 	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
 	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
@@ -340,6 +340,16 @@ protected:
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
 	virtual void OnContactEnter(CollisionData& collisionData) {}
+	/// <summary>
+	/// 起動フラグが変化したときの処理
+	/// </summary>
+	/// <param name="isActive">変化後の値</param>
+	virtual void ChangedActive(bool isActive);
+	/// <summary>
+	/// 起動フラグが変化したときの処理
+	/// </summary>
+	/// <param name="isActive">変化後の値</param>
+	virtual void OnChangedActive(bool isActive) {}
 #pragma endregion
 
 protected:

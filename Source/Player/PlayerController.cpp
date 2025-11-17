@@ -17,6 +17,8 @@ void PlayerController::Start()
 	_damageable = GetActor()->GetComponent<Damageable>();
 	_targetable = GetActor()->GetComponent<Targetable>();
 
+	_playerItemController = GetActor()->GetComponent<PlayerItemController>();
+
 	auto stateController = GetActor()->GetComponent<StateController>();
 	_stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
 
@@ -168,6 +170,17 @@ void PlayerController::Update(float elapsedTime)
 			}
 			color.w = color.w * rate;
 			material.SetParameter("bodyColor", color);
+		}
+	}
+
+	// アイテム使用
+	if (IsUsingItem())
+	{
+		auto playerItemController = _playerItemController.lock();
+		if (playerItemController)
+		{
+			playerItemController->Use();
+			SetIsUsingItem(false);
 		}
 	}
 }

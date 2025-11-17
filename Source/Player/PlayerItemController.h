@@ -22,11 +22,13 @@ public:
 	void Open();
 	// •Â‚¶‚é
 	void Close();
+	// Žg‚¤
+	void Use();
 
 	bool IsClosed() const;
 	bool IsOpen() const;
 
-	void AddIndex(int addIndex) { _currentIndex += addIndex; }
+	void AddIndex(int addIndex);
 private:
 	std::weak_ptr<ItemUIController> _itemUIController;
 

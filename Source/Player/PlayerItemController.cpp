@@ -54,6 +54,30 @@ void PlayerItemController::Close()
 	}
 }
 
+// 使う
+void PlayerItemController::Use()
+{
+	auto userDataManager = _userDataManager.lock();
+	if (!userDataManager)
+		return;
+	auto item = userDataManager->GetPouchItem(_currentIndex);
+
+	if (item->itemIndex < 0)
+		return;
+
+	// 所持数があれば使用
+	if (item->quantity > 0)
+	{
+		item->quantity--;
+
+		// 0になったらアイテムを外す
+		if (item->quantity == 0)
+		{
+			item->itemIndex = -1;
+		}
+	}
+}
+
 bool PlayerItemController::IsClosed() const
 {
 	if (auto itemUIController = _itemUIController.lock())
@@ -70,4 +94,12 @@ bool PlayerItemController::IsOpen() const
 		return itemUIController->IsOpen();
 	}
 	return false;
+}
+
+void PlayerItemController::AddIndex(int addIndex)
+{
+	_currentIndex += addIndex;
+	// ポーチの整理
+	if (auto userDataManager = _userDataManager.lock())
+		userDataManager->SortPouchItems();
 }

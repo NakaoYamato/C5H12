@@ -62,15 +62,6 @@ void PlayerInput::OnUpdate(float elapsedTime)
 
 		if (playerItemController->IsOpen())
 		{
-			float mouseWheel = _INPUT_VALUE("MouseOldWheel");
-			if (mouseWheel > 0.0f)
-			{
-				playerItemController->AddIndex(-1);
-			}
-			else if (mouseWheel < 0.0f)
-			{
-				playerItemController->AddIndex(1);
-			}
 		}
 	}
 	else
@@ -80,8 +71,21 @@ void PlayerInput::OnUpdate(float elapsedTime)
 			playerItemController->Close();
 		}
 
-		playerController->SetIsUsingItem(_INPUT_PRESSED("Use"));
-		playerController->SetIsSelect(_INPUT_PRESSED("Select"));
+		if (_INPUT_TRIGGERD("Use"))
+			playerController->SetIsUsingItem(true);
+		if (_INPUT_TRIGGERD("Select"))
+			playerController->SetIsSelect(true);
+	}
+
+	// マウスホイールによるアイテム選択
+	float mouseWheel = _INPUT_VALUE("MouseOldWheel");
+	if (mouseWheel > 0.0f)
+	{
+		playerItemController->AddIndex(-1);
+	}
+	else if (mouseWheel < 0.0f)
+	{
+		playerItemController->AddIndex(1);
 	}
 
 	// メニュー画面起動入力

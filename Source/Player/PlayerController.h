@@ -10,6 +10,8 @@
 #include "../../Source/Common/Targetable.h"
 #include "StateMachine/PlayerStateMachine.h"
 
+#include "PlayerItemController.h"
+
 class PlayerController : public Component
 {
 public:
@@ -116,6 +118,8 @@ private:
 
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<Targetable> _targetable;
+
+	std::weak_ptr<PlayerItemController> _playerItemController;
 
 #pragma region ŠeŽíƒtƒ‰ƒO
 	bool _callInputBufferingEvent = false;

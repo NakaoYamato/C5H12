@@ -7,7 +7,6 @@
 #include "../../Library/Graphics/GpuResourceManager.h"
 
 #include "../../Library/Component/Light/LightController.h"
-#include "../../Library/Component/CameraEventReceiver.h"
 
 #include <imgui.h>
 
@@ -72,7 +71,6 @@ void Scene::Initialize()
     }
     {
         _mainCameraActor = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::System);
-		_mainCameraActor.lock()->AddComponent<CameraEventReceiver>();
     }
 
     OnInitialize();

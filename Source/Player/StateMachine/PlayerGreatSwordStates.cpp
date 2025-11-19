@@ -403,13 +403,15 @@ namespace Attack1SubState
             _owner->GetEffect()->GetEffectData(PlayerController::EffectType::Charge2)->SetPosition(position);
 
             // ƒJƒƒ‰
-			_owner->GetCameraEventReceiver()->AddOnUpdateCallback([&](float elapsedTime, CameraEventReceiver* receiver)
-				{
-                    float rate = (_chargingTimer - (_chargeStage - 1) * _chargeStageTimer) / _chargeStageTimer;
-                    _owner->GetCameraEventReceiver()->AddEyeOffset(
-                        Vector3::Lerp(_cameraEyeStartOffset, _cameraEyeEndOffset, rate, EasingType::InSine));
-					return true;
-				});
+            if (auto cameraActor = _owner->GetPlayer()->GetActor()->GetScene()->GetMainCameraActor())
+            {
+                cameraActor->AddOnUpdateCallback([&](float elapsedTime, MainCamera* camera)
+                    {
+                        float rate = (_chargingTimer - (_chargeStage - 1) * _chargeStageTimer) / _chargeStageTimer;
+                        camera->AddEyeOffset(Vector3::Lerp(_cameraEyeStartOffset, _cameraEyeEndOffset, rate, EasingType::InSine));
+                        return true;
+                    });
+            }
         }
         void OnExit() override
         {

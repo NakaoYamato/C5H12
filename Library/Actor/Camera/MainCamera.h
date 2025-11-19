@@ -4,6 +4,8 @@
 #include "../../Library/Component/Component.h"
 #include "../../Library/Camera/Camera.h"
 
+#include <functional>
+
 class CameraControllerBase;
 using CameraControllerRef = CameraControllerBase*;
 
@@ -39,6 +41,22 @@ public:
 		return _cameraControllers.find(controllerName) != _cameraControllers.end();
 	}
 
+	// 更新処理追加
+	// 戻り値がtrueの場合、登録解除される
+	void AddOnUpdateCallback(const std::function<bool(float, MainCamera*)>& callback)
+	{
+		_onUpdateCallbacks.push_back(callback);
+	}
+
+	void AddEyeOffset(const Vector3& offset)
+	{
+		_eyeOffset += offset;
+	}
+
+	const Vector3& GetEyeOffset() const
+	{
+		return _eyeOffset;
+	}
 private:
 	// コントローラー群
 	std::unordered_map<std::string, CameraControllerRef> _cameraControllers;
@@ -49,4 +67,8 @@ private:
 
 	// コントローラー変更履歴
 	std::vector<std::string> _cameraControllerHistory;
+
+	// 更新コールバック関数
+	std::vector<std::function<bool(float, MainCamera*)>> _onUpdateCallbacks;
+	Vector3 _eyeOffset{};
 };

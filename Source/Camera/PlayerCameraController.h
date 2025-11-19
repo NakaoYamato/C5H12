@@ -3,7 +3,6 @@
 #include "../../Library/Component/CameraControllerBase.h"
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Camera/Camera.h"
-#include "../../Library/Component/CameraEventReceiver.h"
 
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/InGame/InputManager.h"
@@ -33,7 +32,6 @@ private:
 	std::weak_ptr<InputManager> _inputManager;
 
 	std::weak_ptr<StateController> _stateController;
-	std::weak_ptr<CameraEventReceiver> _cameraEventReceiver;
 
     Vector3 _currentFocus{};
     Vector3 _currentEye{};

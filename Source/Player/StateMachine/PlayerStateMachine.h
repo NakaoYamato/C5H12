@@ -3,7 +3,6 @@
 #include <variant>
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Component/EffectController.h"
-#include "../../Library/Component/CameraEventReceiver.h"
 #include "../../Library/Math/Vector.h"
 
 #include "../../Source/Common/DamageSender.h"
@@ -40,7 +39,6 @@ public:
     StaminaController* GetStaminaController() { return _staminaController; }
 	Animator*			GetAnimator()		{ return _animator; }
 	EffectController*	GetEffect()			{ return _effect; }
-	CameraEventReceiver*GetCameraEventReceiver() { return _cameraEventReceiver; }
 	// ステート変更
 	void ChangeState(const char* mainStateName, const char* subStateName) override;
     // ステート名取得
@@ -55,7 +53,6 @@ private:
     StaminaController*					_staminaController = nullptr;
 	Animator*							_animator = nullptr;
 	EffectController*					_effect = nullptr;
-	CameraEventReceiver*				_cameraEventReceiver = nullptr;
 };
 
 // プレイヤーのヒエラルキカルステートのベースクラス

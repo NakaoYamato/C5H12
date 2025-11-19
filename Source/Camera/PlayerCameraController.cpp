@@ -9,7 +9,6 @@ void PlayerCameraController::Start()
 {
     _stateController = _playerActor->GetComponent<StateController>();
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
-	_cameraEventReceiver = GetActor()->GetScene()->GetMainCameraActor()->GetComponent<CameraEventReceiver>();
 
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
@@ -126,10 +125,10 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
     // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
     Vector3 newEye = newFocus - front * cameraDistance;
 
-    if (_cameraEventReceiver.lock())
+    if (auto cameraActor = GetActor()->GetScene()->GetMainCameraActor())
     {
         // カメライベント受信者が存在するならオフセットを加算
-        const Vector3& eyeOffset = _cameraEventReceiver.lock()->GetEyeOffset();
+        const Vector3& eyeOffset = cameraActor->GetEyeOffset();
         // カメラの角度に合わせてオフセットを変換
         newEye += right * eyeOffset.x;
         newEye += up * eyeOffset.y;

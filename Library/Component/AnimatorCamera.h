@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Animator.h"
-#include "CameraEventReceiver.h"
 
 class AnimatorCamera : public Component
 {
@@ -19,5 +18,4 @@ public:
 
 private:
 	std::weak_ptr<Animator> _animator;
-	std::weak_ptr<CameraEventReceiver> _cameraEventReceiver;
 };

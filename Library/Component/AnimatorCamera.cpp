@@ -7,8 +7,6 @@
 // ŠJŽnˆ—
 void AnimatorCamera::Start()
 {
-	_cameraEventReceiver = GetActor()->GetScene()->GetMainCameraActor()->GetComponent<CameraEventReceiver>();
-
 	_animator = GetActor()->GetComponent<Animator>();
 }
 
@@ -17,8 +15,8 @@ void AnimatorCamera::Update(float elapsedTime)
 {
 	auto animator = _animator.lock();
 	if (!animator) return;
-	auto cameraEventReceiver = _cameraEventReceiver.lock();
-	if (!cameraEventReceiver) return;
+	auto mainCamera = GetActor()->GetScene()->GetMainCameraActor();
+	if (!mainCamera) return;
 
 
 	auto& animationEvent = animator->GetAnimationEvent();
@@ -35,17 +33,17 @@ void AnimatorCamera::Update(float elapsedTime)
 		{
 			float rate = (animator->GetAnimationTimer() - event.startSeconds) / (event.endSeconds - event.startSeconds);
 			Vector3 offset = event.position;
-			cameraEventReceiver->AddEyeOffset(offset * rate);
+			mainCamera->AddEyeOffset(offset * rate);
 		}
 		if (massageList.at(event.messageIndex) == "CameraEyeOffsetEnd")
 		{
 			float rate = 1.0f - (animator->GetAnimationTimer() - event.startSeconds) / (event.endSeconds - event.startSeconds);
 			Vector3 offset = event.position;
-			cameraEventReceiver->AddEyeOffset(offset * rate);
+			mainCamera->AddEyeOffset(offset * rate);
 		}
 		if (massageList.at(event.messageIndex) == "CameraEyeOffsetLoop")
 		{
-			cameraEventReceiver->AddEyeOffset(event.position);
+			mainCamera->AddEyeOffset(event.position);
 		}
 	}
 }

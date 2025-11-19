@@ -162,6 +162,7 @@
     <ClCompile Include="Library\Audio\SourceVoice.cpp" />
     <ClCompile Include="Library\Audio\SubmixVoice.cpp" />
     <ClCompile Include="Library\Audio\VoiceRecorder\VoiceRecorder.cpp" />
+    <ClCompile Include="Library\Camera\CameraShake.cpp" />
     <ClCompile Include="Library\Component\AnimatorCamera.cpp" />
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\CameraControllerBase.cpp" />
@@ -429,6 +430,7 @@
     <ClInclude Include="Library\Audio\SourceVoice.h" />
     <ClInclude Include="Library\Audio\SubmixVoice.h" />
     <ClInclude Include="Library\Audio\VoiceRecorder\VoiceRecorder.h" />
+    <ClInclude Include="Library\Camera\CameraShake.h" />
     <ClInclude Include="Library\Collision\CollisionDefine.h" />
     <ClInclude Include="Library\Component\AnimatorCamera.h" />
     <ClInclude Include="Library\Component\BehaviorController.h" />

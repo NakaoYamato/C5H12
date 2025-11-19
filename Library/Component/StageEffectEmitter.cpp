@@ -22,5 +22,17 @@ void StageEffectEmitter::OnContactEnter(CollisionData& collisionData)
 		_effectController.lock()->Play(
 			_effectIndex,
 			collisionData.hitPosition);
+
+		// カメラシェイク
+		if (auto cameraActor = GetActor()->GetScene()->GetMainCameraActor())
+		{
+			CameraShakeInfo shake;
+			shake.amplitude = _amplitude;
+			shake.frequency = _frequency;
+			shake.duration = _duration;
+			shake.directionMask = _directionMask;
+			shake.decayType = _decayType;
+			cameraActor->GetShakeManager()->StartShake(shake);
+		}
 	}
 }

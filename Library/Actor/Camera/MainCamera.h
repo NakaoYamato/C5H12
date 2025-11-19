@@ -3,6 +3,7 @@
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Component/Component.h"
 #include "../../Library/Camera/Camera.h"
+#include "../../Library/Camera/CameraShake.h"
 
 #include <functional>
 
@@ -47,16 +48,17 @@ public:
 	{
 		_onUpdateCallbacks.push_back(callback);
 	}
-
+	// コールバック用目のオフセット追加
 	void AddEyeOffset(const Vector3& offset)
 	{
-		_eyeOffset += offset;
+		_callbackEyeOffset += offset;
 	}
+	// コールバック用目のオフセット取得
+	const Vector3& GetCallBackEyeOffset() const { return _callbackEyeOffset; }
 
-	const Vector3& GetEyeOffset() const
-	{
-		return _eyeOffset;
-	}
+	// シェイクマネージャー取得
+	CameraShakeManager* GetShakeManager() { return &_shakeManager; }
+
 private:
 	// コントローラー群
 	std::unordered_map<std::string, CameraControllerRef> _cameraControllers;
@@ -70,5 +72,8 @@ private:
 
 	// 更新コールバック関数
 	std::vector<std::function<bool(float, MainCamera*)>> _onUpdateCallbacks;
-	Vector3 _eyeOffset{};
+	Vector3 _callbackEyeOffset{};
+
+	// カメラシェイク
+	CameraShakeManager _shakeManager;
 };

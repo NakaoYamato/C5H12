@@ -47,8 +47,11 @@ void MainCamera::OnUpdate(float elapsedTime)
 		}
 		_nextCameraControllerName.clear();
 	}
+	
+	// シェイクマネージャーの更新
+	_shakeManager.Update(elapsedTime);
 
-	_eyeOffset = Vector3::Zero;
+	_callbackEyeOffset = Vector3::Zero;
 	for (auto it = _onUpdateCallbacks.begin(); it != _onUpdateCallbacks.end(); )
 	{
 		if ((*it)(elapsedTime, this))
@@ -60,6 +63,11 @@ void MainCamera::OnUpdate(float elapsedTime)
 			++it;
 		}
 	}
+	
+	// シェイクによるオフセットを取得して
+	Vector3 shakeOffset = _shakeManager.GetTotalOffset(_transform.GetPosition());
+
+	_callbackEyeOffset += shakeOffset; // 既存の_eyeOffsetに合成
 }
 
 // GUI描画
@@ -112,7 +120,9 @@ void MainCamera::OnDrawGui()
 				this->AddOnUpdateCallback(testCallback);
 			}
 			ImGui::Text(u8"設定されている関数:%d", _onUpdateCallbacks.size());
-			ImGui::DragFloat3(u8"目のオフセット", &_eyeOffset.x, 0.1f);
+			ImGui::DragFloat3(u8"目のオフセット", &_callbackEyeOffset.x, 0.1f);
+
+			_shakeManager.DrawGui();
 
 			ImGui::EndTabItem();
 		}

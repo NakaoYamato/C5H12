@@ -128,7 +128,7 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
     if (auto cameraActor = GetActor()->GetScene()->GetMainCameraActor())
     {
         // カメライベント受信者が存在するならオフセットを加算
-        const Vector3& eyeOffset = cameraActor->GetEyeOffset();
+        const Vector3& eyeOffset = cameraActor->GetCallBackEyeOffset();
         // カメラの角度に合わせてオフセットを変換
         newEye += right * eyeOffset.x;
         newEye += up * eyeOffset.y;

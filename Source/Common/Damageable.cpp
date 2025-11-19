@@ -25,6 +25,14 @@ void Damageable::DrawGui()
 	ImGui::Text(u8"無敵状態 : %s", _invisibleTimer > 0.0f ? u8"True" : u8"False");
 	ImGui::Text(u8"前フレームに受けたダメージ量 : %f", _lastDamage);
 	ImGui::Text(u8"総ダメージ量 : %f", _totalDamage);
+	if (ImGui::Button(u8"10ダメージを与える"))
+	{
+		AddDamage(1.0f, Vector3::Zero);
+	}
+	if (ImGui::Button(u8"体力全回復"))
+	{
+		Heal(_maxHealth);
+	}
 }
 // HP初期化
 void Damageable::ResetHealth(float maxHealth)
@@ -59,4 +67,12 @@ bool Damageable::AddDamage(float damage, Vector3 hitPosition, bool networkData)
 	// 受けたダメージ量を記録
 	_lastDamage += damage;
 	return true;
+}
+
+// 回復する
+void Damageable::Heal(float amount)
+{
+	_health += amount;
+	if (_health > _maxHealth)
+		_health = _maxHealth;
 }

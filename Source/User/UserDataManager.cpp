@@ -280,6 +280,42 @@ void UserDataManager::SetEquippedArmorIndex(ArmorType type, int index)
 #pragma endregion
 
 #pragma region アイテム
+// アイテムを使用する
+bool UserDataManager::UseItem(int pouchIndex, Actor* user)
+{
+	auto pouch = GetPouchItem(pouchIndex);
+	if (pouch->itemIndex < 0)
+		return false;
+	auto itemData = GetAcquiredItemData(pouch->itemIndex);
+	if (!itemData || itemData->quantity <= 0)
+		return false;
+
+	auto itemManager = ResourceManager::Instance().GetResourceAs<ItemManager>("ItemManager");
+	if (!itemManager)
+		return false;
+
+	// 関数取得
+	auto itemFunction = itemManager->GetItemFunction(pouch->itemIndex);
+	if (itemFunction)
+	{
+		// 使用処理
+		itemFunction->Execute(itemData->GetBaseData(), user);
+	}
+
+	// 所持数を減らす
+	if (pouch->quantity > 0)
+	{
+		pouch->quantity--;
+		// 所持数が0になった場合はポーチから削除
+		if (pouch->quantity == 0)
+		{
+			pouch->itemIndex = -1;
+			SortPouchItems();
+		}
+	}
+
+	return false;
+}
 // ポーチの整理
 void UserDataManager::SortPouchItems()
 {
@@ -292,7 +328,8 @@ void UserDataManager::SortPouchItems()
 		{
 			if (_pouchItems[j].itemIndex == -1)
 				continue;
-			_pouchItems[i] = _pouchItems[j];
+			_pouchItems[i].itemIndex = _pouchItems[j].itemIndex;
+			_pouchItems[i].quantity = _pouchItems[j].quantity;
 			_pouchItems[j].itemIndex = -1;
 			_pouchItems[j].quantity = 0;
 			break;
@@ -310,12 +347,12 @@ UserDataManager::ItemUserData* UserDataManager::GetAcquiredItemData(int index)
 UserDataManager::PouchItemData* UserDataManager::GetPouchItem(int pouchIndex)
 {
 	auto lastPouchItem = GetLastPouchItem();
-	int maxCount = lastPouchItem->pouchIndex + 1;
+	int maxCount = lastPouchItem->pouchIndex + 2;
 	int index = pouchIndex % maxCount;
 	if (index < 0)
 		index += maxCount;
 
-	if (index == lastPouchItem->pouchIndex)
+	if (index == lastPouchItem->pouchIndex + 1)
 		return &_emptyPouchItemData;
 
 	return &_pouchItems[index];

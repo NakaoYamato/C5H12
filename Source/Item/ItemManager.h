@@ -4,6 +4,7 @@
 #include "../../Library/2D/Canvas.h"
 #include "../../Library/Graphics/Texture.h"
 #include "ItemData.h"
+#include "ItemFunctions.h"
 
 class ItemManager : public ResourceBase
 {
@@ -43,6 +44,16 @@ public:
 	// オーバーレイアイコンテクスチャのUV取得
 	Canvas::TextureData GetOverlayIconTextureData(int overlayIconIndex);
 
+	// アイテム効果処理取得
+	ItemFunctionBase* GetItemFunction(int index)
+	{
+		if (index >= 0 && index < static_cast<int>(_itemFunctionList.size()))
+		{
+			return _itemFunctionList[index].get();
+		}
+		return nullptr;
+	}
+
 private:
 	std::string _filePath = "./Data/Resource/ItemManager.json";
 	std::unique_ptr<Canvas> _itemIconCanvas;
@@ -50,7 +61,11 @@ private:
 	int _itemIconTextureIndex = 0;
 	Texture _overlayIconTexture;
 
+	// アイテムデータリスト
 	std::vector<ItemData> _itemDataList;
+
+	// アイテム効果処理リスト
+	std::vector<std::unique_ptr<ItemFunctionBase>> _itemFunctionList;
 
 	int _selectedAddTypeIndex = 0;
 };

@@ -22,6 +22,8 @@ public:
 	virtual void ResetHealth(float maxHealth);
 	// ダメージを与える
 	virtual bool AddDamage(float damage, Vector3 hitPosition, bool networkData = false);
+	// 回復する
+	virtual void Heal(float amount);
 
 #pragma region アクセサ
 	// ヘルス取得

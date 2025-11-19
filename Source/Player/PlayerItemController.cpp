@@ -60,22 +60,7 @@ void PlayerItemController::Use()
 	auto userDataManager = _userDataManager.lock();
 	if (!userDataManager)
 		return;
-	auto item = userDataManager->GetPouchItem(_currentIndex);
-
-	if (item->itemIndex < 0)
-		return;
-
-	// 所持数があれば使用
-	if (item->quantity > 0)
-	{
-		item->quantity--;
-
-		// 0になったらアイテムを外す
-		if (item->quantity == 0)
-		{
-			item->itemIndex = -1;
-		}
-	}
+	userDataManager->UseItem(_currentIndex, GetActor().get());
 }
 
 bool PlayerItemController::IsClosed() const
@@ -99,7 +84,4 @@ bool PlayerItemController::IsOpen() const
 void PlayerItemController::AddIndex(int addIndex)
 {
 	_currentIndex += addIndex;
-	// ポーチの整理
-	if (auto userDataManager = _userDataManager.lock())
-		userDataManager->SortPouchItems();
 }

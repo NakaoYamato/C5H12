@@ -22,6 +22,9 @@ bool ItemManager::Initialize()
 		Graphics::Instance().GetDevice(),
 		ToWString("./Data/Texture/UI/Item/OverlayIcons.png").c_str());
 
+	// アイテム効果処理リスト初期化
+	_itemFunctionList.push_back(std::make_unique<HealingPotionFunc>());
+
 	return true;
 }
 
@@ -89,16 +92,17 @@ bool ItemManager::SaveToFile()
 // Gui描画
 void ItemManager::DrawGui()
 {
-	static std::vector<char> ItemTypeNames;
-	if (ItemTypeNames.empty())
+	// 各名前リスト
+	static std::vector<char> ItemFunctionNames;
+	if (ItemFunctionNames.empty())
 	{
-		for (size_t i = 0; i < static_cast<size_t>(ItemType::ItemTypeMax); ++i)
+		for (size_t i = 0; i < _itemFunctionList.size(); ++i)
 		{
-			for (char c : ToString<ItemType>(i))
+			for (char c : _itemFunctionList[i]->GetName())
 			{
-				ItemTypeNames.push_back(c);
+				ItemFunctionNames.push_back(c);
 			}
-			ItemTypeNames.push_back('\0');
+			ItemFunctionNames.push_back('\0');
 		}
 	}
 
@@ -117,6 +121,59 @@ void ItemManager::DrawGui()
 			// アイテムアイコンGui描画
 			DrawItemIconGui(data.iconIndex, data.overlayIconIndex, data.color);
 			data.DrawGui(_itemIconTextureIndex);
+			ImGui::Separator();
+			
+			if (ImGui::TreeNode(u8"アイテム実行処理"))
+			{
+				if (ImGui::TreeNode(u8"パラメータ"))
+				{
+					for (auto& [name, parm] : data.parameters)
+					{
+						if (auto p = std::get_if<int>(&parm))
+						{
+							ImGui::DragInt(name.c_str(), p);
+						}
+						else if (auto p = std::get_if<float>(&parm))
+						{
+							ImGui::DragFloat(name.c_str(), p);
+						}
+						else if (auto p = std::get_if<Vector2>(&parm))
+						{
+							ImGui::DragFloat2(name.c_str(), &p->x);
+						}
+						else if (auto p = std::get_if<Vector3>(&parm))
+						{
+							ImGui::DragFloat3(name.c_str(), &p->x);
+						}
+						else if (auto p = std::get_if<Vector4>(&parm))
+						{
+							ImGui::DragFloat4(name.c_str(), &p->x);
+						}
+					}
+					ImGui::TreePop();
+				}
+
+				for (int index = -1; index < static_cast<int>(_itemFunctionList.size()); ++index)
+				{
+					if (index == -1)
+					{
+						if (ImGui::RadioButton(u8"なし", data.executeProcessIndex == index))
+						{
+							data.executeProcessIndex = index;
+						}
+						continue;
+					}
+
+					auto& func = _itemFunctionList[index];
+					if (ImGui::RadioButton(func->GetName().c_str(), data.executeProcessIndex == index))
+					{
+						data.executeProcessIndex = index;
+						// パラメータ初期化
+						data.parameters = func->GetParameterKeys();
+					}
+				}
+				ImGui::TreePop();
+			}
 
 			ImGui::TreePop();
 		}

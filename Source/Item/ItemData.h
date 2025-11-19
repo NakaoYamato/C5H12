@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <variant>
 #include <Mygui.h>
 
 enum class ItemType
@@ -21,6 +22,9 @@ enum class ItemType
 
 struct ItemData
 {
+	using VariantType = std::variant<int, float, Vector2, Vector3, Vector4>;
+	using ParameterMap = std::unordered_map<std::string, VariantType>;
+
 	std::string		name			= "";					// アイテムの名前
 	int 			iconIndex		= -1;					// アイテムアイコンの番号
 	Vector4			color			= Vector4::White;		// アイテムの色
@@ -30,6 +34,7 @@ struct ItemData
 	int				rarity			= 0;					// レア度
 	int				overlayIconIndex = -1;					// アイテムオーバーレイアイコンの番号
 	int 			executeProcessIndex = -1;				// アイテム実行処理のインデックス
+	ParameterMap	parameters;								// アイテム実行処理のパラメータマップ
 
 	inline void DrawGui(int itemIconTextureIndex)
 	{
@@ -74,6 +79,47 @@ struct ItemData
 		rarity				= json.value("rarity", rarity);
 		overlayIconIndex	= json.value("overlayIconIndex", overlayIconIndex);
 		executeProcessIndex = json.value("executeProcessIndex", executeProcessIndex);
+		size_t parametersSize = json.value("parametersSize", 0);
+		for (size_t i = 0; i < parametersSize; ++i)
+		{
+			auto& sub = json["parameter" + std::to_string(i)];
+			std::string parmName = sub.value("name", "");
+			std::string type = sub.value("type", "");
+			if (type == "int")
+			{
+				int value = sub.value("value", 0);
+				parameters[parmName] = value;
+			}
+			else if (type == "float")
+			{
+				float value = sub.value("value", 0.0f);
+				parameters[parmName] = value;
+			}
+			else if (type == "Vector2")
+			{
+				Vector2 value;
+				value.x = sub.value("value0", 0.0f);
+				value.y = sub.value("value1", 0.0f);
+				parameters[parmName] = value;
+			}
+			else if (type == "Vector3")
+			{
+				Vector3 value;
+				value.x = sub.value("value0", 0.0f);
+				value.y = sub.value("value1", 0.0f);
+				value.z = sub.value("value2", 0.0f);
+				parameters[parmName] = value;
+			}
+			else if (type == "Vector4")
+			{
+				Vector4 value;
+				value.x = sub.value("value0", 0.0f);
+				value.y = sub.value("value1", 0.0f);
+				value.z = sub.value("value2", 0.0f);
+				value.w = sub.value("value3", 0.0f);
+				parameters[parmName] = value;
+			}
+		}
 	}
 
 	// データ出力
@@ -91,5 +137,44 @@ struct ItemData
 		json["rarity"]				= rarity;
 		json["overlayIconIndex"]	= overlayIconIndex;
 		json["executeProcessIndex"] = executeProcessIndex;
+		json["parametersSize"] = parameters.size();
+		int index = 0;
+		for (auto& [parmName, parm] : parameters)
+		{
+			auto& sub = json["parameter" + std::to_string(index)];
+			sub["name"] = parmName;
+			if (auto p = std::get_if<int>(&parm))
+			{
+				sub["type"] = "int";
+				sub["value"] = *p;
+			}
+			else if (auto p = std::get_if<float>(&parm))
+			{
+				sub["type"] = "float";
+				sub["value"] = *p;
+			}
+			else if (auto p = std::get_if<Vector2>(&parm))
+			{
+				sub["type"] = "Vector2";
+				sub["value0"] = p->x;
+				sub["value1"] = p->y;
+			}
+			else if (auto p = std::get_if<Vector3>(&parm))
+			{
+				sub["type"] = "Vector3";
+				sub["value0"] = p->x;
+				sub["value1"] = p->y;
+				sub["value2"] = p->z;
+			}
+			else if (auto p = std::get_if<Vector4>(&parm))
+			{
+				sub["type"] = "Vector4";
+				sub["value0"] = p->x;
+				sub["value1"] = p->y;
+				sub["value2"] = p->z;
+				sub["value3"] = p->w;
+			}
+			index++;
+		}
 	}
 };

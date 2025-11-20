@@ -48,11 +48,12 @@ private:
 	float _timer = 0.0f;
 	float _intervalTimer = 0.0f;
 
-	Vector2 _textStartPos = Vector2(830.0f, 900.0f);
-	float _textInterval = 95.0f;
+	Vector2 _textStartPos = Vector2(1100.0f, 900.0f);
+	float _textInterval = 55.0f;
 	float _textMoveTime = 0.45f;
-	float _textMoveInterval = 1.0f;
-	Vector2 _textMoveOffset = Vector2(20.0f, 85.0f);
+	float _textMoveInterval = 0.1f;
+	Vector2 _textMoveOffset = Vector2(30.0f, 90.0f);
+	float _textMoveDelay = 0.55f;
 
 	SceneLoading* _loadingScene = nullptr;
 };

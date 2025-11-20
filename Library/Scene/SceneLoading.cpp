@@ -1,7 +1,6 @@
 #include "SceneLoading.h"
 
 #include "../Graphics/Graphics.h"
-#include "../../Library/Input/Input.h"
 
 #include "../../Source/Loading/LoadingSprController.h"
 
@@ -15,11 +14,6 @@ void SceneLoading::OnInitialize()
 
 	auto back = RegisterActor<UIActor>(u8"LoadingBack", ActorTag::UI);
 	auto backController = back->AddComponent<LoadingSprController>();
-
-	// ロードバーの読み込み
-	_sprites["LoadingBar"].LoadTexture(L"./Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-	_sprites["LoadingBar"].GetRectTransform().SetLocalPosition(Vector2(870.0f, 970.0f));
-	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(0.0f, 1.0f));
 }
 //終了化 
 void SceneLoading::OnFinalize()
@@ -30,110 +24,15 @@ void SceneLoading::OnFinalize()
 		_thread = nullptr;
 	}
 }
-//更新処理
-void SceneLoading::OnUpdate(float elapsedTime)
+// シーン切り替え
+void SceneLoading::ChangeNextScene()
 {
-	_sprites["LoadingBar"].GetRectTransform().UpdateTransform();
-
 	if (_nextScene->IsReady())
 	{
-		GetTextRenderer().Draw(
-			FontType::MSGothic,
-			"Spaceで開始",
-			_completeTextPosition,
-			_completeTextColor,
-			0.0f,
-			Vector2::Zero,
-			_completeTextScale
-		);
-		GetTextRenderer().Draw(
-			FontType::MSGothic,
-			std::to_string(_loadingTimer).c_str(),
-			_completeTextPosition + Vector2(0.0f, 100.0f),
-			_completeTextColor,
-			0.0f,
-			Vector2::Zero,
-			_completeTextScale
-		);
-
-		// 入力によってシーンを切り替える
-		if (_INPUT_TRIGGERD("Evade"))
-		{
-			SceneManager::Instance().ChangeScene(_nextScene);
-		}
+		SceneManager::Instance().ChangeScene(_nextScene);
 	}
-	else
-	{
-		_loadingTimer += elapsedTime;
-	}
-
-	// ロードバーの進捗更新
-	_loadingBarWidth = EasingLerp( 
-		_loadingBarWidth,
-		std::clamp(_nextScene->GetCompletionLoading(), 0.0f, 1.0f),
-		_loadingBarSpeed * elapsedTime);
-	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(_loadingBarWidth * 1.5f, 1.0f));
+	// ローディングスレッド
 }
-//描画処理
-void SceneLoading::OnRender()
-{
-	Graphics& graphics = Graphics::Instance();
-	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
-	ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
-	ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
-	RenderState* renderState = graphics.GetRenderState();
-	ConstantBufferManager* cbManager = graphics.GetConstantBufferManager();
-	float screenWidth = graphics.GetScreenWidth();
-	float screenHeight = graphics.GetScreenHeight();
-
-	// レンダーコンテキスト作成
-	RenderContext& rc = GetRenderContext();
-
-	// レンダーステート設定
-	dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-	dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-
-	// スプライト描画
-	{
-		// フレーム部分の描画
-		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-		_sprites["LoadingBar"].Render(rc, GetTextureRenderer());
-
-		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-	}
-
-	// テキスト描画
-	dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
-	GetTextRenderer().Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
-}
-// GUI描画処理
-void SceneLoading::OnDrawGui()
-{
-	if (ImGui::Begin("Loading"))
-	{
-		ImGui::DragFloat(u8"ロードバー横幅", &_loadingBarWidth, 0.01f, 0.0f, 1.0f);
-		ImGui::DragFloat(u8"ロードバー速度", &_loadingBarSpeed, 0.01f, 0.0f, 10.0f);
-		ImGui::Separator();
-
-		ImGui::DragFloat2(u8"完了テキスト位置", &_completeTextPosition.x, 1.0f, 0.0f);
-		ImGui::DragFloat2(u8"完了テキストサイズ", &_completeTextScale.x, 0.01f, 0.0f);
-		ImGui::ColorEdit4(u8"完了テキスト色", &_completeTextColor.x);
-		ImGui::Separator();
-
-		for (auto& [name, sprite] : _sprites)
-		{
-			if (ImGui::TreeNode(name.c_str()))
-			{
-				sprite.DrawGui();
-				ImGui::TreePop();
-			}
-		}
-	}
-	ImGui::End();
-}
-
 void SceneLoading::LoadingThread(SceneLoading* scene)
 {
 	//COM関連の初期化でスレッド毎に呼ぶ必要がある

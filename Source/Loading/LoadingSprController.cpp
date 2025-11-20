@@ -20,13 +20,13 @@ void LoadingSprController::Start()
 
 		// 進捗バー背景の生成
 		spriteRenderer->LoadTexture(LoadingBarBackSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalPosition(Vector2(870.0f, 970.0f));
+		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalPosition(Vector2(1070.0f, 970.0f));
 		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalScale(Vector2(1.5f, 1.0f));
 		spriteRenderer->SetColor(LoadingBarBackSpr, Vector4::Black);
 
 		// 進捗バーの生成
 		spriteRenderer->LoadTexture(LoadingBarSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalPosition(Vector2(870.0f, 970.0f));
+		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalPosition(Vector2(1070.0f, 970.0f));
 		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(Vector2(0.0f, 1.0f));
 
 		// テキストスプライトの生成
@@ -45,7 +45,7 @@ void LoadingSprController::Start()
 		{
 			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalPosition(
 				Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y));
-			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.6f, 0.6f));
+			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.4f, 0.4f));
 		}
 	}
 
@@ -61,12 +61,30 @@ void LoadingSprController::Update(float elapsedTime)
 		return;
 
 	// 進捗バー
+	float maxScale = spriteRenderer->GetRectTransform(LoadingBarBackSpr).GetLocalScale().x;
 	spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(
 		Vector2(
 			EasingLerp(spriteRenderer->GetRectTransform(LoadingBarSpr).GetLocalScale().x,
-				std::clamp(_loadingScene->GetCompletionLoading(), 0.0f, 1.0f) * 1.5f,
+				std::clamp(_loadingScene->GetCompletionLoading(), 0.0f, 1.0f) * maxScale,
 				_loadingBarSpeed * elapsedTime),
 			1.0f));
+
+	// フェーズ処理
+	if (_loadingScene && _loadingScene->IsNextSceneReady())
+	{
+		if (!_loadingScene->GetFade()->IsFading())
+		{
+			switch (_loadingScene->GetFade()->GetType())
+			{
+			case Fade::Type::FadeOut:
+                _loadingScene->ChangeNextScene();
+                break;
+			default:
+				_loadingScene->GetFade()->Start(Fade::Type::FadeOut, 1.0f);
+				break;
+			}
+		}
+	}
 
 	if (_intervalTimer > 0.0f)
 	{
@@ -77,7 +95,6 @@ void LoadingSprController::Update(float elapsedTime)
 		{
 			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalPosition(
 				Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y));
-			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.6f, 0.6f));
 		}
 		return;
 	}
@@ -86,12 +103,11 @@ void LoadingSprController::Update(float elapsedTime)
 	for (int i = 0; i < 11; ++i)
 	{
 		float t = (_timer - i * _textMoveTime) / _textMoveTime;
-		t -= 0.1f * i; // 少し早めに開始
+		t += _textMoveDelay * i; // 少し早めに開始
 		if (t < 0.0f || 1.0f < t)
 		{
 			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalPosition(
 				Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y));
-			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.6f, 0.6f));
 			continue;
 		}
 		Vector2 offset{};
@@ -99,9 +115,8 @@ void LoadingSprController::Update(float elapsedTime)
 		offset.y = -std::sinf(t * DirectX::XM_PI) * _textMoveOffset.y;
 		spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalPosition(
 			Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y) + offset);
-		spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.6f, 0.6f));
 	}
-	if (_timer >= _textMoveTime * 12.0f)
+	if (_timer >= _textMoveTime * 10.0f)
 	{
 		_timer = 0.0f;
 		_intervalTimer = _textMoveInterval;
@@ -116,4 +131,5 @@ void LoadingSprController::DrawGui()
 	ImGui::DragFloat(u8"テキスト移動時間", &_textMoveTime, 0.01f, 0.0f);
 	ImGui::DragFloat(u8"テキスト移動間隔", &_textMoveInterval, 0.01f, 0.0f);
 	ImGui::DragFloat2(u8"テキスト移動オフセット", &_textMoveOffset.x, 1.0f);
+    ImGui::DragFloat(u8"テキスト移動遅延", &_textMoveDelay, 0.01f, 0.0f);
 }

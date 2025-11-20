@@ -56,6 +56,10 @@ public:
 		else
 			return t;
 	}
+	Type GetType() const
+	{
+		return _type;
+    }
 private:
 	float _duration = 1.0f;
 	float _elapsedTime = 0.0f;

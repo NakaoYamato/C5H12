@@ -17,6 +17,8 @@ void WeaponActor::OnStart()
 // ’x‰„XVˆ—
 void WeaponActor::OnLateUpdate(float elapsedTime)
 {
+	ModelAttachActor::OnLateUpdate(elapsedTime);
+
 	Vector3 velocity = (_transform.GetPosition() - _oldPosition);
 	_oldPosition = _transform.GetPosition();
 

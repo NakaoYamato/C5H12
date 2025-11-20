@@ -16,6 +16,8 @@ public:
 		SetParent(owner);
 		_parentNode = parentNode;
 	}
+	// ’x‰„XVˆ—
+	void OnLateUpdate(float elapsedTime) override;
 
 	std::string GetParentName() override
 	{

@@ -836,7 +836,7 @@ namespace PlayerDrinkSubState
 		DrinkStartSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"DrinkStart",
-				u8"Idle",
+				u8"Buff",
 				0.2f,
 				false,
 				true)
@@ -856,7 +856,7 @@ namespace PlayerDrinkSubState
 		DrinkingSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"Drinking",
-				u8"Idle",
+				u8"Buff",
 				0.2f,
 				true,
 				true)
@@ -885,7 +885,7 @@ namespace PlayerDrinkSubState
 		DrinkEndSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"DrinkEnd",
-				u8"Idle",
+				u8"Buff",
 				0.2f,
 				false,
 				true)

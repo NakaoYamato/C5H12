@@ -2,6 +2,13 @@
 
 #include "../../Library/Scene/Scene.h"
 
+// 遅延更新時処理
+void ModelAttachActor::OnLateUpdate(float elapsedTime)
+{
+	// モデルのトランスフォーム更新
+	UpdateModelTransform();
+}
+
 // ギズモ描画
 void ModelAttachActor::DrawGuizmo()
 {

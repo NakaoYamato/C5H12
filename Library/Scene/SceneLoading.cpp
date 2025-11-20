@@ -3,28 +3,25 @@
 #include "../Graphics/Graphics.h"
 #include "../../Library/Input/Input.h"
 
+#include "../../Source/Loading/LoadingSprController.h"
+
 #include <imgui.h>
 
 //初期化
-void SceneLoading::Initialize()
+void SceneLoading::OnInitialize()
 {
 	//スレッド開始
 	_thread = new std::thread(LoadingThread, this);
 
-	// レンダラー作成
-	{
-		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-		GetTextureRenderer().Initialize(Graphics::Instance().GetDevice());
-		GetTextRenderer().Initialize(Graphics::Instance().GetDevice(),
-			Graphics::Instance().GetDeviceContext());
-	}
+	auto back = RegisterActor<UIActor>(u8"LoadingBack", ActorTag::UI);
+	auto backController = back->AddComponent<LoadingSprController>();
 
 	// ロードバーの読み込み
 	_sprites["LoadingBar"].LoadTexture(L"./Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
 	_sprites["LoadingBar"].GetRectTransform().SetLocalPosition(Vector2(870.0f, 40.0f));
 }
 //終了化 
-void SceneLoading::Finalize()
+void SceneLoading::OnFinalize()
 {
 	if (_thread != nullptr && _thread->joinable()) {
 		_thread->join();
@@ -33,7 +30,7 @@ void SceneLoading::Finalize()
 	}
 }
 //更新処理
-void SceneLoading::Update(float elapsedTime)
+void SceneLoading::OnUpdate(float elapsedTime)
 {
 	_sprites["LoadingBar"].GetRectTransform().UpdateTransform();
 
@@ -77,7 +74,7 @@ void SceneLoading::Update(float elapsedTime)
 	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(_loadingBarWidth, 1.0f));
 }
 //描画処理
-void SceneLoading::Render()
+void SceneLoading::OnRender()
 {
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
@@ -142,7 +139,7 @@ void SceneLoading::Render()
 	GetTextRenderer().Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
 }
 // GUI描画処理
-void SceneLoading::DrawGui()
+void SceneLoading::OnDrawGui()
 {
 	if (ImGui::Begin("Loading"))
 	{

@@ -351,6 +351,7 @@
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Item\ItemFunctions.cpp" />
     <ClCompile Include="Source\Item\ItemManager.cpp" />
+    <ClCompile Include="Source\Loading\LoadingSprController.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
     <ClCompile Include="Source\Armor\ArmorActor.cpp" />
     <ClCompile Include="Source\Player\BuffController.cpp" />
@@ -641,6 +642,7 @@
     <ClInclude Include="Source\Item\ItemData.h" />
     <ClInclude Include="Source\Item\ItemFunctions.h" />
     <ClInclude Include="Source\Item\ItemManager.h" />
+    <ClInclude Include="Source\Loading\LoadingSprController.h" />
     <ClInclude Include="Source\Menu\MenuMediator.h" />
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />

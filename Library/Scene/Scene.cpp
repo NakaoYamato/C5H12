@@ -117,8 +117,11 @@ void Scene::Update(float elapsedTime)
 	// Effekseerの更新
 	_effekseerEffectManager.Update(elapsedTime);
 
-	// パーティクルの更新
-	_particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+    {
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+        // パーティクルの更新
+        _particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+    }
 
     // フェード更新
 	_fade.Update(elapsedTime);

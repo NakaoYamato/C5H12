@@ -19,23 +19,18 @@ public:
 	SceneMenuLevel GetLevel() const { return SceneMenuLevel::LevelEnd; }
 
 	//初期化
-	void Initialize()override;
+	void OnInitialize()override;
 	//終了化 
-	void Finalize()override;
+	void OnFinalize()override;
 	//更新処理
-	void Update(float elapsedTime)override;
+	void OnUpdate(float elapsedTime)override;
 	//描画処理
-	void Render()override;
+	void OnRender()override;
 	// GUI描画処理
-	void DrawGui() override;
+	void OnDrawGui() override;
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
 	{
-		return nullptr;
-	}
-	// カメラ取得
-	// ロード中はカメラを使用しないためにnullptr
-	Camera* GetMainCamera() override {
 		return nullptr;
 	}
 private:

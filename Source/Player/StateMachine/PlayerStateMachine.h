@@ -136,7 +136,7 @@ public:
 	void OnEnter() override;
 	void OnExecute(float elapsedTime) override {}
 	void OnExit() override {}
-private:
+protected:
 	std::string _name = "";
 	std::string _animationName = "";
 	float		_blendSeconds = 0.2f;

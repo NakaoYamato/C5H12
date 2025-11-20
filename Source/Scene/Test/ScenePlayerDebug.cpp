@@ -8,8 +8,6 @@
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Dummy/DummyActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Enemy/Weak/WeakActor.h"
-#include "../../Source/Enemy/Gryphus/GryphusActor.h"
 #include "../../Source/Stage/Props/Chest/ChestActor.h"
 
 #include "../../InGame/InputManager.h"
@@ -70,22 +68,4 @@ void ScenePlayerDebug::OnInitialize()
         auto canvas = RegisterActor<InGameCanvasActor>("Canvas", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
-    //{
-    //    auto weak0 = RegisterActor<WeakActor>("Weak0", ActorTag::Enemy);
-    //}
-    //{
-    //    auto weak1 = RegisterActor<WeakActor>("Weak1", ActorTag::Enemy);
-    //    weak1->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -5.0f));
-    //}
-    //{
-    //    auto gryphus = RegisterActor<GryphusActor>("Gryphus", ActorTag::Enemy);
-    //    gryphus->GetTransform().SetPosition(Vector3(0.0f, 5.0f, -40.0f));
-    //}
-    //AddCompletionLoading(CompletionLoadingRate);
-    // •‰‰×ƒeƒXƒg
-    //for (int i = 0; i < 10; ++i)
-    //{
-    //    auto player = RegisterActor<PlayerActor>("Player" + std::to_string(i), ActorTag::Player, false);
-    //}
-    //AddCompletionLoading(CompletionLoadingRate);
 }

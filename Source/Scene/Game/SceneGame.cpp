@@ -9,8 +9,6 @@
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Enemy/Gryphus/GryphusActor.h"
-#include "../../Source/Enemy/Weak/WeakActor.h"
 #include "../../Source/Stage/StageController.h"
 
 #include "../../InGame/InputManager.h"

@@ -17,7 +17,6 @@ namespace Network
 		Player = 0,
 
 		Wyvern,
-		Weak,
 	};
 
 #pragma region 送信データ

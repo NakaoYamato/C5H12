@@ -4,7 +4,6 @@
 #include "../../Source/Player/PlayerActor.h"
 
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Enemy/Weak/WeakActor.h"
 
 #include <string>
 #include <imgui.h>
@@ -257,27 +256,6 @@ std::weak_ptr<Actor> NetworkMediator::CreateEnemy(
         _characters[uniqueID].actor = enemy;
         _characters[uniqueID].receiver = receiver;
 		_characters[uniqueID].sender = sender;
-        return enemy;
-    }
-    else if (type == Network::CharacterType::Weak)
-    {
-        // 敵キャラクターの生成
-        auto enemy = _scene->RegisterActor<WeakActor>(
-            "Enemy" + std::to_string(uniqueID),
-            ActorTag::Enemy
-        );
-        auto receiver = enemy->GetComponent<NetworkReceiver>();
-        auto sender = enemy->GetComponent<NetworkSender>();
-        // 管理者のIDを設定
-        receiver->SetManagerId(controllerID);
-        // ユーザーが操作するプレイヤーの場合レシーバーは起動しない
-        if (myPlayerId == controllerID)
-            receiver->SetActive(false);
-        // コンテナに登録
-        _characters[uniqueID].uniqueID = uniqueID;
-        _characters[uniqueID].actor = enemy;
-        _characters[uniqueID].receiver = receiver;
-        _characters[uniqueID].sender = sender;
         return enemy;
     }
     return std::weak_ptr<EnemyActor>();

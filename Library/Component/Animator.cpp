@@ -641,6 +641,7 @@ void Animator::StopPartialAnimation(float blendSeconds)
         _partialState = PartialState::None;
         _partialAnimationIndex = -1;
         _partialWeight = 0.0f;
+        _partialRootMotionIgnoreCount = 2;
     }
     _isPartialPlaying = false;
 }
@@ -663,6 +664,50 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         animationIndex = _partialAnimationIndex;
         animationTimer = _partialAnimationTimer;
         animationLength = _model.lock()->GetResource()->GetAnimations().at(animationIndex).secondsLength;
+    }
+
+    if (_partialRootMotionIgnoreCount > 0)
+    {
+        // 部分アニメーション停止直後はルートモーションを無視する
+        _partialRootMotionIgnoreCount--;
+        // ポーズノードの移動量を取り除く
+        poseNodes[_rootNodeIndex].position = {};
+        ModelResource::Node startRootNode{};
+        ComputeAnimation(animationIndex, _rootNodeIndex, 0.0f, startRootNode);
+        // オブジェクトに応じてノードの位置を調整
+        switch (_rootMotionOption)
+        {
+        case Animator::RootMotionOption::None:
+            break;
+        case Animator::RootMotionOption::RemovePositionX:
+            poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+            poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+            break;
+        case Animator::RootMotionOption::RemovePositionY:
+            poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+            break;
+        case Animator::RootMotionOption::RemovePositionZ:
+            poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+            break;
+        case Animator::RootMotionOption::RemovePositionXY:
+            poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+            break;
+        case Animator::RootMotionOption::RemovePositionXZ:
+            poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+            break;
+        case Animator::RootMotionOption::RemovePositionYZ:
+            poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
+            break;
+        case Animator::RootMotionOption::RemovePositionXYZ:
+            break;
+        case Animator::RootMotionOption::UseOffset:
+        default:
+            poseNodes[_rootNodeIndex].position = _rootOffset;
+            break;
+        }
+        return;
     }
 
     // 現在のルートノード取得
@@ -823,6 +868,7 @@ void Animator::UpdatePartialAnimation(float elapsedTime)
                 _partialWeight = 0.0f;
                 _partialAnimationIndex = -1;
                 _isPartialPlaying = false;
+                _partialRootMotionIgnoreCount = 2;
             }
             else
             {

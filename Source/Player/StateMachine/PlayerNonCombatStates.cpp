@@ -836,7 +836,7 @@ namespace PlayerDrinkSubState
 		DrinkStartSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"DrinkStart",
-				u8"Buff",
+				u8"DrinkStart",
 				0.2f,
 				false,
 				true)
@@ -856,7 +856,7 @@ namespace PlayerDrinkSubState
 		DrinkingSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"Drinking",
-				u8"Buff",
+				u8"Drinking",
 				0.2f,
 				true,
 				true)
@@ -885,7 +885,7 @@ namespace PlayerDrinkSubState
 		DrinkEndSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"DrinkEnd",
-				u8"Buff",
+				u8"DrinkEnd",
 				0.2f,
 				false,
 				true)
@@ -896,7 +896,15 @@ namespace PlayerDrinkSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlayAnimation())
-				_owner->GetStateMachine().ChangeState("Idle");
+			{
+				if (_owner->GetPlayer()->IsMoving())
+				{
+					_owner->GetStateMachine().ChangeState("Walk");
+                    _owner->GetStateMachine().ChangeSubState("Walking");
+				}
+                else
+                    _owner->GetStateMachine().ChangeState("Idle");
+			}
 		}
 	};
 }
@@ -935,7 +943,7 @@ void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
 	else
 	{
 		if (_owner->GetAnimator()->IsPartialAnimationPlaying())
-			_owner->GetAnimator()->StopPartialAnimation();
+			_owner->GetAnimator()->StopPartialAnimation(0.5f);
 	}
 
 	// 回避移行
@@ -946,6 +954,7 @@ void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
 void PlayerNonCombatDrinkState::OnExit()
 {
 	_owner->GetAnimator()->StopPartialAnimation();
+	_owner->GetAnimator()->Update(0.2f);
 	_owner->GetPlayer()->SetIsAbleToUseItem(true);
 }
 #pragma endregion

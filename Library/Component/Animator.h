@@ -363,6 +363,9 @@ private:
 
 	// マスク用インデックス
 	std::vector<int> _partialMaskIndices;
+
+	// ルートモーション処理を行わない回数
+    int _partialRootMotionIgnoreCount = 0;
 #pragma endregion
 
 };

@@ -86,7 +86,18 @@ public:
     /// <param name="animationName">アニメーション名</param>
     /// <param name="t">特定の時間</param>
     /// <returns>カーブの値</returns>
-    float Evaluate(const std::string& animationName, float t) const {
+    float Evaluate(const std::string& animationName, float t)
+    {
+        // データが存在しない場合は作る
+        if (_data.find(animationName) == _data.end())
+        {
+            CurveData tempCurve;
+            tempCurve.animationName = animationName;
+            tempCurve.AddKeyframe(0.0f, 1.0f, true, false);
+            tempCurve.AddKeyframe(1.0f, 1.0f, true, false);
+
+            _data[animationName] = tempCurve;
+        }
 		return _data.at(animationName).Evaluate(t);
     }
 

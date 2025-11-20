@@ -18,7 +18,8 @@ void SceneLoading::OnInitialize()
 
 	// ロードバーの読み込み
 	_sprites["LoadingBar"].LoadTexture(L"./Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-	_sprites["LoadingBar"].GetRectTransform().SetLocalPosition(Vector2(870.0f, 40.0f));
+	_sprites["LoadingBar"].GetRectTransform().SetLocalPosition(Vector2(870.0f, 970.0f));
+	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(0.0f, 1.0f));
 }
 //終了化 
 void SceneLoading::OnFinalize()
@@ -71,7 +72,7 @@ void SceneLoading::OnUpdate(float elapsedTime)
 		_loadingBarWidth,
 		std::clamp(_nextScene->GetCompletionLoading(), 0.0f, 1.0f),
 		_loadingBarSpeed * elapsedTime);
-	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(_loadingBarWidth, 1.0f));
+	_sprites["LoadingBar"].GetRectTransform().SetLocalScale(Vector2(_loadingBarWidth * 1.5f, 1.0f));
 }
 //描画処理
 void SceneLoading::OnRender()
@@ -85,31 +86,9 @@ void SceneLoading::OnRender()
 	float screenWidth = graphics.GetScreenWidth();
 	float screenHeight = graphics.GetScreenHeight();
 
-	FLOAT color[] = { 0.0f,0.0f,0.0f,1.0f };//RGBA(0.0~1.0)
-	dc->ClearRenderTargetView(rtv, color);
-	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	dc->OMSetRenderTargets(1, &rtv, dsv);
-
 	// レンダーコンテキスト作成
 	RenderContext& rc = GetRenderContext();
-	rc.deviceContext = dc;
-	rc.renderState = graphics.GetRenderState();
-	rc.camera = GetMainCamera();
-	rc.lightDirection = Vector4::Right;
-	rc.lightColor = Vector4::White;
-	rc.lightAmbientColor = Vector4::Black;
 
-	// サンプラーステート設定
-	{
-		ID3D11SamplerState* samplerStates[] =
-		{
-			renderState->GetSamplerState(SamplerState::PointWrap),
-			renderState->GetSamplerState(SamplerState::PointClamp),
-			renderState->GetSamplerState(SamplerState::LinearWrap),
-			renderState->GetSamplerState(SamplerState::LinearClamp)
-		};
-		dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-	}
 	// レンダーステート設定
 	dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
@@ -121,15 +100,6 @@ void SceneLoading::OnRender()
 		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
 		_sprites["LoadingBar"].Render(rc, GetTextureRenderer());
 
-		// マスク部分の描画
-		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteMask), 1);
-		//SpriteRender(MaskSprite, rc, offset, offsetScale);
-
-		// ゲージ部分の描画
-		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::SpriteApplyMask), 0);
-		//SpriteRender(DamageGaugeSprite, rc, offset, offsetScale);
-		//SpriteRender(GaugeSprite, rc, offset, offsetScale);
-	
 		rc.deviceContext->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 1);
 	}
 

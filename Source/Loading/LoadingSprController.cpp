@@ -18,6 +18,17 @@ void LoadingSprController::Start()
 		spriteRenderer->GetRectTransform(BackSpr).SetLocalPosition(Vector2(960.0f, 540.0f));
 		spriteRenderer->GetRectTransform(BackSpr).SetLocalScale(Vector2(0.4f, 0.4f));
 
+		// 進捗バー背景の生成
+		spriteRenderer->LoadTexture(LoadingBarBackSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
+		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalPosition(Vector2(870.0f, 970.0f));
+		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalScale(Vector2(1.5f, 1.0f));
+		spriteRenderer->SetColor(LoadingBarBackSpr, Vector4::Black);
+
+		// 進捗バーの生成
+		spriteRenderer->LoadTexture(LoadingBarSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
+		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalPosition(Vector2(870.0f, 970.0f));
+		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(Vector2(0.0f, 1.0f));
+
 		// テキストスプライトの生成
 		spriteRenderer->LoadTexture(TextSprs[0], L"Data/Texture/Loading/N.png");
 		spriteRenderer->LoadTexture(TextSprs[1], L"Data/Texture/Loading/O.png");
@@ -48,6 +59,14 @@ void LoadingSprController::Update(float elapsedTime)
 	auto spriteRenderer = _spriteRenderer.lock();
 	if (!spriteRenderer)
 		return;
+
+	// 進捗バー
+	spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(
+		Vector2(
+			EasingLerp(spriteRenderer->GetRectTransform(LoadingBarSpr).GetLocalScale().x,
+				std::clamp(_loadingScene->GetCompletionLoading(), 0.0f, 1.0f) * 1.5f,
+				_loadingBarSpeed * elapsedTime),
+			1.0f));
 
 	if (_intervalTimer > 0.0f)
 	{

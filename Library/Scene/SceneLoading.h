@@ -33,6 +33,12 @@ public:
 	{
 		return nullptr;
 	}
+
+	// i’»Žæ“¾
+	float GetCompletionLoading() const
+	{
+		return std::clamp(_nextScene->GetCompletionLoading(), 0.0f, 1.0f);
+	}
 private:
 	static void LoadingThread(SceneLoading* scene);
 

@@ -145,3 +145,17 @@ public:
 	void OnExit() override {}
 };
 #pragma endregion
+
+#pragma region 飲む
+class PlayerNonCombatDrinkState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerNonCombatDrinkState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatDrinkState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Drink"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+#pragma endregion

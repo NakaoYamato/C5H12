@@ -207,10 +207,10 @@ void WyvernStateMachine::DrawGui()
 
         ImGui::Separator();
         std::string str = u8"現在のステート:";
-        str += _stateMachine.GetState()->GetName();
+        str += _stateMachine.GetState() ? _stateMachine.GetState()->GetName() : "";
         ImGui::Text("%s", str.c_str());
         str = u8"現在のサブステート:";
-        str += _stateMachine.GetState()->GetSubStateName();
+        str += _stateMachine.GetState() ? _stateMachine.GetState()->GetSubStateName() : "";
         ImGui::Text("%s", str.c_str());
 
         ImGui::Separator();

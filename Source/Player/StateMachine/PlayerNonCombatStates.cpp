@@ -826,3 +826,126 @@ void PlayerNonCombatDownState::OnExit()
 	}
 }
 #pragma endregion
+
+#pragma region 飲む
+namespace PlayerDrinkSubState
+{
+	class DrinkStartSubState : public PlayerSSB
+	{
+	public:
+		DrinkStartSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"DrinkStart",
+				u8"Idle",
+				0.2f,
+				false,
+				true)
+		{
+		}
+		~DrinkStartSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+				_owner->GetStateMachine().ChangeSubState("Drinking");
+		}
+	};
+	class DrinkingSubState : public PlayerSSB
+	{
+	public:
+		DrinkingSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"Drinking",
+				u8"Idle",
+				0.2f,
+				true,
+				true)
+		{
+		}
+		~DrinkingSubState() override {}
+		void OnEnter() override
+		{
+			PlayerSSB::OnEnter();
+			_timer = 0.0f;
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			_timer += elapsedTime;
+			if (_timer >= _owner->GetPlayer()->GetUseItemTime())
+			{
+				_owner->GetStateMachine().ChangeSubState("DrinkEnd");
+			}
+		}
+	private:
+		float _timer = 0.0f;
+	};
+	class DrinkEndSubState : public PlayerSSB
+	{
+	public:
+		DrinkEndSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"DrinkEnd",
+				u8"Idle",
+				0.2f,
+				false,
+				true)
+		{
+		}
+		~DrinkEndSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+				_owner->GetStateMachine().ChangeState("Idle");
+		}
+	};
+}
+
+PlayerNonCombatDrinkState::PlayerNonCombatDrinkState(PlayerStateMachine* stateMachine) :
+	HierarchicalStateBase(stateMachine)
+{
+	// サブステート登録
+	RegisterSubState(std::make_shared<PlayerDrinkSubState::DrinkStartSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerDrinkSubState::DrinkingSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerDrinkSubState::DrinkEndSubState>(stateMachine));
+}
+
+void PlayerNonCombatDrinkState::OnEnter()
+{
+	_owner->GetPlayer()->SetIsAbleToUseItem(false);
+	ChangeSubState("DrinkStart");
+}
+
+void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
+{
+	std::string stateName = _owner->GetStateName();
+	if (stateName != "Drink")
+		return;
+
+	// 移動処理
+	if (_owner->GetPlayer()->IsMoving())
+	{
+		if (!_owner->GetAnimator()->IsPartialAnimationPlaying())
+		{
+			_owner->GetAnimator()->PlayPartialAnimation(u8"RunLoopF0", true);
+		}
+		// 移動方向に向く
+		_owner->RotationMovement(elapsedTime);
+	}
+	else
+	{
+		if (_owner->GetAnimator()->IsPartialAnimationPlaying())
+			_owner->GetAnimator()->StopPartialAnimation();
+	}
+
+	// 回避移行
+	if (_owner->GetPlayer()->IsEvade())
+		_owner->GetStateMachine().ChangeState("Evade");
+}
+
+void PlayerNonCombatDrinkState::OnExit()
+{
+	_owner->GetAnimator()->StopPartialAnimation();
+	_owner->GetPlayer()->SetIsAbleToUseItem(true);
+}
+#pragma endregion

@@ -22,6 +22,14 @@ void Animator::Update(float elapsedTime)
     _rootMovement = Vector3::Zero;
     std::vector<ModelResource::Node>&   poseNodes = _model.lock()->GetPoseNodes();
 	std::vector<ModelResource::Node>    oldPoseNodes = poseNodes;
+    // ノードのワールド座標を取得
+	Vector3 oldPosition = Vector3::Zero;
+    if (_useRootMotion && _rootNodeIndex != -1 && _isPlaying && !_isPaused)
+    {
+        ModelResource::Node oldRootNode{};
+        ComputeAnimation(_animationIndex, _rootNodeIndex, _animationTimer, oldRootNode);
+        oldPosition = Vector3::TransformCoord(oldRootNode.position, poseNodes[_rootNodeIndex].parent->worldTransform);
+    }
 
     // アニメーション経過時間更新
     UpdateAnimSeconds(elapsedTime);
@@ -50,6 +58,9 @@ void Animator::Update(float elapsedTime)
 
 		_isBlending = true;
     }
+
+    // 部分アニメーション更新処理
+	UpdatePartialAnimation(elapsedTime);
 
 	// ルートモーション計算
     CalcRootMotion(elapsedTime, poseNodes);
@@ -527,6 +538,114 @@ std::string Animator::GetAnimationName() const
 }
 #pragma endregion
 
+#pragma region 部分アニメーション
+/// 部分アニメーションさせるノードを設定
+void Animator::SetPartialAnimationMask(const std::string& nodeName)
+{
+	if (!_model.lock())
+		return;
+	int nodeIndex = _model.lock()->GetNodeIndex(nodeName);
+	if (nodeIndex == -1)
+		return;
+
+	// 指定ノードとその子ノードをマスクに登録
+	std::function<void(int)> addNodeAndChildren = [&](int index)
+		{
+            _partialMaskIndices.push_back(index);
+			const ModelResource::Node& node = _model.lock()->GetResource()->GetNodes().at(index);
+			for (const auto& child : node.children)
+			{
+				int childIndex = _model.lock()->GetNodeIndex(child->name);
+				if (childIndex != -1)
+				{
+					addNodeAndChildren(childIndex);
+				}
+			}
+		};
+	addNodeAndChildren(nodeIndex);
+}
+/// 部分アニメーションさせるノードを解除
+void Animator::RemovePartialAnimationMask(const std::string& nodeName)
+{
+    if (!_model.lock())
+        return;
+    int nodeIndex = _model.lock()->GetNodeIndex(nodeName);
+    if (nodeIndex == -1)
+        return;
+
+    // 指定ノードとその子ノードをマスクに登録
+    std::function<void(int)> addNodeAndChildren = [&](int index)
+        {
+            auto it = std::find(_partialMaskIndices.begin(), _partialMaskIndices.end(), index);
+            if (it != _partialMaskIndices.end())
+                _partialMaskIndices.erase(it);
+
+            const ModelResource::Node& node = _model.lock()->GetResource()->GetNodes().at(index);
+            for (const auto& child : node.children)
+            {
+                int childIndex = _model.lock()->GetNodeIndex(child->name);
+                if (childIndex != -1)
+                {
+                    addNodeAndChildren(childIndex);
+                }
+            }
+        };
+    addNodeAndChildren(nodeIndex);
+}
+/// 特定のノード以下に別のアニメーションを再生する（部分アニメーション）
+void Animator::PlayPartialAnimation(std::string animationName, bool loop, float blendSeconds)
+{
+    auto modelPtr = _model.lock();
+    if (!modelPtr) return;
+
+    int index = GetAnimationIndex(animationName);
+    if (index == -1) return;
+
+    // 新しいアニメーションの設定
+    _partialAnimationIndex = index;
+    _partialAnimationTimer = 0.0f;
+    _isPartialLoop = loop;
+
+    // ブレンド設定
+    if (blendSeconds > 0.0f)
+    {
+        _partialState = PartialState::FadingIn;
+        _partialBlendDuration = blendSeconds;
+        _partialBlendTimer = 0.0f;
+        _partialWeight = 0.0f;
+    }
+    else
+    {
+        _partialState = PartialState::Active;
+        _partialBlendDuration = 0.0f;
+        _partialBlendTimer = 0.0f;
+        _partialWeight = 1.0f;
+    }
+    _isPartialPlaying = true;
+}
+/// 部分アニメーションを停止する
+void Animator::StopPartialAnimation(float blendSeconds)
+{
+    if (_partialState == PartialState::None) return;
+
+    // ブレンド設定
+    if (blendSeconds > 0.0f)
+    {
+        _partialState = PartialState::FadingOut;
+        _partialBlendDuration = blendSeconds;
+        _partialBlendTimer = 0.0f;
+        // 現在のウェイトから0に向かってフェードアウトさせるため、Weightは維持
+    }
+    else
+    {
+        _partialState = PartialState::None;
+        _partialAnimationIndex = -1;
+        _partialWeight = 0.0f;
+    }
+    _isPartialPlaying = false;
+}
+#pragma endregion
+
 /// ルートモーション計算
 void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node>& poseNodes)
 {
@@ -535,26 +654,50 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
     if (!_isPlaying) return;
     if (_isPaused) return;
 
+    int animationIndex = _animationIndex;
+	float animationTimer = _animationTimer;
+	float animationLength = GetAnimationEndTime();
+	// 部分アニメーション中
+    if (_partialAnimationIndex != -1)
+    {
+        animationIndex = _partialAnimationIndex;
+        animationTimer = _partialAnimationTimer;
+        animationLength = _model.lock()->GetResource()->GetAnimations().at(animationIndex).secondsLength;
+    }
+
     // 現在のルートノード取得
     ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
     // ブレンド中はブレンドしていないルートノードを取得
-    if (_blendTimer < _blendEndTime)
+	// 部分アニメーション中
+    if (_partialAnimationIndex != -1)
     {
-        ModelResource::Node node{};
-        ComputeAnimation(_animationIndex, _rootNodeIndex, _animationTimer, node);
-        // poseNodesの行列を使いたいためpositionのみ取得
-        currentRootNode.position = node.position;
+        if (_partialBlendTimer < _partialBlendDuration)
+        {
+            ModelResource::Node node{};
+            ComputeAnimation(animationIndex, _rootNodeIndex, animationTimer, node);
+            // poseNodesの行列を使いたいためpositionのみ取得
+            currentRootNode.position = node.position;
+        }
+    }
+    else
+    {
+        if (_blendTimer < _blendEndTime)
+        {
+            ModelResource::Node node{};
+            ComputeAnimation(animationIndex, _rootNodeIndex, animationTimer, node);
+            // poseNodesの行列を使いたいためpositionのみ取得
+            currentRootNode.position = node.position;
+        }
     }
     Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
 
     // 前フレームのアニメーションタイマーを取得
-    float oldTimer = _animationTimer - elapsedTime;
+    float oldTimer = animationTimer - elapsedTime;
     if (oldTimer >= 0.0f)
     {
-        ModelResource::Node oldRootNode{};
-        ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
-
         // ノードのワールド座標を取得
+        ModelResource::Node oldRootNode{};
+        ComputeAnimation(animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
         Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
 
         // 移動量取得
@@ -567,7 +710,6 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         // アニメーションがループ再生されているとoldTimerが0.0f未満になるときがある
         // その場合は前フレームの姿勢、アニメーション終了時の姿勢、アニメーション開始時の姿勢、現在時の姿勢を使って
         // 移動量を取得する
-        float animationLength = GetAnimationEndTime();
         oldTimer = animationLength + oldTimer;
         float endTimer = animationLength - FLT_EPSILON;
         float startTimer = 0.0f;
@@ -575,9 +717,9 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         ModelResource::Node oldRootNode{};
         ModelResource::Node endRootNode{};
         ModelResource::Node startRootNode{};
-        ComputeAnimation(_animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
-        ComputeAnimation(_animationIndex, _rootNodeIndex, endTimer, endRootNode);
-        ComputeAnimation(_animationIndex, _rootNodeIndex, startTimer, startRootNode);
+        ComputeAnimation(animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
+        ComputeAnimation(animationIndex, _rootNodeIndex, endTimer, endRootNode);
+        ComputeAnimation(animationIndex, _rootNodeIndex, startTimer, startRootNode);
 
         // ノードのワールド座標を取得
         Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
@@ -593,7 +735,7 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
     // ポーズノードの移動量を取り除く
     poseNodes[_rootNodeIndex].position = {};
     ModelResource::Node startRootNode{};
-    ComputeAnimation(_animationIndex, _rootNodeIndex, 0.0f, startRootNode);
+    ComputeAnimation(animationIndex, _rootNodeIndex, 0.0f, startRootNode);
     // オブジェクトに応じてノードの位置を調整
     switch (_rootMotionOption)
     {
@@ -649,5 +791,98 @@ void Animator::Filtering(std::string filterStr)
         }
 
         index++;
+    }
+}
+
+/// 部分アニメーション更新処理
+void Animator::UpdatePartialAnimation(float elapsedTime)
+{
+    if (_partialState != PartialState::None && _partialAnimationIndex != -1 && !_partialMaskIndices.empty())
+    {
+        // ウェイトの更新
+        if (_partialState == PartialState::FadingIn)
+        {
+            _partialBlendTimer += elapsedTime;
+            if (_partialBlendTimer >= _partialBlendDuration)
+            {
+                _partialBlendTimer = _partialBlendDuration;
+                _partialState = PartialState::Active;
+                _partialWeight = 1.0f;
+            }
+            else
+            {
+                _partialWeight = _partialBlendTimer / _partialBlendDuration;
+            }
+        }
+        else if (_partialState == PartialState::FadingOut)
+        {
+            _partialBlendTimer += elapsedTime;
+            if (_partialBlendTimer >= _partialBlendDuration)
+            {
+                _partialState = PartialState::None; // 終了
+                _partialWeight = 0.0f;
+                _partialAnimationIndex = -1;
+                _isPartialPlaying = false;
+            }
+            else
+            {
+                // 1.0 -> 0.0 へ
+                _partialWeight = 1.0f - (_partialBlendTimer / _partialBlendDuration);
+            }
+        }
+        else // Active
+        {
+            _partialWeight = 1.0f;
+        }
+
+        // ステートがNoneになった瞬間の対策
+        if (_partialState != PartialState::None)
+        {
+            // 部分アニメーションの時刻更新
+            auto modelPtr = _model.lock();
+            const auto& anim = modelPtr->GetResource()->GetAnimations().at(_partialAnimationIndex);
+
+            // カーブ等使わない簡易進行
+            _partialAnimationTimer += _animationSpeed * elapsedTime;
+
+            if (_partialAnimationTimer >= anim.secondsLength)
+            {
+                if (_isPartialLoop)
+                    _partialAnimationTimer = std::fmod(_partialAnimationTimer, anim.secondsLength);
+                else
+                    _partialAnimationTimer = anim.secondsLength;
+            }
+
+            // 部分アニメーションの姿勢計算（一時バッファへ）
+            std::vector<ModelResource::Node>& poseNodes = _model.lock()->GetPoseNodes();
+            static std::vector<ModelResource::Node> tempPartialNodes;
+            if (tempPartialNodes.size() != poseNodes.size())
+                tempPartialNodes.resize(poseNodes.size());
+
+            // 計算（全体を計算してしまうが、実装の容易さを優先）
+            ComputeAnimation(_partialAnimationIndex, _partialAnimationTimer, tempPartialNodes);
+
+            // ブレンド計算（マスクされたノードのみ）
+            for (int index : _partialMaskIndices)
+            {
+                ModelResource::Node& baseNode = poseNodes[index];        // 現在のポーズ（適用先）
+                const ModelResource::Node& partNode = tempPartialNodes[index]; // 部分ポーズ
+
+                // Scale
+                DirectX::XMVECTOR S0 = DirectX::XMLoadFloat3(&baseNode.scale);
+                DirectX::XMVECTOR S1 = DirectX::XMLoadFloat3(&partNode.scale);
+                DirectX::XMStoreFloat3(&baseNode.scale, DirectX::XMVectorLerp(S0, S1, _partialWeight));
+
+                // Rotation
+                DirectX::XMVECTOR R0 = DirectX::XMLoadFloat4(&baseNode.rotation);
+                DirectX::XMVECTOR R1 = DirectX::XMLoadFloat4(&partNode.rotation);
+                DirectX::XMStoreFloat4(&baseNode.rotation, DirectX::XMQuaternionSlerp(R0, R1, _partialWeight));
+
+                // Position
+                DirectX::XMVECTOR P0 = DirectX::XMLoadFloat3(&baseNode.position);
+                DirectX::XMVECTOR P1 = DirectX::XMLoadFloat3(&partNode.position);
+                DirectX::XMStoreFloat3(&baseNode.position, DirectX::XMVectorLerp(P0, P1, _partialWeight));
+            }
+        }
     }
 }

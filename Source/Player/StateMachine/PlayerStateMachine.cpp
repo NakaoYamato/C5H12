@@ -30,6 +30,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
     _stateMachine.RegisterState(std::make_shared<PlayerNonCombatHitKnockDownState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDownState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDeathState>(this));
+	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDrinkState>(this));
 
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordIdleState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordRunState>(this));
@@ -50,6 +51,9 @@ void PlayerStateMachine::Start()
     _animator->SetIsUseRootMotion(false);
     _animator->SetRootNodeIndex("root");
     _animator->SetRootMotionOption(Animator::RootMotionOption::None);
+
+    _animator->SetPartialAnimationMask("root");
+    _animator->RemovePartialAnimationMask("spine_01");
     // 初期ステート設定
     _stateMachine.ChangeState("Idle");
 }

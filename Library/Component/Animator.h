@@ -242,6 +242,39 @@ public:
 	void SetDrawEventDebugGui(bool draw) { _drawEventDebugGui = draw; }
 	void SetDrawAnimationCurveGui(bool draw) { _drawAnimationCurveGui = draw; }
 #pragma endregion
+
+#pragma region 部分アニメーション
+	/// <summary>
+	/// 部分アニメーション再生中か
+	/// </summary>
+	/// <returns></returns>
+	bool IsPartialAnimationPlaying() const { return _isPartialPlaying; }
+	/// <summary>
+	/// 部分アニメーションさせるノードを設定
+	/// </summary>
+	/// <param name="nodeName"></param>
+	void SetPartialAnimationMask(const std::string& nodeName);
+	/// <summary>
+	/// 部分アニメーションさせるノードを解除
+	/// </summary>
+	/// <param name="nodeName"></param>
+	void RemovePartialAnimationMask(const std::string& nodeName);
+
+	/// <summary>
+	/// 特定のノード以下に別のアニメーションを再生する（部分アニメーション）
+	/// </summary>
+	/// <param name="animationName">アニメーション名</param>
+	/// <param name="loop">ループするか</param>
+	/// <param name="blendSeconds">ブレンドにかける時間</param>
+	void PlayPartialAnimation(std::string animationName, bool loop = false, float blendSeconds = 0.2f);
+
+	/// <summary>
+	/// 部分アニメーションを停止する
+	/// </summary>
+	/// <param name="blendSeconds">フェードアウトにかける時間</param>
+	void StopPartialAnimation(float blendSeconds = 0.2f);
+#pragma endregion
+
 private:
     /// <summary>
     /// ルートモーション計算
@@ -255,6 +288,12 @@ private:
 	/// </summary>
 	/// <param name="filterStr">これを含むアニメーションを表示</param>
 	void Filtering(std::string filterStr);
+
+	/// <summary>
+	/// 部分アニメーション更新処理
+	/// </summary>
+	/// <param name="elapsedTime"></param>
+	void UpdatePartialAnimation(float elapsedTime);
 
 private:
 	// アニメーションするモデル
@@ -300,4 +339,30 @@ private:
 	bool	_drawEventDebugGui = false;
 	bool	_drawAnimationCurveGui = false;
 #pragma endregion
+
+#pragma region 部分アニメーション
+	// 部分アニメーションの状態
+	enum class PartialState
+	{
+		None,       // なし
+		FadingIn,   // フェードイン中
+		Active,     // 再生中（ウェイト1.0）
+		FadingOut   // フェードアウト中
+	};
+	// 部分アニメーション制御用パラメーター
+	bool _isPartialPlaying = false;
+	int _partialAnimationIndex = -1;
+	float _partialAnimationTimer = 0.0f;
+	bool _isPartialLoop = false;
+
+	// ブレンド制御
+	PartialState _partialState = PartialState::None;
+	float _partialBlendTimer = 0.0f;    // 現在のブレンド経過時間
+	float _partialBlendDuration = 0.0f; // ブレンドにかかる時間
+	float _partialWeight = 0.0f;        // 現在の適用率 (0.0 ~ 1.0)
+
+	// マスク用インデックス
+	std::vector<int> _partialMaskIndices;
+#pragma endregion
+
 };

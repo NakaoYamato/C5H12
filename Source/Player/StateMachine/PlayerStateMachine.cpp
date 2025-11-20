@@ -76,6 +76,17 @@ void PlayerStateMachine::Execute(float elapsedTime)
 	}
 
     _stateMachine.Update(elapsedTime);
+
+	// 現在のステート名にcombatが含まれているかで戦闘状態を設定
+	std::string stateName = _stateMachine.GetStateName();
+	if (stateName.find("Combat") != std::string::npos)
+	{
+		_player->SetIsDrawingWeapon(true);
+	}
+	else
+	{
+		_player->SetIsDrawingWeapon(false);
+	}
 }
 
 // Gui描画

@@ -78,8 +78,10 @@ public:
 	bool IsSpecialAttack() const { return _isSpecialAttack; }
 	bool IsGuard()	const { return _isGuard; }
 	bool IsDead()	const { return _isDead; }
+	bool IsAbleToUseItem() const { return _isAbleToUseItem; }
 	bool IsUsingItem() const { return _isUsingItem; }
 	bool IsSelect()	const { return _isSelect; }
+	bool IsDrawingWeapon() const { return _isDrawingWeapon; }
 	int GetChargeLevel() const { return _chargeLevel; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
@@ -92,8 +94,10 @@ public:
 	void SetIsSpecialAttack(bool isSpecialAttack) { _isSpecialAttack = isSpecialAttack; }
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
 	void SetIsDead(bool isDead) { _isDead = isDead; }
+	void SetIsAbleToUseItem(bool isAbleToUseItem) { _isAbleToUseItem = isAbleToUseItem; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
 	void SetIsSelect(bool isSelect) { _isSelect = isSelect; }
+	void SetIsDrawingWeapon(bool isDrawingWeapon) { _isDrawingWeapon = isDrawingWeapon; }
 	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
 
     float GetDashRotationFactor() const { return _dashRotationFactor; }
@@ -139,8 +143,14 @@ private:
 	bool _isSpecialAttack = false;
 	bool _isGuard = false;
 	bool _isDead = false;
+	// アイテムを使用可能か
+	bool _isAbleToUseItem = true;
+	// アイテム使用中か
 	bool _isUsingItem = false;
 	bool _isSelect = false;
+
+	// 抜刀状態か
+	bool _isDrawingWeapon = false;
 
 	// 溜め段階
 	int _chargeLevel = 0;

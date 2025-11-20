@@ -281,26 +281,18 @@ void UserDataManager::SetEquippedArmorIndex(ArmorType type, int index)
 
 #pragma region アイテム
 // アイテムを使用する
-bool UserDataManager::UseItem(int pouchIndex, Actor* user)
+ItemFunctionBase* UserDataManager::UseItem(int pouchIndex, Actor* user)
 {
 	auto pouch = GetPouchItem(pouchIndex);
 	if (pouch->itemIndex < 0)
-		return false;
+		return nullptr;
 	auto itemData = GetAcquiredItemData(pouch->itemIndex);
 	if (!itemData || itemData->quantity <= 0)
-		return false;
+		return nullptr;
 
 	auto itemManager = ResourceManager::Instance().GetResourceAs<ItemManager>("ItemManager");
 	if (!itemManager)
-		return false;
-
-	// 関数取得
-	auto itemFunction = itemManager->GetItemFunction(pouch->itemIndex);
-	if (itemFunction)
-	{
-		// 使用処理
-		itemFunction->Execute(itemData->GetBaseData(), user);
-	}
+		return nullptr;
 
 	// 所持数を減らす
 	if (pouch->quantity > 0)
@@ -314,7 +306,15 @@ bool UserDataManager::UseItem(int pouchIndex, Actor* user)
 		}
 	}
 
-	return false;
+	// 関数取得
+	auto itemFunction = itemManager->GetItemFunction(pouch->itemIndex);
+	if (itemFunction)
+	{
+		// 使用処理
+		itemFunction->Start(itemData->GetBaseData(), user);
+	}
+
+	return itemFunction;
 }
 // ポーチの整理
 void UserDataManager::SortPouchItems()

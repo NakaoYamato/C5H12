@@ -2,34 +2,97 @@
 
 #include "../../Source/Common/Damageable.h"
 
-void HealingPotionFunc::Execute(ItemData* item, Actor* user)
+#pragma region 回復薬
+// 開始処理
+void HealingPotionFunc::Start(ItemData* item, Actor* user)
 {
-	if (!item || !user)
-		return;
-	auto damageable = user->GetComponent<Damageable>();
+	ItemFunctionBase::Start(item, user);
+	_timer = 0.0f;
+	// パラメータ取得
+	auto it = _item->parameters.find(u8"回復量");
+	if (it != _item->parameters.end())
+	{
+		_healAmount = std::get<float>(it->second);
+	}
+	it = _item->parameters.find(u8"必要時間");
+	if (it != _item->parameters.end())
+	{
+		_requiredTime = std::get<float>(it->second);
+	}
+}
+
+void HealingPotionFunc::Execute(float elapsedTime)
+{
+	auto damageable = _user->GetComponent<Damageable>();
 	if (!damageable)
 		return;
-	// パラメータ取得
-	float healAmount = 0.0f;
-	float requiredTime = 0.0f;
-	auto it = item->parameters.find("HealAmount");
-	if (it != item->parameters.end())
-	{
-		healAmount = std::get<float>(it->second);
-	}
-	it = item->parameters.find("RequiredTime");
-	if (it != item->parameters.end())
-	{
-		requiredTime = std::get<float>(it->second);
-	}
+
+	_timer += elapsedTime;
+	float amount = _healAmount * (elapsedTime / _requiredTime);
+
 	// 回復処理
-	damageable->Heal(healAmount);
+	damageable->Heal(amount);
+
+	if (_timer >= _requiredTime)
+	{
+		_state = State::End;
+	}
 }
 
 ItemData::ParameterMap HealingPotionFunc::GetParameterKeys()
 {
 	ItemData::ParameterMap p;
-	p["HealAmount"] = 0.0f;
-	p["RequiredTime"] = 0.0f;
+	p[u8"回復量"] = 0.0f;
+	p[u8"必要時間"] = 0.0f;
 	return p;
 }
+#pragma endregion
+
+#pragma region 強化薬
+// 開始処理
+void StrengthPotionFunc::Start(ItemData* item, Actor* user)
+{
+	ItemFunctionBase::Start(item, user);
+	_timer = 0.0f;
+	// パラメータ取得
+	auto it = _item->parameters.find("効果量");
+	if (it != _item->parameters.end())
+	{
+		_strengthAmount = std::get<float>(it->second);
+	}
+	it = _item->parameters.find("必要時間");
+	if (it != _item->parameters.end())
+	{
+		_requiredTime = std::get<float>(it->second);
+	}
+	it = _item->parameters.find("効果");
+	if (it != _item->parameters.end())
+	{
+		_strengthType = static_cast<StrengthType>(std::get<int>(it->second));
+	}
+	it = _item->parameters.find("効果時間");
+	if (it != _item->parameters.end())
+	{
+		_effectTime = std::get<float>(it->second);
+	}
+}
+// 効果発動
+void StrengthPotionFunc::Execute(float elapsedTime)
+{
+	_timer += elapsedTime;
+	if (_timer >= _requiredTime)
+	{
+		_state = State::End;
+	}
+}
+// パラメータマップ取得
+ItemData::ParameterMap StrengthPotionFunc::GetParameterKeys()
+{
+	ItemData::ParameterMap p;
+	p[u8"効果"] = 0;
+	p[u8"効果量"] = 0.0f;
+	p[u8"必要時間"] = 0.0f;
+	p[u8"効果時間"] = 0.0f;
+	return p;
+}
+#pragma endregion

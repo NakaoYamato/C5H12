@@ -174,14 +174,15 @@ void PlayerController::Update(float elapsedTime)
 	}
 
 	// アイテム使用
-	if (IsUsingItem())
+	if (!IsDrawingWeapon() && IsAbleToUseItem() && IsUsingItem())
 	{
 		auto playerItemController = _playerItemController.lock();
 		if (playerItemController)
 		{
-			playerItemController->Use();
-			SetIsUsingItem(false);
+			if (playerItemController->Use())
+				SetIsAbleToUseItem(false);
 		}
+		SetIsUsingItem(false);
 	}
 }
 

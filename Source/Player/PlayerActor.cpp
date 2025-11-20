@@ -164,7 +164,7 @@ void PlayerActor::OnCreate()
 			true));
 	}
 
-	damageable->SetMaxHealth(10.0f);
+	damageable->SetMaxHealth(100.0f);
 	damageSender->SetHitEffectIndex(PlayerController::EffectType::HitEffect);
     staminaController->SetStaminaRecoverSpeed(10.0f);
 	// ‘€ì‘ÎÛ‚Å‚È‚¯‚ê‚ÎUŒ‚—Í‚Ì”{—¦‚ð0‚É‚µ‚Äƒ_ƒ[ƒW‚ð—^‚¦‚ç‚ê‚È‚¢‚æ‚¤‚É‚·‚é

@@ -75,7 +75,7 @@ public:
 
 #pragma region アイテム
 	// アイテムを使用する
-	bool UseItem(int pouchIndex, Actor* user);
+	ItemFunctionBase* UseItem(int pouchIndex, Actor* user);
 	// ポーチの整理
 	void SortPouchItems();
 

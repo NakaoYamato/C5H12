@@ -4,6 +4,7 @@
 
 #include "../../Source/User/UserDataManager.h"
 #include "../../Source/Armor/ArmorActor.h"
+#include "../../Source/Common/Damageable.h"
 
 class PlayerArmorController : public Component
 {
@@ -38,4 +39,5 @@ private:
 	std::weak_ptr<ArmorActor> _armorActors[static_cast<int>(ArmorType::Leg) + 1];
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
+	std::weak_ptr<Damageable> _damageable;
 };

@@ -42,6 +42,10 @@ public:
 	float GetLastDamage() const { return _lastDamage; }
 	// 総ダメージ量取得
 	float GetTotalDamage() const { return _totalDamage; }
+	// 防御力取得
+	float GetDefense() const { return _defense; }
+	// 防御倍率取得
+	float GetDefenseFactor() const { return _defenseFactor; }
 	// 最後にダメージを与えてきたアクター取得
     std::shared_ptr<Actor> GetLastDamageActor() const { return _lastDamageActor.lock(); }
 
@@ -59,6 +63,10 @@ public:
 	void SetOnDamageCallback(std::function<void(float, Vector3)> callback) { _onDamageCallback = callback; }
 	// 最後にダメージを与えてきたアクターを設定
     void SetLastDamageActor(std::shared_ptr<Actor> actor) { _lastDamageActor = actor; }
+	// 防御力を設定
+	void SetDefense(float defense) { _defense = defense; }
+	// 防御倍率を設定
+	void SetDefenseFactor(float factor) { _defenseFactor = factor; }
 #pragma endregion
 
 protected:
@@ -76,6 +84,10 @@ protected:
 	float _lastDamage = 0.0f;
 	// 総ダメージ量
 	float _totalDamage = 0.0f;
+	// 防御力
+	float _defense = 0.0f;
+	// 防御倍率
+	float _defenseFactor = 1.0f;
 
 	// ダメージを受ける判定のコールバック関数
 	std::function<bool(float, Vector3)> _takeableDamageCallback;

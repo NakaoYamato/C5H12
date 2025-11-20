@@ -1,5 +1,6 @@
 #include "PlayerItemController.h"
 
+#include "PlayerController.h"
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/InGame/InGameCanvasActor.h"
 #include <imgui.h>
@@ -18,6 +19,7 @@ void PlayerItemController::Start()
 			break;
 		}
 	}
+	_playerController = GetActor()->GetComponent<PlayerController>();
 	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
 }
 
@@ -29,6 +31,24 @@ void PlayerItemController::Update(float elapsedTime)
 		return;
 
 	itemUIController->SetCurrentIndex(_currentIndex);
+
+	if (_function)
+	{
+		switch (_function->GetState())
+		{
+		case ItemFunctionBase::State::Execute:
+			_function->Execute(elapsedTime);
+			break;
+		case ItemFunctionBase::State::End:
+			_function->End();
+			_function = nullptr;
+			if (auto playerController = _playerController.lock())
+			{
+				playerController->SetIsAbleToUseItem(true);
+			}
+			break;
+		}
+	}
 }
 
 // GUI•`‰æ
@@ -55,12 +75,14 @@ void PlayerItemController::Close()
 }
 
 // Žg‚¤
-void PlayerItemController::Use()
+bool PlayerItemController::Use()
 {
 	auto userDataManager = _userDataManager.lock();
 	if (!userDataManager)
-		return;
-	userDataManager->UseItem(_currentIndex, GetActor().get());
+		return false;
+	_function = userDataManager->UseItem(_currentIndex, GetActor().get());
+
+	return _function != nullptr;
 }
 
 bool PlayerItemController::IsClosed() const

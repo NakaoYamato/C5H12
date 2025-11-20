@@ -8,12 +8,31 @@
 // ¶¬ˆ—
 void PlayerArmorController::OnCreate()
 {
+	_damageable = GetActor()->GetComponent<Damageable>();
 	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
 }
 
 // XVˆ—
 void PlayerArmorController::Update(float elapsedTime)
 {
+	auto userDataManager = _userDataManager.lock();
+	if (!userDataManager)
+		return;
+
+	// –hŒä—Í‚ğİ’è
+	float totalDefense = 0.0f;
+	for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
+	{
+		UserDataManager::ArmorUserData* userData = userDataManager->GetEquippedArmorData(static_cast<ArmorType>(i));
+		if (userData)
+		{
+			totalDefense += userData->GetBaseData()->defense;
+		}
+	}
+	if (auto damageable = _damageable.lock())
+	{
+		damageable->SetDefense(totalDefense);
+	}
 }
 
 // GUI•`‰æ

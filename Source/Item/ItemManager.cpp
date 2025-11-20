@@ -24,6 +24,7 @@ bool ItemManager::Initialize()
 
 	// アイテム効果処理リスト初期化
 	_itemFunctionList.push_back(std::make_unique<HealingPotionFunc>());
+	_itemFunctionList.push_back(std::make_unique<StrengthPotionFunc>());
 
 	return true;
 }

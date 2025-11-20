@@ -1,8 +1,10 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
-
 #include "../../Source/InGame/UI/Item/ItemUIController.h"
+
+// ‘O•ûéŒ¾
+class PlayerController;
 
 class PlayerItemController : public Component
 {
@@ -23,16 +25,17 @@ public:
 	// •Â‚¶‚é
 	void Close();
 	// g‚¤
-	void Use();
+	bool Use();
 
 	bool IsClosed() const;
 	bool IsOpen() const;
 
 	void AddIndex(int addIndex);
 private:
+	std::weak_ptr<PlayerController> _playerController;
 	std::weak_ptr<ItemUIController> _itemUIController;
-
 	std::weak_ptr<UserDataManager> _userDataManager;
+	ItemFunctionBase* _function = nullptr;
 
 	int _currentIndex = 0;
 };

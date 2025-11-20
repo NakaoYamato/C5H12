@@ -25,9 +25,18 @@ void Damageable::DrawGui()
 	ImGui::Text(u8"無敵状態 : %s", _invisibleTimer > 0.0f ? u8"True" : u8"False");
 	ImGui::Text(u8"前フレームに受けたダメージ量 : %f", _lastDamage);
 	ImGui::Text(u8"総ダメージ量 : %f", _totalDamage);
+	ImGui::Text(u8"防御力 : %f", _defense);
+	ImGui::Text(u8"防御倍率 : %f", _defenseFactor);
+	ImGui::Separator();
+
 	if (ImGui::Button(u8"10ダメージを与える"))
 	{
-		AddDamage(1.0f, Vector3::Zero);
+		AddDamage(10.0f, Vector3::Zero);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button(u8"HPの半分ダメージを与える"))
+	{
+		AddDamage(_health / 2.0f, Vector3::Zero);
 	}
 	if (ImGui::Button(u8"体力全回復"))
 	{
@@ -54,6 +63,10 @@ bool Damageable::AddDamage(float damage, Vector3 hitPosition, bool networkData)
 		if (_takeableDamageCallback)
 			if (_takeableDamageCallback(damage, hitPosition) == false) return false;
 	}
+
+	// ダメージ計算
+	float def = 80.0f / (80.0f + _defense * _defenseFactor);
+	damage = damage * def;
 
 	_health -= damage;
 	_hitPosition = hitPosition;

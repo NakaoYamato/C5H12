@@ -353,6 +353,7 @@
     <ClCompile Include="Source\Item\ItemManager.cpp" />
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
     <ClCompile Include="Source\Armor\ArmorActor.cpp" />
+    <ClCompile Include="Source\Player\BuffController.cpp" />
     <ClCompile Include="Source\Player\PlayerArmorController.cpp" />
     <ClCompile Include="Source\Player\PlayerItemController.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
@@ -645,6 +646,7 @@
     <ClInclude Include="Source\Network\NetworkSender.h" />
     <ClInclude Include="Source\Armor\ArmorActor.h" />
     <ClInclude Include="Source\Armor\ArmorData.h" />
+    <ClInclude Include="Source\Player\BuffController.h" />
     <ClInclude Include="Source\Player\PlayerArmorController.h" />
     <ClInclude Include="Source\Player\PlayerItemController.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />

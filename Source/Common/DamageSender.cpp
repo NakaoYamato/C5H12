@@ -1,6 +1,7 @@
 #include "DamageSender.h"
 
 #include "../../Source/Common/Damageable.h"
+#include "../../Library/Scene/Scene.h"
 
 #include <imgui.h>
 
@@ -21,6 +22,43 @@ void DamageSender::Update(float elapsedTime)
 		if (!modelCollider->IsCollAttackEvent())
 			ResetAttackState();
 	}
+
+	// ダメージテキストの表示
+	auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
+	for (auto it = _damageTexts.begin(); it != _damageTexts.end(); )
+	{
+		auto& text = *it;
+
+		// タイマー更新
+		text.timer += elapsedTime;
+		if (text.timer >= _textRemoveTime)
+		{
+			// 期限切れなら削除
+			it = _damageTexts.erase(it);
+			continue;
+		}
+
+		// 位置調整
+		Vector3 textPosition = text.position;
+		textPosition.y += (text.timer * _textRiseSpeed);
+		// 色設定
+		Vector4 textColor = text.isCritical ? _textCriticalColor : _textNormalColor;
+		// 透明度設定
+		textColor.w = 1.0f - (text.timer / _textRemoveTime);
+
+		// テキスト描画
+		textRenderer.Draw3D(
+			FontType::MSGothic,
+			std::to_string(static_cast<int>(text.damageAmount)).c_str(),
+			textPosition,
+			textColor,
+			0.0f,
+			Vector2::Zero,
+			_textScale);
+
+		// 次の要素へ進む
+		++it;
+	}
 }
 
 // GUI描画
@@ -32,6 +70,13 @@ void DamageSender::DrawGui()
 	ImGui::DragFloat(u8"会心倍率", &_criticalFactor, 0.01f, 0.0f, 10.0f);
 	ImGui::DragInt(u8"ヒットエフェクトインデックス", &_hitEffectIndex, 1, -1, 100);
 	ImGui::DragFloat(u8"ヘイト倍率", &_heteFactor, 0.01f, 0.0f, 10.0f);
+	ImGui::Separator();
+
+	ImGui::ColorEdit4(u8"ダメージテキスト通常色", &_textNormalColor.x);
+	ImGui::ColorEdit4(u8"ダメージテキスト会心色", &_textCriticalColor.x);
+	ImGui::DragFloat(u8"ダメージテキスト上昇速度", &_textRiseSpeed, 0.1f, 0.0f, 100.0f);
+	ImGui::DragFloat(u8"ダメージテキスト表示時間", &_textRemoveTime, 0.1f, 0.1f, 10.0f);
+	ImGui::DragFloat2(u8"ダメージテキストスケール", &_textScale.x, 0.1f, 0.1f, 10.0f);
 }
 
 // 接触時処理
@@ -69,6 +114,16 @@ void DamageSender::OnContact(CollisionData& collisionData)
 
 				// 攻撃先情報を保存
 				_attackedTargets[targetName] = collisionData.other;
+
+				if (_drawText)
+				{
+					// ダメージテキスト追加
+					DamageText damageText;
+					damageText.position = collisionData.hitPosition;
+					damageText.damageAmount = _ATK;
+					damageText.isCritical = (_criticalFactor > 1.0f);
+					_damageTexts.push_back(damageText);
+				}
 			}
 		}
 	}

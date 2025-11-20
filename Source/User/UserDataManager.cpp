@@ -307,7 +307,7 @@ ItemFunctionBase* UserDataManager::UseItem(int pouchIndex, Actor* user)
 	}
 
 	// ŠÖ”æ“¾
-	auto itemFunction = itemManager->GetItemFunction(pouch->itemIndex);
+	auto itemFunction = itemManager->GetItemFunction(itemData->GetBaseData()->executeProcessIndex);
 	if (itemFunction)
 	{
 		// g—pˆ—

@@ -14,6 +14,7 @@
 #include "PlayerItemController.h"
 #include "PlayerInput.h"
 #include "PlayerArmorController.h"
+#include "BuffController.h"
 #include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
 #include "UI/PlayerStaminaUIController.h"
@@ -49,6 +50,7 @@ void PlayerActor::OnCreate()
 	auto playerController		= this->AddComponent<PlayerController>();
 	auto armorController		= this->AddComponent<PlayerArmorController>();
 	auto itemController			= this->AddComponent<PlayerItemController>();
+	auto buffController			= this->AddComponent<BuffController>();
 	auto effectController		= this->AddComponent<EffectController>();
 	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(this));
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
@@ -165,6 +167,7 @@ void PlayerActor::OnCreate()
 	}
 
 	damageable->SetMaxHealth(100.0f);
+	damageSender->SetDrawText(true);
 	damageSender->SetHitEffectIndex(PlayerController::EffectType::HitEffect);
     staminaController->SetStaminaRecoverSpeed(10.0f);
 	// ‘€ì‘ÎÛ‚Å‚È‚¯‚ê‚ÎUŒ‚—Í‚Ì”{—¦‚ğ0‚É‚µ‚Äƒ_ƒ[ƒW‚ğ—^‚¦‚ç‚ê‚È‚¢‚æ‚¤‚É‚·‚é

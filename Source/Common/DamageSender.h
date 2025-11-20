@@ -8,6 +8,15 @@
 class DamageSender : public Component
 {
 public:
+	struct DamageText
+	{
+		Vector3 position;
+		float timer = 0.0f;
+		float damageAmount = 0.0f;
+		bool isCritical = false;
+	};
+
+public:
 	DamageSender() {}
 	~DamageSender() override {}
 	// 名前取得
@@ -39,6 +48,8 @@ public:
 	void SetHitEffectIndex(int index) { _hitEffectIndex = index; }
 	// ヘイト倍率のセット
 	void SetHateFactor(float hateFactor) { _heteFactor = hateFactor; }
+	// テキスト描画するかどうか
+	void SetDrawText(bool f) { _drawText = f; }
 
 	// 最終攻撃力の取得
 	float GetATK() const { return _ATK; }
@@ -72,4 +83,12 @@ private:
 	std::weak_ptr<ModelCollider> _modelCollider;
 	// 攻撃先情報
 	std::unordered_map<std::string, Actor*> _attackedTargets;
+	
+	bool _drawText = false;
+	std::vector<DamageText> _damageTexts;
+	Vector4 _textNormalColor = Vector4::Orange;
+	Vector4 _textCriticalColor = Vector4::Red;
+	Vector2 _textScale = Vector2(1.5f, 1.5f);
+	float _textRemoveTime = 1.0f;
+	float _textRiseSpeed = 0.25f;
 };

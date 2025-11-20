@@ -1,6 +1,7 @@
 #include "ItemFunctions.h"
 
 #include "../../Source/Common/Damageable.h"
+#include "../../Source/Player/BuffController.h"
 
 #pragma region 回復薬
 // 開始処理
@@ -55,22 +56,22 @@ void StrengthPotionFunc::Start(ItemData* item, Actor* user)
 	ItemFunctionBase::Start(item, user);
 	_timer = 0.0f;
 	// パラメータ取得
-	auto it = _item->parameters.find("効果量");
+	auto it = _item->parameters.find(u8"効果量");
 	if (it != _item->parameters.end())
 	{
 		_strengthAmount = std::get<float>(it->second);
 	}
-	it = _item->parameters.find("必要時間");
+	it = _item->parameters.find(u8"必要時間");
 	if (it != _item->parameters.end())
 	{
 		_requiredTime = std::get<float>(it->second);
 	}
-	it = _item->parameters.find("効果");
+	it = _item->parameters.find(u8"効果");
 	if (it != _item->parameters.end())
 	{
 		_strengthType = static_cast<StrengthType>(std::get<int>(it->second));
 	}
-	it = _item->parameters.find("効果時間");
+	it = _item->parameters.find(u8"効果時間");
 	if (it != _item->parameters.end())
 	{
 		_effectTime = std::get<float>(it->second);
@@ -82,6 +83,21 @@ void StrengthPotionFunc::Execute(float elapsedTime)
 	_timer += elapsedTime;
 	if (_timer >= _requiredTime)
 	{
+		// 効果付与
+		auto buffController = _user->GetComponent<BuffController>();
+		if (buffController)
+		{
+			switch (_strengthType)
+			{
+			case StrengthType::AttackPower:
+				buffController->AddBuff(BuffController::BuffType::Attack, _effectTime, _strengthAmount);
+				break;
+			case StrengthType::DefensePower:
+				buffController->AddBuff(BuffController::BuffType::Defense, _effectTime, _strengthAmount);
+				break;
+			}
+		}
+
 		_state = State::End;
 	}
 }

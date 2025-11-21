@@ -11,6 +11,8 @@
 #include "../../Source/InGame/UI/Item/ItemUIController.h"
 #include "../../Source/InGame/UI/Item/Slider/ItemSliderController.h"
 
+#include "../../Source/InGame/UI/Operate/OperateUIController.h"
+
 // ¶¬Žžˆ—
 void InGameCanvasActor::OnCreate()
 {
@@ -47,4 +49,9 @@ void InGameCanvasActor::OnCreate()
 		itemSliderActor->SetParent(itemUIActor.get());
 		itemSliderActor->AddComponent<ItemSliderController>();
 	}
+
+	// ‘€ìUI¶¬
+	auto operateUIActor = GetScene()->RegisterActor<UIActor>("OperateUI", ActorTag::UI);
+	operateUIActor->SetParent(this);
+	operateUIActor->AddComponent<OperateUIController>();
 }

@@ -97,14 +97,15 @@ void InputUI::Initialize()
 	SetData(_keybordSprData, KEYBORD_AXIS_RX, 7, 7, 9, 7);
 	SetData(_keybordSprData, KEYBORD_AXIS_RY, 3, 7, 5, 7);
 
-	SetData(_keybordSprData, VK_LBUTTON, 0, 10, 2, 10);
-	SetData(_keybordSprData, VK_MBUTTON, 0, 10, 4, 10);
-	SetData(_keybordSprData, VK_RBUTTON, 0, 10, 3, 10);
+	SetData(_keybordSprData, VK_LBUTTON, 2, 10, 2, 10);
+	SetData(_keybordSprData, VK_MBUTTON, 2, 10, 4, 10);
+	SetData(_keybordSprData, VK_RBUTTON, 2, 10, 3, 10);
 }
 
 // 描画
 void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 {
+	// デバイスインデックス取得関数
 	auto GetDeviceIndex = [](Input::InputType type) -> int
 		{
 			switch (type)
@@ -121,6 +122,7 @@ void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 
 	int currentInputDevice = GetDeviceIndex(Input::Instance().GetCurrentInputDevice());
 	auto& inputActionMap = Input::Instance().GetButtonActionMap();
+	// 描画スプライト、スプライトデータ選択
 	Sprite* spr = nullptr;
 	std::unordered_map<int, SprData>* sprData = nullptr;
 	switch (currentInputDevice)
@@ -137,8 +139,13 @@ void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 		return;
 	}
 
+	// 描画処理
 	for (const auto& drawInfo : _drawInfos)
 	{
+		// アクション名が存在しなければスキップ
+		if (inputActionMap.find(drawInfo.actionName) == inputActionMap.end())
+			continue;
+
 		for (const auto& inputMapInfo : inputActionMap.at(drawInfo.actionName))
 		{
 			if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)

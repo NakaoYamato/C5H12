@@ -337,6 +337,7 @@
     <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.cpp" />
     <ClCompile Include="Source\InGame\UI\Item\ItemUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Item\Slider\ItemSliderController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Operate\OperateUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Item\ItemFunctions.cpp" />
@@ -615,6 +616,7 @@
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.h" />
     <ClInclude Include="Source\InGame\UI\Item\ItemUIController.h" />
     <ClInclude Include="Source\InGame\UI\Item\Slider\ItemSliderController.h" />
+    <ClInclude Include="Source\InGame\UI\Operate\OperateUIController.h" />
     <ClInclude Include="Source\InGame\UI\TimerUIController.h" />
     <ClInclude Include="Source\InGame\InputManager.h" />
     <ClInclude Include="Source\Item\ItemData.h" />

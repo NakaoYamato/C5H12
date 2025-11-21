@@ -112,8 +112,8 @@ void TransparentWallBrush::UpdateNone(
     const DirectX::XMFLOAT4X4& projection = _deformer->GetActor()->GetScene()->GetMainCamera()->GetProjection();
     const DirectX::XMFLOAT4X4& world = _deformer->GetActor()->GetTransform().GetMatrix();
 
-    _clickScreenPoint.x = _INPUT_VALUE("MousePositionX");
-    _clickScreenPoint.y = _INPUT_VALUE("MousePositionY");
+    _clickScreenPoint.x = Input::Instance().GetMouseInput()->GetCurrentCursorPosX();
+    _clickScreenPoint.y = Input::Instance().GetMouseInput()->GetCurrentCursorPosY();
     _intersectState = IntersectState::None;
     // マウス座標から地形との当たり判定
     Vector3 rayStart = Vector3::Unproject(Vector3(_clickScreenPoint.x, _clickScreenPoint.y, 0.0f), screenWidth, screenHeight, view, projection);

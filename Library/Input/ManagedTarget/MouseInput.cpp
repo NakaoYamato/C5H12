@@ -19,10 +19,6 @@ MouseInput::MouseInput(HWND hWnd)
 	_states[VK_XBUTTON1] = FALSE;
 	_states[VK_XBUTTON2] = FALSE;
 
-	_values[MOUSE_POSITION_X] = 0.0f;
-	_values[MOUSE_POSITION_Y] = 0.0f;
-	_values[MOUSE_OLD_POSITION_X] = 0.0f;
-	_values[MOUSE_OLD_POSITION_Y] = 0.0f;
 	_values[MOUSE_WHEEL] = 0.0f;
 	_values[MOUSE_OLD_WHEEL] = 0.0f;
 
@@ -67,13 +63,13 @@ void MouseInput::UpdatePosition()
 
 	// âÊñ ï‚ê≥
 	// ì¸óÕó Ç™Ç†ÇÈèÓïÒÇÃçXêV
-	_values[MOUSE_OLD_POSITION_X] = _values[MOUSE_POSITION_X];
-	_values[MOUSE_OLD_POSITION_Y] = _values[MOUSE_POSITION_Y];
-	_values[MOUSE_POSITION_X] = (float)(_currentClientCursorPos.x / static_cast<float>(viewportW) * static_cast<float>(screenW));
-	_values[MOUSE_POSITION_Y] = (float)(_currentClientCursorPos.y / static_cast<float>(viewportH) * static_cast<float>(screenH));
+	_oldCoursorPosX = _currentCoursorPosX;
+	_oldCoursorPosY = _currentCoursorPosY;
+	_currentCoursorPosX = (float)(_currentClientCursorPos.x / static_cast<float>(viewportW) * static_cast<float>(screenW));
+	_currentCoursorPosY = (float)(_currentClientCursorPos.y / static_cast<float>(viewportH) * static_cast<float>(screenH));
 
-	_values[MOUSE_MOVE_X] = _values[MOUSE_POSITION_X] - _values[MOUSE_OLD_POSITION_X];
-	_values[MOUSE_MOVE_Y] = _values[MOUSE_POSITION_Y] - _values[MOUSE_OLD_POSITION_Y];
+	_values[MOUSE_MOVE_X] = _currentCoursorPosX - _oldCoursorPosX;
+	_values[MOUSE_MOVE_Y] = _currentCoursorPosY - _oldCoursorPosY;
 
 	_values[MOUSE_AXIS_RX] = std::clamp<float>(_values[MOUSE_MOVE_X] / _normalizeFactor, -1.0f, 1.0f);
 	_values[MOUSE_AXIS_RY] = std::clamp<float>(-_values[MOUSE_MOVE_Y] / _normalizeFactor, -1.0f, 1.0f);

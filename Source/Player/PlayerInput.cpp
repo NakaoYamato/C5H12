@@ -62,6 +62,10 @@ void PlayerInput::OnUpdate(float elapsedTime)
 
 		if (playerItemController->IsOpen())
 		{
+			if (_INPUT_TRIGGERD("ItemPrevSlide"))
+				playerItemController->AddIndex(-1);
+			if (_INPUT_TRIGGERD("ItemNextSlide"))
+				playerItemController->AddIndex(+1);
 		}
 	}
 	else

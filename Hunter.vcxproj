@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Library\2D\Canvas.cpp" />
+    <ClCompile Include="Library\2D\InputUI.cpp" />
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
     <ClCompile Include="Library\2D\SpriteResource.cpp" />
@@ -400,6 +401,7 @@
   <ItemGroup>
     <ClInclude Include="Library\2D\Canvas.h" />
     <ClInclude Include="Library\2D\Fade.h" />
+    <ClInclude Include="Library\2D\InputUI.h" />
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
     <ClInclude Include="Library\2D\SpriteResource.h" />

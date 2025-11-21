@@ -33,8 +33,6 @@ Input::Input()
 	_valueActionMap["AxisLY"] = { {InputType::Keyboard,KEYBORD_AXIS_LY}, {InputType::XboxPad,XBOXPAD_AXIS_LY}, {InputType::DirectPad, DIRECTPAD_AXIS_LY} };
 	_valueActionMap["AxisRX"] = { {InputType::Keyboard,KEYBORD_AXIS_RX}, {InputType::XboxPad,XBOXPAD_AXIS_RX}, {InputType::Mouse,MOUSE_AXIS_RX}, {InputType::DirectPad, DIRECTPAD_AXIS_RX} };
 	_valueActionMap["AxisRY"] = { {InputType::Keyboard,KEYBORD_AXIS_RY}, {InputType::XboxPad,XBOXPAD_AXIS_RY}, {InputType::Mouse,MOUSE_AXIS_RY}, {InputType::DirectPad, DIRECTPAD_AXIS_RY} };
-	_valueActionMap["MousePositionX"] = { {InputType::Mouse,MOUSE_POSITION_X} };
-	_valueActionMap["MousePositionY"] = { {InputType::Mouse,MOUSE_POSITION_Y} };
 	_valueActionMap["MouseMoveX"] = { {InputType::Mouse,MOUSE_MOVE_X} };
 	_valueActionMap["MouseMoveY"] = { {InputType::Mouse,MOUSE_MOVE_Y} };
 	_valueActionMap["MouseWheel"] = { {InputType::Mouse,MOUSE_WHEEL} };
@@ -94,8 +92,8 @@ void Input::Update()
 	const std::unordered_map<int, BOOL>* inputStates[] =
 	{
 		_keybordInput.GetStates(),
-		_gamePadInput.GetStates(),
 		_mouseInput->GetStates(),
+		_gamePadInput.GetStates(),
 		_directInput->GetStates(),
 	};
 
@@ -126,8 +124,8 @@ void Input::Update()
 	const std::unordered_map<int, float>* movedParameters[] =
 	{
 		_keybordInput.GetValues(),
-		_gamePadInput.GetValues(),
 		_mouseInput->GetValues(),
+		_gamePadInput.GetValues(),
 		_directInput->GetValues(),
 	};
 

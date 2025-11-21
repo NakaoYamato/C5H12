@@ -43,8 +43,14 @@ void ItemUIController::Update(float elapsedTime)
 {
 	if (_myRectTransform)
 	{
-		if (_state == State::Opening)
+		switch (_state)
 		{
+		case ItemUIController::Closed:
+			// UI表示
+			GetActor()->GetScene()->GetInputUI()->Draw("Use", _INPUT_PRESSED("Use"), _itemUseUIPos, _itemUseUIScale, _itemUseUIColor);
+			GetActor()->GetScene()->GetInputUI()->Draw("ItemSelect", _INPUT_PRESSED("ItemSelect"), _itemSelectUIPos, _itemSelectUIScale, _itemSelectUIColor);
+			break;
+		case ItemUIController::Opening:
 			_stateTimer = _stateTimer + _lerpSpeed * elapsedTime;
 			if (_stateTimer >= 1.0f)
 			{
@@ -58,9 +64,13 @@ void ItemUIController::Update(float elapsedTime)
 				Vector2::Lerp(_closeScale, _openScale, _stateTimer));
 			_iconTransform.SetLocalPosition(
 				Vector2::Lerp(_closeItemPosition, _openItemPosition, _stateTimer));
-		}
-		else if(_state == State::Closing)
-		{
+			break;
+		case ItemUIController::Opened:
+			// UI表示
+			GetActor()->GetScene()->GetInputUI()->Draw("ItemPrevSlide", _INPUT_PRESSED("ItemPrevSlide"), _itemSliderLUIPos, _itemSliderLUIScale, _itemSliderLUIColor);
+			GetActor()->GetScene()->GetInputUI()->Draw("ItemNextSlide", _INPUT_PRESSED("ItemNextSlide"), _itemSliderRUIPos, _itemSliderRUIScale, _itemSliderRUIColor);
+			break;
+		case ItemUIController::Closing:
 			_stateTimer = std::clamp(_stateTimer + _lerpSpeed * elapsedTime, 0.0f, 1.0f);
 			if (_stateTimer >= 1.0f)
 			{
@@ -73,11 +83,12 @@ void ItemUIController::Update(float elapsedTime)
 			_myRectTransform->SetLocalScale(
 				Vector2::Lerp(_openScale, _closeScale, _stateTimer));
 			_iconTransform.SetLocalPosition(
-				Vector2::Lerp(_openItemPosition,  _closeItemPosition, _stateTimer));
+				Vector2::Lerp(_openItemPosition, _closeItemPosition, _stateTimer));
+			break;
 		}
-
 		_iconTransform.UpdateTransform(_myRectTransform);
 		_quantityTransform.UpdateTransform(_myRectTransform);
+
 	}
 }
 
@@ -220,6 +231,26 @@ void ItemUIController::DrawGui()
 	ImGui::Separator();
 
 	ImGui::DragFloat(u8"ステートタイマー", &_stateTimer, 0.01f, 0.0f, 1.0f);
+	ImGui::Separator();
+
+	if (ImGui::TreeNode(u8"入力UI"))
+	{
+		ImGui::DragFloat2(u8"アイテム使用UI位置", &_itemUseUIPos.x, 1.0f);
+		ImGui::DragFloat2(u8"アイテム使用UIスケール", &_itemUseUIScale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"アイテム使用UI色", &_itemUseUIColor.x);
+		ImGui::DragFloat2(u8"アイテム選択UI位置", &_itemSelectUIPos.x, 1.0f);
+		ImGui::DragFloat2(u8"アイテム選択UIスケール", &_itemSelectUIScale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"アイテム選択UI色", &_itemSelectUIColor.x);
+		ImGui::DragFloat2(u8"スライダー左UI位置", &_itemSliderLUIPos.x, 1.0f);
+		ImGui::DragFloat2(u8"スライダー左UIスケール", &_itemSliderLUIScale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"スライダー左UI色", &_itemSliderLUIColor.x);
+		ImGui::DragFloat2(u8"スライダー右UI位置", &_itemSliderRUIPos.x, 1.0f);
+		ImGui::DragFloat2(u8"スライダー右UIスケール", &_itemSliderRUIScale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"スライダー右UI色", &_itemSliderRUIColor.x);
+
+		ImGui::TreePop();
+	}
+
 }
 
 // 開く

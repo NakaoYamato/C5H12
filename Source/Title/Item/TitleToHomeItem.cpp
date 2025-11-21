@@ -14,8 +14,8 @@ TitleToHomeItem::TitleToHomeItem(TitleMediator* titleMediator, const std::string
 void TitleToHomeItem::Update(float elapsedTime)
 {
 	Vector2 mousePos{};
-	mousePos.x = _INPUT_VALUE("MousePositionX");
-	mousePos.y = _INPUT_VALUE("MousePositionY");
+	mousePos.x = Input::Instance().GetMouseInput()->GetCurrentCursorPosX();
+	mousePos.y = Input::Instance().GetMouseInput()->GetCurrentCursorPosY();
 	if (_sprites["StartButton"].IsHit(mousePos))
 	{
 		// スタートボタンにマウスカーソルが当たっている場合、拡大

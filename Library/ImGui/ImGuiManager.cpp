@@ -16,7 +16,6 @@ void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceConte
 	ImGuiIO& id = ImGui::GetIO();
 	(void)id;
 	id.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	id.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	id.ConfigFlags &= ImGuiConfigFlags_NavEnableGamepad;
 	id.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	id.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;

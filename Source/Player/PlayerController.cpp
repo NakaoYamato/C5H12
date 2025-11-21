@@ -182,8 +182,8 @@ void PlayerController::Update(float elapsedTime)
 			if (playerItemController->Use())
 				SetIsAbleToUseItem(false);
 		}
-		SetIsUsingItem(false);
 	}
+	SetIsUsingItem(false);
 }
 
 // 3D•`‰æŒã‚Ì•`‰æˆ—

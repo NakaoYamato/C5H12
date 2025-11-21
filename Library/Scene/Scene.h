@@ -7,6 +7,7 @@
 #include "../../Library/2D/SkyMap.h"
 #include "../../Library/2D/Primitive.h"
 #include "../../Library/2D/Fade.h"
+#include "../../Library/2D/InputUI.h"
 #include "../../Library/Renderer/MeshRenderer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/Renderer/TextRenderer.h"
@@ -144,6 +145,10 @@ public:
 	Fade* GetFade() {
 		return &_fade;
 	}
+	// “ü—ÍUIæ“¾
+	InputUI* GetInputUI() {
+		return &_inputUI;
+	}
 	// ƒJƒƒ‰æ“¾
 	virtual Camera* GetMainCamera() {
 		return &_camera;
@@ -201,6 +206,7 @@ private:
 #pragma endregion
 
 	Fade 							_fade;
+	InputUI							_inputUI;
 	Camera							_camera = {};
 	RenderContext					_renderContext;
 	MeshRenderer					_meshRenderer;

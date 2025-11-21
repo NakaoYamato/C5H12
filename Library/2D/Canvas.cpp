@@ -89,7 +89,7 @@ Canvas::TextureData Canvas::Load(ID3D11Device* device,
 	}
 	else
 	{
-		if (_nextTexPos.x + _textureScale.x > static_cast<float>(_canvasScale.x))
+		if (_nextTexPos.x + _textureScale.x >= static_cast<float>(_canvasScale.x))
 		{
 			_nextTexPos.x = 0.0f;
 			_nextTexPos.y += sprite.GetTextureSize().y;
@@ -134,11 +134,13 @@ void Canvas::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 				device,
 				dc);
 		}
+		ImGui::DragFloat2(u8"次のテクスチャ位置", &_nextTexPos.x, 1.0f, 0.0f, static_cast<float>(_canvasScale.x));
 
 		static float textureSize = 512.0f;
+		float aspectRatio = static_cast<float>(_canvasScale.x) / static_cast<float>(_canvasScale.y);
 		ImGui::DragFloat("TextureSize", &textureSize);
 		ImGui::Image(_canvasBuffer->GetColorSRV().Get(),
-			{ textureSize ,textureSize });
+			{ textureSize ,textureSize / aspectRatio });
 
 		ImGui::TreePop();
 	}

@@ -3,10 +3,6 @@
 #include <Windows.h>
 #include <unordered_map>
 
-static constexpr int MOUSE_POSITION_X = 0x00;
-static constexpr int MOUSE_POSITION_Y = 0x01;
-static constexpr int MOUSE_OLD_POSITION_X = 0x02;
-static constexpr int MOUSE_OLD_POSITION_Y = 0x03;
 static constexpr int MOUSE_WHEEL = 0x04;
 static constexpr int MOUSE_OLD_WHEEL = 0x05;
 
@@ -62,6 +58,11 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	const std::unordered_map<int, float>* GetValues() const { return &_values; }
+
+	float GetCurrentCursorPosX() const { return _currentCoursorPosX; }
+	float GetCurrentCursorPosY() const { return _currentCoursorPosY; }
+	float GetOldCursorPosX() const { return _oldCoursorPosX; }
+	float GetOldCursorPosY() const { return _oldCoursorPosY; }
 private:
 	// マウス入力情報格納
 	// 一覧:https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
@@ -79,4 +80,8 @@ private:
 	// 現在のカーソル位置
 	POINT _currentScreenCursorPos = { 0, 0 };
 	POINT _currentClientCursorPos = { 0, 0 };
+	float _currentCoursorPosX = 0.0f;
+	float _currentCoursorPosY = 0.0f;
+	float _oldCoursorPosX = 0.0f;
+	float _oldCoursorPosY = 0.0f;
 };

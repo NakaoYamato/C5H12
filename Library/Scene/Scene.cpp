@@ -43,6 +43,7 @@ void Scene::Initialize()
     }
 
 	_primitive = std::make_unique<Primitive>(device);
+	_inputUI.Initialize();
     // レンダラー作成
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
@@ -455,6 +456,13 @@ void Scene::Render()
         // 3D描画後の描画処理
         _actorManager.DelayedRender(rc);
 
+        // インプットUI描画
+        dc->OMSetBlendState(renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
+        dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
+        dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        rc.deviceContext->ClearDepthStencilView(rc.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
+        _inputUI.Render(rc, GetTextureRenderer());
+
         // テキスト描画
         _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
 
@@ -533,6 +541,8 @@ void Scene::DrawGui()
 
     if(_skyMap)
         _skyMap->DrawGui();
+
+    _inputUI.DrawGui();
 
     OnDrawGui();
 }

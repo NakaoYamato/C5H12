@@ -32,12 +32,13 @@ private:
 	Input();
 	~Input() {};
 
+public:
 	// 入力情報の判別用
 	enum class InputType
 	{
 		Keyboard,
-		XboxPad,
 		Mouse,
+		XboxPad,
 		DirectPad
 	};
 
@@ -50,6 +51,8 @@ private:
 		int buttonID;
 	};
 
+	// 入力とアクションの対応テーブル
+	using InputActionMap = std::unordered_map<std::string, std::vector<InputMapInfo>>;
 public:
 	/// <summary>
 	/// インプット生成
@@ -113,9 +116,10 @@ public:
 	MouseInput* GetMouseInput() { return _mouseInput.get();	}
 	DirectInput* GetDirectInput() { return _directInput.get(); }
 
+	const InputActionMap& GetButtonActionMap() const { return _buttonActionMap; }
+	const InputActionMap& GetValueActionMap() const { return _valueActionMap; }
+
 private:
-	// 入力とアクションの対応テーブル
-	using InputActionMap = std::unordered_map<std::string, std::vector<InputMapInfo>>;
 	InputActionMap							_buttonActionMap;
 	// 現在の押下状態
 	std::unordered_map<std::string, BOOL>	_currentInput;

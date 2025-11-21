@@ -54,7 +54,7 @@ private:
 	Vector2 _closeScale = Vector2(0.8f, 0.8f);
 	Vector2 _closeItemPosition = Vector2(0.0f, 38.0f);
 	// 開いている時のパラメータ
-	Vector2 _openPosition = Vector2(1700.0f, 930.0f);
+	Vector2 _openPosition = Vector2(1690.0f, 930.0f);
 	Vector2 _openScale = Vector2(1.0f, 1.0f);
 	Vector2 _openItemPosition = Vector2(0.0f, 45.0f);
 	float _lerpSpeed = 15.0f;
@@ -76,4 +76,19 @@ private:
 
 	State _state = State::Closed;
 	float _stateTimer = 0.0f;
+
+	// 入力UI
+	Vector2 _itemUseUIPos = Vector2(1760.0f, 970.0f);
+	Vector2 _itemUseUIScale = Vector2(0.3f, 0.3f);
+	Vector4 _itemUseUIColor = Vector4::Blue;
+	Vector2 _itemSelectUIPos = Vector2(1850.0f, 860.0f);
+	Vector2 _itemSelectUIScale = Vector2(0.5f, 0.5f);
+	Vector4 _itemSelectUIColor = Vector4::Orange;
+	
+	Vector2 _itemSliderLUIPos = Vector2(1500.0f, 980.0f);
+	Vector2 _itemSliderLUIScale = Vector2(0.3f, 0.3f);
+	Vector4 _itemSliderLUIColor = Vector4::Blue;
+	Vector2 _itemSliderRUIPos = Vector2(1860.0f, 980.0f);
+	Vector2 _itemSliderRUIScale = Vector2(0.3f, 0.3f);
+	Vector4 _itemSliderRUIColor = Vector4::Red;
 };

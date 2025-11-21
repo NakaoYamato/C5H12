@@ -4,7 +4,7 @@
 
 class TimerUIController : public Component
 {
-    public:
+public:
     TimerUIController() {}
     ~TimerUIController() override {}
     // –¼‘OŽæ“¾

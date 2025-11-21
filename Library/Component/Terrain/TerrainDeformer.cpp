@@ -155,8 +155,8 @@ void TerrainDeformer::Update(float elapsedTime)
         return;
 
     Vector3 mousePos{};
-    mousePos.x = _INPUT_VALUE("MousePositionX");
-    mousePos.y = _INPUT_VALUE("MousePositionY");
+    mousePos.x = Input::Instance().GetMouseInput()->GetCurrentCursorPosX();
+    mousePos.y = Input::Instance().GetMouseInput()->GetCurrentCursorPosY();
     float screenWidth = Graphics::Instance().GetScreenWidth();
     float screenHeight = Graphics::Instance().GetScreenHeight();
     auto& view = GetActor()->GetScene()->GetMainCamera()->GetView();

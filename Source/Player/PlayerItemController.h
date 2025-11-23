@@ -2,6 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Source/InGame/UI/Item/ItemUIController.h"
+#include "../../Source/InGame/UI/Operate/OperateUIController.h"
 
 // ‘O•ûéŒ¾
 class PlayerController;
@@ -35,6 +36,7 @@ private:
 	std::weak_ptr<PlayerController> _playerController;
 	std::weak_ptr<ItemUIController> _itemUIController;
 	std::weak_ptr<UserDataManager> _userDataManager;
+    std::weak_ptr<OperateUIController> _operateUIController;
 	ItemFunctionBase* _function = nullptr;
 
 	int _currentIndex = 0;

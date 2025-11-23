@@ -1,14 +1,42 @@
 #include "InputUI.h"
 
 #include "../../Library/Algorithm/Converter.h"
+//#include "../../Library/2D/Canvas.h"
+//#include "../../Library/Graphics/Graphics.h"
 
 #include <Xinput.h>
 
 #include <Mygui.h>
 
+//std::unique_ptr<Canvas> g_inputUICanvas = nullptr;
+
+// デバイスインデックス取得関数
+static int GetDeviceIndex(Input::InputType type)
+{
+	switch (type)
+	{
+	case Input::InputType::Keyboard:
+	case Input::InputType::Mouse:
+		return 0;
+	case Input::InputType::XboxPad:
+		return 1;
+	default:
+		return -1;
+	}
+};
+
 // 初期化
 void InputUI::Initialize()
 {
+	//if (!g_inputUICanvas)
+	//{
+	//	g_inputUICanvas = std::make_unique<Canvas>(Graphics::Instance().GetDevice(),
+	//		DirectX::XMUINT2(1280, 1280 * 2));
+ //       g_inputUICanvas->SetFilePath("Data/Texture/UI/Input/KeyboardInputUI.png");
+ //       g_inputUICanvas->Deserialize(Graphics::Instance().GetDevice(),
+ //           Graphics::Instance().GetDeviceContext());
+ //   }
+
 	_gamePadSprite.LoadTexture(L"Data/Texture/UI/Input/XboxInputUI.png", Sprite::CenterCenter);
 	_keybordSprite.LoadTexture(L"Data/Texture/UI/Input/KeyboardInputUI.png", Sprite::CenterCenter);
 
@@ -98,30 +126,20 @@ void InputUI::Initialize()
 	SetData(_keybordSprData, KEYBORD_AXIS_RY, 3, 7, 5, 7);
 
 	SetData(_keybordSprData, VK_LBUTTON, 2, 10, 2, 10);
-	SetData(_keybordSprData, VK_MBUTTON, 2, 10, 4, 10);
-	SetData(_keybordSprData, VK_RBUTTON, 2, 10, 3, 10);
+	SetData(_keybordSprData, VK_MBUTTON, 4, 10, 4, 10);
+	SetData(_keybordSprData, VK_RBUTTON, 3, 10, 3, 10);
+	SetData(_keybordSprData, VK_XBUTTON1, 1, 11, 1, 11);
+	SetData(_keybordSprData, VK_XBUTTON2, 0, 11, 0, 11);
+
+	SetData(_keybordSprData, MOUSE_OLD_WHEEL, 5, 10, 6, 10);
 }
 
 // 描画
 void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 {
-	// デバイスインデックス取得関数
-	auto GetDeviceIndex = [](Input::InputType type) -> int
-		{
-			switch (type)
-			{
-			case Input::InputType::Keyboard:
-			case Input::InputType::Mouse:
-				return 0;
-			case Input::InputType::XboxPad:
-				return 1;
-			default:
-				return -1;
-			}
-		};
-
 	int currentInputDevice = GetDeviceIndex(Input::Instance().GetCurrentInputDevice());
 	auto& inputActionMap = Input::Instance().GetButtonActionMap();
+    auto& valueActionMap = Input::Instance().GetValueActionMap();
 	// 描画スプライト、スプライトデータ選択
 	Sprite* spr = nullptr;
 	std::unordered_map<int, SprData>* sprData = nullptr;
@@ -140,32 +158,42 @@ void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 	}
 
 	// 描画処理
-	for (const auto& drawInfo : _drawInfos)
-	{
-		// アクション名が存在しなければスキップ
-		if (inputActionMap.find(drawInfo.actionName) == inputActionMap.end())
-			continue;
-
-		for (const auto& inputMapInfo : inputActionMap.at(drawInfo.actionName))
+	auto Draw = [&](const std::vector<DrawInfo>& drawInfos, const Input::InputActionMap& actionMap)
 		{
-			if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
+			for (const auto& drawInfo : drawInfos)
 			{
-				spr->GetRectTransform().SetLocalPosition(drawInfo.position);
-				spr->GetRectTransform().SetLocalScale(drawInfo.scale);
-				if (drawInfo.isActive)
-					spr->SetTexPos(sprData->at(inputMapInfo.buttonID).activateTexPos);
-				else
-					spr->SetTexPos(sprData->at(inputMapInfo.buttonID).texPos);
-				spr->SetTexSize(sprData->at(inputMapInfo.buttonID).texSize);
-				spr->SetCenterAlignment(spr->GetCenterAlignment());
-				spr->UpdateTransform();
-				spr->SetColor(drawInfo.color);
-				spr->Render(rc, renderer);
-				break;
+				// アクション名が存在しなければスキップ
+				if (actionMap.find(drawInfo.actionName) == actionMap.end())
+					return;
+				for (const auto& inputMapInfo : actionMap.at(drawInfo.actionName))
+				{
+					if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
+					{
+						// ボタンIDが存在しなければスキップ
+						if (sprData->find(inputMapInfo.buttonID) == sprData->end())
+							continue;
+
+						spr->GetRectTransform().SetLocalPosition(drawInfo.position);
+						spr->GetRectTransform().SetLocalScale(drawInfo.scale);
+						if (drawInfo.isActive)
+							spr->SetTexPos(sprData->at(inputMapInfo.buttonID).activateTexPos);
+						else
+							spr->SetTexPos(sprData->at(inputMapInfo.buttonID).texPos);
+						spr->SetTexSize(sprData->at(inputMapInfo.buttonID).texSize);
+						spr->SetCenterAlignment(spr->GetCenterAlignment());
+						spr->UpdateTransform();
+						spr->SetColor(drawInfo.color);
+						spr->Render(rc, renderer);
+						break;
+					}
+				}
 			}
-		}
-	}
+        };
+    Draw(_drawInfos, inputActionMap);
+    Draw(_drawValueInfos, valueActionMap);
+
 	_drawInfos.clear();
+	_drawValueInfos.clear();
 }
 
 // GUI描画
@@ -187,6 +215,28 @@ void InputUI::DrawGui()
 		{
 			_gamePadSprite.DrawGui();
 		}
+
+		//if (ImGui::Button("add"))
+		//{
+		//	// ダイアログを開く
+		//	std::string filepath;
+		//	std::string currentDirectory;
+		//	Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
+		//	// ファイルを選択したら
+		//	if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+		//	{
+		//		ToWString(filepath);
+		//		g_inputUICanvas->Load(
+		//			Graphics::Instance().GetDevice(),
+		//			Graphics::Instance().GetDeviceContext(),
+		//			ToWString(filepath).c_str(),
+		//			{ 1,1 });
+		//	}
+		//}
+		//g_inputUICanvas->DrawGui(Graphics::Instance().GetDevice(),
+		//	Graphics::Instance().GetDeviceContext());
+		//	_keybordSprite.DrawGui();
+
 		ImGui::End();
 	}
 }
@@ -205,5 +255,47 @@ void InputUI::Draw(
 	info.position = position;
 	info.scale = scale;
 	info.color = color;
-	_drawInfos.push_back(info);
+
+	int currentInputDevice = GetDeviceIndex(Input::Instance().GetCurrentInputDevice());
+	auto& inputActionMap = Input::Instance().GetButtonActionMap();
+	auto& valueActionMap = Input::Instance().GetValueActionMap();
+    // 入力値がどちらに存在するか確認
+	if (inputActionMap.find(actionName) != inputActionMap.end())
+	{
+		for (const auto& inputMapInfo : inputActionMap.at(actionName))
+		{
+			if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
+			{
+				_drawInfos.push_back(info);
+				return;
+			}
+        }
+	}
+	if (valueActionMap.find(actionName) != valueActionMap.end())
+	{
+		for (const auto& inputMapInfo : valueActionMap.at(actionName))
+		{
+			if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
+			{
+				_drawValueInfos.push_back(info);
+				return;
+			}
+        }
+	}
+}
+
+// 描画登録
+void InputUI::DrawValue(
+	const std::string& actionName,
+	float value, 
+	const Vector2& position,
+	const Vector2& scale,
+	const Vector4& color)
+{
+	Draw(
+		actionName,
+		value > 0.0f,
+		position,
+		scale,
+        color);
 }

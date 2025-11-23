@@ -24,6 +24,20 @@ void PlayerGreatSwordIdleState::OnExecute(float elapsedTime)
     // 納刀移行
 	else if (_owner->GetPlayer()->IsUsingItem())
 		_owner->GetStateMachine().ChangeState("ToNonCombat");
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード",
+        { "Guard" });
 }
 #pragma endregion
 
@@ -158,6 +172,20 @@ void PlayerGreatSwordRunState::OnExecute(float elapsedTime)
     // ガード移行
     else if (_owner->GetPlayer()->IsGuard())
         _owner->GetStateMachine().ChangeState("CombatGuard");
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード",
+        { "Guard" });
 }
 void PlayerGreatSwordRunState::OnExit()
 {
@@ -242,6 +270,20 @@ void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
         else if (_owner->GetPlayer()->IsGuard())
             _owner->GetStateMachine().ChangeState("CombatGuard");
     }
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード",
+        { "Guard" });
 }
 void PlayerGreatSwordEvadeState::OnExit()
 {
@@ -412,6 +454,11 @@ namespace Attack1SubState
                         return true;
                     });
             }
+
+            // 操作UI表示
+            _owner->GetOperateUIController()->AddDescription(
+                "タックル",
+                { "Action2" });
         }
         void OnExit() override
         {
@@ -512,6 +559,20 @@ void PlayerGreatSwordAttack1State::OnExecute(float elapsedTime)
         // ガード移行
         else if (_owner->GetPlayer()->IsGuard())
             _nextStateName = "CombatGuard";
+
+        // 操作UI表示
+        _owner->GetOperateUIController()->AddDescription(
+            "溜め斬り",
+            { "Action1" });
+        _owner->GetOperateUIController()->AddDescription(
+            "薙ぎ払い",
+            { "Action2" });
+        _owner->GetOperateUIController()->AddDescription(
+            "回避",
+            { "Evade" });
+        _owner->GetOperateUIController()->AddDescription(
+            "ガード",
+            { "Guard" });
     }
 
     // 攻撃キャンセル判定
@@ -608,6 +669,14 @@ namespace Attack2SubState
                 _owner->GetStateMachine().ChangeState("CombatAttack1");
                 _owner->GetStateMachine().ChangeSubState(_branchSubStateName);
             }
+
+            // 操作UI表示
+            _owner->GetOperateUIController()->AddDescription(
+                "溜め斬り",
+                { "Action1" });
+            _owner->GetOperateUIController()->AddDescription(
+                "薙ぎ払い",
+                { "Action2" });
         }
     };
 }
@@ -853,6 +922,20 @@ void PlayerGreatSwordGuardState::OnExecute(float elapsedTime)
     // 回避移行
     else if (_owner->GetPlayer()->IsEvade())
         _owner->GetStateMachine().ChangeState("CombatEvade");
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード解除",
+        { "Guard" });
 }
 void PlayerGreatSwordGuardState::OnExit()
 {
@@ -915,6 +998,20 @@ void PlayerGreatSwordHitState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!_owner->GetAnimator()->IsPlayAnimation())
         _owner->GetStateMachine().ChangeState("CombatIdle");
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード",
+        { "Guard" });
 }
 
 void PlayerGreatSwordHitState::OnExit()
@@ -979,6 +1076,20 @@ void PlayerGreatSwordHitKnockDownState::OnExecute(float elapsedTime)
     // アニメーションが終了していたら遷移
     if (!_owner->GetAnimator()->IsPlayAnimation())
         _owner->GetStateMachine().ChangeState("CombatIdle");
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード",
+        { "Guard" });
 }
 
 void PlayerGreatSwordHitKnockDownState::OnExit()
@@ -1087,6 +1198,20 @@ void PlayerGreatSwordDownState::OnEnter()
     {
         charactorController->SetIsPushable(false);
     }
+
+    // 操作UI表示
+    _owner->GetOperateUIController()->AddDescription(
+        "溜め斬り",
+        { "Action1" });
+    _owner->GetOperateUIController()->AddDescription(
+        "薙ぎ払い",
+        { "Action2" });
+    _owner->GetOperateUIController()->AddDescription(
+        "回避",
+        { "Evade" });
+    _owner->GetOperateUIController()->AddDescription(
+        "ガード",
+        { "Guard" });
 }
 
 void PlayerGreatSwordDownState::OnExit()

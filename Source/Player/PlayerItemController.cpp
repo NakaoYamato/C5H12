@@ -8,7 +8,7 @@
 // 開始処理
 void PlayerItemController::Start()
 {
-	// アイテムUIコントローラー取得
+	// アイテムUI、操作UI取得
 	auto canvasActor = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI);
 	for (auto& child : canvasActor->GetChildren())
 	{
@@ -16,8 +16,14 @@ void PlayerItemController::Start()
 		if (itemUIController)
 		{
 			_itemUIController = itemUIController;
-			break;
+			continue;
 		}
+		auto operateUIController = child->GetComponent<OperateUIController>();
+		if (operateUIController)
+		{
+			_operateUIController = operateUIController;
+			continue;
+        }
 	}
 	_playerController = GetActor()->GetComponent<PlayerController>();
 	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
@@ -29,6 +35,9 @@ void PlayerItemController::Update(float elapsedTime)
 	auto itemUIController = _itemUIController.lock();
 	if (!itemUIController)
 		return;
+    auto operateUIController = _operateUIController.lock();
+    if (!operateUIController)
+        return;
 
 	itemUIController->SetCurrentIndex(_currentIndex);
 
@@ -49,6 +58,21 @@ void PlayerItemController::Update(float elapsedTime)
 			break;
 		}
 	}
+
+    // 操作UIに説明文を追加
+	if (itemUIController->IsOpen())
+	{
+		{
+			if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
+			{
+				std::string description = "アイテム選択";
+				std::vector<std::string> inputActionNames;
+				inputActionNames.push_back("ItemPrevSlide");
+				inputActionNames.push_back("ItemNextSlide");
+				operateUIController->AddDescription(description, inputActionNames);
+			}
+		}
+    }
 }
 
 // GUI描画

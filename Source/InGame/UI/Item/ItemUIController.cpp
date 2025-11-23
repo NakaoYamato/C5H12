@@ -67,8 +67,17 @@ void ItemUIController::Update(float elapsedTime)
 			break;
 		case ItemUIController::Opened:
 			// UI表示
-			GetActor()->GetScene()->GetInputUI()->Draw("ItemPrevSlide", _INPUT_PRESSED("ItemPrevSlide"), _itemSliderLUIPos, _itemSliderLUIScale, _itemSliderLUIColor);
-			GetActor()->GetScene()->GetInputUI()->Draw("ItemNextSlide", _INPUT_PRESSED("ItemNextSlide"), _itemSliderRUIPos, _itemSliderRUIScale, _itemSliderRUIColor);
+			if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
+			{
+				GetActor()->GetScene()->GetInputUI()->Draw("ItemPrevSlide", _INPUT_PRESSED("ItemPrevSlide"), _itemSliderLUIPos, _itemSliderLUIScale, _itemSliderLUIColor);
+				GetActor()->GetScene()->GetInputUI()->Draw("ItemNextSlide", _INPUT_PRESSED("ItemNextSlide"), _itemSliderRUIPos, _itemSliderRUIScale, _itemSliderRUIColor);
+			}
+			else
+			{
+				// マウスホイールの上下を表示
+				GetActor()->GetScene()->GetInputUI()->DrawValue("MouseOldWheel", 0.0f, _itemSliderLUIPos, _itemSliderLUIScale, _itemSliderLUIColor);
+				GetActor()->GetScene()->GetInputUI()->DrawValue("MouseOldWheel", 1.0f, _itemSliderRUIPos, _itemSliderRUIScale, _itemSliderRUIColor);
+            }
 			break;
 		case ItemUIController::Closing:
 			_stateTimer = std::clamp(_stateTimer + _lerpSpeed * elapsedTime, 0.0f, 1.0f);

@@ -8,6 +8,8 @@
 #include "PlayerNonCombatStates.h"
 #include "PlayerGreatSwordStates.h"
 
+#include "../../Source/InGame/InGameCanvasActor.h"
+
 #include <imgui.h>
 
 PlayerStateMachine::PlayerStateMachine(Actor* owner)
@@ -47,6 +49,18 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 // 開始処理
 void PlayerStateMachine::Start()
 {
+    // InGameアクターからOperateUIController取得
+    auto canvasActor = _player->GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI);
+    for (auto& child : canvasActor->GetChildren())
+    {
+        auto operateUIController = child->GetComponent<OperateUIController>();
+        if (operateUIController)
+        {
+            _operateUIController = operateUIController.get();
+            break;
+        }
+    }
+
     // ルートモーション設定
     _animator->SetIsUseRootMotion(false);
     _animator->SetRootNodeIndex("root");

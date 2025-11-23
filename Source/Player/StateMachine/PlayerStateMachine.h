@@ -7,6 +7,7 @@
 
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/StaminaController.h"
+#include "../../Source/InGame/UI/Operate/OperateUIController.h"
 
 // 前方宣言
 class PlayerController;
@@ -36,9 +37,10 @@ public:
 	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
 	PlayerController*	GetPlayer()			{ return _player; }
 	DamageSender*		GetDamageSender()	{ return _damageSender; }
-    StaminaController* GetStaminaController() { return _staminaController; }
+    StaminaController*	GetStaminaController() { return _staminaController; }
 	Animator*			GetAnimator()		{ return _animator; }
 	EffectController*	GetEffect()			{ return _effect; }
+    OperateUIController* GetOperateUIController() { return _operateUIController; }
 	// ステート変更
 	void ChangeState(const char* mainStateName, const char* subStateName) override;
     // ステート名取得
@@ -53,6 +55,7 @@ private:
     StaminaController*					_staminaController = nullptr;
 	Animator*							_animator = nullptr;
 	EffectController*					_effect = nullptr;
+    OperateUIController*				_operateUIController = nullptr;
 };
 
 // プレイヤーのヒエラルキカルステートのベースクラス

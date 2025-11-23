@@ -37,7 +37,7 @@ private:
 
 	Vector2 _descPosition = Vector2(1630.0f, 40.0f);
 	Vector2 _descScale = Vector2(0.8f, 0.8f);
-	Vector2 _descOrigin = Vector2(0.38f, 0.0f);
+	Vector2 _descOrigin = Vector2(0.7f, 0.0f);
 	float _descInterval = 35.0f;
 	float _inputUIInterval = 100.0f;
 	float _orInterval = -15.0f;

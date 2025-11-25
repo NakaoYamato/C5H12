@@ -2,6 +2,8 @@
 
 #include "../../Algorithm/Converter.h"
 
+#include <imgui.h>
+
 /// 初期化処理
 void TextRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc)
 {
@@ -54,6 +56,12 @@ void TextRenderer::Draw(FontType type,
 		scale);
 }
 
+/// テキスト描画
+void TextRenderer::Draw(TextDrawData data)
+{
+	_textDrawDatas.push_back(data);
+}
+
 /// 3Dテキスト描画
 void TextRenderer::Draw3D(FontType type, 
 	const wchar_t* text,
@@ -91,6 +99,12 @@ void TextRenderer::Draw3D(FontType type,
 		rotation,
 		origin,
 		scale);
+}
+
+/// 3Dテキスト描画
+void TextRenderer::Draw3D(Text3DDrawData data)
+{
+	_text3DDrawDatas.push_back(data);
 }
 
 /// 描画実行
@@ -145,4 +159,30 @@ void TextRenderer::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOA
 	// 描画後にクリア
 	_text3DDrawDatas.clear();
 	_spriteBatch->End();
+}
+
+void TextRenderer::TextDrawData::DrawGui(const char* label)
+{
+	if (ImGui::TreeNode(label))
+	{
+		ImGui::DragFloat2(u8"位置",		&position.x, 1.0f);
+		ImGui::ColorEdit4(u8"色",		&color.x);
+		ImGui::DragFloat(u8"回転",		&rotation, 0.1f);
+		ImGui::DragFloat2(u8"原点(0~1)",	&origin.x, 0.1f);
+		ImGui::DragFloat2(u8"スケール",	&scale.x, 0.1f);
+		ImGui::TreePop();
+	}
+}
+
+void TextRenderer::Text3DDrawData::DrawGui(const char* label)
+{
+	if (ImGui::TreeNode(label))
+	{
+		ImGui::DragFloat3(u8"位置",		&position.x, 1.0f);
+		ImGui::ColorEdit4(u8"色",		&color.x);
+		ImGui::DragFloat(u8"回転",		&rotation, 0.1f);
+		ImGui::DragFloat2(u8"原点(0~1)",	&origin.x, 0.1f);
+		ImGui::DragFloat2(u8"スケール",	&scale.x, 0.1f);
+		ImGui::TreePop();
+	}
 }

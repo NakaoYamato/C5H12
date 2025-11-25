@@ -31,6 +31,8 @@ public:
 		float			rotation	= 0.0f;					// 回転量
 		Vector2			origin		= Vector2::Zero;		// 原点位置
 		Vector2			scale		= Vector2::One;			// スケール
+
+		void DrawGui(const char* label);
 	};
 	struct Text3DDrawData
 	{
@@ -41,6 +43,8 @@ public:
 		float			rotation	= 0.0f;					// 回転量
 		Vector2			origin		= Vector2::Zero;		// 原点位置
 		Vector2			scale		= Vector2::One;			// スケール
+
+		void DrawGui(const char* label);
 	};
 
 public:
@@ -88,6 +92,12 @@ public:
 		const Vector2& origin	= Vector2::Zero,
 		const Vector2& scale	= Vector2::One);
 	/// <summary>
+	/// テキスト描画
+	/// </summary>
+	/// <param name="data"></param>
+	void Draw(TextDrawData data);
+
+	/// <summary>
 	/// 3Dテキスト描画
 	/// </summary>
 	/// <param name="type"></param>
@@ -121,6 +131,12 @@ public:
 		float rotation			= 0.0f,
 		const Vector2& origin	= Vector2::Zero,
 		const Vector2& scale	= Vector2::One);
+	/// <summary>
+	/// 3Dテキスト描画
+	/// </summary>
+	/// <param name="data"></param>
+	void Draw3D(Text3DDrawData data);
+
 	/// <summary>
 	/// 描画実行
 	/// </summary>

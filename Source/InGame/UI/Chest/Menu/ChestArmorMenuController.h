@@ -3,6 +3,7 @@
 #include "../../Library/Component/SpriteRenderer.h"
 
 #include "../../Source/Player/PlayerArmorController.h"
+#include "../../Library/Scene/Scene.h"
 
 class ChestArmorMenuController : public Component
 {
@@ -86,6 +87,8 @@ private:
 	const std::string FrontSpr = "Front";
 	const std::string BoxBackSpr = "BoxBack";
 
+	const std::string TextBoxSpr = "TextBox";
+
 	// テキストパラメータ
 	Vector2 _textOffset = Vector2(110.0f, -20.0f);
 	Vector2 _textOrigin = Vector2::Zero;
@@ -103,9 +106,15 @@ private:
 	std::unique_ptr<Sprite> _armorFrontSprite;
 
 	Vector2 _armorSprPositionInterval = Vector2(140.0f, 140.0f);
-	int _armorSprColumnNum = 5;
+	int _armorSprColumnNum = 4;
 	int _armorSprRowNum = 5;
 
 	int _selectArmorColumnIndex = 0;
 	int _selectArmorRowIndex = 0;
+
+	// 防具説明テキストパラメータ
+	TextRenderer::TextDrawData _nameTextData;
+	TextRenderer::TextDrawData _rarityextData;
+	TextRenderer::TextDrawData _defenseTextData;
+	TextRenderer::TextDrawData _skillTextData;
 };

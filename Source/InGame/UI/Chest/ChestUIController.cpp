@@ -101,6 +101,10 @@ void ChestUIController::Open()
         selectUI->GetActor()->SetIsActive(true);
 		selectUI->ResetIndex();
     }
+    if (auto armorUI = _armorUI.lock())
+    {
+        armorUI->Reset();
+    }
 
 	// ƒvƒŒƒCƒ„[‚ð’T‚·
     auto& players = GetActor()->GetScene()->GetActorManager().FindByTag(ActorTag::Player);

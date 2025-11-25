@@ -1,6 +1,7 @@
 #include "ArmorData.h"
 
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Source/Skill/SkillManager.h"
 
 #include <Mygui.h>
 
@@ -32,21 +33,9 @@ Vector4 ArmorData::GetRarityColor(int rarity)
 // GUI描画
 void ArmorData::DrawGui()
 {
-	// スキル名リスト作成
-	static std::vector<char> SkillNames;
-	if (SkillNames.empty())
-	{
-		size_t skillTypeMax = static_cast<size_t>(SkillType::SkillTypeMax);
-		for (size_t i = 0; i < skillTypeMax; ++i)
-		{
-			std::string typeName = ToString<SkillType>(i);
-			for (char c : typeName)
-			{
-				SkillNames.push_back(c);
-			}
-			SkillNames.push_back('\0');
-		}
-	}
+	auto skillManager = ResourceManager::Instance().GetResourceAs<SkillManager>("SkillManager");
+	if (!skillManager)
+		return;
 
 	ImGui::InputText(u8"名前", &name);
 	ImGui::Text(u8"ファイルパス:");
@@ -97,15 +86,27 @@ void ArmorData::DrawGui()
 	{
 		for (size_t i = 0; i < static_cast<size_t>(SkillType::SkillTypeMax); ++i)
 		{
+			std::string skillName = skillManager->GetSkillData(i)->name;
 			SkillType skillType = static_cast<SkillType>(i);
 			int level = 0;
 			if (skills.find(skillType) != skills.end())
 			{
 				level = skills[skillType];
 			}
-			std::string skillName = ToString<SkillType>(i);
-			ImGui::InputInt((skillName + u8" レベル").c_str(), &level);
-			skills[skillType] = level;
+			if (ImGui::InputInt((skillName + u8" レベル").c_str(), &level))
+			{
+				if (level <= 0)
+				{
+					level = 0;
+					// レベル0以下なら削除
+					skills.erase(skillType);
+				}
+				else
+				{
+					// スキル追加・更新
+					skills[skillType] = level;
+				}
+			}
 		}
 		ImGui::TreePop();
 	}
@@ -128,6 +129,19 @@ void ArmorData::Load(nlohmann::json_abi_v3_12_0::json& json)
 	type = static_cast<ArmorType>(json.value("type", static_cast<int>(type)));
 	defense = json.value("defense", defense);
 	rarity = json.value("rarity", rarity);
+	if (json.contains("skillsSize"))
+	{
+		size_t size = json["skillsSize"].get<std::size_t>();
+		skills.clear();
+		for (size_t j = 0; j < size; ++j)
+		{
+			SkillType skillType = static_cast<SkillType>(j);
+			int level = json.value("skillType" + std::to_string(static_cast<int>(skillType)), 0);
+			if (level <= 0)
+				continue;
+			skills[skillType] = level;
+		}
+	}
 }
 
 // データ出力
@@ -143,4 +157,9 @@ void ArmorData::Save(nlohmann::json_abi_v3_12_0::json& json) const
 	json["type"] = static_cast<int>(type);
 	json["defense"] = defense;
 	json["rarity"] = rarity;
+	json["skillsSize"] = skills.size();
+	for (auto& [skillType, level] : skills)
+	{
+		json["skillType" + std::to_string(static_cast<int>(skillType))] = level;
+	}
 }

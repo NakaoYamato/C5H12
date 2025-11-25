@@ -155,6 +155,7 @@ void ArmorActor::BuildData(ArmorData* data, int index)
 	}
 
 	userDataManager->SetEquippedArmorIndex(_type, index);
+	// TODO
 	userData = _userDataManager.lock()->GetEquippedArmorData(_type);
 
 	_armorIndex = index;

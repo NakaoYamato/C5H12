@@ -84,3 +84,14 @@ SkillData* SkillManager::GetSkillData(size_t index)
 	}
 	return nullptr;
 }
+
+// スキルデータ取得
+SkillData* SkillManager::GetSkillData(SkillType type)
+{
+	auto it = _skillDataMap.find(type);
+	if (it != _skillDataMap.end())
+	{
+		return &it->second;
+	}
+	return nullptr;
+}

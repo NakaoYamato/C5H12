@@ -2,10 +2,25 @@
 
 #include "../../Source/Item/ItemManager.h"
 #include "../../Source/Armor/ArmorManager.h"
+#include "../../Source/Weapon/WeaponManager.h"
 
 class UserDataManager : public ResourceBase
 {
 public:
+	// 武器ユーザーデータ
+	struct WeaponUserData
+	{
+		WeaponType	type = WeaponType::GreatSword;	// 武器の種類
+		int			index = 0;						// 武器データインデックス
+		float		acquisitionTime = 0.0f;			// 武器入手時刻
+		int			level = 1;						// 武器レベル
+		// マネージャーから元データ取得
+		inline WeaponData* GetBaseData() const;
+		// Gui描画
+		inline void DrawGui();
+	};
+
+	// 防具ユーザーデータ
 	struct ArmorUserData
 	{
 		ArmorType	type			= ArmorType::Head;	// 防具の種類
@@ -21,6 +36,7 @@ public:
 		inline void DrawGui();
 	};
 
+	// アイテムユーザーデータ
 	struct ItemUserData
 	{
 		int			index			= 0;	// アイテムデータインデックス
@@ -34,6 +50,7 @@ public:
 	};
 
 	static constexpr int MaxPouchItemCount = 20;
+	// ポーチ内アイテムデータ
 	struct PouchItemData
 	{
 		int			pouchIndex	= 0;	// ポーチ内インデックス
@@ -58,6 +75,24 @@ public:
 	bool SaveToFile() override;
 	// Gui描画
 	void DrawGui() override;
+
+#pragma region 武器
+	// 武器データ取得
+	WeaponUserData* GetAcquiredWeaponData(WeaponType type, int index);
+	// 装備中の武器データ取得
+	WeaponUserData* GetEquippedWeaponData();
+	// 所持している武器データリスト取得
+	std::vector<WeaponUserData>& GetAcquiredWeaponDataList(WeaponType type);
+	// 装備中の武器タイプ取得
+	WeaponType GetEquippedWeaponType() const;
+	// 装備中の武器タイプ変更
+	void SetEquippedWeaponType(WeaponType type);
+	// 装備中の武器インデックス取得
+	int GetEquippedWeaponIndex() const;
+	// 装備中の武器インデックス変更
+	void SetEquippedWeaponIndex(int index);
+#pragma endregion
+
 
 #pragma region 防具
 	// 防具データ取得
@@ -97,6 +132,8 @@ public:
 #pragma endregion
 
 private:
+	// 武器Gui描画
+	void DrawWeaponGui();
 	// 防具Gui描画
 	void DrawAromrGui();
 	// アイテムGui描画
@@ -105,10 +142,17 @@ private:
 private:
 	std::string _filePath = "./Data/Resource/UserData/UserDataManager.json";
 
+	// 所持しているすべての武器
+	std::unordered_map<WeaponType, std::vector<WeaponUserData>> _acquiredWeaponMap;
 	// 所持しているすべての防具
 	std::unordered_map<ArmorType, std::vector<ArmorUserData>> _acquiredArmorMap;
 	// すべてのアイテムの所持状況
 	std::unordered_map<int, ItemUserData> _acquiredItemMap;
+
+	// 装備中の武器タイプ
+	WeaponType _equippedWeaponType = WeaponType::GreatSword;
+	// 装備中の武器インデックス
+	int _equippedWeaponIndex = 0;
 
 	// 装備中の防具インデックス
 	int _equippedArmorIndices[static_cast<int>(ArmorType::Leg) + 1] = { -1, -1, -1, -1, -1 };

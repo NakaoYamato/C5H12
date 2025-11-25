@@ -13,7 +13,7 @@
 #include "../../Source/Common/StaminaController.h"
 #include "PlayerItemController.h"
 #include "PlayerInput.h"
-#include "PlayerArmorController.h"
+#include "PlayerEquipmentController.h"
 #include "BuffController.h"
 #include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
@@ -48,7 +48,7 @@ void PlayerActor::OnCreate()
 	auto animatorCamera			= this->AddComponent<AnimatorCamera>();
 	auto charactorController	= this->AddComponent<CharactorController>();
 	auto playerController		= this->AddComponent<PlayerController>();
-	auto armorController		= this->AddComponent<PlayerArmorController>();
+	auto equipmentController	= this->AddComponent<PlayerEquipmentController>();
 	auto itemController			= this->AddComponent<PlayerItemController>();
 	auto buffController			= this->AddComponent<BuffController>();
 	auto effectController		= this->AddComponent<EffectController>();
@@ -187,6 +187,7 @@ void PlayerActor::OnCreate()
 		const ModelResource::Node* rightHandNode = &(model.lock()->GetPoseNodes().at(model.lock()->GetNodeIndex("weapon_r")));
 		sword->Initialize(this, rightHandNode);
 		_swordActor = sword;
+		equipmentController->SetWeaponActor(sword);
 	}
 
 	// –h‹ï¶¬
@@ -195,45 +196,45 @@ void PlayerActor::OnCreate()
 			GetName() + std::string(u8"Head"), 
 			ActorTag::Player,
 			ArmorType::Head,
-			armorController->GetArmorIndex(ArmorType::Head));
+			equipmentController->GetArmorIndex(ArmorType::Head));
 		head->SetParent(this);
-		armorController->SetArmorActor(ArmorType::Head, head);
+		equipmentController->SetArmorActor(ArmorType::Head, head);
 	}
 	{
 		auto chest = this->_scene->RegisterActor<ArmorActor>(
 			GetName() + std::string(u8"Chest"), 
 			ActorTag::Player, 
 			ArmorType::Chest,
-			armorController->GetArmorIndex(ArmorType::Chest));
+			equipmentController->GetArmorIndex(ArmorType::Chest));
 		chest->SetParent(this);
-		armorController->SetArmorActor(ArmorType::Chest, chest);
+		equipmentController->SetArmorActor(ArmorType::Chest, chest);
 	}
 	{
 		auto arm = this->_scene->RegisterActor<ArmorActor>(
 			GetName() + std::string(u8"Arm"),
 			ActorTag::Player,
 			ArmorType::Arm,
-			armorController->GetArmorIndex(ArmorType::Arm));
+			equipmentController->GetArmorIndex(ArmorType::Arm));
 		arm->SetParent(this);
-		armorController->SetArmorActor(ArmorType::Arm, arm);
+		equipmentController->SetArmorActor(ArmorType::Arm, arm);
 	}
 	{
 		auto Waist = this->_scene->RegisterActor<ArmorActor>(
 			GetName() + std::string(u8"Waist"),
 			ActorTag::Player,
 			ArmorType::Waist,
-			armorController->GetArmorIndex(ArmorType::Waist));
+			equipmentController->GetArmorIndex(ArmorType::Waist));
 		Waist->SetParent(this);
-		armorController->SetArmorActor(ArmorType::Waist, Waist);
+		equipmentController->SetArmorActor(ArmorType::Waist, Waist);
 	}
 	{
 		auto Leg = this->_scene->RegisterActor<ArmorActor>(
 			GetName() + std::string(u8"Leg"), 
 			ActorTag::Player,
 			ArmorType::Leg,
-			armorController->GetArmorIndex(ArmorType::Leg));
+			equipmentController->GetArmorIndex(ArmorType::Leg));
 		Leg->SetParent(this);
-		armorController->SetArmorActor(ArmorType::Leg, Leg);
+		equipmentController->SetArmorActor(ArmorType::Leg, Leg);
 	}
 
 	// ƒJƒƒ‰ì¬

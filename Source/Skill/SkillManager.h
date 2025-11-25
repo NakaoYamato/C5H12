@@ -29,6 +29,8 @@ public:
 	std::unordered_map<SkillType, SkillData>& GetSkillDataMap() { return _skillDataMap; }
 	// スキルデータ取得
 	SkillData* GetSkillData(size_t index);
+	// スキルデータ取得
+	SkillData* GetSkillData(SkillType type);
 
 private:
 	std::string _filePath = "./Data/Resource/SkillManager.json";

@@ -5,11 +5,8 @@
 void PlayerGreatSwordActor::OnCreate()
 {
 	WeaponActor::OnCreate();
-	// モデル読み込み
-	LoadModel(GetModelFilePath());
 
 	// コンポーネント追加
-	auto modelRenderer = AddComponent<ModelRenderer>();
 	_collider = AddCollider<SphereCollider>();
 
 	GetTransform().SetPosition(Vector3(-3.6f, 1.7f, 0.8f));
@@ -31,7 +28,6 @@ void PlayerGreatSwordActor::OnCreate()
 void PlayerGreatSwordActor::OnStart()
 {
 	WeaponActor::OnStart();
-	_modelRenderer = GetComponent<ModelRenderer>();
 	if (GetParent())
 	{
 		_parentModelRenderer = GetParent()->GetComponent<ModelRenderer>();

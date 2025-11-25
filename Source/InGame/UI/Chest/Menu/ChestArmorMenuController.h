@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/SpriteRenderer.h"
 
-#include "../../Source/Player/PlayerArmorController.h"
+#include "../../Source/Player/PlayerEquipmentController.h"
 #include "../../Library/Scene/Scene.h"
 
 class ChestArmorMenuController : public Component
@@ -57,14 +57,14 @@ public:
 	// リセット
 	void Reset();
 
-	void SetPlayerArmorController(const std::shared_ptr<PlayerArmorController>& controller);
+	void SetPlayerEquipmentController(const std::shared_ptr<PlayerEquipmentController>& controller);
 
 	SelectType GetSelectType() const { return _selectType; }
 	State GetState() const { return _state; }
 private:
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
-	// プレイヤー防具コントローラー
-	std::weak_ptr<PlayerArmorController> _playerArmorController;
+	// プレイヤー装備コントローラー
+	std::weak_ptr<PlayerEquipmentController> _PlayerEquipmentController;
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
 
@@ -77,7 +77,10 @@ private:
 	const std::string WaistBackSpr = "WaistBack";
 	const std::string LegBackSpr = "LegBack";
 
-	const std::string WeaponSpr = "Weapon";
+	const std::string WeaponSprs[static_cast<int>(WeaponType::WeaponTypeMax)] =
+	{
+		"GreatSword",
+	};
 	const std::string HeadSpr = "Head";
 	const std::string ChestSpr = "Chest";
 	const std::string ArmSpr = "Arm";
@@ -102,7 +105,8 @@ private:
 	const float BackPositionInterval = 120.0f;
 
 	std::unique_ptr<Sprite> _armorBackSprite;
-	std::unique_ptr<Sprite> _armorSprites[static_cast<int>(SelectType::MaxType)];
+	std::unique_ptr<Sprite> _weaponSprites[static_cast<int>(WeaponType::WeaponTypeMax)];
+	std::unique_ptr<Sprite> _armorSprites[static_cast<int>(ArmorType::Leg) + 1];
 	std::unique_ptr<Sprite> _armorFrontSprite;
 
 	Vector2 _armorSprPositionInterval = Vector2(140.0f, 140.0f);
@@ -117,4 +121,5 @@ private:
 	TextRenderer::TextDrawData _rarityextData;
 	TextRenderer::TextDrawData _defenseTextData;
 	TextRenderer::TextDrawData _skillTextData;
+	float _skillTextIntervalY = 45.0f;
 };

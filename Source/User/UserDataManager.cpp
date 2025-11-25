@@ -5,6 +5,38 @@
 #include <Mygui.h>
 
 // マネージャーから元データ取得
+inline WeaponData* UserDataManager::WeaponUserData::GetBaseData() const
+{
+	auto weaponManager = ResourceManager::Instance().GetResourceAs<WeaponManager>("WeaponManager");
+	if (!weaponManager)
+		return nullptr;
+	return weaponManager->GetWeaponData(type, index);
+}
+
+// Gui描画
+inline void UserDataManager::WeaponUserData::DrawGui()
+{
+	auto weaponManager = ResourceManager::Instance().GetResourceAs<WeaponManager>("WeaponManager");
+	if (!weaponManager)
+		return;
+
+	int maxCount = static_cast<int>(weaponManager->GetWeaponDataList(type).size()) - 1;
+	ImGui::InputInt(u8"参照番号", &index);
+	index = std::clamp(index, 0, maxCount);
+	ImGui::DragFloat(u8"入手時間", &acquisitionTime, 0.1f);
+	ImGui::InputInt(u8"レベル", &level);
+	WeaponData* baseData = GetBaseData();
+	if (baseData)
+	{
+		if (ImGui::TreeNode((std::string("Base") + std::to_string(index)).c_str()))
+		{
+			baseData->DrawGui();
+			ImGui::TreePop();
+		}
+	}
+}
+
+// マネージャーから元データ取得
 inline ArmorData* UserDataManager::ArmorUserData::GetBaseData() const
 {
 	auto armorManager = ResourceManager::Instance().GetResourceAs<ArmorManager>("ArmorManager");
@@ -110,12 +142,37 @@ bool UserDataManager::LoadFromFile()
 	nlohmann::json jsonData;
 	if (Exporter::LoadJsonFile(_filePath, &jsonData))
 	{
+#pragma region 武器データ読み込み
+		_acquiredWeaponMap.clear();
+		for (size_t i = 0; i < static_cast<size_t>(WeaponType::WeaponTypeMax); ++i)
+		{
+			WeaponType type = static_cast<WeaponType>(i);
+			_acquiredWeaponMap[type] = std::vector<WeaponUserData>();
+			std::string typeName = ToString<WeaponType>(static_cast<size_t>(type));
+			if (!jsonData.contains(typeName + "Size"))
+				continue;
+			size_t size = jsonData[typeName + "Size"].get<std::size_t>();
+			for (size_t i = 0; i < size; ++i)
+			{
+				auto& sub = jsonData[typeName + std::to_string(i)];
+				WeaponUserData data;
+				data.type				= type;
+				data.index				= sub.value("index", data.index);
+				data.acquisitionTime	= sub.value("acquisitionTime", data.acquisitionTime);
+				data.level				= sub.value("level", data.level);
+				_acquiredWeaponMap[type].push_back(data);
+			}
+		}
+#pragma endregion
+
+
+#pragma region 防具データ読み込み
 		_acquiredArmorMap.clear();
-		_acquiredArmorMap[ArmorType::Head]	= std::vector<ArmorUserData>();
+		_acquiredArmorMap[ArmorType::Head] = std::vector<ArmorUserData>();
 		_acquiredArmorMap[ArmorType::Chest] = std::vector<ArmorUserData>();
-		_acquiredArmorMap[ArmorType::Arm]	= std::vector<ArmorUserData>();
+		_acquiredArmorMap[ArmorType::Arm] = std::vector<ArmorUserData>();
 		_acquiredArmorMap[ArmorType::Waist] = std::vector<ArmorUserData>();
-		_acquiredArmorMap[ArmorType::Leg]	= std::vector<ArmorUserData>();
+		_acquiredArmorMap[ArmorType::Leg] = std::vector<ArmorUserData>();
 
 		for (auto& [type, dataVec] : _acquiredArmorMap)
 		{
@@ -127,19 +184,21 @@ bool UserDataManager::LoadFromFile()
 			{
 				auto& sub = jsonData[typeName + std::to_string(i)];
 				ArmorUserData data;
-				data.type				= static_cast<ArmorType>(sub.value("type", static_cast<int>(data.type)));
-				data.index				= sub.value("index", data.index);
-				data.acquisitionTime	= sub.value("acquisitionTime", data.acquisitionTime);
-				data.level				= sub.value("level", data.level);
-				data.experience			= sub.value("experience", data.experience);
-				data.color.x			= sub.value("colorX", data.color.x);
-				data.color.y			= sub.value("colorY", data.color.y);
-				data.color.z			= sub.value("colorZ", data.color.z);
-				data.color.w			= sub.value("colorW", data.color.w);
+				data.type = static_cast<ArmorType>(sub.value("type", static_cast<int>(data.type)));
+				data.index = sub.value("index", data.index);
+				data.acquisitionTime = sub.value("acquisitionTime", data.acquisitionTime);
+				data.level = sub.value("level", data.level);
+				data.experience = sub.value("experience", data.experience);
+				data.color.x = sub.value("colorX", data.color.x);
+				data.color.y = sub.value("colorY", data.color.y);
+				data.color.z = sub.value("colorZ", data.color.z);
+				data.color.w = sub.value("colorW", data.color.w);
 				dataVec.push_back(data);
 			}
 		}
+#pragma endregion
 
+#pragma region アイテムデータ読み込み
 		if (!jsonData.contains("AcquiredItemListSize"))
 			return false;
 		int itemListSize = static_cast<int>(jsonData["AcquiredItemListSize"].get<std::size_t>());
@@ -147,9 +206,9 @@ bool UserDataManager::LoadFromFile()
 		{
 			auto& sub = jsonData["AcquiredItemList" + std::to_string(i)];
 			ItemUserData data;
-			data.index				= sub.value("index", data.index);
-			data.quantity			= sub.value("quantity", data.quantity);
-			data.acquisitionTime	= sub.value("acquisitionTime", data.acquisitionTime);
+			data.index = sub.value("index", data.index);
+			data.quantity = sub.value("quantity", data.quantity);
+			data.acquisitionTime = sub.value("acquisitionTime", data.acquisitionTime);
 			_acquiredItemMap[i] = data;
 		}
 		for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
@@ -169,6 +228,7 @@ bool UserDataManager::LoadFromFile()
 			_pouchItems[i].itemIndex = sub.value("itemIndex", -1);
 			_pouchItems[i].quantity = sub.value("quantity", 0);
 		}
+#pragma endregion
 		return true;
 	}
 	return false;
@@ -178,6 +238,22 @@ bool UserDataManager::LoadFromFile()
 bool UserDataManager::SaveToFile()
 {
 	nlohmann::json jsonData;
+#pragma region 武器データ保存
+	for (auto& [type, dataVec] : _acquiredWeaponMap)
+	{
+		std::string typeName = ToString<WeaponType>(static_cast<size_t>(type));
+		jsonData[typeName + "Size"] = dataVec.size();
+		for (size_t i = 0; i < dataVec.size(); ++i)
+		{
+			auto& sub = jsonData[typeName + std::to_string(i)];
+			sub["index"]			= dataVec[i].index;
+			sub["acquisitionTime"]	= dataVec[i].acquisitionTime;
+			sub["level"]			= dataVec[i].level;
+		}
+	}
+#pragma endregion
+
+#pragma region 防具データ保存
 	for (auto& [type, dataVec] : _acquiredArmorMap)
 	{
 		std::string typeName = ToString<ArmorType>(static_cast<size_t>(type));
@@ -196,6 +272,9 @@ bool UserDataManager::SaveToFile()
 			sub["colorW"]			= dataVec[i].color.w;
 		}
 	}
+#pragma endregion
+
+#pragma region アイテムデータ保存
 	jsonData["AcquiredItemListSize"] = _acquiredItemMap.size();
 	for (int i = 0; i < static_cast<int>(_acquiredItemMap.size()); ++i)
 	{
@@ -216,6 +295,7 @@ bool UserDataManager::SaveToFile()
 		sub["itemIndex"]	= _pouchItems[i].itemIndex;
 		sub["quantity"]		= _pouchItems[i].quantity;
 	}
+#pragma endregion
 
 	return Exporter::SaveJsonFile(_filePath, jsonData);
 }
@@ -223,6 +303,12 @@ bool UserDataManager::SaveToFile()
 // Gui描画
 void UserDataManager::DrawGui()
 {
+	if (ImGui::TreeNode(u8"武器GUI"))
+	{
+		// 武器Gui描画
+		DrawWeaponGui();
+		ImGui::TreePop();
+	}
 	if (ImGui::TreeNode(u8"防具GUI"))
 	{
 		// 防具Gui描画
@@ -236,6 +322,58 @@ void UserDataManager::DrawGui()
 		ImGui::TreePop();
 	}
 }
+
+#pragma region 武器
+// 武器データ取得
+UserDataManager::WeaponUserData* UserDataManager::GetAcquiredWeaponData(WeaponType type, int index)
+{
+	auto weaponManager = ResourceManager::Instance().GetResourceAs<WeaponManager>("WeaponManager");
+	if (!weaponManager)
+		return nullptr;
+	// 範囲チェック
+	if (index < 0 || index >= _acquiredWeaponMap[type].size())
+		return nullptr;
+	return &_acquiredWeaponMap[type][index];
+}
+
+// 装備中の武器データ取得
+UserDataManager::WeaponUserData* UserDataManager::GetEquippedWeaponData()
+{
+	return GetAcquiredWeaponData(
+		_equippedWeaponType,
+		_equippedWeaponIndex);
+}
+
+// 所持している武器データリスト取得
+std::vector<UserDataManager::WeaponUserData>& UserDataManager::GetAcquiredWeaponDataList(WeaponType type)
+{
+	return _acquiredWeaponMap[type];
+}
+
+// 装備中の武器タイプ取得
+WeaponType UserDataManager::GetEquippedWeaponType() const
+{
+	return _equippedWeaponType;
+}
+
+// 装備中の武器タイプ変更
+void UserDataManager::SetEquippedWeaponType(WeaponType type)
+{
+	_equippedWeaponType = type;
+}
+
+// 装備中の武器インデックス取得
+int UserDataManager::GetEquippedWeaponIndex() const
+{
+	return _equippedWeaponIndex;
+}
+
+// 装備中の武器インデックス変更
+void UserDataManager::SetEquippedWeaponIndex(int index)
+{
+	_equippedWeaponIndex = index;
+}
+#pragma endregion
 
 #pragma region 防具
 // 防具データ取得
@@ -422,6 +560,52 @@ void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 	_pouchItems[pouchIndex].quantity = 0;
 }
 #pragma endregion
+
+// 武器Gui描画
+void UserDataManager::DrawWeaponGui()
+{
+	auto weaponManager = ResourceManager::Instance().GetResourceAs<WeaponManager>("WeaponManager");
+	if (!weaponManager)
+		return;
+	if (ImGui::TreeNode(u8"所持している武器一覧"))
+	{
+		for (size_t i = 0; i < static_cast<size_t>(WeaponType::WeaponTypeMax); ++i)
+		{
+			WeaponType type = static_cast<WeaponType>(i);
+			if (ImGui::TreeNode(ToString<WeaponType>(i).c_str()))
+			{
+				if (ImGui::Button("Add"))
+				{
+					WeaponUserData data;
+					data.type = static_cast<WeaponType>(i);
+					_acquiredWeaponMap[type].push_back(data);
+				}
+				ImGui::Separator();
+
+				auto& weaponList = _acquiredWeaponMap[type];
+				int index = 0;
+				for (auto& userData : weaponList)
+				{
+					std::string label = ToString<WeaponType>(i) + std::to_string(index);
+					if (ImGui::TreeNode(label.c_str()))
+					{
+						userData.DrawGui();
+						if (ImGui::Button(u8"削除"))
+						{
+							weaponList.erase(weaponList.begin() + index);
+							ImGui::TreePop();
+							break;
+						}
+						ImGui::TreePop();
+					}
+					index++;
+				}
+				ImGui::TreePop();
+			}
+		}
+		ImGui::TreePop();
+	}
+}
 
 // 防具Gui描画
 void UserDataManager::DrawAromrGui()

@@ -6,13 +6,23 @@
 // 生成時処理
 void WeaponActor::OnCreate()
 {
+	// コンポーネント追加
+	_modelRenderer = this->AddComponent<ModelRenderer>();
 	_locusRenderer = this->AddComponent<LocusRenderer>();
 }
 // 開始時処理
 void WeaponActor::OnStart()
 {
+	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
 	// 親のモデルコライダーを取得
 	_ownerModelCollider = GetParent()->GetCollider<ModelCollider>();
+
+	// タイプ設定
+	if (auto userDataManager = _userDataManager.lock())
+	{
+		userDataManager->SetEquippedWeaponType(_weaponType);
+		BuildData(_weaponIndex);
+	}
 }
 // 遅延更新時処理
 void WeaponActor::OnLateUpdate(float elapsedTime)
@@ -80,5 +90,27 @@ void WeaponActor::OnDrawGui()
 		}
 
 		ImGui::EndTabBar();
+	}
+}
+
+// データ構築
+void WeaponActor::BuildData(int index)
+{
+	auto userDataManager = _userDataManager.lock();
+	if (!userDataManager)
+		return;
+
+	userDataManager->SetEquippedWeaponIndex(index);
+	_weaponIndex = index;
+
+	if (auto data = userDataManager->GetEquippedWeaponData())
+	{
+		// モデル読み込み
+		LoadModel(data->GetBaseData()->modelFilePath.c_str());
+	}
+	else
+	{
+		// モデル読み込み
+		LoadModel("");
 	}
 }

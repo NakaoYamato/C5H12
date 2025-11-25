@@ -348,7 +348,7 @@
     <ClCompile Include="Source\Menu\MenuMediator.cpp" />
     <ClCompile Include="Source\Armor\ArmorActor.cpp" />
     <ClCompile Include="Source\Player\BuffController.cpp" />
-    <ClCompile Include="Source\Player\PlayerArmorController.cpp" />
+    <ClCompile Include="Source\Player\PlayerEquipmentController.cpp" />
     <ClCompile Include="Source\Player\PlayerItemController.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
@@ -381,7 +381,7 @@
     <ClCompile Include="Source\Scene\Test\SceneTwoBoneIKDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneLookAtDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernIKDebug.cpp" />
-    <ClCompile Include="Source\Player\Weapon\WeaponActor.cpp" />
+    <ClCompile Include="Source\Weapon\WeaponActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernJudgmentDerived.cpp" />
@@ -402,6 +402,8 @@
     <ClCompile Include="Source\Title\Item\TitleToOnlineItem.cpp" />
     <ClCompile Include="Source\Title\Item\TitleToOnlineSettingItem.cpp" />
     <ClCompile Include="Source\User\UserDataManager.cpp" />
+    <ClCompile Include="Source\Weapon\WeaponData.cpp" />
+    <ClCompile Include="Source\Weapon\WeaponManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\2D\Canvas.h" />
@@ -634,7 +636,7 @@
     <ClInclude Include="Source\Armor\ArmorActor.h" />
     <ClInclude Include="Source\Armor\ArmorData.h" />
     <ClInclude Include="Source\Player\BuffController.h" />
-    <ClInclude Include="Source\Player\PlayerArmorController.h" />
+    <ClInclude Include="Source\Player\PlayerEquipmentController.h" />
     <ClInclude Include="Source\Player\PlayerItemController.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
@@ -667,7 +669,7 @@
     <ClInclude Include="Source\Scene\Test\SceneLookAtDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneTwoBoneIKDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernIKDebug.h" />
-    <ClInclude Include="Source\Player\Weapon\WeaponActor.h" />
+    <ClInclude Include="Source\Weapon\WeaponActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernJudgmentDerived.h" />
@@ -688,6 +690,8 @@
     <ClInclude Include="Source\Title\Item\TitleToOnlineItem.h" />
     <ClInclude Include="Source\Title\Item\TitleToOnlineSettingItem.h" />
     <ClInclude Include="Source\User\UserDataManager.h" />
+    <ClInclude Include="Source\Weapon\WeaponData.h" />
+    <ClInclude Include="Source\Weapon\WeaponManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\CBuffer\B0\SceneCB.hlsli" />

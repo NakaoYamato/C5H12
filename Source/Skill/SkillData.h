@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../Library/Exporter/Exporter.h"
+#include "../../Library/Math/Vector.h"
+
 #include <string>
 
 enum class SkillType
@@ -19,6 +21,7 @@ struct SkillData
 	std::string name = "";				// スキルの名前
 	std::string description = "";		// スキルの説明
 	int			maxLevel = 1;			// スキルの最大レベル
+	Vector4 	color = Vector4::White;	// スキルカラー
 
 	// GUI描画
 	void DrawGui();

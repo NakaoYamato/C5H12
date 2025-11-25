@@ -243,7 +243,7 @@
     <ClCompile Include="Library\Actor\Camera\MainCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\Weapon\WeaponActor.cpp">
+    <ClCompile Include="Source\Weapon\WeaponActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene\Test\SceneCollisionDebug.cpp">
@@ -714,7 +714,7 @@
     <ClCompile Include="Source\Camera\ChangeArmorCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\PlayerArmorController.cpp">
+    <ClCompile Include="Source\Player\PlayerEquipmentController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Item\ItemManager.cpp">
@@ -772,6 +772,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Armor\ArmorEditActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Weapon\WeaponData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Weapon\WeaponManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1010,7 +1016,7 @@
     <ClInclude Include="Library\PostProcess\FXAA\FXAA.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\Weapon\WeaponActor.h">
+    <ClInclude Include="Source\Weapon\WeaponActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Player\PlayerInput.h">
@@ -1565,7 +1571,7 @@
     <ClInclude Include="Source\Camera\ChangeArmorCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\PlayerArmorController.h">
+    <ClInclude Include="Source\Player\PlayerEquipmentController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Item\ItemData.h">
@@ -1626,6 +1632,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Armor\ArmorEditActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Weapon\WeaponData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Weapon\WeaponManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

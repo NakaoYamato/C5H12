@@ -2,13 +2,20 @@
 
 #include "../../Library/Actor/ModelAttach/ModelAttachActor.h"
 
-#include "../../Library/Model/ModelResource.h"
+#include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/LocusRenderer.h"
+
+#include "../../Source/User/UserDataManager.h"
 
 class WeaponActor : public ModelAttachActor
 {
 public:
+	WeaponActor(WeaponType type, int weaponIndex = 0) :
+		_weaponType(type),
+		_weaponIndex(weaponIndex)
+	{
+	}
 	~WeaponActor()override {}
 
 	// 生成時処理
@@ -19,9 +26,18 @@ public:
 	void OnLateUpdate(float elapsedTime) override;
 	// GUI描画時処理
 	void OnDrawGui() override;
+
+	// データ構築
+	void BuildData(int index);
 protected:
+	WeaponType _weaponType = WeaponType::GreatSword;
+	int _weaponIndex = 0;
+
+	std::weak_ptr<ModelRenderer>	_modelRenderer;
 	std::weak_ptr<ModelCollider>	_ownerModelCollider; // 親のモデルコライダー
 	std::weak_ptr<LocusRenderer>	_locusRenderer; // 軌跡レンダラー
+	// ユーザーデータマネージャー
+	std::weak_ptr<UserDataManager> _userDataManager;
 
 	Vector3 _oldPosition = Vector3::Zero; // 前回の位置(ワールド座標)
 	Vector3 _locusRootLocalPosition = Vector3::Zero; // 軌跡のルート位置(ローカル座標)

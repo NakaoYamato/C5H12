@@ -241,11 +241,11 @@ void ChestUIController::UpdateToArmorMenu(float elapsedTime)
         GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, _fadeTime);
         auto armorUI = _armorUI.lock();
         armorUI->GetActor()->SetIsActive(true);
-        // プレイヤーの防具コントローラー設定
+        // プレイヤーの装備コントローラー設定
 		if (auto player = _playerActor.lock())
 		{
-			auto playerArmorController = player->GetComponent<PlayerArmorController>();
-			armorUI->SetPlayerArmorController(playerArmorController);
+			auto playerEquipmentController = player->GetComponent<PlayerEquipmentController>();
+			armorUI->SetPlayerEquipmentController(playerEquipmentController);
 		}
 
         auto chestActor = _chestActor.lock();

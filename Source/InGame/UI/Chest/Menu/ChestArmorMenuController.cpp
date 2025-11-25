@@ -2,6 +2,7 @@
 
 #include "../../Library/Actor/UI/UIActor.h"
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Source/Skill/SkillManager.h"
 
 #include <imgui.h>
 
@@ -22,7 +23,13 @@ void ChestArmorMenuController::Start()
         spriteRenderer->LoadTexture(WaistBackSpr, L"Data/Texture/UI/Chest/ArmorBack.png");
         spriteRenderer->LoadTexture(LegBackSpr, L"Data/Texture/UI/Chest/ArmorBack.png");
 
-        spriteRenderer->LoadTexture(WeaponSpr, L"");
+		for (int i = 0; i < static_cast<int>(WeaponType::WeaponTypeMax); ++i)
+		{
+			std::wstring path = L"Data/Texture/UI/Chest/";
+			path += ToWString(WeaponSprs[i]);
+			path += L".png";
+			spriteRenderer->LoadTexture(WeaponSprs[i], path.c_str());
+		}
         spriteRenderer->LoadTexture(HeadSpr, L"Data/Texture/UI/Chest/ArmorHead.png");
         spriteRenderer->LoadTexture(ChestSpr, L"Data/Texture/UI/Chest/ArmorChest.png");
         spriteRenderer->LoadTexture(ArmSpr, L"Data/Texture/UI/Chest/ArmorArm.png");
@@ -66,7 +73,10 @@ void ChestArmorMenuController::Start()
 				spriteRenderer->GetRectTransform(name).SetLocalScale(Vector2(0.25f, 0.25f));
 				spriteRenderer->GetRectTransform(name).SetLocalPosition(spriteRenderer->GetRectTransform(parent).GetLocalPosition());
 			};
-		InitArmorSpr(WeaponSpr, WeaponBackSpr, SelectType::Weapon);
+		for (int i = 0; i < static_cast<int>(WeaponType::WeaponTypeMax); ++i)
+		{
+			InitArmorSpr(WeaponSprs[i], WeaponBackSpr, SelectType::Weapon);
+		}
 		InitArmorSpr(HeadSpr, HeadBackSpr, SelectType::Head);
 		InitArmorSpr(ChestSpr, ChestBackSpr, SelectType::Chest);
 		InitArmorSpr(ArmSpr, ArmBackSpr, SelectType::Arm);
@@ -79,20 +89,34 @@ void ChestArmorMenuController::Start()
 	_armorBackSprite = std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorBack.png", Sprite::LeftUp);
     _armorSprites[static_cast<int>(SelectType::Weapon)] = 
         std::make_unique<Sprite>(L"", Sprite::LeftUp);
-    _armorSprites[static_cast<int>(SelectType::Head)] =
+
+#pragma region 武器UI
+	_weaponSprites[static_cast<int>(WeaponType::GreatSword)] =
+		std::make_unique<Sprite>(L"Data/Texture/UI/Chest/GreatSword.png", Sprite::LeftUp);
+#pragma endregion
+
+#pragma region 防具UI
+    _armorSprites[static_cast<int>(ArmorType::Head)] =
         std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorHead.png", Sprite::LeftUp);
-    _armorSprites[static_cast<int>(SelectType::Chest)] =
+    _armorSprites[static_cast<int>(ArmorType::Chest)] =
         std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorChest.png", Sprite::LeftUp);
-    _armorSprites[static_cast<int>(SelectType::Arm)] =
+    _armorSprites[static_cast<int>(ArmorType::Arm)] =
         std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorArm.png", Sprite::LeftUp);
-    _armorSprites[static_cast<int>(SelectType::Waist)] =
+    _armorSprites[static_cast<int>(ArmorType::Waist)] =
         std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorWaist.png", Sprite::LeftUp);
-    _armorSprites[static_cast<int>(SelectType::Leg)] =
+    _armorSprites[static_cast<int>(ArmorType::Leg)] =
         std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorLeg.png", Sprite::LeftUp);
+#pragma endregion
+
     _armorFrontSprite = std::make_unique<Sprite>(L"Data/Texture/UI/Chest/ArmorFront.png", Sprite::LeftUp);
 
 	_armorBackSprite->GetRectTransform().SetReflectParentScale(false);
 	_armorBackSprite->GetRectTransform().SetLocalScale(Vector2(0.5f, 0.5f));
+    for (auto& weaponSpr : _weaponSprites)
+    {
+        weaponSpr->GetRectTransform().SetReflectParentScale(false);
+        weaponSpr->GetRectTransform().SetLocalScale(Vector2(0.25f, 0.25f));
+    }
     for (auto& armorSpr : _armorSprites)
     {
 		armorSpr->GetRectTransform().SetReflectParentScale(false);
@@ -119,8 +143,8 @@ void ChestArmorMenuController::Start()
 // 更新処理
 void ChestArmorMenuController::Update(float elapsedTime)
 {
-	auto playerArmorController = _playerArmorController.lock();
-    if (!playerArmorController)
+	auto playerEquipmentController = _PlayerEquipmentController.lock();
+    if (!playerEquipmentController)
         return;
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
@@ -128,6 +152,24 @@ void ChestArmorMenuController::Update(float elapsedTime)
     auto userDataManager = _userDataManager.lock();
     if (!userDataManager)
         return;
+
+    // 装備中の武器のUIをアクティブ化
+    {
+        auto type = userDataManager->GetEquippedWeaponType();
+		auto weaponData = userDataManager->GetEquippedWeaponData();
+		for (int i = 0; i < static_cast<int>(WeaponType::WeaponTypeMax); ++i)
+		{
+            spriteRenderer->SetColor(WeaponSprs[i], weaponData ? WeaponData::GetRarityColor(weaponData->GetBaseData()->rarity) : Vector4::Zero);
+			if (i == static_cast<int>(type))
+			{
+				spriteRenderer->SetColorAlpha(WeaponSprs[i], 1.0f);
+			}
+			else
+			{
+                spriteRenderer->SetColorAlpha(WeaponSprs[i], 0.0f);
+			}
+		}
+    }
 
     // 防具の色を設定
     auto SetColor = [&](const std::string& name, SelectType type)
@@ -151,7 +193,7 @@ void ChestArmorMenuController::Update(float elapsedTime)
                 armorType = ArmorType::Leg;
                 break;
             }
-            int armorIndex = playerArmorController->GetArmorIndex(armorType);
+            int armorIndex = playerEquipmentController->GetArmorIndex(armorType);
             auto armorUserData = userDataManager->GetAcquiredArmorData(armorType, armorIndex);
             if (!armorUserData || !armorUserData->GetBaseData())
             {
@@ -171,83 +213,25 @@ void ChestArmorMenuController::Update(float elapsedTime)
 
     // TODO : 選択中の防具を光らせる
 
-    // 防具説明テキスト描画
-    _nameTextData.text = L"■";
-	_rarityextData.text = L"レア度:";
-    _defenseTextData.text = L"防御力:";
-    switch (_state)
-    {
-    case ChestArmorMenuController::State::SelectArmorType:
-        switch (_selectType)
-        {
-        case ChestArmorMenuController::SelectType::Weapon:  _nameTextData.text += L"なし"; /*後でする*/break;
-        case ChestArmorMenuController::SelectType::Head:
-        case ChestArmorMenuController::SelectType::Chest:
-        case ChestArmorMenuController::SelectType::Arm:
-        case ChestArmorMenuController::SelectType::Waist:
-        case ChestArmorMenuController::SelectType::Leg:
-        {
-            ArmorType type = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
-            int armorIndex = playerArmorController->GetArmorIndex(type);
-            if (armorIndex != -1)
-            {
-                if (auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex)->GetBaseData())
-                {
-                    _nameTextData.text += ToUtf16(armorData->name);
-                    _defenseTextData.text += std::to_wstring(static_cast<int>(armorData->defense));
-                    _rarityextData.text += std::to_wstring(armorData->rarity);
-                }
-            }
-            break;
-        }
-        }
-        break;
-    case ChestArmorMenuController::State::SelectArmor:
-        switch (_selectType)
-        {
-        case ChestArmorMenuController::SelectType::Weapon:  _nameTextData.text += L"なし"; /*後でする*/break;
-        case ChestArmorMenuController::SelectType::Head:
-        case ChestArmorMenuController::SelectType::Chest:
-        case ChestArmorMenuController::SelectType::Arm:
-        case ChestArmorMenuController::SelectType::Waist:
-        case ChestArmorMenuController::SelectType::Leg:
-        {
-            ArmorType type = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
-            // 防具変更
-            int armorIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
-            // 選択中のマスに対応する防具が存在するか確認
-            if (armorIndex < static_cast<int>(userDataManager->GetAcquiredArmorDataList(type).size()))
-            {
-                auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex);
-                _nameTextData.text += ToUtf16(armorData->GetBaseData()->name);
-                _defenseTextData.text += std::to_wstring(static_cast<int>(armorData->GetBaseData()->defense));
-                _rarityextData.text += std::to_wstring(armorData->GetBaseData()->rarity);
-            }
-            break;
-        }
-        }
-        break;
-    }
-    if (!_nameTextData.text.empty())
-    {
-        GetActor()->GetScene()->GetTextRenderer().Draw(_nameTextData);
-		GetActor()->GetScene()->GetTextRenderer().Draw(_rarityextData);
-        GetActor()->GetScene()->GetTextRenderer().Draw(_defenseTextData);
-        GetActor()->GetScene()->GetTextRenderer().Draw(_skillTextData);
-    }
 }
 
 // 3D描画後の描画処理
 void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
 {
+    auto PlayerEquipmentController = _PlayerEquipmentController.lock();
+    if (!PlayerEquipmentController)
+        return;
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
         return;
     auto userDataManager = _userDataManager.lock();
     if (!userDataManager)
         return;
-    auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
+    auto skillManager = ResourceManager::Instance().GetResourceAs<SkillManager>("SkillManager");
+    if (!skillManager)
+        return;
 
+    auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
     auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
 
     // 各背景に描画
@@ -278,49 +262,86 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
 			for (int r = 0; r < _armorSprRowNum; ++r)
 			{
                 int index = r * _armorSprColumnNum + c;
+                Sprite* spr = nullptr;
+
+				UserDataManager::WeaponUserData* weaponUserData = nullptr;
 				UserDataManager::ArmorUserData* armorUserData = nullptr;
                 switch (_selectType)
                 {
                 case ChestArmorMenuController::SelectType::Weapon:
+					weaponUserData = userDataManager->GetAcquiredWeaponData(WeaponType::GreatSword, index);
+					spr = _weaponSprites[static_cast<int>(WeaponType::GreatSword)].get();
                     break;
                 case ChestArmorMenuController::SelectType::Head:
                     armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Head, index);
+					spr = _armorSprites[static_cast<int>(ArmorType::Head)].get();
                     break;
                 case ChestArmorMenuController::SelectType::Chest:
                     armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Chest, index);
+					spr = _armorSprites[static_cast<int>(ArmorType::Chest)].get();
                     break;
                 case ChestArmorMenuController::SelectType::Arm:
                     armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Arm, index);
+					spr = _armorSprites[static_cast<int>(ArmorType::Arm)].get();
                     break;
                 case ChestArmorMenuController::SelectType::Waist:
                     armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Waist, index);
+					spr = _armorSprites[static_cast<int>(ArmorType::Waist)].get();
                     break;
                 case ChestArmorMenuController::SelectType::Leg:
                     armorUserData = userDataManager->GetAcquiredArmorData(ArmorType::Leg, index);
+					spr = _armorSprites[static_cast<int>(ArmorType::Leg)].get();
                     break;
                 }
 
+				// 位置設定
                 Vector2 position{};
                 position.x = _armorSprPositionInterval.x * c;
                 position.y = _armorSprPositionInterval.y * r;
                 _armorBackSprite->GetRectTransform().SetLocalPosition(position);
                 _armorBackSprite->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
 
-                ArmorData* armorData = armorUserData ? armorUserData->GetBaseData() : nullptr;
-                if (armorData)
+                if (_selectType == ChestArmorMenuController::SelectType::Weapon)
                 {
-                    _armorBackSprite->SetColorAlpha(1.0f);
-                    _armorBackSprite->Render(rc, textureRenderer);
+                    // 武器の一覧表示
+					WeaponData* weaponData = weaponUserData ? weaponUserData->GetBaseData() : nullptr;
+                    if (weaponData && spr)
+                    {
+                        _armorBackSprite->SetColorAlpha(1.0f);
+                        _armorBackSprite->Render(rc, textureRenderer);
 
-                    _armorSprites[static_cast<int>(_selectType)]->SetColor(armorData->GetRarityColor(armorData->rarity));
-                    _armorSprites[static_cast<int>(_selectType)]->GetRectTransform().SetLocalPosition(position);
-                    _armorSprites[static_cast<int>(_selectType)]->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
-                    _armorSprites[static_cast<int>(_selectType)]->Render(rc, textureRenderer);
+                        // 防具スプライト描画
+                        spr->SetColor(weaponData->GetRarityColor(weaponData->rarity));
+                        spr->GetRectTransform().SetLocalPosition(position);
+                        spr->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
+                        spr->Render(rc, textureRenderer);
+                    }
+                    else
+                    {
+                        _armorBackSprite->SetColorAlpha(0.5f);
+                        _armorBackSprite->Render(rc, textureRenderer);
+                    }
                 }
                 else
                 {
-                    _armorBackSprite->SetColorAlpha(0.5f);
-                    _armorBackSprite->Render(rc, textureRenderer);
+					// 防具の一覧表示
+                    ArmorData* armorData = armorUserData ? armorUserData->GetBaseData() : nullptr;
+                    if (armorData && spr)
+                    {
+                        _armorBackSprite->SetColorAlpha(1.0f);
+                        _armorBackSprite->Render(rc, textureRenderer);
+
+                        // 防具スプライト描画
+                        spr->SetColor(armorData->GetRarityColor(armorData->rarity));
+                        spr->GetRectTransform().SetLocalPosition(position);
+                        spr->GetRectTransform().UpdateTransform(&spriteRenderer->GetRectTransform(BoxBackSpr));
+                        spr->Render(rc, textureRenderer);
+                    }
+                    else
+                    {
+                        _armorBackSprite->SetColorAlpha(0.5f);
+                        _armorBackSprite->Render(rc, textureRenderer);
+                    }
                 }
 
 			}
@@ -335,6 +356,97 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
             _armorFrontSprite->Render(rc, textureRenderer);
         }
         break;
+    }
+
+    // 防具説明テキスト描画
+    _nameTextData.text = L"■";
+    _rarityextData.text = L"レア度:";
+    _defenseTextData.text = L"防御力:";
+    std::unordered_map<SkillType, int>* skillData = nullptr;
+    switch (_state)
+    {
+    case ChestArmorMenuController::State::SelectArmorType:
+        switch (_selectType)
+        {
+        case ChestArmorMenuController::SelectType::Weapon:  _nameTextData.text += L"なし"; /*後でする*/break;
+        case ChestArmorMenuController::SelectType::Head:
+        case ChestArmorMenuController::SelectType::Chest:
+        case ChestArmorMenuController::SelectType::Arm:
+        case ChestArmorMenuController::SelectType::Waist:
+        case ChestArmorMenuController::SelectType::Leg:
+        {
+            ArmorType type = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
+            int armorIndex = PlayerEquipmentController->GetArmorIndex(type);
+            if (armorIndex != -1)
+            {
+                if (auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex))
+                {
+                    _nameTextData.text += ToUtf16(armorData->GetBaseData()->name);
+                    _defenseTextData.text += std::to_wstring(static_cast<int>(armorData->GetBaseData()->defense));
+                    _rarityextData.text += std::to_wstring(armorData->GetBaseData()->rarity);
+                    skillData = &armorData->GetBaseData()->skills;
+                }
+            }
+            break;
+        }
+        }
+        break;
+    case ChestArmorMenuController::State::SelectArmor:
+        switch (_selectType)
+        {
+        case ChestArmorMenuController::SelectType::Weapon:  _nameTextData.text += L"なし"; /*後でする*/break;
+        case ChestArmorMenuController::SelectType::Head:
+        case ChestArmorMenuController::SelectType::Chest:
+        case ChestArmorMenuController::SelectType::Arm:
+        case ChestArmorMenuController::SelectType::Waist:
+        case ChestArmorMenuController::SelectType::Leg:
+        {
+            ArmorType type = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
+            // 防具変更
+            int armorIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
+            // 選択中のマスに対応する防具が存在するか確認
+            if (armorIndex < static_cast<int>(userDataManager->GetAcquiredArmorDataList(type).size()))
+            {
+                auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex);
+                _nameTextData.text += ToUtf16(armorData->GetBaseData()->name);
+                _defenseTextData.text += std::to_wstring(static_cast<int>(armorData->GetBaseData()->defense));
+                _rarityextData.text += std::to_wstring(armorData->GetBaseData()->rarity);
+                skillData = &armorData->GetBaseData()->skills;
+            }
+            break;
+        }
+        }
+        break;
+    }
+    if (!_nameTextData.text.empty())
+    {
+        textRenderer.Draw(_nameTextData);
+        textRenderer.Draw(_rarityextData);
+        textRenderer.Draw(_defenseTextData);
+        textRenderer.Draw(_skillTextData);
+
+        // スキル表示
+        if (skillData)
+        {
+            float skillTextOffsetY = 55.0f;
+            for (auto& [skillType, level] : *skillData)
+            {
+                if (auto data = skillManager->GetSkillData(skillType))
+                {
+					// レベル0のスキルは表示しない
+					if (level <= 0)
+						continue;
+                    TextRenderer::TextDrawData skillData;
+					skillData.text = L"　";
+                    skillData.text += ToUtf16(data->name) + L":" + std::to_wstring(level);
+                    skillData.position = Vector2(820.0f, 300.0f + skillTextOffsetY);
+                    skillData.scale = Vector2(1.0f, 1.0f);
+                    skillData.color = data->color;
+                    textRenderer.Draw(skillData);
+                    skillTextOffsetY += 55.0f;
+                }
+            }
+        }
     }
 }
 
@@ -353,14 +465,25 @@ void ChestArmorMenuController::DrawGui()
 			_armorBackSprite->DrawGui();
 			ImGui::TreePop();
 		}
-		for (int i = 0; i < static_cast<int>(SelectType::MaxType); ++i)
+        ImGui::Separator();
+		for (int i = 0; i <= static_cast<int>(WeaponType::WeaponTypeMax) - 1; ++i)
 		{
-            if (ImGui::TreeNode(ToString<SelectType>(static_cast<size_t>(i)).c_str()))
+			if (ImGui::TreeNode(ToString<WeaponType>(static_cast<size_t>(i)).c_str()))
+			{
+				_weaponSprites[i]->DrawGui();
+				ImGui::TreePop();
+			}
+		}
+        ImGui::Separator();
+		for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+		{
+            if (ImGui::TreeNode(ToString<ArmorType>(static_cast<size_t>(i)).c_str()))
             {
                 _armorSprites[i]->DrawGui();
                 ImGui::TreePop();
             }
 		}
+        ImGui::Separator();
         if (ImGui::TreeNode(u8"装備前景"))
         {
 			_armorFrontSprite->DrawGui();
@@ -458,51 +581,61 @@ void ChestArmorMenuController::NextState()
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
         return;
-    auto playerArmorController = _playerArmorController.lock();
-	if (!playerArmorController)
+    auto playerEquipmentController = _PlayerEquipmentController.lock();
+	if (!playerEquipmentController)
 		return;
 
+    size_t armorIndex = 0;
     ArmorType armorType = ArmorType::Head;
     switch (_selectType)
     {
+    case SelectType::Weapon:
+        armorIndex = playerEquipmentController->GetWeaponIndex();
+        break;
     case SelectType::Head:
-        armorType = ArmorType::Head;
-        break;
     case SelectType::Chest:
-        armorType = ArmorType::Chest;
-        break;
     case SelectType::Arm:
-        armorType = ArmorType::Arm;
-        break;
     case SelectType::Waist:
-        armorType = ArmorType::Waist;
-        break;
     case SelectType::Leg:
-        armorType = ArmorType::Leg;
+        armorType = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
+        armorIndex = playerEquipmentController->GetArmorIndex(armorType);
         break;
     }
-    size_t armorIndex = playerArmorController->GetArmorIndex(armorType);
 
     switch (_state)
     {
     case State::SelectArmorType:
 		spriteRenderer->SetColorAlpha(BoxBackSpr, 0.5f);
 
-		// 現在選択中の防具にインデックスを合わせる
+		// 現在選択中の装備にインデックスを合わせる
         _selectArmorColumnIndex = static_cast<int>(armorIndex % _armorSprColumnNum);
         _selectArmorRowIndex = static_cast<int>(armorIndex / _armorSprColumnNum);
 
 		_state = State::SelectArmor;
         break;
     case State::SelectArmor:
-		// 防具変更
-		armorIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
-		// 現在装備中の防具と同じなら脱ぐ
-		if (armorIndex == static_cast<size_t>(playerArmorController->GetArmorIndex(armorType)))
-            playerArmorController->SetArmorIndex(armorType, -1);
-		// 選択中のマスに対応する防具が存在するか確認
-        else if (armorIndex < static_cast<int>(userDataManager->GetAcquiredArmorDataList(armorType).size()))
-            playerArmorController->SetArmorIndex(armorType, static_cast<int>(armorIndex));
+        if (_selectType == SelectType::Weapon)
+        {
+			// 武器変更
+			size_t weaponIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
+			// 現在装備中の武器と同じなら処理しない
+			if (weaponIndex == static_cast<size_t>(playerEquipmentController->GetWeaponIndex()))
+				return;
+			// 選択中のマスに対応する武器が存在するか確認
+			else if (weaponIndex < static_cast<int>(userDataManager->GetAcquiredWeaponDataList(WeaponType::GreatSword).size()))
+				playerEquipmentController->SetWeaponIndex(static_cast<int>(weaponIndex));
+        }
+        else
+        {
+            // 防具変更
+            armorIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
+            // 現在装備中の防具と同じなら脱ぐ
+            if (armorIndex == static_cast<size_t>(playerEquipmentController->GetArmorIndex(armorType)))
+                playerEquipmentController->SetArmorIndex(armorType, -1);
+            // 選択中のマスに対応する防具が存在するか確認
+            else if (armorIndex < static_cast<int>(userDataManager->GetAcquiredArmorDataList(armorType).size()))
+                playerEquipmentController->SetArmorIndex(armorType, static_cast<int>(armorIndex));
+        }
         break;
     }
 }
@@ -540,7 +673,7 @@ void ChestArmorMenuController::Reset()
 	}
 }
 
-void ChestArmorMenuController::SetPlayerArmorController(const std::shared_ptr<PlayerArmorController>& controller)
+void ChestArmorMenuController::SetPlayerEquipmentController(const std::shared_ptr<PlayerEquipmentController>& controller)
 {
 	if (!controller)
 		return;
@@ -548,7 +681,7 @@ void ChestArmorMenuController::SetPlayerArmorController(const std::shared_ptr<Pl
     if (!spriteRenderer)
         return;
 
-    _playerArmorController = controller;
+    _PlayerEquipmentController = controller;
 
     // 防具の色を設定
     auto SetColor = [&](const std::string& name, SelectType type)

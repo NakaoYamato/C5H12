@@ -1,17 +1,16 @@
 #pragma once
 
-#include "../WeaponActor.h"
+#include "../../Source/Weapon/WeaponActor.h"
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/SphereCollider.h"
 
 class PlayerGreatSwordActor : public WeaponActor
 {
 public:
-	static const char* GetModelFilePath()
+	PlayerGreatSwordActor(int weaponIndex = 0) :
+		WeaponActor(WeaponType::GreatSword, weaponIndex)
 	{
-		return "./Data/Model/Player/Weapon/Marcus' sword1.fbx";
 	}
-public:
 	~PlayerGreatSwordActor()override {}
 
 	// ¶¬ˆ—
@@ -21,7 +20,6 @@ public:
 	// XVˆ—
 	void OnUpdate(float elapsedTime) override;
 private:
-	std::weak_ptr<ModelRenderer> _modelRenderer;
 	std::weak_ptr<ModelRenderer> _parentModelRenderer;
 	std::weak_ptr<SphereCollider> _collider;
 

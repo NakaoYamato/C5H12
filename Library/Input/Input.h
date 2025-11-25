@@ -104,6 +104,7 @@ public:
 
 	/// <summary>
 	/// 現在の入力デバイス取得
+	/// マウス操作はキーボード扱い
 	/// </summary>
 	/// <returns></returns>
 	InputType GetCurrentInputDevice() const { return _currentInputDevice; }

@@ -178,3 +178,10 @@ void MainCamera::SwitchController(const std::string& nextControllerName)
 
 	_currentCameraControllerName = nextControllerName;
 }
+
+// 更新処理追加
+// 戻り値がtrueの場合、登録解除される
+void MainCamera::AddOnUpdateCallback(const std::function<bool(float, MainCamera*)>& callback)
+{
+	_onUpdateCallbacks.push_back(callback);
+}

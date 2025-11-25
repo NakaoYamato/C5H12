@@ -4,8 +4,6 @@
 //#include "../../Library/2D/Canvas.h"
 //#include "../../Library/Graphics/Graphics.h"
 
-#include <Xinput.h>
-
 #include <Mygui.h>
 
 //std::unique_ptr<Canvas> g_inputUICanvas = nullptr;
@@ -137,7 +135,7 @@ void InputUI::Initialize()
 // 描画
 void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 {
-	int currentInputDevice = GetDeviceIndex(Input::Instance().GetCurrentInputDevice());
+	auto currentInputDevice = Input::Instance().GetCurrentInputDevice();
 	auto& inputActionMap = Input::Instance().GetButtonActionMap();
     auto& valueActionMap = Input::Instance().GetValueActionMap();
 	// 描画スプライト、スプライトデータ選択
@@ -145,11 +143,12 @@ void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 	std::unordered_map<int, SprData>* sprData = nullptr;
 	switch (currentInputDevice)
 	{
-	case 0:
+	case Input::InputType::Keyboard:
+	case Input::InputType::Mouse:
 		spr = &_keybordSprite;
 		sprData = &_keybordSprData;
 		break;
-	case 1:
+	case Input::InputType::XboxPad:
 		spr = &_gamePadSprite;
 		sprData = &_gamePadSprData;
 		break;
@@ -158,39 +157,41 @@ void InputUI::Render(const RenderContext& rc, TextureRenderer& renderer)
 	}
 
 	// 描画処理
-	auto Draw = [&](const std::vector<DrawInfo>& drawInfos, const Input::InputActionMap& actionMap)
+	auto Draw = [&](const std::vector<DrawInfo>& drawInfos)
 		{
 			for (const auto& drawInfo : drawInfos)
 			{
-				// アクション名が存在しなければスキップ
-				if (actionMap.find(drawInfo.actionName) == actionMap.end())
-					return;
-				for (const auto& inputMapInfo : actionMap.at(drawInfo.actionName))
+				int key = -1;
+				switch (currentInputDevice)
 				{
-					if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
-					{
-						// ボタンIDが存在しなければスキップ
-						if (sprData->find(inputMapInfo.buttonID) == sprData->end())
-							continue;
-
-						spr->GetRectTransform().SetLocalPosition(drawInfo.position);
-						spr->GetRectTransform().SetLocalScale(drawInfo.scale);
-						if (drawInfo.isActive)
-							spr->SetTexPos(sprData->at(inputMapInfo.buttonID).activateTexPos);
-						else
-							spr->SetTexPos(sprData->at(inputMapInfo.buttonID).texPos);
-						spr->SetTexSize(sprData->at(inputMapInfo.buttonID).texSize);
-						spr->SetCenterAlignment(spr->GetCenterAlignment());
-						spr->UpdateTransform();
-						spr->SetColor(drawInfo.color);
-						spr->Render(rc, renderer);
-						break;
-					}
+				case Input::InputType::Keyboard:
+				case Input::InputType::Mouse:
+					key = drawInfo.keyboardKey;
+					break;
+				case Input::InputType::XboxPad:
+					key = drawInfo.gamePadKey;
+					break;
 				}
+
+				// ボタンIDが存在しなければスキップ
+				if (sprData->find(key) == sprData->end())
+					continue;
+
+				spr->GetRectTransform().SetLocalPosition(drawInfo.position);
+				spr->GetRectTransform().SetLocalScale(drawInfo.scale);
+				if (drawInfo.isActive)
+					spr->SetTexPos(sprData->at(key).activateTexPos);
+				else
+					spr->SetTexPos(sprData->at(key).texPos);
+				spr->SetTexSize(sprData->at(key).texSize);
+				spr->SetCenterAlignment(spr->GetCenterAlignment());
+				spr->UpdateTransform();
+				spr->SetColor(drawInfo.color);
+				spr->Render(rc, renderer);
 			}
         };
-    Draw(_drawInfos, inputActionMap);
-    Draw(_drawValueInfos, valueActionMap);
+    Draw(_drawInfos);
+    Draw(_drawValueInfos);
 
 	_drawInfos.clear();
 	_drawValueInfos.clear();
@@ -242,60 +243,7 @@ void InputUI::DrawGui()
 }
 
 // 描画登録
-void InputUI::Draw(
-	const std::string& actionName,
-	bool isActive, 
-	const Vector2& position,
-	const Vector2& scale,
-	const Vector4& color)
+void InputUI::Draw(DrawInfo drawinfo)
 {
-	DrawInfo info;
-	info.actionName = actionName;
-	info.isActive = isActive;
-	info.position = position;
-	info.scale = scale;
-	info.color = color;
-
-	int currentInputDevice = GetDeviceIndex(Input::Instance().GetCurrentInputDevice());
-	auto& inputActionMap = Input::Instance().GetButtonActionMap();
-	auto& valueActionMap = Input::Instance().GetValueActionMap();
-    // 入力値がどちらに存在するか確認
-	if (inputActionMap.find(actionName) != inputActionMap.end())
-	{
-		for (const auto& inputMapInfo : inputActionMap.at(actionName))
-		{
-			if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
-			{
-				_drawInfos.push_back(info);
-				return;
-			}
-        }
-	}
-	if (valueActionMap.find(actionName) != valueActionMap.end())
-	{
-		for (const auto& inputMapInfo : valueActionMap.at(actionName))
-		{
-			if (GetDeviceIndex(inputMapInfo.type) == currentInputDevice)
-			{
-				_drawValueInfos.push_back(info);
-				return;
-			}
-        }
-	}
-}
-
-// 描画登録
-void InputUI::DrawValue(
-	const std::string& actionName,
-	float value, 
-	const Vector2& position,
-	const Vector2& scale,
-	const Vector4& color)
-{
-	Draw(
-		actionName,
-		value > 0.0f,
-		position,
-		scale,
-        color);
+	_drawInfos.push_back(drawinfo);
 }

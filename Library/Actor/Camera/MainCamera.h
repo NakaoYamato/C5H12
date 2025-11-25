@@ -44,10 +44,7 @@ public:
 
 	// 更新処理追加
 	// 戻り値がtrueの場合、登録解除される
-	void AddOnUpdateCallback(const std::function<bool(float, MainCamera*)>& callback)
-	{
-		_onUpdateCallbacks.push_back(callback);
-	}
+	void AddOnUpdateCallback(const std::function<bool(float, MainCamera*)>& callback);
 	// コールバック用目のオフセット追加
 	void AddEyeOffset(const Vector3& offset)
 	{

@@ -34,8 +34,7 @@ void CameraShakeManager::StartShake(const CameraShakeInfo& info)
     // ランダムな軸を生成（揺れのベースとなる方向）
     Vector3 seed(RandomFloat(), RandomFloat(), RandomFloat());
 
-    // ベクトル正規化（Vector3の実装に依存。Normalize関数がない場合は自作してください）
-    // seed.Normalize(); 
+    seed.Normalize(); 
 
     _activeShakes.emplace_back(info, seed);
 }

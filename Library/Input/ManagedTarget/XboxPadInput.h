@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <unordered_map>
+#include <Xinput.h>
 
 #pragma region “ü—Í’l‚ðŽæ“¾‚·‚é—p‚Ì’è‹`
 static constexpr int XBOXPAD_AXIS_LX = 0x00;

@@ -1,7 +1,6 @@
 #include "Input.h"
 
 #include <math.h>
-#include <Xinput.h>
 #include <cassert>
 #include <imgui.h>
 
@@ -149,6 +148,12 @@ void Input::Update()
 		}
 
 		_currentMovedParameter[mapInfo.first] = moved;
+	}
+
+	// 最後に入力されたデバイスがマウスの場合、キーボード扱いにする
+	if (_currentInputDevice == InputType::Mouse)
+	{
+		_currentInputDevice = InputType::Keyboard;
 	}
 }
 

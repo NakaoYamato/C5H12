@@ -15,7 +15,9 @@ public:
 
 	struct DrawInfo
 	{
-		std::string actionName = "";
+		int keyboardKey		= 0;
+		int gamePadKey		= 0;
+
 		Vector2 position{};
 		Vector2 scale{};
 		Vector4 color{};
@@ -34,19 +36,7 @@ public:
 	void DrawGui();
 
 	// ï`âÊìoò^
-	void Draw(const std::string& actionName,
-		bool isActive,
-		const Vector2& position, 
-		const Vector2& scale = Vector2::One,
-		const Vector4& color = Vector4::White);
-
-	// ï`âÊìoò^
-	// 0.0fà»è„Ç≈ÉAÉNÉeÉBÉu
-	void DrawValue(const std::string& actionName,
-		float value,
-		const Vector2& position, 
-		const Vector2& scale = Vector2::One,
-		const Vector4& color = Vector4::White);
+	void Draw(DrawInfo drawinfo);
 
 private:
 	const float SpriteWidth = 128.0f;

@@ -1,7 +1,5 @@
 #include "XboxPadInput.h"
 
-#include <Xinput.h>
-
 XboxPadInput::XboxPadInput()
 {
 	// 使用するボタンを設定

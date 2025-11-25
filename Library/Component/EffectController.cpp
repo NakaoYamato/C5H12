@@ -275,7 +275,7 @@ void EffectController::Play(UINT id, const Vector3& position)
 	if (_effectMap.find(id) != _effectMap.end())
 	{
 		_effectMap[id]->SetPosition(position);
-		_effectMap[id]->Play();
+		Play(id);
 	}
 }
 
@@ -286,7 +286,7 @@ void EffectController::Play(UINT id, const Vector3& position, const Vector3& rot
 	{
 		_effectMap[id]->SetPosition(position);
 		_effectMap[id]->SetRotation(rotation);
-		_effectMap[id]->Play();
+		Play(id);
 	}
 }
 
@@ -298,7 +298,7 @@ void EffectController::Play(UINT id, const Vector3& position, const Vector3& rot
 		_effectMap[id]->SetPosition(position);
 		_effectMap[id]->SetRotation(rotation);
 		_effectMap[id]->SetScale(scale);
-		_effectMap[id]->Play();
+		Play(id);
 	}
 }
 

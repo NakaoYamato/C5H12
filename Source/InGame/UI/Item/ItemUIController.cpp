@@ -1,7 +1,6 @@
 #include "ItemUIController.h"
 
 #include "../../Library/Actor/UI/UIActor.h"
-#include "../../Library/Scene/Scene.h"
 #include "../../Library/Algorithm/Converter.h"
 
 #include <imgui.h>
@@ -34,6 +33,9 @@ void ItemUIController::Start()
 		_myRectTransform = &uiActor->GetRectTransform();
 	}
 
+	// 入力UI初期化
+	InitializeInputUI();
+
 	// 初期状態は閉じている
 	Close();
 }
@@ -47,8 +49,8 @@ void ItemUIController::Update(float elapsedTime)
 		{
 		case ItemUIController::Closed:
 			// UI表示
-			GetActor()->GetScene()->GetInputUI()->Draw("Use", _INPUT_PRESSED("Use"), _itemUseUIPos, _itemUseUIScale, _itemUseUIColor);
-			GetActor()->GetScene()->GetInputUI()->Draw("ItemSelect", _INPUT_PRESSED("ItemSelect"), _itemSelectUIPos, _itemSelectUIScale, _itemSelectUIColor);
+			GetActor()->GetScene()->GetInputUI()->Draw(_drawInfoUse);
+			GetActor()->GetScene()->GetInputUI()->Draw(_drawInfoItemSelect);
 			break;
 		case ItemUIController::Opening:
 			_stateTimer = _stateTimer + _lerpSpeed * elapsedTime;
@@ -69,14 +71,14 @@ void ItemUIController::Update(float elapsedTime)
 			// UI表示
 			if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
 			{
-				GetActor()->GetScene()->GetInputUI()->Draw("ItemPrevSlide", _INPUT_PRESSED("ItemPrevSlide"), _itemSliderLUIPos, _itemSliderLUIScale, _itemSliderLUIColor);
-				GetActor()->GetScene()->GetInputUI()->Draw("ItemNextSlide", _INPUT_PRESSED("ItemNextSlide"), _itemSliderRUIPos, _itemSliderRUIScale, _itemSliderRUIColor);
+				GetActor()->GetScene()->GetInputUI()->Draw(_drawInfoItemPrevSlide);
+				GetActor()->GetScene()->GetInputUI()->Draw(_drawInfoItemNextSlide);
 			}
 			else
 			{
 				// マウスホイールの上下を表示
-				GetActor()->GetScene()->GetInputUI()->DrawValue("MouseOldWheel", 0.0f, _itemSliderLUIPos, _itemSliderLUIScale, _itemSliderLUIColor);
-				GetActor()->GetScene()->GetInputUI()->DrawValue("MouseOldWheel", 1.0f, _itemSliderRUIPos, _itemSliderRUIScale, _itemSliderRUIColor);
+				GetActor()->GetScene()->GetInputUI()->Draw(_drawInfoMouseOldWheelL);
+				GetActor()->GetScene()->GetInputUI()->Draw(_drawInfoMouseOldWheelR);
             }
 			break;
 		case ItemUIController::Closing:
@@ -244,18 +246,25 @@ void ItemUIController::DrawGui()
 
 	if (ImGui::TreeNode(u8"入力UI"))
 	{
-		ImGui::DragFloat2(u8"アイテム使用UI位置", &_itemUseUIPos.x, 1.0f);
-		ImGui::DragFloat2(u8"アイテム使用UIスケール", &_itemUseUIScale.x, 0.01f, 0.1f, 3.0f);
-		ImGui::ColorEdit4(u8"アイテム使用UI色", &_itemUseUIColor.x);
-		ImGui::DragFloat2(u8"アイテム選択UI位置", &_itemSelectUIPos.x, 1.0f);
-		ImGui::DragFloat2(u8"アイテム選択UIスケール", &_itemSelectUIScale.x, 0.01f, 0.1f, 3.0f);
-		ImGui::ColorEdit4(u8"アイテム選択UI色", &_itemSelectUIColor.x);
-		ImGui::DragFloat2(u8"スライダー左UI位置", &_itemSliderLUIPos.x, 1.0f);
-		ImGui::DragFloat2(u8"スライダー左UIスケール", &_itemSliderLUIScale.x, 0.01f, 0.1f, 3.0f);
-		ImGui::ColorEdit4(u8"スライダー左UI色", &_itemSliderLUIColor.x);
-		ImGui::DragFloat2(u8"スライダー右UI位置", &_itemSliderRUIPos.x, 1.0f);
-		ImGui::DragFloat2(u8"スライダー右UIスケール", &_itemSliderRUIScale.x, 0.01f, 0.1f, 3.0f);
-		ImGui::ColorEdit4(u8"スライダー右UI色", &_itemSliderRUIColor.x);
+		ImGui::DragFloat2(u8"アイテム使用UI位置",		&_drawInfoUse.position.x, 1.0f);
+		ImGui::DragFloat2(u8"アイテム使用UIスケール", &_drawInfoUse.scale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"アイテム使用UI色",		&_drawInfoUse.color.x);
+		ImGui::DragFloat2(u8"アイテム選択UI位置",		&_drawInfoItemSelect.position.x, 1.0f);
+		ImGui::DragFloat2(u8"アイテム選択UIスケール", &_drawInfoItemSelect.scale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"アイテム選択UI色",		&_drawInfoItemSelect.color.x);
+		ImGui::DragFloat2(u8"スライダー左UI位置",		&_drawInfoItemPrevSlide.position.x, 1.0f);
+		ImGui::DragFloat2(u8"スライダー左UIスケール", &_drawInfoItemPrevSlide.scale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"スライダー左UI色",		&_drawInfoItemPrevSlide.color.x);
+		ImGui::DragFloat2(u8"スライダー右UI位置",		&_drawInfoItemNextSlide.position.x, 1.0f);
+		ImGui::DragFloat2(u8"スライダー右UIスケール", &_drawInfoItemNextSlide.scale.x, 0.01f, 0.1f, 3.0f);
+		ImGui::ColorEdit4(u8"スライダー右UI色",		&_drawInfoItemNextSlide.color.x);
+
+		_drawInfoMouseOldWheelL.position	= _drawInfoItemPrevSlide.position;
+		_drawInfoMouseOldWheelL.scale		= _drawInfoItemPrevSlide.scale;
+		_drawInfoMouseOldWheelL.color		= _drawInfoItemPrevSlide.color;
+		_drawInfoMouseOldWheelR.position	= _drawInfoItemNextSlide.position;
+		_drawInfoMouseOldWheelR.scale		= _drawInfoItemNextSlide.scale;
+		_drawInfoMouseOldWheelR.color		= _drawInfoItemNextSlide.color;
 
 		ImGui::TreePop();
 	}
@@ -276,4 +285,40 @@ void ItemUIController::Close()
 	_state = State::Closing;
 	_sliderSpriteRenderer.lock()->GetActor()->SetIsActive(false);
 	_stateTimer = 0.0f;
+}
+
+// 入力UI初期化
+void ItemUIController::InitializeInputUI()
+{
+	_drawInfoUse.keyboardKey = 'E';
+	_drawInfoUse.gamePadKey = XINPUT_GAMEPAD_X;
+	_drawInfoUse.position = Vector2(1760.0f, 970.0f);
+	_drawInfoUse.scale = Vector2(0.3f, 0.3f);
+	_drawInfoUse.color = Vector4::Blue;
+
+	_drawInfoItemSelect.keyboardKey = VK_CONTROL;
+	_drawInfoItemSelect.gamePadKey = XINPUT_GAMEPAD_LEFT_SHOULDER;
+	_drawInfoItemSelect.position = Vector2(1850.0f, 860.0f);
+	_drawInfoItemSelect.scale = Vector2(0.5f, 0.5f);
+	_drawInfoItemSelect.color = Vector4::Orange;
+
+	_drawInfoItemPrevSlide.keyboardKey = KEYBORD_AXIS_RY;
+	_drawInfoItemPrevSlide.gamePadKey = XINPUT_GAMEPAD_RIGHT_SHOULDER;
+	_drawInfoItemPrevSlide.position = Vector2(1500.0f, 980.0f);
+	_drawInfoItemPrevSlide.scale = Vector2(0.3f, 0.3f);
+	_drawInfoItemPrevSlide.color = Vector4::Blue;
+	_drawInfoItemNextSlide.keyboardKey = KEYBORD_AXIS_RY;
+	_drawInfoItemNextSlide.gamePadKey = XINPUT_GAMEPAD_RIGHT_SHOULDER;
+	_drawInfoItemNextSlide.position = Vector2(1860.0f, 980.0f);
+	_drawInfoItemNextSlide.scale = Vector2(0.3f, 0.3f);
+	_drawInfoItemNextSlide.color = Vector4::Red;
+	
+	_drawInfoMouseOldWheelL.keyboardKey = MOUSE_OLD_WHEEL;
+	_drawInfoMouseOldWheelL.position = Vector2(1500.0f, 980.0f);
+	_drawInfoMouseOldWheelL.scale = Vector2(0.3f, 0.3f);
+	_drawInfoMouseOldWheelL.color = Vector4::Blue;
+	_drawInfoMouseOldWheelR.keyboardKey = MOUSE_OLD_WHEEL;
+	_drawInfoMouseOldWheelR.position = Vector2(1860.0f, 980.0f);
+	_drawInfoMouseOldWheelR.scale = Vector2(0.3f, 0.3f);
+	_drawInfoMouseOldWheelR.color = Vector4::Red;
 }

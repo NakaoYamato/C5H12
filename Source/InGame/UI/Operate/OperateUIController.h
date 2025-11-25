@@ -1,18 +1,20 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Library/Scene/Scene.h"
 
 class OperateUIController : public Component
 {
 public:
 	struct DescriptionData
 	{
+		// キー群
+		std::vector<int> keyboardKeys = {};
+		std::vector<int> gamePadKeys = {};
 		// 起動フラグ
 		bool isActive = true;
 		// 生存時間
 		float lifeTime = 0.2f;
-		// 入力アクション名群
-		std::vector<std::string> inputActionNames = {};
 	};
 
 public:

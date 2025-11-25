@@ -855,7 +855,6 @@ namespace PlayerDrinkSubState
 	public:
 		DrinkingSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
-				"Drinking",
 				u8"Drinking",
 				0.2f,
 				true,

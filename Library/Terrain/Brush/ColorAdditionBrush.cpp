@@ -16,10 +16,12 @@ ColorAdditionBrush::ColorAdditionBrush(TerrainDeformer* deformer) :
         "./Data/Shader/HLSL/Terrain/Deform/TerrainDeformAddPS.cso",
         _pixelShader.ReleaseAndGetAddressOf());
 	_brushPadding.x = 1.0f;
+	_brushPadding.y = 1.0f;
 }
 // GUI描画
 void ColorAdditionBrush::DrawGui()
 {
     TerrainDeformerBrush::DrawGui();
     ImGui::DragFloat(u8"高さマップ影響度", &_brushPadding.x, 0.01f);
+    ImGui::DragFloat(u8"色補正値", &_brushPadding.y, 0.01f);
 }

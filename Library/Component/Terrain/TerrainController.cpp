@@ -154,10 +154,10 @@ void TerrainController::DebugRender(const RenderContext& rc)
 				Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
 				for (size_t i = 0; i < pointCount - 1; i++)
 				{
-                    const Vector3& p1 = wall.vertices[i].TransformCoord(world);
-                    const Vector3& p2 = wall.vertices[i + 1].TransformCoord(world);
-                    const Vector3& p3 = p1 + heightOffset;
-                    const Vector3& p4 = p2 + heightOffset;
+                    const Vector3 p1 = wall.vertices[i];
+                    const Vector3 p2 = wall.vertices[i + 1];
+                    const Vector3 p3 = p1 + heightOffset;
+                    const Vector3 p4 = p2 + heightOffset;
 					Vector4 color = Vector4::Green;
 					Debug::Renderer::AddVertex(p1, color);
 					Debug::Renderer::AddVertex(p2, color);

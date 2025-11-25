@@ -19,18 +19,18 @@ void SceneTerrainEditor::OnInitialize()
 
     auto stage0 = RegisterActor<TerrainActor>("Stage0", 
         ActorTag::Stage, 
-        "./Data/Terrain/Save/Test000.json",
+        "./Data/Terrain/Save/001.json",
         Vector3(0.0f, 0.0f, 0.0f));
     auto stage1 = RegisterActor<TerrainActor>("Stage1", 
         ActorTag::Stage, 
-        "./Data/Terrain/Save/Test000.json",
+        "./Data/Terrain/Save/002.json",
         Vector3(100.0f, 0.0f, 0.0f));
-    auto stage2 = RegisterActor<TerrainActor>("Stage2", 
-        ActorTag::Stage, 
-        "./Data/Terrain/Save/Test000.json",
-        Vector3(0.0f, 0.0f, 100.0f));
-    auto stage3 = RegisterActor<TerrainActor>("Stage3", 
-        ActorTag::Stage, 
-        "./Data/Terrain/Save/Test000.json",
-        Vector3(100.0f, 0.0f, 100.0f));
+    //auto stage2 = RegisterActor<TerrainActor>("Stage2", 
+    //    ActorTag::Stage, 
+    //    "./Data/Terrain/Save/Test000.json",
+    //    Vector3(0.0f, 0.0f, 100.0f));
+    //auto stage3 = RegisterActor<TerrainActor>("Stage3", 
+    //    ActorTag::Stage, 
+    //    "./Data/Terrain/Save/Test000.json",
+    //    Vector3(100.0f, 0.0f, 100.0f));
 }

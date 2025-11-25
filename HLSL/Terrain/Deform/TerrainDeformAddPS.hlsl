@@ -11,6 +11,7 @@ PS_OUT main(VsOut pin)
 
     float2 paintTexcoord = pin.texcoord * textureTillingScale;
     float4 color = paintColorTexture.Sample(samplerStates[_POINT_WRAP_SAMPLER_INDEX], paintTexcoord);
+    color.rgb *= padding.y;
     color = lerp(baseColor, color, brushStrength * rate);
     color = saturate(color);
     

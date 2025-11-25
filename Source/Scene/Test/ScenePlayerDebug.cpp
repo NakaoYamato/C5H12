@@ -16,7 +16,7 @@
 
 void ScenePlayerDebug::OnInitialize()
 {
-	static const float CompletionLoadingRate = 1.0f / 10.0f;
+	static const float CompletionLoadingRate = 1.0f / 11.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -35,15 +35,16 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/001.json", Vector3(0.0f, 0.0f, 0.0f));
+    }
+    AddCompletionLoading(CompletionLoadingRate);
+    {
+        auto stage1 = RegisterActor<TerrainActor>("Stage1", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(100.0f, 0.0f, 0.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto Chest = RegisterActor<ChestActor>("Chest", ActorTag::Stage);
     }
-    //{
-    //    auto stage1 = RegisterActor<StageActor>("Stage1", ActorTag::Stage, 1, "./Data/Terrain/Save/002.json", Vector3(50.0f, 0.0f, -50.0f));
-    //}
     //{
     //    auto stage2 = RegisterActor<StageActor>("Stage2", ActorTag::Stage, 2, "./Data/Terrain/Save/002.json", Vector3(-50.0f, 0.0f, 50.0f));
     //}

@@ -47,10 +47,13 @@ void TransparentWallBrush::DrawGui()
 	if (!_terrain)
 		return;
 
+    auto& walls = _terrain->GetTransparentWall()->GetWalls();
+    if (_editingWallIndex >= walls.size())
+        return;
+
     ImGui::Checkbox(u8"頂点をスナップするか", &_snapToGround);
     if (_editingWallIndex != -1)
     {
-        auto& walls = _terrain->GetTransparentWall()->GetWalls();
 		auto& wall = walls[_editingWallIndex];
         wall.DrawGui();
         ImGui::Separator();
@@ -189,6 +192,9 @@ void TransparentWallBrush::UpdateMovePoint(std::shared_ptr<Terrain> terrain, flo
     const DirectX::XMFLOAT4X4& invWorld = _deformer->GetActor()->GetTransform().GetMatrixInverse();
     const DirectX::XMFLOAT4X4& view = _deformer->GetActor()->GetScene()->GetMainCamera()->GetView();
     const DirectX::XMFLOAT4X4& projection = _deformer->GetActor()->GetScene()->GetMainCamera()->GetProjection();
+
+    if (_editingWallIndex >= walls.size())
+        return;
 
     // ギズモでポイントを移動
     Vector3& point = walls[_editingWallIndex].vertices[_editingPointIndex];

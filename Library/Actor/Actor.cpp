@@ -37,10 +37,20 @@ void Actor::Deleted()
 
 	OnDeleted();
 
+	// 親との関連解除
+	if (auto parent = GetParent())
+	{
+		auto iter = std::find(parent->_children.begin(), parent->_children.end(), shared_from_this());
+		if (iter != parent->_children.end())
+		{
+			parent->_children.erase(iter);
+		}
+	}
 	// 子供の削除
 	for (std::shared_ptr<Actor>& child : _children)
 	{
-		child->Deleted();
+		if (child)
+			child->Deleted();
 	}
 }
 /// 開始処理

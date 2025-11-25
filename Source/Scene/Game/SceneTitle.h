@@ -13,6 +13,8 @@ public:
 	SceneMenuLevel GetLevel() const override { return SceneMenuLevel::Game; }
 	// 初期化
 	void OnInitialize() override;
+	// 更新処理
+	void OnUpdate(float elapsedTime) override;
 	// 自身を新規のポインタで渡す
 	std::shared_ptr<Scene> GetNewShared() override
 	{

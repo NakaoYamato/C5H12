@@ -14,6 +14,7 @@ void MetaAI::Start()
 // 更新処理
 void MetaAI::Update(float elapsedTime)
 {
+    bool playerDead = false;
 	int deadCount = 0;
 	for (auto& target : _targetables)
 	{
@@ -32,9 +33,20 @@ void MetaAI::Update(float elapsedTime)
 				}
 			}
 		}
+		else if (target.lock()->GetFaction() == Targetable::Faction::Player)
+		{
+			auto damageable = target.lock()->GetActor()->GetComponent<Damageable>();
+			if (damageable)
+			{
+				if (damageable->IsDead())
+				{
+					playerDead = true;
+				}
+			}
+        }
 	}
 
-	if (deadCount == _targetables.size())
+	if (deadCount > 0)
 		_gameClear = true;
 
 	if (_gameClear)
@@ -43,8 +55,13 @@ void MetaAI::Update(float elapsedTime)
 		if (_clearMovieTimer > _clearMovieTime)
 		{
 			// シーン遷移
-			//SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Result");
+			SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
 		}
+	}
+	if (playerDead)
+	{
+		// シーン遷移
+        SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
 	}
 }
 

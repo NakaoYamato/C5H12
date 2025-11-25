@@ -99,10 +99,11 @@ void MouseInput::ClipCursorInWindow() const
 	RECT rect;
 	if (GetClientRect(_hWnd, &rect)) 
 	{
-		static constexpr LONG ClipCursorOffset = 30;
+		static constexpr LONG ClipCursorOffsetX = 30;
+		static constexpr LONG ClipCursorOffsetY = 100;
 
-		POINT tl = { rect.left	+ ClipCursorOffset, rect.top	+ ClipCursorOffset };
-		POINT br = { rect.right - ClipCursorOffset, rect.bottom - ClipCursorOffset };
+		POINT tl = { rect.left	+ ClipCursorOffsetX, rect.top	+ ClipCursorOffsetY };
+		POINT br = { rect.right - ClipCursorOffsetX, rect.bottom - ClipCursorOffsetY };
 
 		// クライアント座標をスクリーン座標に変換
 		ClientToScreen(_hWnd, &tl);

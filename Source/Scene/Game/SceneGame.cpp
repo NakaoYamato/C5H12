@@ -10,6 +10,7 @@
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Stage/StageController.h"
+#include "../../Source/Stage/Props/Chest/ChestActor.h"
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
@@ -60,6 +61,12 @@ void SceneGame::OnInitialize()
     {
         auto stage1 = RegisterActor<TerrainActor>("Stage1", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(100.0f, 0.0f, 0.0f));
         auto stageController = stage1->AddComponent<StageController>(1);
+    }
+    AddCompletionLoading(CompletionLoadingRate);
+    {
+        auto Chest = RegisterActor<ChestActor>("Chest", ActorTag::Stage);
+        Chest->GetTransform().SetPosition(Vector3(-43.0f, 0.0f, 9.0f));
+        Chest->GetTransform().SetAngleY(DirectX::XMConvertToRadians(90.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

@@ -191,6 +191,14 @@ void WyvernBehaviorTree::Start()
 // ビヘイビアツリー実行
 void WyvernBehaviorTree::Execute(float elapsedTime)
 {
+	std::string currentStateName = _stateMachine->GetStateName();
+
+	// 死亡時は処理しない
+	if (currentStateName == "Death")
+	{
+		return;
+	}
+
 	// 被弾処理
 	if (IsDamageInterruption())
 	{

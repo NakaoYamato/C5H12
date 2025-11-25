@@ -113,24 +113,24 @@ void MenuMediator::OnDelayedRender(const RenderContext& rc)
 	if (_menuInput.lock() == nullptr || !_menuInput.lock()->IsActive())
 		return;
 
-	// 各カテゴリーの描画
-	Vector2 categoryOffset = _categoryOffset;
-	for (auto& category : _categoryMap)
-	{
-		category->Render(GetScene(), rc, categoryOffset, Vector2::One);
-		categoryOffset += _categoryInterval;
-	}
-	// 各アイテムの描画
-	if (_currentCategoryIndex != -1)
-	{
-		auto& category = _categoryMap.at(_currentCategoryIndex);
-		Vector2 itemOffset = _itemOffset;
-		for (auto& item : _categoryItemsMap[category->GetName()])
-		{
-			item->Render(GetScene(), rc, itemOffset, Vector2::One);
-			itemOffset += _itemInterval;
-		}
-	}
+	//// 各カテゴリーの描画
+	//Vector2 categoryOffset = _categoryOffset;
+	//for (auto& category : _categoryMap)
+	//{
+	//	category->Render(GetScene(), rc, categoryOffset, Vector2::One);
+	//	categoryOffset += _categoryInterval;
+	//}
+	//// 各アイテムの描画
+	//if (_currentCategoryIndex != -1)
+	//{
+	//	auto& category = _categoryMap.at(_currentCategoryIndex);
+	//	Vector2 itemOffset = _itemOffset;
+	//	for (auto& item : _categoryItemsMap[category->GetName()])
+	//	{
+	//		item->Render(GetScene(), rc, itemOffset, Vector2::One);
+	//		itemOffset += _itemInterval;
+	//	}
+	//}
 }
 // GUI描画
 void MenuMediator::OnDrawGui()

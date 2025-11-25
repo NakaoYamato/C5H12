@@ -50,16 +50,9 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
                     0,
                     0,
                     Network::CharacterType::Wyvern,
-                    Vector3(0.0f, 5.0f, 10.0f),
+                    Vector3(14.0f, 0.3f, 0.0f),
                     0.0f,
                     100.0f);
-                //CreateEnemy(
-                //    1,
-                //    0,
-                //    Network::CharacterType::Weak,
-                //    Vector3(5.0f, 5.0f, -5.0f),
-                //    0.0f,
-                //    10.0f);
             }
             else
             {
@@ -209,6 +202,10 @@ std::weak_ptr<Actor> NetworkMediator::CreatePlayer(int id, bool isControlled)
     auto player = _scene->RegisterActor<PlayerActor>("Player" + std::to_string(id), ActorTag::Player, isControlled);
     auto receiver = player->GetComponent<NetworkReceiver>();
 	auto sender     = player->GetComponent<NetworkSender>();
+
+    // ‰ŠúˆÊ’u
+    player->GetTransform().SetPosition(Vector3(-45.0f, 0.23f, 0.0f));
+    player->GetTransform().SetAngleY(DirectX::XMConvertToRadians(90.0f));
 
     // ŠÇ—ŽÒ‚ÌID‚ðÝ’è
     receiver->SetManagerId(id);

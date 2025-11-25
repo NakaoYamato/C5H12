@@ -33,7 +33,7 @@ void WyvernActor::OnCreate()
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetScale(1.5f);
 	_charactorController.lock()->SetMass(1000.0f);
-	_damageable.lock()->ResetHealth(100.0f);
+	_damageable.lock()->ResetHealth(200.0f);
 
 	// コンポーネント追加
 	_modelRenderer				= AddComponent<ModelRenderer>();
@@ -75,13 +75,13 @@ void WyvernActor::OnCreate()
 
 			return bodyPart;
 		};
-	auto headParts = CreateParts("Head", "Head", 20.0f, 5.0f, -1);
-	auto bodyParts = CreateParts("Body", "Spine", 20.0f, 5.0f, -1);
-	auto tailParts = CreateParts("Tail", "Tail01", 20.0f, 5.0f, -1);
-	auto leftWingParts = CreateParts("LeftWing", "L Clavicle", 20.0f, 3.0f, 2);
-	auto rightWingParts = CreateParts("RightWing", "R Clavicle", 20.0f, 3.0f, 2);
-	auto leftFootParts = CreateParts("LeftFoot", "L Thigh", 20.0f, 3.0f, 2);
-	auto rightFootParts = CreateParts("RightFoot", "R Thigh", 20.0f, 3.0f, 2);
+	auto headParts = CreateParts("Head", "Head",				40.0f, 15.0f, -1);
+	auto bodyParts = CreateParts("Body", "Spine",				40.0f, 15.0f, -1);
+	auto tailParts = CreateParts("Tail", "Tail01",				40.0f, 15.0f, -1);
+	auto leftWingParts = CreateParts("LeftWing", "L Clavicle",	40.0f, 10.0f, 2);
+	auto rightWingParts = CreateParts("RightWing", "R Clavicle", 40.0f, 10.0f, 2);
+	auto leftFootParts = CreateParts("LeftFoot", "L Thigh",		40.0f, 15.0f, 2);
+	auto rightFootParts = CreateParts("RightFoot", "R Thigh",	40.0f, 15.0f, 2);
 
 	// 部位破壊時のコールバック設定
 	leftWingParts->SetOnDestroyCallback([&] {

@@ -47,6 +47,7 @@ void LoadingSprController::Start()
 				Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y));
 			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.4f, 0.4f));
 		}
+		spriteRenderer->GetRectTransform(TextSprs[3]).SetLocalScale(Vector2(0.0f, 0.0f));
 	}
 
 	_timer = 0.0f;

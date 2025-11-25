@@ -478,6 +478,8 @@ void UserDataManager::SortPouchItems()
 // アイテムデータ取得
 UserDataManager::ItemUserData* UserDataManager::GetAcquiredItemData(int index)
 {
+	if (_acquiredItemMap.find(index) == _acquiredItemMap.end())
+        return nullptr;
 	return &_acquiredItemMap[index];
 }
 
@@ -523,6 +525,13 @@ void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 	if (_pouchItems[pouchIndex].itemIndex == itemIndex)
 		return;
 
+	// 空にする場合
+	if (itemIndex >= _acquiredItemMap.size() || itemIndex == -1)
+	{
+		_pouchItems[pouchIndex].itemIndex = -1;
+		return;
+	}
+
 	// 変更先がポーチに含めないアイテムの場合は次のアイテムに変更
 	if (_acquiredItemMap[itemIndex].GetBaseData() &&
 		!_acquiredItemMap[itemIndex].GetBaseData()->isInPouch)
@@ -530,13 +539,6 @@ void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 			_pouchItems[pouchIndex].itemIndex < itemIndex ?
 			itemIndex + 1 :
 			itemIndex - 1);
-
-	// 空にする場合
-	if (itemIndex >= _acquiredItemMap.size() || itemIndex == -1)
-	{
-		_pouchItems[pouchIndex].itemIndex = -1;
-		return;
-	}
 
 	// そのアイテムがセットできるか判定
 	for (int i = 0; i < MaxPouchItemCount; ++i)

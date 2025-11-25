@@ -255,8 +255,10 @@ void ChestUIController::UpdateToArmorMenu(float elapsedTime)
         // プレイヤーをチェストの前に移動、回転させる
 		if (auto player = _playerActor.lock())
 		{
+            float positionY = player->GetTransform().GetWorldPosition().y;
             player->GetTransform().SetPosition(
                 chestActor->GetTransform().GetWorldPosition() - chestActor->GetTransform().GetAxisZ());
+            player->GetTransform().SetPositionY(positionY + 0.1f);
             player->GetTransform().SetAngleY(chestActor->GetTransform().GetAngle().y + DirectX::XMConvertToRadians(180.0f));
 		}
 		// カメラをチェスト用に切り替え

@@ -124,22 +124,22 @@ void CollisionManager::Update()
 		}
 
 		// カプセルの当たり判定
-		for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
-		{
-			auto& capsuleA = _capsuleDatas[capsuleIndex];
-
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
+		jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+			std::to_string(jobResults.size()).c_str(),
+			ImGuiControl::Profiler::Color::Blue,
+			[&]()
+			{
+				for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
 				{
+					auto& capsuleA = _capsuleDatas[capsuleIndex];
+
 					for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
 					{
 						auto& capsuleB = _capsuleDatas[capsuleBIndex];
 						CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
 					}
-				}));
-		}
+				}
+			}));
 
 		// すべてのジョブの終了を待機
 		for (auto& result : jobResults)

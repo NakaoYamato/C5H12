@@ -327,8 +327,12 @@ namespace Attack1SubState
         {
             PlayerSSB::OnEnter();
             // 攻撃フラグを立てる
-			_owner->GetDamageSender()->SetMotionFactor(_motionFactor);
+            // チャージ量に合わせて攻撃力を設定
+            int chargeLevel = std::clamp(_owner->GetPlayer()->GetChargeLevel(), 1, 3);
+			_owner->GetDamageSender()->SetMotionFactor(_motionFactor + 0.5f * (chargeLevel - 1));
             _owner->GetAnimator()->SetAnimationSpeed(_animationSpeed);
+
+
         }
         void OnExecute(float elapsedTime) override
         {
@@ -463,6 +467,7 @@ namespace Attack1SubState
         void OnExit() override
         {
             ComboSubState::OnExit();
+            _owner->GetPlayer()->SetChargeLevel(_chargeStage);
         }
     private:
         float _chargingTimer = 0.0f;

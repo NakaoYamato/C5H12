@@ -100,7 +100,10 @@ void PlayerActor::OnCreate()
 
 	// プレイヤーが操作する場合は、プレイヤーインプットを追加
 	if (_isUserControlled)
-		this->AddComponent<PlayerInput>();
+	{
+		auto input = this->AddComponent<PlayerInput>();
+		input->Swich();
+	}
 
     // ネットワーク受信イベントの設定
 	if (networkReceiver)
@@ -150,6 +153,7 @@ void PlayerActor::OnCreate()
 	// コライダー設定
 	auto capsuleCollider = this->AddCollider<CapsuleCollider>();
 	auto modelCollider = this->AddCollider<ModelCollider>();
+    modelCollider->SetLayer(CollisionLayer::Hit);
 
 	// パラメータ設定
 	GetTransform().SetLengthScale(1.0f);

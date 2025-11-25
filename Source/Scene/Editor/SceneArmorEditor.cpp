@@ -4,7 +4,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Armor/ArmorActor.h"
+#include "../../Source/Armor/ArmorEditActor.h"
 
 void SceneArmorEditor::OnInitialize()
 {
@@ -28,23 +28,23 @@ void SceneArmorEditor::OnInitialize()
 
 	// ñhãÔê∂ê¨
 	{
-		auto head = RegisterActor<ArmorActor>(GetName() + std::string(u8"Head"), ActorTag::Player, ArmorType::Head);
+		auto head = RegisterActor<ArmorEditActor>(GetName() + std::string(u8"Head"), ActorTag::Player, ArmorType::Head);
 		head->SetParent(player.get());
 	}
 	{
-		auto chest = RegisterActor<ArmorActor>(GetName() + std::string(u8"Chest"), ActorTag::Player, ArmorType::Chest);
+		auto chest = RegisterActor<ArmorEditActor>(GetName() + std::string(u8"Chest"), ActorTag::Player, ArmorType::Chest);
 		chest->SetParent(player.get());
 	}
 	{
-		auto arm = RegisterActor<ArmorActor>(GetName() + std::string(u8"Arm"), ActorTag::Player, ArmorType::Arm);
+		auto arm = RegisterActor<ArmorEditActor>(GetName() + std::string(u8"Arm"), ActorTag::Player, ArmorType::Arm);
 		arm->SetParent(player.get());
 	}
 	{
-		auto Waist = RegisterActor<ArmorActor>(GetName() + std::string(u8"Waist"), ActorTag::Player, ArmorType::Waist);
+		auto Waist = RegisterActor<ArmorEditActor>(GetName() + std::string(u8"Waist"), ActorTag::Player, ArmorType::Waist);
 		Waist->SetParent(player.get());
 	}
 	{
-		auto Leg = RegisterActor<ArmorActor>(GetName() + std::string(u8"Leg"), ActorTag::Player, ArmorType::Leg);
+		auto Leg = RegisterActor<ArmorEditActor>(GetName() + std::string(u8"Leg"), ActorTag::Player, ArmorType::Leg);
 		Leg->SetParent(player.get());
 	}
 }

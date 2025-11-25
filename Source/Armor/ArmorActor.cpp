@@ -1,7 +1,5 @@
 #include "ArmorActor.h"
 
-#include "../../Library/Component/ModelRenderer.h"
-
 #include <Mygui.h>
 
 void ArmorActor::OnCreate()
@@ -58,22 +56,24 @@ void ArmorActor::OnLateUpdate(float elapsedTime)
 	}
 
 	// プレイヤーのマテリアル情報を反映
-	Vector4 color = *_parentModelRenderer.lock()->GetMaterials().at(0).GetParameterF4("bodyColor");
-	for (auto& material : _modelRenderer.lock()->GetMaterials())
+	if (const Vector4* color = _parentModelRenderer.lock()->GetMaterials().at(0).GetParameterF4("bodyColor"))
 	{
-		// マテリアルをプレイヤーと同じものにする
-		if (material.GetShaderName() != "Player")
+		for (auto& material : _modelRenderer.lock()->GetMaterials())
 		{
-			auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
-			material.SetShaderName("Player");
-			// シェーダー変更時はパラメータも初期化
-			material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
-				_modelRenderer.lock()->GetRenderType(),
-				"Player",
-				true));
-		}
+			// マテリアルをプレイヤーと同じものにする
+			if (material.GetShaderName() != "Player")
+			{
+				auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+				material.SetShaderName("Player");
+				// シェーダー変更時はパラメータも初期化
+				material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
+					_modelRenderer.lock()->GetRenderType(),
+					"Player",
+					true));
+			}
 
-		material.SetParameter("bodyColor", color);
+			material.SetParameter("bodyColor", *color);
+		}
 	}
 }
 
@@ -104,6 +104,7 @@ void ArmorActor::OnDrawGui()
 				if (data.GetBaseData() == nullptr)
 					continue;
 
+				// 選択中の防具
 				bool active = index == _armorIndex;
 				if (ImGui::RadioButton(data.GetBaseData()->name.c_str(), active))
 				{

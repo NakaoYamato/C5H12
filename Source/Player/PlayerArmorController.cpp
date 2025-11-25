@@ -42,26 +42,6 @@ void PlayerArmorController::DrawGui()
 	{
 		SaveArmorData();
 	}
-	//if (ImGui::InputInt(u8"頭防具インデックス", &_armorIndices[static_cast<int>(ArmorType::Head)]))
-	//{
-	//	SetArmorIndex(ArmorType::Head, _armorIndices[static_cast<int>(ArmorType::Head)]);
-	//}
-	//if (ImGui::InputInt(u8"胴防具インデックス", &_armorIndices[static_cast<int>(ArmorType::Chest)]))
-	//{
-	//	SetArmorIndex(ArmorType::Chest, _armorIndices[static_cast<int>(ArmorType::Chest)]);
-	//}
-	//if (ImGui::InputInt(u8"腕防具インデックス", &_armorIndices[static_cast<int>(ArmorType::Arm)]))
-	//{
-	//	SetArmorIndex(ArmorType::Arm, _armorIndices[static_cast<int>(ArmorType::Arm)]);
-	//}
-	//if (ImGui::InputInt(u8"腰防具インデックス", &_armorIndices[static_cast<int>(ArmorType::Waist)]))
-	//{
-	//	SetArmorIndex(ArmorType::Waist, _armorIndices[static_cast<int>(ArmorType::Waist)]);
-	//}
-	//if (ImGui::InputInt(u8"脚防具インデックス", &_armorIndices[static_cast<int>(ArmorType::Leg)]))
-	//{
-	//	SetArmorIndex(ArmorType::Leg, _armorIndices[static_cast<int>(ArmorType::Leg)]);
-	//}
 }
 
 // 防具インデックス取得

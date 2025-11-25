@@ -2,8 +2,6 @@
 
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Player/BuffController.h"
-#include "../../Source/Player/PlayerController.h"
-#include "../../Library/Component/StateController.h"
 
 #pragma region ‰ñ•œ–ò
 // ŠJnˆ—
@@ -22,33 +20,26 @@ void HealingPotionFunc::Start(ItemData* item, Actor* user)
 	{
 		_requiredTime = std::get<float>(it->second);
 	}
-	auto playerController = _user->GetComponent<PlayerController>();
-	auto stateController = _user->GetComponent<StateController>();
-	if (playerController && stateController)
-	{
-		playerController->SetUseItemTime(_requiredTime);
-		stateController->ChangeState("Drink", nullptr);
-	}
+
+	_timer = 0.0f;
 }
 
 void HealingPotionFunc::Execute(float elapsedTime)
 {
-	auto stateController = _user->GetComponent<StateController>();
 	auto damageable = _user->GetComponent<Damageable>();
-	if (!damageable || !stateController)
+	if (!damageable)
 		return;
 
-	std::string subStateName = stateController->GetSubStateName();
-	if (subStateName == "Drinking")
-	{
-		float amount = _healAmount * (elapsedTime / _requiredTime);
+	// ‰ñ•œˆ—
+	float amount = _healAmount * (elapsedTime / _requiredTime);
+	damageable->Heal(amount);
 
-		// ‰ñ•œˆ—
-		damageable->Heal(amount);
-	}
-	else if (subStateName == "DrinkEnd")
+	// Œo‰ßŠÔˆ—
+	_timer += elapsedTime;
+	if (_timer >= _requiredTime)
 	{
 		_state = State::End;
+		return;
 	}
 }
 

@@ -20,6 +20,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_effect = owner->GetComponent<EffectController>().get();
 	_damageSender = owner->GetComponent<DamageSender>().get();
     _staminaController = owner->GetComponent<StaminaController>().get();
+	_itemController = owner->GetComponent<PlayerItemController>().get();
 
     // ステート設定
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatIdleState>(this));
@@ -65,9 +66,9 @@ void PlayerStateMachine::Start()
     _animator->SetIsUseRootMotion(false);
     _animator->SetRootNodeIndex("root");
     _animator->SetRootMotionOption(Animator::RootMotionOption::None);
+    // 部分アニメーション用パラメータ設定
+    _animator->SetPartialAnimationMask("spine_01");
 
-    _animator->SetPartialAnimationMask("root");
-    _animator->RemovePartialAnimationMask("spine_01");
     // 初期ステート設定
     _stateMachine.ChangeState("Idle");
 }
@@ -181,6 +182,23 @@ const char* PlayerStateMachine::GetSubStateName()
     if (!_stateMachine.GetState())
         return"";
     return _stateMachine.GetState()->GetSubStateName();
+}
+
+// 汎用遷移
+void PlayerStateMachine::ChangeItemState()
+{
+    // アイテムの種類で遷移先を変更
+    switch (GetItemController()->GetCurrentItemType())
+    {
+    case ItemType::Drinkable:
+        // アイテム使用
+        if (GetItemController()->Use())
+            GetStateMachine().ChangeState("Drink");
+        break;
+    case ItemType::Useable:
+
+        break;
+    }
 }
 
 #pragma region ベースステート

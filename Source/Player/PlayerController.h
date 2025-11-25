@@ -83,7 +83,6 @@ public:
 	bool IsSelect()	const { return _isSelect; }
 	bool IsDrawingWeapon() const { return _isDrawingWeapon; }
 	int GetChargeLevel() const { return _chargeLevel; }
-	float GetUseItemTime() const { return _useItemTime; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
 	void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
@@ -100,7 +99,6 @@ public:
 	void SetIsSelect(bool isSelect) { _isSelect = isSelect; }
 	void SetIsDrawingWeapon(bool isDrawingWeapon) { _isDrawingWeapon = isDrawingWeapon; }
 	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
-	void SetUseItemTime(float useItemTime) { _useItemTime = useItemTime; }
 
     float GetDashRotationFactor() const { return _dashRotationFactor; }
 
@@ -156,8 +154,6 @@ private:
 
 	// 溜め段階
 	int _chargeLevel = 0;
-	// アイテム使用時間
-	float _useItemTime = 0.0f;
 #pragma endregion
 
 	// ダッシュ時の回転補正値

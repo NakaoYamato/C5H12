@@ -65,6 +65,7 @@ public:
 	ItemData::ParameterMap GetParameterKeys() override;
 
 private:
+	float _timer = 0.0f;
 	float _healAmount = 0.0f;
 	float _requiredTime = 0.0f;
 };

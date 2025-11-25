@@ -41,24 +41,6 @@ void PlayerItemController::Update(float elapsedTime)
 
 	itemUIController->SetCurrentIndex(_currentIndex);
 
-	if (_function)
-	{
-		switch (_function->GetState())
-		{
-		case ItemFunctionBase::State::Execute:
-			_function->Execute(elapsedTime);
-			break;
-		case ItemFunctionBase::State::End:
-			_function->End();
-			_function = nullptr;
-			if (auto playerController = _playerController.lock())
-			{
-				playerController->SetIsAbleToUseItem(true);
-			}
-			break;
-		}
-	}
-
     // 操作UIに説明文を追加
 	if (itemUIController->IsOpen())
 	{
@@ -78,6 +60,32 @@ void PlayerItemController::Update(float elapsedTime)
 // GUI描画
 void PlayerItemController::DrawGui()
 {
+}
+
+// アイテム効果処理
+ItemFunctionBase::State PlayerItemController::ExecuteItemFunction(float elapsedTime)
+{
+	if (_function)
+	{
+		switch (_function->GetState())
+		{
+		case ItemFunctionBase::State::Execute:
+			_function->Execute(elapsedTime);
+			break;
+		}
+
+		if (_function->GetState() == ItemFunctionBase::State::End)
+		{
+			_function->End();
+			_function = nullptr;
+			if (auto playerController = _playerController.lock())
+			{
+				playerController->SetIsAbleToUseItem(true);
+			}
+		}
+	}
+
+	return _function ? _function->GetState() : ItemFunctionBase::State::End;
 }
 
 // 開く
@@ -107,6 +115,26 @@ bool PlayerItemController::Use()
 	_function = userDataManager->UseItem(_currentIndex, GetActor().get());
 
 	return _function != nullptr;
+}
+
+// 現在選択中のアイテムタイプを取得
+// ItemTypeMaxであれば選択中アイテムなし
+ItemType PlayerItemController::GetCurrentItemType() const
+{
+	auto userDataManager = _userDataManager.lock();
+	if (!userDataManager)
+		return ItemType::ItemTypeMax;
+	auto pouch = userDataManager->GetPouchItem(_currentIndex);
+	if (pouch)
+	{
+		auto item = userDataManager->GetAcquiredItemData(pouch->itemIndex);
+		if (item && item->GetBaseData())
+		{
+			return item->GetBaseData()->type;
+		}
+	}
+
+	return ItemType::ItemTypeMax;
 }
 
 bool PlayerItemController::IsClosed() const

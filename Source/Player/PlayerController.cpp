@@ -172,18 +172,6 @@ void PlayerController::Update(float elapsedTime)
 			material.SetParameter("bodyColor", color);
 		}
 	}
-
-	// アイテム使用
-	if (!IsDrawingWeapon() && IsAbleToUseItem() && IsUsingItem())
-	{
-		auto playerItemController = _playerItemController.lock();
-		if (playerItemController)
-		{
-			if (playerItemController->Use())
-				SetIsAbleToUseItem(false);
-		}
-	}
-	SetIsUsingItem(false);
 }
 
 // 3D描画後の描画処理

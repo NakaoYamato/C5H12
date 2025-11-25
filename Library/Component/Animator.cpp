@@ -658,13 +658,6 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
     int animationIndex = _animationIndex;
 	float animationTimer = _animationTimer;
 	float animationLength = GetAnimationEndTime();
-	// 部分アニメーション中
-    if (_partialAnimationIndex != -1)
-    {
-        animationIndex = _partialAnimationIndex;
-        animationTimer = _partialAnimationTimer;
-        animationLength = _model.lock()->GetResource()->GetAnimations().at(animationIndex).secondsLength;
-    }
 
     if (_partialRootMotionIgnoreCount > 0)
     {
@@ -713,26 +706,12 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
     // 現在のルートノード取得
     ModelResource::Node currentRootNode = poseNodes[_rootNodeIndex];
     // ブレンド中はブレンドしていないルートノードを取得
-	// 部分アニメーション中
-    if (_partialAnimationIndex != -1)
+    if (_blendTimer < _blendEndTime)
     {
-        if (_partialBlendTimer < _partialBlendDuration)
-        {
-            ModelResource::Node node{};
-            ComputeAnimation(animationIndex, _rootNodeIndex, animationTimer, node);
-            // poseNodesの行列を使いたいためpositionのみ取得
-            currentRootNode.position = node.position;
-        }
-    }
-    else
-    {
-        if (_blendTimer < _blendEndTime)
-        {
-            ModelResource::Node node{};
-            ComputeAnimation(animationIndex, _rootNodeIndex, animationTimer, node);
-            // poseNodesの行列を使いたいためpositionのみ取得
-            currentRootNode.position = node.position;
-        }
+        ModelResource::Node node{};
+        ComputeAnimation(animationIndex, _rootNodeIndex, animationTimer, node);
+        // poseNodesの行列を使いたいためpositionのみ取得
+        currentRootNode.position = node.position;
     }
     Vector3 currentPosition = Vector3::TransformCoord(currentRootNode.position, currentRootNode.parent->worldTransform);
 
@@ -845,8 +824,9 @@ void Animator::UpdatePartialAnimation(float elapsedTime)
     if (_partialState != PartialState::None && _partialAnimationIndex != -1 && !_partialMaskIndices.empty())
     {
         // ウェイトの更新
-        if (_partialState == PartialState::FadingIn)
+        switch (_partialState)
         {
+        case Animator::PartialState::FadingIn:
             _partialBlendTimer += elapsedTime;
             if (_partialBlendTimer >= _partialBlendDuration)
             {
@@ -858,9 +838,11 @@ void Animator::UpdatePartialAnimation(float elapsedTime)
             {
                 _partialWeight = _partialBlendTimer / _partialBlendDuration;
             }
-        }
-        else if (_partialState == PartialState::FadingOut)
-        {
+            break;
+        case Animator::PartialState::Active:
+            _partialWeight = 1.0f;
+            break;
+        case Animator::PartialState::FadingOut:
             _partialBlendTimer += elapsedTime;
             if (_partialBlendTimer >= _partialBlendDuration)
             {
@@ -875,10 +857,7 @@ void Animator::UpdatePartialAnimation(float elapsedTime)
                 // 1.0 -> 0.0 へ
                 _partialWeight = 1.0f - (_partialBlendTimer / _partialBlendDuration);
             }
-        }
-        else // Active
-        {
-            _partialWeight = 1.0f;
+            break;
         }
 
         // ステートがNoneになった瞬間の対策
@@ -896,7 +875,11 @@ void Animator::UpdatePartialAnimation(float elapsedTime)
                 if (_isPartialLoop)
                     _partialAnimationTimer = std::fmod(_partialAnimationTimer, anim.secondsLength);
                 else
+                {
                     _partialAnimationTimer = anim.secondsLength;
+					// 停止
+                    _isPartialPlaying = false;
+                }
             }
 
             // 部分アニメーションの姿勢計算（一時バッファへ）

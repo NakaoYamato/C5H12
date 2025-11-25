@@ -21,12 +21,19 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
+	// アイテム効果処理
+	ItemFunctionBase::State ExecuteItemFunction(float elapsedTime);
+
 	// 開く
 	void Open();
 	// 閉じる
 	void Close();
 	// 使う
 	bool Use();
+
+	// 現在選択中のアイテムタイプを取得
+	// ItemTypeMaxであれば選択中アイテムなし
+	ItemType GetCurrentItemType() const;
 
 	bool IsClosed() const;
 	bool IsOpen() const;

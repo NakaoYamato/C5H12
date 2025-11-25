@@ -10,15 +10,18 @@ void PlayerNonCombatIdleState::OnExecute(float elapsedTime)
 	// 抜刀遷移
 	if (_owner->GetPlayer()->IsAttack())
 		_owner->GetStateMachine().ChangeState("ToCombat");
-    // 移動
-    else if (_owner->GetPlayer()->IsMoving())
-        _owner->GetStateMachine().ChangeState("Walk");
-    // 回避移行
-    else if (_owner->GetPlayer()->IsEvade())
-        _owner->GetStateMachine().ChangeState("Evade");
-    // ガード移行
-    else if (_owner->GetPlayer()->IsGuard())
-        _owner->GetStateMachine().ChangeState("CombatGuard");
+	// 移動
+	else if (_owner->GetPlayer()->IsMoving())
+		_owner->GetStateMachine().ChangeState("Walk");
+	// 回避移行
+	else if (_owner->GetPlayer()->IsEvade())
+		_owner->GetStateMachine().ChangeState("Evade");
+	// ガード移行
+	else if (_owner->GetPlayer()->IsGuard())
+		_owner->GetStateMachine().ChangeState("CombatGuard");
+	// アイテム使用
+	else if (_owner->GetPlayer()->IsUsingItem())
+		_owner->ChangeItemState();
 }
 #pragma endregion
 
@@ -240,6 +243,9 @@ void PlayerNonCombatWalkState::OnExecute(float elapsedTime)
 		else
 			_owner->GetStateMachine().ChangeState("ToCombat");
 	}
+	// アイテム使用
+	else if (_owner->GetPlayer()->IsUsingItem())
+		_owner->ChangeItemState();
 }
 void PlayerNonCombatWalkState::OnExit()
 {
@@ -494,6 +500,9 @@ void PlayerNonCombatRunState::OnExecute(float elapsedTime)
 		else
 			_owner->GetStateMachine().ChangeState("ToCombat");
 	}
+	// アイテム使用
+	else if (_owner->GetPlayer()->IsUsingItem())
+		_owner->ChangeItemState();
 }
 void PlayerNonCombatRunState::OnExit()
 {
@@ -830,71 +839,84 @@ void PlayerNonCombatDownState::OnExit()
 #pragma region 飲む
 namespace PlayerDrinkSubState
 {
-	class DrinkStartSubState : public PlayerSSB
+	class DrinkStartSubState : public StateBase<PlayerStateMachine>
 	{
 	public:
 		DrinkStartSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
-				"DrinkStart",
-				u8"DrinkStart",
-				0.2f,
-				false,
-				true)
+			StateBase(stateMachine)
 		{
 		}
 		~DrinkStartSubState() override {}
+		const char* GetName() const override { return "DrinkStart"; }
+
+		void OnEnter() override
+		{
+			// 部分アニメーションを再生
+			_owner->GetAnimator()->PlayPartialAnimation(u8"DrinkStart", false);
+		}
 		void OnExecute(float elapsedTime) override
 		{
-			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			// 部分アニメーションが終了していたら遷移
+			if (_owner->GetAnimator()->IsPartialAnimationPlaying() == false)
 				_owner->GetStateMachine().ChangeSubState("Drinking");
 		}
+		void OnExit() override {}
 	};
-	class DrinkingSubState : public PlayerSSB
+	class DrinkingSubState : public StateBase<PlayerStateMachine>
 	{
 	public:
 		DrinkingSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
-				u8"Drinking",
-				0.2f,
-				true,
-				true)
+			StateBase(stateMachine)
 		{
 		}
 		~DrinkingSubState() override {}
+
+		const char* GetName() const override { return "Drinking"; }
 		void OnEnter() override
 		{
-			PlayerSSB::OnEnter();
-			_timer = 0.0f;
+			// 部分アニメーションを再生
+			_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
 		}
 		void OnExecute(float elapsedTime) override
 		{
-			_timer += elapsedTime;
-			if (_timer >= _owner->GetPlayer()->GetUseItemTime())
+			// アイテム効果処理
+			auto type = _owner->GetItemController()->ExecuteItemFunction(elapsedTime);
+
+			// 部分アニメーションが終了したタイミングで定時間経過していたら遷移
+			if (!_owner->GetAnimator()->IsPartialAnimationPlaying())
 			{
-				_owner->GetStateMachine().ChangeSubState("DrinkEnd");
+				if (type == ItemFunctionBase::State::End)
+				{
+					_owner->GetStateMachine().ChangeSubState("DrinkEnd");
+				}
+				else
+				{
+					// 部分アニメーションを再生
+					_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
+				}
 			}
 		}
-	private:
-		float _timer = 0.0f;
+		void OnExit() override {}
 	};
-	class DrinkEndSubState : public PlayerSSB
+	class DrinkEndSubState : public StateBase<PlayerStateMachine>
 	{
 	public:
 		DrinkEndSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
-				"DrinkEnd",
-				u8"DrinkEnd",
-				0.2f,
-				false,
-				true)
+			StateBase(stateMachine)
 		{
 		}
 		~DrinkEndSubState() override {}
+
+		const char* GetName() const override { return "DrinkEnd"; }
+		void OnEnter() override
+		{
+			// 部分アニメーションを再生
+			_owner->GetAnimator()->PlayPartialAnimation(u8"DrinkEnd", false, 0.0f);
+		}
 		void OnExecute(float elapsedTime) override
 		{
-			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			// 部分アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPartialAnimationPlaying())
 			{
 				if (_owner->GetPlayer()->IsMoving())
 				{
@@ -905,6 +927,7 @@ namespace PlayerDrinkSubState
                     _owner->GetStateMachine().ChangeState("Idle");
 			}
 		}
+		void OnExit() override {}
 	};
 }
 
@@ -921,6 +944,8 @@ void PlayerNonCombatDrinkState::OnEnter()
 {
 	_owner->GetPlayer()->SetIsAbleToUseItem(false);
 	ChangeSubState("DrinkStart");
+
+	_owner->GetAnimator()->PlayAnimation(u8"Idle", true, 0.2f);
 }
 
 void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
@@ -932,17 +957,17 @@ void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
 	// 移動処理
 	if (_owner->GetPlayer()->IsMoving())
 	{
-		if (!_owner->GetAnimator()->IsPartialAnimationPlaying())
+		if (_owner->GetAnimator()->GetAnimationName() != "RunLoopF0")
 		{
-			_owner->GetAnimator()->PlayPartialAnimation(u8"RunLoopF0", true);
+			_owner->GetAnimator()->PlayAnimation(u8"RunLoopF0", true, 0.2f);
 		}
 		// 移動方向に向く
 		_owner->RotationMovement(elapsedTime);
 	}
 	else
 	{
-		if (_owner->GetAnimator()->IsPartialAnimationPlaying())
-			_owner->GetAnimator()->StopPartialAnimation(0.5f);
+		if (_owner->GetAnimator()->GetAnimationName() != "Idle")
+			_owner->GetAnimator()->PlayAnimation(u8"Idle", true, 0.2f);
 	}
 
 	// 回避移行
@@ -952,8 +977,7 @@ void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
 
 void PlayerNonCombatDrinkState::OnExit()
 {
-	_owner->GetAnimator()->StopPartialAnimation();
-	_owner->GetAnimator()->Update(0.2f);
+	_owner->GetAnimator()->StopPartialAnimation(1.0f);
 	_owner->GetPlayer()->SetIsAbleToUseItem(true);
 }
 #pragma endregion

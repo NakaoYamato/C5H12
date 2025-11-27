@@ -70,7 +70,7 @@ void LoadingSprController::Update(float elapsedTime)
 	spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(Vector2(scale, 1.0f));
 
 	// フェーズ処理
-	if (_loadingScene && scale >= maxScale)
+	if (_loadingScene && _loadingScene->IsNextSceneReady() && scale >= maxScale)
 	{
 		if (!_loadingScene->GetFade()->IsFading())
 		{

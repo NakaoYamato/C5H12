@@ -159,3 +159,20 @@ public:
 	void OnExit() override;
 };
 #pragma endregion
+
+#pragma region 疲労
+class PlayerNonCombatFatigueState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerNonCombatFatigueState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatFatigueState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Fatigue"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+private:
+	float _recoverStaminaSpeed = 30.0f;
+};
+#pragma endregion
+

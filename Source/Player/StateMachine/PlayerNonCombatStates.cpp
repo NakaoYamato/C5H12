@@ -474,7 +474,8 @@ void PlayerNonCombatRunState::OnExecute(float elapsedTime)
 	// スタミナが尽きたら遷移
 	if (_owner->GetStaminaController()->GetStamina() <= 0.0f)
 	{
-		_owner->GetStateMachine().ChangeState("Idle");
+		_owner->GetStateMachine().ChangeState("Fatigue");
+		return;
     }
 
 	// ダッシュ入力がなければ歩きへ遷移
@@ -576,6 +577,13 @@ void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
 		_owner->GetStateMachine().ChangeState("Idle");
 	else if (_owner->GetPlayer()->CallCancelEvent())
 	{
+		// スタミナが尽きたら遷移
+		if (_owner->GetStaminaController()->GetStamina() <= 0.0f)
+		{
+			_owner->GetStateMachine().ChangeState("Fatigue");
+			return;
+		}
+
 		// 攻撃移行
 		if (_owner->GetPlayer()->IsAttack())
 			_owner->GetStateMachine().ChangeState("CombatAttack1");
@@ -979,5 +987,105 @@ void PlayerNonCombatDrinkState::OnExit()
 {
 	_owner->GetAnimator()->StopPartialAnimation(1.0f);
 	_owner->GetPlayer()->SetIsAbleToUseItem(true);
+}
+#pragma endregion
+
+#pragma region 疲労
+namespace PlayerFatigueSubState
+{
+	class FatigueStartSubState : public PlayerSSB
+	{
+	public:
+		FatigueStartSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(
+				stateMachine,
+				"FatigueStart",
+				u8"KnockDownStart",
+				1.0f,
+				false,
+				false)
+		{
+		}
+		~FatigueStartSubState() override {}
+
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlaying())
+				_owner->GetStateMachine().ChangeSubState("FatigueLoop");
+		}
+	};
+	class FatigueLoopSubState : public PlayerSSB
+	{
+	public:
+		FatigueLoopSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(
+				stateMachine,
+				"FatigueLoop",
+				u8"KnockDownLoop",
+				0.0f,
+				true,
+				false)
+		{
+		}
+		~FatigueLoopSubState() override {}
+
+		void OnExecute(float elapsedTime) override
+		{
+			// スタミナが回復したら終了に遷移
+			if (_owner->GetStaminaController()->GetStamina() >=
+				_owner->GetStaminaController()->GetMaxStamina())
+			{
+				_owner->GetStateMachine().ChangeSubState("FatigueEnd");
+				return;
+			}
+		}
+	};
+	class FatigueEndSubState : public PlayerSSB
+	{
+	public:
+		FatigueEndSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(
+				stateMachine,
+				"FatigueEnd",
+				u8"KnockDownEnd",
+				0.5f,
+				false,
+				false)
+		{
+		}
+		~FatigueEndSubState() override {}
+
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlaying())
+				_owner->GetStateMachine().ChangeState("Idle");
+		}
+	};
+}
+PlayerNonCombatFatigueState::PlayerNonCombatFatigueState(PlayerStateMachine* stateMachine) :
+	HierarchicalStateBase(stateMachine)
+{
+	RegisterSubState(std::make_shared<PlayerFatigueSubState::FatigueStartSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerFatigueSubState::FatigueLoopSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerFatigueSubState::FatigueEndSubState>(stateMachine));
+}
+
+void PlayerNonCombatFatigueState::OnEnter()
+{
+	ChangeSubState("FatigueStart");
+	// スタミナ自動回復を開始
+	_owner->GetStaminaController()->SetIsStaminaRecover(true);
+}
+
+void PlayerNonCombatFatigueState::OnExecute(float elapsedTime)
+{
+	// スタミナを回復
+	_owner->GetStaminaController()->RecoverStamina(_recoverStaminaSpeed * elapsedTime);
+}
+
+void PlayerNonCombatFatigueState::OnExit()
+{
 }
 #pragma endregion

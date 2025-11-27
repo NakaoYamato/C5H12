@@ -319,6 +319,9 @@ private:
 
 	Vector3	_rootOffset		= Vector3::Zero;
 	Vector3	_rootMovement	= Vector3::Zero;
+
+	// アニメーションの最初の姿勢
+	ModelResource::Node _startRootNode{};
 #pragma endregion
 
 #pragma region イベント
@@ -367,5 +370,4 @@ private:
 	// ルートモーション処理を行わない回数
     int _partialRootMotionIgnoreCount = 0;
 #pragma endregion
-
 };

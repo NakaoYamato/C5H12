@@ -11,6 +11,7 @@
 #include "../../Collision/CollisionDefine.h"
 
 #include "../../Library/DebugSupporter/DebugSupporter.h"
+#include "../../Library/ImGui/ImGuiProfiler.h"
 
 // 前方宣言
 class Component;
@@ -391,5 +392,11 @@ protected:
 	bool 				_isDrawingHierarchy = false;
 	// 親のトランスフォームを反映するか
 	bool				_isInheritParentTransform = true;
+	// プロファイラーを開くか
+	bool				_isOpenProfiler = false;
+#pragma endregion
+
+#pragma region プロファイル
+	ImGuiControl::Profiler _profiler;
 #pragma endregion
 };

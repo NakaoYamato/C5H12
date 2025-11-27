@@ -136,17 +136,25 @@ namespace ImGuiControl
 
     struct ProfileScope
     {
-        ProfileScope(int threadIndex, const char* name, unsigned int color, const char* fileName, int line)
-            : threadIndex(threadIndex)
+        ProfileScope(int threadIndex, const char* name, unsigned int color, const char* fileName, int line, Profiler* target = nullptr)
+            : _threadIndex(threadIndex)
         {
-            globalInstance.PushSectionInternal(threadIndex, name, color, fileName, line);
+			if (target == nullptr)
+                _target = &globalInstance;
+            else
+				_target = target;
+
+            if (_target)
+                _target->PushSectionInternal(_threadIndex, name, color, fileName, line);
         }
 
         ~ProfileScope()
         {
-            globalInstance.PopSectionInternal(threadIndex);
+            if (_target)
+                _target->PopSectionInternal(_threadIndex);
         }
     private:
-        int threadIndex;
+        Profiler* _target = nullptr;
+        int _threadIndex;
     };
 }

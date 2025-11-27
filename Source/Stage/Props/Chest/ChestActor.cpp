@@ -25,10 +25,12 @@ void ChestActor::OnCreate()
 	// ƒpƒ‰ƒ[ƒ^İ’è
 	GetTransform().SetScale(2.0f);
 	bodyCollider->SetLayer(CollisionLayer::Stage);
+	bodyCollider->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
 	bodyCollider->SetTrigger(false);
 	bodyCollider->SetPosition(Vector3(0.0f, 0.3f, 0.0f));
 	bodyCollider->SetRadius(1.0f);
 	judgeCollider->SetLayer(CollisionLayer::Stage);
+	judgeCollider->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
 	judgeCollider->SetTrigger(true);
 	judgeCollider->SetPosition(Vector3(0.0f, 0.3f, 0.0f));
 	judgeCollider->SetRadius(2.0f);

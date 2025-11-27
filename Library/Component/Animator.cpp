@@ -5,6 +5,9 @@
 
 #include <imgui.h>
 
+// アニメーション計算の分割数
+static const int ANIMATION_COMPUTE_DIVIDE_COUNT = 50;
+
 // 開始処理
 void Animator::Start()
 {
@@ -22,14 +25,6 @@ void Animator::Update(float elapsedTime)
     _rootMovement = Vector3::Zero;
     std::vector<ModelResource::Node>&   poseNodes = _model.lock()->GetPoseNodes();
 	std::vector<ModelResource::Node>    oldPoseNodes = poseNodes;
-    // ノードのワールド座標を取得
-	Vector3 oldPosition = Vector3::Zero;
-    if (_useRootMotion && _rootNodeIndex != -1 && _isPlaying && !_isPaused)
-    {
-        ModelResource::Node oldRootNode{};
-        ComputeAnimation(_animationIndex, _rootNodeIndex, _animationTimer, oldRootNode);
-        oldPosition = Vector3::TransformCoord(oldRootNode.position, poseNodes[_rootNodeIndex].parent->worldTransform);
-    }
 
     // アニメーション経過時間更新
     UpdateAnimSeconds(elapsedTime);
@@ -68,19 +63,17 @@ void Animator::Update(float elapsedTime)
     // 取り除き
     if (_rootNodeIndex != -1)
     {
-        ModelResource::Node startRootNode{};
-        ComputeAnimation(_animationIndex, _rootNodeIndex, 0.0f, startRootNode);
         // 回転量の取り除き
         if (_removeRootRotation)
         {
             // rootノードの回転量を取り除く
-            poseNodes[_rootNodeIndex].rotation = startRootNode.rotation;
+            poseNodes[_rootNodeIndex].rotation = _startRootNode.rotation;
         }
 		// 位置量の取り除き
 		if (_removeRootMovement)
 		{
 			// rootノードの位置量を取り除く
-			poseNodes[_rootNodeIndex].position = startRootNode.position;
+			poseNodes[_rootNodeIndex].position = _startRootNode.position;
 		}
     }
 }
@@ -318,6 +311,12 @@ void Animator::PlayAnimation(int index, bool loop, float blendSeconds)
     // ブレンドアニメーションパラメーター
     _blendTimer = 0.0f;
     _blendEndTime = blendSeconds;
+
+	// 開始時のルートノード情報を取得
+    if (_rootNodeIndex != -1)
+    {
+        ComputeAnimation(_animationIndex, _rootNodeIndex, 0.0f, _startRootNode);
+    }
 }
 
 // アニメーション再生(名前から検索)
@@ -410,9 +409,41 @@ void Animator::ComputeAnimation(int animationIndex, float time, std::vector<Mode
     {
         nodePoses.resize(_model.lock()->GetPoseNodes().size());
     }
-    for (size_t nodeIndex = 0; nodeIndex < nodePoses.size(); ++nodeIndex)
+	size_t nodeSize = nodePoses.size();
+    if (JobSystem::Instance().UseMultiThread())
     {
-        ComputeAnimation(animationIndex, static_cast<int>(nodeIndex), time, nodePoses.at(nodeIndex));
+        std::vector<std::future<void>> jobResults;
+        for (size_t i = 0; i * 50 < nodeSize; i++)
+        {
+			std::string jobName = "Animator::ComputeAnimation " + std::to_string(i);
+            jobResults.emplace_back(JobSystem::Instance().EnqueueJob(jobName.c_str(),
+                ImGuiControl::Profiler::Color::Blue,
+                [&](size_t index)
+                {
+                    size_t startIndex = index * 50;
+                    size_t endIndex = (index + 1) * 50;
+                    if (endIndex > nodeSize)
+                        endIndex = nodeSize;
+                    for (size_t nodeIndex = startIndex; nodeIndex < endIndex; ++nodeIndex)
+                    {
+                        ComputeAnimation(animationIndex, static_cast<int>(nodeIndex), time, nodePoses.at(nodeIndex));
+                    }
+                },
+                i
+            ));
+        }
+        // すべてのジョブの終了を待機
+        for (auto& result : jobResults)
+        {
+            result.get();
+        }
+    }
+    else
+    {
+        for (size_t nodeIndex = 0; nodeIndex < nodeSize; ++nodeIndex)
+        {
+            ComputeAnimation(animationIndex, static_cast<int>(nodeIndex), time, nodePoses.at(nodeIndex));
+        }
     }
 }
 
@@ -665,33 +696,31 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         _partialRootMotionIgnoreCount--;
         // ポーズノードの移動量を取り除く
         poseNodes[_rootNodeIndex].position = {};
-        ModelResource::Node startRootNode{};
-        ComputeAnimation(animationIndex, _rootNodeIndex, 0.0f, startRootNode);
         // オブジェクトに応じてノードの位置を調整
         switch (_rootMotionOption)
         {
         case Animator::RootMotionOption::None:
             break;
         case Animator::RootMotionOption::RemovePositionX:
-            poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
-            poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+            poseNodes[_rootNodeIndex].position.y = _startRootNode.position.y;
+            poseNodes[_rootNodeIndex].position.z = _startRootNode.position.z;
             break;
         case Animator::RootMotionOption::RemovePositionY:
-            poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
-            poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+            poseNodes[_rootNodeIndex].position.x = _startRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.z = _startRootNode.position.z;
             break;
         case Animator::RootMotionOption::RemovePositionZ:
-            poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
-            poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+            poseNodes[_rootNodeIndex].position.x = _startRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.y = _startRootNode.position.y;
             break;
         case Animator::RootMotionOption::RemovePositionXY:
-            poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+            poseNodes[_rootNodeIndex].position.z = _startRootNode.position.z;
             break;
         case Animator::RootMotionOption::RemovePositionXZ:
-            poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+            poseNodes[_rootNodeIndex].position.y = _startRootNode.position.y;
             break;
         case Animator::RootMotionOption::RemovePositionYZ:
-            poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
+            poseNodes[_rootNodeIndex].position.x = _startRootNode.position.x;
             break;
         case Animator::RootMotionOption::RemovePositionXYZ:
             break;
@@ -736,19 +765,16 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         // 移動量を取得する
         oldTimer = animationLength + oldTimer;
         float endTimer = animationLength - FLT_EPSILON;
-        float startTimer = 0.0f;
 
         ModelResource::Node oldRootNode{};
         ModelResource::Node endRootNode{};
-        ModelResource::Node startRootNode{};
         ComputeAnimation(animationIndex, _rootNodeIndex, oldTimer, oldRootNode);
         ComputeAnimation(animationIndex, _rootNodeIndex, endTimer, endRootNode);
-        ComputeAnimation(animationIndex, _rootNodeIndex, startTimer, startRootNode);
 
         // ノードのワールド座標を取得
         Vector3 oldPosition = Vector3::TransformCoord(oldRootNode.position, currentRootNode.parent->worldTransform);
         Vector3 endPosition = Vector3::TransformCoord(endRootNode.position, currentRootNode.parent->worldTransform);
-        Vector3 startPosition = Vector3::TransformCoord(startRootNode.position, currentRootNode.parent->worldTransform);
+        Vector3 startPosition = Vector3::TransformCoord(_startRootNode.position, currentRootNode.parent->worldTransform);
 
         // 移動量取得
         // デバッグでF5を押しているときは移動量を取得しない
@@ -758,33 +784,31 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
 
     // ポーズノードの移動量を取り除く
     poseNodes[_rootNodeIndex].position = {};
-    ModelResource::Node startRootNode{};
-    ComputeAnimation(animationIndex, _rootNodeIndex, 0.0f, startRootNode);
     // オブジェクトに応じてノードの位置を調整
     switch (_rootMotionOption)
     {
     case Animator::RootMotionOption::None:
         break;
     case Animator::RootMotionOption::RemovePositionX:
-        poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
-        poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+        poseNodes[_rootNodeIndex].position.y = _startRootNode.position.y;
+        poseNodes[_rootNodeIndex].position.z = _startRootNode.position.z;
         break;
     case Animator::RootMotionOption::RemovePositionY:
-        poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
-        poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+        poseNodes[_rootNodeIndex].position.x = _startRootNode.position.x;
+        poseNodes[_rootNodeIndex].position.z = _startRootNode.position.z;
         break;
     case Animator::RootMotionOption::RemovePositionZ:
-        poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
-        poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+        poseNodes[_rootNodeIndex].position.x = _startRootNode.position.x;
+        poseNodes[_rootNodeIndex].position.y = _startRootNode.position.y;
         break;
     case Animator::RootMotionOption::RemovePositionXY:
-        poseNodes[_rootNodeIndex].position.z = startRootNode.position.z;
+        poseNodes[_rootNodeIndex].position.z = _startRootNode.position.z;
         break;
     case Animator::RootMotionOption::RemovePositionXZ:
-        poseNodes[_rootNodeIndex].position.y = startRootNode.position.y;
+        poseNodes[_rootNodeIndex].position.y = _startRootNode.position.y;
         break;
     case Animator::RootMotionOption::RemovePositionYZ:
-        poseNodes[_rootNodeIndex].position.x = startRootNode.position.x;
+        poseNodes[_rootNodeIndex].position.x = _startRootNode.position.x;
         break;
     case Animator::RootMotionOption::RemovePositionXYZ:
         break;

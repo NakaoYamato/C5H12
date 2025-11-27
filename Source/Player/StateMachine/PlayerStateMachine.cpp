@@ -34,6 +34,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDownState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDeathState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDrinkState>(this));
+	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatFatigueState>(this));
 
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordIdleState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordRunState>(this));

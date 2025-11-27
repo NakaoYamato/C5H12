@@ -219,10 +219,6 @@ void Profiler::DrawUI()
         ImGui::BeginChild("Controls", controlsAreaSize, showBorders);
         ImGui::GetWindowDrawList()->AddRectFilled(controlsAreaMin, controlsAreaMax, controlsBackColor);
 
-        if (ImGui::Button("Record", ImVec2(controlsWidth, controlsHeight)))
-        {
-        }
-
         ImGui::SameLine();
         if (ImGui::Button(IsPaused() ? "Resume" : "Pause", ImVec2(controlsWidth, controlsHeight)))
         {
@@ -372,33 +368,10 @@ void Profiler::DrawUI()
                 double endTime = endFrame->endTime == -1 ? recordsMaxTime : endFrame->endTime;
                 _timeOffset = recordsMaxTime - endTime;
                 _timeDuration = endTime - startFrame->startTime;
-
-                if (IsPaused() == false)
-                {
-                    //SetPause(m_frameSelectionEnd != 0);
-                }
             }
         }
     }
     ImGui::EndChild();
-
-    //-------------------------------------------------------------------------
-    // Vertical slider for fames max duration 
-    //-------------------------------------------------------------------------
-    //{
-    //    ImGui::SameLine();
-    //    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + frameAreaSliderSpacing);
-    //    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
-    //    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
-    //    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImColor(frameAreaSliderBackColor));
-    //    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImColor(frameAreaSliderBackColor));
-    //    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImColor(frameAreaSliderBackColor));
-    //    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImColor(frameAreaSliderGrabColor));
-    //    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImColor(frameAreaSliderGrabColor));
-    //    ImGui::VSliderFloat("##frameMaxDuration", ImVec2(frameAreaSliderWidth, frameAreaHeight), &m_frameAreaMaxDuration, 1.0f, 1000.0f / 30.0f, "");
-    //    ImGui::PopStyleColor(5);
-    //    ImGui::PopStyleVar(2);
-    //}
 
     //-------------------------------------------------------------------------
     // Store interaction button

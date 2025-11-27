@@ -12,10 +12,15 @@
 
 #include <ImGuizmo.h>
 
+static bool ActorProfilerIsPause = false;
+
 #pragma region ActorManagerで呼ぶ関数
 /// 生成処理
 void Actor::Create(ActorTag tag)
 {
+	_profiler.Initialize(&ActorProfilerIsPause, [](bool pause) {ActorProfilerIsPause = pause; }, 1);
+	_profiler._threads[0].name = "Actor";
+
 	// タグを設定
 	_tag = tag;
 
@@ -25,6 +30,8 @@ void Actor::Create(ActorTag tag)
 /// 削除時処理
 void Actor::Deleted()
 {
+	_profiler.Shutdown();
+
 	// 各コンポーネントの削除処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
@@ -83,6 +90,9 @@ void Actor::Start()
 ///	更新処理
 void Actor::Update(float elapsedTime)
 {
+	_profiler.NewFrame();
+	ImGuiControl::ProfileScope profileScope(0, "Update", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 
@@ -94,10 +104,12 @@ void Actor::Update(float elapsedTime)
 	// 各コンポーネントの更新処理
 	for (std::shared_ptr<Component>& component : _components)
 	{
+		ImGuiControl::ProfileScope profileScope(0, component->GetName(), ImGuiControl::Profiler::Color::Blue, __FILE__, __LINE__, &_profiler);
 		component->Update(elapsedTime);
 	}
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
+		ImGuiControl::ProfileScope profileScope(0, collider->GetName(), ImGuiControl::Profiler::Color::Green, __FILE__, __LINE__, &_profiler);
 		collider->Update(elapsedTime);
 	}
 
@@ -109,15 +121,19 @@ void Actor::Update(float elapsedTime)
 /// Update後更新処理
 void Actor::LateUpdate(float elapsedTime)
 {
+	ImGuiControl::ProfileScope profileScope(0, "LateUpdate", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 
 	for (std::shared_ptr<Component>& component : _components)
 	{
+		ImGuiControl::ProfileScope profileScope(0, component->GetName(), ImGuiControl::Profiler::Color::Purple, __FILE__, __LINE__, &_profiler);
 		component->LateUpdate(elapsedTime);
 	}
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
+		ImGuiControl::ProfileScope profileScope(0, collider->GetName(), ImGuiControl::Profiler::Color::Yellow, __FILE__, __LINE__, &_profiler);
 		collider->LateUpdate(elapsedTime);
 	}
 	OnLateUpdate(elapsedTime);
@@ -125,6 +141,8 @@ void Actor::LateUpdate(float elapsedTime)
 /// 固定間隔更新処理
 void Actor::FixedUpdate()
 {
+	ImGuiControl::ProfileScope profileScope(0, "FixedUpdate", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 
@@ -143,6 +161,8 @@ void Actor::FixedUpdate()
 /// 描画処理
 void Actor::Render(const RenderContext& rc)
 {
+	ImGuiControl::ProfileScope profileScope(0, "Render", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 	// 表示チェック
@@ -164,6 +184,8 @@ void Actor::Render(const RenderContext& rc)
 /// デバッグ表示
 void Actor::DebugRender(const RenderContext& rc)
 {
+	ImGuiControl::ProfileScope profileScope(0, "DebugRender", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 	// デバッグ表示チェック
@@ -185,6 +207,8 @@ void Actor::DebugRender(const RenderContext& rc)
 /// 影描画
 void Actor::CastShadow(const RenderContext& rc)
 {
+	ImGuiControl::ProfileScope profileScope(0, "CastShadow", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 
@@ -196,6 +220,8 @@ void Actor::CastShadow(const RenderContext& rc)
 /// 3D描画後の描画処理
 void Actor::DelayedRender(const RenderContext& rc)
 {
+	ImGuiControl::ProfileScope profileScope(0, "DelayedRender", ImGuiControl::Profiler::Color::Dark, __FILE__, __LINE__, &_profiler);
+
 	// 起動チェック
 	if (!_isActive)return;
 
@@ -210,6 +236,17 @@ void Actor::DelayedRender(const RenderContext& rc)
 /// Gui描画
 void Actor::DrawGui()
 {
+	// プロファイラー表示
+	if (_isOpenProfiler)
+	{
+		std::string title = std::string(GetName()) + " Profiler";
+		if (ImGui::Begin(title.c_str()))
+		{
+			_profiler.DrawUI();
+		}
+		ImGui::End();
+	}
+
 	// 親の名前表示
 	if (GetParent())
 	{
@@ -229,6 +266,7 @@ void Actor::DrawGui()
 		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
 		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
 		ImGui::Checkbox(u8"InheritParentTransform", &_isInheritParentTransform);
+		ImGui::Checkbox(u8"OpenProfiler", &_isOpenProfiler);
 	}
 
 	// トランスフォーム

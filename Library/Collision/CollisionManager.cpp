@@ -28,220 +28,245 @@ void CollisionManager::Setup()
 // 更新処理
 void CollisionManager::Update()
 {
+	if (!_enableCollision)
+	{
+		// データをクリア
+		_sphereDatas.clear();
+		_boxDatas.clear();
+		_capsuleDatas.clear();
+
+		return;
+	}
+
 	// 衝突情報のコンテナ
     std::unordered_map<Actor*, std::vector<CollisionData>> collisionDataMap;
 
 	// 各コンポーネントの情報を設定
 	SetDataByCollider();
 
-	// 全体の計算時間
-	ProfileScopedSection_2(0, CollisionManager, ImGuiControl::Profiler::Purple);
-    // ジョブシステムでマルチスレッドを使用する場合
-	if (JobSystem::Instance().UseMultiThread())
 	{
-		std::vector<std::future<void>> jobResults;
-
-		// 球の当たり判定
-		for (size_t sphereIndex = 0; sphereIndex < _sphereDatas.size(); ++sphereIndex)
+		// 全体の計算時間
+		ProfileScopedSection_2(0, CollisionManager, ImGuiControl::Profiler::Purple);
+		// ジョブシステムでマルチスレッドを使用する場合
+		if (JobSystem::Instance().UseMultiThread())
 		{
-			auto& sphereA = _sphereDatas[sphereIndex];
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
-				{
-					// 球Vs球
-					for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
-					{
-						auto& sphereB = _sphereDatas[sphereBIndex];
-						SphereVsSphere(sphereA, sphereB, collisionDataMap);
-					}
-				}));
-
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
-				{
-					// 球Vsボックス
-					for (auto& box : _boxDatas)
-					{
-						SphereVsBox(sphereA, box, collisionDataMap);
-					}
-				}));
-
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
-				{
-					// 球Vsカプセル
-					for (auto& capsule : _capsuleDatas)
-					{
-						SphereVsCapsule(sphereA, capsule, collisionDataMap);
-					}
-				}));
-
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
-				{
-					// 球Vsメッシュ
-					SphereVsMesh(sphereA, collisionDataMap);
-				}));
-		}
-
-		// ボックスの当たり判定
-		for (size_t boxIndex = 0; boxIndex < _boxDatas.size(); ++boxIndex)
-		{
-			auto& boxA = _boxDatas[boxIndex];
-
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
-				{
-					// ボックスVsボックス
-					for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
-					{
-						auto& boxB = _boxDatas[boxBIndex];
-						BoxVsBox(boxA, boxB, collisionDataMap);
-					}
-				}));
-
-			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-				std::to_string(jobResults.size()).c_str(),
-				ImGuiControl::Profiler::Color::Blue,
-				[&]()
-				{
-					// ボックスVsカプセル
-					for (auto& capsule : _capsuleDatas)
-					{
-						BoxVeCapsule(boxA, capsule, collisionDataMap);
-					}
-				}));
-		}
-
-		// カプセルの当たり判定
-		jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
-			std::to_string(jobResults.size()).c_str(),
-			ImGuiControl::Profiler::Color::Blue,
-			[&]()
-			{
-				for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
-				{
-					auto& capsuleA = _capsuleDatas[capsuleIndex];
-
-					for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
-					{
-						auto& capsuleB = _capsuleDatas[capsuleBIndex];
-						CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
-					}
-				}
-			}));
-
-		// すべてのジョブの終了を待機
-		for (auto& result : jobResults)
-		{
-			result.get();
-		}
-	}
-	else
-	{
-		Vector3 hitPosition{};
-		Vector3 hitNormal{};
-		float penetration = 0.0f;
-
-		// 球の当たり判定
-		for (size_t sphereIndex = 0; sphereIndex < _sphereDatas.size(); ++sphereIndex)
-		{
-			auto& sphereA = _sphereDatas[sphereIndex];
+			std::vector<std::future<void>> jobResults;
 
 			// 球Vs球
-			for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
-			{
-				auto& sphereB = _sphereDatas[sphereBIndex];
-				SphereVsSphere(sphereA, sphereB, collisionDataMap);
-			}
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"SphereVsSphere",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (size_t sphereIndex = 0; sphereIndex < _sphereDatas.size(); ++sphereIndex)
+					{
+						auto& sphereA = _sphereDatas[sphereIndex];
+
+						for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
+						{
+							auto& sphereB = _sphereDatas[sphereBIndex];
+							SphereVsSphere(sphereA, sphereB, collisionDataMap);
+						}
+					}
+				}));
 
 			// 球Vsボックス
-			for (auto& box : _boxDatas)
-			{
-				SphereVsBox(sphereA, box, collisionDataMap);
-			}
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"SphereVsBox",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (auto& sphere : _sphereDatas)
+					{
+						for (auto& box : _boxDatas)
+						{
+							SphereVsBox(sphere, box, collisionDataMap);
+						}
+					}
+				}));
 
 			// 球Vsカプセル
-			for (auto& capsule : _capsuleDatas)
-			{
-				SphereVsCapsule(sphereA, capsule, collisionDataMap);
-			}
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"SphereVsCapsule",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (auto& sphere : _sphereDatas)
+					{
+						for (auto& capsule : _capsuleDatas)
+						{
+							SphereVsCapsule(sphere, capsule, collisionDataMap);
+						}
+					}
+				}));
 
 			// 球Vsメッシュ
-			SphereVsMesh(sphereA, collisionDataMap);
-		}
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"SphereVsMesh",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (auto& sphere : _sphereDatas)
+					{
+						SphereVsMesh(sphere, collisionDataMap);
+					}
+				}));
 
-		// ボックスの当たり判定
-		for (size_t boxIndex = 0; boxIndex < _boxDatas.size(); ++boxIndex)
-		{
-			auto& boxA = _boxDatas[boxIndex];
 
 			// ボックスVsボックス
-			for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
-			{
-				auto& boxB = _boxDatas[boxBIndex];
-				BoxVsBox(boxA, boxB, collisionDataMap);
-			}
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"BoxVsBox",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (size_t boxIndex = 0; boxIndex < _boxDatas.size(); ++boxIndex)
+					{
+						auto& boxA = _boxDatas[boxIndex];
+						for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
+						{
+							auto& boxB = _boxDatas[boxBIndex];
+							BoxVsBox(boxA, boxB, collisionDataMap);
+						}
+					}
+				}));
 
 			// ボックスVsカプセル
-			for (auto& capsule : _capsuleDatas)
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"BoxVeCapsule",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (auto& box : _boxDatas)
+					{
+						for (auto& capsule : _capsuleDatas)
+						{
+							BoxVeCapsule(box, capsule, collisionDataMap);
+						}
+					}
+				}));
+
+			// カプセルVsカプセル
+			jobResults.emplace_back(JobSystem::Instance().EnqueueJob(
+				"CapsuleVsCapsule",
+				ImGuiControl::Profiler::Color::Blue,
+				[&]()
+				{
+					for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
+					{
+						auto& capsuleA = _capsuleDatas[capsuleIndex];
+						for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
+						{
+							auto& capsuleB = _capsuleDatas[capsuleBIndex];
+							CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
+						}
+					}
+				}));
+
+			// すべてのジョブの終了を待機
+			for (auto& result : jobResults)
 			{
-				BoxVeCapsule(boxA, capsule, collisionDataMap);
+				result.get();
 			}
 		}
-
-		// カプセルの当たり判定
-		for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
+		else
 		{
-			auto& capsuleA = _capsuleDatas[capsuleIndex];
+			Vector3 hitPosition{};
+			Vector3 hitNormal{};
+			float penetration = 0.0f;
 
-			for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
+			// 球の当たり判定
+			for (size_t sphereIndex = 0; sphereIndex < _sphereDatas.size(); ++sphereIndex)
 			{
-				auto& capsuleB = _capsuleDatas[capsuleBIndex];
-				CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
+				auto& sphereA = _sphereDatas[sphereIndex];
+
+				// 球Vs球
+				for (size_t sphereBIndex = sphereIndex + 1; sphereBIndex < _sphereDatas.size(); ++sphereBIndex)
+				{
+					auto& sphereB = _sphereDatas[sphereBIndex];
+					SphereVsSphere(sphereA, sphereB, collisionDataMap);
+				}
+
+				// 球Vsボックス
+				for (auto& box : _boxDatas)
+				{
+					SphereVsBox(sphereA, box, collisionDataMap);
+				}
+
+				// 球Vsカプセル
+				for (auto& capsule : _capsuleDatas)
+				{
+					SphereVsCapsule(sphereA, capsule, collisionDataMap);
+				}
+
+				// 球Vsメッシュ
+				SphereVsMesh(sphereA, collisionDataMap);
+			}
+
+			// ボックスの当たり判定
+			for (size_t boxIndex = 0; boxIndex < _boxDatas.size(); ++boxIndex)
+			{
+				auto& boxA = _boxDatas[boxIndex];
+
+				// ボックスVsボックス
+				for (size_t boxBIndex = boxIndex + 1; boxBIndex < _boxDatas.size(); ++boxBIndex)
+				{
+					auto& boxB = _boxDatas[boxBIndex];
+					BoxVsBox(boxA, boxB, collisionDataMap);
+				}
+
+				// ボックスVsカプセル
+				for (auto& capsule : _capsuleDatas)
+				{
+					BoxVeCapsule(boxA, capsule, collisionDataMap);
+				}
+			}
+
+			// カプセルの当たり判定
+			for (size_t capsuleIndex = 0; capsuleIndex < _capsuleDatas.size(); ++capsuleIndex)
+			{
+				auto& capsuleA = _capsuleDatas[capsuleIndex];
+
+				for (size_t capsuleBIndex = capsuleIndex + 1; capsuleBIndex < _capsuleDatas.size(); ++capsuleBIndex)
+				{
+					auto& capsuleB = _capsuleDatas[capsuleBIndex];
+					CapsuleVsCapsule(capsuleA, capsuleB, collisionDataMap);
+				}
 			}
 		}
 	}
 
-    // 接触情報を各アクターに通知
-	for (auto& [actor, datas] : collisionDataMap)
 	{
-		if (!actor->IsActive())
-			continue;
-
-		std::unordered_map<CollisionLayer, std::vector<Actor*>> currentContactActors;
-		// 前フレームに接触したアクターを取得
-		auto& lastContactActors = actor->GetLastContactActors();
-
-		for (auto& data : datas)
+		ProfileScopedSection_2(0, Contact, ImGuiControl::Profiler::Green);
+		// 接触情報を各アクターに通知
+		for (auto& [actor, datas] : collisionDataMap)
 		{
-			// 前フレームに接触していたか確認
-			bool isOldContact = std::find(
-				lastContactActors[data.myLayer].begin(), lastContactActors[data.myLayer].end(),
-				data.other) != lastContactActors[data.myLayer].end();
+			if (!actor->IsActive())
+				continue;
 
-			// 前フレームで接触していないなら
-			if (!isOldContact)
-				actor->ContactEnter(data);
-			else
-				actor->Contact(data);
+			std::unordered_map<CollisionLayer, std::vector<Actor*>> currentContactActors;
+			// 前フレームに接触したアクターを取得
+			auto& lastContactActors = actor->GetLastContactActors();
 
-			currentContactActors[data.myLayer].push_back(data.other);
+			for (auto& data : datas)
+			{
+				// 前フレームに接触していたか確認
+				bool isOldContact = std::find(
+					lastContactActors[data.myLayer].begin(), lastContactActors[data.myLayer].end(),
+					data.other) != lastContactActors[data.myLayer].end();
+
+				// 前フレームで接触していないなら
+				if (!isOldContact)
+					actor->ContactEnter(data);
+				else
+					actor->Contact(data);
+
+				currentContactActors[data.myLayer].push_back(data.other);
+			}
+
+			// 今回のフレームで接触したアクターの名前を保存
+			lastContactActors.clear();
+			lastContactActors = currentContactActors;
 		}
-
-		// 今回のフレームで接触したアクターの名前を保存
-		lastContactActors.clear();
-		lastContactActors = currentContactActors;
 	}
 
 	// データをクリア
@@ -258,6 +283,7 @@ void CollisionManager::DrawGui()
 		{
 			if (ImGui::BeginMenu(u8"当たり判定"))
 			{
+				ImGui::Checkbox(u8"当たり判定を行うか", &_enableCollision);
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenu();
@@ -744,9 +770,18 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 	{
 		// 同じ場合は処理しない
 		if (sphere.actor == meshCollider->GetActor().get())return;
+		// マスクチェック
+		if (!CheckCollisionLayer(
+			sphere.layer, sphere.mask,
+			meshCollider->GetLayer(), meshCollider->GetLayerMask()))
+			return;
 
 		auto& collisionMesh = meshCollider->GetCollisionMesh();
 
+		bool hit = false;
+		Vector3 resultHitPosition{};
+		Vector3 resultHitNormal{};
+		float resultDistance = FLT_MAX;
 		for (auto& area : collisionMesh.areas)
 		{
 			DirectX::XMVECTOR aabbCenter = DirectX::XMLoadFloat3(&area.boundingBox.Center);
@@ -774,20 +809,32 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 						TrianglePos,
 						hitPosition, hitNormal, distance))
 					{
-						PushCollisionData(
-							collisionDataMap,
-							sphere.actor,
-							sphere.layer,
-							sphere.isTrigger,
-							meshCollider->GetActor().get(),
-							meshCollider->GetLayer(),
-							meshCollider->IsTrigger(),
-							hitPosition,
-							hitNormal,
-							distance);
+						// 最も近い衝突情報を保存
+						if (distance < resultDistance)
+						{
+							hit = true;
+							resultDistance = distance;
+							resultHitPosition = hitPosition;
+							resultHitNormal = hitNormal;
+						}
 					}
 				}
 			}
+		}
+		if (hit)
+		{
+			// 最も近い衝突情報を保存
+			PushCollisionData(
+				collisionDataMap,
+				sphere.actor,
+				sphere.layer,
+				sphere.isTrigger,
+				meshCollider->GetActor().get(),
+				meshCollider->GetLayer(),
+				meshCollider->IsTrigger(),
+				resultHitPosition,
+				resultHitNormal,
+				resultDistance);
 		}
 	}
 }

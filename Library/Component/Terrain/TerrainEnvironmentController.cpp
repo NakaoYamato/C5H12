@@ -37,6 +37,7 @@ void TerrainEnvironmentController::OnCreate()
 		collider->SetRadius(myLayout.collisionParameter.Vec3());
 		collider->SetTrigger(myLayout.collisionType == TerrainObjectLayout::CollisionType::BoxTrigger); // ƒgƒŠƒK[‚Ìê‡‚ÍƒgƒŠƒK[Ý’è
 		collider->SetLayer(CollisionLayer::Stage);
+		collider->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
 	}
 		break;
 	case TerrainObjectLayout::CollisionType::Sphere:
@@ -47,6 +48,7 @@ void TerrainEnvironmentController::OnCreate()
 		collider->SetRadius(myLayout.collisionParameter.x); // ‹…‚Ì”¼Œa‚ÍX¬•ª‚ÉŠi”[
 		collider->SetTrigger(myLayout.collisionType == TerrainObjectLayout::CollisionType::SphereTrigger); // ƒgƒŠƒK[‚Ìê‡‚ÍƒgƒŠƒK[Ý’è
 		collider->SetLayer(CollisionLayer::Stage);
+		collider->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
 	}
 		break;
 	case TerrainObjectLayout::CollisionType::Capsule:
@@ -58,6 +60,7 @@ void TerrainEnvironmentController::OnCreate()
 		collider->SetRadius(myLayout.collisionParameter.w);
 		collider->SetTrigger(myLayout.collisionType == TerrainObjectLayout::CollisionType::CapsuleTrigger); // ƒgƒŠƒK[‚Ìê‡‚ÍƒgƒŠƒK[Ý’è
 		collider->SetLayer(CollisionLayer::Stage);
+		collider->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
 	}
 		break;
 	case TerrainObjectLayout::CollisionType::Mesh:

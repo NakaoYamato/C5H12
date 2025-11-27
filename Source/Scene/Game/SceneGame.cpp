@@ -31,6 +31,11 @@ void SceneGame::OnInitialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
     AddCompletionLoading(CompletionLoadingRate);
 
+    // 予め読み込むモデル
+    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::GetModelFilePath()));
+    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::GetModelFilePath()));
+    AddCompletionLoading(CompletionLoadingRate);
+
     // オブジェクト作成
     {
         auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
@@ -76,10 +81,5 @@ void SceneGame::OnInitialize()
     {
         auto canvas = RegisterActor<InGameCanvasActor>("Canvas", ActorTag::UI);
     }
-    AddCompletionLoading(CompletionLoadingRate);
-
-    // 予め読み込むモデル
-    _preloadModels.push_back(std::make_shared<Model>(device, PlayerActor::GetModelFilePath()));
-    _preloadModels.push_back(std::make_shared<Model>(device, WyvernActor::GetModelFilePath()));
     AddCompletionLoading(CompletionLoadingRate);
 }

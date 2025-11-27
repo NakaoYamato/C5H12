@@ -260,4 +260,7 @@ private:
     std::vector<CapsuleData> _capsuleDatas;
 
     std::mutex _mutex; // スレッドセーフ用
+
+	// 当たり判定を行うか
+	bool _enableCollision = true;
 };

@@ -19,6 +19,9 @@ void SpriteRenderer::OnCreate()
 	{
 		_myRectTransform = &uiActor->GetRectTransform();
 	}
+
+	// データ読み込み
+	_isLoaded = LoadFromFile();
 }
 
 // 更新処理
@@ -88,6 +91,56 @@ void SpriteRenderer::DrawGui()
 	ImGui::DragFloat(u8"全体透明度", &_overallAlpha, 0.01f, 0.0f, 1.0f);
 	ImGui::Separator();
 
+	if (ImGui::TreeNode(u8"描画順"))
+	{
+		for (int n = 0; n < _spriteDrawOrder.size(); n++)
+		{
+			ImGui::PushID(n);
+
+			ImGui::Selectable(_spriteDrawOrder[n].c_str(), false);
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+			{
+				// ペイロードとして「現在のインデックス(int)」を渡す
+				ImGui::SetDragDropPayload("DND_SPRITE_ORDER", &n, sizeof(int));
+
+				// ドラッグ中にマウスカーソルの横に表示されるプレビュー
+				ImGui::Text("Move %s", _spriteDrawOrder[n].c_str());
+
+				ImGui::EndDragDropSource();
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				// ペイロードを受け取る
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_SPRITE_ORDER"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(int));
+					int source_n = *(const int*)payload->Data;
+					int target_n = n;
+
+					// 自分自身へのドロップでなければ入れ替え処理を行う
+					if (source_n != target_n)
+					{
+						// 移動させる要素をコピー
+						std::string temp = _spriteDrawOrder[source_n];
+
+						// 元の位置から削除
+						_spriteDrawOrder.erase(_spriteDrawOrder.begin() + source_n);
+
+						_spriteDrawOrder.insert(_spriteDrawOrder.begin() + target_n, temp);
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			ImGui::PopID();
+		}
+
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
+
 	if (ImGui::Button(u8"ファイル保存"))
 	{
 		SaveToFile();
@@ -141,12 +194,11 @@ bool SpriteRenderer::LoadFromFile()
 
 		std::string name = sub.value("name", "");
 		_sprites[name]._parentName = sub.value("parentName", "");
-		_sprites[name].SetCenterAlignment(static_cast<Sprite::CenterAlignment>(sub.value("centerAlignment", static_cast<int>(Sprite::CenterAlignment::CenterCenter))));
 
 		// テクスチャデータ
 		std::string textureFilePath = sub.value("textureFilePath", "");
 		_sprites[name].LoadTexture(ToWString(textureFilePath).c_str(),
-			static_cast<Sprite::CenterAlignment>(sub.value("centerAlignment", _sprites[name].GetCenterAlignment())));
+			static_cast<Sprite::CenterAlignment>(sub.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
 
 		// トランスフォームデータ
 		_sprites[name].GetRectTransform().LoadFromFile(sub);
@@ -154,11 +206,12 @@ bool SpriteRenderer::LoadFromFile()
 		// マテリアルデータ
 		_sprites[name].GetMaterial().LoadFromFile(sub);
 
+		_sprites[name].SetCenterAlignment(sub.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
 		_sprites[name].SetTexPos({ sub.value("texPosX", 0.0f), sub.value("texPosY", 0.0f) });
 		_sprites[name].SetTexSize({ sub.value("texSizeX", 100.0f), sub.value("texSizeY", 100.0f) });
 		_sprites[name].SetCenter({ sub.value("centerX", 0.0f), sub.value("centerY", 0.0f) });
 		_sprites[name].SetColor({ sub.value("colorR", 1.0f), sub.value("colorG", 1.0f), sub.value("colorB", 1.0f), sub.value("colorA", 1.0f) });
-		_sprites[name].SetDepthState(static_cast<DepthState>(sub.value("depthState", static_cast<int>(DepthState::TestAndWrite))));
+		_sprites[name].SetDepthState(sub.value("depthState", DepthState::TestAndWrite));
 		_sprites[name].SetStencil(sub.value("stencil", 0));
 	}
 
@@ -171,7 +224,7 @@ bool SpriteRenderer::LoadFromFile()
 		_spriteDrawOrder.push_back(spriteName);
 	}
 
-	return false;
+	return true;
 }
 // ファイル保存
 bool SpriteRenderer::SaveToFile()
@@ -216,7 +269,7 @@ bool SpriteRenderer::SaveToFile()
 		// マテリアルデータ
 		spriteData.GetMaterial().SaveToFile(sub);
 
-		sub["centerAlignment"] = static_cast<int>(spriteData.GetCenterAlignment());
+		sub["centerAlignment"] = spriteData.GetCenterAlignment();
 		sub["texPosX"] = spriteData.GetTexPos().x;
 		sub["texPosY"] = spriteData.GetTexPos().y;
 		sub["texSizeX"] = spriteData.GetTexSize().x;
@@ -227,7 +280,7 @@ bool SpriteRenderer::SaveToFile()
 		sub["colorG"] = spriteData.GetColor().y;
 		sub["colorB"] = spriteData.GetColor().z;
 		sub["colorA"] = spriteData.GetColor().w;
-		sub["depthState"] = static_cast<int>(spriteData.GetDepthState());
+		sub["depthState"] = spriteData.GetDepthState();
 		sub["stencil"] = spriteData.GetStencil();
 
 		index++;

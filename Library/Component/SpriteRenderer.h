@@ -47,6 +47,7 @@ public:
     int GetStencil(const std::string& name) const { return _sprites.at(name).GetStencil(); }
 	const std::string& GetParentName(const std::string& name) const { return _sprites.at(name)._parentName; }
 	float GetOverallAlpha() const { return _overallAlpha; }
+	bool IsLoaded() const { return _isLoaded; }
 
 	void SetCenterAlignment(const std::string& name, Sprite::CenterAlignment alignment) {
 		_sprites.at(name).SetCenterAlignment(alignment);
@@ -84,4 +85,6 @@ private:
 
 	// ‘S‘Ì“§–¾“x
 	float _overallAlpha = 1.0f;
+	// “Ç‚İ‚±‚İ‚ª¬Œ÷‚µ‚½‚©
+	bool _isLoaded = false;
 };

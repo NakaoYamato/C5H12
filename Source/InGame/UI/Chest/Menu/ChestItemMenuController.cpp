@@ -14,7 +14,7 @@ void ChestItemMenuController::Start()
 
     if (auto spriteRenderer = _spriteRenderer.lock())
 	{
-		if (!spriteRenderer->LoadFromFile())
+		if (!spriteRenderer->IsLoaded())
 		{
 			spriteRenderer->LoadTexture(BackSpr, L"");
 			spriteRenderer->LoadTexture(PourchBackSpr, L"");
@@ -22,29 +22,6 @@ void ChestItemMenuController::Start()
 			spriteRenderer->LoadTexture(FrontSpr, L"Data/Texture/UI/Chest/ItemFront.png");
 			spriteRenderer->LoadTexture(BoxBackSpr, L"");
 			spriteRenderer->LoadTexture(TextBoxSpr, L"");
-
-			spriteRenderer->SetCenterAlignment(BackSpr, Sprite::LeftUp);
-			spriteRenderer->GetRectTransform(BackSpr).SetLocalPosition(Vector2(80.0f, 380.0f));
-			spriteRenderer->GetRectTransform(BackSpr).SetLocalScale(Vector2(110.0f, 40.0f));
-			spriteRenderer->SetColor(BackSpr, Vector4(0.0f, 0.0f, 0.0f, 90.0f / 255.0f));
-
-			spriteRenderer->SetCenterAlignment(PourchBackSpr, Sprite::LeftUp);
-			spriteRenderer->SetParentName(PourchBackSpr, BackSpr);
-			spriteRenderer->GetRectTransform(PourchBackSpr).SetReflectParentScale(false);
-
-			spriteRenderer->SetCenterAlignment(StrageBackSpr, Sprite::LeftUp);
-			spriteRenderer->SetParentName(StrageBackSpr, BackSpr);
-			spriteRenderer->GetRectTransform(StrageBackSpr).SetReflectParentScale(false);
-
-			spriteRenderer->SetCenterAlignment(BoxBackSpr, Sprite::LeftUp);
-			spriteRenderer->GetRectTransform(BoxBackSpr).SetLocalPosition(Vector2(245.0f, 120.0f));
-			spriteRenderer->GetRectTransform(BoxBackSpr).SetLocalScale(Vector2(34.5f, 49.0f));
-			spriteRenderer->SetColor(BoxBackSpr, Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-
-			spriteRenderer->SetCenterAlignment(TextBoxSpr, Sprite::LeftUp);
-			spriteRenderer->GetRectTransform(TextBoxSpr).SetLocalPosition(Vector2(810.0f, 110.0f));
-			spriteRenderer->GetRectTransform(TextBoxSpr).SetLocalScale(Vector2(31.0f, 50.0f));
-			spriteRenderer->SetColor(TextBoxSpr, Vector4(0.0f, 0.0f, 0.0f, 90.0f / 255.0f));
 		}
 	}
 }

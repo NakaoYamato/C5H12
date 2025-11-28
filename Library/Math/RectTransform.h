@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector.h"
+#include "../../Library/Exporter/Exporter.h"
 
 class RectTransform
 {
@@ -31,12 +32,22 @@ public:
 	const Vector2&	GetWorldScale()const		{ return _worldScale; }
 	float			GetWorldAngle()const		{ return _worldAngle; }
 	bool			GetReflectParentScale()const { return _reflectParentScale; }
+	bool			GetReflectParentAngle()const { return _reflectParentAngle; }
 
 	void SetLocalPosition(const Vector2& p) { _localPosition = p; }
 	void SetLocalScale(const Vector2& s)	{ _localScale = s; }
 	void SetLocalAngle(float a)				{ _localAngle = a; }
 	void SetReflectParentScale(bool reflect) { _reflectParentScale = reflect; }
+	void SetReflectParentAngle(bool reflect) { _reflectParentAngle = reflect; }
 #pragma endregion
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile(nlohmann::json_abi_v3_12_0::json& json);
+	// ファイル保存
+	bool SaveToFile(nlohmann::json_abi_v3_12_0::json& json);
+#pragma endregion
+
 private:
 	Vector2			_localPosition		= Vector2::Zero;
 	Vector2			_localScale			= Vector2::One;
@@ -48,4 +59,6 @@ private:
 
 	// 親のスケールを反映するか
 	bool			_reflectParentScale = true;
+	// 親の回転を反映するか
+	bool 		  _reflectParentAngle = true;
 };

@@ -8,6 +8,7 @@
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Graphics/Texture.h"
+#include "../../Library/Exporter/Exporter.h"
 
 /// <summary>
 /// ブレンドタイプ
@@ -142,6 +143,13 @@ public:
 	void SetBlendType(BlendType type) { _blendType = type; }
 	// シェーダー名設定
 	void SetShaderName(std::string type) { _shaderName = type; }
+#pragma endregion
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile(nlohmann::json_abi_v3_12_0::json& json);
+	// ファイル保存
+	bool SaveToFile(nlohmann::json_abi_v3_12_0::json& json);
 #pragma endregion
 
 private:

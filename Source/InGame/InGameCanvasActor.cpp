@@ -5,8 +5,6 @@
 #include "../../Source/InGame/UI/TimerUIController.h"
 
 #include "../../Source/InGame/UI/Chest/ChestUIController.h"
-#include "../../Source/InGame/UI/Chest/Menu/ChestSelectMenuController.h"
-#include "../../Source/InGame/UI/Chest/Menu/ChestArmorMenuController.h"
 
 #include "../../Source/InGame/UI/Item/ItemUIController.h"
 #include "../../Source/InGame/UI/Item/Slider/ItemSliderController.h"
@@ -32,6 +30,7 @@ void InGameCanvasActor::OnCreate()
 
 		auto ItemState = GetScene()->RegisterActor<UIActor>("ChestItemStateUI", ActorTag::UI);
 		ItemState->SetParent(chestUIActor.get());
+		ItemState->AddComponent<ChestItemMenuController>();
 
 		auto ArmorState = GetScene()->RegisterActor<UIActor>("ChestArmorStateUI", ActorTag::UI);
 		ArmorState->SetParent(chestUIActor.get());

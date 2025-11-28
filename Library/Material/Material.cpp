@@ -76,6 +76,141 @@ void Material::MakeDummyTexture(const std::string& key,
 	_textureDatas[key].MakeDummyTexture(Graphics::Instance().GetDevice(), value, dimension);
 }
 
+#pragma region ì¸èoóÕ
+bool Material::LoadFromFile(nlohmann::json_abi_v3_12_0::json& json)
+{
+	auto& sub = json["Material"];
+	_name = sub["Name"].get<std::string>();
+	_shaderType = static_cast<ShaderType>(sub["ShaderType"].get<int>());
+	_shaderName = sub["ShaderName"].get<std::string>();
+	_blendType = static_cast<BlendType>(sub["BlendType"].get<int>());
+	for (auto& item : sub["Colors"])
+	{
+		std::string key = item["Key"].get<std::string>();
+		Vector4 color;
+		color.x = item["ValueX"].get<float>();
+		color.y = item["ValueY"].get<float>();
+		color.z = item["ValueZ"].get<float>();
+		color.w = item["ValueW"].get<float>();
+		_colors[key] = color;
+	}
+	for (auto& item : sub["TextureDatas"])
+	{
+		std::string key = item["Key"].get<std::string>();
+		std::string filepath = item["Filepath"].get<std::string>();
+		_textureDatas[key].Load(Graphics::Instance().GetDevice(), ToWString(filepath).c_str());
+	}
+	for (auto& item : sub["Parameters"])
+	{
+		std::string key = item["Key"].get<std::string>();
+		std::string type = item["Type"].get<std::string>();
+		if (type == "int")
+		{
+			int value = item["Value"].get<int>();
+			_parameters[key] = value;
+		}
+		else if (type == "float")
+		{
+			float value = item["Value"].get<float>();
+			_parameters[key] = value;
+		}
+		else if (type == "Vector2")
+		{
+			Vector2 value;
+			value.x = item["ValueX"].get<float>();
+			value.y = item["ValueY"].get<float>();
+			_parameters[key] = value;
+		}
+		else if (type == "Vector3")
+		{
+			Vector3 value;
+			value.x = item["ValueX"].get<float>();
+			value.y = item["ValueY"].get<float>();
+			value.z = item["ValueZ"].get<float>();
+			_parameters[key] = value;
+		}
+		else if (type == "Vector4")
+		{
+			Vector4 value;
+			value.x = item["ValueX"].get<float>();
+			value.y = item["ValueY"].get<float>();
+			value.z = item["ValueZ"].get<float>();
+			value.w = item["ValueW"].get<float>();
+			_parameters[key] = value;
+		}
+	}
+	return true;
+}
+
+bool Material::SaveToFile(nlohmann::json_abi_v3_12_0::json& json)
+{
+	auto& sub = json["Material"];
+	sub["Name"] = _name;
+	sub["ShaderType"] = static_cast<int>(_shaderType);
+	sub["ShaderName"] = _shaderName;
+	sub["BlendType"] = static_cast<int>(_blendType);
+	size_t index = 0;
+	for (auto& [key, color] : _colors)
+	{
+		sub["Colors"][index]["Key"] = key;
+		sub["Colors"][index]["ValueX"] = color.x;
+		sub["Colors"][index]["ValueY"] = color.y;
+		sub["Colors"][index]["ValueZ"] = color.z;
+		sub["Colors"][index]["ValueW"] = color.w;
+		++index;
+	}
+	index = 0;
+	for (auto& [key, textureData] : _textureDatas)
+	{
+		sub["TextureDatas"][index]["Key"] = key;
+		sub["TextureDatas"][index]["Filepath"] = textureData.GetFilepath();
+		++index;
+	}
+	index = 0;
+	for (auto& [key, parameter] : _parameters)
+	{
+		sub["Parameters"][index]["Key"] = key;
+		if (std::holds_alternative<int>(parameter))
+		{
+			sub["Parameters"][index]["Type"] = "int";
+			sub["Parameters"][index]["Value"] = std::get<int>(parameter);
+		}
+		else if (std::holds_alternative<float>(parameter))
+		{
+			sub["Parameters"][index]["Type"] = "float";
+			sub["Parameters"][index]["Value"] = std::get<float>(parameter);
+		}
+		else if (std::holds_alternative<Vector2>(parameter))
+		{
+			sub["Parameters"][index]["Type"] = "Vector2";
+			auto& value = std::get<Vector2>(parameter);
+			sub["Parameters"][index]["ValueX"] = value.x;
+			sub["Parameters"][index]["ValueY"] = value.y;
+		}
+		else if (std::holds_alternative<Vector3>(parameter))
+		{
+			sub["Parameters"][index]["Type"] = "Vector3";
+			auto& value = std::get<Vector3>(parameter);
+			sub["Parameters"][index]["ValueX"] = value.x;
+			sub["Parameters"][index]["ValueY"] = value.y;
+			sub["Parameters"][index]["ValueZ"] = value.z;
+		}
+		else if (std::holds_alternative<Vector4>(parameter))
+		{
+			sub["Parameters"][index]["Type"] = "Vector4";
+			auto& value = std::get<Vector4>(parameter);
+			sub["Parameters"][index]["ValueX"] = value.x;
+			sub["Parameters"][index]["ValueY"] = value.y;
+			sub["Parameters"][index]["ValueZ"] = value.z;
+			sub["Parameters"][index]["ValueW"] = value.w;
+		}
+		++index;
+	}
+
+	return true;
+}
+#pragma endregion
+
 // ColorMapGUIï`âÊ
 void Material::DrawColorMapGui()
 {

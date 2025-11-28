@@ -9,7 +9,6 @@ public:
 	{
 		ItemOption,
 		ArmorOption,
-		TestOption,
 		MaxOption,
     };
 
@@ -38,7 +37,6 @@ private:
 	// 各種スプライトの名前
 	const std::string ItemBackSpr = "ItemBack";
 	const std::string ArmorBackSpr = "ArmorBack";
-	const std::string TestBackSpr = "TestBack";
 	const std::string FrontSpr = "Front";
 
 	// テキストパラメータ

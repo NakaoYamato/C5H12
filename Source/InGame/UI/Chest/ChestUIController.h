@@ -4,6 +4,7 @@
 
 #include "Menu/ChestSelectMenuController.h"
 #include "Menu/ChestArmorMenuController.h"
+#include "Menu/ChestItemMenuController.h"
 
 #include "../../Source/Camera/ChangeArmorCamera.h"
 
@@ -41,8 +42,6 @@ public:
 	void Start() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
-	// 3D描画後の描画処理
-	void DelayedRender(const RenderContext& rc) override;
 
 	// GUI描画
 	void DrawGui() override;
@@ -61,13 +60,12 @@ public:
 	// 入力値設定
 	void SetInputState(InputState inputState) { _inputState = inputState; }
 private:
-	// 入力処理
-	void UpdateInput();
-
 	// Selectメニューの入力処理
 	void SelectInput();
 	// Armorメニューの入力処理
 	void ArmorMenuInput();
+	// Itemメニューの入力処理
+	void ItemMenuInput();
 
 	void UpdateToArmorMenu(float elapsedTime);
 	void UpdateFromArmorMenu(float elapsedTime);
@@ -75,6 +73,7 @@ private:
 private:
 	std::weak_ptr<ChestSelectMenuController> _selectUI;
 	std::weak_ptr<ChestArmorMenuController> _armorUI;
+	std::weak_ptr<ChestItemMenuController> _itemUI;
 
 	std::weak_ptr<ChangeArmorCamera> _changeArmorCamera;
 

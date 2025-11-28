@@ -11,6 +11,13 @@
 class SpriteRenderer : public Component
 {
 public:
+	class SpriteData : public Sprite
+	{
+	public:
+		std::string _parentName = "";
+	};
+
+public:
 	SpriteRenderer() {}
 	~SpriteRenderer() override = default;
 	// 名前取得
@@ -38,6 +45,7 @@ public:
 	const Vector4& GetColor(const std::string& name)const { return _sprites.at(name).GetColor(); }
     DepthState GetDepthState(const std::string& name) const { return _sprites.at(name).GetDepthState(); }
     int GetStencil(const std::string& name) const { return _sprites.at(name).GetStencil(); }
+	const std::string& GetParentName(const std::string& name) const { return _sprites.at(name)._parentName; }
 	float GetOverallAlpha() const { return _overallAlpha; }
 
 	void SetCenterAlignment(const std::string& name, Sprite::CenterAlignment alignment) {
@@ -51,7 +59,15 @@ public:
 	void SetColorAlpha(const std::string& name, float a) { _sprites.at(name).SetColorAlpha(a); }
     void SetDepthState(const std::string& name, DepthState ds) { _sprites.at(name).SetDepthState(ds); }
     void SetStencil(const std::string& name, int stencil) { _sprites.at(name).SetStencil(stencil); }
+	void SetParentName(const std::string& name, const std::string& parentName) { _sprites.at(name)._parentName = parentName; }
 	void SetOverallAlpha(float a) { _overallAlpha = a; }
+#pragma endregion
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile();
+	// ファイル保存
+	bool SaveToFile();
 #pragma endregion
 
 protected:
@@ -63,7 +79,7 @@ protected:
 private:
 	RectTransform* _myRectTransform = nullptr;
 
-	std::unordered_map<std::string, Sprite> _sprites;
+	std::unordered_map<std::string, SpriteData> _sprites;
     std::vector<std::string> _spriteDrawOrder;
 
 	// 全体透明度

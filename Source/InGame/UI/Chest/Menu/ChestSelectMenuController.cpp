@@ -14,7 +14,6 @@ void ChestSelectMenuController::Start()
     {
         spriteRenderer->LoadTexture(ItemBackSpr, L"Data/Texture/UI/Chest/Back.png");
         spriteRenderer->LoadTexture(ArmorBackSpr, L"Data/Texture/UI/Chest/Back.png");
-        spriteRenderer->LoadTexture(TestBackSpr, L"Data/Texture/UI/Chest/Back.png");
         spriteRenderer->LoadTexture(FrontSpr, L"Data/Texture/UI/Chest/Front.png");
 
         spriteRenderer->GetRectTransform(ItemBackSpr).SetLocalScale(Vector2(0.5f, 0.4f));
@@ -24,10 +23,6 @@ void ChestSelectMenuController::Start()
         spriteRenderer->GetRectTransform(ArmorBackSpr).SetLocalScale(Vector2(0.5f, 0.4f));
         spriteRenderer->GetRectTransform(ArmorBackSpr).SetLocalPosition(SprStartPos + Vector2(0.0f, BackPositionInterval));
         spriteRenderer->SetColorAlpha(ArmorBackSpr, 0.6f);
-
-        spriteRenderer->GetRectTransform(TestBackSpr).SetLocalScale(Vector2(0.5f, 0.4f));
-        spriteRenderer->GetRectTransform(TestBackSpr).SetLocalPosition(SprStartPos + Vector2(0.0f, BackPositionInterval * 2.0f));
-        spriteRenderer->SetColorAlpha(TestBackSpr, 0.6f);
 
         spriteRenderer->GetRectTransform(FrontSpr).SetLocalScale(Vector2(0.5f, 0.4f));
         spriteRenderer->SetColorAlpha(FrontSpr, 0.8f);
@@ -57,13 +52,6 @@ void ChestSelectMenuController::DelayedRender(const RenderContext& rc)
         0.0f,
         _textOrigin,
         _textScale);
-    textRenderer.Draw(FontType::MSGothic,
-        "ÉeÉXÉg",
-        spriteRenderer->GetRectTransform(TestBackSpr).GetWorldPosition() + _textOffset,
-        _index == SelectMenuOption::TestOption ? _textSelectColor : _textColor,
-        0.0f,
-        _textOrigin,
-        _textScale);
 }
 
 // GUIï`âÊ
@@ -82,7 +70,7 @@ void ChestSelectMenuController::AddIndex(int val)
 
     // indexÇÃêßå¿
     if (_index < SelectMenuOption::ItemOption)
-        _index = SelectMenuOption::TestOption;
+        _index = SelectMenuOption::ArmorOption;
     else if (_index >= SelectMenuOption::MaxOption)
         _index = SelectMenuOption::ItemOption;
 
@@ -99,9 +87,6 @@ void ChestSelectMenuController::AddIndex(int val)
         break;
     case ChestSelectMenuController::SelectMenuOption::ArmorOption:
 		position = spriteRenderer->GetRectTransform(ArmorBackSpr).GetLocalPosition();
-        break;
-    case ChestSelectMenuController::SelectMenuOption::TestOption:
-		position = spriteRenderer->GetRectTransform(TestBackSpr).GetLocalPosition();
         break;
     }
 

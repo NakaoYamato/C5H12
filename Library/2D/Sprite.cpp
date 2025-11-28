@@ -3,8 +3,9 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/Shader/Sprite/SpriteShaderResource.h"
+#include "../../Library/Algorithm/Converter.h"
 
-#include <imgui.h>
+#include <Mygui.h>
 
 Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 {
@@ -15,8 +16,19 @@ void Sprite::DrawGui()
 {
 	if (_sprite.Get())
 	{
-		ImGui::Image(_sprite.Get(),
-			ImVec2(100, 100));
+		if (ImGui::ImageButton(_sprite.Get(),
+			ImVec2(100, 100)))
+		{
+			// ダイアログを開く
+			std::string filepath;
+			std::string currentDirectory;
+			Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
+			// ファイルを選択したら
+			if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+			{
+				LoadTexture(ToWString(filepath).c_str(), _centerAlignment);
+			}
+		}
 	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"マテリアル"))

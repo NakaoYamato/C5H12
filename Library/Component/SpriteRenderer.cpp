@@ -5,7 +5,9 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Collision/CollisionMath.h"
 #include "../../Library/Scene/Scene.h"
+#include "../../Library/Exporter/Exporter.h"
 
+#include <fstream>
 #include <Mygui.h>
 
 // 生成時処理
@@ -24,7 +26,17 @@ void SpriteRenderer::Update(float elapsedTime)
 {
 	for (auto& [name, spriteData] : _sprites)
 	{
-		spriteData.UpdateTransform(_myRectTransform);
+		if (!spriteData._parentName.empty())
+		{
+			// 親のRectTransformを取得
+			if (_sprites.find(spriteData._parentName) != _sprites.end())
+			{
+				auto& parentRectTransform = _sprites.at(spriteData._parentName).GetRectTransform();
+				spriteData.UpdateTransform(&parentRectTransform);
+			}
+		}
+		else
+			spriteData.UpdateTransform(_myRectTransform);
 	}
 }
 
@@ -64,11 +76,27 @@ void SpriteRenderer::DrawGui()
 	{
 		if (ImGui::TreeNode(name.c_str()))
 		{
+			ImGui::Text(u8"親:");
+			ImGui::SameLine();
+			ImGui::InputText("##parentName", &spriteData._parentName);
+
+			ImGui::Separator();
 			spriteData.DrawGui();
 			ImGui::TreePop();
 		}
 	}
 	ImGui::DragFloat(u8"全体透明度", &_overallAlpha, 0.01f, 0.0f, 1.0f);
+	ImGui::Separator();
+
+	if (ImGui::Button(u8"ファイル保存"))
+	{
+		SaveToFile();
+	}
+	if (ImGui::Button(u8"ファイル読み込み"))
+	{
+		LoadFromFile();
+	}
+
 }
 // 画像読み込み
 void SpriteRenderer::LoadTexture(const std::string& spriteName,
@@ -87,6 +115,135 @@ bool SpriteRenderer::IsHit(const std::string& name, const Vector2& pos) const
 		return spriteData.IsHit(pos);
     }
 	return false;
+}
+// ファイル読み込み
+bool SpriteRenderer::LoadFromFile()
+{
+	// 現在のシーン名、アクター名からファイルパスを生成
+	std::string filePath = "./Data/Resource/";
+	filePath += GetActor()->GetScene()->GetName();
+	filePath += "/";
+	filePath += this->GetActor()->GetName();
+	filePath += "/";
+	filePath += this->GetName();
+	filePath += ".json";
+
+	nlohmann::json jsonData;
+	if (!Exporter::LoadJsonFile(filePath.c_str(), &jsonData))
+		return false;
+
+	// 各スプライトデータ読みこみ
+	size_t spriteSize = jsonData["spriteSize"].get<size_t>();
+	for (size_t index = 0; index < spriteSize; ++index)
+	{
+		std::string label = "sprite_" + std::to_string(index);
+		auto& sub = jsonData[label];
+
+		std::string name = sub.value("name", "");
+		_sprites[name]._parentName = sub.value("parentName", "");
+		_sprites[name].SetCenterAlignment(static_cast<Sprite::CenterAlignment>(sub.value("centerAlignment", static_cast<int>(Sprite::CenterAlignment::CenterCenter))));
+
+		// テクスチャデータ
+		std::string textureFilePath = sub.value("textureFilePath", "");
+		_sprites[name].LoadTexture(ToWString(textureFilePath).c_str(),
+			static_cast<Sprite::CenterAlignment>(sub.value("centerAlignment", _sprites[name].GetCenterAlignment())));
+
+		// トランスフォームデータ
+		_sprites[name].GetRectTransform().LoadFromFile(sub);
+
+		// マテリアルデータ
+		_sprites[name].GetMaterial().LoadFromFile(sub);
+
+		_sprites[name].SetTexPos({ sub.value("texPosX", 0.0f), sub.value("texPosY", 0.0f) });
+		_sprites[name].SetTexSize({ sub.value("texSizeX", 100.0f), sub.value("texSizeY", 100.0f) });
+		_sprites[name].SetCenter({ sub.value("centerX", 0.0f), sub.value("centerY", 0.0f) });
+		_sprites[name].SetColor({ sub.value("colorR", 1.0f), sub.value("colorG", 1.0f), sub.value("colorB", 1.0f), sub.value("colorA", 1.0f) });
+		_sprites[name].SetDepthState(static_cast<DepthState>(sub.value("depthState", static_cast<int>(DepthState::TestAndWrite))));
+		_sprites[name].SetStencil(sub.value("stencil", 0));
+	}
+
+	// 描画順読みこみ
+	size_t drawOrderSize = jsonData["drawOrderSize"].get<size_t>();
+	for (size_t index = 0; index < drawOrderSize; ++index)
+	{
+		std::string label = "drawOrder_" + std::to_string(index);
+		std::string spriteName = jsonData[label].get<std::string>();
+		_spriteDrawOrder.push_back(spriteName);
+	}
+
+	return false;
+}
+// ファイル保存
+bool SpriteRenderer::SaveToFile()
+{
+	// 現在のシーン名、アクター名からファイルパスを生成
+	std::string filePath = "./Data/Resource/";
+	filePath += GetActor()->GetScene()->GetName();
+	filePath += "/";
+	filePath += this->GetActor()->GetName();
+	filePath += "/";
+
+	// ディレクトリ確保
+	std::filesystem::path outputDirPath(filePath);
+	if (!std::filesystem::exists(outputDirPath))
+	{
+		// なかったらディレクトリ作成
+		std::filesystem::create_directories(outputDirPath);
+	}
+
+	filePath += this->GetName();
+	filePath += ".json";
+
+	nlohmann::json jsonData;
+	jsonData["spriteSize"] = _sprites.size();
+
+	// 各スプライトデータ保存
+	size_t index = 0;
+	for (auto& [name, spriteData] : _sprites)
+	{
+		std::string label = "sprite_" + std::to_string(index);
+		auto& sub = jsonData[label];
+
+		sub["name"] = name;
+		sub["parentName"] = spriteData._parentName;
+
+		// テクスチャデータ
+		sub["textureFilePath"] = ToString(spriteData.GetTexture().GetFilepath());
+
+		// トランスフォームデータ
+		spriteData.GetRectTransform().SaveToFile(sub);
+
+		// マテリアルデータ
+		spriteData.GetMaterial().SaveToFile(sub);
+
+		sub["centerAlignment"] = static_cast<int>(spriteData.GetCenterAlignment());
+		sub["texPosX"] = spriteData.GetTexPos().x;
+		sub["texPosY"] = spriteData.GetTexPos().y;
+		sub["texSizeX"] = spriteData.GetTexSize().x;
+		sub["texSizeY"] = spriteData.GetTexSize().y;
+		sub["centerX"] = spriteData.GetCenter().x;
+		sub["centerY"] = spriteData.GetCenter().y;
+		sub["colorR"] = spriteData.GetColor().x;
+		sub["colorG"] = spriteData.GetColor().y;
+		sub["colorB"] = spriteData.GetColor().z;
+		sub["colorA"] = spriteData.GetColor().w;
+		sub["depthState"] = static_cast<int>(spriteData.GetDepthState());
+		sub["stencil"] = spriteData.GetStencil();
+
+		index++;
+	}
+
+	// 描画順保存
+	index = 0;
+	jsonData["drawOrderSize"] = _spriteDrawOrder.size();
+	for (const auto& spriteName : _spriteDrawOrder)
+	{
+		std::string label = "drawOrder_" + std::to_string(index);
+		jsonData[label] = spriteName;
+		index++;
+	}
+
+	return Exporter::SaveJsonFile(filePath.c_str(), jsonData);
 }
 // スプライト描画
 void SpriteRenderer::SpriteRender(const std::string& spriteName, 

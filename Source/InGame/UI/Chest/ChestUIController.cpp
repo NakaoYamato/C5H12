@@ -24,6 +24,12 @@ void ChestUIController::Start()
             _armorUI.lock()->GetActor()->SetIsActive(false);
             continue;
 		}
+		if (child->GetComponent<ChestItemMenuController>())
+		{
+            _itemUI = child->GetComponent<ChestItemMenuController>();
+            _itemUI.lock()->GetActor()->SetIsActive(false);
+            continue;
+		}
 	}
 
 	for (auto& child : GetActor()->GetScene()->GetMainCameraActor()->GetChildren())
@@ -40,16 +46,16 @@ void ChestUIController::Start()
 // 更新処理
 void ChestUIController::Update(float elapsedTime)
 {
-    // 入力処理
-	UpdateInput();
-
     switch (_state)
     {
     case ChestUIController::SelectMenu:
+        SelectInput();
         break;
     case ChestUIController::ItemMenu:
+        ItemMenuInput();
         break;
     case ChestUIController::ArmorMenu:
+        ArmorMenuInput();
         break;
 
     case ChestUIController::ToArmorMenu:
@@ -59,25 +65,8 @@ void ChestUIController::Update(float elapsedTime)
         UpdateFromArmorMenu(elapsedTime);
         break;
     }
-}
 
-// 3D描画後の描画処理
-void ChestUIController::DelayedRender(const RenderContext& rc)
-{
-    auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
-
-
-    switch (_state)
-    {
-    case ChestUIController::SelectMenu:
-        break;
-    case ChestUIController::ItemMenu:
-        break;
-    case ChestUIController::ArmorMenu:
-        break;
-    default:
-        break;
-    }
+    _inputState = InputState::None;
 }
 
 // GUI描画
@@ -105,6 +94,10 @@ void ChestUIController::Open()
     {
         armorUI->Reset();
     }
+	if (auto itemUI = _itemUI.lock())
+	{
+		itemUI->Reset();
+	}
 
 	// プレイヤーを探す
     auto& players = GetActor()->GetScene()->GetActorManager().FindByTag(ActorTag::Player);
@@ -127,36 +120,20 @@ void ChestUIController::Close()
         selectUI->GetActor()->SetIsActive(false);
 	if (auto armorUI = _armorUI.lock())
 		armorUI->GetActor()->SetIsActive(false);
+	if (auto itemUI = _itemUI.lock())
+		itemUI->GetActor()->SetIsActive(false);
 
 	this->GetActor()->SetIsActive(false);
 
 	_chestActor.reset();
 }
 
-// 入力処理
-void ChestUIController::UpdateInput()
-{
-    switch (_state)
-    {
-    case ChestUIController::SelectMenu:
-		SelectInput();
-        break;
-    case ChestUIController::ItemMenu:
-        break;
-    case ChestUIController::ArmorMenu:
-        ArmorMenuInput();
-        break;
-    }
-
-	_inputState = InputState::None;
-}
-
 // Selectメニューの入力処理
 void ChestUIController::SelectInput()
 {
     auto selectUI = _selectUI.lock();
-    auto armorUI = _armorUI.lock();
-    if (!selectUI || !armorUI)
+    auto itemUI = _itemUI.lock();
+    if (!selectUI || !itemUI)
         return;
 
     switch (_inputState)
@@ -171,14 +148,16 @@ void ChestUIController::SelectInput()
         switch (selectUI->GetSelectIndex())
         {
         case ChestSelectMenuController::SelectMenuOption::ItemOption:
+            selectUI->GetActor()->SetIsActive(false);
+            itemUI->GetActor()->SetIsActive(true);
+
+            _state = ChestUIController::ItemMenu;
             break;
         case ChestSelectMenuController::SelectMenuOption::ArmorOption:
             GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, _fadeTime);
             selectUI->GetActor()->SetIsActive(false);
 
             _state = ChestUIController::ToArmorMenu;
-            break;
-        case ChestSelectMenuController::SelectMenuOption::TestOption:
             break;
         }
         break;
@@ -192,9 +171,8 @@ void ChestUIController::SelectInput()
 // Armorメニューの入力処理
 void ChestUIController::ArmorMenuInput()
 {
-    auto selectUI = _selectUI.lock();
     auto armorUI = _armorUI.lock();
-    if (!selectUI || !armorUI)
+    if (!armorUI)
         return;
 
     switch (_inputState)
@@ -229,6 +207,49 @@ void ChestUIController::ArmorMenuInput()
             armorUI->GetActor()->SetIsActive(false);
 
             _state = ChestUIController::FromArmorMenu;
+        }
+        break;
+    }
+}
+
+// Itemメニューの入力処理
+void ChestUIController::ItemMenuInput()
+{
+    auto itemUI = _itemUI.lock();
+    auto selectUI = _selectUI.lock();
+    if (!itemUI || !selectUI)
+        return;
+
+    switch (_inputState)
+    {
+    case ChestUIController::InputState::Up:
+        if (itemUI->GetState() == ChestItemMenuController::State::Pourch)
+			itemUI->AddIndex(-1);
+        else
+            itemUI->AddIndex(-1);
+        break;
+    case ChestUIController::InputState::Down:
+        if (itemUI->GetState() == ChestItemMenuController::State::Pourch)
+            itemUI->AddIndex(-1);
+        else
+            itemUI->AddIndex(+1);
+        break;
+    case ChestUIController::InputState::Left:
+        itemUI->AddIndex(-1);
+        break;
+    case ChestUIController::InputState::Right:
+        itemUI->AddIndex(+1);
+        break;
+    case ChestUIController::InputState::Select:
+        itemUI->NextState();
+        break;
+    case ChestUIController::InputState::Back:
+        if (itemUI->PreviousState())
+        {
+            itemUI->GetActor()->SetIsActive(false);
+            selectUI->GetActor()->SetIsActive(true);
+
+            _state = ChestUIController::SelectMenu;
         }
         break;
     }

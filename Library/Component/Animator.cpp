@@ -580,7 +580,7 @@ void Animator::SetPartialAnimationMask(const std::string& nodeName)
 		return;
 
 	// 指定ノードとその子ノードをマスクに登録
-	std::function<void(int)> addNodeAndChildren = [&](int index)
+	std::function<void(int)> AddNodeAndChildren = [&](int index)
 		{
             _partialMaskIndices.push_back(index);
 			const ModelResource::Node& node = _model.lock()->GetResource()->GetNodes().at(index);
@@ -589,11 +589,11 @@ void Animator::SetPartialAnimationMask(const std::string& nodeName)
 				int childIndex = _model.lock()->GetNodeIndex(child->name);
 				if (childIndex != -1)
 				{
-					addNodeAndChildren(childIndex);
+                    AddNodeAndChildren(childIndex);
 				}
 			}
 		};
-	addNodeAndChildren(nodeIndex);
+    AddNodeAndChildren(nodeIndex);
 }
 /// 部分アニメーションさせるノードを解除
 void Animator::RemovePartialAnimationMask(const std::string& nodeName)
@@ -604,8 +604,8 @@ void Animator::RemovePartialAnimationMask(const std::string& nodeName)
     if (nodeIndex == -1)
         return;
 
-    // 指定ノードとその子ノードをマスクに登録
-    std::function<void(int)> addNodeAndChildren = [&](int index)
+    // 指定ノードとその子ノードをマスク解除
+    std::function<void(int)> RemoveNodeAndChildren = [&](int index)
         {
             auto it = std::find(_partialMaskIndices.begin(), _partialMaskIndices.end(), index);
             if (it != _partialMaskIndices.end())
@@ -617,11 +617,11 @@ void Animator::RemovePartialAnimationMask(const std::string& nodeName)
                 int childIndex = _model.lock()->GetNodeIndex(child->name);
                 if (childIndex != -1)
                 {
-                    addNodeAndChildren(childIndex);
+                    RemoveNodeAndChildren(childIndex);
                 }
             }
         };
-    addNodeAndChildren(nodeIndex);
+    RemoveNodeAndChildren(nodeIndex);
 }
 /// 特定のノード以下に別のアニメーションを再生する（部分アニメーション）
 void Animator::PlayPartialAnimation(std::string animationName, bool loop, float blendSeconds)

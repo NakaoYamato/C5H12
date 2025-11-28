@@ -884,6 +884,8 @@ namespace PlayerDrinkSubState
 		{
 			// 部分アニメーションを再生
 			_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
+			// 部分アニメーション用パラメータ設定
+			_owner->GetAnimator()->RemovePartialAnimationMask("clavicle_r");
 		}
 		void OnExecute(float elapsedTime) override
 		{
@@ -904,7 +906,11 @@ namespace PlayerDrinkSubState
 				}
 			}
 		}
-		void OnExit() override {}
+		void OnExit() override
+		{
+			// 部分アニメーション用パラメータ設定
+			_owner->GetAnimator()->SetPartialAnimationMask("clavicle_r");
+		}
 	};
 	class DrinkEndSubState : public StateBase<PlayerStateMachine>
 	{
@@ -950,6 +956,7 @@ PlayerNonCombatDrinkState::PlayerNonCombatDrinkState(PlayerStateMachine* stateMa
 
 void PlayerNonCombatDrinkState::OnEnter()
 {
+	_owner->GetAnimator()->SetIsUseRootMotion(true);
 	_owner->GetPlayer()->SetIsAbleToUseItem(false);
 	ChangeSubState("DrinkStart");
 

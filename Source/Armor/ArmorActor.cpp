@@ -58,6 +58,9 @@ void ArmorActor::OnLateUpdate(float elapsedTime)
 	// プレイヤーのマテリアル情報を反映
 	if (const Vector4* color = _parentModelRenderer.lock()->GetMaterials().at(0).GetParameterF4("bodyColor"))
 	{
+		if (_isOverrideRimLight)
+			color = &_rimLightColor;
+
 		for (auto& material : _modelRenderer.lock()->GetMaterials())
 		{
 			// マテリアルをプレイヤーと同じものにする
@@ -119,6 +122,8 @@ void ArmorActor::OnDrawGui()
 				BuildData(nullptr, -1);
 			}
 			ImGui::Separator();
+			ImGui::Checkbox(u8"リムライトを上書きするか", &_isOverrideRimLight);
+			ImGui::DragFloat4(u8"上書きするリムライトの色", &_rimLightColor.x, 0.01f, 0.0f, 20.0f);
 
 			ImGui::EndTabItem();
 		}

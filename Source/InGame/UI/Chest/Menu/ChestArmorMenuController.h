@@ -122,4 +122,7 @@ private:
 	TextRenderer::TextDrawData _defenseTextData;
 	TextRenderer::TextDrawData _skillTextData;
 	float _skillTextIntervalY = 45.0f;
+
+	// 選択中のリムライト色
+	Vector4 _selectedRimLightColor = Vector4(1.0f, 1.0f, 0.0f, 0.6f);
 };

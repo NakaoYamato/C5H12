@@ -33,20 +33,12 @@ void LocusRenderer::Update(float elapsedTime)
 		pos.lifeTime -= elapsedTime;
 		if (pos.lifeTime <= 0.0f)
 			isShift = true;
-        // 速度更新
-        //const Vector3 movement = pos.velocity * elapsedTime;
-        //pos.rootPosition += movement;
-        //pos.tipPosition += movement;
-        //// 軌跡の外側に広げる
-        //const Vector3 vec = (pos.tipPosition - pos.rootPosition).Normalize() * elapsedTime;
-        //pos.rootPosition += vec * 2.0f;
-        //pos.tipPosition += vec;
 	}
 
     // ずらす必要がない場合は終了
     if (!isShift) return;
     // 保存していた頂点バッファを1つずらす
-    //_trailPositions.erase(_trailPositions.begin());
+    _trailPositions.erase(_trailPositions.begin());
 }
 // GUI描画
 void LocusRenderer::DrawGui()
@@ -61,7 +53,6 @@ void LocusRenderer::DrawGui()
 void LocusRenderer::Render(const RenderContext& rc)
 {
 	Draw(rc, _trailPositions, &_distortionMaterial);
-	//Draw(rc, _trailPositions, &_material);// TODO : 軌跡
 }
 // 軌跡追加
 void LocusRenderer::PushFrontVertex(const Vector3& rootWP, 

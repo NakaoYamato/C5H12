@@ -63,8 +63,24 @@ void PlayerGreatSwordActor::OnUpdate(float elapsedTime)
 		if (_locusPushTimer > 0.0f)
 			color.w = _rimLightFactor;
 
+		// 上書き設定がある場合はそちらを優先
+		if (_isOverrideRimLight)
+			color = _rimLightColor;
+
 		for (auto& material : _modelRenderer.lock()->GetMaterials())
 		{
+			// シェーダー名が違う場合は変更する
+			if (material.GetShaderName() != "Player")
+			{
+				material.SetShaderName("Player");
+				// シェーダー変更時はパラメータも初期化
+				auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
+				material.SetParameterMap(modelShaderResource->GetShaderParameterKey(
+					_modelRenderer.lock()->GetRenderType(),
+					"Player",
+					true));
+			}
+
 			material.SetParameter("bodyColor", color);
 		}
 	}

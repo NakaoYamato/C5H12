@@ -29,6 +29,11 @@ public:
 
 	// データ構築
 	void BuildData(int index);
+
+	// リムライトを上書きするか
+	void SetIsOverrideRimLight(bool isOverride) { _isOverrideRimLight = isOverride; }
+	// 上書きするリムライトの色設定
+	void SetRimLightColor(const Vector4& color) { _rimLightColor = color; }
 protected:
 	WeaponType _weaponType = WeaponType::GreatSword;
 	int _weaponIndex = 0;
@@ -39,11 +44,20 @@ protected:
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
 
+#pragma region 軌跡
 	Vector3 _oldPosition = Vector3::Zero; // 前回の位置(ワールド座標)
 	Vector3 _locusRootLocalPosition = Vector3::Zero; // 軌跡のルート位置(ローカル座標)
 	Vector3 _locusTipLocalPosition = Vector3::Up; // 軌跡の先端位置(ローカル座標)
-    float _locusLifeTime = 0.1f; // 軌跡のライフタイム
+	float _locusLifeTime = 0.2f; // 軌跡のライフタイム
 	float _locusPushInterval = 0.01f; // 軌跡の位置を追加する間隔(秒)
 	float _locusPushTimer = 0.0f; // 軌跡の位置を追加するタイマー
 	bool _isDrawingLocusPosition = true; // 軌跡の位置を描画するかどうか
+#pragma endregion
+
+#pragma region リムライト
+	// リムライトを上書きするか
+	bool _isOverrideRimLight = false;
+	// 上書きするリムライトの色
+	Vector4 _rimLightColor = Vector4::White;
+#pragma endregion
 };

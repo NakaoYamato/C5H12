@@ -54,5 +54,4 @@ private:
     bool					_splineInterpolation = true; // スプライン補間を使用するかどうか
 	// マテリアル
 	Material				_distortionMaterial;
-	Material				_material;
 };

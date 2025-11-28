@@ -24,6 +24,11 @@ public:
 
 	// データ構築
 	void BuildData(ArmorData* data, int index);
+
+	// リムライトを上書きするか
+	void SetIsOverrideRimLight(bool isOverride) { _isOverrideRimLight = isOverride; }
+	// 上書きするリムライトの色設定
+	void SetRimLightColor(const Vector4& color) { _rimLightColor = color; }
 private:
 	// モデルのトランスフォーム更新
 	void UpdateModelTransform() override;
@@ -37,4 +42,11 @@ protected:
 	std::weak_ptr<ModelRenderer> _parentModelRenderer;
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
+
+#pragma region リムライト
+	// リムライトを上書きするか
+	bool _isOverrideRimLight = false;
+	// 上書きするリムライトの色
+	Vector4 _rimLightColor = Vector4::White;
+#pragma endregion
 };

@@ -85,6 +85,10 @@ void WeaponActor::OnDrawGui()
 			ImGui::DragFloat3(u8"軌跡のルート位置", &_locusRootLocalPosition.x, 0.01f);
 			ImGui::DragFloat3(u8"軌跡の先端位置", &_locusTipLocalPosition.x, 0.01f);
             ImGui::DragFloat(u8"軌跡のライフタイム", &_locusLifeTime, 0.01f, 0.01f, 10.0f);
+			ImGui::Separator();
+
+			ImGui::Checkbox(u8"リムライトを上書きするか", &_isOverrideRimLight);
+			ImGui::DragFloat4(u8"上書きするリムライトの色", &_rimLightColor.x, 0.01f, 0.0f, 20.0f);
 
 			ImGui::EndTabItem();
 		}

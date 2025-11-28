@@ -211,15 +211,49 @@ void ChestArmorMenuController::Update(float elapsedTime)
     SetColor(WaistSpr, SelectType::Waist);
     SetColor(LegSpr, SelectType::Leg);
 
-    // TODO : 選択中の防具を光らせる
+    // 選択中の防具を光らせる
+    switch (_selectType)
+    {
+    case ChestArmorMenuController::SelectType::Weapon:
+		playerEquipmentController->GetWeaponActor()->SetIsOverrideRimLight(true);
+		playerEquipmentController->GetWeaponActor()->SetRimLightColor(_selectedRimLightColor);
 
+		// 他の防具は光らせない
+		for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+		{
+            playerEquipmentController->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(false);
+		}
+
+        break;
+    case ChestArmorMenuController::SelectType::Head:
+    case ChestArmorMenuController::SelectType::Chest:
+    case ChestArmorMenuController::SelectType::Arm:
+    case ChestArmorMenuController::SelectType::Waist:
+    case ChestArmorMenuController::SelectType::Leg:
+    {
+        ArmorType type = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
+		playerEquipmentController->GetArmorActor(type)->SetIsOverrideRimLight(true);
+		playerEquipmentController->GetArmorActor(type)->SetRimLightColor(_selectedRimLightColor);
+
+		// 他の防具は光らせない
+        playerEquipmentController->GetWeaponActor()->SetIsOverrideRimLight(false);
+		for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+		{
+			if (i == static_cast<int>(type))
+				continue;
+            playerEquipmentController->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(false);
+		}
+
+        break;
+    }
+    }
 }
 
 // 3D描画後の描画処理
 void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
 {
-    auto PlayerEquipmentController = _PlayerEquipmentController.lock();
-    if (!PlayerEquipmentController)
+    auto playerEquipmentController = _PlayerEquipmentController.lock();
+    if (!playerEquipmentController)
         return;
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
@@ -368,7 +402,17 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
     case ChestArmorMenuController::State::SelectArmorType:
         switch (_selectType)
         {
-        case ChestArmorMenuController::SelectType::Weapon:  _nameTextData.text += L"なし"; /*後でする*/break;
+        case ChestArmorMenuController::SelectType::Weapon:
+        {
+			int weaponIndex = playerEquipmentController->GetWeaponIndex();
+            if (auto weaponData = userDataManager->GetAcquiredWeaponData(userDataManager->GetEquippedWeaponType(), weaponIndex))
+            {
+				_nameTextData.text += ToUtf16(weaponData->GetBaseData()->name);
+				_defenseTextData.text = L"攻撃力:" + std::to_wstring(static_cast<int>(weaponData->GetBaseData()->attack));
+				_rarityextData.text += std::to_wstring(weaponData->GetBaseData()->rarity);
+            }
+            break;
+        }
         case ChestArmorMenuController::SelectType::Head:
         case ChestArmorMenuController::SelectType::Chest:
         case ChestArmorMenuController::SelectType::Arm:
@@ -376,7 +420,7 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
         case ChestArmorMenuController::SelectType::Leg:
         {
             ArmorType type = static_cast<ArmorType>(static_cast<int>(_selectType) - 1);
-            int armorIndex = PlayerEquipmentController->GetArmorIndex(type);
+            int armorIndex = playerEquipmentController->GetArmorIndex(type);
             if (armorIndex != -1)
             {
                 if (auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex))
@@ -394,7 +438,17 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
     case ChestArmorMenuController::State::SelectArmor:
         switch (_selectType)
         {
-        case ChestArmorMenuController::SelectType::Weapon:  _nameTextData.text += L"なし"; /*後でする*/break;
+        case ChestArmorMenuController::SelectType::Weapon:
+        {
+            int weaponIndex = _selectArmorRowIndex * _armorSprColumnNum + _selectArmorColumnIndex;
+            if (auto weaponData = userDataManager->GetAcquiredWeaponData(userDataManager->GetEquippedWeaponType(), weaponIndex))
+            {
+                _nameTextData.text += ToUtf16(weaponData->GetBaseData()->name);
+                _defenseTextData.text = L"攻撃力:" + std::to_wstring(static_cast<int>(weaponData->GetBaseData()->attack));
+                _rarityextData.text += std::to_wstring(weaponData->GetBaseData()->rarity);
+            }
+            break;
+        }
         case ChestArmorMenuController::SelectType::Head:
         case ChestArmorMenuController::SelectType::Chest:
         case ChestArmorMenuController::SelectType::Arm:
@@ -418,6 +472,8 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
         }
         break;
     }
+
+	// テキスト描画
     if (!_nameTextData.text.empty())
     {
         textRenderer.Draw(_nameTextData);
@@ -493,9 +549,13 @@ void ChestArmorMenuController::DrawGui()
 		ImGui::TreePop();
 	}
     ImGui::Separator();
+
 	_nameTextData.DrawGui(u8"防具名テキスト");
 	_rarityextData.DrawGui(u8"レア度テキスト");
     _defenseTextData.DrawGui(u8"防御力テキスト");
+    ImGui::Separator();
+
+	ImGui::ColorEdit4(u8"選択中リムライト色", &_selectedRimLightColor.x);
 }
 
 // インデックス追加
@@ -646,10 +706,20 @@ bool ChestArmorMenuController::PreviousState()
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
         return false;
+    auto playerEquipmentController = _PlayerEquipmentController.lock();
+    if (!playerEquipmentController)
+        return false;
 
     switch (_state)
     {
     case State::SelectArmorType:
+        // 戻るときに装備の上書きリムライトを消す
+        playerEquipmentController->GetWeaponActor()->SetIsOverrideRimLight(false);
+        for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+        {
+            playerEquipmentController->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(false);
+        }
+
         return true;
         break;
     case State::SelectArmor:

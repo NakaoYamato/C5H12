@@ -1,6 +1,7 @@
 #include "MeshRenderer.h"
 
 #include "../Graphics/GpuResourceManager.h"
+#include "../../Library/JobSystem/JobSystem.h"
 #include "../../Shader/Model/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include "../../Library/Algorithm/Converter.h"
@@ -139,6 +140,8 @@ void MeshRenderer::DrawInstancing(Model* model,
 /// 描画実行
 void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 {
+	ProfileScopedSection_3(0, "MeshRenderer::RenderOpaque", ImGuiControl::Profiler::Green);
+
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// サンプラステート設定
@@ -180,10 +183,16 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 				Debug::Output::String(L"\tシェーダーがnullptrのためPhongシェーダーを使用\n");
 				shader = shaders[static_cast<int>(ModelRenderType::Dynamic)]["Phong"].get();
 			}
+			ProfileScopedSection_3(0, drawInfomap.first.c_str(), ImGuiControl::Profiler::Blue);
+
 			shader->Begin(rc);
 
 			for (auto& drawInfo : drawInfomap.second)
 			{
+				ProfileScopedSection_3(0, 
+					drawInfo.material ? drawInfo.material->GetName().c_str() : "NoMaterialMesh",
+					ImGuiControl::Profiler::Yellow);
+
 				// メッシュ描画
 				DrawDynamicBoneMesh(rc, shader, drawInfo);
 			}
@@ -212,10 +221,15 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 				Debug::Output::String(L"\tシェーダーがnullptrのためPhongシェーダーを使用\n");
 				shader = shaders[static_cast<int>(ModelRenderType::Static)]["Phong"].get();
 			}
+			ProfileScopedSection_3(0, drawInfomap.first.c_str(), ImGuiControl::Profiler::Blue);
 			shader->Begin(rc);
 
 			for (auto& drawInfo : drawInfomap.second)
 			{
+				ProfileScopedSection_3(0,
+					drawInfo.material ? drawInfo.material->GetName().c_str() : "NoMaterialMesh",
+					ImGuiControl::Profiler::Yellow);
+
 				// メッシュ描画
 				DrawStaticBoneModel(rc, shader, drawInfo);
 			}
@@ -229,6 +243,8 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 /// 半透明描画
 void MeshRenderer::RenderAlpha(const RenderContext& rc)
 {
+	ProfileScopedSection_3(0, "MeshRenderer::RenderAlpha", ImGuiControl::Profiler::Green);
+
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// サンプラステート設定
@@ -246,27 +262,32 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 	// ブレンドステート設定
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
-	// カメラ距離でソート
-	DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
-	DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
-	for (auto& alphaDrawInfo : _alphaDrawInfomap)
 	{
-		const std::vector<ModelResource::Node>& nodes = alphaDrawInfo.drawInfo.model->GetPoseNodes();
-		const ModelResource::Mesh* mesh = alphaDrawInfo.drawInfo.mesh;
-		DirectX::XMVECTOR Position = DirectX::XMVectorSet(
-			nodes[mesh->nodeIndex].worldTransform._41,
-			nodes[mesh->nodeIndex].worldTransform._42,
-			nodes[mesh->nodeIndex].worldTransform._43,
-			0.0f);
-		DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
-		alphaDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
-	}
-	// 遠い順にソート
-	std::sort(_alphaDrawInfomap.begin(), _alphaDrawInfomap.end(),
-		[](const AlphaDrawInfo& lhs, const AlphaDrawInfo& rhs)
+		ProfileScopedSection_3(0, "Sort", ImGuiControl::Profiler::Green);
+
+		// カメラ距離でソート
+		DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
+		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
+		for (auto& alphaDrawInfo : _alphaDrawInfomap)
 		{
-			return lhs.distance > rhs.distance;
-		});
+			const std::vector<ModelResource::Node>& nodes = alphaDrawInfo.drawInfo.model->GetPoseNodes();
+			const ModelResource::Mesh* mesh = alphaDrawInfo.drawInfo.mesh;
+			DirectX::XMVECTOR Position = DirectX::XMVectorSet(
+				nodes[mesh->nodeIndex].worldTransform._41,
+				nodes[mesh->nodeIndex].worldTransform._42,
+				nodes[mesh->nodeIndex].worldTransform._43,
+				0.0f);
+			DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
+			alphaDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
+		}
+
+		// 遠い順にソート
+		std::sort(_alphaDrawInfomap.begin(), _alphaDrawInfomap.end(),
+			[](const AlphaDrawInfo& lhs, const AlphaDrawInfo& rhs)
+			{
+				return lhs.distance > rhs.distance;
+			});
+	}
 
 	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 	auto shaders = modelShaderResource->GetShaderMap(false);
@@ -294,6 +315,9 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 			}
 			shader->Begin(rc);
 
+			ProfileScopedSection_3(0,
+				alphaDrawInfo.drawInfo.material ? alphaDrawInfo.drawInfo.material->GetName().c_str() : "NoMaterialMesh",
+				ImGuiControl::Profiler::Yellow);
 			// メッシュ描画
 			DrawDynamicBoneMesh(rc, shader, alphaDrawInfo.drawInfo);
 
@@ -319,6 +343,9 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 			}
 			shader->Begin(rc);
 
+			ProfileScopedSection_3(0,
+				alphaDrawInfo.drawInfo.material ? alphaDrawInfo.drawInfo.material->GetName().c_str() : "NoMaterialMesh",
+				ImGuiControl::Profiler::Yellow);
 			// メッシュ描画
 			DrawDynamicBoneMesh(rc, shader, alphaDrawInfo.drawInfo);
 
@@ -461,6 +488,8 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 // インスタンシングモデルの描画
 void MeshRenderer::RenderInstancing(const RenderContext& rc)
 {
+	ProfileScopedSection_3(0, "MeshRenderer::RenderInstancing", ImGuiControl::Profiler::Blue);
+
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// モデルの描画関数

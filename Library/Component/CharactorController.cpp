@@ -159,7 +159,7 @@ void CharactorController::UpdatePosition(float deltaTime)
 }
 
 /// 移動＆滑り
-void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
+void CharactorController::MoveAndSlide(const Vector3& move, bool vertical, int loopCount)
 {
 	CollisionManager& collisionManager = this->GetActor()->GetScene()->GetCollisionManager();
 	Transform& transform = this->GetActor()->GetTransform();
@@ -168,7 +168,7 @@ void CharactorController::MoveAndSlide(const Vector3& move, bool vertical)
 	DirectX::XMVECTOR Move = DirectX::XMLoadFloat3(&move);
 	DirectX::XMVECTOR CenterOffset = DirectX::XMVectorSet(0, _radius + _stepOffset, 0, 0);
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < loopCount; ++i)
 	{
 		// キャスト量算出
 		float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(Move));
@@ -299,9 +299,9 @@ void CharactorController::ResolvPushOut()
 		return;
 
 	// スフィアキャストでめり込み解消
-	MoveAndSlide({ _pushOut.x, 0.0f, _pushOut.z }, false);
+	MoveAndSlide({ _pushOut.x, 0.0f, _pushOut.z }, false, 1);
 	// 垂直処理
-	MoveAndSlide({ 0.0f, _pushOut.y, 0.0f }, true);
+	MoveAndSlide({ 0.0f, _pushOut.y, 0.0f }, true, 1);
 
 	_pushOut = {};
 }

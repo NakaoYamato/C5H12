@@ -93,7 +93,8 @@ public:
     /// </summary>
     /// <param name="move"></param>
     /// <param name="vertical">true‚Å‚’¼ˆ—</param>
-    void MoveAndSlide(const Vector3& move, bool vertical);
+    /// <param name="loopCount">”»’è‚ğŒJ‚è•Ô‚·‰ñ”</param>
+    void MoveAndSlide(const Vector3& move, bool vertical, int loopCount = 3);
 
 	/// <summary>
 	/// ‰ñ“]ˆ—

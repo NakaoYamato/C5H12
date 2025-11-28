@@ -2,6 +2,7 @@
 
 #include "../HRTrace.h"
 #include "../../Library/Graphics/GpuResourceManager.h"
+#include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/Shader/Model/CascadedShadowMap/CascadedShadowMapShader.h"
 
 #include <Mygui.h>
@@ -237,6 +238,8 @@ void TerrainRenderer::DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& wo
 // 頂点書き出し処理
 void TerrainRenderer::ExportVertex(const RenderContext& rc)
 {
+    ProfileScopedSection_3(0, "TerrainRenderer::ExportVertex", ImGuiControl::Profiler::Green);
+
     ID3D11DeviceContext* dc = rc.deviceContext;
 
     // 定数バッファ設定
@@ -254,6 +257,8 @@ void TerrainRenderer::ExportVertex(const RenderContext& rc)
 // 描画処理
 void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 {
+    ProfileScopedSection_3(0, "TerrainRenderer::Render", ImGuiControl::Profiler::Green);
+
     ID3D11DeviceContext* dc = rc.deviceContext;
 
     if (_isWireFrame)

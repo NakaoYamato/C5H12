@@ -255,6 +255,8 @@ void Scene::Render()
     GBuffer* gBuffer = graphics.GetGBuffer();
     if (graphics.RenderingDeferred())
     {
+        ProfileScopedSection_3(0, "GBuffer", ImGuiControl::Profiler::Blue);
+
         rc.depthStencilView = gBuffer->GetDepthStencilView().Get();
 
         // ƒŒƒ“ƒ_[ƒXƒe[ƒgÝ’è
@@ -289,6 +291,8 @@ void Scene::Render()
     FrameBuffer* renderFrame = graphics.GetFrameBuffer(_RENDER_FRAME_INDEX);
     renderFrame->ClearAndActivate(dc, Vector4::Zero, 1.0f);
     {
+        ProfileScopedSection_3(0, "FrameBuffer0", ImGuiControl::Profiler::Blue);
+
         rc.depthStencilView = renderFrame->GetDSV().Get();
 
         // ‹ó‚Ì•`‰æ
@@ -376,6 +380,8 @@ void Scene::Render()
     CascadedShadowMap* cascadedShadowMap = graphics.GetCascadedShadowMap();
     if (cascadedShadowMap->IsCreateShadow())
     {
+        ProfileScopedSection_3(0, "CascadedShadowMap", ImGuiControl::Profiler::Blue);
+
         rc.depthStencilView = nullptr;
 
         cascadedShadowMap->ClearAndActivate(rc);
@@ -399,6 +405,8 @@ void Scene::Render()
     FrameBuffer* modelAndShadowRenderFrame = graphics.GetFrameBuffer(_APPLY_SHADOW_FRAME_INDEX);
     modelAndShadowRenderFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
+        ProfileScopedSection_3(0, "FrameBuffer1", ImGuiControl::Profiler::Blue);
+
         rc.depthStencilView = modelAndShadowRenderFrame->GetDSV().Get();
 
         // ‰e‚Ì•`‰æ
@@ -430,6 +438,8 @@ void Scene::Render()
     FrameBuffer* sceneFrame = graphics.GetFrameBuffer(_SCENE_FRAME_INDEX);
     sceneFrame->ClearAndActivate(dc, Vector4::Zero, 0.0f);
     {
+        ProfileScopedSection_3(0, "FrameBuffer2", ImGuiControl::Profiler::Blue);
+
         rc.depthStencilView = sceneFrame->GetDSV().Get();
 
         //--------------------------------------------------------------------------------------

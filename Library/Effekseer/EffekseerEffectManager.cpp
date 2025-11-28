@@ -1,6 +1,7 @@
 #include "EffekseerEffectManager.h"
 
 #include "../../Graphics/Graphics.h"
+#include "../../Library/JobSystem/JobSystem.h"
 
 /// 初期化
 void EffekseerEffectManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc)
@@ -38,6 +39,8 @@ void EffekseerEffectManager::Update(float elapsedTime)
 /// 描画処理
 void EffekseerEffectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
 {
+    ProfileScopedSection_3(0, "TerrainRenderer::Render", ImGuiControl::Profiler::Green);
+
     //ビュー&プロジェクション行列をEffekseerレンダラに設定
     effekseerRenderer->SetCameraMatrix(*reinterpret_cast<const Effekseer::Matrix44*>(&view));
     effekseerRenderer->SetProjectionMatrix(*reinterpret_cast<const Effekseer::Matrix44*>(&projection));

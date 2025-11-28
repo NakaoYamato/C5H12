@@ -88,8 +88,8 @@ void PlayerController::Start()
 		}
 	}
 	_chargeEffectRimLightColor1.w = 2.0f;
-	_chargeEffectRimLightColor2.w = 8.0f;
-	_chargeEffectRimLightColor3.w = 10.0f;
+	_chargeEffectRimLightColor2.w = 2.0f;
+	_chargeEffectRimLightColor3.w = 3.0f;
 }
 
 // 更新処理
@@ -116,7 +116,7 @@ void PlayerController::Update(float elapsedTime)
 			{
 				// モーション値取得
 				_attackMotionFactor = static_cast<float>(event.messageIndex);
-				return;
+				continue;
 			}
 
 			// メッセージインデックスが範囲外ならcontinue

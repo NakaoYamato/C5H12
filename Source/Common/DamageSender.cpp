@@ -169,9 +169,8 @@ void DamageSender::ContactStage(StageEffectEmitter* target, CollisionData& colli
 	if (_stageEffectTimer > 0.0f)
 		return;
 
-	float mf = sqrtf(_motionFactor);
-	float effectScale = std::clamp<float>(mf * _stageEffectMotionFactor, 0.0f, 1.0f);
-	float shakePower = std::clamp<float>(mf * _stageShakeMotionFactor, 0.0f, 1.0f);
+	float effectScale = std::clamp<float>(_motionFactor * _stageEffectMotionFactor, 0.0f, 1.0f);
+	float shakePower = std::clamp<float>(_motionFactor * _stageShakeMotionFactor, 0.0f, 1.0f);
 
 	// エフェクト再生
 	target->PlayEffect(collisionData.hitPosition, Vector3::Zero, effectScale, shakePower);

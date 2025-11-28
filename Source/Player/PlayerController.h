@@ -173,7 +173,7 @@ private:
 	float _chargeEffectRimLightTimer = 0.0f;
 	float _chargeEffectRimLightTimeMax = 0.5f;
 	// 溜め段階のリムライトカラー
-	Vector4 _chargeEffectRimLightColor1 = Vector4::Yellow;
-	Vector4 _chargeEffectRimLightColor2 = Vector4(1.0f, 50.0f / 255.0f, 0.0f, 1.0f);
+	Vector4 _chargeEffectRimLightColor1 = Vector4::White;
+	Vector4 _chargeEffectRimLightColor2 = Vector4::Yellow;
 	Vector4 _chargeEffectRimLightColor3 = Vector4::Red;
 };

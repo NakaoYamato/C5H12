@@ -133,6 +133,8 @@ namespace RunSubState
 		}
 		void OnExecute(float elapsedTime) override
 		{
+            // 移動方向に向く
+            _owner->RotationMovement(elapsedTime);
 			// アニメーションが終了していたら遷移
             if (!_owner->GetAnimator()->IsPlayAnimation())
             {

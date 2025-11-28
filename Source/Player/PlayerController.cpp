@@ -112,6 +112,13 @@ void PlayerController::Update(float elapsedTime)
 		auto events = animator->GetCurrentEvents();
 		for (auto& event : events)
 		{
+			if (event.eventType == AnimationEvent::EventType::Attack)
+			{
+				// モーション値取得
+				_attackMotionFactor = static_cast<float>(event.messageIndex);
+				return;
+			}
+
 			// メッセージインデックスが範囲外ならcontinue
 			if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
 				continue;

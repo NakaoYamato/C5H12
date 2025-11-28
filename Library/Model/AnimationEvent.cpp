@@ -149,19 +149,21 @@ void AnimationEvent::EventData::DrawGui(const std::vector<const char*>& messageL
             eventType = static_cast<EventType>(type);
     }
     
-    if (messageList.size() != 0)
-        ImGui::Combo(u8"メッセージ", &messageIndex, messageList.data(), (int)messageList.size());
     ImGui::DragFloat(u8"開始時間", &startSeconds, 0.01f, 0.0f, endSeconds);
     ImGui::DragFloat(u8"終了時間", &endSeconds, 0.01f, startSeconds);
 
     switch (eventType)
     {
     case AnimationEvent::EventType::Flag:
+        if (messageList.size() != 0)
+            ImGui::Combo(u8"メッセージ", &messageIndex, messageList.data(), (int)messageList.size());
         ImGui::DragFloat3(u8"position", &position.x, 0.1f);
         break;
     case AnimationEvent::EventType::Hit:
     case AnimationEvent::EventType::Attack:
     {
+        // モーション値設定
+		ImGui::DragInt(u8"モーション値", &messageIndex, 1, 0, 1000);
         // ShapeTypeの選択
         {
             int type = static_cast<int>(shapeType);

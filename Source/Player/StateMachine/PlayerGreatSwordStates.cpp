@@ -305,7 +305,6 @@ namespace Attack1SubState
             const std::string& nextSubStateName,
             const std::string& branchSubStateName,
             float animationBlendTime,
-            float motionFactor,
             float animationSpeed = 1.0f) :
             PlayerSSB(stateMachine,
                 name,
@@ -315,7 +314,6 @@ namespace Attack1SubState
                 true),
 			_nextSubStateName(nextSubStateName),
             _branchSubStateName(branchSubStateName),
-            _motionFactor(motionFactor),
             _animationSpeed(animationSpeed)
         {
         }
@@ -327,9 +325,10 @@ namespace Attack1SubState
         {
             PlayerSSB::OnEnter();
             // 攻撃フラグを立てる
+			float motionFactor = _owner->GetPlayer()->GetAttackMotionFactor();
             // チャージ量に合わせて攻撃力を設定
             int chargeLevel = std::clamp(_owner->GetPlayer()->GetChargeLevel(), 1, 3);
-			_owner->GetDamageSender()->SetMotionFactor(_motionFactor + 0.5f * (chargeLevel - 1));
+			_owner->GetDamageSender()->SetMotionFactor(motionFactor + 0.5f * (chargeLevel - 1));
             _owner->GetAnimator()->SetAnimationSpeed(_animationSpeed);
 
 
@@ -351,7 +350,6 @@ namespace Attack1SubState
     protected:
         std::string _nextSubStateName;
         std::string _branchSubStateName;
-		float _motionFactor = 1.0f;
         float _animationSpeed = 1.0f;
     };
     class ChargeSubState : public ComboSubState
@@ -370,7 +368,6 @@ namespace Attack1SubState
                 nextSubStateName,
                 branchSubStateName,
                 animationBlendTime,
-                0.0f,
                 animationSpeed)
         {
         }
@@ -498,7 +495,6 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "ChargeAttack02Start",
         "SpinningAttack",
         1.0f,
-        1.0f,
         1.0f));
     RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
         "ChargeAttack02Start",
@@ -513,7 +509,6 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "ChargeAttack03Start",
         "SpinningAttack",
         1.0f,
-        1.0f,
         1.0f));
     RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
         "ChargeAttack03Start",
@@ -527,7 +522,6 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "ChargeAttack03End",
         "",
         "",
-        1.0f,
         1.0f,
         0.8f));
 }
@@ -624,7 +618,6 @@ namespace Attack2SubState
             const std::string& animationName,
             const std::string& nextSubStateName,
             float animationBlendTime,
-            float motionFactor,
             float animationSpeed = 1.0f) :
             Attack1SubState::ComboSubState(stateMachine,
                 name,
@@ -632,15 +625,12 @@ namespace Attack2SubState
                 nextSubStateName,
                 "",
                 animationBlendTime,
-                motionFactor,
                 animationSpeed)
         {
         }
         void OnEnter() override
         {
             ComboSubState::OnEnter();
-            // 攻撃フラグを立てる
-            _owner->GetDamageSender()->SetMotionFactor(_motionFactor);
             // 直前のサブステートの名前から次のサブステートを決定
             auto& str = _owner->GetStateMachine().GetPreviousSubStateName();
             if (str == "ChargeAttack01Start")
@@ -695,14 +685,12 @@ PlayerGreatSwordAttack2State::PlayerGreatSwordAttack2State(PlayerStateMachine* s
         "",
         "ChargeAttack01Start",
         0.3f,
-        1.0f,
         0.7f));
     RegisterSubState(std::make_shared<Attack2SubState::TackleSubState>(stateMachine,
         "AttackTackle",
         "AttackTackle",
         "",
         0.3f,
-        1.0f,
         0.7f));
 }
 

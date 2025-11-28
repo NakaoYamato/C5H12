@@ -339,6 +339,12 @@ void Actor::Contact(CollisionData& collisionData)
 		collider->OnContact(collisionData);
 	}
 
+	// 親にも通知
+	if (GetParent())
+	{
+		GetParent()->Contact(collisionData);
+	}
+
 	OnContact(collisionData);
 }
 /// 接触した瞬間の処理
@@ -352,6 +358,12 @@ void Actor::ContactEnter(CollisionData& collisionData)
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
 		collider->OnContactEnter(collisionData);
+	}
+
+	// 親にも通知
+	if (GetParent())
+	{
+		GetParent()->ContactEnter(collisionData);
 	}
 
 	OnContactEnter(collisionData);

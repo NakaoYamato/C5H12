@@ -82,6 +82,7 @@ public:
 	bool IsUsingItem() const { return _isUsingItem; }
 	bool IsSelect()	const { return _isSelect; }
 	bool IsDrawingWeapon() const { return _isDrawingWeapon; }
+	float GetAttackMotionFactor() const { return _attackMotionFactor; }
 	int GetChargeLevel() const { return _chargeLevel; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
@@ -152,6 +153,8 @@ private:
 	// 抜刀状態か
 	bool _isDrawingWeapon = false;
 
+	// アニメーションの攻撃モーション値
+	float _attackMotionFactor = 1.0f;
 	// 溜め段階
 	int _chargeLevel = 0;
 #pragma endregion

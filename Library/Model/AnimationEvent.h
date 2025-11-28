@@ -44,6 +44,7 @@ public:
 		ShapeType shapeType = ShapeType::Box;
 
 		int nodeIndex = 0;
+		// メッセージインデックス EventType::Flag時はメッセージ、EventType::Hit/Attack時はモーション値
 		int messageIndex = -1;
 		float startSeconds = 0.0f;
 		float endSeconds = 0.0f;

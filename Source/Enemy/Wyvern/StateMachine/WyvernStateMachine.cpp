@@ -79,6 +79,9 @@ void WyvernStateMachine::Execute(float elapsedTime)
         auto events = GetAnimator()->GetCurrentEvents();
         for (auto& event : events)
         {
+			if (event.eventType != AnimationEvent::EventType::Flag)
+				continue;
+
             // メッセージインデックスが範囲外ならcontinue
             if (event.messageIndex < 0 || event.messageIndex >= massageListSize)
                 continue;

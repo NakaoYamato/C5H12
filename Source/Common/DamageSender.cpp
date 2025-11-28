@@ -23,6 +23,12 @@ void DamageSender::Update(float elapsedTime)
 			ResetAttackState();
 	}
 
+	// ステージエフェクトタイマー更新
+	if (_stageEffectTimer > 0.0f)
+	{
+		_stageEffectTimer = std::max<float>(0.0f, _stageEffectTimer - elapsedTime);
+	}
+
 	// ダメージテキストの表示
 	auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
 	for (auto it = _damageTexts.begin(); it != _damageTexts.end(); )
@@ -72,6 +78,14 @@ void DamageSender::DrawGui()
 	ImGui::DragFloat(u8"ヘイト倍率", &_heteFactor, 0.01f, 0.0f, 10.0f);
 	ImGui::Separator();
 
+	ImGui::Checkbox(u8"ステージエフェクト再生", &_isPlayStageEffect);
+	ImGui::Checkbox(u8"ステージカメラシェイク", &_isShakeOnStageContact);
+	ImGui::DragFloat(u8"ステージエフェクト生成間隔", &_stageEffectInterval, 0.01f, 0.0f, 10.0f);
+	ImGui::DragFloat(u8"ステージエフェクトモーション影響度", &_stageEffectMotionFactor, 0.01f, 0.0f, 10.0f);
+	ImGui::DragFloat(u8"ステージシェイクモーション影響度", &_stageShakeMotionFactor, 0.01f, 0.0f, 10.0f);
+	ImGui::Separator();
+
+	ImGui::Checkbox(u8"ダメージテキスト表示", &_drawText);
 	ImGui::ColorEdit4(u8"ダメージテキスト通常色", &_textNormalColor.x);
 	ImGui::ColorEdit4(u8"ダメージテキスト会心色", &_textCriticalColor.x);
 	ImGui::DragFloat(u8"ダメージテキスト上昇速度", &_textRiseSpeed, 0.1f, 0.0f, 100.0f);
@@ -82,6 +96,20 @@ void DamageSender::DrawGui()
 // 接触時処理
 void DamageSender::OnContact(CollisionData& collisionData)
 {
+	// エフェクト判定
+	// ステージとの接触処理
+	if (_isPlayStageEffect && collisionData.myLayer == CollisionLayer::Effect)
+	{
+		if (collisionData.otherLayer == CollisionLayer::Stage)
+		{
+			if (auto stageEffectEmitter = collisionData.other->GetComponent<StageEffectEmitter>())
+			{
+				ContactStage(stageEffectEmitter.get(), collisionData);
+				return;
+			}
+		}
+	}
+
 	// 攻撃判定
 	if (collisionData.myLayer == CollisionLayer::Attack)
 	{
@@ -133,4 +161,21 @@ void DamageSender::OnContact(CollisionData& collisionData)
 void DamageSender::CalculateATK(float hitzoneFactor)
 {
 	_ATK = _baseATK * _motionFactor * _sharpnessFactor * hitzoneFactor * _criticalFactor;
+}
+
+// ステージとの接触処理
+void DamageSender::ContactStage(StageEffectEmitter* target, CollisionData& collisionData)
+{
+	if (_stageEffectTimer > 0.0f)
+		return;
+
+	float mf = sqrtf(_motionFactor);
+	float effectScale = std::clamp<float>(mf * _stageEffectMotionFactor, 0.0f, 1.0f);
+	float shakePower = std::clamp<float>(mf * _stageShakeMotionFactor, 0.0f, 1.0f);
+
+	// エフェクト再生
+	target->PlayEffect(collisionData.hitPosition, Vector3::Zero, effectScale, shakePower);
+
+	// タイマー設定
+	_stageEffectTimer = _stageEffectInterval;
 }

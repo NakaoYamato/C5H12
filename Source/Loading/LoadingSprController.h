@@ -40,8 +40,6 @@ private:
 		"G",
 	};
 
-	// ロードバーの幅
-	float _loadingBarWidth = 0.0f;
 	// ロードバーの進捗速度
 	float _loadingBarSpeed = 3.0f;
 

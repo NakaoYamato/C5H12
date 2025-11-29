@@ -66,9 +66,9 @@ public:
 
 #pragma region 入出力
 	// ファイル読み込み
-	bool LoadFromFile();
+	bool LoadFromFile() override;
 	// ファイル保存
-	bool SaveToFile();
+	bool SaveToFile() override;
 #pragma endregion
 
 protected:

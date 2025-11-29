@@ -169,6 +169,7 @@
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\CameraControllerBase.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
+    <ClCompile Include="Library\Component\Component.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
     <ClCompile Include="Library\Component\EffectController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />

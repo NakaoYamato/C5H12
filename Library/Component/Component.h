@@ -87,6 +87,16 @@ public:
 	// アクター取得
 	std::shared_ptr<Actor> GetActor() { return _actor.lock(); }
 
+#pragma region 入出力
+	// ディレクトリ取得
+	std::string GetDirectory() const;
+
+	// ファイル読み込み
+	virtual bool LoadFromFile() { return false; }
+	// ファイル保存
+	virtual bool SaveToFile() { return false; }
+#pragma endregion
+
 private:
 	std::weak_ptr<Actor>	_actor;
 };

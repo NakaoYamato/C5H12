@@ -13,34 +13,16 @@ void PlayerHealthUIController::Start()
 		// êeê›íË
 		GetActor()->SetParent(canvas.get());
     }
-	// âÊëúì«Ç›çûÇ›
-	LoadTexture(FrameSprite, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(DamageGaugeMaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(MaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
-	LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
-
-	SetDepthState(MaskSprite, DepthState::SpriteMask);
-	SetStencil(MaskSprite, 1);
-	GetRectTransform(MaskSprite).SetLocalPosition(Vector2(_maskStartPosX, 0.0f));
-	GetRectTransform(MaskSprite).SetLocalScale(Vector2(_maskStartScaleX, 1.0f));
-
-	SetDepthState(GaugeSprite, DepthState::SpriteApplyMask);
-	SetStencil(GaugeSprite, 1);
-    SetColor(GaugeSprite, Vector4::Green);
-
-	SetDepthState(DamageGaugeMaskSprite, DepthState::SpriteMask);
-	SetStencil(DamageGaugeMaskSprite, 2);
-	GetRectTransform(DamageGaugeMaskSprite).SetLocalPosition(Vector2(_maskStartPosX, 0.0f));
-	GetRectTransform(DamageGaugeMaskSprite).SetLocalScale(Vector2(_maskStartScaleX, 1.0f));
-
-	SetDepthState(DamageGaugeSprite, DepthState::SpriteApplyMask);
-	SetStencil(DamageGaugeSprite, 2);
-    SetColor(DamageGaugeSprite, Vector4::Red);
-
-	GetRectTransform(GaugeEndSprite).SetLocalScale(Vector2(2.0f, 4.0f));
-	SetColor(GaugeEndSprite, Vector4::Green);
+	if (!IsLoaded())
+	{
+		// âÊëúì«Ç›çûÇ›
+		LoadTexture(FrameSprite, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
+		LoadTexture(DamageGaugeMaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
+		LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+		LoadTexture(MaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
+		LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
+		LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
+	}
 }
 // çXêVèàóù
 void PlayerHealthUIController::Update(float elapsedTime)

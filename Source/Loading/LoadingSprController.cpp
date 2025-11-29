@@ -14,40 +14,26 @@ void LoadingSprController::Start()
 	_spriteRenderer = this->GetActor()->GetComponent<SpriteRenderer>();
 	if (auto spriteRenderer = _spriteRenderer.lock())
 	{
-		spriteRenderer->LoadTexture(BackSpr, L"Data/Texture/Loading/Back.jpg");
-		spriteRenderer->GetRectTransform(BackSpr).SetLocalPosition(Vector2(960.0f, 540.0f));
-		spriteRenderer->GetRectTransform(BackSpr).SetLocalScale(Vector2(0.4f, 0.4f));
-
-		// 進捗バー背景の生成
-		spriteRenderer->LoadTexture(LoadingBarBackSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalPosition(Vector2(1070.0f, 970.0f));
-		spriteRenderer->GetRectTransform(LoadingBarBackSpr).SetLocalScale(Vector2(1.5f, 1.0f));
-		spriteRenderer->SetColor(LoadingBarBackSpr, Vector4::Black);
-
-		// 進捗バーの生成
-		spriteRenderer->LoadTexture(LoadingBarSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
-		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalPosition(Vector2(1070.0f, 970.0f));
-		spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(Vector2(0.0f, 1.0f));
-
-		// テキストスプライトの生成
-		spriteRenderer->LoadTexture(TextSprs[0], L"Data/Texture/Loading/N.png");
-		spriteRenderer->LoadTexture(TextSprs[1], L"Data/Texture/Loading/O.png");
-		spriteRenderer->LoadTexture(TextSprs[2], L"Data/Texture/Loading/W.png");
-		spriteRenderer->LoadTexture(TextSprs[3], L"");
-		spriteRenderer->LoadTexture(TextSprs[4], L"Data/Texture/Loading/L.png");
-		spriteRenderer->LoadTexture(TextSprs[5], L"Data/Texture/Loading/O.png");
-		spriteRenderer->LoadTexture(TextSprs[6], L"Data/Texture/Loading/A.png");
-		spriteRenderer->LoadTexture(TextSprs[7], L"Data/Texture/Loading/D.png");
-		spriteRenderer->LoadTexture(TextSprs[8], L"Data/Texture/Loading/I.png");
-		spriteRenderer->LoadTexture(TextSprs[9], L"Data/Texture/Loading/N.png");
-		spriteRenderer->LoadTexture(TextSprs[10], L"Data/Texture/Loading/G.png");
-		for (int i = 0; i < 11; ++i)
+		if (!spriteRenderer->IsLoaded())
 		{
-			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalPosition(
-				Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y));
-			spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalScale(Vector2(0.4f, 0.4f));
+			spriteRenderer->LoadTexture(BackSpr, L"Data/Texture/Loading/Back.jpg");
+			// 進捗バー背景の生成
+			spriteRenderer->LoadTexture(LoadingBarBackSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
+			// 進捗バーの生成
+			spriteRenderer->LoadTexture(LoadingBarSpr, L"Data/Texture/Loading/LoadingBar.png", Sprite::CenterAlignment::LeftCenter);
+			// テキストスプライトの生成
+			spriteRenderer->LoadTexture(TextSprs[0], L"Data/Texture/Loading/N.png");
+			spriteRenderer->LoadTexture(TextSprs[1], L"Data/Texture/Loading/O.png");
+			spriteRenderer->LoadTexture(TextSprs[2], L"Data/Texture/Loading/W.png");
+			spriteRenderer->LoadTexture(TextSprs[3], L"");
+			spriteRenderer->LoadTexture(TextSprs[4], L"Data/Texture/Loading/L.png");
+			spriteRenderer->LoadTexture(TextSprs[5], L"Data/Texture/Loading/O.png");
+			spriteRenderer->LoadTexture(TextSprs[6], L"Data/Texture/Loading/A.png");
+			spriteRenderer->LoadTexture(TextSprs[7], L"Data/Texture/Loading/D.png");
+			spriteRenderer->LoadTexture(TextSprs[8], L"Data/Texture/Loading/I.png");
+			spriteRenderer->LoadTexture(TextSprs[9], L"Data/Texture/Loading/N.png");
+			spriteRenderer->LoadTexture(TextSprs[10], L"Data/Texture/Loading/G.png");
 		}
-		spriteRenderer->GetRectTransform(TextSprs[3]).SetLocalScale(Vector2(0.0f, 0.0f));
 	}
 
 	_timer = 0.0f;
@@ -86,6 +72,7 @@ void LoadingSprController::Update(float elapsedTime)
 		}
 	}
 
+	// 待機時間
 	if (_intervalTimer > 0.0f)
 	{
 		_intervalTimer -= elapsedTime;
@@ -99,6 +86,7 @@ void LoadingSprController::Update(float elapsedTime)
 		return;
 	}
 
+	// テキスト移動
 	_timer += elapsedTime;
 	for (int i = 0; i < 11; ++i)
 	{
@@ -116,6 +104,7 @@ void LoadingSprController::Update(float elapsedTime)
 		spriteRenderer->GetRectTransform(TextSprs[i]).SetLocalPosition(
 			Vector2(_textStartPos.x + i * _textInterval, _textStartPos.y) + offset);
 	}
+	// リセット
 	if (_timer >= _textMoveTime * 10.0f)
 	{
 		_timer = 0.0f;

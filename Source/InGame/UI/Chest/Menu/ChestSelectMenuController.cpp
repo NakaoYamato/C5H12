@@ -12,20 +12,12 @@ void ChestSelectMenuController::Start()
 
     if (auto spriteRenderer = _spriteRenderer.lock())
     {
-        spriteRenderer->LoadTexture(ItemBackSpr, L"Data/Texture/UI/Chest/Back.png");
-        spriteRenderer->LoadTexture(ArmorBackSpr, L"Data/Texture/UI/Chest/Back.png");
-        spriteRenderer->LoadTexture(FrontSpr, L"Data/Texture/UI/Chest/Front.png");
-
-        spriteRenderer->GetRectTransform(ItemBackSpr).SetLocalScale(Vector2(0.5f, 0.4f));
-		spriteRenderer->GetRectTransform(ItemBackSpr).SetLocalPosition(SprStartPos);
-        spriteRenderer->SetColorAlpha(ItemBackSpr, 0.6f);
-
-        spriteRenderer->GetRectTransform(ArmorBackSpr).SetLocalScale(Vector2(0.5f, 0.4f));
-        spriteRenderer->GetRectTransform(ArmorBackSpr).SetLocalPosition(SprStartPos + Vector2(0.0f, BackPositionInterval));
-        spriteRenderer->SetColorAlpha(ArmorBackSpr, 0.6f);
-
-        spriteRenderer->GetRectTransform(FrontSpr).SetLocalScale(Vector2(0.5f, 0.4f));
-        spriteRenderer->SetColorAlpha(FrontSpr, 0.8f);
+        if (!spriteRenderer->IsLoaded())
+        {
+            spriteRenderer->LoadTexture(ItemBackSpr, L"Data/Texture/UI/Chest/Back.png");
+            spriteRenderer->LoadTexture(ArmorBackSpr, L"Data/Texture/UI/Chest/Back.png");
+            spriteRenderer->LoadTexture(FrontSpr, L"Data/Texture/UI/Chest/Front.png");
+        }
     }
 }
 

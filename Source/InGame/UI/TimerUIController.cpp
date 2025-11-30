@@ -10,19 +10,14 @@ void TimerUIController::Start()
 
     if (auto spriteRenderer = _spriteRenderer.lock())
     {
-        spriteRenderer->LoadTexture(FrameSpr, L"Data/Texture/UI/Timer/Frame.png");
-        spriteRenderer->LoadTexture(HandSpr, L"Data/Texture/UI/Timer/Hand.png");
-        spriteRenderer->LoadTexture(EndHandSpr, L"Data/Texture/UI/Timer/Hand.png");
-
-        spriteRenderer->SetColor(HandSpr, Vector4::Black);
-        spriteRenderer->SetColor(EndHandSpr, Vector4::Red);
+        if (!spriteRenderer->IsLoaded())
+        {
+            spriteRenderer->LoadTexture(FrameSpr, L"Data/Texture/UI/Timer/Frame.png");
+            spriteRenderer->LoadTexture(HandSpr, L"Data/Texture/UI/Timer/Hand.png");
+            spriteRenderer->LoadTexture(EndHandSpr, L"Data/Texture/UI/Timer/Hand.png");
+        }
 
         _handRectTransform = &spriteRenderer->GetRectTransform(HandSpr);
-
-        // 60•ª‚Å1T
-        spriteRenderer->GetRectTransform(EndHandSpr).SetLocalAngle(
-            DirectX::XMConvertToRadians(360.0f * _endTimer / 3600.0f)
-        );
     }
 
     // ƒpƒ‰ƒ[ƒ^İ’è

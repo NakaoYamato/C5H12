@@ -47,7 +47,4 @@ private:
 	Vector4 _textSelectColor = Vector4::Yellow;
 
 	SelectMenuOption _index = SelectMenuOption::ItemOption;
-
-	const Vector2 SprStartPos = Vector2(300.0f, 200.0f);
-	const float BackPositionInterval = 102.0f;
 };

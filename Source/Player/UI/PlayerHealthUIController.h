@@ -3,7 +3,7 @@
 #include "../../Source/InGame/InGameCanvasActor.h"
 #include "../../Source/Common/Damageable.h"
 
-class PlayerHealthUIController : public SpriteRenderer
+class PlayerHealthUIController : public Component
 {
 public:
 	PlayerHealthUIController(bool isUserControlled, std::shared_ptr<Damageable> damageable) :
@@ -22,6 +22,7 @@ private:
 	// ユーザーが操作するプレイヤーか
 	const bool _isUserControlled = true;
 	std::weak_ptr<Damageable> _damageable;
+	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 
 	// 各種スプライトの名前
 	const std::string FrameSprite	= "Frame";

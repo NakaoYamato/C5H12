@@ -11,14 +11,11 @@ void ItemSliderController::Start()
     {
         spriteRenderer->SetOverallAlpha(0.0f);
 
-        spriteRenderer->LoadTexture(LeftUnderlineSpr, L"Data/Texture/UI/Item/ItemSlideUnderline.png");
-        spriteRenderer->LoadTexture(RightUnderlineSpr, L"Data/Texture/UI/Item/ItemSlideUnderline.png");
-
-        spriteRenderer->GetRectTransform(LeftUnderlineSpr).SetLocalPosition(Vector2(-125.0f, 50.0f));
-        spriteRenderer->GetRectTransform(LeftUnderlineSpr).SetLocalScale(Vector2(0.7f, 0.4f));
-        spriteRenderer->GetRectTransform(RightUnderlineSpr).SetLocalPosition(Vector2(125.0f, 50.0f));
-        spriteRenderer->GetRectTransform(RightUnderlineSpr).SetLocalScale(Vector2(0.7f, 0.4f));
-        spriteRenderer->GetRectTransform(RightUnderlineSpr).SetLocalAngle(DirectX::XMConvertToRadians(180.0f));
+        if (!spriteRenderer->IsLoaded())
+        {
+            spriteRenderer->LoadTexture(LeftUnderlineSpr, L"Data/Texture/UI/Item/ItemSlideUnderline.png");
+            spriteRenderer->LoadTexture(RightUnderlineSpr, L"Data/Texture/UI/Item/ItemSlideUnderline.png");
+        }
     }
 }
 

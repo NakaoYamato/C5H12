@@ -140,16 +140,6 @@ void SpriteRenderer::DrawGui()
 		ImGui::TreePop();
 	}
 	ImGui::Separator();
-
-	if (ImGui::Button(u8"ファイル保存"))
-	{
-		SaveToFile();
-	}
-	if (ImGui::Button(u8"ファイル読み込み"))
-	{
-		LoadFromFile();
-	}
-
 }
 // 画像読み込み
 void SpriteRenderer::LoadTexture(const std::string& spriteName,
@@ -173,11 +163,7 @@ bool SpriteRenderer::IsHit(const std::string& name, const Vector2& pos) const
 bool SpriteRenderer::LoadFromFile()
 {
 	// 現在のシーン名、アクター名からファイルパスを生成
-	std::string filePath = "./Data/Resource/";
-	filePath += GetActor()->GetScene()->GetName();
-	filePath += "/";
-	filePath += this->GetActor()->GetName();
-	filePath += "/";
+	std::string filePath = this->GetDirectory();
 	filePath += this->GetName();
 	filePath += ".json";
 
@@ -230,11 +216,7 @@ bool SpriteRenderer::LoadFromFile()
 bool SpriteRenderer::SaveToFile()
 {
 	// 現在のシーン名、アクター名からファイルパスを生成
-	std::string filePath = "./Data/Resource/";
-	filePath += GetActor()->GetScene()->GetName();
-	filePath += "/";
-	filePath += this->GetActor()->GetName();
-	filePath += "/";
+	std::string filePath = this->GetDirectory();
 
 	// ディレクトリ確保
 	std::filesystem::path outputDirPath(filePath);

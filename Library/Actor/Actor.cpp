@@ -286,10 +286,31 @@ void Actor::DrawGui()
 				ImGui::Spacing();
 				ImGui::Separator();
 
-				if (ImGui::CollapsingHeader(component->GetName(), ImGuiTreeNodeFlags_DefaultOpen))
+				ImGui::PushID(&component);
+
+				bool isOpen = ImGui::CollapsingHeader(component->GetName(), ImGuiTreeNodeFlags_DefaultOpen);
+
+				if (ImGui::BeginPopupContextItem())
+				{
+					if (ImGui::MenuItem("Save"))
+					{
+						component->SaveToFile();
+					}
+
+					if (ImGui::MenuItem("Load"))
+					{
+						component->LoadFromFile();
+					}
+
+					ImGui::EndPopup();
+				}
+
+				if (isOpen)
 				{
 					component->DrawGui();
 				}
+
+				ImGui::PopID();
 			}
 			ImGui::EndTabItem();
 		}

@@ -223,16 +223,11 @@ void ChestUIController::ItemMenuInput()
     switch (_inputState)
     {
     case ChestUIController::InputState::Up:
-        if (itemUI->GetState() == ChestItemMenuController::State::Pourch)
-			itemUI->AddIndex(-1);
-        else
-            itemUI->AddIndex(-1);
+        if (itemUI->GetTab() != ChestItemMenuController::Tab::Pourch)
+            itemUI->AddIndex(-itemUI->GetStrageItemColumnIndex());
         break;
     case ChestUIController::InputState::Down:
-        if (itemUI->GetState() == ChestItemMenuController::State::Pourch)
-            itemUI->AddIndex(-1);
-        else
-            itemUI->AddIndex(+1);
+        itemUI->AddIndex(+itemUI->GetStrageItemColumnIndex());
         break;
     case ChestUIController::InputState::Left:
         itemUI->AddIndex(-1);
@@ -252,6 +247,12 @@ void ChestUIController::ItemMenuInput()
             _state = ChestUIController::SelectMenu;
         }
         break;
+    case ChestUIController::InputState::L3:
+
+        break;
+	case ChestUIController::InputState::R3:
+		itemUI->ChangeTab();
+		break;
     }
 }
 

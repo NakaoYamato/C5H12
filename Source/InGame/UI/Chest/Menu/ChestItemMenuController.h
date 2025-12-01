@@ -8,10 +8,16 @@
 class ChestItemMenuController : public Component
 {
 public:
-	enum class State
+	enum class Tab
 	{
 		Pourch,
 		Strage,
+	};
+
+	enum class State
+	{
+		ItmeSelect,
+
 		MaxState,
 	};
 
@@ -39,19 +45,67 @@ public:
 	// リセット
 	void Reset();
 
+	// タブ切り替え
+	void ChangeTab();
+
+	Tab GetTab() const { return _tab; }
 	State GetState() const { return _state; }
+	int GetCurrentIndex() const { return _currentIndex; }
+
+	int GetStrageItemColumnIndex() const { return _strageItemColumnIndex; }
+	int GetStrageItemRowIndex() const { return _strageItemRowIndex; }
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile() override;
+	// ファイル保存
+	bool SaveToFile() override;
+#pragma endregion
+
+private:
+	// ポーチメニュー描画
+	void RenderPourch(const RenderContext& rc);
+
+	// ストレージメニュー描画
+	void RenderStrage(const RenderContext& rc);
+
 private:
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
 
 	// 各種スプライトの名前
-	const std::string BackSpr		= "Back";
 	const std::string PourchBackSpr = "PourchBack";
 	const std::string StrageBackSpr = "StrageBack";
-	const std::string FrontSpr		= "Front";
-	const std::string BoxBackSpr	= "BoxBack";
 	const std::string TextBoxSpr	= "TextBox";
 
-	State _state = State::Pourch;
+	Tab _tab = Tab::Pourch;
+	State _state = State::ItmeSelect;
+	int _currentIndex = 0;
+
+	// ポーチ内アイテム用トランスフォーム
+	RectTransform _pourchItemTransform;
+	Vector2 _pourchItemOffset = Vector2(90.0f, 0.0f);
+	Vector2 _pourchItemScale = Vector2(2.0f, 2.0f);
+	// ストレージ内アイテム用トランスフォーム
+	RectTransform _strageItemTransform;
+	Vector2 _strageItemOffset = Vector2(90.0f, 90.0f);
+	Vector2 _strageItemScale = Vector2(2.0f, 2.0f);
+	int _strageItemColumnIndex = 5;
+	int _strageItemRowIndex = 10;
+	int _strageItemMaxPage = 3;
+
+	// アイテムの背景スプライト
+	std::unique_ptr<Sprite> _itemBackSprite;
+	// アイテムの前面スプライト
+	std::unique_ptr<Sprite> _itemFrontSprite;
+
+	// 個数表示用パラメータ
+	Vector2 _itemQuantityOffset = Vector2(30.0f, 30.0f);
+	Vector2 _itemQuantityScale = Vector2(1.0f, 1.0f);
+
+	// アイテムの名前
+	TextRenderer::TextDrawData _itemName;
+	// アイテムの説明
+	TextRenderer::TextDrawData _itemDescription;
 };

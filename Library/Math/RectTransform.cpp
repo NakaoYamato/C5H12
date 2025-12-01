@@ -68,14 +68,17 @@ void RectTransform::Reset()
 // ÉtÉ@ÉCÉãì«Ç›çûÇ›
 bool RectTransform::LoadFromFile(nlohmann::json_abi_v3_12_0::json& json)
 {
-	auto& sub = json["RectTransform"];
-	_localPosition.x = sub.value("localPositionX", 0.0f);
-	_localPosition.y = sub.value("localPositionY", 0.0f);
-	_localScale.x = sub.value("localScaleX", 1.0f);
-	_localScale.y = sub.value("localScaleY", 1.0f);
-	_localAngle = sub.value("localAngle", 0.0f);
-	_reflectParentScale = sub.value("reflectParentScale", true);
-	_reflectParentAngle = sub.value("reflectParentAngle", true);
+	if (json.contains("RectTransform"))
+	{
+		auto& sub = json["RectTransform"];
+		_localPosition.x = sub.value("localPositionX", 0.0f);
+		_localPosition.y = sub.value("localPositionY", 0.0f);
+		_localScale.x = sub.value("localScaleX", 1.0f);
+		_localScale.y = sub.value("localScaleY", 1.0f);
+		_localAngle = sub.value("localAngle", 0.0f);
+		_reflectParentScale = sub.value("reflectParentScale", true);
+		_reflectParentAngle = sub.value("reflectParentAngle", true);
+	}
 
 	return true;
 }

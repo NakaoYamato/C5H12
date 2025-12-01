@@ -85,6 +85,15 @@ void SpriteRenderer::DrawGui()
 
 			ImGui::Separator();
 			spriteData.DrawGui();
+			ImGui::Separator();
+			if (ImGui::Button(u8"削除"))
+			{
+				_sprites.erase(name);
+				// 描画順リストからも削除
+				_spriteDrawOrder.erase(std::remove(_spriteDrawOrder.begin(), _spriteDrawOrder.end(), name), _spriteDrawOrder.end());
+				ImGui::TreePop();
+				break;
+			}
 			ImGui::TreePop();
 		}
 	}
@@ -110,6 +119,7 @@ void SpriteRenderer::DrawGui()
 				ImGui::EndDragDropSource();
 			}
 
+			// ドロップ処理
 			if (ImGui::BeginDragDropTarget())
 			{
 				// ペイロードを受け取る
@@ -132,6 +142,21 @@ void SpriteRenderer::DrawGui()
 					}
 				}
 				ImGui::EndDragDropTarget();
+			}
+
+			// 右クリックされたとき
+			if (ImGui::BeginPopupContextItem())
+			{
+				if (ImGui::MenuItem("Delete"))
+				{
+					// 描画順リストから削除
+					_spriteDrawOrder.erase(_spriteDrawOrder.begin() + n);
+
+					ImGui::EndPopup();
+					ImGui::PopID();
+					break;
+				}
+				ImGui::EndPopup();
 			}
 
 			ImGui::PopID();

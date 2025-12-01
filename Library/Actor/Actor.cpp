@@ -290,6 +290,7 @@ void Actor::DrawGui()
 
 				bool isOpen = ImGui::CollapsingHeader(component->GetName(), ImGuiTreeNodeFlags_DefaultOpen);
 
+				// 右クリックされたとき
 				if (ImGui::BeginPopupContextItem())
 				{
 					if (ImGui::MenuItem("Save"))

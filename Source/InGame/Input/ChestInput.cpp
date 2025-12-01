@@ -30,6 +30,9 @@ void ChestInput::Start()
 // GUI描画
 void ChestInput::DrawGui()
 {
+	ImGui::Text(u8"入力の継続時間 :%f", _inputHoldTime);
+	ImGui::DragFloat(u8"連続入力までの時間", &_inputHoldThreshold, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat(u8"連続入力時の入力間隔時間", &_inputRepeatInterval, 0.01f, 0.0f, 1.0f);
 }
 
 // 起動時関数
@@ -51,18 +54,44 @@ void ChestInput::OnUpdate(float elapsedTime)
 	if (!chestUIController)
 		return;
 
-	if (_INPUT_TRIGGERD("Up"))
-		chestUIController->SetInputState(ChestUIController::InputState::Up);
-	if (_INPUT_TRIGGERD("Down"))
-		chestUIController->SetInputState(ChestUIController::InputState::Down);
-	if (_INPUT_TRIGGERD("Left"))
-		chestUIController->SetInputState(ChestUIController::InputState::Left);
-	if (_INPUT_TRIGGERD("Right"))
-		chestUIController->SetInputState(ChestUIController::InputState::Right);
+	ChestUIController::InputState currentInputState = ChestUIController::InputState::None;
+
+	if (_INPUT_PRESSED("Up"))
+		currentInputState = ChestUIController::InputState::Up;
+	if (_INPUT_PRESSED("Down"))
+		currentInputState = ChestUIController::InputState::Down;
+	if (_INPUT_PRESSED("Left"))
+		currentInputState = ChestUIController::InputState::Left;
+	if (_INPUT_PRESSED("Right"))
+		currentInputState = ChestUIController::InputState::Right;
 	if (_INPUT_TRIGGERD("Select"))
-		chestUIController->SetInputState(ChestUIController::InputState::Select);
+		currentInputState = ChestUIController::InputState::Select;
 	if (_INPUT_TRIGGERD("Back"))
-		chestUIController->SetInputState(ChestUIController::InputState::Back);
+		currentInputState = ChestUIController::InputState::Back;
+	if (_INPUT_TRIGGERD("L3"))
+		currentInputState = ChestUIController::InputState::L3;
+	if (_INPUT_TRIGGERD("R3"))
+		currentInputState = ChestUIController::InputState::R3;
+
+	// 連続入力処理
+	if (currentInputState != ChestUIController::InputState::None &&
+		currentInputState == _previousInputState)
+	{
+		if (_inputHoldTime >= _inputHoldThreshold)
+		{
+			_inputHoldTime -= _inputRepeatInterval;
+			chestUIController->SetInputState(currentInputState);
+		}
+
+		_inputHoldTime += elapsedTime;
+	}
+	else
+	{
+		_inputHoldTime = 0.0f;
+		chestUIController->SetInputState(currentInputState);
+	}
+
+	_previousInputState = currentInputState;
 
 	// 前の入力コントローラーに戻す
 	if (!chestUIController->GetActor()->IsActive())

@@ -36,6 +36,14 @@ public:
 	void Render(const RenderContext& rc, TextureRenderer& renderer);
 	// •`‰æ
 	void Render(const RenderContext& rc, TextureRenderer& renderer, float alpha);
+	// •`‰æ
+	void Render(const RenderContext& rc,
+		TextureRenderer& renderer,
+		const Vector2& position,
+		const Vector2& scale	= Vector2::One,
+		const Vector2& center	= Vector2::Zero,
+		float angle				= 0.0f,
+		const Vector4& color	= Vector4::White);
 	// GUI•`‰æ
 	void DrawGui();
 	// ‰æ‘œ“Ç‚İ‚İ

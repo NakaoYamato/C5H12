@@ -27,4 +27,13 @@ protected:
 
 private:
 	std::weak_ptr<ChestUIController> _chestUIController;
+
+	// 前フレームの入力状態
+	ChestUIController::InputState _previousInputState = ChestUIController::InputState::None;
+	// 入力の継続時間
+	float _inputHoldTime = 0.0f;
+	// 連続入力までの時間
+	float _inputHoldThreshold = 0.25f;
+	// 連続入力時の入力間隔時間
+	float _inputRepeatInterval = 0.1f;
 };

@@ -27,6 +27,8 @@ Input::Input()
 	_buttonActionMap["Right"] = { {InputType::Keyboard, 'D'}, {InputType::Keyboard, VK_RIGHT}, {InputType::XboxPad,XINPUT_GAMEPAD_DPAD_RIGHT}, {InputType::DirectPad, DIRECTPAD_BUTTON_L_RIGHT} };
 	_buttonActionMap["Select"] = { {InputType::Keyboard, 'F'}, {InputType::XboxPad,XINPUT_GAMEPAD_A}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_DOWN} };
 	_buttonActionMap["Back"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::Keyboard, VK_BACK}, {InputType::XboxPad,XINPUT_GAMEPAD_B}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_RIGHT} };
+	_buttonActionMap["L3"] = { {InputType::Keyboard, VK_SHIFT}, {InputType::XboxPad,XINPUT_GAMEPAD_LEFT_THUMB}, {InputType::DirectPad, DIRECTPAD_BUTTON_L3}};
+	_buttonActionMap["R3"] = { {InputType::Keyboard, 'Q'}, {InputType::XboxPad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::DirectPad, DIRECTPAD_BUTTON_R3}};
 
 	_valueActionMap["AxisLX"] = { {InputType::Keyboard,KEYBORD_AXIS_LX}, {InputType::XboxPad,XBOXPAD_AXIS_LX}, {InputType::DirectPad, DIRECTPAD_AXIS_LX} };
 	_valueActionMap["AxisLY"] = { {InputType::Keyboard,KEYBORD_AXIS_LY}, {InputType::XboxPad,XBOXPAD_AXIS_LY}, {InputType::DirectPad, DIRECTPAD_AXIS_LY} };

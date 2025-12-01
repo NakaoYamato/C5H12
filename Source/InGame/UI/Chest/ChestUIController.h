@@ -31,6 +31,8 @@ public:
 		Right,
 		Select,
 		Back,
+		L3,
+		R3,
 	};
 
 public:

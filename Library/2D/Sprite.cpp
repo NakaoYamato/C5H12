@@ -181,3 +181,28 @@ void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer, float al
 		color,
 		&GetMaterial());
 }
+
+// •`‰æ
+void Sprite::Render(const RenderContext& rc,
+	TextureRenderer& renderer,
+	const Vector2& position, 
+	const Vector2& scale, 
+	const Vector2& center, 
+	float angle, 
+	const Vector4& color)
+{
+	if (_sprite.Get() == nullptr)
+		return;
+
+	rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(_depthState), static_cast<UINT8>(_stencil));
+	renderer.Render(rc,
+		&GetTexture(),
+		position,
+		scale,
+		GetTexPos(),
+		GetTexSize(),
+		center,
+		angle,
+		color,
+		&GetMaterial());
+}

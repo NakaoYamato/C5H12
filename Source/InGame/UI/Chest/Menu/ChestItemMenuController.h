@@ -82,6 +82,7 @@ private:
 	Tab _tab = Tab::Pourch;
 	State _state = State::ItmeSelect;
 	int _currentIndex = 0;
+    int _currentPage = 0;
 
 	// ポーチ内アイテム用トランスフォーム
 	RectTransform _pourchItemTransform;

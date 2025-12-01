@@ -209,7 +209,7 @@ void ChestItemMenuController::AddIndex(int val)
 			_currentIndex -= _strageItemColumnIndex - 1;
 		}
 		// ‰º’[‚©‚çã’[‚ÖˆÚ“®
-		else if (_currentIndex / _strageItemColumnIndex == _strageItemRowIndex && val >= +_strageItemColumnIndex)
+		else if (_currentIndex / _strageItemColumnIndex == (_strageItemRowIndex - 1) && val >= +_strageItemColumnIndex)
 		{
 			_currentIndex = (_currentIndex + val) % (_strageItemColumnIndex);
 		}
@@ -306,6 +306,11 @@ bool ChestItemMenuController::LoadFromFile()
 		_strageItemRowIndex = json.value("StrageItemRowIndex", 10);
 		_strageItemMaxPage = json.value("StrageItemMaxPage", 10);
 
+        _itemQuantityOffset.x = json.value("ItemQuantityOffsetX", 0.0f);
+        _itemQuantityOffset.y = json.value("ItemQuantityOffsetY", 0.0f);
+        _itemQuantityScale.x = json.value("ItemQuantityScaleX", 1.0f);
+        _itemQuantityScale.y = json.value("ItemQuantityScaleY", 1.0f);
+
 		if (json.contains("Text"))
 		{
 			auto& sub = json["Text"];
@@ -356,6 +361,11 @@ bool ChestItemMenuController::SaveToFile()
 	json["StrageItemColumnIndex"] = _strageItemColumnIndex;
 	json["StrageItemRowIndex"] = _strageItemRowIndex;
 	json["StrageItemMaxPage"] = _strageItemMaxPage;
+
+	json["ItemQuantityOffsetX"] = _itemQuantityOffset.x;
+	json["ItemQuantityOffsetY"] = _itemQuantityOffset.y;
+    json["ItemQuantityScaleX"] = _itemQuantityScale.x;
+    json["ItemQuantityScaleY"] = _itemQuantityScale.y;
 
 	{
 		auto& sub = json["Text"];

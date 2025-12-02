@@ -152,6 +152,12 @@ void DamageSender::OnContact(CollisionData& collisionData)
 					damageText.isCritical = (_criticalFactor > 1.0f);
 					_damageTexts.push_back(damageText);
 				}
+
+				// コールバック
+				if (_onSendDamageCallback)
+				{
+					_onSendDamageCallback(this, collisionData);
+				}
 			}
 		}
 	}

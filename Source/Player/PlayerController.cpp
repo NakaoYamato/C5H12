@@ -79,6 +79,20 @@ void PlayerController::Start()
 			}
 		}
 	);
+	// ダメージを与えた時のコールバック設定
+	damageSender->SetOnSendDamageCallback(
+		[&](DamageSender* myself, CollisionData& collisionData)
+		{
+			// ゲームパッド振動
+			if (auto inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System))
+			{
+				inputManager->SetVibration(_stageContactVibrationL, _stageContactVibrationR, _stageContactVibrationTime);
+			}
+			// ヒットストップ
+			GetActor()->GetScene()->GetActorManager().SetGameSpeed(ActorTag::Player, _hitStopScale, _hitStopTime);
+		}
+	);
+
 	// ステージ接触時のコールバック設定
 	damageSender->SetOnStageContactCallback(
 		[&](StageEffectEmitter* target, CollisionData& collisionData)
@@ -230,6 +244,9 @@ void PlayerController::DrawGui()
 	ImGui::DragFloat(u8"溜め段階2リムライトカラー強度", &_chargeEffectRimLightColor2.w, 0.01f, 0.0f, 10.0f);
 	ImGui::ColorEdit3(u8"溜め段階3リムライトカラー", &_chargeEffectRimLightColor3.x);
 	ImGui::DragFloat(u8"溜め段階3リムライトカラー強度", &_chargeEffectRimLightColor3.w, 0.01f, 0.0f, 10.0f);
+	ImGui::Separator();
+	ImGui::DragFloat(u8"ヒットストップ時間", &_hitStopTime, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat(u8"ヒットストップスケール", &_hitStopScale, 0.01f, 0.0f, 1.0f);
 	ImGui::Separator();
 	ImGui::DragFloat(u8"ステージ接触時のLモーター値", &_stageContactVibrationL, 0.01f, 0.0f, 1.0f);
 	ImGui::DragFloat(u8"ステージ接触時のRモーター値", &_stageContactVibrationR, 0.01f, 0.0f, 1.0f);

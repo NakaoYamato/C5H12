@@ -63,6 +63,11 @@ public:
 	void SetHateFactor(float hateFactor) { _heteFactor = hateFactor; }
 	// テキスト描画するかどうか
 	void SetDrawText(bool f) { _drawText = f; }
+	// ダメージを与えた時のコールバック関数のセット
+	void SetOnSendDamageCallback(std::function<void(DamageSender*, CollisionData&)> callback)
+	{
+		_onSendDamageCallback = callback;
+	}
 	// ステージとの接触時のコールバック関数のセット
 	void SetOnStageContactCallback(std::function<void(StageEffectEmitter*, CollisionData&)> callback)
 	{
@@ -117,6 +122,8 @@ private:
 	// モーション値によるステージエフェクトカメラシェイク影響度
 	float _stageShakeMotionFactor = 1.0f;
 
+	// ダメージを与えた時のコールバック関数
+	std::function<void(DamageSender*, CollisionData&)> _onSendDamageCallback;
 	// ステージとの接触時のコールバック関数
 	std::function<void(StageEffectEmitter*, CollisionData&)> _onStageContactCallback;
 #pragma endregion

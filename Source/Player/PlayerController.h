@@ -184,6 +184,10 @@ private:
 	Vector4 _chargeEffectRimLightColor2 = Vector4::Yellow;
 	Vector4 _chargeEffectRimLightColor3 = Vector4::Red;
 
+	// ヒットストップ時間
+	float _hitStopScale = 0.1f;
+	float _hitStopTime = 0.45f;
+
 	// ステージ接触時の振動
 	float _stageContactVibrationL = 0.2f;
 	float _stageContactVibrationR = 0.2f;

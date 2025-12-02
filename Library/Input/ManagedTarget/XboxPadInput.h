@@ -23,7 +23,7 @@ public:
 	/// コンストラクタで取得するボタンを設定している
 	/// </summary>
 	XboxPadInput();
-	~XboxPadInput() {}
+	~XboxPadInput();
 
 	/// <summary>
 	/// 入力情報更新
@@ -43,6 +43,21 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	const std::unordered_map<int, float>* GetValues() const { return &_values; }
+
+#pragma region 振動
+	/// <summary>
+	/// バイブレーションを設定
+	/// </summary>
+	/// <param name="leftMotor">左モーター(低周波:重い振動)の強さ 0.0f ~ 1.0f</param>
+	/// <param name="rightMotor">右モーター(高周波:軽い振動)の強さ 0.0f ~ 1.0f</param>
+	void SetVibration(float leftMotor, float rightMotor) const;
+
+	/// <summary>
+	/// バイブレーションを停止
+	/// </summary>
+	void StopVibration();
+#pragma endregion
+
 private:
 	// ゲームパッド入力情報格納
 	// 一覧:https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes

@@ -225,6 +225,24 @@ void Input::DrawGui()
 				}
 				ImGui::TreePop();
 			}
+
+			if (ImGui::TreeNode(u8"振動テスト"))
+			{
+				if (ImGui::Button(u8"振動開始：左モーター"))
+				{
+					_gamePadInput.SetVibration(1.0f, 0.0f);
+				}
+				if (ImGui::Button(u8"振動開始：右モーター"))
+				{
+					_gamePadInput.SetVibration(0.0f, 1.0f);
+				}
+				if (ImGui::Button(u8"振動停止"))
+				{
+					_gamePadInput.SetVibration(0.0f, 0.0f);
+				}
+
+				ImGui::TreePop();
+			}
 		}
 		ImGui::End();
 	}

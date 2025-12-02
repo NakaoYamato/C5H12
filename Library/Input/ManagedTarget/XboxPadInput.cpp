@@ -1,5 +1,7 @@
 #include "XboxPadInput.h"
 
+#include <algorithm>
+
 XboxPadInput::XboxPadInput()
 {
 	// 使用するボタンを設定
@@ -28,6 +30,12 @@ XboxPadInput::XboxPadInput()
 
 	_values[XBOXPAD_TRIGGER_L] = 0.0f;
 	_values[XBOXPAD_TRIGGER_R] = 0.0f;
+}
+
+XboxPadInput::~XboxPadInput()
+{
+	// バイブレーション終了
+	StopVibration();
 }
 
 /// 入力情報更新
@@ -98,3 +106,28 @@ const char* XboxPadInput::ToString(int vKey)
 
 	return " ";
 }
+
+#pragma region 振動
+/// バイブレーションを設定
+void XboxPadInput::SetVibration(float leftMotor, float rightMotor) const
+{
+	// 0.0f ~ 1.0f の範囲に制限
+	leftMotor = std::clamp(leftMotor, 0.0f, 1.0f);
+	rightMotor = std::clamp(rightMotor, 0.0f, 1.0f);
+
+	XINPUT_VIBRATION vibration;
+	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+
+	vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 65535.0f);
+	vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 65535.0f);
+
+	// 振動状態を適用
+	XInputSetState(_slot, &vibration);
+}
+
+/// バイブレーションを停止
+void XboxPadInput::StopVibration()
+{
+	SetVibration(0.0f, 0.0f);
+}
+#pragma endregion

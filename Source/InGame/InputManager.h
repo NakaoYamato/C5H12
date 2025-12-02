@@ -10,6 +10,15 @@ using InputControllerRef = InputControllerBase*;
 class InputManager : public Actor
 {
 public:
+	struct VibrationData
+	{
+		float leftMotor = 0.0f;
+		float rightMotor = 0.0f;
+		float duration = 0.0f;
+		float elapsedTime = 0.0f;
+	};
+
+public:
 	~InputManager() override {}
 
 	// 生成時処理
@@ -31,6 +40,9 @@ public:
 	// カメラを動かせるかどうか
 	bool CanMoveCamera() const;
 
+	// 振動設定
+	void SetVibration(float leftMotor, float rightMotor, float duration);
+
 private:
 	// 入力コントローラー群
 	std::unordered_map<std::string, InputControllerRef> _inputControllers;
@@ -41,6 +53,9 @@ private:
 
 	// 入力コントローラー変更履歴
 	std::vector<std::string> _inputControllerHistory;
+
+	// 振動データ
+	VibrationData _vibrationData;
 };
 
 

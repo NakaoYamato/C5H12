@@ -2,8 +2,9 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/Enemy/EnemyController.h" 
-
+#include "../../Source/Common/DamageSender.h"
 #include "../../Source/Stage/Props/Chest/ChestController.h"
+#include "../../Source/InGame/InputManager.h"
 
 #include <imgui.h>
 
@@ -15,6 +16,7 @@ void PlayerController::Start()
 	_modelRenderer = GetActor()->GetComponent<ModelRenderer>();
 
 	_damageable = GetActor()->GetComponent<Damageable>();
+	auto damageSender = GetActor()->GetComponent<DamageSender>();
 	_targetable = GetActor()->GetComponent<Targetable>();
 
 	_playerItemController = GetActor()->GetComponent<PlayerItemController>();
@@ -22,6 +24,8 @@ void PlayerController::Start()
 	auto stateController = GetActor()->GetComponent<StateController>();
 	_stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
 
+#pragma region コールバック設定
+	// 被ダメージコールバック設定
 	_damageable.lock()->SetTakeableDamageCallback(
 		[&](float damage, Vector3 hitPosition) -> bool
 		{
@@ -39,6 +43,7 @@ void PlayerController::Start()
 			return true;
 		}
 	);
+	// ダメージ時コールバック設定
 	_damageable.lock()->SetOnDamageCallback(
 		[&](float damage, Vector3 hitPosition)
 		{
@@ -74,6 +79,18 @@ void PlayerController::Start()
 			}
 		}
 	);
+	// ステージ接触時のコールバック設定
+	damageSender->SetOnStageContactCallback(
+		[&](StageEffectEmitter* target, CollisionData& collisionData)
+		{
+			// ゲームパッド振動
+			if (auto inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System))
+			{
+				inputManager->SetVibration(_stageContactVibrationL, _stageContactVibrationR, _stageContactVibrationTime);
+			}
+		}
+	);
+#pragma endregion
 
 	_charactorController.lock()->SetMaxSpeedXZ(5.0f);
 
@@ -213,6 +230,10 @@ void PlayerController::DrawGui()
 	ImGui::DragFloat(u8"溜め段階2リムライトカラー強度", &_chargeEffectRimLightColor2.w, 0.01f, 0.0f, 10.0f);
 	ImGui::ColorEdit3(u8"溜め段階3リムライトカラー", &_chargeEffectRimLightColor3.x);
 	ImGui::DragFloat(u8"溜め段階3リムライトカラー強度", &_chargeEffectRimLightColor3.w, 0.01f, 0.0f, 10.0f);
+	ImGui::Separator();
+	ImGui::DragFloat(u8"ステージ接触時のLモーター値", &_stageContactVibrationL, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat(u8"ステージ接触時のRモーター値", &_stageContactVibrationR, 0.01f, 0.0f, 1.0f);
+	ImGui::DragFloat(u8"ステージ接触時の時間", &_stageContactVibrationTime, 0.01f, 0.0f, 1.0f);
 }
 
 // 接触処理

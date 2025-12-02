@@ -44,6 +44,31 @@ void InputManager::OnPreUpdate(float elapsedTime)
 		}
 		_nextInputControllerName.clear();
 	}
+
+	// U“®XV
+	if (_vibrationData.duration > 0.0f)
+	{
+		_vibrationData.elapsedTime += elapsedTime;
+		float rate = _vibrationData.duration > 0.0f ?
+		_vibrationData.elapsedTime / _vibrationData.duration : 1.0f;
+		if (_vibrationData.elapsedTime >= _vibrationData.duration)
+		{
+			_vibrationData.leftMotor = 0.0f;
+			_vibrationData.rightMotor = 0.0f;
+			_vibrationData.duration = 0.0f;
+			_vibrationData.elapsedTime = 0.0f;
+		}
+		float leftMotor = MathF::Lerp(_vibrationData.leftMotor, 0.0f, rate);
+		float rightMotor = MathF::Lerp(_vibrationData.rightMotor, 0.0f, rate);
+
+		// U“®î•ñ‚ğİ’è
+		Input::Instance().GetGamePadInput()->SetVibration(leftMotor, rightMotor);
+	}
+	else
+	{
+		// U“®’â~
+		Input::Instance().GetGamePadInput()->StopVibration();
+	}
 }
 
 // GUI•`‰æ
@@ -107,6 +132,15 @@ bool InputManager::CanMoveCamera() const
 		return _inputControllers.at(_currentInputControllerName)->CanMoveCamera();
 	}
 	return false;
+}
+
+// U“®İ’è
+void InputManager::SetVibration(float leftMotor, float rightMotor, float duration)
+{
+	_vibrationData.leftMotor = leftMotor;
+	_vibrationData.rightMotor = rightMotor;
+	_vibrationData.duration = duration;
+	_vibrationData.elapsedTime = 0.0f;
 }
 
 // ¶¬ˆ—

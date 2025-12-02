@@ -6,6 +6,8 @@
 #include "../../Source/Common/Targetable.h"
 #include "../../Library/Component/StageEffectEmitter.h"
 
+#include <functional>
+
 class DamageSender : public Component
 {
 public:
@@ -61,6 +63,11 @@ public:
 	void SetHateFactor(float hateFactor) { _heteFactor = hateFactor; }
 	// テキスト描画するかどうか
 	void SetDrawText(bool f) { _drawText = f; }
+	// ステージとの接触時のコールバック関数のセット
+	void SetOnStageContactCallback(std::function<void(StageEffectEmitter*, CollisionData&)> callback)
+	{
+		_onStageContactCallback = callback;
+	}
 
 
 	// 基本攻撃力の取得
@@ -109,6 +116,9 @@ private:
 	float _stageEffectMotionFactor = 1.0f;
 	// モーション値によるステージエフェクトカメラシェイク影響度
 	float _stageShakeMotionFactor = 1.0f;
+
+	// ステージとの接触時のコールバック関数
+	std::function<void(StageEffectEmitter*, CollisionData&)> _onStageContactCallback;
 #pragma endregion
 
 #pragma region ヘイト値関係

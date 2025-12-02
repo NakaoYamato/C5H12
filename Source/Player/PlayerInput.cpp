@@ -76,8 +76,7 @@ void PlayerInput::OnUpdate(float elapsedTime)
 		}
 
 		playerController->SetIsUsingItem(_INPUT_TRIGGERD("Use"));
-		if (_INPUT_TRIGGERD("Select"))
-			playerController->SetIsSelect(true);
+		playerController->SetIsSelect(_INPUT_TRIGGERD("Select"));
 	}
 
 	// マウスホイールによるアイテム選択

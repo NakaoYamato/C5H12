@@ -101,6 +101,13 @@ public:
 	void SetIsDrawingWeapon(bool isDrawingWeapon) { _isDrawingWeapon = isDrawingWeapon; }
 	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
 
+	void SetStageContactVibration(float left, float right, float time)
+	{
+		_stageContactVibrationL = left;
+		_stageContactVibrationR = right;
+		_stageContactVibrationTime = time;
+	}
+
     float GetDashRotationFactor() const { return _dashRotationFactor; }
 
     float GetDashStaminaConsume() const { return _dashStaminaConsume; }
@@ -176,4 +183,9 @@ private:
 	Vector4 _chargeEffectRimLightColor1 = Vector4::White;
 	Vector4 _chargeEffectRimLightColor2 = Vector4::Yellow;
 	Vector4 _chargeEffectRimLightColor3 = Vector4::Red;
+
+	// ステージ接触時の振動
+	float _stageContactVibrationL = 0.2f;
+	float _stageContactVibrationR = 0.2f;
+	float _stageContactVibrationTime = 0.1f;
 };

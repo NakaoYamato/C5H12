@@ -307,7 +307,10 @@ namespace Attack1SubState
             const std::string& nextSubStateName,
             const std::string& branchSubStateName,
             float animationBlendTime,
-            float animationSpeed = 1.0f) :
+            float animationSpeed = 1.0f,
+            float vibrationL = 0.5f,
+            float vibrationR = 0.0f,
+            float vibrationTime = 0.1f) :
             PlayerSSB(stateMachine,
                 name,
                 animationName,
@@ -316,7 +319,10 @@ namespace Attack1SubState
                 true),
 			_nextSubStateName(nextSubStateName),
             _branchSubStateName(branchSubStateName),
-            _animationSpeed(animationSpeed)
+            _animationSpeed(animationSpeed),
+			_vibrationL(vibrationL),
+			_vibrationR(vibrationR),
+			_vibrationTime(vibrationTime)
         {
         }
 
@@ -333,7 +339,11 @@ namespace Attack1SubState
 			_owner->GetDamageSender()->SetMotionFactor(motionFactor + 0.5f * (chargeLevel - 1));
             _owner->GetAnimator()->SetAnimationSpeed(_animationSpeed);
 
-
+			// U“®
+			_owner->GetPlayer()->SetStageContactVibration(
+				_vibrationL,
+				_vibrationR,
+				_vibrationTime);
         }
         void OnExecute(float elapsedTime) override
         {
@@ -353,6 +363,9 @@ namespace Attack1SubState
         std::string _nextSubStateName;
         std::string _branchSubStateName;
         float _animationSpeed = 1.0f;
+		float _vibrationL = 0.5f;
+		float _vibrationR = 0.0f;
+		float _vibrationTime = 0.1f;
     };
     class ChargeSubState : public ComboSubState
     {
@@ -479,6 +492,46 @@ namespace Attack1SubState
         Vector3 _cameraEyeStartOffset = Vector3(0.0f, 0.0f, 0.5f);
         Vector3 _cameraEyeEndOffset = Vector3(0.0f, -0.05f, 0.6f);
     };
+    class EndComboSubState : public ComboSubState
+    {
+    public:
+		EndComboSubState(PlayerStateMachine* stateMachine) :
+            ComboSubState(stateMachine,
+                "ChargeAttack03End",
+                "ChargeAttack03End",
+                "",
+                "",
+                1.0f,
+                0.8f,
+                0.25f, 0.0f, 0.15f)
+		{
+		}
+        void OnEnter() override
+        {
+			ComboSubState::OnEnter();
+            _timer = 0.0f;
+        }
+		void OnExecute(float elapsedTime) override
+		{
+			_timer += elapsedTime;
+            if (_timer > 1.0f)
+            {
+                // U“®
+                _owner->GetPlayer()->SetStageContactVibration(
+                    1.0f,
+                    0.25f,
+                    0.6f);
+            }
+			// ƒAƒjƒ[ƒVƒ‡ƒ“‚ªI—¹‚µ‚Ä‚¢‚½‚ç‘JˆÚ
+			if (!_owner->GetAnimator()->IsPlayAnimation())
+			{
+				// UŒ‚‚©‚çIdle‚É‘JˆÚ
+				_owner->GetStateMachine().ChangeState("CombatIdle");
+			}
+		}
+    private:
+        float _timer = 0.0f;
+    };
 }
 PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* stateMachine) :
     HierarchicalStateBase(stateMachine)
@@ -497,7 +550,8 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "ChargeAttack02Start",
         "SpinningAttack",
         1.0f,
-        1.0f));
+        1.0f,
+        0.3f, 0.0f, 0.15f));
     RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
         "ChargeAttack02Start",
         "ChargeAttack02Loop",
@@ -511,7 +565,8 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "ChargeAttack03Start",
         "SpinningAttack",
         1.0f,
-        1.0f));
+        1.0f,
+        0.5f, 0.0f, 0.2f));
     RegisterSubState(std::make_shared<Attack1SubState::ChargeSubState>(stateMachine,
         "ChargeAttack03Start",
         "ChargeAttack03Loop",
@@ -519,13 +574,7 @@ PlayerGreatSwordAttack1State::PlayerGreatSwordAttack1State(PlayerStateMachine* s
         "AttackTackle",
         1.0f,
         0.7f));
-    RegisterSubState(std::make_shared<Attack1SubState::ComboSubState>(stateMachine,
-        "ChargeAttack03End",
-        "ChargeAttack03End",
-        "",
-        "",
-        1.0f,
-        0.8f));
+    RegisterSubState(std::make_shared<Attack1SubState::EndComboSubState>(stateMachine));
 }
 
 void PlayerGreatSwordAttack1State::OnEnter()
@@ -687,7 +736,8 @@ PlayerGreatSwordAttack2State::PlayerGreatSwordAttack2State(PlayerStateMachine* s
         "",
         "ChargeAttack01Start",
         0.3f,
-        0.7f));
+        0.7f,
+        0.5f, 0.0f, 0.2f));
     RegisterSubState(std::make_shared<Attack2SubState::TackleSubState>(stateMachine,
         "AttackTackle",
         "AttackTackle",

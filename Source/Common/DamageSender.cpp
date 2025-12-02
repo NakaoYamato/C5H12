@@ -169,12 +169,18 @@ void DamageSender::ContactStage(StageEffectEmitter* target, CollisionData& colli
 	if (_stageEffectTimer > 0.0f)
 		return;
 
-	float effectScale = std::clamp<float>(_motionFactor * _stageEffectMotionFactor, 0.0f, 1.0f);
-	float shakePower = std::clamp<float>(_motionFactor * _stageShakeMotionFactor, 0.0f, 1.0f);
+	float effectScale = std::clamp<float>(std::powf(_motionFactor * _stageEffectMotionFactor, 2.0f), 0.0f, 1.0f);
+	float shakePower = std::clamp<float>(std::powf(_motionFactor * _stageShakeMotionFactor, 2.0f), 0.0f, 1.0f);
 
 	// エフェクト再生
 	target->PlayEffect(collisionData.hitPosition, Vector3::Zero, effectScale, shakePower);
 
 	// タイマー設定
 	_stageEffectTimer = _stageEffectInterval;
+
+	// コールバック
+	if (_onStageContactCallback)
+	{
+		_onStageContactCallback(target, collisionData);
+	}
 }

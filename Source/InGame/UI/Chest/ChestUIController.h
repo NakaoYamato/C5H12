@@ -21,14 +21,18 @@ public:
 		FromArmorMenu,
 	};
 
+	enum class InputDirection : unsigned int
+	{
+		None	= 0b0000,
+		Up		= 0b0001,
+		Down	= 0b0010,
+		Left	= 0b0100,
+		Right	= 0b1000,
+	};
 	enum class InputState
 	{
 		None,
 
-		Up,
-		Down,
-		Left,
-		Right,
 		Select,
 		Back,
 		L3,
@@ -61,6 +65,8 @@ public:
 	void SetChestActor(const std::shared_ptr<Actor>& actor) { _chestActor = actor; }
 	// 入力値設定
 	void SetInputState(InputState inputState) { _inputState = inputState; }
+	// 入力値設定
+	void SetInputDirection(int inputDirection) { _inputDirection = inputDirection; }
 private:
 	// Selectメニューの入力処理
 	void SelectInput();
@@ -83,6 +89,7 @@ private:
 	State _state = State::SelectMenu;
 	// 入力値
 	InputState _inputState = InputState::None;
+	int _inputDirection = 0;
 
 	float _fadeTime = 0.4f;
 

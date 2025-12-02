@@ -29,7 +29,7 @@ private:
 	std::weak_ptr<ChestUIController> _chestUIController;
 
 	// 前フレームの入力状態
-	ChestUIController::InputState _previousInputState = ChestUIController::InputState::None;
+	unsigned int _previousInputDirection = 0;
 	// 入力の継続時間
 	float _inputHoldTime = 0.0f;
 	// 連続入力までの時間

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../Library/Component/SpriteRenderer.h"
+#include "ChestMenuControllerBase.h"
 
-class ChestSelectMenuController : public Component
+class ChestSelectMenuController : public ChestMenuControllerBase
 {
 public:
 	enum class SelectMenuOption
@@ -25,9 +25,14 @@ public:
 	void DrawGui() override;
 
 	// インデックス追加
-	void AddIndex(int val);
+	void AddIndex(int direction) override;
 	// リセット
-	void ResetIndex();
+	void Reset() override;
+	// 次へ進む
+	void NextState() override {}
+	// 前の状態へ戻る
+	// メニューを閉じる場合はtrueを返す
+	bool PreviousState() override { return true; }
 
 	SelectMenuOption GetSelectIndex() const { return _index; }
 

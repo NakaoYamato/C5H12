@@ -1,5 +1,6 @@
 #include "ChestArmorMenuController.h"
 
+#include "../ChestUIController.h"
 #include "../../Library/Actor/UI/UIActor.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Source/Skill/SkillManager.h"
@@ -559,13 +560,33 @@ void ChestArmorMenuController::DrawGui()
 }
 
 // インデックス追加
-void ChestArmorMenuController::AddIndex(int val)
+void ChestArmorMenuController::AddIndex(int direction)
 {
-	// 状態確認
-	if (_state != State::SelectArmorType)
-		return;
+    bool up = (direction & static_cast<unsigned int>(ChestUIController::InputDirection::Up)) != 0;
+    bool down = (direction & static_cast<unsigned int>(ChestUIController::InputDirection::Down)) != 0;
+    bool left = (direction & static_cast<unsigned int>(ChestUIController::InputDirection::Left)) != 0;
+    bool right = (direction & static_cast<unsigned int>(ChestUIController::InputDirection::Right)) != 0;
 
-    _selectType = static_cast<SelectType>(static_cast<int>(_selectType) + val);
+	// 状態確認
+    if (_state != State::SelectArmorType)
+    {
+		if (left)
+			AddSelectArmorColumnIndex(-1);
+		else if (right)
+			AddSelectArmorColumnIndex(1);
+
+		if (up)
+			AddSelectArmorRowIndex(-1);
+		else if (down)
+			AddSelectArmorRowIndex(1);
+
+		return;
+    }
+
+	if (up)
+        _selectType = static_cast<SelectType>(static_cast<int>(_selectType) - 1);
+	else if (down)
+        _selectType = static_cast<SelectType>(static_cast<int>(_selectType) + 1);
 
     // indexの制限
     if (_selectType < SelectType::Weapon)

@@ -4,6 +4,7 @@
 #include "MathF.h"
 
 #include <DirectXMath.h>
+#include "../../Library/Exporter/Exporter.h"
 
 #pragma region プロトタイプ宣言
 class Vector2;
@@ -99,6 +100,10 @@ public:
 	{
 		return Lerp(*this, dst, t, type);
 	}
+#pragma endregion
+
+#pragma region ファイル操作
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector2, x, y)
 #pragma endregion
 };
 //--------------------------------------------------
@@ -299,6 +304,10 @@ public:
 		return Vector3::Maximum(*this, dst);
     }
 #pragma endregion
+
+#pragma region ファイル操作
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector3, x, y, z)
+#pragma endregion
 };
 
 //--------------------------------------------------
@@ -355,4 +364,8 @@ public:
 #pragma endregion
 
     const Vector3 Vec3()const { return Vector3(x, y, z); }
+
+#pragma region ファイル操作
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector4, x, y, z, w)
+#pragma endregion
 };

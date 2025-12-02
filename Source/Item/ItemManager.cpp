@@ -158,21 +158,16 @@ void ItemManager::DrawGui()
 
 		if (ImGui::TreeNode(std::to_string(index).c_str()))
 		{
-			static float ColumnWidths[2] = { 300.0f, 460.0f };
+			ImGui::MyColumns(3, "user_item_colums", true, { 300.0f, 460.0f });
 
-			ImGui::Columns(3, "user_item_colums", true);
-			ImGui::SetColumnWidth(0, ColumnWidths[0]);
-			ImGui::SetColumnWidth(1, ColumnWidths[1]);
-
-
-			// アイテムアイコンGui描画
-			DrawItemIconGui(data.iconIndex, data.overlayIconIndex, data.color);
 			ImGui::SetNextItemWidth(100.0f);
 			if (ImGui::InputInt(u8"アイコン番号", &data.iconIndex))
 				data.iconIndex = std::clamp<int>(data.iconIndex, -1, _itemIconTextureIndex - 1);
 			ImGui::SetNextItemWidth(100.0f);
 			if (ImGui::InputInt(u8"オーバーレイアイコン番号", &data.overlayIconIndex))
 				data.overlayIconIndex = std::clamp<int>(data.overlayIconIndex, -1, 7);
+			// アイテムアイコンGui描画
+			DrawItemIconGui(data.iconIndex, data.overlayIconIndex, data.color);
 
 			// ItemDataGui描画
 			ImGui::NextColumn();
@@ -249,11 +244,11 @@ void ItemManager::DrawGui()
 			}
 
 			ImGui::NextColumn();
-			ImGui::Columns(1);
 			ImGui::TreePop();
 		}
 		index++;
 	}
+	ImGui::Columns(1);
 
 	ImGui::Separator();
 	{

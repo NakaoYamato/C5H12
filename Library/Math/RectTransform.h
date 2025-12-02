@@ -41,13 +41,9 @@ public:
 	void SetReflectParentAngle(bool reflect) { _reflectParentAngle = reflect; }
 #pragma endregion
 
-#pragma region 入出力
-	// ファイル読み込み
-	bool LoadFromFile(nlohmann::json_abi_v3_12_0::json& json);
-	// ファイル保存
-	bool SaveToFile(nlohmann::json_abi_v3_12_0::json& json);
+#pragma region ファイル操作
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(RectTransform, _localPosition, _localScale, _localAngle, _reflectParentScale, _reflectParentAngle)
 #pragma endregion
-
 private:
 	Vector2			_localPosition		= Vector2::Zero;
 	Vector2			_localScale			= Vector2::One;

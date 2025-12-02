@@ -126,6 +126,8 @@ public:
 	PouchItemData* GetPouchItem(int pouchIndex);
 	// アイテムポーチ内の最後のアイテムポーチ取得
 	PouchItemData* GetLastPouchItem();
+	// 特定のアイテムを所持しているポーチ取得
+	PouchItemData* GetPouchItemFromItemIndex(int itemIndex);
 
 	// アイテムポーチ内のアイテムインデックス変更
 	void SetPouchItemIndex(int pouchIndex, int itemIndex);

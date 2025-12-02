@@ -1,5 +1,6 @@
 #include "ChestSelectMenuController.h"
 
+#include "../ChestUIController.h"
 #include "../../Library/Actor/UI/UIActor.h"
 #include "../../Library/Scene/Scene.h"
 
@@ -56,9 +57,14 @@ void ChestSelectMenuController::DrawGui()
 	ImGui::ColorEdit4(u8"テキスト選択色", &_textSelectColor.x);
 }
 
-void ChestSelectMenuController::AddIndex(int val)
+void ChestSelectMenuController::AddIndex(int direction)
 {
-    _index = static_cast<SelectMenuOption>(static_cast<int>(_index) + val);
+	if (direction & static_cast<unsigned int>(ChestUIController::InputDirection::Up))
+        _index = static_cast<SelectMenuOption>(static_cast<int>(_index) - 1);
+	else if (direction & static_cast<unsigned int>(ChestUIController::InputDirection::Down))
+        _index = static_cast<SelectMenuOption>(static_cast<int>(_index) + 1);
+    else
+		return;
 
     // indexの制限
     if (_index < SelectMenuOption::ItemOption)
@@ -86,7 +92,7 @@ void ChestSelectMenuController::AddIndex(int val)
 }
 
 // リセット
-void ChestSelectMenuController::ResetIndex()
+void ChestSelectMenuController::Reset()
 {
     _index = SelectMenuOption::ItemOption;
 	if (auto spriteRenderer = _spriteRenderer.lock())

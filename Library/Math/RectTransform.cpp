@@ -48,12 +48,19 @@ void RectTransform::DrawGui()
 	ImGui::Separator();
 	ImGui::Checkbox(u8"親のスケールを反映", &_reflectParentScale);
 	ImGui::Checkbox(u8"親の回転を反映", &_reflectParentAngle);
-	ImGui::Separator();
+	if (ImGui::Button(u8"再計算"))
+	{
+		UpdateTransform();
+	}
 
-	ImGui::DragFloat2(u8"ワールド位置", &_worldPosition.x, 0.1f);
-	ImGui::DragFloat2(u8"ワールドスケール", &_worldScale.x, 0.01f);
-	angleDegree = DirectX::XMConvertToDegrees(_worldAngle);
-	ImGui::DragFloat(u8"ワールド角度", &angleDegree, 1.0f);
+	if (ImGui::TreeNode(u8"ワールド情報"))
+	{
+		ImGui::Text(u8"ワールド位置: (%.2f, %.2f)", _worldPosition.x, _worldPosition.y);
+		ImGui::Text(u8"ワールドスケール: (%.2f, %.2f)", _worldScale.x, _worldScale.y);
+		ImGui::Text(u8"ワールド角度: %.2f", DirectX::XMConvertToDegrees(_worldAngle));
+		angleDegree = DirectX::XMConvertToDegrees(_worldAngle);
+		ImGui::TreePop();
+	}
 }
 
 /// 値をリセット
@@ -63,37 +70,3 @@ void RectTransform::Reset()
 	_localScale = Vector2::One;
 	_localAngle = 0.0f;
 }
-
-#pragma region 入出力
-// ファイル読み込み
-bool RectTransform::LoadFromFile(nlohmann::json_abi_v3_12_0::json& json)
-{
-	if (json.contains("RectTransform"))
-	{
-		auto& sub = json["RectTransform"];
-		_localPosition.x = sub.value("localPositionX", 0.0f);
-		_localPosition.y = sub.value("localPositionY", 0.0f);
-		_localScale.x = sub.value("localScaleX", 1.0f);
-		_localScale.y = sub.value("localScaleY", 1.0f);
-		_localAngle = sub.value("localAngle", 0.0f);
-		_reflectParentScale = sub.value("reflectParentScale", true);
-		_reflectParentAngle = sub.value("reflectParentAngle", true);
-	}
-
-	return true;
-}
-
-// ファイル保存
-bool RectTransform::SaveToFile(nlohmann::json_abi_v3_12_0::json& json)
-{
-	auto& sub = json["RectTransform"];
-	sub["localPositionX"] = _localPosition.x;
-	sub["localPositionY"] = _localPosition.y;
-	sub["localScaleX"] = _localScale.x;
-	sub["localScaleY"] = _localScale.y;
-	sub["localAngle"] = _localAngle;
-	sub["reflectParentScale"] = _reflectParentScale;
-	sub["reflectParentAngle"] = _reflectParentAngle;
-	return true;
-}
-#pragma endregion

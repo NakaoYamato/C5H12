@@ -14,6 +14,7 @@ public:
 	class SpriteData : public Sprite
 	{
 	public:
+		bool		_isActive = true;
 		std::string _parentName = "";
 	};
 
@@ -47,6 +48,7 @@ public:
     int GetStencil(const std::string& name) const { return _sprites.at(name).GetStencil(); }
 	const std::string& GetParentName(const std::string& name) const { return _sprites.at(name)._parentName; }
 	float GetOverallAlpha() const { return _overallAlpha; }
+	bool IsActive(const std::string& name) const { return _sprites.at(name)._isActive; }
 	bool IsLoaded() const { return _isLoaded; }
 
 	void SetCenterAlignment(const std::string& name, Sprite::CenterAlignment alignment) {
@@ -61,6 +63,7 @@ public:
     void SetDepthState(const std::string& name, DepthState ds) { _sprites.at(name).SetDepthState(ds); }
     void SetStencil(const std::string& name, int stencil) { _sprites.at(name).SetStencil(stencil); }
 	void SetParentName(const std::string& name, const std::string& parentName) { _sprites.at(name)._parentName = parentName; }
+	void SetActive(const std::string& name, bool isActive) { _sprites.at(name)._isActive = isActive; }
 	void SetOverallAlpha(float a) { _overallAlpha = a; }
 #pragma endregion
 

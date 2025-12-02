@@ -1664,6 +1664,9 @@
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestItemMenuController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestMenuControllerBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../../Library/Component/SpriteRenderer.h"
+#include "ChestMenuControllerBase.h"
 
 #include "../../Source/Player/PlayerEquipmentController.h"
 #include "../../Library/Scene/Scene.h"
 
-class ChestArmorMenuController : public Component
+class ChestArmorMenuController : public ChestMenuControllerBase
 {
 public:
 	enum class SelectType
@@ -43,19 +43,19 @@ public:
 	void DrawGui() override;
 
 	// インデックス追加
-	void AddIndex(int val);
+	void AddIndex(int direction) override;
 	// 装備インデックス追加
 	void AddSelectArmorColumnIndex(int val);
 	// 装備インデックス追加
 	void AddSelectArmorRowIndex(int val);
 
 	// 次へ進む
-	void NextState();
+	void NextState() override;
 	// 前の状態へ戻る
 	// メニューを閉じる場合はtrueを返す
-	bool PreviousState();
+	bool PreviousState() override;
 	// リセット
-	void Reset();
+	void Reset() override;
 
 	void SetPlayerEquipmentController(const std::shared_ptr<PlayerEquipmentController>& controller);
 

@@ -515,6 +515,17 @@ UserDataManager::PouchItemData* UserDataManager::GetLastPouchItem()
 	return &_pouchItems[MaxPouchItemCount - 1];
 }
 
+// 特定のアイテムを所持しているポーチ取得
+UserDataManager::PouchItemData* UserDataManager::GetPouchItemFromItemIndex(int itemIndex)
+{
+	for (int i = 0; i < MaxPouchItemCount; ++i)
+	{
+		if (_pouchItems[i].itemIndex == itemIndex)
+			return &_pouchItems[i];
+	}
+	return nullptr;
+}
+
 // アイテムポーチ内のアイテムインデックス変更
 void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 {

@@ -626,6 +626,7 @@
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestItemMenuController.h" />
+    <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestMenuControllerBase.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestSelectMenuController.h" />
     <ClInclude Include="Source\InGame\UI\Item\ItemUIController.h" />
     <ClInclude Include="Source\InGame\UI\Item\Slider\ItemSliderController.h" />

@@ -69,11 +69,37 @@ void SpriteRenderer::DelayedRender(const RenderContext& rc)
 // GUI描画
 void SpriteRenderer::DrawGui()
 {
-	std::string resultPath = "";
-	if (ImGui::OpenDialogBotton(u8"画像読み込み", &resultPath, ImGui::TextureFilter))
+	static std::string newSpriteName = "NewSprite";
+	ImGui::InputText(u8"スプライト名", &newSpriteName);
+	if (ImGui::Button(u8"追加"))
 	{
-		LoadTexture(resultPath.c_str(), ToWString(resultPath).c_str(), Sprite::CenterCenter);
+		std::string resultPath = "";
+		{
+			// ダイアログを開く
+			std::string filepath;
+			std::string currentDirectory;
+			Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
+			// ファイルを選択したら
+			if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+			{
+				// 相対パス取得
+				try
+				{
+					// 相対パス取得
+					std::filesystem::path path = std::filesystem::relative(filepath, currentDirectory);
+					resultPath = path.u8string();
+				}
+				catch (...)
+				{
+					// 相対パス取得に失敗した場合は絶対パスを使用
+					resultPath = filepath;
+				}
+			}
+		}
+
+		LoadTexture(newSpriteName, ToWString(resultPath).c_str(), Sprite::CenterCenter);
 	}
+	ImGui::Separator();
 
 	for (auto& [name, spriteData] : _sprites)
 	{
@@ -212,16 +238,16 @@ bool SpriteRenderer::LoadFromFile()
 			static_cast<Sprite::CenterAlignment>(sub.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
 
 		// トランスフォームデータ
-		_sprites[name].GetRectTransform().LoadFromFile(sub);
+		_sprites[name].GetRectTransform() = sub.value("RectTransform", RectTransform());
 
 		// マテリアルデータ
 		_sprites[name].GetMaterial().LoadFromFile(sub);
 
 		_sprites[name].SetCenterAlignment(sub.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
-		_sprites[name].SetTexPos({ sub.value("texPosX", 0.0f), sub.value("texPosY", 0.0f) });
-		_sprites[name].SetTexSize({ sub.value("texSizeX", 100.0f), sub.value("texSizeY", 100.0f) });
-		_sprites[name].SetCenter({ sub.value("centerX", 0.0f), sub.value("centerY", 0.0f) });
-		_sprites[name].SetColor({ sub.value("colorR", 1.0f), sub.value("colorG", 1.0f), sub.value("colorB", 1.0f), sub.value("colorA", 1.0f) });
+		_sprites[name].SetTexPos(sub.value("texPos", _sprites[name].GetTexPos()));
+		_sprites[name].SetTexSize(sub.value("texSize", _sprites[name].GetTexSize()));
+		_sprites[name].SetCenter(sub.value("center", _sprites[name].GetCenter()));
+		_sprites[name].SetColor(sub.value("color", _sprites[name].GetColor()));
 		_sprites[name].SetDepthState(sub.value("depthState", DepthState::TestAndWrite));
 		_sprites[name].SetStencil(sub.value("stencil", 0));
 	}
@@ -271,22 +297,16 @@ bool SpriteRenderer::SaveToFile()
 		sub["textureFilePath"] = ToString(spriteData.GetTexture().GetFilepath());
 
 		// トランスフォームデータ
-		spriteData.GetRectTransform().SaveToFile(sub);
+		sub["RectTransform"] = spriteData.GetRectTransform();
 
 		// マテリアルデータ
 		spriteData.GetMaterial().SaveToFile(sub);
 
 		sub["centerAlignment"] = spriteData.GetCenterAlignment();
-		sub["texPosX"] = spriteData.GetTexPos().x;
-		sub["texPosY"] = spriteData.GetTexPos().y;
-		sub["texSizeX"] = spriteData.GetTexSize().x;
-		sub["texSizeY"] = spriteData.GetTexSize().y;
-		sub["centerX"] = spriteData.GetCenter().x;
-		sub["centerY"] = spriteData.GetCenter().y;
-		sub["colorR"] = spriteData.GetColor().x;
-		sub["colorG"] = spriteData.GetColor().y;
-		sub["colorB"] = spriteData.GetColor().z;
-		sub["colorA"] = spriteData.GetColor().w;
+		sub["texPos"] = spriteData.GetTexPos();
+		sub["texSize"] = spriteData.GetTexSize();
+		sub["center"] = spriteData.GetCenter();
+		sub["color"] = spriteData.GetColor();
 		sub["depthState"] = spriteData.GetDepthState();
 		sub["stencil"] = spriteData.GetStencil();
 
@@ -310,5 +330,7 @@ void SpriteRenderer::SpriteRender(const std::string& spriteName,
 	const RenderContext& rc)
 {
 	auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
+	if (!_sprites[spriteName]._isActive)
+		return;
 	_sprites[spriteName].Render(rc, textureRenderer, _overallAlpha);
 }

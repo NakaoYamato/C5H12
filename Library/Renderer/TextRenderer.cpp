@@ -59,6 +59,10 @@ void TextRenderer::Draw(FontType type,
 /// テキスト描画
 void TextRenderer::Draw(TextDrawData data)
 {
+	// 文字数取得
+	float length = static_cast<float>(wcslen(data.text.c_str()));
+	data.origin.x = data.origin.x * length * _fontScale[static_cast<int>(data.type)];
+	data.origin.y = data.origin.x * length;
 	_textDrawDatas.push_back(data);
 }
 
@@ -165,6 +169,9 @@ void TextRenderer::TextDrawData::DrawGui(const char* label)
 {
 	if (ImGui::TreeNode(label))
 	{
+		std::string textUtf8 = ToString(text);
+		ImGui::InputText(u8"テキスト", &textUtf8);
+		text = ToUtf16(textUtf8);
 		ImGui::DragFloat2(u8"位置",		&position.x, 1.0f);
 		ImGui::ColorEdit4(u8"色",		&color.x);
 		ImGui::DragFloat(u8"回転",		&rotation, 0.1f);
@@ -178,6 +185,7 @@ void TextRenderer::Text3DDrawData::DrawGui(const char* label)
 {
 	if (ImGui::TreeNode(label))
 	{
+		ImGui::InputText(u8"テキスト", &text);
 		ImGui::DragFloat3(u8"位置",		&position.x, 1.0f);
 		ImGui::ColorEdit4(u8"色",		&color.x);
 		ImGui::DragFloat(u8"回転",		&rotation, 0.1f);

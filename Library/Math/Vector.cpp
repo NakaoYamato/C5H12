@@ -428,18 +428,18 @@ Vector3 Vector3::Unproject(const Vector3& screenPos,
 Vector3 Vector3::Minimum(const Vector3& src, const Vector3& dst)
 {
 	return Vector3(
-		std::min(src.x, dst.x),
-        std::min(src.y, dst.y),
-        std::min(src.z, dst.z)
+		std::min<float>(src.x, dst.x),
+        std::min<float>(src.y, dst.y),
+        std::min<float>(src.z, dst.z)
 	);
 }
 // Vector3‚ÌÅ‘å’l‚ğæ“¾
 Vector3 Vector3::Maximum(const Vector3& src, const Vector3& dst)
 {
     return Vector3(
-        std::max(src.x, dst.x),
-        std::max(src.y, dst.y),
-        std::max(src.z, dst.z)
+        std::max<float>(src.x, dst.x),
+        std::max<float>(src.y, dst.y),
+        std::max<float>(src.z, dst.z)
     );
 }
 #pragma endregion

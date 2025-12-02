@@ -54,33 +54,29 @@ void ChestInput::OnUpdate(float elapsedTime)
 	if (!chestUIController)
 		return;
 
-	ChestUIController::InputState currentInputState = ChestUIController::InputState::None;
+	unsigned int currentInputDirection = 0;
 
 	if (_INPUT_PRESSED("Up"))
-		currentInputState = ChestUIController::InputState::Up;
+		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Up);
 	if (_INPUT_PRESSED("Down"))
-		currentInputState = ChestUIController::InputState::Down;
+		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Down);
 	if (_INPUT_PRESSED("Left"))
-		currentInputState = ChestUIController::InputState::Left;
+		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Left);
 	if (_INPUT_PRESSED("Right"))
-		currentInputState = ChestUIController::InputState::Right;
-	if (_INPUT_TRIGGERD("Select"))
-		currentInputState = ChestUIController::InputState::Select;
-	if (_INPUT_TRIGGERD("Back"))
-		currentInputState = ChestUIController::InputState::Back;
-	if (_INPUT_TRIGGERD("L3"))
-		currentInputState = ChestUIController::InputState::L3;
-	if (_INPUT_TRIGGERD("R3"))
-		currentInputState = ChestUIController::InputState::R3;
+		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Right);
 
 	// 連続入力処理
-	if (currentInputState != ChestUIController::InputState::None &&
-		currentInputState == _previousInputState)
+	if (currentInputDirection != 0 &&
+		currentInputDirection & _previousInputDirection)
 	{
 		if (_inputHoldTime >= _inputHoldThreshold)
 		{
 			_inputHoldTime -= _inputRepeatInterval;
-			chestUIController->SetInputState(currentInputState);
+			chestUIController->SetInputDirection(currentInputDirection);
+		}
+		else
+		{
+			chestUIController->SetInputDirection(0);
 		}
 
 		_inputHoldTime += elapsedTime;
@@ -88,10 +84,20 @@ void ChestInput::OnUpdate(float elapsedTime)
 	else
 	{
 		_inputHoldTime = 0.0f;
-		chestUIController->SetInputState(currentInputState);
+		chestUIController->SetInputDirection(currentInputDirection);
 	}
 
-	_previousInputState = currentInputState;
+	_previousInputDirection = currentInputDirection;
+
+	if (_INPUT_TRIGGERD("Select"))
+		chestUIController->SetInputState(ChestUIController::InputState::Select);
+	if (_INPUT_TRIGGERD("Back"))
+		chestUIController->SetInputState(ChestUIController::InputState::Back);
+	if (_INPUT_TRIGGERD("L3"))
+		chestUIController->SetInputState(ChestUIController::InputState::L3);
+	if (_INPUT_TRIGGERD("R3"))
+		chestUIController->SetInputState(ChestUIController::InputState::R3);
+
 
 	// 前の入力コントローラーに戻す
 	if (!chestUIController->GetActor()->IsActive())

@@ -98,6 +98,10 @@ public:
 	// ワールド座標取得
 	Vector3 GetWorldPosition()const { return Vector3(_transform._41, _transform._42, _transform._43); }
 #pragma endregion
+
+#pragma region ファイル操作
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(Transform, _lengthScale, _position, _scale, _angle)
+#pragma endregion
 private:
 	// 長さの単位(m)
 	float _lengthScale = 1.0f;

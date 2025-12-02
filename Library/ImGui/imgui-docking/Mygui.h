@@ -148,4 +148,41 @@ namespace ImGui
 		}
 		return ImGui::Combo(title, itemIndex, itemPtrs.data(), static_cast<int>(itemPtrs.size()));
 	}
+
+	/// <summary>
+	/// Columnsのラッパー　最初に呼ばれたときに幅を設定
+	/// </summary>
+	/// <param name="count"></param>
+	/// <param name="id"></param>
+	/// <param name="border"></param>
+	/// <param name="widths"></param>
+	static void MyColumns(int count, const char* id, bool border, const float widths[])
+	{
+		static std::vector<const char*> ColumnIds;
+
+		ImGui::Columns(count, id, border);
+		// 登録済みか確認
+		auto it = std::find(ColumnIds.begin(), ColumnIds.end(), id);
+		if (it == ColumnIds.end())
+		{
+			// 登録されていなければ幅を設定して登録
+			for (int i = 0; i < count - 1; ++i)
+			{
+				ImGui::SetColumnWidth(i, widths[i]);
+			}
+			ColumnIds.push_back(id);
+		}
+	}
+
+	/// <summary>
+	/// Columnsのラッパー　最初に呼ばれたときに幅を設定
+	/// </summary>
+	/// <param name="count"></param>
+	/// <param name="id"></param>
+	/// <param name="border"></param>
+	/// <param name="widths"></param>
+	static void MyColumns(int count, const char* id, bool border, const std::vector<float>& widths)
+	{
+		MyColumns(count, id, border, widths.data());
+	}
 }

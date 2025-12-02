@@ -88,7 +88,7 @@ void ChestUIController::Open()
     if (auto selectUI = _selectUI.lock())
     {
         selectUI->GetActor()->SetIsActive(true);
-		selectUI->ResetIndex();
+		selectUI->Reset();
     }
     if (auto armorUI = _armorUI.lock())
     {
@@ -136,14 +136,9 @@ void ChestUIController::SelectInput()
     if (!selectUI || !itemUI)
         return;
 
+	selectUI->AddIndex(_inputDirection);
     switch (_inputState)
     {
-    case ChestUIController::InputState::Up:
-        selectUI->AddIndex(-1);
-        break;
-    case ChestUIController::InputState::Down:
-        selectUI->AddIndex(1);
-        break;
     case ChestUIController::InputState::Select:
         switch (selectUI->GetSelectIndex())
         {
@@ -175,28 +170,9 @@ void ChestUIController::ArmorMenuInput()
     if (!armorUI)
         return;
 
+    armorUI->AddIndex(_inputDirection);
     switch (_inputState)
     {
-    case ChestUIController::InputState::Up:
-        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
-            armorUI->AddSelectArmorRowIndex(-1);
-        else
-            armorUI->AddIndex(-1);
-        break;
-    case ChestUIController::InputState::Down:
-        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
-            armorUI->AddSelectArmorRowIndex(+1);
-        else
-            armorUI->AddIndex(1);
-        break;
-    case ChestUIController::InputState::Left:
-        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
-            armorUI->AddSelectArmorColumnIndex(-1);
-        break;
-    case ChestUIController::InputState::Right:
-        if (armorUI->GetState() == ChestArmorMenuController::State::SelectArmor)
-            armorUI->AddSelectArmorColumnIndex(+1);
-        break;
     case ChestUIController::InputState::Select:
         armorUI->NextState();
         break;
@@ -220,21 +196,9 @@ void ChestUIController::ItemMenuInput()
     if (!itemUI || !selectUI)
         return;
 
+    itemUI->AddIndex(_inputDirection);
     switch (_inputState)
     {
-    case ChestUIController::InputState::Up:
-        if (itemUI->GetTab() != ChestItemMenuController::Tab::Pourch)
-            itemUI->AddIndex(-itemUI->GetStrageItemColumnIndex());
-        break;
-    case ChestUIController::InputState::Down:
-        itemUI->AddIndex(+itemUI->GetStrageItemColumnIndex());
-        break;
-    case ChestUIController::InputState::Left:
-        itemUI->AddIndex(-1);
-        break;
-    case ChestUIController::InputState::Right:
-        itemUI->AddIndex(+1);
-        break;
     case ChestUIController::InputState::Select:
         itemUI->NextState();
         break;
@@ -248,7 +212,7 @@ void ChestUIController::ItemMenuInput()
         }
         break;
     case ChestUIController::InputState::L3:
-
+		itemUI->SortPourch();
         break;
 	case ChestUIController::InputState::R3:
 		itemUI->ChangeTab();

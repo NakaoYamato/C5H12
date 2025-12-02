@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../../Library/Component/SpriteRenderer.h"
+#include "ChestMenuControllerBase.h"
 
 #include "../../Source/User/UserDataManager.h"
 #include "../../Library/Scene/Scene.h"
 
-class ChestItemMenuController : public Component
+class ChestItemMenuController : public ChestMenuControllerBase
 {
 public:
 	enum class Tab
@@ -13,10 +13,17 @@ public:
 		Pourch,
 		Strage,
 	};
+	enum class Property
+	{
+		MoveAll,
+		MoveOne,
+		Cancel,
+	};
 
 	enum class State
 	{
-		ItmeSelect,
+		ItemSelecting,
+		PropertySelecting,
 
 		MaxState,
 	};
@@ -35,18 +42,21 @@ public:
 	void DelayedRender(const RenderContext& rc) override;
 	// GUI描画
 	void DrawGui() override;
+
 	// インデックス追加
-	void AddIndex(int val);
+	void AddIndex(int direction) override;
 	// 次へ進む
-	void NextState();
+	void NextState() override;
 	// 前の状態へ戻る
 	// メニューを閉じる場合はtrueを返す
-	bool PreviousState();
+	bool PreviousState() override;
 	// リセット
-	void Reset();
+	void Reset() override;
 
 	// タブ切り替え
 	void ChangeTab();
+	// ポーチ整列
+	void SortPourch();
 
 	Tab GetTab() const { return _tab; }
 	State GetState() const { return _state; }
@@ -69,6 +79,9 @@ private:
 	// ストレージメニュー描画
 	void RenderStrage(const RenderContext& rc);
 
+	// アイテム移動処理
+	void ItemMove(bool all);
+
 private:
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 	// ユーザーデータマネージャー
@@ -80,7 +93,8 @@ private:
 	const std::string TextBoxSpr	= "TextBox";
 
 	Tab _tab = Tab::Pourch;
-	State _state = State::ItmeSelect;
+	Property _property = Property::MoveAll;
+	State _state = State::ItemSelecting;
 	int _currentIndex = 0;
     int _currentPage = 0;
 
@@ -100,6 +114,18 @@ private:
 	std::unique_ptr<Sprite> _itemBackSprite;
 	// アイテムの前面スプライト
 	std::unique_ptr<Sprite> _itemFrontSprite;
+	// プロパティ表示用スプライト
+	std::unique_ptr<Sprite> _propertySprite;
+
+	// プロパティ表示用パラメータ
+	Vector2 _propertyOffset = Vector2(30.0f, 30.0f);
+	Vector2 _propertyScale = Vector2(1.0f, 1.0f);
+	float _propertyInversPosisionX = 1200.0f;
+	float _propertyTextInterval = 30.0f;
+	Vector2 _propertyTextOrigin = Vector2(0.0f, 0.0f);
+	Vector2 _propertyTextScale = Vector2(1.0f, 1.0f);
+	Vector4 _propertyTextColor = Vector4::White;
+	Vector4 _propertySelectTextColor = Vector4::Orange;
 
 	// 個数表示用パラメータ
 	Vector2 _itemQuantityOffset = Vector2(30.0f, 30.0f);
@@ -109,4 +135,20 @@ private:
 	TextRenderer::TextDrawData _itemName;
 	// アイテムの説明
 	TextRenderer::TextDrawData _itemDescription;
+	// アイテムの個数
+	TextRenderer::TextDrawData _itemQuantityText;
+	// ポーチ
+	TextRenderer::TextDrawData _pourchText;
+	// ストレージ
+	TextRenderer::TextDrawData _strageText;
+
+	// 入力UI
+	InputUI::DrawInfo _selectInputUI;
+	TextRenderer::TextDrawData _selectInputUIText;
+	InputUI::DrawInfo _backInputUI;
+	TextRenderer::TextDrawData _backInputUIText;
+	InputUI::DrawInfo _tabChangeInputUI;
+	TextRenderer::TextDrawData _tabChangeInputUIText;
+	InputUI::DrawInfo _sortInputUI;
+	TextRenderer::TextDrawData _sortInputUIText;
 };

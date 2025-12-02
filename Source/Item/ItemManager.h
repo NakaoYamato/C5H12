@@ -67,7 +67,10 @@ private:
 	// アイテム効果処理リスト
 	std::vector<std::unique_ptr<ItemFunctionBase>> _itemFunctionList;
 
+	// Gui用選択インデックス
 	int _selectedAddTypeIndex = 0;
+	// Gui用ソートタイプ
+	ItemType _selectedSortType = ItemType::ItemTypeMax;
 };
 
 // リソース設定

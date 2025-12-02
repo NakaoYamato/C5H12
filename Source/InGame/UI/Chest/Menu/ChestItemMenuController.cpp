@@ -73,7 +73,7 @@ void ChestItemMenuController::Update(float elapsedTime)
 				break;
 
 			_itemName.text = ToUtf16(baseData->name);
-			_itemDescription.text = L"テスト\nテスト";
+			_itemDescription.text = ToUtf16(baseData->description);
 		}
 		break;
 	case ChestItemMenuController::Tab::Strage:
@@ -96,7 +96,7 @@ void ChestItemMenuController::Update(float elapsedTime)
 				break;
 
 			_itemName.text = ToUtf16(baseData->name);
-			_itemDescription.text = L"テスト\nテスト\nテスト";
+			_itemDescription.text = ToUtf16(baseData->description);
 		}
 		break;
 	}

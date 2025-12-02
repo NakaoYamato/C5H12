@@ -344,6 +344,7 @@
     <ClCompile Include="Source\InGame\UI\Operate\OperateUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
+    <ClCompile Include="Source\Item\ItemData.cpp" />
     <ClCompile Include="Source\Item\ItemFunctions.cpp" />
     <ClCompile Include="Source\Item\ItemManager.cpp" />
     <ClCompile Include="Source\Loading\LoadingSprController.cpp" />

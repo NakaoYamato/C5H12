@@ -93,6 +93,31 @@ bool ItemManager::SaveToFile()
 // Gui描画
 void ItemManager::DrawGui()
 {
+	// 各種類リスト
+	static std::vector<char> ItemTypeNames;
+	// ソート用リスト
+	static std::vector<char> SortedItemTypeNames;
+	if (ItemTypeNames.empty())
+	{
+		for (size_t i = 0; i < static_cast<size_t>(ItemType::ItemTypeMax); ++i)
+		{
+			for (char c : ToString<ItemType>(i))
+			{
+				ItemTypeNames.push_back(c);
+			}
+			ItemTypeNames.push_back('\0');
+		}
+
+		SortedItemTypeNames = ItemTypeNames;
+		SortedItemTypeNames.push_back('A');
+		SortedItemTypeNames.push_back('l');
+		SortedItemTypeNames.push_back('l');
+		SortedItemTypeNames.push_back('\0');
+
+		ItemTypeNames.push_back('\0');
+		SortedItemTypeNames.push_back('\0');
+	}
+
 	// 各名前リスト
 	static std::vector<char> ItemFunctionNames;
 	if (ItemFunctionNames.empty())
@@ -107,9 +132,15 @@ void ItemManager::DrawGui()
 		}
 	}
 
+	ImGui::Combo(u8"ソート", reinterpret_cast<int*>(&_selectedSortType), SortedItemTypeNames.data(), static_cast<int>(ItemType::ItemTypeMax));
+	ImGui::Separator();
 	if (ImGui::Button("Add"))
 	{
 		ItemData data;
+		if (_selectedSortType != ItemType::ItemTypeMax)
+		{
+			data.type = _selectedSortType;
+		}
 		_itemDataList.push_back(data);
 	}
 	ImGui::Separator();
@@ -117,13 +148,56 @@ void ItemManager::DrawGui()
 	size_t index = 0;
 	for (auto& data : _itemDataList)
 	{
+		// ソート処理
+		if (_selectedSortType != ItemType::ItemTypeMax &&
+			data.type != _selectedSortType)
+		{
+			index++;
+			continue;
+		}
+
 		if (ImGui::TreeNode(std::to_string(index).c_str()))
 		{
+			static float ColumnWidths[2] = { 300.0f, 460.0f };
+
+			ImGui::Columns(3, "user_item_colums", true);
+			ImGui::SetColumnWidth(0, ColumnWidths[0]);
+			ImGui::SetColumnWidth(1, ColumnWidths[1]);
+
+
 			// アイテムアイコンGui描画
 			DrawItemIconGui(data.iconIndex, data.overlayIconIndex, data.color);
-			data.DrawGui(_itemIconTextureIndex);
-			ImGui::Separator();
-			
+			ImGui::SetNextItemWidth(100.0f);
+			if (ImGui::InputInt(u8"アイコン番号", &data.iconIndex))
+				data.iconIndex = std::clamp<int>(data.iconIndex, -1, _itemIconTextureIndex - 1);
+			ImGui::SetNextItemWidth(100.0f);
+			if (ImGui::InputInt(u8"オーバーレイアイコン番号", &data.overlayIconIndex))
+				data.overlayIconIndex = std::clamp<int>(data.overlayIconIndex, -1, 7);
+
+			// ItemDataGui描画
+			ImGui::NextColumn();
+			{
+				ImGui::SetNextItemWidth(200.0f);
+				ImGui::InputText(u8"名前", &data.name);
+
+				ImGui::InputTextMultiline(u8"説明", &data.description, ImVec2(200.0f, 100.0f));
+
+				ImGui::ColorEdit4(u8"表示色", &data.color.x, ImGuiColorEditFlags_NoInputs);
+
+				ImGui::Combo(u8"種類", reinterpret_cast<int*>(&data.type), ItemTypeNames.data(), static_cast<int>(ItemType::ItemTypeMax));
+
+				ImGui::SetNextItemWidth(100.0f);
+				ImGui::Checkbox(u8"ポーチ内に入るかどうか", &data.isInPouch);
+				ImGui::SetNextItemWidth(100.0f);
+				ImGui::SameLine();
+				ImGui::InputInt(u8"ポーチ内最大所持数", &data.maxCountInpouch);
+				data.maxCountInpouch = std::clamp<int>(data.maxCountInpouch, -1, 99);
+
+				ImGui::SetNextItemWidth(100.0f);
+				ImGui::InputInt(u8"レア度", &data.rarity);
+			}
+
+			ImGui::NextColumn();
 			if (ImGui::TreeNode(u8"アイテム実行処理"))
 			{
 				if (ImGui::TreeNode(u8"パラメータ"))
@@ -169,13 +243,13 @@ void ItemManager::DrawGui()
 					if (ImGui::RadioButton(func->GetName().c_str(), data.executeProcessIndex == index))
 					{
 						data.executeProcessIndex = index;
-						// パラメータ初期化
-						data.parameters = func->GetParameterKeys();
 					}
 				}
 				ImGui::TreePop();
 			}
 
+			ImGui::NextColumn();
+			ImGui::Columns(1);
 			ImGui::TreePop();
 		}
 		index++;
@@ -235,7 +309,7 @@ void ItemManager::DrawItemIconGui(int selectedIconIndex, int overlayIconIndex, c
 		// テクスチャ表示
 		ImGui::Image(
 			_itemIconCanvas->GetColorSRV().Get(),
-			ImVec2(64.0f, 64.0f),
+			ImVec2(128.0f, 128.0f),
 			uv0,
 			uv1,
 			ImVec4(color.x, color.y, color.z, color.w));
@@ -252,7 +326,7 @@ void ItemManager::DrawItemIconGui(int selectedIconIndex, int overlayIconIndex, c
 			ImGui::SetCursorScreenPos(startPos);
 			ImGui::Image(
 				_overlayIconTexture.Get(),
-				ImVec2(64.0f, 64.0f),
+				ImVec2(128.0f, 128.0f),
 				ImVec2(overlayUvX0, overlayUvY0),
 				ImVec2(overlayUvX1, overlayUvY1),
 				ImVec4(1.0f, 1.0f, 1.0f, 1.0f));

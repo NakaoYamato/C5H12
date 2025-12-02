@@ -49,7 +49,7 @@ void SceneManager::Initialize()
 		ChangeScene(SceneMenuLevel::Debug, u8"Debug");
 	}
 #else
-	ChangeScene(SceneMenuLevel::Debug, u8"Debug");
+	ChangeScene(SceneMenuLevel::Game, u8"Title");
 #endif
 }
 

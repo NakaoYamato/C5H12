@@ -91,12 +91,12 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
     case WM_KEYDOWN:
         // 仮想キーボード入力取得
         // 参考:https://learn.microsoft.com/ja-jp/windows/win32/inputdev/virtual-key-codes
+#ifdef _DEBUG
         switch (wparam)
         {
         //case VK_ESCAPE:
         //    PostMessage(hwnd, WM_CLOSE, 0, 0);
         //    break;
-#ifdef _DEBUG
             // デバッグ中のみ有効化
         case VK_F1:
         case VK_F2:
@@ -113,8 +113,8 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
             // 指定のキーを押すとそのビットを反転
             Debug::GetDebugInput()->buttonData ^= (1 << (wparam - VK_F1));
             break;
-#endif
         }
+#endif
         break;
     case WM_ENTERSIZEMOVE:
         _tictoc.Stop();

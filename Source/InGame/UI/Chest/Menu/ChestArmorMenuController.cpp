@@ -462,11 +462,13 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
             // 選択中のマスに対応する防具が存在するか確認
             if (armorIndex < static_cast<int>(userDataManager->GetAcquiredArmorDataList(type).size()))
             {
-                auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex);
-                _nameTextData.text += ToUtf16(armorData->GetBaseData()->name);
-                _defenseTextData.text += std::to_wstring(static_cast<int>(armorData->GetBaseData()->defense));
-                _rarityextData.text += std::to_wstring(armorData->GetBaseData()->rarity);
-                skillData = &armorData->GetBaseData()->skills;
+                if (auto armorData = userDataManager->GetAcquiredArmorData(type, armorIndex))
+                {
+                    _nameTextData.text += ToUtf16(armorData->GetBaseData()->name);
+                    _defenseTextData.text += std::to_wstring(static_cast<int>(armorData->GetBaseData()->defense));
+                    _rarityextData.text += std::to_wstring(armorData->GetBaseData()->rarity);
+                    skillData = &armorData->GetBaseData()->skills;
+                }
             }
             break;
         }

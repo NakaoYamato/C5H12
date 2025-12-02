@@ -17,7 +17,7 @@ public:
     {
         DirectX::XMFLOAT4X4 world = {};
 
-        Vector4 lodTessFactors = { 63.0f, 41.0f, 29.0f, 13.0f }; // LODの分割数
+        Vector4 lodTessFactors = { 49.0f, 31.0f, 21.0f, 11.0f }; // LODの分割数
 
         float lodTessDistance = 15.0f;      // LODの距離
         float collisionTessFactor = 11.0f;  // 衝突判定用エッジ分割数(奇数のみ)

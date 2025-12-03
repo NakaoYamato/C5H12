@@ -19,6 +19,19 @@ void SceneManager::Initialize()
 	ID3D11Device* device = graphics.GetDevice();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
+	// サンプラーステート設定
+	{
+		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		RenderState* renderState = graphics.GetRenderState();
+		std::vector<ID3D11SamplerState*> samplerStates;
+		for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
+		{
+			samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
+		}
+		dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+		dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+		dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+	}
 	_primitive = std::make_unique<Primitive>(device);
 	_inputUI.Initialize();
 	// レンダラー作成

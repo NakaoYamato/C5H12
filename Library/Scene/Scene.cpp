@@ -29,19 +29,6 @@ void Scene::Initialize()
     _renderContext.lightAmbientColor = Vector4::Black;
     _renderContext.environmentMap = nullptr;
     _renderContext.pointLights.clear();
-    // サンプラーステート設定
-    {
-        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-        RenderState* renderState = graphics.GetRenderState();
-        std::vector<ID3D11SamplerState*> samplerStates;
-        for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
-        {
-            samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
-        }
-        dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
-        dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
-        dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
-    }
 
     // Effekseerエフェクトマネージャー作成
     {

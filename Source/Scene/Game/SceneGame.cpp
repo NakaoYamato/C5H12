@@ -11,6 +11,7 @@
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Source/Stage/StageController.h"
 #include "../../Source/Stage/Props/Chest/ChestActor.h"
+#include "../../Source/Stage/Props/Fence/FenceActor.h"
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
@@ -23,7 +24,7 @@ std::string SceneGame::NetworkAddress = "127.0.0.1";
 
 void SceneGame::OnInitialize()
 {
-    static const float CompletionLoadingRate = 1.0f / 8.0f;
+    static const float CompletionLoadingRate = 1.0f / 9.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -70,8 +71,13 @@ void SceneGame::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto Chest = RegisterActor<ChestActor>("Chest", ActorTag::Stage);
-        Chest->GetTransform().SetPosition(Vector3(-43.0f, 0.0f, 9.0f));
+        Chest->GetTransform().SetPosition(Vector3(-44.5f, 0.0f, 4.8f));
         Chest->GetTransform().SetAngleY(DirectX::XMConvertToRadians(90.0f));
+    }
+    AddCompletionLoading(CompletionLoadingRate);
+    {
+        auto Fence = RegisterActor<FenceActor>("Fence", ActorTag::Stage);
+        Fence->GetTransform().SetPosition(Vector3(-43.5f, 0.0f, 0.45f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

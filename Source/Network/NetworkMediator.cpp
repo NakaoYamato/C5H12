@@ -204,7 +204,7 @@ std::weak_ptr<Actor> NetworkMediator::CreatePlayer(int id, bool isControlled)
 	auto sender     = player->GetComponent<NetworkSender>();
 
     // ‰ŠúˆÊ’u
-    player->GetTransform().SetPosition(Vector3(-45.0f, 0.23f, 0.0f));
+    player->GetTransform().SetPosition(Vector3(-48.0f, 0.23f, 4.0f));
     player->GetTransform().SetAngleY(DirectX::XMConvertToRadians(90.0f));
 
     // ŠÇ—Ò‚ÌID‚ğİ’è

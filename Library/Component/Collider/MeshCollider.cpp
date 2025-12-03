@@ -85,6 +85,16 @@ void MeshCollider::DebugRender(const RenderContext& rc)
 			Debug::Renderer::AddVertex(triangle.positions[2]);
 			Debug::Renderer::AddVertex(triangle.positions[2]);
 			Debug::Renderer::AddVertex(triangle.positions[0]);
+
+			// 法線の描画
+			Vector3 center = (triangle.positions[0] + triangle.positions[1] + triangle.positions[2]) / 3.0f;
+			Vector3 normal = (triangle.positions[1] - triangle.positions[0]).Cross(triangle.positions[2] - triangle.positions[0]).Normalize();
+			// 法線の向きがカメラ方向なら青色、逆方向なら赤色
+			Vector4 color = Vector4::Blue;
+			if (normal.Dot(rc.camera->GetEye() - center) < 0.0f)
+				color = Vector4::Red;
+			Debug::Renderer::AddVertex(center, color);
+			Debug::Renderer::AddVertex(center + normal, color);
 		}
 	}
 	if (_drawCellIndex != -1)

@@ -2,11 +2,11 @@
 
 #include "../../Library/Actor/Actor.h"
 
-class ChestActor : public Actor
+class FenceActor : public Actor
 {
 public:
-	ChestActor() = default;
-	~ChestActor() override {}
+	FenceActor() = default;
+	~FenceActor() override {}
 
 	// ¶¬ˆ—
 	void OnCreate() override;

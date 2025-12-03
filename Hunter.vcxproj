@@ -369,6 +369,8 @@
     <ClCompile Include="Source\Stage\Props\Chest\ChestActor.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestController.cpp" />
     <ClCompile Include="Source\InGame\Input\ChestInput.cpp" />
+    <ClCompile Include="Source\Stage\Props\Fence\FenceActor.cpp" />
+    <ClCompile Include="Source\Stage\Props\Fence\GeteController.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\Title\TitleMediator.cpp" />
     <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
@@ -662,6 +664,8 @@
     <ClInclude Include="Source\Stage\Props\Chest\ChestActor.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestController.h" />
     <ClInclude Include="Source\InGame\Input\ChestInput.h" />
+    <ClInclude Include="Source\Stage\Props\Fence\FenceActor.h" />
+    <ClInclude Include="Source\Stage\Props\Fence\GeteController.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Title\TitleMediator.h" />
     <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />

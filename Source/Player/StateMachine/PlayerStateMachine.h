@@ -54,6 +54,10 @@ public:
 	// 汎用遷移
 	void ChangeItemState();
 
+	void SetNextSubStateName(const std::string& subStateName) { _nextSubStateName = subStateName; }
+	void SetNextBranchSubStateName(const std::string& subStateName) { _nextBranchSubStateName = subStateName; }
+	std::string GetNextSubStateName() const { return _nextSubStateName; }
+	std::string GetNextBranchSubStateName() const { return _nextBranchSubStateName; }
 private:
 	StateMachineBase<PlayerStateMachine> _stateMachine;
 	PlayerController*					_player = nullptr;
@@ -63,6 +67,10 @@ private:
 	EffectController*					_effect = nullptr;
     OperateUIController*				_operateUIController = nullptr;
 	PlayerItemController*				_itemController = nullptr;
+
+	// 先行入力遷移先
+	std::string _nextSubStateName = "";
+	std::string _nextBranchSubStateName = "";
 };
 
 // プレイヤーのヒエラルキカルステートのベースクラス

@@ -49,10 +49,6 @@ public:
 	// アニメーション再生(名前から検索)
 	void PlayAnimation(std::string name, bool loop, float blendSeconds = 0.0f);
 
-	// アニメーション再生中か
-	// index	: 指定のアニメーションが再生中か調べる-1ですべてから調べる
-	bool IsPlayAnimation(int index = -1)const;
-
 	// アニメーション計算処理
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, ModelResource::Node& nodePose) const;
 	// アニメーション計算処理
@@ -194,6 +190,12 @@ public:
 	/// <returns></returns>
 	bool IsPlaying() const { return _isPlaying; }
 	/// <summary>
+	/// アニメーション再生中か
+	/// index	: 指定のアニメーションが再生中か調べる-1ですべてから調べる
+	/// </summary>
+	/// <returns></returns>
+	bool IsPlaying(int index)const;
+	/// <summary>
 	/// ループ再生するか
 	/// </summary>
 	/// <returns></returns>
@@ -204,7 +206,7 @@ public:
 	/// <returns></returns>
 	bool IsPaused() const { return _isPaused; }
 	/// <summary>
-	/// ブレンド処理をするか
+	/// ブレンド処理をしているか
 	/// </summary>
 	/// <returns></returns>
 	bool IsBlending() const { return _isBlending; }

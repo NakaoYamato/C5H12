@@ -21,7 +21,7 @@ void TitleWyvernActor::OnStart()
 {
 	if (auto animator = _animator.lock())
 	{
-		if (!animator->IsPlayAnimation())
+		if (!animator->IsPlaying())
 		{
 			animator->PlayAnimation("Idle03Shake", true);
         }

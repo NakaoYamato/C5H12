@@ -84,6 +84,7 @@ public:
 	bool IsDrawingWeapon() const { return _isDrawingWeapon; }
 	float GetAttackMotionFactor() const { return _attackMotionFactor; }
 	int GetChargeLevel() const { return _chargeLevel; }
+	float GetTimeSinceLastMove() const { return _timeSinceLastMove; }
 
 	void SetMovement(const Vector2& movement) { _movement = movement; }
 	void SetIsMoving(bool isMoving) { _isMoving = isMoving; }
@@ -164,6 +165,8 @@ private:
 	float _attackMotionFactor = 1.0f;
 	// 溜め段階
 	int _chargeLevel = 0;
+	// 最後に移動してからの時間
+	float _timeSinceLastMove = 0.0f;
 #pragma endregion
 
 	// ダッシュ時の回転補正値

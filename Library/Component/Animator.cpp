@@ -327,7 +327,7 @@ void Animator::PlayAnimation(std::string name, bool loop, float blendSeconds)
 }
 
 // アニメーション再生中か
-bool Animator::IsPlayAnimation(int index) const
+bool Animator::IsPlaying(int index) const
 {
     if (index != -1)
     {

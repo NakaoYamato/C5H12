@@ -72,7 +72,7 @@ void WyvernStateMachine::Execute(float elapsedTime)
     _callLookAtTarget = false;
 
     // アニメーションイベント取得
-    if (GetAnimator()->IsPlayAnimation())
+    if (GetAnimator()->IsPlaying())
     {
         auto& animationEvent = GetAnimator()->GetAnimationEvent();
         int massageListSize = (int)animationEvent.GetMessageList().size();

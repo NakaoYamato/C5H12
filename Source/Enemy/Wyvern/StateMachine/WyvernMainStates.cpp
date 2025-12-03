@@ -10,7 +10,7 @@
 void WyvernThreatState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -22,7 +22,7 @@ void WyvernThreatState::OnExecute(float elapsedTime)
 void WyvernRoarState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -98,7 +98,7 @@ void WyvernTurnState::OnEnter()
 void WyvernTurnState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -131,7 +131,7 @@ void WyvernToTargetState::OnExecute(float elapsedTime)
 	}
 
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -171,7 +171,7 @@ void WyvernBiteAttackState::OnEnter()
 void WyvernBiteAttackState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -298,7 +298,7 @@ void WyvernClawAttackState::OnExecute(float elapsedTime)
 	}
 
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -342,7 +342,7 @@ void WyvernTailAttackState::OnEnter()
 void WyvernTailAttackState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -365,7 +365,7 @@ void WyvernChargeAttackState::OnEnter()
 void WyvernChargeAttackState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		// 現在の位置がターゲット位置を越しているか判定
 		auto& currentPosition = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
@@ -405,7 +405,7 @@ void WyvernBackStepState::OnExecute(float elapsedTime)
 	_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -445,7 +445,7 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 	}
 
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -491,7 +491,7 @@ void WyvernFireBallAttackState::OnExecute(float elapsedTime)
 	}
 
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -545,7 +545,7 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 		_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 	}
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -612,7 +612,7 @@ void WyvernDamageState::OnEnter()
 void WyvernDamageState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているときステートの終了
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		_owner->GetBase().EndState();
 	}
@@ -639,7 +639,7 @@ namespace WyvernDownSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了しているとき次の状態へ遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 			{
 				_owner->GetBase().ChangeSubState(_nextState);
 			}
@@ -690,7 +690,7 @@ namespace WyvernDownSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了しているときステートの終了
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 			{
 				_owner->GetBase().EndState();
 			}

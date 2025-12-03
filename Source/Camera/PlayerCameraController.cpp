@@ -10,6 +10,9 @@ void PlayerCameraController::Start()
     _stateController = _playerActor->GetComponent<StateController>();
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 
+    // 初期設定
+    GetActor()->GetTransform().SetAngle(_stateController.lock()->GetActor()->GetTransform().GetAngle());
+
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform =
@@ -18,11 +21,13 @@ void PlayerCameraController::Start()
     // 回転行列から前方向ベクトルを取り出す
     DirectX::XMVECTOR Front = Transform.r[2];
     Vector3 front{};
-    DirectX::XMStoreFloat3(&front, Front);
-    // 初期設定
+    DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(Front));
+
     _currentFocus = _playerActor->GetTransform().GetPosition();
     _currentFocus.y += _focusVerticalOffset;
-    GetActor()->GetTransform().SetPosition(_currentFocus - front * _cameraDistance);
+    _currentEye = _currentFocus - front * _cameraDistance;
+    GetActor()->GetTransform().SetPosition(_currentEye);
+    GetActor()->GetScene()->GetMainCamera()->SetLookAt(_currentEye, _currentFocus, Vector3::Up);
 }
 
 void PlayerCameraController::DrawGui()
@@ -69,6 +74,10 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
             moveY = 0.0f;
         }
     }
+
+    // フェード中は動かせないようにする
+	if (GetActor()->GetScene()->GetFade()->IsFading())
+		return;
 
     // 抜刀状態か確認
     bool isCombat = false;

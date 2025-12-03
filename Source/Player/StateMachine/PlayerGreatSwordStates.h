@@ -58,7 +58,6 @@ public:
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
 private:
-	// æs“ü—Í‘JˆÚæ
 	std::string _nextStateName = "";
 	// ‰ñ“]‘¬“x
 	float _rotationSpeed = 0.07f;
@@ -78,7 +77,6 @@ public:
 	void OnExecute(float elapsedTime) override;
 	void OnExit() override {}
 private:
-	// æs“ü—Í‘JˆÚæ
 	std::string _nextStateName = "";
 };
 #pragma endregion

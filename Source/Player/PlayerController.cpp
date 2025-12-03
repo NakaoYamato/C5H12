@@ -136,7 +136,7 @@ void PlayerController::Update(float elapsedTime)
 	_callChargingEvent = false;
 
 	// アニメーションイベント取得
-	if (animator->IsPlayAnimation())
+	if (animator->IsPlaying())
 	{
 		auto& animationEvent = animator->GetAnimationEvent();
 		int massageListSize = (int)animationEvent.GetMessageList().size();
@@ -210,6 +210,12 @@ void PlayerController::Update(float elapsedTime)
 			material.SetParameter("bodyColor", color);
 		}
 	}
+
+	// 最後に移動してからの時間
+	if (_isMoving)
+		_timeSinceLastMove = 0.0f;
+	else
+		_timeSinceLastMove += elapsedTime;
 }
 
 // 3D描画後の描画処理

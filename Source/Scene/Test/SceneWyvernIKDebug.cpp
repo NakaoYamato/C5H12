@@ -272,7 +272,7 @@ void SceneWyvernIKDebug::UpdateAnimationIK(float elapsedTime)
 	auto& midNode = model->GetPoseNodes()[midNodeIndex];
 	auto& endNode = model->GetPoseNodes()[endNodeIndex];
 
-	if (!_animator.lock()->IsPlayAnimation())
+	if (!_animator.lock()->IsPlaying())
 	{
 		_animator.lock()->PlayAnimation(
 			u8"AttackWingFistLeft",

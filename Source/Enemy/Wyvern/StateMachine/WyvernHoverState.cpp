@@ -49,7 +49,7 @@ void WyvernHoverToTargetState::OnExecute(float elapsedTime)
 	);
 
 	// アニメーションが終了しているとき滞空状態へ遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetBase().ChangeState("HoverIdle");
 }
 
@@ -120,7 +120,7 @@ void WyvernHoverTurnState::OnEnter()
 void WyvernHoverTurnState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき滞空状態へ遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetBase().ChangeState("HoverIdle");
 }
 
@@ -184,7 +184,7 @@ void WyvernHoverFireBallAttackState::OnExecute(float elapsedTime)
 		_owner->GetEnemy()->LookAtTarget(targetPosition, elapsedTime, rotationSpeed);
 	}
 	// アニメーションが終了しているとき滞空状態へ遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetBase().ChangeState("HoverIdle");
 }
 
@@ -206,7 +206,7 @@ void WyvernHoverClawAttackState::OnEnter()
 void WyvernHoverClawAttackState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき滞空状態へ遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetBase().ChangeState("HoverIdle");
 }
 
@@ -234,7 +234,7 @@ namespace WyvernHitFallSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了しているとき次の状態へ遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 			{
 				_owner->GetBase().ChangeSubState(u8"HitFallLoop");
 			}
@@ -277,7 +277,7 @@ namespace WyvernHitFallSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了しているとき次の状態へ遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 			{
 				_owner->ChangeState(u8"Down", u8"DownRLoop");
 			}
@@ -319,7 +319,7 @@ void WyvernLandState::OnEnter()
 void WyvernLandState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき待機状態へ遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetBase().ChangeState("Idle");
 }
 

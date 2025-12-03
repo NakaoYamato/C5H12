@@ -11,7 +11,14 @@ void PlayerNonCombatIdleState::OnExecute(float elapsedTime)
 {
 	// 抜刀遷移
 	if (_owner->GetPlayer()->IsAttack())
-		_owner->GetStateMachine().ChangeState("ToCombat");
+	{
+		// 移動しながらか、最後の移動からの経過時間が一定値以下なら抜刀攻撃
+		if (_owner->GetPlayer()->IsMoving() ||
+			_owner->GetPlayer()->GetTimeSinceLastMove() <= 0.4f)
+			_owner->GetStateMachine().ChangeState("CombatAttack1");
+		else
+			_owner->GetStateMachine().ChangeState("ToCombat");
+	}
 	// 移動
 	else if (_owner->GetPlayer()->IsMoving())
 		_owner->GetStateMachine().ChangeState("Walk");
@@ -59,7 +66,7 @@ void PlayerNonCombatTurnState::OnEnter()
 void PlayerNonCombatTurnState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		// 待機に移行
 		_owner->GetStateMachine().ChangeState("Idle");
@@ -130,7 +137,7 @@ namespace NonCombatWalkSubState
 			// 移動方向に向く
 			_owner->RotationMovement(elapsedTime);
 			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeSubState("Walking");
 			// 移動していなければ終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
@@ -204,7 +211,7 @@ namespace NonCombatWalkSubState
 			if (_owner->GetPlayer()->IsMoving())
 				_owner->GetStateMachine().ChangeSubState("Walking");
 			// アニメーションが終了していたら遷移
-			else if (!_owner->GetAnimator()->IsPlayAnimation())
+			else if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeState("Idle");
 		}
 	};
@@ -226,12 +233,14 @@ void PlayerNonCombatWalkState::OnEnter()
 
 void PlayerNonCombatWalkState::OnExecute(float elapsedTime)
 {
-	// 移動があって、ダッシュ入力があれば走りへ遷移
+	// 走り始めではなく、移動があって、ダッシュ入力があれば走りへ遷移
 	if (_owner->GetPlayer()->IsMoving() && _owner->GetPlayer()->IsDash())
 	{
-		_owner->GetStateMachine().ChangeState("Run");
 		if (std::string(this->GetSubStateName()) != "WalkStart")
+		{
+			_owner->GetStateMachine().ChangeState("Run");
 			_owner->GetStateMachine().ChangeSubState("Running");
+		}
 	}
 
 	// 回避移行
@@ -243,8 +252,9 @@ void PlayerNonCombatWalkState::OnExecute(float elapsedTime)
 	// 攻撃移行
 	else if (_owner->GetPlayer()->IsAttack())
 	{
-		// 移動していたら攻撃へ
-		if (_owner->GetPlayer()->IsMoving())
+		// 移動しながらか、最後の移動からの経過時間が一定値以下なら抜刀攻撃
+		if (_owner->GetPlayer()->IsMoving() ||
+			_owner->GetPlayer()->GetTimeSinceLastMove() <= 0.4f)
 			_owner->GetStateMachine().ChangeState("CombatAttack1");
 		// 移動していなければ抜刀
 		else
@@ -272,7 +282,7 @@ namespace NonCombatRunSubState
 		RunStartSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"RunStart",
-				u8"RunFastStart", 0.2f,
+				u8"RunStartF0", 0.2f,
 				false,
 				true)
 		{
@@ -283,7 +293,7 @@ namespace NonCombatRunSubState
 			// 移動方向に向く
 			_owner->RotationMovement(_owner->GetPlayer()->GetDashRotationFactor() * elapsedTime);
 			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeSubState("Running");
 			// 移動していなければ終了に遷移
 			else if (!_owner->GetPlayer()->IsMoving())
@@ -297,7 +307,7 @@ namespace NonCombatRunSubState
 		RunningSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"Running",
-				u8"RunFastLoop", 0.2f,
+				u8"RunFastLoop", 1.0f,
 				true,
 				true)
 		{
@@ -364,7 +374,7 @@ namespace NonCombatRunSubState
 		RunStopSubState(PlayerStateMachine* stateMachine) :
 			PlayerSSB(stateMachine,
 				"RunStop",
-				u8"RunFastStop", 0.2f,
+				u8"RunFastStop", 0.5f,
 				false,
 				true)
 		{
@@ -378,7 +388,7 @@ namespace NonCombatRunSubState
 			if (_owner->GetPlayer()->IsMoving())
 				_owner->GetStateMachine().ChangeSubState("Running");
 			// アニメーションが終了していたら遷移
-			else if (!_owner->GetAnimator()->IsPlayAnimation())
+			else if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeState("Idle");
 		}
 	};
@@ -398,7 +408,7 @@ namespace NonCombatRunSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeSubState("Running");
 		}
 		void OnExit() override
@@ -432,7 +442,7 @@ namespace NonCombatRunSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeSubState("Running");
 		}
 		void OnExit() override
@@ -580,7 +590,7 @@ void PlayerNonCombatEvadeState::OnEnter()
 void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了していたら遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetStateMachine().ChangeState("Idle");
 	else if (_owner->GetPlayer()->CallCancelEvent())
 	{
@@ -620,7 +630,7 @@ void PlayerNonCombatToCombatState::OnExecute(float elapsedTime)
 
 	}
 	// アニメーションが終了していたら遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetStateMachine().ChangeState("CombatIdle");
 }
 #pragma endregion
@@ -676,7 +686,7 @@ void PlayerNonCombatHitState::OnEnter()
 void PlayerNonCombatHitState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了していたら遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetStateMachine().ChangeState("Idle");
 }
 
@@ -740,7 +750,7 @@ void PlayerNonCombatHitKnockDownState::OnEnter()
 void PlayerNonCombatHitKnockDownState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了していたら遷移
-	if (!_owner->GetAnimator()->IsPlayAnimation())
+	if (!_owner->GetAnimator()->IsPlaying())
 		_owner->GetStateMachine().ChangeState("Idle");
 }
 
@@ -774,7 +784,7 @@ namespace PlayerNonCombatDownSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了していて、移動入力があれば遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 			{
 				if (_owner->GetPlayer()->IsMoving())
 				{
@@ -800,7 +810,7 @@ namespace PlayerNonCombatDownSubState
 		void OnExecute(float elapsedTime) override
 		{
 			// アニメーションが終了していたら遷移
-			if (!_owner->GetAnimator()->IsPlayAnimation())
+			if (!_owner->GetAnimator()->IsPlaying())
 				_owner->GetStateMachine().ChangeState("Idle");
 			// キャンセルイベントが呼ばれたら
 			if (_owner->GetPlayer()->CallCancelEvent())

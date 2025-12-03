@@ -22,8 +22,15 @@ public:
 	virtual void OnExit() = 0;
 	// GUi描画
 	virtual void DrawGui() {};
+
+	// 親ステート設定
+	virtual void SetParentState(StateBase* parentState)
+	{
+		_parentState = parentState;
+	}
 protected:
 	T* _owner;
+	StateBase* _parentState = nullptr;
 };
 
 template<typename T>
@@ -83,6 +90,7 @@ public:
 	// サブステート登録
 	virtual void RegisterSubState(std::shared_ptr<StateBase<T>> state)
 	{
+		state->SetParentState(this);
 		_stateMap.insert(std::make_pair(state->GetName(), state));
 	}
 	// サブステートの名前番号取得

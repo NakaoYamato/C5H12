@@ -53,6 +53,8 @@ public:
 	bool GetIsUpdate() const { return _isUpdate; }
 	// ターゲットを更新するかどうかを取得
 	bool GetIsUpdateTarget() const { return _isUpdateTarget; }
+	// 縄張り中心座標を取得
+    const Vector3& GetTerritoryCenter() const { return _territoryCenter; }
 
 	// 状態を設定
 	void SetStatus(Status status) { 
@@ -77,6 +79,8 @@ public:
 	void SetIsUpdate(bool isUpdate) { _isUpdate = isUpdate; }
 	// ターゲットを更新するかどうかを設定
 	void SetIsUpdateTarget(bool isUpdateTarget) { _isUpdateTarget = isUpdateTarget; }
+	// 縄張り中心座標を設定
+    void SetTerritoryCenter(const Vector3& center) { _territoryCenter = center; }
 #pragma endregion
 
 private:
@@ -109,4 +113,7 @@ private:
 	bool _isUpdate = true;
 	// ターゲットを更新するかどうか
 	bool _isUpdateTarget = true;
+
+	// 縄張り中心座標
+    Vector3 _territoryCenter = Vector3::Zero;
 };

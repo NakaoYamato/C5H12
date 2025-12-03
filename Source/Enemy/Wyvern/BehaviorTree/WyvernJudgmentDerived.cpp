@@ -131,3 +131,11 @@ bool WyvernHoverEndJudgment::Judgment()
 		_owner->GetStateMachine()->GetWyvern()->GetFlightTimer() >= _owner->GetStateMachine()->GetWyvern()->GetFlightDuration();
 }
 
+// ターゲットが近距離か判定
+bool WyvernTargetNearJudgment::Judgment()
+{
+	auto vec = _owner->GetCombatStatus()->GetToTargetVec();
+	float length = vec.Length();
+	// 現在の位置とターゲットの位置の距離から近距離か判定
+    return length < _nearDistance;
+}

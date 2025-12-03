@@ -6,14 +6,46 @@
 // GUI描画
 void ColliderBase::DrawGui()
 {
-    std::vector<const char*> layerNames;
-	for (auto layer : magic_enum::enum_values<CollisionLayer>())
+	if (ImGui::TreeNode(u8"レイヤー"))
 	{
-		layerNames.push_back(magic_enum::enum_name(layer).data());
+		for (auto layer : magic_enum::enum_values<CollisionLayer>())
+		{
+			bool isChecked = (static_cast<unsigned int>(_layer) & static_cast<unsigned int>(layer));
+			if (ImGui::Checkbox(magic_enum::enum_name(layer).data(), &isChecked))
+			{
+				unsigned int layerValue = static_cast<unsigned int>(layer);
+				if (isChecked)
+				{
+                    _layer = static_cast<CollisionLayer>(static_cast<unsigned int>(_layer) | layerValue);
+				}
+				else
+				{
+                    _layer = static_cast<CollisionLayer>(static_cast<unsigned int>(_layer) & ~layerValue);
+				}
+			}
+		}
+        ImGui::TreePop();
 	}
-	int layer = static_cast<int>(_layer);
-	ImGui::Combo(u8"レイヤー", &layer, layerNames.data(), static_cast<int>(layerNames.size()));
-	_layer = static_cast<CollisionLayer>(layer);
+	if (ImGui::TreeNode(u8"レイヤーマスク"))
+	{
+		for (auto layer : magic_enum::enum_values<CollisionLayer>())
+		{
+			bool isChecked = (_layerMask & static_cast<unsigned int>(layer)) != 0;
+			if (ImGui::Checkbox(magic_enum::enum_name(layer).data(), &isChecked))
+			{
+				unsigned int layerValue = static_cast<unsigned int>(layer);
+				if (isChecked)
+				{
+					_layerMask |= layerValue;
+				}
+				else
+				{
+					_layerMask &= ~layerValue;
+				}
+			}
+		}
+		ImGui::TreePop();
+    }
 	ImGui::Checkbox(u8"有効", &_isActive);
 	ImGui::Checkbox(u8"トリガー", &_isTrigger);
 }

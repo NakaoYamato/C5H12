@@ -6,6 +6,17 @@
 
 #include <imgui.h>
 
+#pragma region 待機
+void WyvernIdleState::OnExecute(float elapsedTime)
+{
+	// アニメーションが終了しているときステートの終了
+	if (!_owner->GetAnimator()->IsPlaying())
+	{
+		_owner->GetBase().EndState();
+	}
+}
+#pragma endregion
+
 #pragma region 威嚇
 void WyvernThreatState::OnExecute(float elapsedTime)
 {
@@ -128,6 +139,12 @@ void WyvernToTargetState::OnExecute(float elapsedTime)
 	{
 		_owner->GetBase().EndState();
 		return;
+	}
+    // 極近距離ならステートの終了
+	if (length < attackRange / 2.0f)
+	{
+		_owner->GetBase().EndState();
+        return;
 	}
 
 	// アニメーションが終了しているときステートの終了

@@ -14,6 +14,9 @@ void CombatStatusController::Start()
 	{
 		_metaAI = metaAIActor->GetComponent<MetaAI>();
 	}
+
+	// 現在の位置を縄張りとする
+    _territoryCenter = GetActor()->GetTransform().GetWorldPosition();
 }
 
 // 更新処理
@@ -55,6 +58,7 @@ void CombatStatusController::DrawGui()
 	ImGui::InputFloat(u8"検索範囲", &_searchRange);
 	ImGui::InputFloat(u8"戦闘継続範囲", &_combatRange);
 	ImGui::Checkbox(u8"更新する", &_isUpdate);
+    ImGui::DragFloat3(u8"縄張り中心座標", &_territoryCenter.x, 0.1f);
 }
 
 // 現在位置からターゲットまでのベクトル取得
@@ -84,8 +88,12 @@ void CombatStatusController::UpdateNormalStatus(float elapsedTime)
 		{
 			SetTargetPosition(targetable->GetActor()->GetTransform().GetWorldPosition());
 			SetStatus(CombatStatusController::Status::Alert);
+			return;
 		}
 	}
+
+	// 縄張りをターゲットにする
+    SetTargetPosition(_territoryCenter);
 }
 
 // 警戒状態の更新

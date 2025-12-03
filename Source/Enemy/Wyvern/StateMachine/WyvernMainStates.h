@@ -17,6 +17,8 @@ public:
 			true	// applyRotation
 			) {}
 	const char* GetName() const override { return "Idle"; };
+	// Àsˆ—
+	void OnExecute(float elapsedTime) override;
 };
 #pragma endregion
 

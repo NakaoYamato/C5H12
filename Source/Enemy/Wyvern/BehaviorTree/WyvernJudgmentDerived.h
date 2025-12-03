@@ -135,3 +135,17 @@ public:
 private:
 	float _requiredStamina;
 };
+
+// ターゲットが近距離か判定
+class WyvernTargetNearJudgment : public BehaviorJudgmentBase<WyvernBehaviorTree>
+{
+	public:
+	WyvernTargetNearJudgment(WyvernBehaviorTree* owner, float nearDistance) :
+		BehaviorJudgmentBase(owner),
+		_nearDistance(nearDistance) {
+	};
+	// 判定
+    bool Judgment() override;
+private:
+	float _nearDistance;
+};

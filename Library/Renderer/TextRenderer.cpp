@@ -11,6 +11,11 @@ void TextRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc)
 	_spriteFonts[static_cast<int>(FontType::MSGothic)] = std::make_unique<DirectX::SpriteFont>(device, L"./Data/Font/MSGothic.spritefont");
 
 	_fontScale[static_cast<int>(FontType::MSGothic)] = 60.0f;
+
+	// シェーダ生成
+	_outlineShader.Load(device, "./Data/Shader/HLSL/Sprite/Font/OutlineFontPS.cso");
+	// 定数バッファ生成
+	_outlineCBuffer.Create(device, sizeof(CbOutline));
 }
 
 /// テキスト描画
@@ -112,10 +117,24 @@ void TextRenderer::Draw3D(Text3DDrawData data)
 }
 
 /// 描画実行
-void TextRenderer::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection,
-	float viewportWidth, float viewportHeight)
+void TextRenderer::Render(RenderContext& rc, float viewportWidth, float viewportHeight)
 {
-	_spriteBatch->Begin();
+	ID3D11DeviceContext* dc = rc.deviceContext;
+	const DirectX::XMFLOAT4X4& view = rc.camera->GetView();
+	const DirectX::XMFLOAT4X4& projection = rc.camera->GetProjection();
+
+	_spriteBatch->Begin(
+		DirectX::SpriteSortMode_Deferred,
+		nullptr, nullptr, nullptr, nullptr,
+		[&] 
+		{
+			// ピクセルシェーダを設定
+			dc->PSSetShader(_outlineShader.Get(), nullptr, 0);
+
+			// 定数バッファをスロット2に設定
+			_outlineCBuffer.Update(dc, &_outlineCbData);
+			dc->PSSetConstantBuffers(2, 1, _outlineCBuffer.GetAddressOf());
+		});
 	for (const auto& drawData : _textDrawDatas)
 	{
 		auto& spriteFont = _spriteFonts[static_cast<int>(drawData.type)];

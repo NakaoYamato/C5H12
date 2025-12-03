@@ -795,6 +795,9 @@
     <ClCompile Include="Source\Item\ItemData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Shader\Sprite\Outline\SpriteOutlineShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1667,6 +1670,9 @@
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestMenuControllerBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Shader\Sprite\Outline\SpriteOutlineShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1806,5 +1812,7 @@
     <FxCompile Include="HLSL\PrimitiveRenderer\Locus\PlayerSwordLocusPS.hlsl" />
     <FxCompile Include="HLSL\Model\Player\PlayerGBPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteScrollPS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\Font\OutlineFontPS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\SpriteOutlinePS.hlsl" />
   </ItemGroup>
 </Project>

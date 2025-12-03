@@ -296,6 +296,7 @@
     <ClCompile Include="Library\Shader\Model\Test\TestShader.cpp" />
     <ClCompile Include="Library\Shader\Primitive\Locus\LocusPrimitiveShader.cpp" />
     <ClCompile Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.cpp" />
+    <ClCompile Include="Library\Shader\Sprite\Outline\SpriteOutlineShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\SpriteShaderResource.cpp" />
@@ -584,6 +585,7 @@
     <ClInclude Include="Library\Shader\Primitive\PrimitiveShaderBase.h" />
     <ClInclude Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.h" />
     <ClInclude Include="Library\Shader\ShaderResourceBase.h" />
+    <ClInclude Include="Library\Shader\Sprite\Outline\SpriteOutlineShader.h" />
     <ClInclude Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.h" />
     <ClInclude Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.h" />
     <ClInclude Include="Library\Shader\Sprite\SpriteShaderBase.h" />
@@ -999,7 +1001,19 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="HLSL\Sprite\Font\OutlineFontPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="HLSL\Sprite\FullscreenQuadPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Sprite\SpriteOutlinePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

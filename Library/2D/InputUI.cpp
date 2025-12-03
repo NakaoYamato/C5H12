@@ -37,6 +37,15 @@ void InputUI::Initialize()
 
 	_gamePadSprite.LoadTexture(L"Data/Texture/UI/Input/XboxInputUI.png", Sprite::CenterCenter);
 	_keybordSprite.LoadTexture(L"Data/Texture/UI/Input/KeyboardInputUI.png", Sprite::CenterCenter);
+	// シェーダ設定
+	_gamePadSprite.GetMaterial().SetShaderName("Outline");
+	_gamePadSprite.GetMaterial().SetParameter("outlineColor", Vector4(Vector4::Black));
+	_gamePadSprite.GetMaterial().SetParameter("outlineScale", Vector2(2.5f, 2.5f));
+
+	_keybordSprite.GetMaterial().SetShaderName("Outline");
+	_keybordSprite.GetMaterial().SetParameter("outlineColor", Vector4(Vector4::Black));
+	_keybordSprite.GetMaterial().SetParameter("outlineScale", Vector2(2.5f, 2.5f));
+
 
 	auto SetData = [&](
 		std::unordered_map<int, SprData>& sprData,
@@ -214,7 +223,16 @@ void InputUI::DrawGui()
 	{
 		if (ImGui::Begin(u8"入力UI設定", &_showGui))
 		{
-			_gamePadSprite.DrawGui();
+			if (ImGui::TreeNode(u8"キーボード用スプライトデータ"))
+			{
+				_keybordSprite.DrawGui();
+				ImGui::TreePop();
+			}
+			if (ImGui::TreeNode(u8"ゲームパッド用スプライトデータ"))
+			{
+				_gamePadSprite.DrawGui();
+				ImGui::TreePop();
+			}
 		}
 
 		//if (ImGui::Button("add"))

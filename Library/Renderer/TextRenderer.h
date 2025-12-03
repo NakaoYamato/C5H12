@@ -4,6 +4,9 @@
 #include "../../External/DirectXTK-main/SpriteFont.h"
 
 #include "../../Library/Math/Vector.h"
+#include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/Graphics/Shader.h"
+#include "../../Library/Graphics/ConstantBuffer.h"
 
 #include <memory>
 #include <vector>
@@ -45,6 +48,14 @@ public:
 		Vector2			scale		= Vector2::One;			// スケール
 
 		void DrawGui(const char* label);
+	};
+
+	struct CbOutline
+	{
+		Vector4 outlineColor = Vector4::Black;
+		Vector2	outlineScale = Vector2::One;
+		float intensity = 1.0f;
+		float padding = 0.0f;
 	};
 
 public:
@@ -140,8 +151,7 @@ public:
 	/// <summary>
 	/// 描画実行
 	/// </summary>
-	void Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection, 
-		float viewportWidth, float viewportHeight);
+	void Render(RenderContext& rc, float viewportWidth, float viewportHeight);
 
 private:
 	std::unique_ptr<DirectX::SpriteFont>	_spriteFonts[static_cast<int>(FontType::FontTypeMax)];
@@ -152,4 +162,9 @@ private:
 	std::vector<Text3DDrawData> _text3DDrawDatas;
 	// 各フォントの大きさ
 	float _fontScale[static_cast<int>(FontType::FontTypeMax)]{};
+
+	// 輪郭シェーダー
+	PixelShader		_outlineShader;
+	ConstantBuffer	_outlineCBuffer;
+	CbOutline _outlineCbData;
 };

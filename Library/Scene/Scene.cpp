@@ -474,7 +474,7 @@ void Scene::Render()
         _inputUI.Render(rc, GetTextureRenderer());
 
         // テキスト描画
-        _textRenderer.Render(rc.camera->GetView(), rc.camera->GetProjection(), screenWidth, screenHeight);
+        _textRenderer.Render(rc, screenWidth, screenHeight);
 
 		// フェード描画
 		Vector4 fadeColor = Vector4::Black;

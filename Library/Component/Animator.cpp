@@ -113,6 +113,7 @@ void Animator::DrawGui()
     int option = static_cast<int>(_rootMotionOption);
     if (ImGui::Combo(u8"ルートモーションオプション", &option, optionNames, _countof(optionNames)))
         _rootMotionOption = static_cast<RootMotionOption>(option);
+	ImGui::DragFloat(u8"ルートモーション影響度", &_rootMotionInfluence, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat3(u8"移動量オフセット", &_rootOffset.x, 0.01f, -100.0f, 100.0f);
 
     if (_animationIndex >= 0)
@@ -756,7 +757,10 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         // 移動量取得
         // デバッグでF5を押しているときは移動量を取得しない
         if (!Debug::Input::IsActive(DebugInput::BTN_F5))
-            _rootMovement = currentPosition - oldPosition;
+        {
+            // 影響度を反映
+            _rootMovement = (currentPosition - oldPosition) * _rootMotionInfluence;
+        }
     }
     else
     {
@@ -779,7 +783,10 @@ void Animator::CalcRootMotion(float elapsedTime, std::vector<ModelResource::Node
         // 移動量取得
         // デバッグでF5を押しているときは移動量を取得しない
         if (!Debug::Input::IsActive(DebugInput::BTN_F5))
-            _rootMovement = (currentPosition - startPosition) + (endPosition - oldPosition);
+        {
+            // 影響度を反映
+            _rootMovement = ((currentPosition - startPosition) + (endPosition - oldPosition)) * _rootMotionInfluence;
+        }
     }
 
     // ポーズノードの移動量を取り除く

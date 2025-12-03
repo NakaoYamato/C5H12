@@ -78,6 +78,78 @@ public:
 	Quaternion RemoveRootRotation(int rootIndex);
 #pragma endregion
 
+#pragma region ルートモーション
+	/// <summary>
+	/// ルートモーションを使うか
+	/// </summary>
+	/// <returns></returns>
+	bool IsUseRootMotion() const { return _useRootMotion; }
+	/// <summary>
+	/// ルートモーション使用時にルートの移動量を取り除くか
+	/// </summary>
+	/// <returns></returns>
+	bool IsRemoveRootMovement() const { return _removeRootMovement; }
+	/// <summary>
+	/// ルートモーション使用時にルートの回転量を取り除くか
+	/// </summary>
+	/// <returns></returns>
+	bool IsRemoveRootRotation() const { return _removeRootRotation; }
+	/// <summary>
+	/// ルートモーションの設定取得
+	/// </summary>
+	/// <returns></returns>
+	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
+
+	/// <summary>
+	///	ルートモーションで使うノード番号設定
+	/// </summary>
+	/// <param name="index"></param>
+	void SetRootNodeIndex(int index) { _rootNodeIndex = index; }
+	/// <summary>
+	/// ルートモーションで使うノード番号設定
+	/// </summary>
+	/// <param name="key"></param>
+	void SetRootNodeIndex(const std::string& key);
+	/// <summary>
+	/// ルートモーションの設定
+	/// </summary>
+	/// <param name="option"></param>
+	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
+
+	/// <summary>
+	/// ルートモーション影響度設定
+	/// </summary>
+	/// <param name="influence"></param>
+	void SetRootMotionInfluence(float influence) { _rootMotionInfluence = influence; }
+	/// <summary>
+	/// ルートモーション使用設定
+	/// </summary>
+	/// <param name="isUseRootMotion"></param>
+	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
+	/// <summary>
+	/// ルートモーションでルートの移動量を取り除くか設定
+	/// </summary>
+	/// <param name="isRemoveRootMovement"></param>
+	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
+	/// <summary>
+	/// ルートモーションでルートの回転量を取り除くか設定
+	/// </summary>
+	/// <param name="isRemoveRootRotation"></param>
+	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
+	/// <summary>
+	/// ルートモーションのオフセット設定
+	/// </summary>
+	/// <param name="offset"></param>
+	void SetRootOffset(const Vector3& offset) { _rootOffset = offset; }
+
+	/// <summary>
+	/// ルートモーションによる移動量取得
+	/// </summary>
+	/// <returns></returns>
+	const Vector3& GetRootMovement() const { return _rootMovement; }
+#pragma endregion
+
+
 #pragma region アニメーションイベント
 	/// <summary>
 	/// 再生中のアニメーションのイベントを取得
@@ -136,47 +208,12 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	bool IsBlending() const { return _isBlending; }
-	/// <summary>
-	/// ルートモーションを使うか
-	/// </summary>
-	/// <returns></returns>
-	bool IsUseRootMotion() const { return _useRootMotion; }
-	/// <summary>
-	/// ルートモーション使用時にルートの移動量を取り除くか
-	/// </summary>
-	/// <returns></returns>
-	bool IsRemoveRootMovement() const { return _removeRootMovement; }
-	/// <summary>
-	/// ルートモーション使用時にルートの回転量を取り除くか
-	/// </summary>
-	/// <returns></returns>
-	bool IsRemoveRootRotation() const { return _removeRootRotation; }
-	/// <summary>
-	/// ルートモーションの設定取得
-	/// </summary>
-	/// <returns></returns>
-	RootMotionOption GetRootMotionOption() const { return _rootMotionOption; }
 
 	/// <summary>
 	/// アニメーション速度設定
 	/// </summary>
 	/// <param name="speed"></param>
 	void SetAnimationSpeed(float speed) { _animationSpeed = speed; }
-	/// <summary>
-	///	ルートモーションで使うノード番号設定
-	/// </summary>
-	/// <param name="index"></param>
-	void SetRootNodeIndex(int index) { _rootNodeIndex = index; }
-	/// <summary>
-	/// ルートモーションで使うノード番号設定
-	/// </summary>
-	/// <param name="key"></param>
-	void SetRootNodeIndex(const std::string& key);
-	/// <summary>
-	/// ルートモーションの設定
-	/// </summary>
-	/// <param name="option"></param>
-	void SetRootMotionOption(RootMotionOption option) { _rootMotionOption = option; }
 	/// <summary>
 	/// ループ再生設定
 	/// </summary>
@@ -187,26 +224,6 @@ public:
 	/// </summary>
 	/// <param name="isPaused"></param>
 	void SetIsPaused(bool isPaused) { _isPaused = isPaused; }
-	/// <summary>
-	/// ルートモーション使用設定
-	/// </summary>
-	/// <param name="isUseRootMotion"></param>
-	void SetIsUseRootMotion(bool isUseRootMotion) { _useRootMotion = isUseRootMotion; }
-	/// <summary>
-	/// ルートモーションでルートの移動量を取り除くか設定
-	/// </summary>
-	/// <param name="isRemoveRootMovement"></param>
-	void SetIsRemoveRootMovement(bool isRemoveRootMovement) { _removeRootMovement = isRemoveRootMovement; }
-	/// <summary>
-	/// ルートモーションでルートの回転量を取り除くか設定
-	/// </summary>
-	/// <param name="isRemoveRootRotation"></param>
-	void SetIsRemoveRootRotation(bool isRemoveRootRotation) { _removeRootRotation = isRemoveRootRotation; }
-	/// <summary>
-	/// ルートモーションのオフセット設定
-	/// </summary>
-	/// <param name="offset"></param>
-	void SetRootOffset(const Vector3& offset) { _rootOffset = offset; }
 
 	/// <summary>
 	/// モデルをリセット
@@ -226,11 +243,6 @@ public:
 	/// <returns></returns>
 	std::string GetAnimationName() const;
 
-	/// <summary>
-	/// ルートモーションによる移動量取得
-	/// </summary>
-	/// <returns></returns>
-	const Vector3& GetRootMovement() const { return _rootMovement; }
 	/// <summary>
 	///	アニメーションイベント取得
 	/// </summary>
@@ -301,8 +313,6 @@ private:
 
 #pragma region パラメータ
 	int		_animationIndex = -1;
-	int		_rootNodeIndex = -1;
-	RootMotionOption _rootMotionOption = RootMotionOption::None;
 
 	float	_animationTimer = 0.0f;
 	float	_animationSpeed = 1.0f;
@@ -313,16 +323,24 @@ private:
 	bool	_isLoop			= false;
 	bool	_isPaused		= false;
 	bool	_isBlending		= false;
-	bool	_useRootMotion	= false;
+#pragma endregion
+
+#pragma region ルートモーション
+	int		_rootNodeIndex = -1;
+	RootMotionOption _rootMotionOption = RootMotionOption::None;
+	float	_rootMotionInfluence = 1.0f;
+
+	bool	_useRootMotion = false;
 	bool	_removeRootMovement = false;
 	bool	_removeRootRotation = false;
 
-	Vector3	_rootOffset		= Vector3::Zero;
-	Vector3	_rootMovement	= Vector3::Zero;
+	Vector3	_rootOffset = Vector3::Zero;
+	Vector3	_rootMovement = Vector3::Zero;
 
 	// アニメーションの最初の姿勢
 	ModelResource::Node _startRootNode{};
 #pragma endregion
+
 
 #pragma region イベント
 	AnimationEvent _animationEvent{};

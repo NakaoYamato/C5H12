@@ -4,6 +4,8 @@
 #include "../PlayerController.h"
 #include "../../Library/Algorithm/Converter.h"
 
+#define NON_TURN
+
 #pragma region 待機
 void PlayerNonCombatIdleState::OnExecute(float elapsedTime)
 {
@@ -99,6 +101,7 @@ namespace NonCombatWalkSubState
 		~WalkStartSubState() override {}
 		void OnExecute(float elapsedTime) override
 		{
+#ifndef NON_TURN
 			// プレイヤーの正面と移動方向から振り向きが必要か判定
 			bool isNeedTurn = false;
 			Vector2 movement = _owner->GetPlayer()->GetMovement();
@@ -122,6 +125,8 @@ namespace NonCombatWalkSubState
 					return;
 				}
 			}
+#endif // !NON_TURN
+
 			// 移動方向に向く
 			_owner->RotationMovement(elapsedTime);
 			// アニメーションが終了していたら遷移
@@ -152,6 +157,7 @@ namespace NonCombatWalkSubState
 			// 移動していなければ終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
 				_owner->GetStateMachine().ChangeSubState("WalkStop");
+#ifndef NON_TURN
 			// プレイヤーの正面と移動方向から振り向きが必要か判定
 			Vector2 movement = _owner->GetPlayer()->GetMovement();
 			if (movement.LengthSq() != 0.0f)
@@ -174,6 +180,7 @@ namespace NonCombatWalkSubState
 					return;
 				}
 			}
+#endif // !NON_TURN
 		}
 	};
 	// 歩き停止

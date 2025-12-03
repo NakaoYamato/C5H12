@@ -95,6 +95,8 @@ public:
 	// –¼‘Oæ“¾
 	const char* GetName() const override { return "EffectController"; }
 
+	// íœˆ
+	void OnDelete() override;
 	// XVˆ—
 	void Update(float elapsedTime) override;
 	// GUI•`‰æ

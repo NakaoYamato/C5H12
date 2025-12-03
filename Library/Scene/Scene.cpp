@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include "SceneManager.h"
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/PostProcess/PostProcessManager.h"
@@ -42,21 +43,7 @@ void Scene::Initialize()
         dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
     }
 
-	_primitive = std::make_unique<Primitive>(device);
-	_inputUI.Initialize();
-    // レンダラー作成
-    {
-        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-        _meshRenderer.Initialize(device);
-        _textureRenderer.Initialize(device);
-		_textRenderer.Initialize(device, dc);
-        _terrainRenderer.Initialize(device);
-        _particleRenderer.Initialize(device, dc);
-		_primitiveRenderer.Initialize(device);
-        _decalRenderer.Initialize(device, static_cast<UINT>(graphics.GetScreenWidth()), static_cast<UINT>(graphics.GetScreenHeight()));
-    }
-
-	// Effekseerエフェクトマネージャー作成
+    // Effekseerエフェクトマネージャー作成
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
         _effekseerEffectManager.Initialize(device, dc);
@@ -79,14 +66,11 @@ void Scene::Initialize()
     // Terrainの頂点書き出し
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-        _terrainRenderer.ExportVertex(GetRenderContext());
+        GetTerrainRenderer().ExportVertex(GetRenderContext());
     }
 
 	// コリジョンの初期化
     _collisionManager.Setup();
-
-    // フェード開始
-	_fade.Start(Fade::Type::FadeIn, _fadeInTime);
 
 	// アクターマネージャーの開始関数を呼び出し
     _actorManager.Start();
@@ -116,16 +100,16 @@ void Scene::Update(float elapsedTime)
     _actorManager.LateUpdate(elapsedTime);
 
 	// Effekseerの更新
-	_effekseerEffectManager.Update(elapsedTime);
+    GetEffekseerEffectManager().Update(elapsedTime);
 
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
         // パーティクルの更新
-        _particleRenderer.Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
+        GetParticleRenderer().Update(Graphics::Instance().GetDeviceContext(), elapsedTime);
     }
 
     // フェード更新
-	_fade.Update(elapsedTime);
+    GetFade()->Update(elapsedTime);
 
 	// 時間の更新
 	_time += elapsedTime;
@@ -270,18 +254,18 @@ void Scene::Render()
             _actorManager.Render(rc);
 
             // モデルの描画
-            _meshRenderer.RenderOpaque(rc, true);
+            GetMeshRenderer().RenderOpaque(rc, true);
 
             // Terrainの頂点書き出し
-            _terrainRenderer.ExportVertex(GetRenderContext());
+            GetTerrainRenderer().ExportVertex(GetRenderContext());
 
 			// テレインの描画
-			_terrainRenderer.Render(rc, true);
+            GetTerrainRenderer().Render(rc, true);
         }
         gBuffer->Deactivate(dc);
 
         // デカール描画
-		_decalRenderer.Render(gBuffer, Graphics::Instance().GetDevice(), rc);
+        GetDecalRenderer().Render(gBuffer, Graphics::Instance().GetDevice(), rc);
     }
     // GBuffer生成終了
     //--------------------------------------------------------------------------------------
@@ -316,7 +300,7 @@ void Scene::Render()
             dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
             dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
-            gBuffer->Blit(_textureRenderer, dc);
+            gBuffer->Blit(GetTextureRenderer(), dc);
         }
         else
         {
@@ -329,21 +313,21 @@ void Scene::Render()
             _actorManager.Render(rc);
 
             // フォワードレンダリング
-            _meshRenderer.RenderOpaque(rc, false);
+            GetMeshRenderer().RenderOpaque(rc, false);
 
             // テレインの描画
-            _terrainRenderer.Render(rc, true);
+            GetTerrainRenderer().Render(rc, true);
         }
 
         // モデルの描画
-        _meshRenderer.RenderAlpha(rc);
+        GetMeshRenderer().RenderAlpha(rc);
 
 		// Effekseerの描画
-		_effekseerEffectManager.Render(rc.camera->GetView(), rc.camera->GetProjection());
+        GetEffekseerEffectManager().Render(rc.camera->GetView(), rc.camera->GetProjection());
 
 		// パーティクルの描画
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Additive), nullptr, 0xFFFFFFFF);
-		_particleRenderer.Render(rc.deviceContext);
+        GetParticleRenderer().Render(rc.deviceContext);
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
         // プリミティブ描画
@@ -364,7 +348,7 @@ void Scene::Render()
             dc->PSSetShaderResources(2, 1, copyColorSRV.GetAddressOf());
         }
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
-		_primitiveRenderer.Render(rc);
+        GetPrimitiveRenderer().Render(rc);
         ID3D11ShaderResourceView* nullsrvs[] = { nullptr };
         dc->PSSetShaderResources(2, 1, nullsrvs);
 
@@ -390,10 +374,10 @@ void Scene::Render()
             _actorManager.CastShadow(rc);
 
             // モデルの影描画処理
-            _meshRenderer.CastShadow(rc);
+            GetMeshRenderer().CastShadow(rc);
 
             // テレインの影描画処理
-            _terrainRenderer.CastShadow(rc);
+            GetTerrainRenderer().CastShadow(rc);
         }
         cascadedShadowMap->Deactivate(rc);
     }
@@ -452,7 +436,7 @@ void Scene::Render()
 
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::None), nullptr, 0xFFFFFFFF);
         // バックバッファに描画
-        _textureRenderer.Blit(
+        GetTextureRenderer().Blit(
             dc,
             PostProcessManager::Instance().GetAppliedEffectSRV().GetAddressOf(),
             0, 1
@@ -471,15 +455,15 @@ void Scene::Render()
         dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
         dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
         rc.deviceContext->ClearDepthStencilView(rc.depthStencilView, D3D11_CLEAR_STENCIL, 1.0f, 0);
-        _inputUI.Render(rc, GetTextureRenderer());
+        GetInputUI()->Render(rc, GetTextureRenderer());
 
         // テキスト描画
-        _textRenderer.Render(rc, screenWidth, screenHeight);
+        GetTextRenderer().Render(rc, screenWidth, screenHeight);
 
 		// フェード描画
 		Vector4 fadeColor = Vector4::Black;
-		fadeColor.w = _fade.GetAlpha();
-        _primitive->Rect(dc,
+		fadeColor.w = GetFade()->GetAlpha();
+        GetPrimitive()->Rect(dc,
             Vector2::Zero,
             Vector2(screenWidth, screenHeight),
             Vector2::Zero,
@@ -498,7 +482,7 @@ void Scene::Render()
     // ImGuiに描画フラグが無効ならバックバッファに描画
     if (!_isImGuiRendering)
     {
-        _textureRenderer.Blit(
+        GetTextureRenderer().Blit(
             dc,
             sceneFrame->GetColorSRV().GetAddressOf(),
             0, 1
@@ -543,16 +527,16 @@ void Scene::DrawGui()
 	// パーティクルのGui表示
     {
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
-        _particleRenderer.DrawGui(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
+        GetParticleRenderer().DrawGui(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
     }
 
 	// テレインレンダラーのGui表示
-	_terrainRenderer.DrawGui();
+    GetTerrainRenderer().DrawGui();
 
     if(_skyMap)
         _skyMap->DrawGui();
 
-    _inputUI.DrawGui();
+    GetInputUI()->DrawGui();
 
     OnDrawGui();
 }
@@ -574,3 +558,60 @@ float Scene::GetScreenHeight() const
 {
     return Graphics::Instance().GetScreenHeight();
 }
+
+// プリミティブ取得
+Primitive* Scene::GetPrimitive()
+{
+    return SceneManager::Instance().GetPrimitive();
+}
+// Effekseerエフェクトマネージャー取得
+EffekseerEffectManager& Scene::GetEffekseerEffectManager()
+{
+    return _effekseerEffectManager;
+}
+// フェード情報取得
+Fade* Scene::GetFade()
+{
+    return SceneManager::Instance().GetFade();
+}
+// 入力UI取得
+InputUI* Scene::GetInputUI()
+{
+    return SceneManager::Instance().GetInputUI();
+}
+#pragma region 各種レンダラー取得
+MeshRenderer& Scene::GetMeshRenderer()
+{
+    return SceneManager::Instance().GetMeshRenderer();
+}
+
+TextureRenderer& Scene::GetTextureRenderer()
+{
+    return SceneManager::Instance().GetTextureRenderer();
+}
+
+TextRenderer& Scene::GetTextRenderer()
+{
+    return SceneManager::Instance().GetTextRenderer();
+}
+
+TerrainRenderer& Scene::GetTerrainRenderer()
+{
+    return SceneManager::Instance().GetTerrainRenderer();
+}
+
+ParticleRenderer& Scene::GetParticleRenderer()
+{
+    return SceneManager::Instance().GetParticleRenderer();
+}
+
+PrimitiveRenderer& Scene::GetPrimitiveRenderer()
+{
+    return SceneManager::Instance().GetPrimitiveRenderer();
+}
+
+DecalRenderer& Scene::GetDecalRenderer()
+{
+    return SceneManager::Instance().GetDecalRenderer();
+}
+#pragma endregion

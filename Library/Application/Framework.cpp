@@ -339,8 +339,8 @@ bool Framework::Uninitialize()
     // ImGui終了化
     ImGuiManager::Uninitialize();
 
-    // エフェクトマネージャーの終了の後にエフェクトの終了処理を行うとエラーになるので防ぐ
-    SceneManager::Instance().Clear();
+    // シーン終了化
+    SceneManager::Instance().Finalize();
 
     // オーディオ終了化
     AudioSystem::Instance().Finalize();

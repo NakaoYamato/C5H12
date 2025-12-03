@@ -200,6 +200,13 @@ void EffectController::ParticleEffectData::DrawGui()
 
 #pragma endregion
 
+// 削除時処
+void EffectController::OnDelete()
+{
+    // エフェクトデータ解放
+	_effectMap.clear();
+}
+
 // 更新処理
 void EffectController::Update(float elapsedTime)
 {

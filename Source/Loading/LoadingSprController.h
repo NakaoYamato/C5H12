@@ -54,4 +54,10 @@ private:
 	float _textMoveDelay = 0.55f;
 
 	SceneLoading* _loadingScene = nullptr;
+
+	// フェードイン時間
+	float							_fadeInTime = 1.0f;
+
+	// フェードアウト時間
+	float							_fadeOutTime = 1.0f;
 };

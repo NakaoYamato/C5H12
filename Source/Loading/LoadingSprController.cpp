@@ -64,9 +64,11 @@ void LoadingSprController::Update(float elapsedTime)
 			{
 			case Fade::Type::FadeOut:
                 _loadingScene->ChangeNextScene();
+				// フェード開始
+				_loadingScene->GetFade()->Start(Fade::Type::FadeIn, _fadeInTime);
                 break;
 			default:
-				_loadingScene->GetFade()->Start(Fade::Type::FadeOut, 1.0f);
+				_loadingScene->GetFade()->Start(Fade::Type::FadeOut, _fadeOutTime);
 				break;
 			}
 		}

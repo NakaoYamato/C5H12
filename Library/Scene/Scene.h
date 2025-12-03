@@ -108,47 +108,46 @@ public:
 		actor->Create(tag);
 		return actor;
 	}
+#pragma region 各種レンダラー取得	
+	// メッシュレンダラー取得
+	MeshRenderer& GetMeshRenderer();
+	// テクスチャレンダラー取得
+	TextureRenderer& GetTextureRenderer();
+	// テキストレンダラー取得
+	TextRenderer& GetTextRenderer();
+	// テレインレンダラー取得
+	TerrainRenderer& GetTerrainRenderer();
+	// パーティクルレンダラー取得
+	ParticleRenderer& GetParticleRenderer();
+	// プリミティブレンダラー取得	
+	PrimitiveRenderer& GetPrimitiveRenderer();
+	// デカールレンダラー取得
+	DecalRenderer& GetDecalRenderer();
+#pragma endregion
 
 #pragma region アクセサ
 	// 自身を新規のポインタで渡す
 	virtual std::shared_ptr<Scene> GetNewShared() = 0;
 
-	Primitive* GetPrimitive() const { return _primitive.get(); }
 	// アクター管理者取得
 	ActorManager&			GetActorManager()			{ return _actorManager; }
 	// 当たり判定管理者取得
 	CollisionManager&		GetCollisionManager()		{ return _collisionManager; }
-	// Effekseerエフェクトマネージャー取得
-	EffekseerEffectManager& GetEffekseerEffectManager() { return _effekseerEffectManager; }
 	// RenderContext取得
 	RenderContext&			GetRenderContext()			{ return _renderContext; }
-	// メッシュレンダラー取得
-	MeshRenderer&			GetMeshRenderer()			{ return _meshRenderer; }
-	// テクスチャレンダラー取得
-	TextureRenderer&		GetTextureRenderer()		{ return _textureRenderer; }
-	// テキストレンダラー取得
-	TextRenderer&			GetTextRenderer()			{ return _textRenderer; }
-	// テレインレンダラー取得
-	TerrainRenderer&		GetTerrainRenderer()		{ return _terrainRenderer; }
-	// パーティクルレンダラー取得
-	ParticleRenderer&		GetParticleRenderer()		{ return _particleRenderer; }
-	// プリミティブレンダラー取得	
-	PrimitiveRenderer&		GetPrimitiveRenderer()		{ return _primitiveRenderer; }
-	// デカールレンダラー取得
-	DecalRenderer&			GetDecalRenderer()			{ return _decalRenderer; }
+    // プリミティブ取得
+	Primitive* GetPrimitive();
+	// Effekseerエフェクトマネージャー取得
+	EffekseerEffectManager& GetEffekseerEffectManager();
 
 	// 平行光源取得
 	std::shared_ptr<LightController> GetDirectionalLight() {
 		return _directionalLight.lock();
 	}
 	// フェード情報取得
-	Fade* GetFade() {
-		return &_fade;
-	}
+	Fade* GetFade();
 	// 入力UI取得
-	InputUI* GetInputUI() {
-		return &_inputUI;
-	}
+	InputUI* GetInputUI();
 	// カメラ取得
 	virtual Camera* GetMainCamera() {
 		return &_camera;
@@ -163,9 +162,6 @@ public:
 
 	// 経過時間取得
 	float GetTime() const { return _time; }
-
-	// フェードイン時間設定
-	void SetFadeInTime(float time) { _fadeInTime = time; }
 
 	// 画面サイズ取得
 	float GetScreenWidth() const;
@@ -197,25 +193,14 @@ public:
 	bool IsImGuiSceneWindowSelected() const { return _isImGuiSceneWindowSelected; }
 #pragma endregion
 private:
-	std::unique_ptr<SkyMap>			_skyMap;
-	std::unique_ptr<Primitive>		_primitive;
-
 #pragma region シーン必須オブジェクト
 	std::weak_ptr<LightController>	_directionalLight;
 	std::weak_ptr<MainCamera>		_mainCameraActor;
 #pragma endregion
 
-	Fade 							_fade;
-	InputUI							_inputUI;
+	std::unique_ptr<SkyMap>			_skyMap;
 	Camera							_camera = {};
 	RenderContext					_renderContext;
-	MeshRenderer					_meshRenderer;
-	TextureRenderer					_textureRenderer;
-	TextRenderer					_textRenderer;
-	TerrainRenderer					_terrainRenderer;
-	ParticleRenderer				_particleRenderer;
-	PrimitiveRenderer				_primitiveRenderer;
-	DecalRenderer					_decalRenderer;
 
 	ActorManager					_actorManager;
 	CollisionManager				_collisionManager;
@@ -223,8 +208,6 @@ private:
 
 	// 経過時間
 	float							_time = 0.0f;
-	// フェードイン時間
-	float							_fadeInTime = 1.0f;
 
 	// ロード進捗率
 	float							_completionLoading = 0.0f;

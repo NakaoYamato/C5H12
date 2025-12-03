@@ -39,6 +39,9 @@ public:
 	// 初期化
 	void Initialize();
 
+    // 終了化
+    void Finalize();
+
 	// 更新処理
 	void Update(float elapsedTime);
 
@@ -76,16 +79,58 @@ public:
 	{
 		return _currentScene;
 	}
+
+	Primitive* GetPrimitive() const { return _primitive.get(); }
+
+	// フェード情報取得
+	Fade* GetFade() {
+		return &_fade;
+	}
+	// 入力UI取得
+	InputUI* GetInputUI() {
+		return &_inputUI;
+	}
+#pragma region 各種レンダラー取得
+	// メッシュレンダラー取得
+	MeshRenderer& GetMeshRenderer() { return _meshRenderer; }
+	// テクスチャレンダラー取得
+	TextureRenderer& GetTextureRenderer() { return _textureRenderer; }
+	// テキストレンダラー取得
+	TextRenderer& GetTextRenderer() { return _textRenderer; }
+	// テレインレンダラー取得
+	TerrainRenderer& GetTerrainRenderer() { return _terrainRenderer; }
+	// パーティクルレンダラー取得
+	ParticleRenderer& GetParticleRenderer() { return _particleRenderer; }
+	// プリミティブレンダラー取得	
+	PrimitiveRenderer& GetPrimitiveRenderer() { return _primitiveRenderer; }
+	// デカールレンダラー取得
+	DecalRenderer& GetDecalRenderer() { return _decalRenderer; }
+#pragma endregion
 private:
 	std::shared_ptr<Scene> _currentScene;
 	std::shared_ptr<Scene> _nextScene;
 
-	// デバッグ用で保存しているシーン
+	// 保存しているシーン
 	std::unordered_map<std::string, std::unique_ptr<Scene>> _sceneDatas[static_cast<int>(SceneMenuLevel::LevelEnd)];
 
 	// Debugビルドでのデフォルトシーン
 	int _defaultSceneLevel = static_cast<int>(SceneMenuLevel::Debug);
 	std::string _defaultSceneName = "";
+
+	std::unique_ptr<Primitive>		_primitive;
+
+#pragma region 各種レンダラー
+	MeshRenderer					_meshRenderer;
+	TextureRenderer					_textureRenderer;
+	TextRenderer					_textRenderer;
+	TerrainRenderer					_terrainRenderer;
+	ParticleRenderer				_particleRenderer;
+	PrimitiveRenderer				_primitiveRenderer;
+	DecalRenderer					_decalRenderer;
+#pragma endregion
+
+	Fade 							_fade;
+	InputUI							_inputUI;
 };
 
 template<class T>

@@ -1,5 +1,7 @@
 #include "SceneManager.h"
 
+#include "../../Library/Graphics/Graphics.h"
+#include "../../Library/Graphics/GpuResourceManager.h"
 #include "SceneLoading.h"
 
 #include "../Model/SerializeFunction.h"
@@ -10,8 +12,27 @@
 
 const char* SceneDefaultNamePath = "./Data/Debug/SceneDefaultName.cereal";
 
+// 初期化
 void SceneManager::Initialize()
 {
+	Graphics& graphics = Graphics::Instance();
+	ID3D11Device* device = graphics.GetDevice();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+	_primitive = std::make_unique<Primitive>(device);
+	_inputUI.Initialize();
+	// レンダラー作成
+	{
+		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		_meshRenderer.Initialize(device);
+		_textureRenderer.Initialize(device);
+		_textRenderer.Initialize(device, dc);
+		_terrainRenderer.Initialize(device);
+		_particleRenderer.Initialize(device, dc);
+		_primitiveRenderer.Initialize(device);
+		_decalRenderer.Initialize(device, static_cast<UINT>(graphics.GetScreenWidth()), static_cast<UINT>(graphics.GetScreenHeight()));
+	}
+
 #ifdef _DEBUG
 	// デバッグビルド時のデフォルトシーンを読み込み
 	std::filesystem::path serializePath(SceneDefaultNamePath);
@@ -51,6 +72,19 @@ void SceneManager::Initialize()
 #else
 	ChangeScene(SceneMenuLevel::Game, u8"Title");
 #endif
+}
+
+// 終了化
+void SceneManager::Finalize()
+{
+	// エフェクトマネージャーの終了の後にエフェクトの終了処理を行うとエラーになるので防ぐ
+	Clear();
+
+	// シーンをクリア
+	for (int i = 0; i < static_cast<int>(SceneMenuLevel::LevelEnd); ++i)
+	{
+		_sceneDatas[i].clear();
+	}
 }
 
 // 更新処理

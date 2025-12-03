@@ -41,7 +41,7 @@ float4 main(VsOut pin) : SV_TARGET
     
     float4 outColor = outlineColor;
     outColor.a *= outlineAlpha;
-    float4 bodyColor = centerColor * centerColor.a;
+    float4 bodyColor = pin.color * centerColor.a;
     
     float4 finalColor = lerp(outColor, bodyColor, centerColor.a);
     

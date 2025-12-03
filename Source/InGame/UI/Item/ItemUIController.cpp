@@ -321,4 +321,5 @@ void ItemUIController::InitializeInputUI()
 	_drawInfoMouseOldWheelR.position = Vector2(1860.0f, 980.0f);
 	_drawInfoMouseOldWheelR.scale = Vector2(0.3f, 0.3f);
 	_drawInfoMouseOldWheelR.color = Vector4::Red;
+    _drawInfoMouseOldWheelR.isActive = true;
 }

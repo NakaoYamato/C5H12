@@ -4,6 +4,8 @@
 #include "../../Library/Scene/Scene.h"
 #include "../WyvernController.h"
 
+#include "../../Source/Camera/HuntingSuccessCamera.h"
+
 #include <imgui.h>
 
 #pragma region 待機
@@ -743,6 +745,23 @@ void WyvernDeathState::OnEnter()
 		false,
 		0.5f);
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
+
+    // ハンティング成功カメラを起動
+	for (auto& child : _owner->GetEnemy()->GetActor()->GetScene()->GetMainCameraActor()->GetChildren())
+	{
+		auto huntingSuccessCamera = child->GetComponent<HuntingSuccessCamera>();
+		if (huntingSuccessCamera)
+		{
+			huntingSuccessCamera->Swich();
+            huntingSuccessCamera->SetTarget(
+                _owner->GetEnemy()->GetActor()->GetTransform().GetPosition(),
+                _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ(),
+				10.0f
+			);
+			break;
+		}
+    }
+
 }
 void WyvernDeathState::OnExecute(float elapsedTime)
 {

@@ -165,6 +165,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 			//{
 			//	wanderNode->AddNode("Normal", 1, SelectRule::Non, nullptr, std::make_shared<WyvernNormalAction>(this));
 			//}
+			//scoutNode->AddNode("Wander", 1, SelectRule::Non, nullptr, nullptr);
 			scoutNode->AddNode("Idle", 2, SelectRule::Non, nullptr, nullptr);
 		}
 	}

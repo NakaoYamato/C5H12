@@ -5,6 +5,7 @@
 #include "../../Source/Stage/StageController.h"
 
 #include "../../External/nameof/include/nameof.hpp"
+#include "../../Source/Stage/SafetyZone.h"
 #include <imgui.h>
 
 // 開始処理
@@ -21,6 +22,20 @@ void Targetable::Start()
 			metaAI->RegisterTargetable(shared_from_this());
 		}
 	}
+}
+// 更新処理
+void Targetable::Update(float elapsedTime)
+{
+    // セーフティタイマー更新
+	if (_sefetyTimer > 0.0f)
+	{
+		_sefetyTimer -= elapsedTime;
+		if (_sefetyTimer <= 0.0f)
+		{
+			SetTargetable(true);
+			_sefetyTimer = 0.0f;
+		}
+    }
 }
 // Gui描画処理
 void Targetable::DrawGui()
@@ -41,4 +56,12 @@ void Targetable::OnContact(CollisionData& collisionData)
 		// エリア番号を更新
 		_areaNumber = stageController->GetAreaNumber();
 	}
+
+    // セーフティゾーンと接触したか確認
+    auto safetyZone = collisionData.other->GetComponent<SafetyZone>();
+	if (safetyZone)
+	{
+        SetTargetable(false);
+        _sefetyTimer = safetyZone->GetSafetyTimer();
+    }
 }

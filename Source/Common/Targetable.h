@@ -21,6 +21,8 @@ public:
 
 	// 開始処理
 	void Start() override;
+	// 更新処理
+	void Update(float elapsedTime) override;
 	// Gui描画処理
 	void DrawGui() override;
 	// オブジェクトとの接触時の処理
@@ -54,4 +56,7 @@ private:
 	float _hateValue = 0.0f;
 	// ターゲット可能か
 	bool _isTargetable = true;
+
+    // セーフティタイマー
+    float _sefetyTimer = 0.0f;
 };

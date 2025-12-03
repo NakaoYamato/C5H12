@@ -4,12 +4,23 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/BoxCollider.h"
 
+#include "../../Source/Stage/SafetyZone.h"
+
 #include "GeteController.h"
 
 // 生成時処理
 void FenceActor::OnCreate()
 {
     GetTransform().SetLengthScale(0.01f);
+    // セーフティゾーン生成
+    this->AddComponent<SafetyZone>();
+    // セーフティゾーン用当たり判定生成
+    auto safetyBox = this->AddCollider<BoxCollider>();
+    safetyBox->SetLayer(CollisionLayer::Stage);
+    safetyBox->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
+    safetyBox->SetTrigger(true);
+    safetyBox->SetPosition(Vector3(-350.0f, 50.0f, 0.0f));
+    safetyBox->SetRadius(Vector3(3.4f, 1.0f, 8.4f));
 
     // フェンス生成
     {

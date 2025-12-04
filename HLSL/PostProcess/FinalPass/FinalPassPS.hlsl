@@ -217,7 +217,7 @@ float4 main(VsOut pin) : SV_TARGET
     }
 #endif
     
-	// Lens flare
+	// ƒŒƒ“ƒYƒtƒŒƒA
     float4 ndc_sun_position = mul(float4(-normalize(lightDirection.xyz) * sumDistance, 1), viewProjection);
     ndc_sun_position /= ndc_sun_position.w;
     [branch]
@@ -262,26 +262,6 @@ float4 main(VsOut pin) : SV_TARGET
         lens_flare_color = cc(lens_flare_color, .5, .1);
         color.rgb += max(0.0, lens_flare_color) * occluded_factor * lightColor.rgb * 0.5 /* * directional_light_color[0].w*/;
     }
-  //  float4 ndc_sun_position = mul(float4(-normalize(directional_light_direction[0].xyz) * distance_to_sun, 1), view_projection);
-  //  ndc_sun_position /= ndc_sun_position.w;
-  //  if (saturate(ndc_sun_position.z) == ndc_sun_position.z)
-  //  {
-  //      float4 occluder;
-  //      occluder.xy = ndc_sun_position.xy;
-  //      occluder.z = texture_maps[SCENE_DEPTH].Sample(sampler_states[LINEAR_BORDER_BLACK], float2(ndc_sun_position.x * 0.5 + 0.5, 0.5 - ndc_sun_position.y * 0.5)).x;
-  //      occluder = mul(float4(occluder.xyz, 1), inverse_projection);
-  //      occluder /= occluder.w;
-  //      float occluded_factor = step(250.0, occluder.z);
-
-		////const float2 aspect_correct = float2(1.0, aspect);
-  //      const float2 aspect_correct = float2(1.0 / aspect, 1.0);
-
-  //      float sun_highlight_factor = max(0, dot(normalize(mul(world_position - camera_position, view)).xyz, float3(0, 0, 1)));
-  //      float3 lens_flare_color = float3(1.4, 1.2, 1.0) * lens_flare(ndc_position.xy * aspect_correct, ndc_sun_position.xy * aspect_correct);
-  //      lens_flare_color -= noise(ndc_position.xy * 256) * .015;
-  //      lens_flare_color = cc(lens_flare_color, .5, .1);
-  //      fragment_color += max(0.0, lens_flare_color) * occluded_factor * directional_light_color[0].rgb * 0.5 /* * directional_light_color[0].w*/;
-  //  }
     
 #if 1
 	// Gamma process

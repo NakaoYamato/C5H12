@@ -45,7 +45,8 @@ void Scene::Initialize()
         std::shared_ptr<Actor> light = RegisterActor<Actor>(u8"Light", ActorTag::System);
         _directionalLight = light->AddComponent<LightController>();
 		light->GetTransform().SetPositionY(1.0f);
-        light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(60.0f));
+        light->GetTransform().SetAngleX(DirectX::XMConvertToRadians(46.0f));
+        light->GetTransform().SetAngleY(DirectX::XMConvertToRadians(-126.0f));
     }
     {
         _mainCameraActor = RegisterActor<MainCamera>(u8"MainCamera", ActorTag::System);

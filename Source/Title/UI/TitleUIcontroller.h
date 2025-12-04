@@ -6,6 +6,14 @@
 class TitleUIcontroller : public Component
 {
 public:
+    enum class SelectType
+    {
+        ToGame,
+        ToPlayerDebug,
+        Quit
+    };
+
+public:
     TitleUIcontroller() {}
     ~TitleUIcontroller() override {}
 
@@ -15,12 +23,21 @@ public:
     void Start() override;
     // çXêVèàóù
     void Update(float elapsedTime) override;
+    // GUIï`âÊ
+    void DrawGui() override;
 
 private:
 	RectTransform* _myRectTransform = nullptr;
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 
-    const std::string BoxSpr = "Box";
+    const std::string ToGameSpr = "ToGame";
+    const std::string ToPlayerDebugSpr = "ToPlayerDebug";
+    const std::string QuitSpr = "Quit";
+    const std::string FrontSpr = "Front";
 
-    Vector2 _textOffset = Vector2(-150.0f, 0.0f);
+    SelectType _selectType = SelectType::ToGame;
+
+    TextRenderer::TextDrawData _textData{};
+    Vector2 _textOffset = Vector2(-245.0f, -20.0f);
+    Vector2 _inputUIOffset = Vector2(-300.0f, 0.0f);
 };

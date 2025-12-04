@@ -2,6 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Scene/Scene.h"
+#include "../../Library/Scene/SceneManager.h"
 
 #include <imgui.h>
 
@@ -29,6 +30,7 @@ void MenuInput::OnUpdate(float elapsedTime)
 		textData.text = L"ゲームを終了しますか？ A->終了, Back->再開";
 	else
 		textData.text = L"ゲームを終了しますか？ Space->終了, Esc->再開";
+	textData.text += L"\n1:タイトルシーン、2:ゲームシーン、3:プレイヤーデバッグシーン";
     textData.position = Vector2(100.0f, 100.0f);
     textData.color = Vector4::Black;
     textData.scale = Vector2(1.0f, 1.0f);
@@ -44,6 +46,19 @@ void MenuInput::OnUpdate(float elapsedTime)
 	{
 		PostMessage(Graphics::Instance().GetHwnd(), WM_CLOSE, 0, 0);
     }
+	// シーン切り替え
+	if (_INPUT_TRIGGERD("1"))
+	{
+		SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
+	}
+	if (_INPUT_TRIGGERD("2"))
+	{
+		SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Game");
+	}
+	if (_INPUT_TRIGGERD("3"))
+	{
+		SceneManager::Instance().ChangeScene(SceneMenuLevel::Debug, "PlayerDebug");
+	}
 }
 // GUI描画
 void MenuInput::DrawGui()

@@ -125,6 +125,19 @@ void ChestUIController::Close()
 
 	this->GetActor()->SetIsActive(false);
 
+	// プレイヤーのリムライトを元に戻す
+	if (auto player = _playerActor.lock())
+	{
+        if (auto playerEquipmentController = player->GetComponent<PlayerEquipmentController>())
+        {
+            playerEquipmentController->GetWeaponActor()->SetIsOverrideRimLight(false);
+            for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+            {
+                playerEquipmentController->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(false);
+            }
+        }
+	}
+
 	_chestActor.reset();
 }
 

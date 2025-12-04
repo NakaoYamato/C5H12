@@ -3,6 +3,7 @@
 #include "../../Library/Component/Animator.h"
 #include "../PlayerController.h"
 #include "../../Library/Algorithm/Converter.h"
+#include "../../Source/Player/PlayerEquipmentController.h"
 
 #define NON_TURN
 
@@ -903,9 +904,13 @@ namespace PlayerDrinkSubState
 			_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
 			// 部分アニメーション用パラメータ設定
 			_owner->GetAnimator()->RemovePartialAnimationMask("clavicle_r");
+
+			_equipment = _owner->GetPlayer()->GetActor()->GetComponent<PlayerEquipmentController>();
+			_timer = 0.0f;
 		}
 		void OnExecute(float elapsedTime) override
 		{
+			_timer += elapsedTime;
 			// アイテム効果処理
 			auto type = _owner->GetItemController()->ExecuteItemFunction(elapsedTime);
 
@@ -922,12 +927,40 @@ namespace PlayerDrinkSubState
 					_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
 				}
 			}
+
+			// リムライト処理
+			if (auto equipment = _equipment.lock())
+			{
+				if (auto item = _owner->GetItemController()->GetUsingItemData())
+				{
+					Vector4 color = item->color;
+					color.w = std::sinf(_timer * DirectX::XM_PI) * 0.5f + 0.5f; // 点滅効果
+					for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+					{
+						equipment->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(true);
+						equipment->GetArmorActor(static_cast<ArmorType>(i))->SetRimLightColor(color);
+					}
+				}
+			}
 		}
 		void OnExit() override
 		{
 			// 部分アニメーション用パラメータ設定
 			_owner->GetAnimator()->SetPartialAnimationMask("clavicle_r");
+
+			// リムライト処理
+			if (auto equipment = _equipment.lock())
+			{
+				for (int i = 0; i <= static_cast<int>(ArmorType::Leg); ++i)
+				{
+					equipment->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(false);
+				}
+			}
 		}
+
+	private:
+		std::weak_ptr<PlayerEquipmentController> _equipment;
+		float _timer = 0.0f;
 	};
 	class DrinkEndSubState : public StateBase<PlayerStateMachine>
 	{

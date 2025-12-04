@@ -82,6 +82,7 @@ ItemFunctionBase::State PlayerItemController::ExecuteItemFunction(float elapsedT
 			{
 				playerController->SetIsAbleToUseItem(true);
 			}
+			_usingItemData = nullptr;
 		}
 	}
 
@@ -112,6 +113,18 @@ bool PlayerItemController::Use()
 	auto userDataManager = _userDataManager.lock();
 	if (!userDataManager)
 		return false;
+
+	auto pouch = userDataManager->GetPouchItem(_currentIndex);
+	if (pouch->itemIndex >= 0)
+	{
+		auto itemData = userDataManager->GetAcquiredItemData(pouch->itemIndex);
+		if (itemData)
+		{
+			_usingItemData = itemData->GetBaseData();
+		}
+	}
+
+
 	_function = userDataManager->UseItem(_currentIndex, GetActor().get());
 
 	return _function != nullptr;

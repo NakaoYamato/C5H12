@@ -244,7 +244,6 @@ void ChestArmorMenuController::Update(float elapsedTime)
 				continue;
             playerEquipmentController->GetArmorActor(static_cast<ArmorType>(i))->SetIsOverrideRimLight(false);
 		}
-
         break;
     }
     }
@@ -689,6 +688,10 @@ void ChestArmorMenuController::NextState()
     {
     case State::SelectArmorType:
 		spriteRenderer->SetColorAlpha(BoxBackSpr, 0.5f);
+
+		// 装備していない場合はインデックスを0にする
+        if (armorIndex < 0)
+			armorIndex = 0;
 
 		// 現在選択中の装備にインデックスを合わせる
         _selectArmorColumnIndex = static_cast<int>(armorIndex % _armorSprColumnNum);

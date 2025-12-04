@@ -268,8 +268,17 @@ void PlayerController::OnContact(CollisionData& collisionData)
 		auto chestController = collisionData.other->GetComponent<ChestController>();
 		if (chestController)
 		{
-			if (IsSelect())
+			// チェストを開ける
+			// 納刀状態、アイテム使用中でない場合のみ開ける
+			if (IsSelect() && !IsDrawingWeapon() && !IsUsingItem())
+			{
 				chestController->Open();
+				if (auto stateMachine = _stateMachine.lock())
+				{
+					// 待機状態へ移行
+					stateMachine->GetStateMachine().ChangeSubState("Idle");
+				}
+			}
 		}
 	}
 }

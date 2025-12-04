@@ -35,6 +35,8 @@ public:
 	// ItemTypeMaxであれば選択中アイテムなし
 	ItemType GetCurrentItemType() const;
 
+	ItemData* GetUsingItemData() const { return _usingItemData; }
+
 	bool IsClosed() const;
 	bool IsOpen() const;
 
@@ -45,6 +47,9 @@ private:
 	std::weak_ptr<UserDataManager> _userDataManager;
     std::weak_ptr<OperateUIController> _operateUIController;
 	ItemFunctionBase* _function = nullptr;
+
+	// 使用中のアイテムデータ
+	ItemData* _usingItemData = nullptr;
 
 	int _currentIndex = 0;
 };

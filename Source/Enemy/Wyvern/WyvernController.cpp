@@ -37,6 +37,10 @@ void WyvernController::Start()
 // 更新処理
 void WyvernController::Update(float elapsedTime)
 {
+	auto damageable = _damageable.lock();
+	if (!damageable)
+		return;
+
 	_combatStatus.lock()->SetIsUpdate(
 		_enemyController.lock() && _behaviorController.lock() && _behaviorController.lock()->IsExecute()
 	);
@@ -55,6 +59,10 @@ void WyvernController::Update(float elapsedTime)
 		_flightTimer = 0.0f;
 		_staminaController.lock()->SetIsStaminaRecover(true);
 	}
+
+	// 死亡している場合は処理しない
+	if (damageable->IsDead())
+		return;
 
 	// 怒り状態
 	if (_enemyController.lock()->IsAngry())
@@ -84,6 +92,7 @@ void WyvernController::DrawGui()
 {
 	ImGui::DragFloat(u8"近接攻撃角度", &_nearAttackRadian, 0.01f, 0.0f, DirectX::XM_PI, "%.1f rad");
 	ImGui::DragFloat(u8"空中スキン幅", &_flightSkinWidth, 0.1f, 0.0f, 20.0f, "%.1f");
+	ImGui::DragFloat(u8"初期スキン幅", &_initialSkinWidth, 0.01f, 0.0f, 1.0f, "%.2f");
 	ImGui::Checkbox(u8"空中か", &_isDuringFlight);
 	ImGui::DragFloat(u8"飛行中近距離判定距離", &_flightNearRange, 0.1f, 0.0f, 100.0f, "%.1f");
 	ImGui::DragFloat(u8"飛行中移動速度", &_flightMoveSpeed, 0.1f, 0.0f, 50.0f, "%.1f");

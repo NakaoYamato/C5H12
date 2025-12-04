@@ -25,14 +25,12 @@ public:
     void DrawGui() override;
 
     // ターゲット設定
-    void SetTarget(const Vector3& position, const Vector3& forward, float distance)
-    {
-        _state = State::HorizontalMove;
-        _timer = 0.0f;
-        _targetPosition = position;
-        _targetForward = forward;
-        _distance = distance;
-    }
+    void SetTarget(const Vector3& position, const Vector3& forward, float distance);
+	// 次のコントローラー名設定
+	void SetNextControllerName(const std::string& name)
+	{
+		_nextControllerName = name;
+	}
 private:
     Vector3 _targetPosition{};
     Vector3 _targetForward{ Vector3::Front };
@@ -49,4 +47,7 @@ private:
 
     float _waitTime = 2.0f;
     float _waitDistanceRate = 0.1f;
+
+    // 遷移先
+	std::string _nextControllerName{};
 };

@@ -133,6 +133,8 @@ void WyvernStateMachine::Execute(float elapsedTime)
     {
         // 死亡遷移
 		_stateMachine.ChangeState("Death");
+		// 飛行終了判定
+		GetWyvern()->SetIsDuringFlight(false);
     }
 
 	// ターゲットを向く処理

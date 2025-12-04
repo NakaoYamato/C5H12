@@ -14,7 +14,6 @@ void MetaAI::Start()
 // 更新処理
 void MetaAI::Update(float elapsedTime)
 {
-    bool playerDead = false;
 	int deadCount = 0;
 	for (auto& target : _targetables)
 	{
@@ -40,7 +39,7 @@ void MetaAI::Update(float elapsedTime)
 			{
 				if (damageable->IsDead())
 				{
-					playerDead = true;
+					_gameOver = true;
 				}
 			}
         }
@@ -51,24 +50,49 @@ void MetaAI::Update(float elapsedTime)
 
 	if (_gameClear)
 	{
-		_clearMovieTimer += elapsedTime;
-		if (_clearMovieTimer > _clearMovieTime)
+		if (_INPUT_PRESSED("Start"))
 		{
-			// シーン遷移
-			SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
+			_inputTimer += elapsedTime;
+			if (_inputTimer > _inputHoldTime)
+			{
+				// シーン遷移
+				SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
+			}
 		}
 	}
-	if (playerDead)
+
+	TextRenderer::TextDrawData textData;
+	textData.type = FontType::MSGothic;
+	textData.position = _textPosition;
+	textData.color = Vector4::White;
+	textData.scale = Vector2(1.0f, 1.0f);
+	if (_gameClear)
 	{
-		// シーン遷移
-        SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
+		// タイトル画面へ戻るメッセージ表示
+		if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
+			textData.text = L"ゲームクリア：スタートボタン長押しでタイトル画面";
+		else
+			textData.text = L"ゲームクリア：Tabキー長押しでタイトル画面";
 	}
+	else if (_gameOver)
+	{
+		// ゲームオーバーメッセージ表示
+		if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
+			textData.text = L"ゲームオーバー：スタートボタン長押しでタイトル画面";
+		else
+			textData.text = L"ゲームオーバー：Tabキー長押しでタイトル画面";
+	}
+	GetActor()->GetScene()->GetTextRenderer().Draw(textData);
 }
 
 // GUI描画
 void MetaAI::DrawGui()
 {
+	ImGui::DragFloat2(u8"テキスト位置", &_textPosition.x, 1.0f, 0.0f, 1920.0f);
+
+	ImGui::Separator();
 	ImGui::Checkbox(u8"ゲームクリアフラグ", &_gameClear);
+	ImGui::Checkbox(u8"ゲームオーバーフラグ", &_gameOver);
 	for (const auto& targetable : _targetables)
 	{
 		if (auto target = targetable.lock())

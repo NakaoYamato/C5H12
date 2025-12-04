@@ -16,7 +16,8 @@ Input::Input()
 	_buttonActionMap["Use"] = { {InputType::Keyboard, 'E'}, {InputType::XboxPad, XINPUT_GAMEPAD_X}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_LEFT} };
 	_buttonActionMap["Collect"] = { {InputType::Keyboard, 'F'}, {InputType::XboxPad, XINPUT_GAMEPAD_B}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_RIGHT} };
 	_buttonActionMap["ItemSelect"] = { {InputType::Keyboard, VK_CONTROL}, {InputType::XboxPad,XINPUT_GAMEPAD_LEFT_SHOULDER}, {InputType::DirectPad, DIRECTPAD_BUTTON_L1} };
-	_buttonActionMap["Menu"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::XboxPad,XINPUT_GAMEPAD_START}, {InputType::DirectPad, DIRECTPAD_BUTTON_START} };
+	_buttonActionMap["Menu"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::XboxPad,XINPUT_GAMEPAD_BACK}, {InputType::DirectPad, DIRECTPAD_BUTTON_BACK} };
+	_buttonActionMap["Start"] = { {InputType::Keyboard, VK_TAB}, {InputType::XboxPad,XINPUT_GAMEPAD_START}, {InputType::DirectPad, DIRECTPAD_BUTTON_START} };
 
 	_buttonActionMap["ItemPrevSlide"] = { {InputType::XboxPad,XINPUT_GAMEPAD_X}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_LEFT} };
 	_buttonActionMap["ItemNextSlide"] = { {InputType::XboxPad,XINPUT_GAMEPAD_B}, {InputType::DirectPad, DIRECTPAD_BUTTON_R_RIGHT} };

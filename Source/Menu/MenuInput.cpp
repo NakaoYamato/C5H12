@@ -26,7 +26,7 @@ void MenuInput::OnUpdate(float elapsedTime)
     TextRenderer::TextDrawData textData;
     textData.type = FontType::MSGothic;
     if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
-		textData.text = L"ゲームを終了しますか？ A->終了, Start->再開";
+		textData.text = L"ゲームを終了しますか？ A->終了, Back->再開";
 	else
 		textData.text = L"ゲームを終了しますか？ Space->終了, Esc->再開";
     textData.position = Vector2(100.0f, 100.0f);

@@ -35,7 +35,7 @@ void WyvernActor::OnCreate()
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetScale(1.5f);
 	_charactorController.lock()->SetMass(1000.0f);
-	_damageable.lock()->ResetHealth(200.0f);
+	_damageable.lock()->ResetHealth(1.0f);
 
 	// コンポーネント追加
 	_modelRenderer				= AddComponent<ModelRenderer>();

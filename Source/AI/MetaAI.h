@@ -60,7 +60,9 @@ private:
 
 	// ゲームクリアフラグ
 	bool _gameClear = false;
-	float _clearMovieTimer = 0.0f;
-	float _clearMovieTime = 3.0f;
+	bool _gameOver = false;
+	float _inputTimer = 0.0f;
+	float _inputHoldTime = 2.0f;
 
+	Vector2 _textPosition = Vector2(100.0f, 100.0f);
 };

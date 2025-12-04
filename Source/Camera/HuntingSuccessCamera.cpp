@@ -56,7 +56,18 @@ void HuntingSuccessCamera::OnUpdate(float elapsedTime)
         {
             _state = State::HorizontalMove;
             _timer = 0.0f;
-            // 切り替え(直前のコントローラーに戻す)
+            // 切り替え
+			if (!_nextControllerName.empty())
+			{
+				GetActor()->GetScene()->GetMainCameraActor()->SwitchController(_nextControllerName);
+				_nextControllerName.clear();
+				break;
+			}
+            else
+            {
+                GetActor()->GetScene()->GetMainCameraActor()->SwitchPreviousController();
+                break;
+            }
             GetActor()->GetScene()->GetMainCameraActor()->SwitchPreviousController();
         }
         break;
@@ -90,4 +101,13 @@ void HuntingSuccessCamera::DrawGui()
             10.0f
         );
     }
+}
+
+void HuntingSuccessCamera::SetTarget(const Vector3& position, const Vector3& forward, float distance)
+{
+    _state = State::HorizontalMove;
+    _timer = 0.0f;
+    _targetPosition = position;
+    _targetForward = forward.Normalize();
+    _distance = distance;
 }

@@ -740,11 +740,11 @@ void WyvernDownState::OnExit()
 #pragma region 死亡
 void WyvernDeathState::OnEnter()
 {
+	_owner->GetAnimator()->SetIsUseRootMotion(false);
 	_owner->GetAnimator()->PlayAnimation(
 		u8"Death01",
 		false,
-		0.5f);
-	_owner->GetAnimator()->SetIsUseRootMotion(true);
+		3.0f);
 
     // ハンティング成功カメラを起動
 	for (auto& child : _owner->GetEnemy()->GetActor()->GetScene()->GetMainCameraActor()->GetChildren())
@@ -752,12 +752,16 @@ void WyvernDeathState::OnEnter()
 		auto huntingSuccessCamera = child->GetComponent<HuntingSuccessCamera>();
 		if (huntingSuccessCamera)
 		{
+			Vector3 position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
+			position.y -= _owner->GetEnemy()->GetCharactorController()->GetStepOffset();
 			huntingSuccessCamera->Swich();
             huntingSuccessCamera->SetTarget(
-                _owner->GetEnemy()->GetActor()->GetTransform().GetPosition(),
+				position,
                 _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ(),
-				10.0f
+				15.0f
 			);
+			// プレイヤーカメラに戻すコントローラー名を設定
+			huntingSuccessCamera->SetNextControllerName("PlayerCameraController");
 			break;
 		}
     }

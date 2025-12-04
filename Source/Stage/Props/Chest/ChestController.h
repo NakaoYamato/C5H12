@@ -19,6 +19,8 @@ public:
 
 	// ŠJ‚­ˆ—
 	bool Open();
+	// ŠJ‚¢‚Ä‚¢‚é‚©
+	bool IsOpen() const;
 private:
 	std::weak_ptr<Actor> _topActor;
 	std::weak_ptr<ChestInput> _chestInput;

@@ -137,7 +137,7 @@ void MenuUIController::Update(float elapsedTime)
             if (auto data = skillManager->GetSkillData(skillType))
             {
                 std::wstring skillName = ToUtf16(data->name);
-                _skillText.text += L"\t " + skillName + L"\t: レベル: " + std::to_wstring(level) + L"\n";
+                _skillText.text += L"　　" + skillName + L"　:　レベル　" + std::to_wstring(level) + L"\n";
             }
         }
         if (playerEquipmentController->GetCurrentSkills().size() == 0)

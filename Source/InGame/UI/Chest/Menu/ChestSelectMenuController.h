@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ChestMenuControllerBase.h"
+#include "../../Library/Scene/Scene.h"
 
 class ChestSelectMenuController : public ChestMenuControllerBase
 {
@@ -52,4 +53,10 @@ private:
 	Vector4 _textSelectColor = Vector4::Yellow;
 
 	SelectMenuOption _index = SelectMenuOption::ItemOption;
+
+	// “ü—ÍUI
+	InputUI::DrawInfo _selectInputUI;
+	TextRenderer::TextDrawData _selectInputUIText;
+	InputUI::DrawInfo _backInputUI;
+	TextRenderer::TextDrawData _backInputUIText;
 };

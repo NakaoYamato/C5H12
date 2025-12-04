@@ -125,4 +125,10 @@ private:
 
 	// 選択中のリムライト色
 	Vector4 _selectedRimLightColor = Vector4(1.0f, 1.0f, 0.0f, 0.6f);
+
+	// 入力UI
+	InputUI::DrawInfo _selectInputUI;
+	TextRenderer::TextDrawData _selectInputUIText;
+	InputUI::DrawInfo _backInputUI;
+	TextRenderer::TextDrawData _backInputUIText;
 };

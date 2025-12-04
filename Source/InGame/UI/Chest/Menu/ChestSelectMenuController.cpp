@@ -2,7 +2,6 @@
 
 #include "../ChestUIController.h"
 #include "../../Library/Actor/UI/UIActor.h"
-#include "../../Library/Scene/Scene.h"
 
 #include <imgui.h>
 
@@ -20,6 +19,22 @@ void ChestSelectMenuController::Start()
             spriteRenderer->LoadTexture(FrontSpr, L"Data/Texture/UI/Chest/Front.png");
         }
     }
+
+    // “ü—ÍUI
+    _selectInputUI.keyboardKey = 'F';
+    _selectInputUI.gamePadKey = XINPUT_GAMEPAD_A;
+    _selectInputUI.color = Vector4::White;
+    _selectInputUI.position = Vector2(110.0f, 960.0f);
+    _selectInputUI.scale = Vector2(0.7f, 0.7f);
+    _selectInputUIText.text = L"F‘I‘ð";
+    _selectInputUIText.position = Vector2(150.0f, 940.0f);
+    _backInputUI.keyboardKey = VK_ESCAPE;
+    _backInputUI.gamePadKey = XINPUT_GAMEPAD_B;
+    _backInputUI.color = Vector4::White;
+    _backInputUI.position = Vector2(470.0f, 960.0f);
+    _backInputUI.scale = Vector2(0.7f, 0.7f);
+    _backInputUIText.text = L"F–ß‚é";
+    _backInputUIText.position = Vector2(500.0f, 940.0f);
 }
 
 // 3D•`‰æŒã‚Ì•`‰æˆ—
@@ -45,6 +60,12 @@ void ChestSelectMenuController::DelayedRender(const RenderContext& rc)
         0.0f,
         _textOrigin,
         _textScale);
+
+    // “ü—ÍUI
+    GetActor()->GetScene()->GetInputUI()->Draw(_selectInputUI);;
+    GetActor()->GetScene()->GetTextRenderer().Draw(_selectInputUIText);
+    GetActor()->GetScene()->GetInputUI()->Draw(_backInputUI);;
+    GetActor()->GetScene()->GetTextRenderer().Draw(_backInputUIText);
 }
 
 // GUI•`‰æ

@@ -139,6 +139,22 @@ void ChestArmorMenuController::Start()
     _skillTextData.position = Vector2(820.0f, 300.0f);
     _skillTextData.scale = Vector2(1.0f, 1.0f);
     _skillTextData.color = Vector4::Red;
+
+    // 入力UI
+    _selectInputUI.keyboardKey = 'F';
+    _selectInputUI.gamePadKey = XINPUT_GAMEPAD_A;
+    _selectInputUI.color = Vector4::White;
+    _selectInputUI.position = Vector2(110.0f, 960.0f);
+    _selectInputUI.scale = Vector2(0.7f, 0.7f);
+    _selectInputUIText.text = L"：選択";
+    _selectInputUIText.position = Vector2(150.0f, 940.0f);
+    _backInputUI.keyboardKey = VK_ESCAPE;
+    _backInputUI.gamePadKey = XINPUT_GAMEPAD_B;
+    _backInputUI.color = Vector4::White;
+    _backInputUI.position = Vector2(470.0f, 960.0f);
+    _backInputUI.scale = Vector2(0.7f, 0.7f);
+    _backInputUIText.text = L"：戻る";
+    _backInputUIText.position = Vector2(500.0f, 940.0f);
 }
 
 // 更新処理
@@ -506,6 +522,12 @@ void ChestArmorMenuController::DelayedRender(const RenderContext& rc)
             }
         }
     }
+
+    // 入力UI
+    GetActor()->GetScene()->GetInputUI()->Draw(_selectInputUI);;
+    GetActor()->GetScene()->GetTextRenderer().Draw(_selectInputUIText);
+    GetActor()->GetScene()->GetInputUI()->Draw(_backInputUI);;
+    GetActor()->GetScene()->GetTextRenderer().Draw(_backInputUIText);
 }
 
 // GUI描画
@@ -558,6 +580,21 @@ void ChestArmorMenuController::DrawGui()
     ImGui::Separator();
 
 	ImGui::ColorEdit4(u8"選択中リムライト色", &_selectedRimLightColor.x);
+    if (ImGui::TreeNode(u8"入力UI"))
+    {
+        ImGui::DragFloat2(u8"選択入力UI位置", &_selectInputUI.position.x, 1.0f);
+        ImGui::DragFloat2(u8"選択入力UIスケール", &_selectInputUI.scale.x, 0.1f);
+        ImGui::ColorEdit4(u8"選択入力UI色", &_selectInputUI.color.x);
+        _selectInputUIText.DrawGui(u8"選択入力UIText");
+
+        ImGui::Separator();
+        ImGui::DragFloat2(u8"戻る入力UI位置", &_backInputUI.position.x, 1.0f);
+        ImGui::DragFloat2(u8"戻る入力UIスケール", &_backInputUI.scale.x, 0.1f);
+        ImGui::ColorEdit4(u8"戻る入力UI色", &_backInputUI.color.x);
+        _backInputUIText.DrawGui(u8"戻る入力UIText");
+
+        ImGui::TreePop();
+    }
 }
 
 // インデックス追加

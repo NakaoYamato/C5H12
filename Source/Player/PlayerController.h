@@ -195,4 +195,8 @@ private:
 	float _stageContactVibrationL = 0.2f;
 	float _stageContactVibrationR = 0.2f;
 	float _stageContactVibrationTime = 0.1f;
+
+	// Žg—pUI•\Ž¦
+    bool _isUseUIVisible = false;
+    Vector3 _useUIWorldPosition = Vector3::Zero;
 };

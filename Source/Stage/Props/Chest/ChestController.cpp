@@ -83,3 +83,11 @@ bool ChestController::Open()
 	return true;
 }
 
+// ŠJ‚¢‚Ä‚¢‚é‚©
+bool ChestController::IsOpen() const
+{
+	auto chestInput = _chestInput.lock();
+	if (!chestInput)
+		return false;
+	return chestInput->IsActive();
+}

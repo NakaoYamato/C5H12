@@ -5,6 +5,7 @@
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Stage/Props/Chest/ChestController.h"
 #include "../../Source/InGame/InputManager.h"
+#include "../../Library/Graphics/Graphics.h"
 
 #include <imgui.h>
 
@@ -228,6 +229,28 @@ void PlayerController::DelayedRender(const RenderContext& rc)
 	//	GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 2.0f, 0.0f),
 	//	Vector4::White
 	//);
+	
+    // 使用UI表示表示
+	if (_isUseUIVisible)
+	{
+		float screenWidth = Graphics::Instance().GetScreenWidth();
+		float screenHeight = Graphics::Instance().GetScreenHeight();
+		Vector3 project = _useUIWorldPosition.Project(screenWidth, screenHeight,
+			rc.camera->GetView(), rc.camera->GetProjection());
+		if (project.z > 0.0f)
+		{
+            InputUI::DrawInfo info;
+			info.position = { project.x, project.y };
+            info.keyboardKey = 'F';
+            info.gamePadKey = XINPUT_GAMEPAD_A;
+			info.scale = Vector2::One;
+			info.isActive = false;
+            info.color = Vector4::Blue;
+			GetActor()->GetScene()->GetInputUI()->Draw(info);
+		}
+
+		_isUseUIVisible = false;
+	}
 }
 
 // GUI描画
@@ -268,16 +291,25 @@ void PlayerController::OnContact(CollisionData& collisionData)
 		auto chestController = collisionData.other->GetComponent<ChestController>();
 		if (chestController)
 		{
+			if (chestController->IsOpen())
+                return;
+
 			// チェストを開ける
 			// 納刀状態、アイテム使用中でない場合のみ開ける
-			if (IsSelect() && !IsDrawingWeapon() && !IsUsingItem())
+			if (!IsDrawingWeapon() && !IsUsingItem())
 			{
-				chestController->Open();
-				if (auto stateMachine = _stateMachine.lock())
+				if (IsSelect())
 				{
-					// 待機状態へ移行
-					stateMachine->GetStateMachine().ChangeState("Idle");
+					chestController->Open();
+					if (auto stateMachine = _stateMachine.lock())
+					{
+						// 待機状態へ移行
+						stateMachine->GetStateMachine().ChangeState("Idle");
+					}
 				}
+                // UI表示
+                _isUseUIVisible = true;
+                _useUIWorldPosition = chestController->GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 1.5f, 0.0f);
 			}
 		}
 	}

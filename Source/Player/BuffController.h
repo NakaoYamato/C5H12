@@ -37,6 +37,8 @@ public:
 
 	// ƒoƒt’Ç‰Á
 	void AddBuff(BuffType _type, float duration, float _value);
+
+	std::vector<std::unique_ptr<BuffData>>& GetActiveBuffs() { return _activeBuffs; }
 private:
 	std::vector<std::unique_ptr<BuffData>> _activeBuffs;
 	std::weak_ptr<Damageable> _damageable;

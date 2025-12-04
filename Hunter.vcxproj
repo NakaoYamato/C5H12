@@ -358,6 +358,7 @@
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
+    <ClCompile Include="Source\Player\UI\PlayerBuffUIController.cpp" />
     <ClCompile Include="Source\Player\UI\PlayerStaminaUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Scene\Editor\SceneArmorEditor.cpp" />
@@ -655,6 +656,7 @@
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />
+    <ClInclude Include="Source\Player\UI\PlayerBuffUIController.h" />
     <ClInclude Include="Source\Player\UI\PlayerStaminaUIController.h" />
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Scene\Editor\SceneArmorEditor.h" />

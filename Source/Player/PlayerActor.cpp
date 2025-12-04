@@ -18,6 +18,7 @@
 #include "StateMachine/PlayerStateMachine.h"
 #include "UI/PlayerHealthUIController.h"
 #include "UI/PlayerStaminaUIController.h"
+#include "UI/PlayerBuffUIController.h"
 
 #include "Weapon/GreatSword/PlayerGreatSwordActor.h"
 
@@ -65,10 +66,15 @@ void PlayerActor::OnCreate()
 
 		if (_isUserControlled)
 		{
+			// スタミナUI
 			auto staminaUIActor = this->_scene->RegisterActor<UIActor>("Player" + std::string(u8"StaminaUI"), ActorTag::UI);
 			staminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 74.0f));
 			staminaUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
 			auto staminaUIController = staminaUIActor->AddComponent<PlayerStaminaUIController>(staminaController);
+
+			// バフUI
+			auto buffUIActor = this->_scene->RegisterActor<UIActor>("Player" + std::string(u8"BuffUI"), ActorTag::UI);
+			auto buffUIController = buffUIActor->AddComponent<PlayerBuffUIController>(buffController);
 		}
 	}
 

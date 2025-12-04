@@ -66,6 +66,9 @@ void Scene::Initialize()
 	// アクターマネージャーの開始関数を呼び出し
     _actorManager.Start();
 
+    // 初回の更新処理を実行
+    Update(0.0f);
+
     // ロード進行度を1に設定
     SetCompletionLoading(1.0f);
 }

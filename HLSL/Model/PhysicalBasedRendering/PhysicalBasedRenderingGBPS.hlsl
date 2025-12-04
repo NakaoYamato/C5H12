@@ -40,9 +40,9 @@ PS_GB_OUT main(VS_OUT pin)
     float roughness = roughnessFactor;
     float metalness = metalnessFactor;
     {
-        float4 sampled = textureMaps[ROUGHNESS_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
-        roughness *= sampled.g;
-        metalness *= sampled.b;
+        //float4 sampled = textureMaps[ROUGHNESS_TEXTURE].Sample(samplerStates[_LINEAR_WRAP_SAMPLER_INDEX], pin.texcoord);
+        //roughness *= sampled.g;
+        //metalness *= sampled.b;
     }
     
     return CreateOutputData(

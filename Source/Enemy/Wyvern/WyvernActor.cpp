@@ -35,7 +35,7 @@ void WyvernActor::OnCreate()
 	GetTransform().SetLengthScale(0.01f);
 	GetTransform().SetScale(1.5f);
 	_charactorController.lock()->SetMass(1000.0f);
-	_damageable.lock()->ResetHealth(1.0f);
+	_damageable.lock()->ResetHealth(300.0f);
 
 	// コンポーネント追加
 	_modelRenderer				= AddComponent<ModelRenderer>();
@@ -49,6 +49,7 @@ void WyvernActor::OnCreate()
 	);
 	auto effectController = this->AddComponent<EffectController>();
 
+	_animator.lock()->SetAnimationSpeed(0.75f);
 	// エフェクト読み込み
 	effectController->LoadEffekseerEffect(EffectType::HitEffect, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
 	effectController->LoadParticleEffect(EffectType::MouthBreathEffect, "./Data/Particle/Wyvern/AngryBreath.json");

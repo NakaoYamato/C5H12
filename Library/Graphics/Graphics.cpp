@@ -52,7 +52,7 @@ void Graphics::Initialize(HWND hwnd, HINSTANCE instance, const BOOL FULLSCREEN)
 		Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory6;
 		hr = CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(dxgiFactory6.GetAddressOf()));
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		AcquireHighPerformanceAdapter(dxgiFactory6.Get(), adapter.GetAddressOf());
+		AcquireHighPerformanceAdapter(dxgiFactory6.Get(), _adapter.GetAddressOf());
 
 
 		UINT createDeviceFlags{};
@@ -62,16 +62,16 @@ void Graphics::Initialize(HWND hwnd, HINSTANCE instance, const BOOL FULLSCREEN)
 #endif
 		// デバイス、デバイスコンテキストの作成
 		D3D_FEATURE_LEVEL featureLevels{ D3D_FEATURE_LEVEL_11_1 };
-		hr = D3D11CreateDevice(adapter.Get(),
+		hr = D3D11CreateDevice(_adapter.Get(),
 			D3D_DRIVER_TYPE_UNKNOWN,
 			0,
 			createDeviceFlags,
 			&featureLevels,
 			1,
 			D3D11_SDK_VERSION,
-			&device,
+			&_device,
 			NULL,
-			&immediateContext);
+			&_immediateContext);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		// スワップチェーンの作成
@@ -431,7 +431,7 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		swap_chain_desc1.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		swap_chain_desc1.Flags = _tearingSupported ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 #ifdef X3DGP_FULLSCREEN
-		hr = dxgiFactory6->CreateSwapChainForHwnd(device.Get(), hwnd, &swap_chain_desc1, NULL, NULL, swapChain.ReleaseAndGetAddressOf());
+		hr = dxgiFactory6->CreateSwapChainForHwnd(_device.Get(), _hwnd, &swap_chain_desc1, NULL, NULL, _swapChain.ReleaseAndGetAddressOf());
 #endif
 #if 0
 		swap_chain_desc1.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;

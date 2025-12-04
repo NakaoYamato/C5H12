@@ -73,7 +73,7 @@ float4 main(VsOut pin) : SV_TARGET
         position_light_space.x = position_light_space.x * +0.5 + 0.5;
         position_light_space.y = position_light_space.y * -0.5 + 0.5;
         shadow_factor = cascaded_shadow_maps.SampleCmpLevelZero(comparison_sampler_state, float3(position_light_space.xy, cascade_index), position_light_space.z - shadow_depth_bias).x;
-#if 1   // ソフトシャドウ
+#if 0   // ソフトシャドウ
         const uint samples = 24;
         const float2 sampleOffsets[samples] =
         {

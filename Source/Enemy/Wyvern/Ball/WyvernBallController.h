@@ -41,5 +41,5 @@ private:
 	// ”š”­ƒtƒ‰ƒO
 	bool _isExploded = false;
 	// UŒ‚—Í
-	float _ATK = 2.0f;
+	float _ATK = 20.0f;
 };

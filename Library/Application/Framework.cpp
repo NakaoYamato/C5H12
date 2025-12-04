@@ -145,12 +145,12 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
 
 #ifdef X3DGP_FULLSCREEN
         // 画面サイズが変更されたとき
-        RECT client_rect{};
-        GetClientRect(hwnd, &client_rect);
-        UINT width = client_rect.right - client_rect.left;
-        UINT height = client_rect.bottom - client_rect.top;
-        if (width != 0 && height != 0)
-            Graphics::Instance().OnSizeChanged(width, height);
+        //RECT client_rect{};
+        //GetClientRect(hwnd, &client_rect);
+        //UINT width = client_rect.right - client_rect.left;
+        //UINT height = client_rect.bottom - client_rect.top;
+        //if (width != 0 && height != 0)
+        //    Graphics::Instance().OnSizeChanged(width, height);
 #endif
         break;
     }

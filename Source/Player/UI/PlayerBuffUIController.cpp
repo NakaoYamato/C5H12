@@ -16,6 +16,7 @@ void PlayerBuffUIController::Start()
 	}
 
 	_buffIconSprite.LoadTexture(L"Data/Texture/UI/Player/BuffIcon.png", Sprite::CenterAlignment::CenterCenter);
+	_buffIconSprite.GetRectTransform().SetLocalScale(Vector2(0.25f, 0.25f));
 	_buffIconSprite.SetTexSize(Vector2(256.0f, 256.0f));
 }
 

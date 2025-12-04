@@ -29,7 +29,7 @@ private:
     // ‰ñ“]‚Ì–€C—Í
     float _friction = 1.0f;
     // ‰ñ“]‚É‘Î‚µ‚Ä‚Ì•â³’l
-    float _rotationFactor = 3.0f;
+    float _rotationFactor = 10.0f;
     // Œ³‚É–ß‚é—Í
     float _returnForce = 100.0f;
 };

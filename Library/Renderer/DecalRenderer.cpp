@@ -113,6 +113,8 @@ void DecalRenderer::Draw(std::string shaderName,
 // •`‰æˆ—
 void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderContext& rc)
 {
+	if (_drawInfos.empty()) return;
+
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// o—Íæ‚ğİ’è

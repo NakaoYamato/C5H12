@@ -13,7 +13,7 @@
 #include "../PostProcess/CascadedShadowMap/CascadedShadowMap.h"
 #include "GBuffer.h"
 
-//#define X3DGP_FULLSCREEN
+#define X3DGP_FULLSCREEN
 
 class Graphics
 {
@@ -111,7 +111,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Device>			_device = nullptr;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>		_immediateContext = nullptr;
 #ifdef X3DGP_FULLSCREEN
-	Microsoft::WRL::ComPtr<IDXGISwapChain1>			swapChain = nullptr;
+	Microsoft::WRL::ComPtr<IDXGISwapChain1>			_swapChain = nullptr;
 #else
 	Microsoft::WRL::ComPtr<IDXGISwapChain>			_swapChain = nullptr;
 #endif

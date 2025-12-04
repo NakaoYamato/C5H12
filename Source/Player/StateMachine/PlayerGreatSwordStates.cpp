@@ -265,6 +265,9 @@ void PlayerGreatSwordEvadeState::OnExecute(float elapsedTime)
             _owner->GetStateMachine().ChangeState("CombatAttack1");
         else if (_owner->GetPlayer()->IsSpecialAttack())
             _owner->GetStateMachine().ChangeState("CombatAttack2");
+        // ‰ñ”ðˆÚs
+        else if (_owner->GetPlayer()->IsEvade())
+            _owner->GetStateMachine().ChangeState("CombatEvade");
         // ˆÚ“®ˆÚs
         else if (_owner->GetPlayer()->IsMoving())
             _owner->GetStateMachine().ChangeState("CombatRun");

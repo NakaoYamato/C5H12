@@ -29,17 +29,22 @@ void MeshCollider::Update(float elapsedTime)
 		// 再計算中フラグを立てる
 		_isCalculating = true;
 		// コリジョンメッシュの再計算をジョブシステムに申請
-		JobSystem::Instance().EnqueueJob(
-			GetName(),
-			ImGuiControl::Profiler::Color::Green,
-			[&]()
-			{
-				CollisionMesh collisionMeshCopy = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
-				{
-					this->SetCalcCollisionMesh(collisionMeshCopy);
-					_isCalculating = false;
-				}
-			});
+		//JobSystem::Instance().EnqueueJob(
+		//	GetName(),
+		//	ImGuiControl::Profiler::Color::Green,
+		//	[&]()
+		//	{
+		//		CollisionMesh collisionMeshCopy = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
+		//		{
+		//			this->SetCalcCollisionMesh(collisionMeshCopy);
+		//			_isCalculating = false;
+		//		}
+		//	});
+		CollisionMesh collisionMeshCopy = RecalculateCollisionMesh(GetActor()->GetModel().lock().get());
+		{
+			this->SetCalcCollisionMesh(collisionMeshCopy);
+			_isCalculating = false;
+		}
 	}
 
 	{

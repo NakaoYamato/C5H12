@@ -17,12 +17,12 @@ void TerrainCollider::OnCreate()
 void TerrainCollider::Update(float elapsedTime)
 {
 	MeshCollider::Update(elapsedTime);
-	// 地形コントローラーが有効で、地形編集が完了している場合は再計算
-	if (_terrainController.lock() && 
-		_terrainController.lock()->GetEditState() == TerrainController::EditState::Complete)
-	{
-		_recalculate = true;
-	}
+	//// 地形コントローラーが有効で、地形編集が完了している場合は再計算
+	//if (_terrainController.lock() && 
+	//	_terrainController.lock()->GetEditState() == TerrainController::EditState::Complete)
+	//{
+	//	_recalculate = true;
+	//}
 }
 // コリジョンメッシュの再計算
 MeshCollider::CollisionMesh TerrainCollider::RecalculateCollisionMesh(Model* model) const

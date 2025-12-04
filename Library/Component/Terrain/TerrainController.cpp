@@ -6,6 +6,7 @@
 #include "../../Library/Algorithm/Converter.h"
 
 #include "TerrainEnvironmentController.h"
+#include "TerrainCollider.h"
 
 #include <filesystem>
 #include <imgui.h>
@@ -80,6 +81,10 @@ void TerrainController::LateUpdate(float elapsedTime)
         GetActor()->GetScene()->GetTerrainRenderer().ExportVertices(
             _terrain.get(),
             GetActor()->GetTransform().GetMatrix());
+		if (auto terrainCollider = GetActor()->GetCollider<TerrainCollider>())
+		{
+			terrainCollider->SetRecalculate(true);
+		}
         _editState = EditState::Complete;
     }
 }
@@ -239,4 +244,10 @@ void TerrainController::CreateEnvironment(int layoutID)
 	actor->SetParent(GetActor().get());
     // 親のトランスフォームを反映しない
     actor->SetInheritParentTransform(false);
+}
+
+// 編集状態設定
+void TerrainController::SetEditState(EditState state)
+{
+    _editState = state;
 }

@@ -422,15 +422,15 @@ void Animator::ComputeAnimation(int animationIndex, float time, std::vector<Mode
     if (JobSystem::Instance().UseMultiThread())
     {
         std::vector<std::future<void>> jobResults;
-        for (size_t i = 0; i * 50 < nodeSize; i++)
+        for (size_t i = 0; i * ANIMATION_COMPUTE_DIVIDE_COUNT < nodeSize; i++)
         {
 			std::string jobName = "Animator::ComputeAnimation " + std::to_string(i);
             jobResults.emplace_back(JobSystem::Instance().EnqueueJob(jobName.c_str(),
                 ImGuiControl::Profiler::Color::Blue,
                 [&](size_t index)
                 {
-                    size_t startIndex = index * 50;
-                    size_t endIndex = (index + 1) * 50;
+                    size_t startIndex = index * ANIMATION_COMPUTE_DIVIDE_COUNT;
+                    size_t endIndex = (index + 1) * ANIMATION_COMPUTE_DIVIDE_COUNT;
                     if (endIndex > nodeSize)
                         endIndex = nodeSize;
                     for (size_t nodeIndex = startIndex; nodeIndex < endIndex; ++nodeIndex)

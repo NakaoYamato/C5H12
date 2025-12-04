@@ -605,6 +605,9 @@ void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
 		// UŒ‚ˆÚs
 		if (_owner->GetPlayer()->IsAttack())
 			_owner->GetStateMachine().ChangeState("CombatAttack1");
+		// ‰ñ”ðˆÚs
+		else if (_owner->GetPlayer()->IsEvade())
+			_owner->GetStateMachine().ChangeState("Evade");
 		// ˆÚ“®ˆÚs
 		else if (_owner->GetPlayer()->IsMoving())
 			_owner->GetStateMachine().ChangeState("Walk");

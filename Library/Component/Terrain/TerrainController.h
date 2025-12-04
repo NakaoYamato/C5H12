@@ -41,7 +41,7 @@ public:
 	// •ÒWó‘Ôæ“¾
 	EditState GetEditState() const { return _editState; }
 	// •ÒWó‘Ôİ’è
-	void SetEditState(EditState state) { _editState = state; }
+    void SetEditState(EditState state);
 #pragma endregion
 
 private:

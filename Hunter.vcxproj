@@ -350,7 +350,7 @@
     <ClCompile Include="Source\Item\ItemFunctions.cpp" />
     <ClCompile Include="Source\Item\ItemManager.cpp" />
     <ClCompile Include="Source\Loading\LoadingSprController.cpp" />
-    <ClCompile Include="Source\Menu\MenuMediator.cpp" />
+    <ClCompile Include="Source\InGame\UI\Menu\MenuUIController.cpp" />
     <ClCompile Include="Source\Armor\ArmorActor.cpp" />
     <ClCompile Include="Source\Player\BuffController.cpp" />
     <ClCompile Include="Source\Player\PlayerEquipmentController.cpp" />
@@ -375,11 +375,7 @@
     <ClCompile Include="Source\Stage\Props\Fence\GeteController.cpp" />
     <ClCompile Include="Source\Stage\SafetyZone.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
-    <ClCompile Include="Source\Title\TitleMediator.cpp" />
-    <ClCompile Include="Source\Menu\Item\MenuExitItem.cpp" />
-    <ClCompile Include="Source\Menu\Category\MenuCategory.cpp" />
-    <ClCompile Include="Source\Menu\MenuInput.cpp" />
-    <ClCompile Include="Source\Menu\Item\MenuItem.cpp" />
+    <ClCompile Include="Source\InGame\Input\Menu\MenuInput.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Result\ResultToExitUI.cpp" />
@@ -407,11 +403,6 @@
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerStateMachine.cpp" />
-    <ClCompile Include="Source\Title\Item\TitleToExitItem.cpp" />
-    <ClCompile Include="Source\Title\Item\TitleToHomeItem.cpp" />
-    <ClCompile Include="Source\Title\Item\TitleToOfflineItem.cpp" />
-    <ClCompile Include="Source\Title\Item\TitleToOnlineItem.cpp" />
-    <ClCompile Include="Source\Title\Item\TitleToOnlineSettingItem.cpp" />
     <ClCompile Include="Source\User\UserDataManager.cpp" />
     <ClCompile Include="Source\Weapon\WeaponData.cpp" />
     <ClCompile Include="Source\Weapon\WeaponManager.cpp" />
@@ -645,7 +636,7 @@
     <ClInclude Include="Source\Item\ItemFunctions.h" />
     <ClInclude Include="Source\Item\ItemManager.h" />
     <ClInclude Include="Source\Loading\LoadingSprController.h" />
-    <ClInclude Include="Source\Menu\MenuMediator.h" />
+    <ClInclude Include="Source\InGame\UI\Menu\MenuUIController.h" />
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />
     <ClInclude Include="Source\Armor\ArmorActor.h" />
@@ -673,11 +664,7 @@
     <ClInclude Include="Source\Stage\Props\Fence\GeteController.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Stage\SafetyZone.h" />
-    <ClInclude Include="Source\Title\TitleMediator.h" />
-    <ClInclude Include="Source\Menu\Item\MenuExitItem.h" />
-    <ClInclude Include="Source\Menu\Category\MenuCategory.h" />
-    <ClInclude Include="Source\Menu\MenuInput.h" />
-    <ClInclude Include="Source\Menu\Item\MenuItem.h" />
+    <ClInclude Include="Source\InGame\Input\Menu\MenuInput.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
     <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Result\ResultToExitUI.h" />
@@ -705,11 +692,6 @@
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerStateMachine.h" />
-    <ClInclude Include="Source\Title\Item\TitleToExitItem.h" />
-    <ClInclude Include="Source\Title\Item\TitleToHomeItem.h" />
-    <ClInclude Include="Source\Title\Item\TitleToOfflineItem.h" />
-    <ClInclude Include="Source\Title\Item\TitleToOnlineItem.h" />
-    <ClInclude Include="Source\Title\Item\TitleToOnlineSettingItem.h" />
     <ClInclude Include="Source\User\UserDataManager.h" />
     <ClInclude Include="Source\Weapon\WeaponData.h" />
     <ClInclude Include="Source\Weapon\WeaponManager.h" />

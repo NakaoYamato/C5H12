@@ -41,6 +41,17 @@ public:
 	std::shared_ptr<ArmorActor> GetArmorActor(ArmorType type) const { return _armorActors[static_cast<int>(type)].lock(); }
 	// –h‹ïƒAƒNƒ^[İ’è
 	void SetArmorActor(ArmorType type, std::shared_ptr<ArmorActor> actor) { _armorActors[static_cast<int>(type)] = actor; }
+
+    // Šî‘bUŒ‚—Íæ“¾
+    float GetBaseAttack() const { return _baseAttack; }
+    // ‘‡UŒ‚—Íæ“¾
+    float GetTotalAttack() const { return _totalAttack; }
+    // Šî‘b–hŒä—Íæ“¾
+    float GetBaseDefense() const { return _baseDefense; }
+    // ‘‡–hŒä—Íæ“¾
+    float GetTotalDefense() const { return _totalDefense; }
+    // Œ»İ‚ÌƒXƒLƒ‹î•ñæ“¾
+    const std::unordered_map<SkillType, int>& GetCurrentSkills() const { return _currentSkills; }
 private:
 	// ƒpƒ‰ƒ[ƒ^‚ÌÄŒvZ
 	void RecalculateParameters();

@@ -178,7 +178,11 @@ void PlayerEquipmentController::RecalculateParameters()
 	{
 		float defense = _baseDefense;
 		// スキルによる防御力補正を適用
-		int defenseLevel = _currentSkills[SkillType::DefenseBoost];
+		int defenseLevel = 0;
+		if (_currentSkills.find(SkillType::DefenseBoost) != _currentSkills.end())
+		{
+			defenseLevel = _currentSkills[SkillType::DefenseBoost];
+        }
 		switch (defenseLevel)
 		{
 		case 1: defense += 3.0f; break;
@@ -196,7 +200,11 @@ void PlayerEquipmentController::RecalculateParameters()
 	{
 		float attack = _baseAttack;
 		// スキルによる攻撃力補正を適用
-		int attackLevel = _currentSkills[SkillType::AttackBoost];
+		int attackLevel = 0;
+		if (_currentSkills.find(SkillType::AttackBoost) != _currentSkills.end())
+		{
+			attackLevel = _currentSkills[SkillType::AttackBoost];
+		}
 		switch (attackLevel)
 		{
 		case 1: attack += 3.0f; break;

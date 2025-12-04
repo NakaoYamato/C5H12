@@ -5,7 +5,6 @@
 #include "../../Library/Actor/Terrain/TerrainActor.h"
 #include "../../Library/Actor/UI/UIActor.h"
 
-#include "../../Source/Title/TitleMediator.h"
 #include "../../Source/Title/Wyvern/TitleWyvernActor.h"
 #include "../../Source/Title/UI/TitleUIcontroller.h"
 
@@ -32,9 +31,6 @@ void SceneTitle::OnInitialize()
 		auto spriteRenderer = background->AddComponent<SpriteRenderer>();
 		spriteRenderer->LoadTexture("TitleBackground", L"./Data/Texture/Title/Background.png", Sprite::CenterAlignment::LeftUp);
     }
-  //  {
-		//auto titleMediator = RegisterActor<TitleMediator>("TitleMediator", ActorTag::UI);
-  //  }
     {
         auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/001.json", Vector3(0.0f, 0.0f, 0.0f));
     }

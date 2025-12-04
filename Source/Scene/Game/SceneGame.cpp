@@ -15,7 +15,6 @@
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
-#include "../../Menu/MenuMediator.h"
 
 // ネットワーク有効フラグ
 bool SceneGame::NetworkEnabled = false;
@@ -24,7 +23,7 @@ std::string SceneGame::NetworkAddress = "127.0.0.1";
 
 void SceneGame::OnInitialize()
 {
-    static const float CompletionLoadingRate = 1.0f / 9.0f;
+    static const float CompletionLoadingRate = 1.0f / 8.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -78,10 +77,6 @@ void SceneGame::OnInitialize()
     {
         auto Fence = RegisterActor<FenceActor>("Fence", ActorTag::Stage);
         Fence->GetTransform().SetPosition(Vector3(-43.5f, 0.0f, 0.45f));
-    }
-    AddCompletionLoading(CompletionLoadingRate);
-    {
-        auto menu = RegisterActor<MenuMediator>("MenuMediator", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

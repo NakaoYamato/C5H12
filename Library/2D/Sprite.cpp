@@ -22,13 +22,27 @@ void Sprite::DrawGui()
 			// ダイアログを開く
 			std::string filepath;
 			std::string currentDirectory;
+			std::string resultPath;
 			Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::TextureFilter);
 			// ファイルを選択したら
 			if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
 			{
-				LoadTexture(ToWString(filepath).c_str(), _centerAlignment);
+				// 相対パス取得
+				try
+				{
+					// 相対パス取得
+					std::filesystem::path path = std::filesystem::relative(filepath, currentDirectory);
+					resultPath = path.u8string();
+				}
+				catch (...)
+				{
+					// 相対パス取得に失敗した場合は絶対パスを使用
+					resultPath = filepath;
+				}
+				LoadTexture(ToWString(resultPath).c_str(), _centerAlignment);
 			}
 		}
+        ImGui::Text(u8"ファイル名:%s", ToString(_sprite.GetFilepath()).c_str());
 	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"マテリアル"))

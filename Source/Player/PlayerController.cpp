@@ -276,7 +276,7 @@ void PlayerController::OnContact(CollisionData& collisionData)
 				if (auto stateMachine = _stateMachine.lock())
 				{
 					// ‘Ò‹@ó‘Ô‚ÖˆÚs
-					stateMachine->GetStateMachine().ChangeSubState("Idle");
+					stateMachine->GetStateMachine().ChangeState("Idle");
 				}
 			}
 		}

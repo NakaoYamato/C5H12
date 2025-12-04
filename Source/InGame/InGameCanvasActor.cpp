@@ -2,14 +2,16 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
-#include "../../Source/InGame/UI/TimerUIController.h"
+#include "UI/TimerUIController.h"
 
-#include "../../Source/InGame/UI/Chest/ChestUIController.h"
+#include "UI/Chest/ChestUIController.h"
 
-#include "../../Source/InGame/UI/Item/ItemUIController.h"
-#include "../../Source/InGame/UI/Item/Slider/ItemSliderController.h"
+#include "UI/Item/ItemUIController.h"
+#include "UI/Item/Slider/ItemSliderController.h"
 
-#include "../../Source/InGame/UI/Operate/OperateUIController.h"
+#include "UI/Operate/OperateUIController.h"
+
+#include "UI/Menu/MenuUIController.h"
 
 // ¶¬Žžˆ—
 void InGameCanvasActor::OnCreate()
@@ -53,4 +55,9 @@ void InGameCanvasActor::OnCreate()
 	auto operateUIActor = GetScene()->RegisterActor<UIActor>("OperateUI", ActorTag::UI);
 	operateUIActor->SetParent(this);
 	operateUIActor->AddComponent<OperateUIController>();
+
+	// ƒƒjƒ…[UI¶¬
+    auto menuUIActor = GetScene()->RegisterActor<UIActor>("MenuUI", ActorTag::UI);
+    menuUIActor->SetParent(this);
+    menuUIActor->AddComponent<MenuUIController>();
 }

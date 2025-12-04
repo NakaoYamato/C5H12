@@ -13,11 +13,10 @@
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
-#include "../../Menu/MenuMediator.h"
 
 void ScenePlayerDebug::OnInitialize()
 {
-	static const float CompletionLoadingRate = 1.0f / 12.0f;
+	static const float CompletionLoadingRate = 1.0f / 11.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -55,10 +54,6 @@ void ScenePlayerDebug::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
-    }
-    AddCompletionLoading(CompletionLoadingRate);
-    {
-		auto menu = RegisterActor<MenuMediator>("MenuMediator", ActorTag::UI);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

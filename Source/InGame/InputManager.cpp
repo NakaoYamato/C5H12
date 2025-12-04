@@ -3,6 +3,7 @@
 #include "../../Library/Scene/Scene.h"
 
 #include "Input/ChestInput.h"
+#include "Input/Menu/MenuInput.h"
 
 #include <imgui.h>
 
@@ -13,6 +14,11 @@ void InputManager::OnCreate()
 	auto chestInputController = GetScene()->RegisterActor<Actor>("ChestInput", ActorTag::System);
 	chestInputController->SetParent(this);
 	auto chestInput = chestInputController->AddComponent<ChestInput>();
+
+    // メニュー用入力コントローラー登録
+    auto menuInputController = GetScene()->RegisterActor<Actor>("MenuInput", ActorTag::System);
+    menuInputController->SetParent(this);
+    auto menuInput = menuInputController->AddComponent<MenuInput>();
 }
 
 // 開始関数

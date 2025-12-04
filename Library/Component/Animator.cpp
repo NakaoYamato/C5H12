@@ -197,6 +197,14 @@ void Animator::DrawGui()
 
         ImGui::TreePop();
     }
+    if (ImGui::TreeNode(u8"部分アニメーション"))
+    {
+		for (auto& maskIndex : _partialMaskIndices)
+		{
+			ImGui::Text("%s", _nodeNames[maskIndex]);
+		}
+		ImGui::TreePop();
+    }
 
 	ImGui::Checkbox(u8"イベント情報を表示", &_drawEventDebugGui);
 	ImGui::Checkbox(u8"アニメーションカーブを表示", &_drawAnimationCurveGui);

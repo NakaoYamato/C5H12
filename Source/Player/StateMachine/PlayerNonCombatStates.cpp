@@ -973,6 +973,10 @@ PlayerNonCombatDrinkState::PlayerNonCombatDrinkState(PlayerStateMachine* stateMa
 
 void PlayerNonCombatDrinkState::OnEnter()
 {
+	// 飲む動きを部分アニメーションで対応
+	// 移動はメインのアニメーションとして使用
+	// サブステートでは部分アニメーションのみを再生する
+
 	_owner->GetAnimator()->SetIsUseRootMotion(true);
 	_owner->GetPlayer()->SetIsAbleToUseItem(false);
 	ChangeSubState("DrinkStart");

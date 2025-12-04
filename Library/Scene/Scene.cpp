@@ -14,6 +14,9 @@
 // 初期化
 void Scene::Initialize()
 {
+	// ロード進行度を0に設定
+    SetCompletionLoading(0.0f);
+
     ProfileScopedSection_3(0, "Scene::Initialize", ImGuiControl::Profiler::Dark);
     Graphics& graphics = Graphics::Instance();
 	ID3D11Device* device = graphics.GetDevice();
@@ -61,6 +64,9 @@ void Scene::Initialize()
 
 	// アクターマネージャーの開始関数を呼び出し
     _actorManager.Start();
+
+    // ロード進行度を1に設定
+    SetCompletionLoading(1.0f);
 }
 
 // 終了化

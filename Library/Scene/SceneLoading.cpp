@@ -31,8 +31,9 @@ void SceneLoading::ChangeNextScene()
 	{
 		SceneManager::Instance().ChangeScene(_nextScene);
 	}
-	// ローディングスレッド
+	_nextScene.reset();
 }
+// ローディングスレッド
 void SceneLoading::LoadingThread(SceneLoading* scene)
 {
 	//COM関連の初期化でスレッド毎に呼ぶ必要がある
@@ -43,6 +44,4 @@ void SceneLoading::LoadingThread(SceneLoading* scene)
 	scene->_nextScene->Initialize();
 
 	CoUninitialize();
-
-	scene->_nextScene->SetCompletionLoading(1.0f);
 }

@@ -101,3 +101,30 @@ private:
 };
 #pragma endregion
 
+#pragma region 秘薬
+class ElixirPotionFunc : public ItemFunctionBase
+{
+public:
+	enum Type : int
+	{
+		HPOnly = 0,
+		All,
+	};
+
+public:
+	ElixirPotionFunc() = default;
+	~ElixirPotionFunc() override = default;
+	// 名前取得
+	std::string GetName() const override { return "ElixirPotionFunc"; }
+	// 開始処理
+	void Start(ItemData* item, Actor* user) override;
+	// 効果発動
+	void Execute(float elapsedTime) override;
+	// パラメータマップ取得
+	ItemData::ParameterMap GetParameterKeys() override;
+private:
+	Type _type = Type::HPOnly;
+	float _timer = 0.0f;
+	float _requiredTime = 0.0f;
+};
+#pragma endregion

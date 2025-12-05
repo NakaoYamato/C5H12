@@ -115,3 +115,54 @@ ItemData::ParameterMap StrengthPotionFunc::GetParameterKeys()
 	return p;
 }
 #pragma endregion
+
+#pragma region 秘薬
+void ElixirPotionFunc::Start(ItemData* item, Actor* user)
+{
+	ItemFunctionBase::Start(item, user);
+	_timer = 0.0f;
+	// パラメータ取得
+	auto it = _item->parameters.find(u8"必要時間");
+	if (it != _item->parameters.end())
+	{
+		_requiredTime = std::get<float>(it->second);
+	}
+	it = _item->parameters.find(u8"効果");
+	if (it != _item->parameters.end())
+	{
+		_type = static_cast<Type>(std::get<int>(it->second));
+	}
+}
+
+void ElixirPotionFunc::Execute(float elapsedTime)
+{
+	_timer += elapsedTime;
+	if (_timer >= _requiredTime)
+	{
+		auto damageable = _user->GetComponent<Damageable>();
+		if (!damageable)
+			return;
+
+		switch (_type)
+		{
+		case ElixirPotionFunc::HPOnly:
+			damageable->ResetHealth(damageable->GetMaxHealth());
+			break;
+		case ElixirPotionFunc::All:
+			damageable->ResetHealth(damageable->GetMaxHealth());
+			// TODO : スタミナ回復
+			break;
+		}
+
+		_state = State::End;
+	}
+}
+
+ItemData::ParameterMap ElixirPotionFunc::GetParameterKeys()
+{
+	ItemData::ParameterMap p;
+	p[u8"効果"] = 0;
+	p[u8"必要時間"] = 0.0f;
+	return p;
+}
+#pragma endregion

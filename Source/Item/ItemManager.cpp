@@ -25,6 +25,7 @@ bool ItemManager::Initialize()
 	// アイテム効果処理リスト初期化
 	_itemFunctionList.push_back(std::make_unique<HealingPotionFunc>());
 	_itemFunctionList.push_back(std::make_unique<StrengthPotionFunc>());
+	_itemFunctionList.push_back(std::make_unique<ElixirPotionFunc>());
 
 	return true;
 }
@@ -238,6 +239,8 @@ void ItemManager::DrawGui()
 					if (ImGui::RadioButton(func->GetName().c_str(), data.executeProcessIndex == index))
 					{
 						data.executeProcessIndex = index;
+						// パラメータ初期化
+						data.parameters = func->GetParameterKeys();
 					}
 				}
 				ImGui::TreePop();

@@ -903,10 +903,10 @@ namespace PlayerDrinkSubState
 		const char* GetName() const override { return "Drinking"; }
 		void OnEnter() override
 		{
-			// 部分アニメーションを再生
-			_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
 			// 部分アニメーション用パラメータ設定
 			_owner->GetAnimator()->RemovePartialAnimationMask("clavicle_r");
+			// 部分アニメーションを再生
+			_owner->GetAnimator()->PlayPartialAnimation(u8"Drinking", false, 0.0f);
 
 			_equipment = _owner->GetPlayer()->GetActor()->GetComponent<PlayerEquipmentController>();
 			_timer = 0.0f;

@@ -46,7 +46,7 @@ void MenuInput::OnUpdate(float elapsedTime)
 
 	if (_INPUT_TRIGGERD("Select"))
 		menuUIController->SetInputState(MenuUIController::InputState::Select);
-	if (_INPUT_TRIGGERD("Back"))
+	if (_INPUT_TRIGGERD("Back") || _INPUT_TRIGGERD("Menu"))
 		menuUIController->SetInputState(MenuUIController::InputState::Back);
 	if (_INPUT_TRIGGERD("L3"))
 		menuUIController->SetInputState(MenuUIController::InputState::L3);

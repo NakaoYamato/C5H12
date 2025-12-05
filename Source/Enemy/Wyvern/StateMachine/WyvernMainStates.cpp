@@ -746,6 +746,9 @@ void WyvernDeathState::OnEnter()
 		false,
 		3.0f);
 
+	// 押し出し判定を消す
+	_owner->GetEnemy()->GetCharactorController()->SetIsPushable(false);
+
     // ハンティング成功カメラを起動
 	for (auto& child : _owner->GetEnemy()->GetActor()->GetScene()->GetMainCameraActor()->GetChildren())
 	{

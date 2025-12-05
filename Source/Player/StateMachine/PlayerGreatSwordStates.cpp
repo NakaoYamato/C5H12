@@ -404,6 +404,9 @@ namespace Attack1SubState
                         _owner->GetPlayer()->SetChargeLevel(_chargeStage);
                         _owner->GetPlayer()->StartChargeEffectRimLight();
 
+                        // コントローラー振動
+                        _owner->GetPlayer()->SetVibration(0.1f * _chargeStage, 0.1f * _chargeStage, 0.2f);
+
                         // 各チャージエフェクト停止
                         _owner->GetEffect()->Stop(PlayerController::EffectType::Charge0);
                         _owner->GetEffect()->Stop(PlayerController::EffectType::Charge1);
@@ -479,7 +482,7 @@ namespace Attack1SubState
         }
     private:
         float _chargingTimer = 0.0f;
-        float _chargeStageTimer = 1.0f;
+        float _chargeStageTimer = 0.8f;
         int _chargeStage = 1;
         int _chargeStageMax = 3;
 
@@ -768,7 +771,6 @@ namespace Attack2SubState
         }
         void OnEnter() override
         {
-            ComboSubState::OnEnter();
             // 直前のサブステートの名前から次のサブステートを決定
             auto& str = _owner->GetStateMachine().GetPreviousSubStateName();
             if (str == "ChargeAttack01Start")
@@ -786,21 +788,14 @@ namespace Attack2SubState
                 // 前方突進攻撃
                 _branchSubStateName = "ChargeAttack03Start";
             }
+            ComboSubState::OnEnter();
         }
         void OnExecute(float elapsedTime) override
         {
-            // アニメーションが終了していたら遷移
-            if (!_owner->GetAnimator()->IsPlaying())
-            {
-                // 攻撃からIdleに遷移
-                _owner->GetStateMachine().ChangeState("CombatIdle");
-            }
             // 攻撃キーを押し続けている時
             if (_owner->GetPlayer()->CallCancelAttackEvent() && _owner->GetPlayer()->IsHoldingAttackKey())
             {
-                // 攻撃1のほうに遷移
-                _owner->GetStateMachine().ChangeState("CombatAttack1");
-                _owner->GetStateMachine().ChangeSubState(_branchSubStateName);
+                _owner->GetPlayer()->SetIsAttack(true);
             }
 
             // 操作UI表示

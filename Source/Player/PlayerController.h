@@ -10,6 +10,8 @@
 #include "../../Source/Common/Targetable.h"
 #include "StateMachine/PlayerStateMachine.h"
 
+#include "../../Source/InGame/InputManager.h"
+
 #include "PlayerItemController.h"
 
 class PlayerController : public Component
@@ -43,6 +45,9 @@ public:
 
 	// 接触処理
 	void OnContact(CollisionData& collisionData) override;
+
+	// ゲームパッド振動
+	void SetVibration(float left, float right, float time);
 
 #pragma region アクセサ
 	// キャラクターコントローラー取得
@@ -134,6 +139,7 @@ private:
 
 	std::weak_ptr<PlayerItemController> _playerItemController;
 
+	std::weak_ptr<InputManager> _inputManager;
 #pragma region 各種フラグ
 	bool _callInputBufferingEvent = false;
 	bool _callCancelAttackEvent = false;

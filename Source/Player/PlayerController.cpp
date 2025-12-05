@@ -4,7 +4,6 @@
 #include "../../Source/Enemy/EnemyController.h" 
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Stage/Props/Chest/ChestController.h"
-#include "../../Source/InGame/InputManager.h"
 #include "../../Library/Graphics/Graphics.h"
 
 #include <imgui.h>
@@ -25,6 +24,7 @@ void PlayerController::Start()
 	auto stateController = GetActor()->GetComponent<StateController>();
 	_stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
 
+	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 #pragma region コールバック設定
 	// 被ダメージコールバック設定
 	_damageable.lock()->SetTakeableDamageCallback(
@@ -85,10 +85,7 @@ void PlayerController::Start()
 		[&](DamageSender* myself, CollisionData& collisionData)
 		{
 			// ゲームパッド振動
-			if (auto inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System))
-			{
-				inputManager->SetVibration(_stageContactVibrationL, _stageContactVibrationR, _stageContactVibrationTime);
-			}
+			SetVibration(_stageContactVibrationL, _stageContactVibrationR, _stageContactVibrationTime);
 			// ヒットストップ
 			GetActor()->GetScene()->GetActorManager().SetGameSpeed(ActorTag::Player, _hitStopScale, _hitStopTime);
 		}
@@ -99,10 +96,7 @@ void PlayerController::Start()
 		[&](StageEffectEmitter* target, CollisionData& collisionData)
 		{
 			// ゲームパッド振動
-			if (auto inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System))
-			{
-				inputManager->SetVibration(_stageContactVibrationL, _stageContactVibrationR, _stageContactVibrationTime);
-			}
+			SetVibration(_stageContactVibrationL, _stageContactVibrationR, _stageContactVibrationTime);
 		}
 	);
 #pragma endregion
@@ -312,5 +306,14 @@ void PlayerController::OnContact(CollisionData& collisionData)
                 _useUIWorldPosition = chestController->GetActor()->GetTransform().GetPosition() + Vector3(0.0f, 1.5f, 0.0f);
 			}
 		}
+	}
+}
+
+// ゲームパッド振動
+void PlayerController::SetVibration(float left, float right, float time)
+{
+	if (auto inputManager = _inputManager.lock())
+	{
+		inputManager->SetVibration(left, right, time);
 	}
 }

@@ -91,7 +91,7 @@ void ChestInput::OnUpdate(float elapsedTime)
 
 	if (_INPUT_TRIGGERD("Select"))
 		chestUIController->SetInputState(ChestUIController::InputState::Select);
-	if (_INPUT_TRIGGERD("Back"))
+	if (_INPUT_TRIGGERD("Back") || _INPUT_TRIGGERD("Menu"))
 		chestUIController->SetInputState(ChestUIController::InputState::Back);
 	if (_INPUT_TRIGGERD("L3"))
 		chestUIController->SetInputState(ChestUIController::InputState::L3);

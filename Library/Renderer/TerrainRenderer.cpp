@@ -7,6 +7,9 @@
 
 #include <Mygui.h>
 
+const size_t TerrainRenderer::DivisionCount = 17;
+const size_t TerrainRenderer::VertexCountPerSide = DivisionCount + 1;
+
 // 初期化
 void TerrainRenderer::Initialize(ID3D11Device* device)
 {
@@ -15,6 +18,9 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         (DivisionCount * 2) * 
         (DivisionCount * 2 - 1) * 
         ((MaxTess - 1) * (MaxTess - 2)) / 2;
+
+    // 分割数
+    _data.divisionCount = static_cast<int>(DivisionCount);
 
     // 定数バッファ作成
     GpuResourceManager::CreateConstantBuffer(

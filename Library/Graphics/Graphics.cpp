@@ -430,11 +430,9 @@ void Graphics::CreateSwapChain(IDXGIFactory6* dxgiFactory6)
 		swap_chain_desc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swap_chain_desc1.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		swap_chain_desc1.Flags = _tearingSupported ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+		swap_chain_desc1.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 #ifdef X3DGP_FULLSCREEN
 		hr = dxgiFactory6->CreateSwapChainForHwnd(_device.Get(), _hwnd, &swap_chain_desc1, NULL, NULL, _swapChain.ReleaseAndGetAddressOf());
-#endif
-#if 0
-		swap_chain_desc1.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 #endif
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 

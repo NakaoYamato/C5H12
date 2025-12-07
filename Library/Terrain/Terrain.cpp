@@ -32,8 +32,8 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
 		D3D11_BUFFER_DESC desc{};
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 		desc.ByteWidth = sizeof(StreamOutVertex) * 
-            (TerrainRenderer::DivisionCount * 2) * 
-            (TerrainRenderer::DivisionCount * 2 - 1) *
+            static_cast<UINT>(TerrainRenderer::DivisionCount * 2) *
+            static_cast<UINT>(TerrainRenderer::DivisionCount * 2 - 1) *
             static_cast<UINT>(std::pow(TerrainRenderer::MaxTessellation, 2.0f));
 		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 		desc.StructureByteStride = sizeof(StreamOutVertex);

@@ -326,9 +326,6 @@ void Framework::Render()
 
     // バックバッファに描画した画を画面に表示する。
     {
-        // 別スレッド中にデバイスコンテキストが使われていた場合に
-        // 同時アクセスしないように排他制御する
-        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
 		ProfileScopedSection_3(0, "Graphics::Present", ImGuiControl::Profiler::Dark);
         Graphics::Instance().Present(syncInterval);
     }

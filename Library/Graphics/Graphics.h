@@ -50,8 +50,13 @@ public:
 	// デバイスコンテキスト取得
 	[[nodiscard]] ID3D11DeviceContext* GetDeviceContext() const { return _immediateContext.Get(); }
 
+#ifdef X3DGP_FULLSCREEN
+	// スワップチェーン取得
+	[[nodiscard]] IDXGISwapChain1* GetSwapChain() const { return _swapChain.Get(); }
+#else
 	// スワップチェーン取得
 	[[nodiscard]] IDXGISwapChain* GetSwapChain() const { return _swapChain.Get(); }
+#endif
 
 	// レンダーターゲットビュー取得
 	[[nodiscard]] ID3D11RenderTargetView* GetRenderTargetView() const { return _renderTargetView.Get(); }

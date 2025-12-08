@@ -531,7 +531,7 @@
     <ClCompile Include="Library\Graphics\Shader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Actor\Terrain\TerrainActor.cpp">
+    <ClCompile Include="Library\Actor\Stage\Terrain\TerrainActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Graphics\ConstantBuffer.cpp">
@@ -784,6 +784,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\InGame\UI\Menu\MenuUIController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Actor\Stage\StageManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1370,7 +1373,7 @@
     <ClInclude Include="Library\Graphics\Shader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Actor\Terrain\TerrainActor.h">
+    <ClInclude Include="Library\Actor\Stage\Terrain\TerrainActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Graphics\ConstantBuffer.h">
@@ -1647,6 +1650,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\InGame\UI\Menu\MenuUIController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Actor\Stage\StageManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

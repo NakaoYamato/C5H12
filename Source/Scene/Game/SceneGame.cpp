@@ -4,7 +4,7 @@
 #include "SceneGame.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/Actor/Terrain/TerrainActor.h"
+#include "../../Library/Actor/Stage/StageManager.h"
 
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
@@ -60,12 +60,7 @@ void SceneGame::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/001.json", Vector3(0.0f, 0.0f, 0.0f));
-        auto stageController = stage0->AddComponent<StageController>(0);
-    }
-    {
-        auto stage1 = RegisterActor<TerrainActor>("Stage1", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(100.0f, 0.0f, 0.0f));
-        auto stageController = stage1->AddComponent<StageController>(1);
+        RegisterActor<StageManager>("StageManager", ActorTag::Stage);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

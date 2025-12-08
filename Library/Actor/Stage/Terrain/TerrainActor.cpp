@@ -9,7 +9,6 @@
 // ¶¬Žžˆ—
 void TerrainActor::OnCreate()
 {
-    GetTransform().SetScale(50.0f);
     GetTransform().UpdateTransform(nullptr);
 
     this->AddComponent<TerrainController>(_terrainPath);

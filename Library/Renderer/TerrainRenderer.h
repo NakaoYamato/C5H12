@@ -20,13 +20,14 @@ public:
         Vector4 lodTessFactors = { 49.0f, 31.0f, 21.0f, 11.0f }; // LODの分割数
 
         int divisionCount = 15;             // 分割数
+		float terrainLength = 50.0f;        // 地形1枚の長さ(m)
         float lodTessDistance = 15.0f;      // LODの距離
         float collisionTessFactor = 11.0f;  // 衝突判定用エッジ分割数(奇数のみ)
-        float emissive = 0.0f;              // エミッシブ
 
+        float emissive = 0.0f;              // エミッシブ
         float metalness = 0.63f;            // メタリック
         float roughness = 0.6f;             // ラフネス
-        float padding[2]{};
+        float padding[1]{};
     };
 	struct GrassConstantBuffer
 	{
@@ -52,8 +53,8 @@ public:
 	static constexpr float MaxTessellation = 64.0f;
     // 分割数
     static const size_t DivisionCount;
-    // 1辺あたりの頂点数
-    static const size_t VertexCountPerSide;
+    // Terrain1枚の長さ(m)
+    static const float TerrainLength;
 public:
 	TerrainRenderer() = default;
 	~TerrainRenderer() = default;

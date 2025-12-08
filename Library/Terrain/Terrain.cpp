@@ -447,7 +447,10 @@ void Terrain::LoadFromFile(ID3D11Device* device, const std::string& path)
 void Terrain::CreateTerrainMesh(ID3D11Device* device)
 {
 	size_t divisionCount = TerrainRenderer::DivisionCount;
-	size_t vertexCountPerSide = TerrainRenderer::VertexCountPerSide;
+	size_t vertexCountPerSide = divisionCount + 1;
+    // 1•Ó“–‚½‚è‚Ì’·‚³
+	float lengthPerSide = TerrainRenderer::TerrainLength / static_cast<float>(divisionCount);
+
     std::vector<TerrainRenderer::Vertex> vertices{};
     std::vector<uint32_t> indices{};
     {
@@ -457,8 +460,10 @@ void Terrain::CreateTerrainMesh(ID3D11Device* device)
         {
             for (size_t z = 0; z < vertexCountPerSide; ++z) 
             {
-                float posX = -1.0f + static_cast<float>(x) / divisionCount * 2.0f;
-                float posZ = -1.0f + static_cast<float>(z) / divisionCount * 2.0f;
+                //float posX = -1.0f + static_cast<float>(x) / divisionCount * 2.0f;
+                //float posZ = -1.0f + static_cast<float>(z) / divisionCount * 2.0f;
+                float posX = static_cast<float>(x) * lengthPerSide;
+                float posZ = static_cast<float>(z) * lengthPerSide;
 
                 vertices.push_back({{posX, 0.0f, posZ}});
             }

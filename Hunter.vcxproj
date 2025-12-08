@@ -155,7 +155,8 @@
     <ClCompile Include="Library\2D\Sprite.cpp" />
     <ClCompile Include="Library\2D\SpriteResource.cpp" />
     <ClCompile Include="Library\Actor\ModelAttach\ModelAttachActor.cpp" />
-    <ClCompile Include="Library\Actor\Terrain\TerrainActor.cpp" />
+    <ClCompile Include="Library\Actor\Stage\StageManager.cpp" />
+    <ClCompile Include="Library\Actor\Stage\Terrain\TerrainActor.cpp" />
     <ClCompile Include="Library\Actor\UI\UIActor.cpp" />
     <ClCompile Include="Library\Audio\AudioLoader.cpp" />
     <ClCompile Include="Library\Audio\AudioResource.cpp" />
@@ -415,7 +416,8 @@
     <ClInclude Include="Library\2D\Sprite.h" />
     <ClInclude Include="Library\2D\SpriteResource.h" />
     <ClInclude Include="Library\Actor\ModelAttach\ModelAttachActor.h" />
-    <ClInclude Include="Library\Actor\Terrain\TerrainActor.h" />
+    <ClInclude Include="Library\Actor\Stage\StageManager.h" />
+    <ClInclude Include="Library\Actor\Stage\Terrain\TerrainActor.h" />
     <ClInclude Include="Library\Actor\UI\UIActor.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorActionBase.h" />
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorData.h" />

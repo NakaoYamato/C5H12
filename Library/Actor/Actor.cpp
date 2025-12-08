@@ -262,6 +262,7 @@ void Actor::DrawGui()
 	if (ImGui::CollapsingHeader("Flags"))
 	{
 		ImGui::Checkbox(u8"Active", &_isActive);
+		ImGui::Checkbox(u8"TransformGui", &_isDrawingTransformGui);
 		ImGui::Checkbox(u8"Show", &_isShowing);
 		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
 		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
@@ -270,7 +271,8 @@ void Actor::DrawGui()
 	}
 
 	// トランスフォーム
-	DrawTransformGui();
+	if (_isDrawingTransformGui)
+		DrawTransformGui();
 
 	static ImGuiTabBarFlags tab_bar_flags =
 		ImGuiTabBarFlags_AutoSelectNewTabs |

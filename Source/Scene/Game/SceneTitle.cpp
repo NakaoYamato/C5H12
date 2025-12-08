@@ -2,7 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Component/SpriteRenderer.h"
-#include "../../Library/Actor/Terrain/TerrainActor.h"
+#include "../../Library/Actor/Stage/StageManager.h"
 #include "../../Library/Actor/UI/UIActor.h"
 
 #include "../../Source/Title/Wyvern/TitleWyvernActor.h"
@@ -32,7 +32,7 @@ void SceneTitle::OnInitialize()
 		spriteRenderer->LoadTexture("TitleBackground", L"./Data/Texture/Title/Background.png", Sprite::CenterAlignment::LeftUp);
     }
     {
-        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/001.json", Vector3(0.0f, 0.0f, 0.0f));
+        RegisterActor<StageManager>("StageManager", ActorTag::Stage);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

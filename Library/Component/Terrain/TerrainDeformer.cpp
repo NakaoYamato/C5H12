@@ -6,7 +6,7 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Library/Exporter/Exporter.h"
-#include "../../Library/Actor/Terrain/TerrainActor.h"
+#include "../../Library/Actor/Stage/Terrain/TerrainActor.h"
 
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
@@ -678,12 +678,15 @@ void TerrainDeformerBrush::Update(std::vector<std::shared_ptr<TerrainController>
 		{
             Vector3 uv = intersectWorldPosition->TransformCoord(terrainController->GetActor()->GetTransform().GetMatrixInverse());
             Vector2 intersectUVPosition{};
-            intersectUVPosition.x = (uv.x + 1.0f) / 2.0f;
-            intersectUVPosition.y = (-uv.z + 1.0f) / 2.0f;
+            //intersectUVPosition.x = (uv.x + 1.0f) / 2.0f;
+            //intersectUVPosition.y = (-uv.z + 1.0f) / 2.0f;
+            intersectUVPosition.x = uv.x / TerrainRenderer::TerrainLength;
+            intersectUVPosition.y = 1.0f - uv.z / TerrainRenderer::TerrainLength;
+			float radius = _brushRadius / terrainController->GetActor()->GetTransform().GetScale().x / TerrainRenderer::TerrainLength;
 
 			RegisterTask(terrainController, 
                 intersectUVPosition,
-				_brushRadius / terrainController->GetActor()->GetTransform().GetScale().x,
+                radius,
 				_brushStrength * elapsedTime);
 		}
 	}

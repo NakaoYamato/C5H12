@@ -10,7 +10,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Animator.h"
 
-#include "../../Library/Actor/Terrain/TerrainActor.h"
+#include "../../Library/Actor/Stage/Terrain/TerrainActor.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Stage/GrassController.h"
 

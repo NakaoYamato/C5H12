@@ -30,7 +30,8 @@ const OutputPatch<DS_IN, 4> patch)
     // 法線計算
     float3 normal = normalize(cross(patch[3].position - patch[1].position, patch[0].position - patch[1].position));
     // positionをUVに変換
-    float2 texcoord = float2((position.x + 1.0f) / 2.0f, 1.0f - (position.z + 1.0f) / 2.0f);
+    //float2 texcoord = float2((position.x + 1.0f) / 2.0f, 1.0f - (position.z + 1.0f) / 2.0f);
+    float2 texcoord = float2(position.x / terrainLength, 1.0f - position.z / terrainLength);
     
     // ワールド法線
     float3 worldNormal = normalize(mul(normal, (float3x3) world));

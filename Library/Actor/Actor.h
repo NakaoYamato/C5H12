@@ -227,6 +227,7 @@ public:
 
 #pragma region フラグ関係
 	void SetIsActive(bool b);
+	void SetIsDrawingTransformGui(bool b) { this->_isDrawingTransformGui = b; }
 	void SetIsShowing(bool b) { this->_isShowing = b; }
 	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
 	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
@@ -234,6 +235,7 @@ public:
 	void SetInheritParentTransform(bool b) { this->_isInheritParentTransform = b; }
 
 	bool IsActive()const { return _isActive; }
+	bool IsDrawingTransformGui()const { return _isDrawingTransformGui; }
 	bool IsShowing()const { return _isShowing; }
 	bool IsDrawingDebug()const { return _isDrawingDebug; }
 	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
@@ -382,6 +384,8 @@ protected:
 #pragma region 各種フラグ
 	// アクティブフラグ
 	bool				_isActive = true;
+	// トランスフォームGUI描画フラグ
+	bool				_isDrawingTransformGui = true;
 	// 表示フラグ
 	bool				_isShowing = true;
 	// デバッグ表示フラグ

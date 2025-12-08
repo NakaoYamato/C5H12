@@ -8,7 +8,7 @@
 #include <Mygui.h>
 
 const size_t TerrainRenderer::DivisionCount = 17;
-const size_t TerrainRenderer::VertexCountPerSide = DivisionCount + 1;
+const float TerrainRenderer::TerrainLength = 100.0f;
 
 // 初期化
 void TerrainRenderer::Initialize(ID3D11Device* device)
@@ -19,6 +19,11 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         (DivisionCount * 2 - 1) * 
         ((MaxTess - 1) * (MaxTess - 2)) / 2;
 
+    // 定数バッファデータ初期化
+    _data.lodTessFactors = Vector4(47.0f, 31.0f, 27.0f, 13.0f);
+    _data.lodTessDistance = 25.0f;
+    // 地形1枚の長さ(m)
+	_data.terrainLength = TerrainLength;
     // 分割数
     _data.divisionCount = static_cast<int>(DivisionCount);
 

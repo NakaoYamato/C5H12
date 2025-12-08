@@ -1,7 +1,7 @@
 #include "SceneWyvernDecalDebug.h"
 
 #include "../../Library/Graphics/Graphics.h"
-#include "../../Library/Actor/Terrain/TerrainActor.h"
+#include "../../Library/Actor/Stage/StageManager.h"
 #include "../../Library/Actor/ModelAttach/ModelAttachActor.h"
 // コンポーネント
 #include "../../Library/Component/DecalController.h"
@@ -31,7 +31,7 @@ void SceneWyvernDecalDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto stage0 = RegisterActor<TerrainActor>("Stage0", ActorTag::Stage, "./Data/Terrain/Save/002.json", Vector3(0.0f, 0.0f, 0.0f));
+        RegisterActor<StageManager>("StageManager", ActorTag::Stage);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

@@ -16,15 +16,7 @@
 #include "../../Library/Terrain/Brush/GrassTransformingBrush.h"
 
 #include <filesystem>
-#include <imgui.h>
 #include <Mygui.h>
-
-// ペイントテクスチャのデフォルトデータパス
-static const char* DEFAULT_PAINT_TEXTURE_PATH = "./Data/Terrain/Debug/DefaultPaintTexture.json";
-// ブラシテクスチャのデフォルトデータパス
-static const char* DEFAULT_BRUSH_TEXTURE_PATH = "./Data/Terrain/Debug/DefaultBrushTexture.json";
-// 配置するモデルデータのデフォルトデータパス
-static const char* DEFAULT_MODEL_DATA_PATH = "./Data/Terrain/Debug/DefaultModelData.json";
 
 // 生成時処理
 void TerrainDeformer::OnCreate()
@@ -471,30 +463,32 @@ void TerrainDeformer::DrawBrushGui()
         }
     }
 }
+
+#pragma region TerrainDeformerBrush
 // 更新処理
 void TerrainDeformerBrush::Update(std::vector<std::shared_ptr<TerrainController>>& terrainControllers,
     float elapsedTime,
     Vector3* intersectWorldPosition)
 {
-	for (auto& terrainController : terrainControllers)
-	{
-		// 地形に接触していて左クリックしたら編集
-		if (terrainController && intersectWorldPosition && _INPUT_PRESSED("LeftClick"))
-		{
+    for (auto& terrainController : terrainControllers)
+    {
+        // 地形に接触していて左クリックしたら編集
+        if (terrainController && intersectWorldPosition && _INPUT_PRESSED("LeftClick"))
+        {
             Vector3 uv = intersectWorldPosition->TransformCoord(terrainController->GetActor()->GetTransform().GetMatrixInverse());
             Vector2 intersectUVPosition{};
             //intersectUVPosition.x = (uv.x + 1.0f) / 2.0f;
             //intersectUVPosition.y = (-uv.z + 1.0f) / 2.0f;
             intersectUVPosition.x = uv.x / TerrainRenderer::TerrainLength;
             intersectUVPosition.y = 1.0f - uv.z / TerrainRenderer::TerrainLength;
-			float radius = _brushRadius / terrainController->GetActor()->GetTransform().GetScale().x / TerrainRenderer::TerrainLength;
+            float radius = _brushRadius / terrainController->GetActor()->GetTransform().GetScale().x / TerrainRenderer::TerrainLength;
 
-			RegisterTask(terrainController, 
+            RegisterTask(terrainController,
                 intersectUVPosition,
                 radius,
-				_brushStrength * elapsedTime);
-		}
-	}
+                _brushStrength * elapsedTime);
+        }
+    }
 }
 // 描画処理
 void TerrainDeformerBrush::Render(SpriteResource* fullscreenQuad, std::shared_ptr<Terrain> terrain, const RenderContext& rc, ID3D11ShaderResourceView** srv, uint32_t startSlot, uint32_t numViews)
@@ -516,14 +510,15 @@ void TerrainDeformerBrush::DrawGui()
 // タスクを登録
 void TerrainDeformerBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
 {
-	TerrainDeformer::Task task;
-	task.brushName = GetName();
-	task.brushUVPosition = uvPosition;
-	task.paintTextureIndex = _deformer->GetPaintTextureIndex();
+    TerrainDeformer::Task task;
+    task.brushName = GetName();
+    task.brushUVPosition = uvPosition;
+    task.paintTextureIndex = _deformer->GetPaintTextureIndex();
     task.brushTextureIndex = _deformer->GetBrushTextureIndex();
-	task.radius = radius;
-	task.strength = strength;
-	task.brushRotationY = _brushRotationY;
-	task.padding = _brushPadding;
-	_deformer->AddTask(terrainController.lock().get(), task);
+    task.radius = radius;
+    task.strength = strength;
+    task.brushRotationY = _brushRotationY;
+    task.padding = _brushPadding;
+    _deformer->AddTask(terrainController.lock().get(), task);
 }
+#pragma endregion

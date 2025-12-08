@@ -4,6 +4,7 @@
 
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "Terrain/TerrainActor.h"
+#include "../../Library/Component/Collider/TransparentWallCollider.h"
 
 // ¶¬Žžˆ—
 void StageManager::OnCreate()
@@ -13,6 +14,7 @@ void StageManager::OnCreate()
 
 	// TerrainDeformer‚ð’Ç‰Á
 	this->AddComponent<TerrainDeformer>();
+	this->AddCollider<TransparentWallCollider>("");
 
 	// Žq‹Ÿ’Ç‰Á
 	auto stage0 = this->GetScene()->RegisterActor<TerrainActor>("Stage0",

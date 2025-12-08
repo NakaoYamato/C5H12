@@ -170,6 +170,7 @@
     <ClCompile Include="Library\Component\BehaviorController.cpp" />
     <ClCompile Include="Library\Component\CameraControllerBase.cpp" />
     <ClCompile Include="Library\Component\Collider\ModelCollider.cpp" />
+    <ClCompile Include="Library\Component\Collider\TransparentWallCollider.cpp" />
     <ClCompile Include="Library\Component\Component.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
     <ClCompile Include="Library\Component\EffectController.cpp" />
@@ -301,6 +302,7 @@
     <ClCompile Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\SpriteShaderResource.cpp" />
+    <ClCompile Include="Library\Stage\TransparentWall.cpp" />
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\GrassTransformingBrush.cpp" />
@@ -440,6 +442,7 @@
     <ClInclude Include="Library\Component\BehaviorController.h" />
     <ClInclude Include="Library\Component\CameraControllerBase.h" />
     <ClInclude Include="Library\Component\Collider\ModelCollider.h" />
+    <ClInclude Include="Library\Component\Collider\TransparentWallCollider.h" />
     <ClInclude Include="Library\Component\DecalController.h" />
     <ClInclude Include="Library\Component\EffectController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
@@ -589,6 +592,7 @@
     <ClInclude Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.h" />
     <ClInclude Include="Library\Shader\Sprite\SpriteShaderBase.h" />
     <ClInclude Include="Library\Shader\Sprite\SpriteShaderResource.h" />
+    <ClInclude Include="Library\Stage\TransparentWall.h" />
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h" />

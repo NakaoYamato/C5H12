@@ -16,9 +16,9 @@ public:
 		// 使用するシェーダー名
 		std::string					shaderName = "";
 		// デカールの色テクスチャ
-		ID3D11ShaderResourceView**	colorSRV = nullptr;
+		ID3D11ShaderResourceView* const*	colorSRV = nullptr;
 		// デカールの法線マップ
-		ID3D11ShaderResourceView**	normalSRV = nullptr;
+		ID3D11ShaderResourceView* const*	normalSRV = nullptr;
 		// ワールド行列
 		const DirectX::XMFLOAT4X4*	world = nullptr;
 		// 色
@@ -74,8 +74,8 @@ public:
 	// 描画申請
 	void Draw(
 		std::string shaderName,
-		ID3D11ShaderResourceView** colorSRV,
-		ID3D11ShaderResourceView** normalSRV,
+		ID3D11ShaderResourceView* const* colorSRV,
+		ID3D11ShaderResourceView* const* normalSRV,
 		const DirectX::XMFLOAT4X4& world,
 		const Vector4& color = Vector4::White,
 		int mask = 0);

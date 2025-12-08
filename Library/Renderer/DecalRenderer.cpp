@@ -94,7 +94,7 @@ void DecalRenderer::Draw(std::string shaderName, Decal* decal, const DirectX::XM
 }
 // ï`âÊê\êø
 void DecalRenderer::Draw(std::string shaderName, 
-	ID3D11ShaderResourceView** colorSRV, ID3D11ShaderResourceView** normalSRV,
+	ID3D11ShaderResourceView* const* colorSRV, ID3D11ShaderResourceView* const* normalSRV,
 	const DirectX::XMFLOAT4X4& world, 
 	const Vector4& color,
 	int mask)

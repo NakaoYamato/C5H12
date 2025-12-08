@@ -4,6 +4,7 @@
 
 #include "TerrainController.h"
 #include "../../Library/2D/SpriteResource.h"
+#include "../../Library/Terrain/TerrainDeformationResource.h"
 
 // 先行宣言
 class TerrainDeformerBrush;
@@ -33,27 +34,6 @@ public:
 		float       strength        = 0.0f;             // ブラシ強度
         float       brushRotationY  = 0.0f;             // ブラシのY軸回転(ラジアン)
         Vector2     padding         = {};               // パディング
-    };
-    // 書き込むテクスチャデータ
-	struct PaintTexture
-	{
-		std::wstring baseColorPath; // ベースカラーのパス
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> baseColorSRV; // ベースカラーのSRV
-		std::wstring normalPath;     // 法線マップのパス
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV; // 法線マップのSRV
-		std::wstring heightPath;     // 高さマップのパス
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> heightSRV; // 高さマップのSRV
-	};
-    // ブラシテクスチャデータ
-    struct BrushTexture
-    {
-        std::wstring path;
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
-    };
-    // 配置するモデルデータ
-    struct ModelData
-    {
-        std::string path = ""; // モデルのパス
     };
 
     static constexpr size_t PaintBaseColorTextureIndex = 4;
@@ -101,15 +81,6 @@ public:
 	const std::string& GetSelectedModelPath() const { return _selectedModelPath; }
 
 private:
-    // テクスチャ読み込み
-    void LoadTexture(const std::wstring& path, ID3D11ShaderResourceView** srv);
-    // ペイントテクスチャの追加
-    void AddPaintTexture(const std::wstring& baseColorPath, const std::wstring& normalPath, const std::wstring& heightPath);
-    // ブラシテクスチャの追加
-    void AddBrushTexture(const std::wstring& path);
-    // 配置するモデルデータの追加
-	void AddModelData(const std::string& modelPath);
-
     // ブラシの描画
     void DrawBrush();
 
@@ -133,15 +104,11 @@ private:
 	// フルスクリーンクアッドのスプライトリソース
     std::unique_ptr<SpriteResource>		_fullscreenQuad;
 
-    // ペイントテクスチャデータ
-	std::vector<PaintTexture> _paintTextures;
-    // ブラシのテクスチャデータ
-    std::vector<BrushTexture> _brushTextures;
-	// 配置するモデルデータ
-	std::vector<ModelData> _environmentObjects;
     // 編集タスク群
 	std::unordered_map<TerrainController*, std::vector<Task>> _taskMap;
 
+    // リソース
+	std::weak_ptr<TerrainDeformationResource> _deformationResource;
     // 使用するテクスチャインデックス
 	size_t _paintTextureIndex = 0;
     // 使用するブラシテクスチャインデックス

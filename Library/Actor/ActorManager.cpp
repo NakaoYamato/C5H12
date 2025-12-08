@@ -185,7 +185,12 @@ void ActorManager::DrawGui()
 			// 子供がいるなら矢印表示
 			if (actor->GetChildren().size() > 0)
 				nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
-			
+
+			// 選択中のオブジェクトは色を変える
+			if (_showGuiObj == actor->GetName())
+				ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+			else
+				ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 			if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
 			{
 				actor->SetIsDrawingHierarchy(false);
@@ -204,6 +209,7 @@ void ActorManager::DrawGui()
 
 				ImGui::TreePop();
 			}
+			ImGui::PopStyleColor();
 		};
 
 	// 登録しているオブジェクトの一覧
@@ -213,6 +219,8 @@ void ActorManager::DrawGui()
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
+			// タグの色変更
+			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(0.0f, 1.0f, 1.0f, 1.0f));
 			if (ImGui::TreeNodeEx(ToString<ActorTag>(i).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				for (auto& actor : _updateActors[i])
@@ -225,6 +233,7 @@ void ActorManager::DrawGui()
 
 				ImGui::TreePop();
 			}
+			ImGui::PopStyleColor();
 		}
 		// GUIが埋まってしまう問題を解決するためのスペース
 		ImGui::Dummy(ImVec2(0.0f, 100.0f));

@@ -186,7 +186,16 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowVS.cso",
             _shadowVertexShader.ReleaseAndGetAddressOf(),
             nullptr, nullptr, 0);
-
+        // ハルシェーダー
+        GpuResourceManager::CreateHsFromCso(
+            device,
+            "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowHS.cso",
+            _shadowHullShader.ReleaseAndGetAddressOf());
+        // ドメインシェーダー
+        GpuResourceManager::CreateDsFromCso(
+            device,
+            "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowDS.cso",
+            _shadowDomainShader.ReleaseAndGetAddressOf());
         // ジオメトリシェーダー
         GpuResourceManager::CreateGsFromCso(device,
             "./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowGS.cso",
@@ -310,28 +319,47 @@ void TerrainRenderer::CastShadow(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
 
-    dc->IASetInputLayout(nullptr);
+    // 定数バッファ設定
+    dc->VSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->HSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->DSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->GSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->PSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+
+    dc->IASetInputLayout(_inputLayout.Get());
     dc->VSSetShader(_shadowVertexShader.Get(), nullptr, 0);
+    dc->HSSetShader(_shadowHullShader.Get(), nullptr, 0);
+    dc->DSSetShader(_shadowDomainShader.Get(), nullptr, 0);
     dc->GSSetShader(_shadowGeometryShader.Get(), nullptr, 0);
     dc->PSSetShader(nullptr, nullptr, 0);
-    // 頂点バッファ設定
-    ID3D11Buffer* clearBuffer[] = { nullptr };
-    UINT strides[] = { 0 };
-    UINT offsets[] = { 0 };
-    dc->IASetVertexBuffers(0, 1, clearBuffer, strides, offsets);
-    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
     for (const auto& drawInfo : _shadowDrawInfos)
     {
+        // 定数バッファの更新
+        _data.world = drawInfo.world;
+        dc->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_data, 0, 0);
+
         // シェーダーリソースビューの設定
         ID3D11ShaderResourceView* srvs[] =
         {
             nullptr,
             nullptr,
-            drawInfo.terrain->GetStreamOutSRV().Get(),
+            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
-        dc->VSSetShaderResources(0, _countof(srvs), srvs);
-
-        dc->DrawInstanced(static_cast<UINT>(drawInfo.terrain->GetStreamOutData().size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0);
+        // Mipmapを使用するかどうか設定
+        if (_isUsingMipmap)
+            srvs[0] = drawInfo.terrain->GetMipmapBaseColorSRV().Get();
+        dc->DSSetShaderResources(0, _countof(srvs), srvs);
+        // 頂点バッファとインデックスバッファを設定
+        UINT stride = sizeof(TerrainRenderer::Vertex);
+        UINT offset = 0;
+        dc->IASetVertexBuffers(0, 1, drawInfo.terrain->GetVertexBuffer().GetAddressOf(), &stride, &offset);
+        dc->IASetIndexBuffer(drawInfo.terrain->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
+        // 描画
+        D3D11_BUFFER_DESC bufferDesc{};
+        drawInfo.terrain->GetIndexBuffer()->GetDesc(&bufferDesc);
+        dc->DrawIndexedInstanced(bufferDesc.ByteWidth / sizeof(uint32_t), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
     }
 
     // シェーダー解除

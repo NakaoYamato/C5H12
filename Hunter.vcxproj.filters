@@ -1802,5 +1802,7 @@
     <FxCompile Include="HLSL\Sprite\SpriteScrollPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\Font\OutlineFontPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteOutlinePS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowDS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowHS.hlsl" />
   </ItemGroup>
 </Project>

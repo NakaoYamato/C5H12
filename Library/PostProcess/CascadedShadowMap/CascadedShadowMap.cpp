@@ -274,6 +274,7 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 
 	immediateContext->UpdateSubresource(_constantBuffer.Get(), 0, 0, &data, 0, 0);
 	immediateContext->VSSetConstantBuffers(cbSlot, 1, _constantBuffer.GetAddressOf());
+	immediateContext->DSSetConstantBuffers(cbSlot, 1, _constantBuffer.GetAddressOf());
 	immediateContext->PSSetConstantBuffers(cbSlot, 1, _constantBuffer.GetAddressOf());
 
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> null_render_target_view;

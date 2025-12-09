@@ -53,12 +53,6 @@ void Actor::Deleted()
 			parent->_children.erase(iter);
 		}
 	}
-	// 子供の削除
-	for (std::shared_ptr<Actor>& child : _children)
-	{
-		if (child)
-			child->Deleted();
-	}
 }
 /// 開始処理
 void Actor::Start()
@@ -257,6 +251,11 @@ void Actor::DrawGui()
 	{
 		ImGui::Text(GetName());
 	}
+	ImGui::Separator();
+
+	// フォルダパス
+	ImGui::InputText(u8"フォルダパス", & _folderPath);
+	ImGui::Separator();
 
 	// フラグ
 	if (ImGui::CollapsingHeader("Flags"))
@@ -435,6 +434,12 @@ void Actor::SetIsActive(bool b)
 {
 	this->_isActive = b;
 	ChangedActive(b);
+
+	// 子供にも伝播
+	for (std::shared_ptr<Actor>& child : _children)
+	{
+		child->SetIsActive(b);
+	}
 }
 #pragma region 親子関係
 /// 親設定

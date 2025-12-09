@@ -471,9 +471,6 @@
     <ClCompile Include="Library\Scene\Test\SceneInstancingModelDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Terrain\Brush\ColorAdditionBrush.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -481,9 +478,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Library\Terrain\Brush\ObjectLayoutBrush.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Stage\StageController.cpp">
@@ -790,6 +784,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Component\Collider\TransparentWallCollider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Actor\ActorFactory.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Component\EnvironmentController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1304,9 +1304,6 @@
     <ClInclude Include="Library\Scene\Test\SceneInstancingModelDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Library\Terrain\TerrainObjectLayout.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Library\Terrain\Brush\ColorAdditionBrush.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1317,9 +1314,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\ImGui\imgui-docking\Mygui.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\Terrain\Brush\ObjectLayoutBrush.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Stage\StageController.h">
@@ -1659,6 +1653,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Component\Collider\TransparentWallCollider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Actor\ActorFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Component\EnvironmentController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -154,6 +154,7 @@
     <ClCompile Include="Library\2D\Primitive.cpp" />
     <ClCompile Include="Library\2D\Sprite.cpp" />
     <ClCompile Include="Library\2D\SpriteResource.cpp" />
+    <ClCompile Include="Library\Actor\ActorFactory.cpp" />
     <ClCompile Include="Library\Actor\ModelAttach\ModelAttachActor.cpp" />
     <ClCompile Include="Library\Actor\Stage\StageManager.cpp" />
     <ClCompile Include="Library\Actor\Stage\Terrain\TerrainActor.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="Library\Component\Component.cpp" />
     <ClCompile Include="Library\Component\DecalController.cpp" />
     <ClCompile Include="Library\Component\EffectController.cpp" />
+    <ClCompile Include="Library\Component\EnvironmentController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
     <ClCompile Include="Library\Component\LocusRenderer.cpp" />
     <ClCompile Include="Library\Component\StageEffectEmitter.cpp" />
@@ -307,10 +309,8 @@
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\GrassTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\HeightTransformingBrush.cpp" />
-    <ClCompile Include="Library\Terrain\Brush\ObjectLayoutBrush.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Library\Terrain\TerrainDeformationResource.cpp" />
-    <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
     <ClCompile Include="Source\Armor\ArmorData.cpp" />
     <ClCompile Include="Source\Armor\ArmorEditActor.cpp" />
@@ -416,6 +416,7 @@
     <ClInclude Include="Library\2D\Primitive.h" />
     <ClInclude Include="Library\2D\Sprite.h" />
     <ClInclude Include="Library\2D\SpriteResource.h" />
+    <ClInclude Include="Library\Actor\ActorFactory.h" />
     <ClInclude Include="Library\Actor\ModelAttach\ModelAttachActor.h" />
     <ClInclude Include="Library\Actor\Stage\StageManager.h" />
     <ClInclude Include="Library\Actor\Stage\Terrain\TerrainActor.h" />
@@ -443,6 +444,7 @@
     <ClInclude Include="Library\Component\Collider\TransparentWallCollider.h" />
     <ClInclude Include="Library\Component\DecalController.h" />
     <ClInclude Include="Library\Component\EffectController.h" />
+    <ClInclude Include="Library\Component\EnvironmentController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
     <ClInclude Include="Library\Component\LocusRenderer.h" />
     <ClInclude Include="Library\Component\StageEffectEmitter.h" />
@@ -595,10 +597,8 @@
     <ClInclude Include="Library\Terrain\Brush\CostTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\HeightTransformingBrush.h" />
-    <ClInclude Include="Library\Terrain\Brush\ObjectLayoutBrush.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Library\Terrain\TerrainDeformationResource.h" />
-    <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
     <ClInclude Include="Source\Armor\ArmorEditActor.h" />
     <ClInclude Include="Source\Armor\ArmorManager.h" />

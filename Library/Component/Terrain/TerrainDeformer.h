@@ -59,16 +59,6 @@ public:
 	{
 		_taskMap[controller].push_back(task);
 	}
-    // 環境物を追加
-    void AddEnvironmentObject(TerrainController* controller,
-        const std::string& modelPath,
-        TerrainObjectLayout::UpdateType updateType,
-        TerrainObjectLayout::CollisionType collisionType,
-        const Vector3& position,
-        const Vector3& rotation,
-        const Vector3& size,
-        const Vector3& collisionOffset,
-        const Vector4& collisionParameter);
 
 	// ブラシの追加
     void RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush);
@@ -77,8 +67,6 @@ public:
 	size_t GetPaintTextureIndex() const { return _paintTextureIndex; }
     // 選択中のブラシテクスチャ番号取得
 	size_t GetBrushTextureIndex() const { return _brushTextureIndex; }
-	// 選択中のモデルファイルパス取得
-	const std::string& GetSelectedModelPath() const { return _selectedModelPath; }
 
 private:
     // ブラシの描画
@@ -88,8 +76,6 @@ private:
     void DrawPaintTextureGui();
     // ブラシテクスチャのGUI描画
     void DrawBrushTextureGui();
-    // モデルの選択GUI描画
-	void DrawModelSelectionGui();
 	// ブラシの選択GUI描画
 	void DrawBrushSelectionGui();
     // ブラシのGUI描画
@@ -113,8 +99,6 @@ private:
 	size_t _paintTextureIndex = 0;
     // 使用するブラシテクスチャインデックス
     size_t _brushTextureIndex = 0;
-    // 選択中のモデルファイルパス
-    std::string _selectedModelPath = "";
 
     // ブラシの行列
     DirectX::XMFLOAT4X4 _brushMatrix = {};

@@ -223,6 +223,11 @@ public:
 	void SetName(const char* name) { this->_name = name; }
 	void SetTransform(const Transform& t) { this->_transform = t; }
 	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
+
+	// フォルダパス取得
+	const std::string& GetFolderPath() const { return _folderPath; }
+	// フォルダパス設定
+	void SetFolderPath(const std::string& folderPath) { _folderPath = folderPath; }
 #pragma endregion
 
 #pragma region フラグ関係
@@ -256,7 +261,7 @@ public:
 	virtual void AddChild(std::shared_ptr<Actor> child);
 
 	Actor* GetParent() { return _parent; }
-	const std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }
+	std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }
 
 	virtual std::string GetParentName()
 	{
@@ -368,6 +373,8 @@ protected:
 	std::shared_ptr<Model>	_model;
 	// コンポーネント
 	std::vector<std::shared_ptr<Component>>		_components;
+	// フォルダパス
+	std::string 			_folderPath;
 
 #pragma region 親子関係
 	Actor*								_parent = nullptr;

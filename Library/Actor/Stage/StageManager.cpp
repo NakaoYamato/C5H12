@@ -2,9 +2,11 @@
 
 #include "../../Library/Scene/Scene.h"
 
+#include "../../Library/Component/Collider/TransparentWallCollider.h"
+#include "../../Library/Component/EnvironmentController.h"
+
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "Terrain/TerrainActor.h"
-#include "../../Library/Component/Collider/TransparentWallCollider.h"
 
 // ¶¬Žžˆ—
 void StageManager::OnCreate()
@@ -14,6 +16,7 @@ void StageManager::OnCreate()
 
 	// TerrainDeformer‚ð’Ç‰Á
 	this->AddComponent<TerrainDeformer>();
+	this->AddComponent<EnvironmentController>();
 	this->AddCollider<TransparentWallCollider>();
 
 	// Žq‹Ÿ’Ç‰Á

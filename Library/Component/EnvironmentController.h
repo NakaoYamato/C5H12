@@ -1,0 +1,90 @@
+#pragma once
+
+#include "Component.h"
+#include "../../Library/Actor/ActorFactory.h"
+
+class EnvironmentController : public Component
+{
+public:
+	// 配置情報
+	struct EnvironmentLayout
+	{
+		std::weak_ptr<Actor> actor;
+		std::string actorType = "";
+		std::string parent = "";
+		Vector3 position = Vector3::Zero;
+		Vector3 angle = Vector3::Zero;
+		Vector3 scale = Vector3::One;
+	};
+
+public:
+	EnvironmentController() = default;
+	~EnvironmentController() override = default;
+
+	// 名前取得
+	const char* GetName() const override { return "EnvironmentController"; }
+	// 生成時処理
+	void OnCreate() override;
+	// 開始処理
+	void Start() override;
+	// 遅延更新処理
+	void LateUpdate(float elapsedTime) override;
+	// GUI描画
+	void DrawGui() override;
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile() override;
+	// ファイル保存
+	bool SaveToFile() override;
+#pragma endregion
+
+private:
+	// 環境アクター生成
+	std::shared_ptr<Actor> CreateEnvironmentActor(
+		std::string actorType,
+		std::string parent,
+		const Vector3& position,
+		const Vector3& angle,
+		const Vector3& scale);
+
+	// 編集用GUI描画
+	void DrawEditingGui();
+
+private:
+	// ActorFactoryへの参照
+	std::weak_ptr<ActorFactory> _actorFactory;
+
+	// 生成する環境アクターのインデックス
+	int _creationEnvironmentIndex = 0;
+#pragma region 編集
+	// 編集中かどうか
+	bool _isEditing = false;
+
+	// 選択している環境アクターのインデックス
+	int _selectedEnvironmentIndex = -1;
+	// レイの長さ
+	float _rayLength = 1000.0f;
+	// 交差点のワールド座標
+	Vector3 _intersectionWorldPoint = Vector3::Zero;
+	// 生成する環境アクターの回転値
+	Vector3 _creationAngle = Vector3::Zero;
+	// 生成する環境アクターのサイズ
+	Vector3 _creationScale = Vector3::One;
+	// 交差したアクターの参照
+	Actor* _intersectedActor = nullptr;
+
+	// 編集で表示する用の環境アクターのリスト
+	std::vector<std::weak_ptr<Actor>> _editingEnvironmentActors;
+	// 生成した環境アクター配置情報
+	std::vector<EnvironmentLayout> _createdEnvironmentLayouts;
+
+	// ダブルクリック判定
+	bool _isDoubleClick = false;
+	// ダブルクリックの閾値
+	float _doubleClickThreshold = 0.3f;
+	// 左クリック時間
+	float _leftClickTime = 0.0f;
+#pragma endregion
+
+};

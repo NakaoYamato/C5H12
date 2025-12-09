@@ -208,11 +208,6 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 
         ImGui::TreePop();
     }
-    if (ImGui::TreeNode(u8"環境オブジェクト"))
-    {
-        _terrainObjectLayout.DrawGui();
-        ImGui::TreePop();
-    }
 }
 // レイキャスト
 bool Terrain::Raycast(
@@ -378,9 +373,6 @@ void Terrain::SaveToFile(ID3D11Device* device, ID3D11DeviceContext* dc, const st
         jsonData["normalTexturePath"] = _normalTexturePath;
         jsonData["parameterTexturePath"] = _parameterTexturePath;
     }
-	// 地形データの書き出し
-	_terrainObjectLayout.Export(&jsonData);
-
     Exporter::SaveJsonFile(path, jsonData);
 
     // シリアライズパスを更新
@@ -400,8 +392,6 @@ void Terrain::LoadFromFile(ID3D11Device* device, const std::string& path)
 		_normalTexturePath = jsonData["normalTexturePath"].get<std::wstring>();
 	if (jsonData.contains("parameterTexturePath"))
 		_parameterTexturePath = jsonData["parameterTexturePath"].get<std::wstring>();
-	// 地形データの読み込み
-	_terrainObjectLayout.Import(device, jsonData);
     // シリアライズパスを更新
 	_serializePath = path;
     // 各テクスチャのパスが設定されている場合はテクスチャをロード

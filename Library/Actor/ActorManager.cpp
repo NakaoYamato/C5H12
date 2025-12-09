@@ -191,15 +191,17 @@ void ActorManager::DrawGui()
 				ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
 			else
 				ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-			if (ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName()))
+			bool isOpen = ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName());
+
+			// ダブルクリックで選択
+			if (ImGui::IsItemClicked())
+			{
+				_showGuiObj = actor->GetName();
+			}
+
+			if (isOpen)
 			{
 				actor->SetIsDrawingHierarchy(false);
-
-				// ダブルクリックで選択
-				if (ImGui::IsItemClicked())
-				{
-					_showGuiObj = actor->GetName();
-				}
 
 				// 子供の表示
 				for (auto& child : actor->GetChildren())
@@ -357,9 +359,17 @@ void ActorManager::Register(std::shared_ptr<Actor> actor, ActorTag tag)
 // 指定要素の削除
 void ActorManager::Remove(std::shared_ptr<Actor> actor)
 {
-	// スレッドセーフ
-	std::lock_guard<std::mutex> lock(_mutex);
-	_removeActors.insert(actor);
+	{
+		// スレッドセーフ
+		std::lock_guard<std::mutex> lock(_mutex);
+		_removeActors.insert(actor);
+	}
+	// 子供の削除
+	for (std::shared_ptr<Actor>& child : actor->GetChildren())
+	{
+		if (child)
+			Remove(child);
+	}
 }
 void ActorManager::Remove(const std::string& name)
 {

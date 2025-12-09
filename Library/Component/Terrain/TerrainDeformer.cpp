@@ -11,7 +11,6 @@
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
 #include "../../Library/Terrain/Brush/CostTransformingBrush.h"
-#include "../../Library/Terrain/Brush/ObjectLayoutBrush.h"
 #include "../../Library/Terrain/Brush/GrassTransformingBrush.h"
 
 #include <filesystem>
@@ -57,7 +56,6 @@ void TerrainDeformer::OnCreate()
 	RegisterBrush(std::make_shared<ColorAdditionBrush>(this));
 	RegisterBrush(std::make_shared<HeightTransformingBrush>(this));
 	RegisterBrush(std::make_shared<CostTransformingBrush>(this));
-	RegisterBrush(std::make_shared<ObjectLayoutBrush>(this));
 	RegisterBrush(std::make_shared<GrassTransformingBrush>(this));
 	// 初期ブラシの選択
 	_selectedBrushName = _brushes.begin()->first;
@@ -299,39 +297,6 @@ void TerrainDeformer::DrawGui()
         auto terrainActor = GetActor()->GetScene()->RegisterActor<TerrainActor>(actorName, ActorTag::Stage);
     }
 }
-// 環境物を追加
-void TerrainDeformer::AddEnvironmentObject(TerrainController* controller, 
-    const std::string& modelPath,
-    TerrainObjectLayout::UpdateType updateType,
-    TerrainObjectLayout::CollisionType collisionType,
-    const Vector3& position,
-    const Vector3& rotation,
-    const Vector3& size,
-    const Vector3& collisionOffset,
-    const Vector4& collisionParameter)
-{
-    auto terrain = controller->GetTerrain().lock();
-    if (!terrain)
-        return;
-    // 選択中のモデルが登録されているか確認
-    if (!terrain->GetTerrainObjectLayout()->HasModel(modelPath))
-    {
-        // モデルが登録されていない場合は登録
-        terrain->GetTerrainObjectLayout()->AddModel(Graphics::Instance().GetDevice(), modelPath);
-    }
-    // オブジェクトを配置
-    int layoutID = terrain->GetTerrainObjectLayout()->AddLayout(
-        modelPath, 
-		updateType,
-        collisionType,
-        position.TransformCoord(controller->GetActor()->GetTransform().GetMatrixInverse()), // 位置をローカル座標系で設定
-        rotation,
-        size,
-        collisionOffset,
-        collisionParameter);
-    // 描画用アクター生成
-    controller->CreateEnvironment(layoutID);
-}
 // ブラシの追加
 void TerrainDeformer::RegisterBrush(std::shared_ptr<TerrainDeformerBrush> brush)
 {
@@ -393,20 +358,6 @@ void TerrainDeformer::DrawBrushTextureGui()
         ImGui::Image(brushTextures[i].textureSRV.Get(), { 128.0f, 128.0f });
     }
 }
-// モデルの選択GUI描画
-void TerrainDeformer::DrawModelSelectionGui()
-{
-    auto deformationResource = ResourceManager::Instance().GetResourceAs<TerrainDeformationResource>();
-    if (!deformationResource)
-        return;
-
-	auto& environmentObjects = deformationResource->GetEnvironmentObjects();
-	for (size_t i = 0; i < environmentObjects.size(); ++i)
-	{
-		if (ImGui::RadioButton(environmentObjects[i].path.c_str(), _selectedModelPath == environmentObjects[i].path.c_str()))
-            _selectedModelPath = environmentObjects[i].path.c_str();
-	}
-}
 // ブラシの選択GUI描画
 void TerrainDeformer::DrawBrushSelectionGui()
 {
@@ -441,10 +392,6 @@ void TerrainDeformer::DrawBrushGui()
 
             // ブラシテクスチャのGUI表示
             DrawBrushTextureGui();
-            ImGui::Separator();
-
-            // モデル選択GUI表示
-            DrawModelSelectionGui();
         }
         ImGui::End();
 

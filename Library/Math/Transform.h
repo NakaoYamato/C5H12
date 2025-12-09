@@ -95,8 +95,20 @@ public:
 	Vector3 GetAxisY()const { return Vector3(_transform._21, _transform._22, _transform._23); }
 	// Z軸取得
 	Vector3 GetAxisZ()const { return Vector3(_transform._31, _transform._32, _transform._33); }
+
 	// ワールド座標取得
-	Vector3 GetWorldPosition()const { return Vector3(_transform._41, _transform._42, _transform._43); }
+	Vector3 GetWorldPosition()const { return _worldPosition; }
+	// ワールドスケール取得
+	Vector3 GetWorldScale()const { return _worldScale; }
+	// ワールド回転取得
+	Vector3 GetWorldAngle()const { return _worldAngle; }
+
+	// ワールド座標設定(高負荷)
+	void SetWorldPosition(const Vector3& v);
+	// ワールドスケール設定(高負荷)
+	void SetWorldScale(const Vector3& v);
+	// ワールド回転設定(高負荷)
+	void SetWorldAngle(const Vector3& v);
 #pragma endregion
 
 #pragma region ファイル操作
@@ -110,5 +122,10 @@ private:
 	Vector3 _scale		= Vector3::One;
 	Vector3 _angle		= Vector3::Zero;
 
-	Matrix4X4 _transform = Matrix4X4::Identity;
+	Vector3 _worldPosition	= Vector3::Zero;
+	Vector3 _worldScale		= Vector3::One;
+	Vector3 _worldAngle		= Vector3::Zero;
+
+	Matrix4X4 _transform	= Matrix4X4::Identity;
+	Matrix4X4 _parent		= Matrix4X4::Identity;
 };

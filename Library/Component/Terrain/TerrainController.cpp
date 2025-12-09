@@ -5,7 +5,6 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Algorithm/Converter.h"
 
-#include "TerrainEnvironmentController.h"
 #include "TerrainCollider.h"
 
 #include <filesystem>
@@ -26,13 +25,6 @@ void TerrainController::OnCreate()
         std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
         _terrain->UpdateTextures(GetActor()->GetScene()->GetTextureRenderer(),
             Graphics::Instance().GetDeviceContext());
-    }
-
-    // 地形の環境物配置情報からアクター生成
-	auto objectLayout = _terrain->GetTerrainObjectLayout();
-    for (const auto& [index, layout] : objectLayout->GetLayouts())
-    {
-		CreateEnvironment(index);
     }
 
 	// 地形の頂点情報をエクスポートする
@@ -60,16 +52,6 @@ void TerrainController::LateUpdate(float elapsedTime)
         {
             _editState = EditState::Editing;
         }
-    }
-    if (_recreateEnvironment)
-    {
-        // 地形の環境物配置情報からアクター生成
-        auto objectLayout = _terrain->GetTerrainObjectLayout();
-        for (const auto& [index, layout] : objectLayout->GetLayouts())
-        {
-            CreateEnvironment(index);
-        }
-		_recreateEnvironment = false;
     }
     // 編集状態がCompleteの場合は、未編集状態に変更
     if (_editState == EditState::Complete)
@@ -157,18 +139,6 @@ void TerrainController::DrawGui()
             _editState = EditState::Editing;
 		// ストリームアウトデータの描画フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"ストリームアウトデータ描画", &_drawStreamOut);
-        if (ImGui::Button(u8"環境物のリセット"))
-        {
-			for (auto& obj : _environmentObjects)
-			{
-                if (obj.lock())
-                {
-					obj.lock()->Remove();
-                }
-			}
-            _environmentObjects.clear();
-			_recreateEnvironment = true;
-        }
         ImGui::Separator();
         std::string resultPath = "";
         if (ImGui::SaveDialogBotton(u8"保存", &resultPath, ImGui::JsonFilter, "保存先を指定"))
@@ -188,23 +158,6 @@ void TerrainController::DrawGui()
         _terrain->DrawGui(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
     }
 }
-// 環境物の生成
-void TerrainController::CreateEnvironment(int layoutID)
-{
-	if (!_terrain)
-		return;
-    // 描画用アクター生成
-    std::string name = GetActor()->GetName();
-    name += "Obj" + std::to_string(layoutID);
-    auto actor = GetActor()->GetScene()->RegisterActor<Actor>(name, ActorTag::Stage);
-    actor->AddComponent<TerrainEnvironmentController>(_terrain, layoutID, GetActor()->GetTransform().GetMatrix());
-	_environmentObjects.push_back(actor);
-	// 親子関係設定
-	actor->SetParent(GetActor().get());
-    // 親のトランスフォームを反映しない
-    actor->SetInheritParentTransform(false);
-}
-
 // 編集状態設定
 void TerrainController::SetEditState(EditState state)
 {

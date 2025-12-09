@@ -12,8 +12,6 @@
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/PostProcess/FrameBuffer.h"
 
-#include "TerrainObjectLayout.h"
-
 class Terrain
 {
 public:
@@ -66,8 +64,6 @@ public:
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
 	// ストリームアウトデータを設定
     void SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<StreamOutVertex>& data);
-	// オブジェクトの配置情報を取得
-	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
 
 	// Mipmap用SRVを取得
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetMipmapBaseColorSRV() { return _mipmapBaseColorSRV; }
@@ -115,9 +111,6 @@ private:
 
     // 頂点情報
     std::vector<StreamOutVertex> _streamOutData;
-
-	// 環境オブジェクトの配置情報
-	TerrainObjectLayout _terrainObjectLayout;
 
     // シリアライズパス
     std::string _serializePath;

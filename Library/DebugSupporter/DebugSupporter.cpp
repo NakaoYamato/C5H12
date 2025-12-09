@@ -453,11 +453,6 @@ namespace Debug
                         if (Debug::Input::IsActive(key))
                         {
                             color = ImVec4(1, 0, 0, 1);
-                            name += ":Active";
-                        }
-                        else
-                        {
-                            name += ":Deactive";
                         }
                         ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, color);
                         if (ImGui::MenuItem(name.c_str()))
@@ -467,10 +462,10 @@ namespace Debug
                         ImGui::PopStyleColor();
                     };
 
-                DrawDebugFlagGui(DebugInput::BTN_F3, "Slowdown");
-                DrawDebugFlagGui(DebugInput::BTN_F4, "DebugCamera");
-                DrawDebugFlagGui(DebugInput::BTN_F5, "FixedTime");
-                DrawDebugFlagGui(DebugInput::BTN_F7, "DebugDraw");
+                DrawDebugFlagGui(DebugInput::BTN_F3, u8"更新1/10");
+                DrawDebugFlagGui(DebugInput::BTN_F4, u8"デバッグカメラ");
+                DrawDebugFlagGui(DebugInput::BTN_F5, u8"更新停止");
+                DrawDebugFlagGui(DebugInput::BTN_F7, u8"デバッグ表示");
             }
 
             ImGui::EndMainMenuBar();

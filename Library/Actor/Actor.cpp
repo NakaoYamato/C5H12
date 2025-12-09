@@ -324,14 +324,34 @@ void Actor::DrawGui()
 			{
 				ImGui::Spacing();
 				ImGui::Separator();
-				if (ImGui::TreeNodeEx(&collider, ImGuiTreeNodeFlags_DefaultOpen, std::to_string(index++).c_str()))
+
+				ImGui::PushID(&collider);
+
+				std::string headerName = std::to_string(index++) + ":" + std::string(collider->GetName());
+				bool isOpen = ImGui::CollapsingHeader(headerName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+
+				// 右クリックされたとき
+				if (ImGui::BeginPopupContextItem())
 				{
-					ImGui::Separator();
-					ImGui::Text(collider->GetName());
-					collider->DrawGui();
-					ImGui::Separator();
-					ImGui::TreePop();
+					if (ImGui::MenuItem("Save"))
+					{
+						collider->SaveToFile();
+					}
+
+					if (ImGui::MenuItem("Load"))
+					{
+						collider->LoadFromFile();
+					}
+
+					ImGui::EndPopup();
 				}
+
+				if (isOpen)
+				{
+					collider->DrawGui();
+				}
+
+				ImGui::PopID();
 			}
 			ImGui::EndTabItem();
 		}

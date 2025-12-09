@@ -308,7 +308,6 @@
     <ClCompile Include="Library\Terrain\Brush\GrassTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\HeightTransformingBrush.cpp" />
     <ClCompile Include="Library\Terrain\Brush\ObjectLayoutBrush.cpp" />
-    <ClCompile Include="Library\Terrain\Brush\TransparentWallBrush.cpp" />
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Library\Terrain\TerrainDeformationResource.cpp" />
     <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
@@ -598,7 +597,6 @@
     <ClInclude Include="Library\Terrain\Brush\GrassTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\HeightTransformingBrush.h" />
     <ClInclude Include="Library\Terrain\Brush\ObjectLayoutBrush.h" />
-    <ClInclude Include="Library\Terrain\Brush\TransparentWallBrush.h" />
     <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Library\Terrain\TerrainDeformationResource.h" />
     <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />

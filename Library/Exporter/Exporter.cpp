@@ -4,6 +4,7 @@
 
 #include <wrl.h>
 #include <wincodec.h>
+#include <fstream>
 
 /// WAVファイルを保存する
 void Exporter::SaveWavFile(
@@ -147,6 +148,14 @@ bool Exporter::SaveDDSFile(ID3D11Device* device,
 
 bool Exporter::SaveJsonFile(const std::string& filename, const nlohmann::json& jsonData)
 {
+    // ディレクトリ確保
+    std::filesystem::path outputDirPath(std::filesystem::path(filename).parent_path());
+    if (!std::filesystem::exists(outputDirPath))
+    {
+        // なかったらディレクトリ作成
+        std::filesystem::create_directories(outputDirPath);
+    }
+
     std::ofstream writing_file;
     writing_file.open(filename, std::ios::out);
 	if (writing_file.is_open())

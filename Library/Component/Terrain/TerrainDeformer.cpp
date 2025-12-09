@@ -11,7 +11,6 @@
 #include "../../Library/Terrain/Brush/ColorAdditionBrush.h"
 #include "../../Library/Terrain/Brush/HeightTransformingBrush.h"
 #include "../../Library/Terrain/Brush/CostTransformingBrush.h"
-#include "../../Library/Terrain/Brush/TransparentWallBrush.h"
 #include "../../Library/Terrain/Brush/ObjectLayoutBrush.h"
 #include "../../Library/Terrain/Brush/GrassTransformingBrush.h"
 
@@ -58,7 +57,6 @@ void TerrainDeformer::OnCreate()
 	RegisterBrush(std::make_shared<ColorAdditionBrush>(this));
 	RegisterBrush(std::make_shared<HeightTransformingBrush>(this));
 	RegisterBrush(std::make_shared<CostTransformingBrush>(this));
-	RegisterBrush(std::make_shared<TransparentWallBrush>(this));
 	RegisterBrush(std::make_shared<ObjectLayoutBrush>(this));
 	RegisterBrush(std::make_shared<GrassTransformingBrush>(this));
 	// ‰Šúƒuƒ‰ƒV‚Ì‘I‘ğ

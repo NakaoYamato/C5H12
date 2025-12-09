@@ -317,41 +317,29 @@ bool CollisionManager::RayCast(
 	return hit;
 }
 /// レイキャスト（接触したアクターすべての情報を取得）
-std::vector<Actor*> CollisionManager::RayCast(
+std::vector<CollisionManager::RayCastResult> CollisionManager::RayCast(
 	const Vector3& start,
 	const Vector3& direction, 
-	float* distance,
-	Vector3* hitPosition,
-	Vector3* hitNormal)
+	float distance)
 {
-	float tmpDist = *distance;
-	std::vector<Actor*> hitActors;
+	std::vector<CollisionManager::RayCastResult> rayCastResult;
 
 	// 各メッシュコライダーに対してレイキャストを行う
 	for (auto& meshCollider : _meshColliders)
 	{
-		float dist = tmpDist;
+		float dist = distance;
 		Vector3 hitPos{}, hitNorm{};
 		if (meshCollider->RayCast(start, direction, &dist, &hitPos, &hitNorm))
 		{
-			hitActors.push_back(meshCollider->GetActor().get());
-
-			// 接触情報を更新
-			if (dist < *distance)
-			{
-				*distance = dist;
-				if (hitPosition)
-				{
-					*hitPosition = hitPos;
-				}
-				if (hitNormal)
-				{
-					*hitNormal = hitNorm;
-				}
-			}
+			CollisionManager::RayCastResult result;
+			result.hitActor = meshCollider->GetActor().get();
+			result.hitPosition = hitPos;
+			result.hitNormal = hitNorm;
+			result.distance = dist;
+			rayCastResult.push_back(result);
 		}
 	}
-	return hitActors;
+	return rayCastResult;
 }
 /// スフィアキャスト
 bool CollisionManager::SphereCast(
@@ -377,42 +365,30 @@ bool CollisionManager::SphereCast(
 	return hit;
 }
 /// スフィアキャスト（接触したアクターすべての情報を取得）
-std::vector<Actor*> CollisionManager::SphereCast(
+std::vector<CollisionManager::RayCastResult> CollisionManager::SphereCast(
 	const Vector3& origin,
 	const Vector3& direction, 
 	float radius,
-	float* distance,
-	Vector3* hitPosition,
-	Vector3* hitNormal)
+	float distance)
 {
-	float tmpDist = *distance;
-	std::vector<Actor*> hitActors;
+	std::vector<CollisionManager::RayCastResult> rayCastResult;
 
 	// 各メッシュコライダーに対してスフィアキャスト行う
 	for (auto& meshCollider : _meshColliders)
 	{
-		float dist = tmpDist;
+		float dist = distance;
 		Vector3 hitPos{}, hitNorm{};
 		if (meshCollider->SphereCast(origin, direction, radius, &dist, &hitPos, &hitNorm))
 		{
-			hitActors.push_back(meshCollider->GetActor().get());
-
-			// 接触情報を更新
-			if (dist < *distance)
-			{
-				*distance = dist;
-				if (hitPosition)
-				{
-					*hitPosition = hitPos;
-				}
-				if (hitNormal)
-				{
-					*hitNormal = hitNorm;
-				}
-			}
+			CollisionManager::RayCastResult result;
+			result.hitActor = meshCollider->GetActor().get();
+			result.hitPosition = hitPos;
+			result.hitNormal = hitNorm;
+			result.distance = dist;
+			rayCastResult.push_back(result);
 		}
 	}
-	return hitActors;
+	return rayCastResult;
 }
 #pragma endregion
 

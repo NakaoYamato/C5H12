@@ -80,6 +80,14 @@ public:
 		bool isTrigger = false;
     };
 
+	struct RayCastResult
+	{
+		Vector3 hitPosition = Vector3::Zero;
+		Vector3 hitNormal = Vector3::Zero;
+		Actor*	hitActor = nullptr;
+		float	distance = 0.0f;
+	};
+
 public:
 	CollisionManager() {}
 	~CollisionManager() {}
@@ -120,12 +128,10 @@ public:
 	/// <param name="hitPosition"></param>
 	/// <param name="hitNormal"></param>
 	/// <returns></returns>
-	std::vector<Actor*> RayCast(
+	std::vector<RayCastResult> RayCast(
 		const Vector3& start,
 		const Vector3& direction,
-		float* distance,
-		Vector3* hitPosition,
-		Vector3* hitNormal);
+		float distance);
 	/// <summary>
 	/// スフィアキャスト
 	/// </summary>
@@ -152,16 +158,12 @@ public:
 	/// <param name="direction"></param>
 	/// <param name="radius"></param>
 	/// <param name="distance"></param>
-	/// <param name="hitPosition"></param>
-	/// <param name="hitNormal"></param>
 	/// <returns></returns>
-	std::vector<Actor*> SphereCast(
+	std::vector<RayCastResult> SphereCast(
 		const Vector3& origin,
 		const Vector3& direction/*must normal*/,
 		float radius,
-		float* distance,
-		Vector3* hitPosition,
-		Vector3* hitNormal);
+		float distance);
 #pragma endregion
 	
 	// TODO : 各コライダーのOverlapSphereを実装する

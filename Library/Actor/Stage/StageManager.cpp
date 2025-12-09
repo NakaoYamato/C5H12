@@ -14,7 +14,7 @@ void StageManager::OnCreate()
 
 	// TerrainDeformer‚ð’Ç‰Á
 	this->AddComponent<TerrainDeformer>();
-	this->AddCollider<TransparentWallCollider>("");
+	this->AddCollider<TransparentWallCollider>();
 
 	// Žq‹Ÿ’Ç‰Á
 	auto stage0 = this->GetScene()->RegisterActor<TerrainActor>("Stage0",

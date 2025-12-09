@@ -483,9 +483,6 @@
     <ClCompile Include="Library\Terrain\Brush\CostTransformingBrush.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Library\Terrain\TerrainTransparentWall.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Terrain\Brush\ObjectLayoutBrush.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1320,9 +1317,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\ImGui\imgui-docking\Mygui.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Library\Terrain\TerrainTransparentWall.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Terrain\Brush\ObjectLayoutBrush.h">

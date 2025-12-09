@@ -270,7 +270,7 @@ void TransparentWallCollider::ChangeState(EditState newState)
 		// クリックしたスクリーン座標を保存
 		_guiPosition.x = ImGui::GetMousePos().x;
 		_guiPosition.y = ImGui::GetMousePos().y;
-		_enableMouseCollision = true;
+		_enableMouseCollision = false;
 		break;
 	case EditState::MovePoint:
 		if (_editingWallIndex != -1 && _editingPointIndex != -1)
@@ -427,7 +427,6 @@ void TransparentWallCollider::UpdateMovePoint(float elapsedTime)
 		if (_snapToGround)
 		{
 			// 地形との交差判定
-			Vector3 hitPosition{};
 			// レイキャストで交差点を取得
 			auto actors = GetActor()->GetScene()->GetCollisionManager().RayCast(
 				worldPosition + Vector3(Vector3::Up) * _rayLength / 2.0f,
@@ -440,7 +439,7 @@ void TransparentWallCollider::UpdateMovePoint(float elapsedTime)
 				{
 					if (result.hitActor != this->GetActor().get())
 					{
-						worldPosition.y = hitPosition.y;
+						worldPosition.y = result.hitPosition.y;
 						break;
 					}
 				}

@@ -67,36 +67,6 @@ MeshCollider::CollisionMesh TerrainCollider::RecalculateCollisionMesh(Model* mod
 		volumeMax = volumeMax.Maximum(v2);
 		volumeMax = volumeMax.Maximum(v3);
     }
-    // 透明壁のデータから三角形を生成
-    for (size_t i = 0; i < terrain->GetTransparentWall()->GetWalls().size(); i++)
-    {
-        auto& wall = terrain->GetTransparentWall()->GetWalls()[i];
-		size_t pointCount = wall.vertices.size();
-		if (pointCount <= 1)
-			continue;
-		Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
-		for (size_t i = 0; i < pointCount - 1; i++)
-		{
-			const Vector3& p1 = wall.vertices[i];
-			const Vector3& p2 = wall.vertices[i + 1];
-			const Vector3& p3 = p1 + heightOffset;
-			const Vector3& p4 = p2 + heightOffset;
-
-			// 法線ベクトルを算出
-			Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();
-			// 三角形データを格納
-			CollisionMesh::Triangle& triangle0 = collisionMesh.triangles.emplace_back();
-			triangle0.positions[0] = p1;
-			triangle0.positions[1] = p2;
-			triangle0.positions[2] = p3;
-			triangle0.normal = normal;
-			CollisionMesh::Triangle& triangle1 = collisionMesh.triangles.emplace_back();
-			triangle1.positions[0] = p2;
-			triangle1.positions[1] = p4;
-			triangle1.positions[2] = p3;
-			triangle1.normal = normal;
-		}
-    }
 
 	// AABBの構築
 	BuildCollisionMeshAABB(collisionMesh, volumeMin, volumeMax);

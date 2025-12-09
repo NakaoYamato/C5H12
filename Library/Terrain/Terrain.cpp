@@ -208,12 +208,6 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
 
         ImGui::TreePop();
     }
-    if (ImGui::TreeNode(u8"透明壁"))
-    {
-        _transparentWall.DrawGui();
-
-        ImGui::TreePop();
-    }
     if (ImGui::TreeNode(u8"環境オブジェクト"))
     {
         _terrainObjectLayout.DrawGui();
@@ -384,8 +378,6 @@ void Terrain::SaveToFile(ID3D11Device* device, ID3D11DeviceContext* dc, const st
         jsonData["normalTexturePath"] = _normalTexturePath;
         jsonData["parameterTexturePath"] = _parameterTexturePath;
     }
-    // 透明壁の書き出し
-    _transparentWall.Export(&jsonData);
 	// 地形データの書き出し
 	_terrainObjectLayout.Export(&jsonData);
 
@@ -408,8 +400,6 @@ void Terrain::LoadFromFile(ID3D11Device* device, const std::string& path)
 		_normalTexturePath = jsonData["normalTexturePath"].get<std::wstring>();
 	if (jsonData.contains("parameterTexturePath"))
 		_parameterTexturePath = jsonData["parameterTexturePath"].get<std::wstring>();
-    // 透明壁の読み込み
-    _transparentWall.Import(jsonData);
 	// 地形データの読み込み
 	_terrainObjectLayout.Import(device, jsonData);
     // シリアライズパスを更新

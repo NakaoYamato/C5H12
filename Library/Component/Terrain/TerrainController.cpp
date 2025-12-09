@@ -146,45 +146,6 @@ void TerrainController::DebugRender(const RenderContext& rc)
                 Debug::Renderer::AddVertex(v1.worldPosition, color);
             }
         }
-
-		// 透明壁の描画
-		if (_drawTransparentWall)
-		{
-			const DirectX::XMFLOAT4X4& world = GetActor()->GetTransform().GetMatrix();
-			for (const auto& wall : _terrain->GetTransparentWall()->GetWalls())
-			{
-				size_t pointCount = wall.vertices.size();
-				if (pointCount <= 1)
-					continue;
-				Vector3 heightOffset = Vector3(0.0f, wall.height, 0.0f);
-				for (size_t i = 0; i < pointCount - 1; i++)
-				{
-                    const Vector3 p1 = wall.vertices[i];
-                    const Vector3 p2 = wall.vertices[i + 1];
-                    const Vector3 p3 = p1 + heightOffset;
-                    const Vector3 p4 = p2 + heightOffset;
-					Vector4 color = Vector4::Green;
-					Debug::Renderer::AddVertex(p1, color);
-					Debug::Renderer::AddVertex(p2, color);
-					Debug::Renderer::AddVertex(p1, color);
-					Debug::Renderer::AddVertex(p3, color);
-					Debug::Renderer::AddVertex(p2, color);
-					Debug::Renderer::AddVertex(p4, color);
-					Debug::Renderer::AddVertex(p3, color);
-					Debug::Renderer::AddVertex(p4, color);
-					// 法線の描画
-					Vector3 center = (p1 + p2 + p3 + p4) / 4.0f;
-					Vector3 normal = (p2 - p1).Cross(p3 - p1).Normalize();
-					// 法線の向きがカメラ方向なら青色、逆方向なら赤色
-					if (normal.Dot(rc.camera->GetEye() - center) < 0.0f)
-                        color = Vector4::Red;
-					else
-                        color = Vector4::Blue;
-					Debug::Renderer::AddVertex(center, color);
-					Debug::Renderer::AddVertex(center + normal, color);
-				}
-			}
-		}
     }
 }
 // GUI描画
@@ -196,8 +157,6 @@ void TerrainController::DrawGui()
             _editState = EditState::Editing;
 		// ストリームアウトデータの描画フラグを切り替えるチェックボックス
 		ImGui::Checkbox(u8"ストリームアウトデータ描画", &_drawStreamOut);
-		// 透明壁の描画フラグを切り替えるチェックボックス
-		ImGui::Checkbox(u8"透明壁描画", &_drawTransparentWall);
         if (ImGui::Button(u8"環境物のリセット"))
         {
 			for (auto& obj : _environmentObjects)

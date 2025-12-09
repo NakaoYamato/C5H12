@@ -12,7 +12,6 @@
 #include "../../Library/Renderer/TextureRenderer.h"
 #include "../../Library/PostProcess/FrameBuffer.h"
 
-#include "TerrainTransparentWall.h"
 #include "TerrainObjectLayout.h"
 
 class Terrain
@@ -67,8 +66,6 @@ public:
     const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
 	// ストリームアウトデータを設定
     void SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<StreamOutVertex>& data);
-    // 透明壁取得
-	 TerrainTransparentWall* GetTransparentWall() { return &_transparentWall; }
 	// オブジェクトの配置情報を取得
 	TerrainObjectLayout* GetTerrainObjectLayout() { return &_terrainObjectLayout; }
 
@@ -118,9 +115,6 @@ private:
 
     // 頂点情報
     std::vector<StreamOutVertex> _streamOutData;
-
-    // 透明壁
-	TerrainTransparentWall _transparentWall;
 
 	// 環境オブジェクトの配置情報
 	TerrainObjectLayout _terrainObjectLayout;

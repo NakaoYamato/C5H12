@@ -52,8 +52,6 @@ private:
 	EditState _editState = EditState::None;
     // ストリームアウトデータ描画フラグ
     bool _drawStreamOut = false;
-    // 透明壁描画フラグ
-    bool _drawTransparentWall = false;
 	// 環境物の再生成フラグ
 	bool _recreateEnvironment = false;
 };

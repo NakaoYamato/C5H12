@@ -311,7 +311,6 @@
     <ClCompile Include="Library\Terrain\Terrain.cpp" />
     <ClCompile Include="Library\Terrain\TerrainDeformationResource.cpp" />
     <ClCompile Include="Library\Terrain\TerrainObjectLayout.cpp" />
-    <ClCompile Include="Library\Terrain\TerrainTransparentWall.cpp" />
     <ClCompile Include="Source\AI\MetaAI.cpp" />
     <ClCompile Include="Source\Armor\ArmorData.cpp" />
     <ClCompile Include="Source\Armor\ArmorEditActor.cpp" />
@@ -600,7 +599,6 @@
     <ClInclude Include="Library\Terrain\Terrain.h" />
     <ClInclude Include="Library\Terrain\TerrainDeformationResource.h" />
     <ClInclude Include="Library\Terrain\TerrainObjectLayout.h" />
-    <ClInclude Include="Library\Terrain\TerrainTransparentWall.h" />
     <ClInclude Include="Source\AI\MetaAI.h" />
     <ClInclude Include="Source\Armor\ArmorEditActor.h" />
     <ClInclude Include="Source\Armor\ArmorManager.h" />

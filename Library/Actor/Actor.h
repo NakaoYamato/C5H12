@@ -258,7 +258,11 @@ public:
 	/// q’Ç‰Á
 	/// </summary>
 	/// <param name="child"></param>
-	virtual void AddChild(std::shared_ptr<Actor> child);
+	virtual void AddChild(std::shared_ptr<Actor> child);	
+	/// <summary>
+	/// eŠÖŒW‰ğœ
+	/// </summary>
+	virtual void ReleaseParent();
 
 	Actor* GetParent() { return _parent; }
 	std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }

@@ -92,10 +92,12 @@ void ChestUIController::Open()
     }
     if (auto armorUI = _armorUI.lock())
     {
+        armorUI->GetActor()->SetIsActive(false);
         armorUI->Reset();
     }
 	if (auto itemUI = _itemUI.lock())
 	{
+        itemUI->GetActor()->SetIsActive(false);
 		itemUI->Reset();
 	}
 

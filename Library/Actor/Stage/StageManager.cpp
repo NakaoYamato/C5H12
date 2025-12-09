@@ -17,7 +17,8 @@ void StageManager::OnCreate()
 	// TerrainDeformer‚ð’Ç‰Á
 	this->AddComponent<TerrainDeformer>();
 	this->AddComponent<EnvironmentController>();
-	this->AddCollider<TransparentWallCollider>();
+	auto collider = this->AddCollider<TransparentWallCollider>();
+	collider->SetLayer(CollisionLayer::Stage);
 
 	// Žq‹Ÿ’Ç‰Á
 	auto stage0 = this->GetScene()->RegisterActor<TerrainActor>("Stage0",

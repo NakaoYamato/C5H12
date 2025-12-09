@@ -218,6 +218,8 @@ void Actor::DelayedRender(const RenderContext& rc)
 
 	// 起動チェック
 	if (!_isActive)return;
+	// 表示チェック
+	if (!_isShowing)return;
 
 	for (std::shared_ptr<Component>& component : _components)
 	{
@@ -465,6 +467,20 @@ void Actor::AddChild(std::shared_ptr<Actor> child)
 {
 	_children.emplace_back(child);
 	child->SetParent(this);
+}
+// 親関係解除
+void Actor::ReleaseParent()
+{
+	if (_parent)
+	{
+		// 親の子供リストから自分を削除
+		auto iter = std::find(_parent->_children.begin(), _parent->_children.end(), shared_from_this());
+		if (iter != _parent->_children.end())
+		{
+			_parent->_children.erase(iter);
+		}
+		_parent = nullptr;
+	}
 }
 #pragma endregion
 #pragma region 仮想関数

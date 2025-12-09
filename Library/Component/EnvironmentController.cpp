@@ -36,6 +36,25 @@ void EnvironmentController::OnCreate()
 // 開始処理
 void EnvironmentController::Start()
 {
+	// OnCreateで生成したオブジェクトは親子関係が構築できていないので再設定
+	for (auto& layout : _createdEnvironmentLayouts)
+	{
+		auto actor = layout.actor.lock();
+		if (!actor)
+			continue;
+		if (layout.parent != "")
+		{
+			auto parentActor = GetActor()->GetScene()->GetActorManager().FindByName(layout.parent);
+			if (parentActor)
+			{
+				actor->ReleaseParent();
+				actor->SetParent(parentActor.get());
+				actor->GetTransform().SetPosition(layout.position.TransformCoord(parentActor->GetTransform().GetMatrix().Inverse()));
+				actor->GetTransform().SetAngle(layout.angle);
+				actor->GetTransform().SetScale(layout.scale);
+			}
+		}
+	}
 }
 
 // 遅延更新処理
@@ -244,12 +263,10 @@ bool EnvironmentController::LoadFromFile()
 			Vector3 scale = layoutJson.value("Scale", Vector3(Vector3::One));
 			auto actor = CreateEnvironmentActor(
 				actorType,
-				_intersectedActor ? _intersectedActor->GetName() : "",
+				parent,
 				position,
 				angle,
 				scale);
-			if (!actor)
-				continue;
 		}
 		return true;
 	}

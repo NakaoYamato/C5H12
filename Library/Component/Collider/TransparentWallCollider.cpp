@@ -131,6 +131,16 @@ MeshCollider::CollisionMesh TransparentWallCollider::RecalculateCollisionMesh(Mo
 			triangle1.positions[1] = p4;
 			triangle1.positions[2] = p3;
 			triangle1.normal = normal;
+
+			// ƒ‚ƒfƒ‹‘S‘Ì‚ÌAABB‚ðŒv‘ª
+			volumeMin = volumeMin.Minimum(p1);
+			volumeMax = volumeMax.Maximum(p1);
+			volumeMin = volumeMin.Minimum(p2);
+			volumeMax = volumeMax.Maximum(p2);
+			volumeMin = volumeMin.Minimum(p3);
+			volumeMax = volumeMax.Maximum(p3);
+			volumeMin = volumeMin.Minimum(p4);
+			volumeMax = volumeMax.Maximum(p4);
 		}
 	}
 

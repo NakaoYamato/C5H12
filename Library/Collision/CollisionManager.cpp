@@ -557,7 +557,7 @@ void CollisionManager::SetDataByCollider()
 				box->GetLayerMask(),
 				box->GetPosition().TransformCoord(transform.GetMatrix()),
 				box->GetHalfSize(),
-				transform.GetAngle(),
+				transform.GetWorldAngle(),
 				box->IsTrigger()));
 	}
 	for (auto& capsule : _capsuleColliders)

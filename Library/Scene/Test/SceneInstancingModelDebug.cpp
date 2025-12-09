@@ -12,9 +12,9 @@ void SceneInstancingModelDebug::OnInitialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/diffuse_iem.dds",
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
-    _model0 = std::make_shared<Model>(device, "./Data/Terrain/Environment/Bush01Re.fbx");
-    _model1 = std::make_shared<Model>(device, "./Data/Terrain/Environment/Bush02Re.fbx");
-    _model2 = std::make_shared<Model>(device, "./Data/Terrain/Environment/Bush03Re.fbx");
+    _model0 = std::make_shared<Model>(device, "./Data/Terrain/Environment/Bush/Bush01Re.fbx");
+    _model1 = std::make_shared<Model>(device, "./Data/Terrain/Environment/Bush/Bush02Re.fbx");
+    _model2 = std::make_shared<Model>(device, "./Data/Terrain/Environment/Bush/Bush03Re.fbx");
 
     for (int i = 0; i < 99; i++)
     {

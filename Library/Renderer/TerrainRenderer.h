@@ -22,7 +22,7 @@ public:
         int divisionCount = 15;             // 分割数
 		float terrainLength = 50.0f;        // 地形1枚の長さ(m)
         float lodTessDistance = 15.0f;      // LODの距離
-        float collisionTessFactor = 11.0f;  // 衝突判定用エッジ分割数(奇数のみ)
+        float collisionTessFactor = 21.0f;  // 衝突判定用エッジ分割数(奇数のみ)
 
         float emissive = 0.0f;              // エミッシブ
         float metalness = 0.63f;            // メタリック

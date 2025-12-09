@@ -43,39 +43,39 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 {
 	HRESULT hr = S_OK;
 
-	D3D11_TEXTURE2D_DESC texture2d_desc = {};
-	texture2d_desc.Width = width;
-	texture2d_desc.Height = height;
-	texture2d_desc.MipLevels = 1;
-	texture2d_desc.ArraySize = cascadeCount;
-	texture2d_desc.Format = DXGI_FORMAT_R32_TYPELESS;
-	texture2d_desc.SampleDesc.Count = 1;
-	texture2d_desc.SampleDesc.Quality = 0;
-	texture2d_desc.Usage = D3D11_USAGE_DEFAULT;
-	texture2d_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	texture2d_desc.CPUAccessFlags = 0;
-	texture2d_desc.MiscFlags = 0;
-	hr = device->CreateTexture2D(&texture2d_desc, 0, _depthStencilBuffer.GetAddressOf());
+	D3D11_TEXTURE2D_DESC texture2dDesc = {};
+	texture2dDesc.Width = width;
+	texture2dDesc.Height = height;
+	texture2dDesc.MipLevels = 1;
+	texture2dDesc.ArraySize = cascadeCount;
+	texture2dDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	texture2dDesc.SampleDesc.Count = 1;
+	texture2dDesc.SampleDesc.Quality = 0;
+	texture2dDesc.Usage = D3D11_USAGE_DEFAULT;
+	texture2dDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	texture2dDesc.CPUAccessFlags = 0;
+	texture2dDesc.MiscFlags = 0;
+	hr = device->CreateTexture2D(&texture2dDesc, 0, _depthStencilBuffer.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc = {};
-	depth_stencil_view_desc.Format = DXGI_FORMAT_D32_FLOAT;
-	depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-	depth_stencil_view_desc.Texture2DArray.FirstArraySlice = 0;
-	depth_stencil_view_desc.Texture2DArray.ArraySize = static_cast<UINT>(cascadeCount);
-	depth_stencil_view_desc.Texture2DArray.MipSlice = 0;
-	depth_stencil_view_desc.Flags = 0;
-	hr = device->CreateDepthStencilView(_depthStencilBuffer.Get(), &depth_stencil_view_desc, _depthStencilView.GetAddressOf());
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	depthStencilViewDesc.Texture2DArray.FirstArraySlice = 0;
+	depthStencilViewDesc.Texture2DArray.ArraySize = static_cast<UINT>(cascadeCount);
+	depthStencilViewDesc.Texture2DArray.MipSlice = 0;
+	depthStencilViewDesc.Flags = 0;
+	hr = device->CreateDepthStencilView(_depthStencilBuffer.Get(), &depthStencilViewDesc, _depthStencilView.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc = {};
-	shader_resource_view_desc.Format = DXGI_FORMAT_R32_FLOAT; // DXGI_FORMAT_R24_UNORM_X8_TYPELESS : DXGI_FORMAT_R32_FLOAT : DXGI_FORMAT_R16_UNORM
-	shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-	shader_resource_view_desc.Texture2DArray.ArraySize = static_cast<UINT>(cascadeCount);
-	shader_resource_view_desc.Texture2DArray.MipLevels = 1;
-	shader_resource_view_desc.Texture2DArray.FirstArraySlice = 0;
-	shader_resource_view_desc.Texture2DArray.MostDetailedMip = 0;
-	hr = device->CreateShaderResourceView(_depthStencilBuffer.Get(), &shader_resource_view_desc, _shaderResourceView.GetAddressOf());
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT; // DXGI_FORMAT_R24_UNORM_X8_TYPELESS : DXGI_FORMAT_R32_FLOAT : DXGI_FORMAT_R16_UNORM
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	shaderResourceViewDesc.Texture2DArray.ArraySize = static_cast<UINT>(cascadeCount);
+	shaderResourceViewDesc.Texture2DArray.MipLevels = 1;
+	shaderResourceViewDesc.Texture2DArray.FirstArraySlice = 0;
+	shaderResourceViewDesc.Texture2DArray.MostDetailedMip = 0;
+	hr = device->CreateShaderResourceView(_depthStencilBuffer.Get(), &shaderResourceViewDesc, _shaderResourceView.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	_viewport.Width = static_cast<float>(width);
@@ -100,6 +100,23 @@ CascadedShadowMap::CascadedShadowMap(ID3D11Device* device, UINT width, UINT heig
 		L"",
 		"./Data/Shader/HLSL/Sprite/FullscreenQuadVS.cso",
 		"./Data/Shader/HLSL/PostProcess/CascadedShadowMap/CascadedShadowMapPS.cso");
+
+    // デバッグ表示用SRV作成
+	_debugSRVs.resize(cascadeCount);
+	for (UINT i = 0; i < cascadeCount; ++i)
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC debugSRVDesc = {};
+		debugSRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		debugSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+
+		debugSRVDesc.Texture2DArray.MostDetailedMip = 0;
+		debugSRVDesc.Texture2DArray.MipLevels = 1;
+		debugSRVDesc.Texture2DArray.FirstArraySlice = i; // i番目のカスケードを指定
+		debugSRVDesc.Texture2DArray.ArraySize = 1;       // 1枚だけ切り抜く
+
+		hr = device->CreateShaderResourceView(_depthStencilBuffer.Get(), &debugSRVDesc, _debugSRVs[i].GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
 }
 // 更新処理
 void CascadedShadowMap::Update(float elapsedTime)
@@ -165,11 +182,25 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 		center.y /= corners.size();
 		center.z /= corners.size();
 
+		// Upベクトルを動的に決定する
+		DirectX::XMVECTOR lightDirVec = DirectX::XMLoadFloat4(&lightDirection);
+		DirectX::XMVECTOR upVec = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+		// ライト方向とUpベクトルの内積を取り、平行に近いか判定
+		DirectX::XMVECTOR dotVec = DirectX::XMVector3Dot(DirectX::XMVector3Normalize(lightDirVec), upVec);
+		float dot = DirectX::XMVectorGetX(dotVec);
+
+		// 平行に近い場合(絶対値が1に近い場合)、UpベクトルをZ軸に変更
+		if (std::abs(dot) > 0.99f)
+		{
+			upVec = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+		}
+
 		DirectX::XMMATRIX V;
 		V = DirectX::XMMatrixLookAtLH(
 			DirectX::XMVectorSet(center.x - lightDirection.x, center.y - lightDirection.y, center.z - lightDirection.z, 1.0f),
 			DirectX::XMVectorSet(center.x, center.y, center.z, 1.0f),
-			DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+			upVec);
 
 		float min_x = std::numeric_limits<float>::max();
 		float max_x = std::numeric_limits<float>::lowest();
@@ -207,6 +238,24 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 			max_z *= _zMult;
 		}
 #endif
+		// シャドウマップの解像度（コンストラクタで渡されたwidthを使用）
+		// widthはテクスチャ全体の幅ですが、Texture2DArrayなので各カスケードの解像度はそのままwidthになります
+		float shadowMapResolution = static_cast<float>(_viewport.Width);
+
+		// 正射影の幅と高さ
+		float frustumWidth = max_x - min_x;
+		float frustumHeight = max_y - min_y;
+
+		// 1テクセルあたりのワールド空間でのサイズ
+		float worldUnitsPerTexelX = frustumWidth / shadowMapResolution;
+		float worldUnitsPerTexelY = frustumHeight / shadowMapResolution;
+
+		// min_x, min_y をテクセルサイズに合わせてスナップ（床関数で丸める）
+		min_x = floorf(min_x / worldUnitsPerTexelX) * worldUnitsPerTexelX;
+		max_x = min_x + frustumWidth; // 幅は変えずに再計算
+
+		min_y = floorf(min_y / worldUnitsPerTexelY) * worldUnitsPerTexelY;
+		max_y = min_y + frustumHeight;
 
 		DirectX::XMMATRIX P = DirectX::XMMatrixOrthographicOffCenterLH(min_x, max_x, min_y, max_y, min_z, max_z);
 		DirectX::XMStoreFloat4x4(&_cascadedMatrices.at(cascade_index), V * P);
@@ -267,10 +316,35 @@ void CascadedShadowMap::DrawGui()
 
 		ImGui::SliderFloat("shadowColor", &_parametricConstants.shadowColor, +0.0f, +1.0f);
 		ImGui::DragFloat("shadowDepthBias", &_parametricConstants.shadowDepthBias, 0.00001f, 0.0f, 0.01f, "%.8f");
-		ImGui::DragFloat("shiftVolume", &_parametricConstants.shiftVolume);
 		bool flag = _parametricConstants.colorizeCascadedLayer != 0.0f ? true : false;
 		ImGui::Checkbox("colorizeCascadedLayer", &flag);
 		_parametricConstants.colorizeCascadedLayer = flag ? 1.0f : 0.0f;
+
+		if (ImGui::TreeNode(u8"シャドウマップデバッグ表示"))
+		{
+			// 表示サイズ（ウィンドウ幅に合わせて調整などお好みで）
+			float aspect = _viewport.Width / _viewport.Height;
+			float dispW = 200.0f;
+			float dispH = dispW / aspect;
+
+			for (size_t i = 0; i < _debugSRVs.size(); ++i)
+			{
+				ImGui::Text("Cascade %d", i);
+
+				if (_debugSRVs[i])
+				{
+					ImGui::Image(
+						(ImTextureID)_debugSRVs[i].Get(),
+						ImVec2(dispW, dispH),
+						ImVec2(0, 0), ImVec2(1, 1),
+						ImVec4(1, 1, 1, 1),
+						ImVec4(1, 1, 1, 1)
+					);
+				}
+			}
+
+            ImGui::TreePop();
+		}
 	}
 	ImGui::End();
 #endif

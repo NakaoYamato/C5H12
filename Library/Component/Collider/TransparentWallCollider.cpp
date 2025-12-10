@@ -154,10 +154,10 @@ MeshCollider::CollisionMesh TransparentWallCollider::RecalculateCollisionMesh(Mo
 // ファイル読み込み
 bool TransparentWallCollider::LoadFromFile()
 {
-	// 現在のシーン名、アクター名からファイルパスを生成
 	std::string filePath = this->GetDirectory();
 	filePath += this->GetName();
 	filePath += ".json";
+
 	// 透明壁の読み込み
 	return _transparentWall.LoadFromFile(filePath);
 }
@@ -165,10 +165,10 @@ bool TransparentWallCollider::LoadFromFile()
 // ファイル保存
 bool TransparentWallCollider::SaveToFile()
 {
-	// 現在のシーン名、アクター名からファイルパスを生成
 	std::string filePath = this->GetDirectory();
 	filePath += this->GetName();
 	filePath += ".json";
+
 	return _transparentWall.SaveToFile(filePath);
 }
 #pragma endregion

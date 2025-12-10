@@ -34,25 +34,9 @@ void StageManager::OnCreate()
 	this->AddChild(stage1);
 
 	_actorFactory = ResourceManager::Instance().GetResourceAs<ActorFactory>("ActorFactory");
-	auto actorFactory = _actorFactory.lock();
-	if (!actorFactory)
-		return;
 
 	// 編集で表示する用の環境アクター生成
-	auto actorTypes = actorFactory->GetRegisteredActorTypes();
-	for (size_t i = 0; i < actorTypes.size(); ++i)
-	{
-		std::string name = "EditObj" + std::to_string(i);
-
-		auto actor = actorFactory->CreateActor(
-			GetScene(),
-			actorTypes[i],
-			name,
-			ActorTag::Stage);
-		actor->SetIsActive(false);
-		actor->SetParent(this);
-		_editingEnvironmentActors.push_back(actor);
-	}
+	CreateEditingEnvironmentActors();
 
 	// データ読み込み
 	LoadFromFile();
@@ -253,21 +237,25 @@ void StageManager::OnDrawGui()
 						ImGui::PopID();
 						break;
 					}
-
-					ImGui::Separator();
-					if (ImGui::Button(u8"保存"))
-					{
-                        SaveToFile();
-					}
-                    ImGui::SameLine();
-					if (ImGui::Button(u8"読み込み"))
-					{
-                        LoadFromFile();
-					}
-
 					ImGui::PopID();
 				}
+
 				ImGui::TreePop();
+			}
+			ImGui::Separator();
+			if (ImGui::Button(u8"編集用アクター再生成"))
+			{
+				CreateEditingEnvironmentActors();
+			}
+			ImGui::Separator();
+			if (ImGui::Button(u8"保存"))
+			{
+				SaveToFile();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(u8"読み込み"))
+			{
+				LoadFromFile();
 			}
 
 			ImGui::EndTabItem();
@@ -402,6 +390,40 @@ std::shared_ptr<Actor> StageManager::CreateEnvironmentActor(
 	_createdEnvironmentLayouts.push_back(layout);
 
 	return actor;
+}
+
+// 編集用アクター生成
+void StageManager::CreateEditingEnvironmentActors()
+{
+	auto actorFactory = _actorFactory.lock();
+	if (!actorFactory)
+		return;
+	auto actorTypes = actorFactory->GetRegisteredActorTypes();
+
+    // 現在登録している編集用アクターを削除
+	for (auto& actorWeak : _editingEnvironmentActors)
+	{
+		auto actor = actorWeak.lock();
+		if (actor)
+		{
+			actor->Remove();
+		}
+    }
+    _editingEnvironmentActors.clear();
+
+	for (size_t i = 0; i < actorTypes.size(); ++i)
+	{
+		std::string name = "EditObj" + std::to_string(i);
+
+		auto actor = actorFactory->CreateActor(
+			GetScene(),
+			actorTypes[i],
+			name,
+			ActorTag::Stage);
+		actor->SetIsActive(false);
+		actor->SetParent(this);
+		_editingEnvironmentActors.push_back(actor);
+	}
 }
 
 // 編集用GUI描画

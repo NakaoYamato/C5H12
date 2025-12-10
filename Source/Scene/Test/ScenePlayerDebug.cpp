@@ -16,7 +16,7 @@
 
 void ScenePlayerDebug::OnInitialize()
 {
-	static const float CompletionLoadingRate = 1.0f / 10.0f;
+	static const float CompletionLoadingRate = 1.0f / 8.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -39,17 +39,8 @@ void ScenePlayerDebug::OnInitialize()
     }
     AddCompletionLoading(CompletionLoadingRate);
     {
-        auto Chest = RegisterActor<ChestActor>("Chest", ActorTag::Stage);
-        Chest->GetTransform().SetPosition(Vector3(0.0f, 0.0f, 5.0f));
-    }
-    AddCompletionLoading(CompletionLoadingRate);
-    {
-        auto Fence = RegisterActor<FenceActor>("Fence", ActorTag::Stage);
-        Fence->GetTransform().SetPosition(Vector3(-43.5f, 0.0f, 0.45f));
-    }
-    AddCompletionLoading(CompletionLoadingRate);
-    {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
+        player->GetTransform().SetPosition(Vector3(4.5f, 0.0f, 50.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

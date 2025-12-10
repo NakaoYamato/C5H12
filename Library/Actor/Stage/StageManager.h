@@ -48,6 +48,9 @@ private:
 		const Vector3& angle,
 		const Vector3& scale);
 
+	// 編集用アクター生成
+    void CreateEditingEnvironmentActors();
+
 	// 編集用GUI描画
 	void DrawEditingGui();
 

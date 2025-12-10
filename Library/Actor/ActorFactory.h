@@ -11,8 +11,16 @@ class Scene;
 class ActorFactory : public ResourceBase
 {
 public:
-	// クリエーター関数の型定義 (ID3D11Device* を受け取ってインスタンスを返す)
-	using CreatorFunc = std::function<std::shared_ptr<Actor>()>;
+	// 生成関数
+	using CreateFunc = std::function<std::shared_ptr<Actor>()>;
+    // 初期化関数
+	using InitFunc = std::function<void(std::shared_ptr<Actor>)>;
+
+	struct CreatorInfo
+	{
+		CreateFunc	createFunc;
+        InitFunc	initFunc;
+    };
 
 public:
 	ActorFactory() = default;
@@ -34,17 +42,20 @@ public:
 	static void Register(const std::string& typeName)
 	{
 		// ラムダ式で生成ロジックを保存
-		_creators[typeName] = []() -> std::shared_ptr<Actor>
+        _creators[typeName].createFunc = []() -> std::shared_ptr<Actor>
 			{
 				return std::make_shared<T>();
 			};
+		_creators[typeName].initFunc = nullptr;
 	}
 
 	// アクター登録
-	void Register(const std::string& typeName, CreatorFunc func)
+	void Register(const std::string& typeName, 
+		CreateFunc createFunc,
+		InitFunc initFunc)
 	{
-		// ラムダ式で生成ロジックを保存
-		_creators[typeName] = func;
+		_creators[typeName].createFunc = createFunc;
+		_creators[typeName].initFunc = initFunc;
 	}
 
 	// アクター生成
@@ -57,14 +68,14 @@ public:
 	std::vector<std::string> GetRegisteredActorTypes() const;
 
 private:
+	std::string _filePath = "./Data/Resource/ActorFactory.json";
 
+	static std::unordered_map<std::string, CreatorInfo> _creators;
 
-private:
-	std::string _filePath = "./Data/Resource/SkillManager.json";
-
-	static std::unordered_map<std::string, CreatorFunc> _creators;
-
+    // 登録されたモデルファイルパス一覧
     std::vector<std::string> _registeredModelFilepaths;
+	// モデルの実体
+	std::unordered_map<std::string, std::shared_ptr<Model>> _registeredModels;
 };
 
 // リソース設定

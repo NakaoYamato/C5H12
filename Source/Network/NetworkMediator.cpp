@@ -50,7 +50,7 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
                     0,
                     0,
                     Network::CharacterType::Wyvern,
-                    Vector3(14.0f, 0.3f, 0.0f),
+                    Vector3(54.0f, 0.3f, 50.0f),
                     0.0f,
                     100.0f);
             }
@@ -204,7 +204,7 @@ std::weak_ptr<Actor> NetworkMediator::CreatePlayer(int id, bool isControlled)
 	auto sender     = player->GetComponent<NetworkSender>();
 
     // ‰ŠúˆÊ’u
-    player->GetTransform().SetPosition(Vector3(-48.0f, 0.23f, 4.0f));
+    player->GetTransform().SetPosition(Vector3(4.5f, 0.0f, 50.0f));
     player->GetTransform().SetAngleY(DirectX::XMConvertToRadians(90.0f));
 
     // ŠÇ—Ò‚ÌID‚ğİ’è
@@ -241,6 +241,7 @@ std::weak_ptr<Actor> NetworkMediator::CreateEnemy(
             "Enemy" + std::to_string(uniqueID),
             ActorTag::Enemy
         );
+        enemy->GetTransform().SetPosition(position);
         auto receiver = enemy->GetComponent<NetworkReceiver>();
 		auto sender = enemy->GetComponent<NetworkSender>();
         // ŠÇ—Ò‚ÌID‚ğİ’è

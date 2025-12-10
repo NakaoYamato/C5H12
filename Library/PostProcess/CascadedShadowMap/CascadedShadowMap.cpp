@@ -369,12 +369,13 @@ void CascadedShadowMap::UpdateCSMConstants(const RenderContext& rc)
 }
 // ‰e‚Ì•`‰æ
 void CascadedShadowMap::Blit(ID3D11DeviceContext* immediateContext,
-	ID3D11ShaderResourceView** colorSRV, 
-	ID3D11ShaderResourceView** depthSRV)
+	ID3D11ShaderResourceView* colorSRV, 
+	ID3D11ShaderResourceView* depthSRV,
+	ID3D11ShaderResourceView* normalSRV)
 {
 	ID3D11ShaderResourceView* srvs[]
 	{
-		*colorSRV, *depthSRV, GetDepthMap().Get()
+		colorSRV, depthSRV, normalSRV, GetDepthMap().Get()
 	};
 	// •`‰æˆ—
 	_fullscreenQuad->Blit(immediateContext,

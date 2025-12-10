@@ -318,6 +318,8 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 void TerrainRenderer::CastShadow(const RenderContext& rc)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
+    
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));
 
     // ’è”ƒoƒbƒtƒ@Ý’è
     dc->VSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
@@ -371,6 +373,8 @@ void TerrainRenderer::CastShadow(const RenderContext& rc)
 
     // “o˜^‚µ‚Ä‚¢‚éTerrain‚ð•`‰æ‚µ‚½Œã‚ÍƒNƒŠƒA
     _shadowDrawInfos.clear();
+
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 }
 // GUI•`‰æ
 void TerrainRenderer::DrawGui()

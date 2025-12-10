@@ -25,7 +25,7 @@ public:
     // カスケードシャドウマップのパラメーター定数バッファ : スロット2
     struct ParametricConstants
     {
-        float shadowColor{ 0.2f };
+        float shadowColor{ 0.45f };
         float shadowDepthBias{ 0.0001f };
         float colorizeCascadedLayer{ 0.0f };
         float padding;
@@ -50,8 +50,9 @@ public:
     void UpdateCSMConstants(const RenderContext& rc);
     // 影の描画
     void Blit(ID3D11DeviceContext* immediateContext,
-        ID3D11ShaderResourceView** colorSRV,
-        ID3D11ShaderResourceView** depthSRV);
+        ID3D11ShaderResourceView* colorSRV,
+        ID3D11ShaderResourceView* depthSRV,
+        ID3D11ShaderResourceView* normalSRV);
     // 深度値のSRV取得
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetDepthMap()
     {

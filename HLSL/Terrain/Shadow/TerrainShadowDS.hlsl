@@ -34,9 +34,7 @@ const OutputPatch<DS_IN_CSM, 4> patch)
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_POINT_CLAMP_SAMPLER_INDEX], texcoord, 0);
     float height = parameter.r + parameter.b;
     // 頂点座標をハイトマップで取得した値分ずらす
-    {
-        worldPosition.y += height;
-    }
+    worldPosition.y += height;
     // 情報設定
     dout.position = mul(float4(worldPosition, 1.0), csm_data.cascaded_matrices[patch[0].instanceId]);
     dout.instanceId = patch[0].instanceId;

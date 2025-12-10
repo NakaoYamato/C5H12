@@ -25,9 +25,9 @@ public:
         float collisionTessFactor = 21.0f;  // 衝突判定用エッジ分割数(奇数のみ)
 
         float emissive = 0.0f;              // エミッシブ
-        float metalness = 0.63f;            // メタリック
-        float roughness = 0.6f;             // ラフネス
-        float padding[1]{};
+        float metalness = 0.0f;            // メタリック
+        float roughness = 1.0f;             // ラフネス
+        float padding{};
     };
 	struct GrassConstantBuffer
 	{

@@ -6,7 +6,8 @@ SamplerComparisonState comparisonSamplerState : register(s5);
 
 Texture2D colorMap : register(t0);
 Texture2D depthMap : register(t1);
-Texture2DArray cascadedShadowMaps : register(t2);
+Texture2D normalMap : register(t2);
+Texture2DArray cascadedShadowMaps : register(t3);
 
 cbuffer PARAMETRIC_CONSTANT_BUFFER : register(b2)
 {
@@ -44,6 +45,16 @@ float4 main(VsOut pin) : SV_TARGET
     // NDCからワールド空間へ変換
     float4 worldPosition = mul(positionNDC, invViewProjection);
     worldPosition = worldPosition / worldPosition.w;
+   
+    // 法線を取得 (0~1 を -1~1 に戻す)
+    float3 worldNormal = normalMap.Sample(borderPointState, pin.texcoord).rgb * 2.0 - 1.0;
+    // ライトの方向 
+    float3 L = normalize(lightDirection.xyz);
+    // 【追加】スロープバイアスの計算
+    // 法線とライトの角度が大きい(側面)ほど、バイアスを大きくする
+    float cosTheta = clamp(dot(worldNormal, L), 0.0, 1.0);
+    //float bias = clamp(shadowDepthBias * tan(acos(cosTheta)), 0.0, 0.01); // 0.01は上限値
+    float bias = max(shadowDepthBias * (1.0 - dot(worldNormal, L)), shadowDepthBias);
     
     // カスケードシャドウマップの適用
     float viewDepth = viewPosition.z;
@@ -75,7 +86,7 @@ float4 main(VsOut pin) : SV_TARGET
 
         // PCFフィルタリング (3x3 カーネル)
         float shadowSum = 0.0;
-        float currentDepth = lightSpacePosition.z - shadowDepthBias;
+        float currentDepth = lightSpacePosition.z - bias;
 
         // -1, 0, +1 の範囲でループ（計9回サンプリング）
         [unroll]

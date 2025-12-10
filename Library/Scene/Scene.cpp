@@ -393,12 +393,6 @@ void Scene::Render()
         // 影の描画
         // cascadedShadowMapにある深度情報から
         // 0番のフレームバッファにあるシェーダーリソースに影を足して描画
-        ID3D11ShaderResourceView* srvs[]
-        {
-            renderFrame->GetColorSRV().Get(), // color_map
-            renderFrame->GetDepthSRV().Get(), // depth_map
-            cascadedShadowMap->GetDepthMap().Get() // cascaded_shadow_maps
-        };
         // cascadedShadowMapの定数バッファ更新
         cascadedShadowMap->UpdateCSMConstants(rc);
         // レンダーステート設定
@@ -407,8 +401,9 @@ void Scene::Render()
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Alpha), nullptr, 0xFFFFFFFF);
 
         cascadedShadowMap->Blit(dc,
-            renderFrame->GetColorSRV().GetAddressOf(),
-            renderFrame->GetDepthSRV().GetAddressOf());
+            renderFrame->GetColorSRV().Get(),
+            renderFrame->GetDepthSRV().Get(),
+            gBuffer->GetRenderTargetSRV(GBUFFER_NORMAL_MAP_INDEX).Get());
     }
     modelAndShadowRenderFrame->Deactivate(dc);
     // フレームバッファ1番の処理終了

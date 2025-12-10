@@ -45,9 +45,9 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
     float terrainLength;        // 全体の長さ
     float lodDistance;          // LOD距離
     float collisionTessFactor;  // 衝突判定用エッジ分割数(奇数のみ)    
-    float emissive;
     
-    float metalness;
-    float roughness;
-    float tessPadding[2];
+    float emissive;             // エミッシブ
+    float metalness;            // メタリック
+    float roughness;            // ラフネス
+    float tesselationPadding;
 }

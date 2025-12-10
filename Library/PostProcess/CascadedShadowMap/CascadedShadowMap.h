@@ -74,7 +74,7 @@ private:
     // 影の生成タイマー
     float _createShadowTimer = 0.0f;
     // 影の更新間隔
-    float _createShadowInterval = 0.0f / 60.0f;
+    float _createShadowInterval = 1.0f / 60.0f;
     // 影を生成するかどうかのフラグ
     bool _createShadow = true;
 

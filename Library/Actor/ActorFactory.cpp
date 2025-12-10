@@ -25,6 +25,13 @@ void ActorFactory::DrawGui()
 	{
 		ImGui::BulletText("%s", typeName.c_str());
 	}
+	ImGui::Separator();
+	std::string filepath{};
+	if (ImGui::OpenDialogBotton(u8"オブジェクト追加", &filepath, ImGui::ModelFilter))
+	{
+
+	}
+	ImGui::Separator();
 }
 
 // アクター生成

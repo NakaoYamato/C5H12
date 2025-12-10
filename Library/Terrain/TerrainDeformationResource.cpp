@@ -11,8 +11,6 @@
 static const char* DEFAULT_PAINT_TEXTURE_PATH = "./Data/Terrain/Debug/DefaultPaintTexture.json";
 // ブラシテクスチャのデフォルトデータパス
 static const char* DEFAULT_BRUSH_TEXTURE_PATH = "./Data/Terrain/Debug/DefaultBrushTexture.json";
-// 配置するモデルデータのデフォルトデータパス
-static const char* DEFAULT_MODEL_DATA_PATH = "./Data/Terrain/Debug/DefaultModelData.json";
 
 // 初期化処理
 bool TerrainDeformationResource::Initialize()
@@ -33,8 +31,6 @@ bool TerrainDeformationResource::LoadFromFile()
 	LoadPaintTextures();
 	// ブラシテクスチャデータ読み込み
 	LoadBrushTextures();
-	// 配置するモデルデータ読み込み
-	LoadModelData();
 
 	// 初期化が完了しているならこの場でリソース構築
 	if (_isInitialized)
@@ -55,8 +51,6 @@ bool TerrainDeformationResource::SaveToFile()
 	SavePaintTextures();
 	// ブラシテクスチャデータ書き出し
 	SaveBrushTextures();
-	// 配置するモデルデータ書き出し
-	SaveModelData();
 
 	return true;
 }
@@ -75,13 +69,6 @@ void TerrainDeformationResource::DrawGui()
 	{
 		// ブラシテクスチャのGUI描画
 		DrawBrushTextureGui();
-		ImGui::TreePop();
-	}
-
-	if (ImGui::TreeNode(u8"配置するモデルデータ"))
-	{
-		// モデルの選択GUI描画
-		DrawModelSelectionGui();
 		ImGui::TreePop();
 	}
 }
@@ -132,24 +119,6 @@ bool TerrainDeformationResource::LoadBrushTextures()
 	}
 	return false;
 }
-
-// 配置するモデルデータ読み込み
-bool TerrainDeformationResource::LoadModelData()
-{
-	nlohmann::json jsonData;
-	if (Exporter::LoadJsonFile(DEFAULT_MODEL_DATA_PATH, &jsonData))
-	{
-		size_t size = jsonData["Size"].get<std::size_t>();
-		for (size_t i = 0; i < size; ++i)
-		{
-			ModelData& modelData = _environmentObjects.emplace_back();
-			modelData.path = jsonData["ModelPath" + std::to_string(i)].get<std::string>();
-		}
-
-		return true;
-	}
-	return false;
-}
 #pragma endregion
 
 #pragma region 書き出し
@@ -177,18 +146,6 @@ bool TerrainDeformationResource::SaveBrushTextures()
 		jsonData["Path" + std::to_string(i)] = _brushTextures[i].path;
 	}
 	return Exporter::SaveJsonFile(DEFAULT_BRUSH_TEXTURE_PATH, jsonData);
-}
-
-// 配置するモデルデータ書き出し
-bool TerrainDeformationResource::SaveModelData()
-{
-	nlohmann::json jsonData;
-	jsonData["Size"] = _environmentObjects.size();
-	for (size_t i = 0; i < _environmentObjects.size(); ++i)
-	{
-		jsonData["ModelPath" + std::to_string(i)] = _environmentObjects[i].path;
-	}
-	return Exporter::SaveJsonFile(DEFAULT_MODEL_DATA_PATH, jsonData);
 }
 #pragma endregion
 
@@ -364,14 +321,6 @@ void TerrainDeformationResource::DrawBrushTextureGui()
 				_brushTextures[i].textureSRV.ReleaseAndGetAddressOf(),
 				nullptr);
 		}
-	}
-}
-// モデルの選択GUI描画
-void TerrainDeformationResource::DrawModelSelectionGui()
-{
-	for (size_t i = 0; i < _environmentObjects.size(); ++i)
-	{
-		ImGui::Text(u8"モデル %d: %s", static_cast<int>(i), _environmentObjects[i].path.c_str());
 	}
 }
 #pragma endregion

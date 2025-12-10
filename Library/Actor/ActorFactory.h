@@ -31,12 +31,20 @@ public:
 
 	// アクター登録
 	template <typename T>
-	static void Register(const std::string& typeName) {
+	static void Register(const std::string& typeName)
+	{
 		// ラムダ式で生成ロジックを保存
 		_creators[typeName] = []() -> std::shared_ptr<Actor>
 			{
 				return std::make_shared<T>();
 			};
+	}
+
+	// アクター登録
+	void Register(const std::string& typeName, CreatorFunc func)
+	{
+		// ラムダ式で生成ロジックを保存
+		_creators[typeName] = func;
 	}
 
 	// アクター生成
@@ -49,9 +57,14 @@ public:
 	std::vector<std::string> GetRegisteredActorTypes() const;
 
 private:
+
+
+private:
 	std::string _filePath = "./Data/Resource/SkillManager.json";
 
 	static std::unordered_map<std::string, CreatorFunc> _creators;
+
+    std::vector<std::string> _registeredModelFilepaths;
 };
 
 // リソース設定

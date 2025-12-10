@@ -23,11 +23,6 @@ public:
 		std::wstring path;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
 	};
-	// 配置するモデルデータ
-	struct ModelData
-	{
-		std::string path = ""; // モデルのパス
-	};
 
 public:
 	TerrainDeformationResource() = default;
@@ -52,8 +47,6 @@ public:
 	const std::vector<PaintTexture>& GetPaintTextures() const { return _paintTextures; }
 	// ブラシテクスチャデータ取得
 	const std::vector<BrushTexture>& GetBrushTextures() const { return _brushTextures; }
-	// 配置するモデルデータ取得
-	const std::vector<ModelData>& GetEnvironmentObjects() const { return _environmentObjects; }
 #pragma endregion
 
 private:
@@ -62,8 +55,6 @@ private:
 	bool LoadPaintTextures();
 	// ブラシテクスチャデータ読み込み
 	bool LoadBrushTextures();
-	// 配置するモデルデータ読み込み
-	bool LoadModelData();
 #pragma endregion
 
 #pragma region 書き出し
@@ -71,8 +62,6 @@ private:
 	bool SavePaintTextures();
 	// ブラシテクスチャデータ書き出し
 	bool SaveBrushTextures();
-	// 配置するモデルデータ書き出し
-	bool SaveModelData();
 #pragma endregion
 
 #pragma region 構築
@@ -87,8 +76,6 @@ private:
 	void DrawPaintTextureGui();
 	// ブラシテクスチャのGUI描画
 	void DrawBrushTextureGui();
-	// モデルの選択GUI描画
-	void DrawModelSelectionGui();
 #pragma endregion
 
 private:
@@ -96,8 +83,6 @@ private:
 	std::vector<PaintTexture> _paintTextures;
 	// ブラシのテクスチャデータ
 	std::vector<BrushTexture> _brushTextures;
-	// 配置するモデルデータ
-	std::vector<ModelData> _environmentObjects;
 
 	bool _isInitialized = false;
 };

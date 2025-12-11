@@ -234,6 +234,7 @@ public:
 	void SetIsActive(bool b);
 	void SetIsDrawingTransformGui(bool b) { this->_isDrawingTransformGui = b; }
 	void SetIsShowing(bool b) { this->_isShowing = b; }
+	void SetIsCastingShadow(bool b) { this->_isCastingShadow = b; }
 	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
 	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
 	void SetIsDrawingHierarchy(bool b) { this->_isDrawingHierarchy = b; }
@@ -242,6 +243,7 @@ public:
 	bool IsActive()const { return _isActive; }
 	bool IsDrawingTransformGui()const { return _isDrawingTransformGui; }
 	bool IsShowing()const { return _isShowing; }
+	bool IsCastingShadow()const { return _isCastingShadow; }
 	bool IsDrawingDebug()const { return _isDrawingDebug; }
 	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
 	bool IsDrawingHierarchy()const { return _isDrawingHierarchy; }
@@ -399,6 +401,8 @@ protected:
 	bool				_isDrawingTransformGui = true;
 	// 表示フラグ
 	bool				_isShowing = true;
+	// 影描画フラグ
+	bool				_isCastingShadow = true;
 	// デバッグ表示フラグ
 	bool				_isDrawingDebug = true;
 	// ギズモ使用フラグ

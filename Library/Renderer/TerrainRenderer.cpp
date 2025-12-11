@@ -62,11 +62,6 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             device,
             "./Data/Shader/HLSL/Terrain/TerrainDS.cso",
             _domainShader.ReleaseAndGetAddressOf());
-        // LODを使用しないハルシェーダー
-		GpuResourceManager::CreateHsFromCso(
-			device,
-			"./Data/Shader/HLSL/Terrain/TerrainNonLODHS.cso",
-			_nonLODHullShader.ReleaseAndGetAddressOf());
         // ピクセルシェーダー
         GpuResourceManager::CreatePsFromCso(
             device,
@@ -147,6 +142,17 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             declaration, _countof(declaration),
             bufferStrides, _countof(bufferStrides),
             0);
+
+		// ハルシェーダー
+        GpuResourceManager::CreateHsFromCso(
+            device,
+            "./Data/Shader/HLSL/Terrain/TerrainStreamOutHS.cso",
+            _streamOutHullShader.ReleaseAndGetAddressOf());
+        // ドメインシェーダー
+        GpuResourceManager::CreateDsFromCso(
+            device,
+            "./Data/Shader/HLSL/Terrain/TerrainStreamOutDS.cso",
+            _streamOutDomainShader.ReleaseAndGetAddressOf());
     }
 
     // ストリームアウトプットされた情報の受け取り用バッファ
@@ -419,8 +425,8 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
     // シェーダー設定
     dc->IASetInputLayout(_inputLayout.Get());
     dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
-    dc->HSSetShader(_nonLODHullShader.Get(), nullptr, 0);
-    dc->DSSetShader(_domainShader.Get(), nullptr, 0);
+    dc->HSSetShader(_streamOutHullShader.Get(), nullptr, 0);
+    dc->DSSetShader(_streamOutDomainShader.Get(), nullptr, 0);
     // ストリームアウトを有効にする
     dc->GSSetShader(_streamOutGeometryShader.Get(), nullptr, 0);
     // 書き込みはしない

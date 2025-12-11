@@ -205,6 +205,8 @@ void Actor::CastShadow(const RenderContext& rc)
 
 	// 起動チェック
 	if (!_isActive)return;
+	// 影描画チェック
+	if (!_isCastingShadow)return;
 
 	for (std::shared_ptr<Component>& component : _components)
 	{
@@ -265,6 +267,7 @@ void Actor::DrawGui()
 		ImGui::Checkbox(u8"Active", &_isActive);
 		ImGui::Checkbox(u8"TransformGui", &_isDrawingTransformGui);
 		ImGui::Checkbox(u8"Show", &_isShowing);
+		ImGui::Checkbox(u8"CastShadow", &_isCastingShadow);
 		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
 		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
 		ImGui::Checkbox(u8"InheritParentTransform", &_isInheritParentTransform);

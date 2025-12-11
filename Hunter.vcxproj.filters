@@ -1794,7 +1794,7 @@
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalGPS.hlsl" />
     <FxCompile Include="HLSL\Decal\TerrainBrush\TerrainBrushDecalSPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainStaticVS.hlsl" />
-    <FxCompile Include="HLSL\Terrain\TerrainNonLODHS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainStreamOutHS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Deform\TerrainDeformBumpyHeightPS.hlsl" />
     <FxCompile Include="HLSL\Terrain\Shadow\TerrainShadowVS.hlsl" />
     <FxCompile Include="HLSL\PrimitiveRenderer\Locus\PlayerSwordLocusPS.hlsl" />
@@ -1802,5 +1802,6 @@
     <FxCompile Include="HLSL\Sprite\SpriteScrollPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\Font\OutlineFontPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteOutlinePS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainStreamOutDS.hlsl" />
   </ItemGroup>
 </Project>

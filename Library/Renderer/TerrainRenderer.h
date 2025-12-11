@@ -89,7 +89,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
-    Microsoft::WRL::ComPtr<ID3D11HullShader>	_nonLODHullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
@@ -113,6 +112,8 @@ private:
     // ストリームアウト用
     Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutVertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCopyBuffer;
+    Microsoft::WRL::ComPtr<ID3D11HullShader>	    _streamOutHullShader;
+    Microsoft::WRL::ComPtr<ID3D11DomainShader>	    _streamOutDomainShader;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
 
     // 影描画用

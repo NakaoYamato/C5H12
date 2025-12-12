@@ -6,7 +6,7 @@
 
 // Framework内のコールバック関数をCreateWindow関数に設定するために
 // グローバルのコールバック関数を作成し、その中でFrameworkのコールバック関数を呼ぶ
-LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+static LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	Framework* p{ reinterpret_cast<Framework*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)) };
 	return p ? p->HandleMessage(hwnd, msg, wparam, lparam) :

@@ -62,7 +62,7 @@ private:
 	/// 毎フレームの更新処理
 	/// </summary>
 	/// <param name="elapsedTime"></param>
-	void Update(float elapsedTime/*Elapsed seconds from last frame*/);
+	void Update(float elapsedTime);
 
 	/// <summary>
 	/// 一定間隔の更新処理

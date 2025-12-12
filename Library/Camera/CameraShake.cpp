@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "../../Library/Math/Random.h"
+
 #include <imgui.h>
 
 CameraShakeManager::CameraShakeManager()
@@ -10,6 +12,7 @@ CameraShakeManager::CameraShakeManager()
 {
 }
 
+// 更新処理
 void CameraShakeManager::Update(float elapsedTime)
 {
     auto it = _activeShakes.begin();
@@ -29,21 +32,24 @@ void CameraShakeManager::Update(float elapsedTime)
     }
 }
 
+// シェイクの開始
 void CameraShakeManager::StartShake(const CameraShakeInfo& info)
 {
     // ランダムな軸を生成（揺れのベースとなる方向）
-    Vector3 seed(RandomFloat(), RandomFloat(), RandomFloat());
+    Vector3 seed(Random::RandBias(), Random::RandBias(), Random::RandBias());
 
     seed.Normalize(); 
 
     _activeShakes.emplace_back(info, seed);
 }
 
+// すべての揺れを停止
 void CameraShakeManager::StopAll()
 {
     _activeShakes.clear();
 }
 
+// GUI描画
 void CameraShakeManager::DrawGui()
 {
     ImGui::DragFloat(u8"デバッグ用最大深度", &_debugAmplitude, 0.1f);
@@ -63,20 +69,21 @@ void CameraShakeManager::DrawGui()
 	}
 }
 
+// 現在の揺れオフセットを取得
 Vector3 CameraShakeManager::GetTotalOffset(const Vector3& listenerPosition) const
 {
     Vector3 totalOffset = { 0.0f, 0.0f, 0.0f };
 
     for (const auto& shake : _activeShakes)
     {
-        // 1. 進行度 (0.0 -> 1.0)
+        // 進行度 (0.0 -> 1.0)
         float progress = 0.0f;
         if (shake.info.duration > 0.0f)
         {
             progress = std::clamp(shake.time / shake.info.duration, 0.0f, 1.0f);
         }
 
-        // 2. 基本強度の計算 (Envelope)
+        // 基本強度の計算
         float intensity = 1.0f;
         switch (shake.info.decayType)
         {
@@ -92,10 +99,9 @@ Vector3 CameraShakeManager::GetTotalOffset(const Vector3& listenerPosition) cons
             break;
         }
 
-        // 3. 距離減衰 (Spatial Attenuation)
+        // 距離減衰
         if (shake.info.usePosition)
         {
-            // Vector3の減算とLength()を想定
             Vector3 diff = listenerPosition - shake.info.sourcePosition;
             float dist = diff.Length();
 
@@ -110,21 +116,16 @@ Vector3 CameraShakeManager::GetTotalOffset(const Vector3& listenerPosition) cons
                 float t = (dist - shake.info.nearDistance) / range;
                 intensity *= (1.0f - t);
             }
-            // else (dist <= nearDistance) の場合は減衰なし(1.0)
         }
 
         // 強度がほぼゼロなら計算スキップ
         if (intensity <= 0.001f) continue;
 
-        // 4. 振動波形の生成 (Perlin Noiseの簡易代替: Sin波 + ランダムシード)
-        // 時間経過 × 周波数 で波を作る
+        // 振動波形の生成
         float noise = std::sinf(shake.time * shake.info.frequency * 6.28f);
 
-        // 毎回ランダムなジッターを加えると、より「ガガガッ」というノイズ感が出る
-        // ここでは簡易的にシードベクトルとnoiseを掛け合わせる
-
         Vector3 offset;
-        offset.x = shake.seedVector.x * noise; // 必要に応じてここでさらに sin(time * freq * 1.5) などずらすと複雑になる
+        offset.x = shake.seedVector.x * noise;
         offset.y = shake.seedVector.y * noise;
         offset.z = shake.seedVector.z * noise;
 
@@ -140,9 +141,4 @@ Vector3 CameraShakeManager::GetTotalOffset(const Vector3& listenerPosition) cons
     }
 
     return totalOffset;
-}
-
-float CameraShakeManager::RandomFloat()
-{
-    return _dist(_rng);
 }

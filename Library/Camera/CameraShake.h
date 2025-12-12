@@ -9,39 +9,44 @@
 /// </summary>
 enum class ShakeDecayType
 {
-    Linear,     // 線形減衰（一定ペースで弱まる）
-    Exponential,// 指数減衰（最初は強く、急激に弱まる。爆発など）
-    None,       // 減衰なし（地震や乗り物の振動など、継続的な揺れ）
+    Linear,     // 線形減衰
+    Exponential,// 指数減衰
+    None,       // 減衰なし
 };
 
-/// <summary>
-/// シェイク発生パラメータ
-/// </summary>
+// シェイク発生パラメータ
 struct CameraShakeInfo
 {
-    float amplitude = 1.0f;             // 最大振幅（揺れの強さ）
-    float duration = 0.5f;              // 持続時間（秒）
-    float frequency = 20.0f;            // 周波数（揺れの速さ・細かさ）
+    // 最大振幅（揺れの強さ）
+    float amplitude = 1.0f;
+    // 持続時間（秒）
+    float duration = 0.5f;
+    // 周波数（揺れの速さ・細かさ）
+    float frequency = 20.0f;
+    // 揺れる軸の指定（(0,1,0)なら縦揺れのみ）
+    Vector3 directionMask = { 1,1,1 };
 
-    Vector3 directionMask = { 1,1,1 };  // 揺れる軸の指定（(0,1,0)なら縦揺れのみ）
+    // 減衰タイプ
+    ShakeDecayType decayType = ShakeDecayType::Exponential;
 
-    ShakeDecayType decayType = ShakeDecayType::Exponential; // 減衰タイプ
-
-    // --- 空間音響的な設定 ---
-    bool usePosition = false;           // 発生源座標を使用するか
-    Vector3 sourcePosition = { 0,0,0 }; // 発生源のワールド座標
-    float reachDistance = 100.0f;       // 揺れが届く限界距離
-    float nearDistance = 10.0f;         // 最大強度で揺れる距離（これより近いと減衰しない）
+    // 発生源座標を使用するか
+    bool usePosition = false;
+    // 発生源のワールド座標
+    Vector3 sourcePosition = { 0,0,0 };
+    // 揺れが届く限界距離
+    float reachDistance = 100.0f;
+    // 最大強度で揺れる距離（これより近いと減衰しない）
+    float nearDistance = 10.0f;
 };
 
-/// <summary>
-/// 個別の揺れインスタンス（内部管理用）
-/// </summary>
+// 個別の揺れインスタンス（内部管理用）
 struct ShakeInstance
 {
     CameraShakeInfo info;
-    float time = 0.0f;      // 経過時間
-    Vector3 seedVector;     // ランダムシード用ベクトル
+    // 経過時間
+    float time = 0.0f;
+    // ランダムシード用ベクトル
+    Vector3 seedVector;
     bool isFinished = false;
 
     ShakeInstance(const CameraShakeInfo& info, const Vector3& seed)
@@ -49,19 +54,17 @@ struct ShakeInstance
     }
 };
 
-/// <summary>
-/// カメラシェイク管理クラス
-/// </summary>
+// カメラシェイク管理クラス
 class CameraShakeManager
 {
 public:
     CameraShakeManager();
     ~CameraShakeManager() = default;
 
-    // 更新処理（時間を進める）
+    // 更新処理
     void Update(float elapsedTime);
 
-    // シェイクの開始（パラメータを渡して登録）
+    // シェイクの開始
     void StartShake(const CameraShakeInfo& info);
 
     // 現在の揺れオフセットを取得
@@ -70,7 +73,7 @@ public:
 
     // すべての揺れを停止
     void StopAll();
-
+	// GUI描画
     void DrawGui();
 
 private:
@@ -80,9 +83,6 @@ private:
     // ランダム生成器
     std::mt19937 _rng;
     std::uniform_real_distribution<float> _dist;
-
-    // ヘルパー：-1.0～1.0の乱数取得
-    float RandomFloat();
 
 private:
     // デバッグ用

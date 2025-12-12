@@ -63,6 +63,7 @@ int Framework::Run()
     return Uninitialize() ? static_cast<int>(msg.wParam) : 0;
 }
 
+/// ウィンドウのメッセージを受け取るためのコールバック関数
 LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 #ifdef USE_IMGUI
@@ -133,7 +134,8 @@ LRESULT Framework::HandleMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpar
         num = DragQueryFile(hdrop, -1, NULL, 0);
 
         // 本来はドロップされた数だけfilanameを取得できるが今回は最後のfilenameのみ取得する
-        for (i = 0; i < num; i++) {
+        for (i = 0; i < num; i++)
+        {
             DragQueryFile(hdrop, i, filename, sizeof(filename) / sizeof(TCHAR));
             filePath = filename;
         }

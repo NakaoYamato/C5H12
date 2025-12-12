@@ -247,11 +247,12 @@ void ItemManager::DrawGui()
 			}
 
 			ImGui::NextColumn();
+			ImGui::Columns(1);
+
 			ImGui::TreePop();
 		}
 		index++;
 	}
-	ImGui::Columns(1);
 
 	ImGui::Separator();
 	{

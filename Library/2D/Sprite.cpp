@@ -14,9 +14,9 @@ Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 // GUI描画
 void Sprite::DrawGui()
 {
-	if (_sprite.Get())
+	if (_texture.Get())
 	{
-		if (ImGui::ImageButton(_sprite.Get(),
+		if (ImGui::ImageButton(_texture.Get(),
 			ImVec2(100, 100)))
 		{
 			// ダイアログを開く
@@ -42,7 +42,7 @@ void Sprite::DrawGui()
 				LoadTexture(ToWString(resultPath).c_str(), _centerAlignment);
 			}
 		}
-        ImGui::Text(u8"ファイル名:%s", ToString(_sprite.GetFilepath()).c_str());
+        ImGui::Text(u8"ファイル名:%s", ToString(_texture.GetFilepath()).c_str());
 	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"マテリアル"))
@@ -92,8 +92,8 @@ void Sprite::DrawGui()
 // 画像読み込み
 void Sprite::LoadTexture(const wchar_t* filename, CenterAlignment alignment)
 {
-	_sprite.Load(Graphics::Instance().GetDevice(), filename);
-	SetTexSize(_sprite.GetTextureSize());
+	_texture.Load(Graphics::Instance().GetDevice(), filename);
+	SetTexSize(_texture.GetTextureSize());
 	RecalcCenter(alignment);
 	// デフォルトマテリアル設定
 	_material.SetShaderType(ShaderType::Sprite);
@@ -178,7 +178,7 @@ void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer)
 // 描画
 void Sprite::Render(const RenderContext& rc, TextureRenderer& renderer, float alpha)
 {
-	if (_sprite.Get() == nullptr)
+	if (_texture.Get() == nullptr)
 		return;
 
 	Vector4 color = GetColor();
@@ -205,7 +205,7 @@ void Sprite::Render(const RenderContext& rc,
 	float angle, 
 	const Vector4& color)
 {
-	if (_sprite.Get() == nullptr)
+	if (_texture.Get() == nullptr)
 		return;
 
 	rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(_depthState), static_cast<UINT8>(_stencil));

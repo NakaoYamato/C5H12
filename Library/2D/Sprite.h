@@ -12,6 +12,7 @@
 class Sprite
 {
 public:
+	// 中心位置の定義
 	enum CenterAlignment
 	{
 		LeftUp,
@@ -54,32 +55,33 @@ public:
 	void RecalcCenter(CenterAlignment alignment);
 
 #pragma region アクセサ
-	Texture&		GetTexture() { return _sprite; }
-	RectTransform&	GetRectTransform() { return _rectTransform; }
-	Material&		GetMaterial() { return _material; }
+	Texture&		GetTexture()		{ return _texture; }
+	RectTransform&	GetRectTransform()	{ return _rectTransform; }
+	Material&		GetMaterial()		{ return _material; }
 
-	CenterAlignment GetCenterAlignment()const { return _centerAlignment; }
-	const Vector2& GetTexPos()const { return _texPos; }
-	const Vector2& GetTexSize()const { return _texSize; }
-	const Vector2& GetCenter()const { return _center; }
-	const Vector4& GetColor()const { return _color; }
-    DepthState GetDepthState() const { return _depthState; }
-	int GetStencil() const { return _stencil; }
+	CenterAlignment GetCenterAlignment()const	{ return _centerAlignment; }
+	const Vector2&	GetTexPos()const			{ return _texPos; }
+	const Vector2&	GetTexSize()const			{ return _texSize; }
+	const Vector2&	GetCenter()const			{ return _center; }
+	const Vector4&	GetColor()const				{ return _color; }
+    DepthState		GetDepthState() const		{ return _depthState; }
+	int				GetStencil() const			{ return _stencil; }
 
-	void SetCenterAlignment(CenterAlignment alignment) {
+	void SetCenterAlignment(CenterAlignment alignment)
+	{
 		_centerAlignment = alignment;
 		RecalcCenter(alignment);
 	}
-	void SetTexPos(const Vector2& p) { _texPos = p; }
-	void SetTexSize(const Vector2& s) { _texSize = s; }
-	void SetCenter(const Vector2& c) { _center = c; }
-	void SetColor(const Vector4& c) { _color = c; }
+	void SetTexPos(const Vector2& p)			{ _texPos = p; }
+	void SetTexSize(const Vector2& s)			{ _texSize = s; }
+	void SetCenter(const Vector2& c)			{ _center = c; }
+	void SetColor(const Vector4& c)				{ _color = c; }
 	void SetColorAlpha(float a) { SetColor(Vector4(GetColor().x, GetColor().y, GetColor().z, a)); }
-	void SetDepthState(DepthState depthState) { _depthState = depthState; }
-    void SetStencil(UINT8 stencil) { _stencil = stencil; }
+	void SetDepthState(DepthState depthState)	{ _depthState = depthState; }
+    void SetStencil(UINT8 stencil)				{ _stencil = stencil; }
 #pragma endregion
 private:
-	Texture			_sprite;
+	Texture			_texture;
 	RectTransform	_rectTransform;
 	Material		_material;
 

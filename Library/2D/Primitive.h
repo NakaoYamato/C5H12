@@ -3,29 +3,36 @@
 #include <DirectXMath.h>
 #include <wrl.h>
 
-#include "../Math/Vector.h"
+#include "../../Library/Math/Vector.h"
+#include "../../Library/Graphics/Shader.h"
 
 class Primitive
 {
 public:
+	// 定数定義
     static constexpr int VertexNum = 130;
     static constexpr int CircleMaxPolygonal = 64;
 
+    // 構造体定義
+    struct Vertex
+    {
+        Vector3 position;
+        Vector4 color;
+    };
 public:
     Primitive(ID3D11Device* device);
     Primitive() = delete;
     ~Primitive() {}
 
-    //--------------------------------------------------------------
-    //  矩形描画
-    //--------------------------------------------------------------
-    //  const Vector2& pos      描画位置 (x, y)
-    //  const Vector2& size     幅高さ   (w, h)
-    //  const Vector2& center   基準点   (x, y)
-    //  float angle             角度     (radian)
-    //  const Vector4& color    色       (r, g, b, a) (0.0f ~ 1.0f)
-    //  bool  world        true:ワールド座標に描画 false : スクリーン座標に描画
-    //--------------------------------------------------------------
+    /// <summary>
+    /// 矩形描画
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="pos">描画位置</param>
+    /// <param name="size">幅高さ</param>
+    /// <param name="center">基準点</param>
+    /// <param name="angle">角度 radian</param>
+    /// <param name="color">色</param>
     void Rect(ID3D11DeviceContext* context,
         const Vector2& pos, 
         const Vector2& size,
@@ -33,32 +40,30 @@ public:
         float angle = (0.0f),
         const Vector4& color = Vector4::White) const;
 
-    //--------------------------------------------------------------
-    //  線描画
-    //--------------------------------------------------------------
-    //  const Vector2& from     始点 (x, y)
-    //  const Vector2& to       終点 (x, y)
-    //  const Vector4& color    色   (r, g, b, a)
-    //  float width             幅
-    //  bool world         true:ワールド座標に描画 false : スクリーン座標に描画
-    //--------------------------------------------------------------
+    /// <summary>
+    /// 線描画
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="from">始点</param>
+    /// <param name="to">終点</param>
+    /// <param name="color">色</param>
+    /// <param name="width">幅</param>
     void Line(ID3D11DeviceContext* context,
         const Vector2& from, 
         const Vector2& to,
         const Vector4& color = Vector4::White, 
         float width = (1.0f)) const;
 
-    //--------------------------------------------------------------
-    //  円描画
-    //--------------------------------------------------------------
-    //  const Vector2& pos      中心位置 (x, y)
-    //  float radius            半径
-    //  const Vector2& scale    スケール
-    //  float angle             角度
-    //  const Vector4& color    色   (r, g, b, a)
-    //  int n                   何角形か
-    //  bool world              true:ワールド座標に描画 false : スクリーン座標に描画
-    //--------------------------------------------------------------
+    /// <summary>
+    /// 円描画
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="center">中心位置</param>
+    /// <param name="radius">半径</param>
+    /// <param name="scale">スケール</param>
+    /// <param name="angle">角度</param>
+    /// <param name="color">色</param>
+    /// <param name="n">何角形か</param>
     void Circle(ID3D11DeviceContext* context,
         const Vector2& center, 
         float radius,
@@ -67,29 +72,23 @@ public:
         const Vector4& color = Vector4::White,
         int n = CircleMaxPolygonal) const;
 
-    //--------------------------------------------------------------
-    //  カプセル描画
-    //--------------------------------------------------------------
-    //  const Vector2& from     始点 (x, y)
-    //  const Vector2& to       終点 (x, y)
-    //  const Vector2& scale    スケール
-    //  float radius            半径
-    //  const Vector4& color    色   (r, g, b, a)
-    //--------------------------------------------------------------
+    /// <summary>
+    /// カプセル描画
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="from">始点</param>
+    /// <param name="to">終点</param>
+    /// <param name="scale">スケール</param>
+    /// <param name="radius">半径</param>
+    /// <param name="color">色</param>
     void Capsule(ID3D11DeviceContext* context,
         const Vector2& from, const Vector2& to,
         const Vector2& scale,
         const float& radius,
-        const Vector4& color = Vector4::White);
+        const Vector4& color = Vector4::White) const;
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> _inputLayout;
+	VertexShader    _vertexShader;
+	PixelShader     _pixelShader;
     Microsoft::WRL::ComPtr<ID3D11Buffer> _vertexBuffer;
-
-    //--------------------------------------------------------------
-    //  構造体定義
-    //--------------------------------------------------------------
-    struct Vertex { Vector3 position; Vector4 color; };
 };

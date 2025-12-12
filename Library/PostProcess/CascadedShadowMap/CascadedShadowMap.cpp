@@ -136,7 +136,7 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 	ID3D11DeviceContext* immediateContext = rc.deviceContext;
 	DirectX::XMFLOAT4X4 cameraProjection = rc.camera->GetProjection();
 	DirectX::XMFLOAT4X4 cameraView = rc.camera->GetView();
-	DirectX::XMFLOAT4 lightDirection = rc.lightDirection;/*TODO : (0,-1,0,0)でエラー*/
+	DirectX::XMFLOAT4 lightDirection = rc.lightDirection;
 
 	immediateContext->RSGetViewports(&_viewportCount, _cachedViewports);
 	immediateContext->OMGetRenderTargets(1, _cachedRTV.ReleaseAndGetAddressOf(), _cachedDSV.ReleaseAndGetAddressOf());
@@ -239,7 +239,6 @@ void CascadedShadowMap::Activate(const RenderContext& rc,
 		}
 #endif
 		// シャドウマップの解像度（コンストラクタで渡されたwidthを使用）
-		// widthはテクスチャ全体の幅ですが、Texture2DArrayなので各カスケードの解像度はそのままwidthになります
 		float shadowMapResolution = static_cast<float>(_viewport.Width);
 
 		// 正射影の幅と高さ
@@ -307,7 +306,7 @@ void CascadedShadowMap::DrawGui()
 	if (ImGui::Begin(u8"カスケードシャドウマップ"))
 	{
 		ImGui::DragFloat(u8"影生成タイマー", &_createShadowTimer);
-		ImGui::DragFloat(u8"影生成間隔", &_createShadowInterval, 0.1f, 0.0f, 10.0f, "%.1f");
+		ImGui::DragFloat(u8"影生成間隔", &_createShadowInterval, 0.001f, 0.0f, 1.0f);
 
 		ImGui::Separator();
 		ImGui::SliderFloat("criticalDepthValue", &_criticalDepthValue, 0.0f, +1000.0f);

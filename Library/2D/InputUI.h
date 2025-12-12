@@ -6,6 +6,7 @@
 class InputUI
 {
 public:
+	// スプライトデータ
 	struct SprData
 	{
 		Vector2 texPos{};
@@ -13,15 +14,16 @@ public:
 		Vector2 texSize{};
 	};
 
+	// 描画情報
 	struct DrawInfo
 	{
 		int keyboardKey		= 0;
 		int gamePadKey		= 0;
 
-		Vector2 position{};
-		Vector2 scale{};
-		Vector4 color{};
-		bool isActive = false;
+		Vector2 position	= Vector2::Zero;
+		Vector2 scale		= Vector2::One;
+		Vector4 color		= Vector4::White;
+		bool isActive		= false;
 	};
 
 public:
@@ -39,6 +41,7 @@ public:
 	void Draw(DrawInfo drawinfo);
 
 private:
+	// スプライトサイズ
 	const float SpriteWidth = 128.0f;
 	Sprite _gamePadSprite;
 	Sprite _keybordSprite;

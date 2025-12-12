@@ -20,20 +20,21 @@ Primitive::Primitive(ID3D11Device* device)
 
     // 頂点宣言
     // 入力レイアウトの定義
-    D3D11_INPUT_ELEMENT_DESC layout[] = {
+    D3D11_INPUT_ELEMENT_DESC layout[] = 
+    {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,     D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
-    UINT numElements = ARRAYSIZE(layout);
 
     //	頂点シェーダーの読み込み
-    GpuResourceManager::CreateVsFromCso(device, "./Data/Shader/HLSL/Primitive/PrimitiveVS.cso", _vertexShader.GetAddressOf(),
-        _inputLayout.GetAddressOf(), layout, numElements);
+    _vertexShader.Load(device, "./Data/Shader/HLSL/Primitive/PrimitiveVS.cso",
+        layout, ARRAYSIZE(layout));
 
     //	ピクセルシェーダーの作成
-    GpuResourceManager::CreatePsFromCso(device, "./Data/Shader/HLSL/Primitive/PrimitivePS.cso", _pixelShader.GetAddressOf());
+    _pixelShader.Load(device, "./Data/Shader/HLSL/Primitive/PrimitivePS.cso");
 }
 
+/// 矩形描画
 void Primitive::Rect(ID3D11DeviceContext* context,
     const Vector2& pos, const Vector2& size,
     const Vector2& center, float angle,
@@ -79,13 +80,14 @@ void Primitive::Rect(ID3D11DeviceContext* context,
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    context->IASetInputLayout(_inputLayout.Get());
+    context->IASetInputLayout(_vertexShader.GetInputLayout());
     context->VSSetShader(_vertexShader.Get(), NULL, 0);
     context->PSSetShader(_pixelShader.Get(), NULL, 0);
 
     context->Draw(4, 0);
 }
 
+/// 線描画
 void Primitive::Line(ID3D11DeviceContext* context,
     const Vector2& from, const Vector2& to,
     const Vector4& color, float width) const
@@ -105,6 +107,7 @@ void Primitive::Line(ID3D11DeviceContext* context,
     Rect(context, Vector2(x, y), Vector2(w, h), Vector2(cx, cy), angle, color);
 }
 
+/// 円描画
 void Primitive::Circle(ID3D11DeviceContext* context,
     const Vector2& center, float radius,
     const Vector2& scale, float angle,
@@ -154,18 +157,19 @@ void Primitive::Circle(ID3D11DeviceContext* context,
     UINT offset = 0;
     context->IASetVertexBuffers(0, 1, _vertexBuffer.GetAddressOf(), &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    context->IASetInputLayout(_inputLayout.Get());
+    context->IASetInputLayout(_vertexShader.GetInputLayout());
     context->VSSetShader(_vertexShader.Get(), NULL, 0);
     context->PSSetShader(_pixelShader.Get(), NULL, 0);
 
     context->Draw((n + 1) * 2 - 1, 0);
 }
 
+/// カプセル描画
 void Primitive::Capsule(ID3D11DeviceContext* context, 
     const Vector2& from, const Vector2& to, 
     const Vector2& scale, 
     const float& radius,
-    const Vector4& color)
+    const Vector4& color) const
 {
     Primitive::Circle(context, from, radius, scale, 0.0f, color);
     Primitive::Circle(context, to, radius, scale, 0.0f, color);

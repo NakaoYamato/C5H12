@@ -10,17 +10,21 @@
 class Canvas
 {
 public:
+	// テクスチャ情報
 	struct TextureData
 	{
-		Vector2				texPosition = Vector2::Zero;		// テクスチャの位置
-		Vector2				texSize		= Vector2::One;			// テクスチャのサイズ
-		DirectX::XMUINT2	texSplit	= DirectX::XMUINT2();	// テクスチャの分割数
+		// テクスチャの位置
+		Vector2				texPosition = Vector2::Zero;
+		// テクスチャのサイズ
+		Vector2				texSize		= Vector2::One;
+		// テクスチャの分割数
+		DirectX::XMUINT2	texSplit	= DirectX::XMUINT2();
 	};
 
 public:
 	Canvas(ID3D11Device* device, 
 		const DirectX::XMUINT2& canvasScale = DirectX::XMUINT2(8192, 8192),
-		const Vector2& textureScale = Vector2(128.0f, 128.0f));
+		const Vector2& textureScale			= Vector2(128.0f, 128.0f));
 	~Canvas() = default;
 
 	/// <summary>
@@ -44,10 +48,10 @@ public:
 
 #pragma region アクセサ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetColorSRV() { return _canvasBuffer->GetColorSRV(); }
-	std::string GetFilePath() const { return _filepath; }
-	DirectX::XMUINT2 GetCanvasScale() const { return _canvasScale; }
-	Vector2 GetTextureScale() const { return _textureScale; }
-	bool IsUseOriginalTextureScale() const { return _isUseOriginalTextureScale; }
+	std::string			GetFilePath() const { return _filepath; }
+	DirectX::XMUINT2	GetCanvasScale() const { return _canvasScale; }
+	Vector2				GetTextureScale() const { return _textureScale; }
+	bool				IsUseOriginalTextureScale() const { return _isUseOriginalTextureScale; }
 
 	void SetFilePath(const std::string& filepath) { _filepath = filepath; }
 	void SetTextureScale(const Vector2& scale) { _textureScale = scale; }	

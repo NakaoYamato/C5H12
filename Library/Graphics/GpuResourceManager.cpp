@@ -277,7 +277,7 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 		vertexShaderMap.insert(std::make_pair(csoName, *vertexShader));
 
 		// 入力レイアウトオブジェクトの生成
-		if (inputLayout)
+		if (inputLayout && inputElementDesc)
 		{
 			hr = device->CreateInputLayout(inputElementDesc, numElements,
 				csoData.get(), csoSize, inputLayout);

@@ -20,8 +20,9 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         ((MaxTess - 1) * (MaxTess - 2)) / 2;
 
     // 定数バッファデータ初期化
-    _data.lodTessFactors = Vector4(47.0f, 31.0f, 27.0f, 13.0f);
-    _data.lodTessDistance = 25.0f;
+    _data.lodTessFactors = Vector4(31.0f, 19.0f, 9.0f, 7.0f);
+    _data.lodTessDistance = 30.0f;
+    _data.collisionTessFactor = 7.0f;
     // 地形1枚の長さ(m)
 	_data.terrainLength = TerrainLength;
     // 分割数

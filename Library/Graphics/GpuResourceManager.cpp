@@ -252,7 +252,8 @@ void GpuResourceManager::CreateVsFromCso(ID3D11Device* device,
 		if (inputIter != inputLayoutMap.end())
 		{
 			*inputLayout = inputIter->second.Get();
-			(*inputLayout)->AddRef();
+			if (*inputLayout)
+				(*inputLayout)->AddRef();
 		}
 	}
 	else

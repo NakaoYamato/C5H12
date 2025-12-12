@@ -225,9 +225,9 @@ bool ModelCollider::IntersectAnimationEvent(
 			modelSphereRadius,
 			eventSphere.position,
 			eventSphere.radius,
-			hitPosition,
-			hitNormal,
-			penetration))
+			&hitPosition,
+			&hitNormal,
+			&penetration))
 		{
 			return true;
 		}
@@ -241,9 +241,9 @@ bool ModelCollider::IntersectAnimationEvent(
 			eventCapsule.start,
 			eventCapsule.end,
 			eventCapsule.radius,
-			hitPosition,
-			hitNormal,
-			penetration))
+			&hitPosition,
+			&hitNormal,
+			&penetration))
 		{
 			return true;
 		}
@@ -270,9 +270,9 @@ bool ModelCollider::IntersectAnimationEvent(
 			modelCapsuleStart,
 			modelCapsuleEnd,
 			modelCapsuleRadius,
-			hitPosition,
-			hitNormal,
-			penetration))
+			&hitPosition,
+			&hitNormal,
+			&penetration))
 		{
 			return true;
 		}
@@ -287,9 +287,9 @@ bool ModelCollider::IntersectAnimationEvent(
 			eventCapsule.start,
 			eventCapsule.end,
 			eventCapsule.radius,
-			hitPosition,
-			hitNormal,
-			penetration))
+			&hitPosition,
+			&hitNormal,
+			&penetration))
 		{
 			return true;
 		}

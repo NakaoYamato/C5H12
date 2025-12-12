@@ -235,9 +235,9 @@ void CollisionManager::Update()
 		}
 	}
 
+	// 接触情報を各アクターに通知
 	{
 		ProfileScopedSection_2(0, Contact, ImGuiControl::Profiler::Green);
-		// 接触情報を各アクターに通知
 		for (auto& [actor, datas] : collisionDataMap)
 		{
 			if (!actor->IsActive())
@@ -618,6 +618,7 @@ void CollisionManager::PushCollisionData(
 	}
 }
 
+#pragma region 各当たり判定
 void CollisionManager::SphereVsSphere(
 	const SphereData& sphereA,
 	const SphereData& sphereB,
@@ -639,9 +640,9 @@ void CollisionManager::SphereVsSphere(
 		sphereA.radius,
 		sphereB.position,
 		sphereB.radius,
-		hitPosition,
-		hitNormal,
-		penetration))
+		&hitPosition,
+		&hitNormal,
+		&penetration))
 	{
 		PushCollisionData(
 			collisionDataMap,
@@ -679,9 +680,9 @@ void CollisionManager::SphereVsBox(
 		box.position,
 		box.halfSize,
 		box.rotation,
-		hitPosition,
-		hitNormal,
-		penetration))
+		&hitPosition,
+		&hitNormal,
+		&penetration))
 	{
 		PushCollisionData(
 			collisionDataMap,
@@ -719,9 +720,9 @@ void CollisionManager::SphereVsCapsule(
 		capsule.start,
 		capsule.end,
 		capsule.radius,
-		hitPosition,
-		hitNormal,
-		penetration))
+		&hitPosition,
+		&hitNormal,
+		&penetration))
 	{
 		PushCollisionData(
 			collisionDataMap,
@@ -783,7 +784,9 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 					if (Collision3D::IntersectSphereVsTriangle(
 						spherePosition, sphere.radius, 
 						TrianglePos,
-						hitPosition, hitNormal, distance))
+						&hitPosition,
+						&hitNormal,
+						&distance))
 					{
 						// 最も近い衝突情報を保存
 						if (distance < resultDistance)
@@ -838,9 +841,9 @@ void CollisionManager::BoxVsBox(
 		boxB.position,
 		boxB.halfSize,
 		boxB.rotation,
-		hitPosition,
-		hitNormal,
-		penetration))
+		&hitPosition,
+		&hitNormal,
+		&penetration))
 	{
 		PushCollisionData(
 			collisionDataMap,
@@ -876,9 +879,9 @@ void CollisionManager::BoxVeCapsule(const BoxData& box, const CapsuleData& capsu
 		capsule.start,
 		capsule.end,
 		capsule.radius,
-		hitPosition,
-		hitNormal,
-		penetration))
+		&hitPosition,
+		&hitNormal,
+		&penetration))
 	{
 		PushCollisionData(
 			collisionDataMap,
@@ -917,9 +920,9 @@ void CollisionManager::CapsuleVsCapsule(
 		capsuleB.start,
 		capsuleB.end,
 		capsuleB.radius,
-		hitPosition,
-		hitNormal,
-		penetration))
+		&hitPosition,
+		&hitNormal,
+		&penetration))
 	{
 		PushCollisionData(
 			collisionDataMap,
@@ -934,3 +937,4 @@ void CollisionManager::CapsuleVsCapsule(
 			penetration);
 	}
 }
+#pragma endregion

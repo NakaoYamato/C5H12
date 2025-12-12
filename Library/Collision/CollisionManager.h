@@ -12,9 +12,7 @@
 #include "../Component/Collider/CapsuleCollider.h"
 #include "../Component/Collider/MeshCollider.h"
 
-/// <summary>
-/// Colliderの管理者
-/// </summary>
+// Colliderの管理者
 class CollisionManager
 {
 public:
@@ -145,7 +143,7 @@ public:
 	/// <returns></returns>
 	bool SphereCast(
 		const Vector3& origin,
-		const Vector3& direction/*must normal*/,
+		const Vector3& direction,
 		float radius,
 		float* distance,
 		Vector3* hitPosition,
@@ -161,7 +159,7 @@ public:
 	/// <returns></returns>
 	std::vector<RayCastResult> SphereCast(
 		const Vector3& origin,
-		const Vector3& direction/*must normal*/,
+		const Vector3& direction,
 		float radius,
 		float distance);
 #pragma endregion
@@ -201,9 +199,7 @@ public:
 #pragma endregion
 
 private:
-	/// <summary>
-	/// 各コンポーネントの情報を設定
-	/// </summary>
+	// 各コンポーネントの情報を設定
 	void SetDataByCollider();
 
 	// コンテナに情報を追加
@@ -249,19 +245,23 @@ private:
 		std::unordered_map<Actor*, std::vector<CollisionData>>& collisionDataMap);
 #pragma endregion
 
-
 private:
-	std::vector<SphereCollider*>	_sphereColliders; // 球コライダー
-	std::vector<BoxCollider*>		_boxColliders; // ボックスコライダー
-	std::vector<CapsuleCollider*>	_capsuleColliders; // カプセルコライダー
-	std::vector<MeshCollider*>		_meshColliders; // メッシュコライダー
+	// 球コライダー
+	std::vector<SphereCollider*>	_sphereColliders;
+	// ボックスコライダー
+	std::vector<BoxCollider*>		_boxColliders;
+	// カプセルコライダー
+	std::vector<CapsuleCollider*>	_capsuleColliders;
+	// メッシュコライダー
+	std::vector<MeshCollider*>		_meshColliders;
 
 	// 衝突データ
-    std::vector<SphereData> _sphereDatas;
-    std::vector<BoxData> _boxDatas;
-    std::vector<CapsuleData> _capsuleDatas;
+    std::vector<SphereData>			_sphereDatas;
+    std::vector<BoxData>			_boxDatas;
+    std::vector<CapsuleData>		_capsuleDatas;
 
-    std::mutex _mutex; // スレッドセーフ用
+	// スレッドセーフ用
+    std::mutex _mutex;
 
 	// 当たり判定を行うか
 	bool _enableCollision = true;

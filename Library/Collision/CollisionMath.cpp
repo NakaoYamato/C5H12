@@ -941,7 +941,9 @@ namespace CollisionHelper
 bool Collision3D::IntersectSphereVsSphere(
 	const Vector3& s0Pos, float s0Radius,
 	const Vector3& s1Pos, float s1Radius,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	return Collision3D::IntersectSphereVsSphere(
 		DirectX::XMLoadFloat3(&s0Pos), s0Radius,
@@ -953,7 +955,9 @@ bool Collision3D::IntersectSphereVsSphere(
 bool Collision3D::IntersectSphereVsSphere(
 	const DirectX::XMVECTOR& s0Pos, float s0Radius,
 	const DirectX::XMVECTOR& s1Pos, float s1Radius,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	// 距離チェック
 	DirectX::XMVECTOR Direction = DirectX::XMVectorSubtract(s0Pos, s1Pos);
@@ -962,28 +966,42 @@ bool Collision3D::IntersectSphereVsSphere(
 	if (length > sumRadi)
 		return false;
 
-	DirectX::XMStoreFloat3(&hitPosition,
-		DirectX::XMVectorScale(DirectX::XMVectorAdd(s0Pos, s1Pos), 0.5f));
-	DirectX::XMStoreFloat3(&hitNormal, DirectX::XMVector3Normalize(Direction));
-	penetration = sumRadi - length;
+	if (hitPosition)
+		DirectX::XMStoreFloat3(hitPosition,
+			DirectX::XMVectorScale(DirectX::XMVectorAdd(s0Pos, s1Pos), 0.5f));
+	if (hitNormal)
+		DirectX::XMStoreFloat3(hitNormal, DirectX::XMVector3Normalize(Direction));
+	if (penetration)
+		*penetration = sumRadi - length;
 	return true;
 }
 
 // 球VsAABB
-bool Collision3D::IntersectSphereVsAABB(const Vector3& spherePos, float sphereRadius, const Vector3& aabbCenter, const Vector3& aabbRadii)
+bool Collision3D::IntersectSphereVsAABB(
+	const Vector3& spherePos,
+	float sphereRadius,
+	const Vector3& aabbCenter,
+	const Vector3& aabbRadii)
 {
 	Vector3 hitPosition{}, hitNormal{};
 	float penetration = 0.0f;
-	return IntersectSphereVsAABB(spherePos, sphereRadius, aabbCenter, aabbRadii, hitPosition, hitNormal, penetration);
+	return IntersectSphereVsAABB(
+		spherePos,
+		sphereRadius,
+		aabbCenter,
+		aabbRadii,
+		&hitPosition,
+		&hitNormal,
+		&penetration);
 }
 
 // 球VsAABB
 bool Collision3D::IntersectSphereVsAABB(
 	const Vector3& spherePos, float sphereRadius,
 	const Vector3& aabbCenter, const Vector3& aabbRadii,
-	Vector3& hitPosition, 
-	Vector3& hitNormal, 
-	float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	// AABBの最近点を求める
 	Vector3 nearPos = Vector3::Clamp(spherePos, aabbCenter - aabbRadii, aabbCenter + aabbRadii);
@@ -995,9 +1013,12 @@ bool Collision3D::IntersectSphereVsAABB(
 	if (length < sphereRadius)
 	{
 		// 衝突している
-		hitPosition = nearPos;
-		hitNormal = vec.Normalize();
-		penetration = sphereRadius - length;
+		if (hitPosition)
+			*hitPosition = nearPos;
+		if (hitNormal)
+			*hitNormal = vec.Normalize();
+		if (penetration)
+			*penetration = sphereRadius - length;
 		return true;
 	}
 	// 衝突していない
@@ -1008,7 +1029,9 @@ bool Collision3D::IntersectSphereVsAABB(
 bool Collision3D::IntersectSphereVsBox(
 	const Vector3& spherePos, float sphereRadius,
 	const Vector3& boxPos, const Vector3& boxRadii, const Vector3& boxAngle,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	DirectX::XMMATRIX BoxM = {}, InvBoxM = {};
 	{
@@ -1031,9 +1054,13 @@ bool Collision3D::IntersectSphereVsBox(
     // 衝突判定
 	if (length < sphereRadius)
 	{
-        hitPosition = nearPos;
-        hitNormal = vec.Normalize();
-		penetration = sphereRadius - length;
+		// 衝突している
+		if (hitPosition)
+			*hitPosition = nearPos;
+		if (hitNormal)
+			*hitNormal = vec.Normalize();
+		if (penetration)
+			*penetration = sphereRadius - length;
         return true;
 	}
 	return false;
@@ -1085,22 +1112,26 @@ bool Collision3D::IntersectSphereVsTriangle(
 	return ret;
 }
 
+// 球Vs三角形
 bool Collision3D::IntersectSphereVsTriangle(
 	const DirectX::XMVECTOR& spherePos, float radius,
 	const DirectX::XMVECTOR trianglePos[3],
-	Vector3& hitPosition,
-	Vector3& hitNormal, 
-	float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	DirectX::XMVECTOR tmpPos = {};
 	CollisionHelper::GetClosestPoint_PointTriangle(spherePos, trianglePos, tmpPos);
 	DirectX::XMVECTOR vec = DirectX::XMVectorSubtract(spherePos, tmpPos);
-	penetration = DirectX::XMVectorGetX(DirectX::XMVector3Length(vec)) - radius;
-	if (penetration <= 0.0f)
+	float p = DirectX::XMVectorGetX(DirectX::XMVector3Length(vec)) - radius;
+	if (p <= 0.0f)
 	{
-		DirectX::XMStoreFloat3(&hitPosition, tmpPos);
-		DirectX::XMStoreFloat3(&hitNormal, DirectX::XMVector3Normalize(vec));
-		penetration = -penetration;
+		if (hitPosition)
+			DirectX::XMStoreFloat3(hitPosition, tmpPos);
+		if (hitNormal)
+			DirectX::XMStoreFloat3(hitNormal, DirectX::XMVector3Normalize(vec));
+		if (penetration)
+			*penetration = -p;
 		return true;
 	}
 	return false;
@@ -1111,7 +1142,9 @@ bool Collision3D::IntersectSphereVsCapsule(
 	const Vector3& sPos, float sRadius,
 	const Vector3& cPos, const Vector3& cDirection,
 	float cRadius, float cLength,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	const DirectX::XMVECTOR SP = DirectX::XMLoadFloat3(&sPos);
 	const DirectX::XMVECTOR CP = DirectX::XMLoadFloat3(&cPos);
@@ -1140,7 +1173,9 @@ bool Collision3D::IntersectSphereVsCapsule(
 	const Vector3& sPos, float sRadius,
 	const Vector3& cStart, const Vector3& cEnd,
 	float cRadius,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	Vector3 direction = cEnd - cStart;
 	float length = Vector3::Length(direction);
@@ -1166,11 +1201,14 @@ bool Collision3D::IntersectSphereVsCapsule(
 bool Collision3D::IntersectBoxVsBox(
 	const Vector3& box0Pos, const Vector3& box0Radii, const Vector3& box0Angle,
 	const Vector3& box1Pos, const Vector3& box1Radii, const Vector3& box1Angle,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	using namespace CollisionHelper;
 
 	CollisionResultOBB data{};
+	float pene = 0.0f;
 
 	data.type = CollisionResultOBB::OBB_SAT_Type::NoHit;
 	data.penetration = FLT_MAX;	// めり込み量の初期値を最大にして比較を行い、小さい方で上書きすることで、最小のめり込み量の軸を求める
@@ -1197,15 +1235,15 @@ bool Collision3D::IntersectBoxVsBox(
 
 		r0 = obb1RadXYZ[i];
 		r1 = SumProjectedRadii(box1Radii, obb1LocalAxis, L);
-		penetration = r0 + r1 - fabsf(LT_Dot);
+		pene = r0 + r1 - fabsf(LT_Dot);
 
 		// １回でも交差していない軸が見つかれば、２物体間が交差していないことが確定する
-		if (penetration <= 0.0f) return false;
+		if (pene <= 0.0f) return false;
 
-		//①衝突処理用パラメータを設定する
-		if (data.penetration > penetration)
+		// 衝突処理用パラメータを設定する
+		if (data.penetration > pene)
 		{
-			data.penetration = penetration;
+			data.penetration = pene;
 			data.type = CollisionResultOBB::OBB_SAT_Type::Point2_Face1;
 			data.hitAxis[0] = i;
 		}
@@ -1219,15 +1257,15 @@ bool Collision3D::IntersectBoxVsBox(
 
 		r0 = SumProjectedRadii(box0Radii, obb0LocalAxis, L);
 		r1 = obb2RadXYZ[i];
-		penetration = r0 + r1 - fabsf(LT_Dot);
+		pene = r0 + r1 - fabsf(LT_Dot);
 
 		// １回でも交差していない軸が見つかれば、２物体間が交差していないことが確定する
-		if (penetration <= 0.0f) return false;
+		if (pene <= 0.0f) return false;
 
-		//①衝突処理用パラメータを設定する
-		if (data.penetration > penetration)
+		// 衝突処理用パラメータを設定する
+		if (data.penetration > pene)
 		{
-			data.penetration = penetration;
+			data.penetration = pene;
 			data.type = CollisionResultOBB::OBB_SAT_Type::Point1_Face2;
 			data.hitAxis[1] = i;
 		}
@@ -1239,12 +1277,12 @@ bool Collision3D::IntersectBoxVsBox(
 		for (int j = 0; j < 3; j++)
 		{
 			L = DirectX::XMVector3Cross(obb0LocalAxis[i], obb1LocalAxis[j]);
-			if (SumProjectedRadiiCrossSAT(box0Radii, box1Radii, obb0LocalAxis, obb1LocalAxis, L, T, penetration))
+			if (SumProjectedRadiiCrossSAT(box0Radii, box1Radii, obb0LocalAxis, obb1LocalAxis, L, T, pene))
 			{
-				//①衝突処理用パラメータを設定する
-				if (data.penetration > penetration)
+				// 衝突処理用パラメータを設定する
+				if (data.penetration > pene)
 				{
-					data.penetration = penetration;
+					data.penetration = pene;
 					data.type = CollisionResultOBB::OBB_SAT_Type::Edge_Edge;
 					data.hitAxis[0] = i;
 					data.hitAxis[1] = j;
@@ -1355,9 +1393,12 @@ bool Collision3D::IntersectBoxVsBox(
 	}
 
 	// 計算した法線と衝突点を反映する
-	DirectX::XMStoreFloat3(&hitPosition, point);
-	DirectX::XMStoreFloat3(&hitNormal, norm);
-    penetration = data.penetration;
+	if (hitPosition)
+		DirectX::XMStoreFloat3(hitPosition, point);
+	if (hitNormal)
+		DirectX::XMStoreFloat3(hitNormal, norm);
+	if (penetration)
+		*penetration = data.penetration;
 
 	return true;
 }
@@ -1365,8 +1406,10 @@ bool Collision3D::IntersectBoxVsBox(
 /// AABBVsカプセル
 bool Collision3D::IntersectAABBVsCapsule(
 	const Vector3& aabbPosition, const Vector3& aabbRadii, 
-	const Vector3& cStart, const Vector3& cEnd, float cRadius, 
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	const Vector3& cStart, const Vector3& cEnd, float cRadius,
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	// カプセルの中心線の始端、AABBの中心、AABBとカプセル半径のボロノイ領域の半径を
 	// ループ処理するため、xyz成分を配列に代入する
@@ -1504,13 +1547,16 @@ bool Collision3D::IntersectAABBVsCapsule(
 				// 衝突点と角の座標とカプセルの半径からめり込み量を算出し、CollideCapsule関数を呼び出す
 				float normalLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(normal));
 				normal = DirectX::XMVector3Normalize(normal);
-				penetration = cRadius - normalLength;
-				if (penetration > 0.0f)
+				float pene = cRadius - normalLength;
+				if (pene > 0.0f)
 				{
-					DirectX::XMStoreFloat3(&hitPosition, intersection);
-                    DirectX::XMStoreFloat3(&hitNormal, normal);
-					// めり込み量がカプセルから見た量になっているので反転
-					penetration = -penetration;
+					if (hitPosition)
+						DirectX::XMStoreFloat3(hitPosition, intersection);
+					if (hitNormal)
+						DirectX::XMStoreFloat3(hitNormal, normal);
+					if (penetration)
+						// めり込み量がカプセルから見た量になっているので反転
+						*penetration = -pene;
 					return true;
 				}
 			}
@@ -1558,13 +1604,16 @@ bool Collision3D::IntersectAABBVsCapsule(
 			DirectX::XMVector3Length(DirectX::XMVectorMultiply(normal, radiiVec))
 		);
 
-		penetration = cRadius + aabbLength - length;
-		if (penetration > 0.0f)
+		float pene = cRadius + aabbLength - length;
+		if (pene > 0.0f)
 		{
-            hitPosition = p;
-			DirectX::XMStoreFloat3(&hitNormal, normal);
-			// めり込み量がカプセルから見た量になっているので反転
-			penetration = -penetration;
+			if (hitPosition)
+				*hitPosition = p;
+			if (hitNormal)
+				DirectX::XMStoreFloat3(hitNormal, normal);
+			if (penetration)
+				// めり込み量がカプセルから見た量になっているので反転
+				*penetration = -pene;
 			return true;
 		}
 	}
@@ -1583,13 +1632,16 @@ bool Collision3D::IntersectAABBVsCapsule(
 		Vector3 vec = NearP[0] - NearP[1];	// 2点間のベクトル
 		float length = vec.Length();	// 2点間の距離
 
-		penetration = cRadius - length;
-		if (penetration > 0.0f)
+		float pene = cRadius - length;
+		if (pene > 0.0f)
 		{
-			hitPosition = p;
-            hitNormal = vec.Normalize();
-			// めり込み量がカプセルから見た量になっているので反転
-			penetration = -penetration;
+			if (hitPosition)
+				*hitPosition = p;
+			if (hitNormal)
+				*hitNormal = vec.Normalize();
+			if (penetration)
+				// めり込み量がカプセルから見た量になっているので反転
+				*penetration = -pene;
 			return true;
 		}
 	}
@@ -1601,7 +1653,9 @@ bool Collision3D::IntersectAABBVsCapsule(
 bool Collision3D::IntersectBoxVsCapsule(
 	const Vector3& boxPos, const Vector3& boxRadii, const Vector3& boxAngle,
 	const Vector3& cStart, const Vector3& cEnd, float cRadius,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
     // カプセルの始点、終点にボックスの回転行列を適用
 	DirectX::XMMATRIX BoxM = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&boxAngle));
@@ -1619,10 +1673,13 @@ bool Collision3D::IntersectBoxVsCapsule(
 	if (result)
 	{
         // 衝突点をボックスの回転行列空間からワールド空間に変換
-        hitPosition = hitPosition.TransformCoord(BoxM);
-		hitPosition += boxPos;
-
-        hitNormal = hitNormal.TransformNormal(BoxM);
+		if (hitPosition)
+		{
+			*hitPosition = hitPosition->TransformCoord(BoxM);
+			*hitPosition += boxPos;
+		}
+		if (hitNormal)
+			*hitNormal = hitNormal->TransformNormal(BoxM).Normalize();
 		return true;
     }
 
@@ -1684,7 +1741,9 @@ bool Collision3D::IntersectCapsuleVsCapsule(
 	float c0Radius,
 	const Vector3& c1Start, const Vector3& c1End,
 	float c1Radius,
-	Vector3& hitPosition, Vector3& hitNormal, float& penetration)
+	Vector3* hitPosition,
+	Vector3* hitNormal,
+	float* penetration)
 {
 	const DirectX::XMVECTOR start0 = DirectX::XMLoadFloat3(&c0Start);
 	const DirectX::XMVECTOR end0 = DirectX::XMLoadFloat3(&c0End);
@@ -1700,10 +1759,13 @@ bool Collision3D::IntersectCapsuleVsCapsule(
 	float radiusAdd = c0Radius + c1Radius;
 	if (distSq < radiusAdd * radiusAdd)
 	{
-		DirectX::XMStoreFloat3(&hitPosition, DirectX::XMVectorScale(
-			DirectX::XMVectorAdd(point1, point2), 0.5f));
-		DirectX::XMStoreFloat3(&hitNormal, DirectX::XMVector3Normalize(vec));
-		penetration = radiusAdd - sqrtf(distSq);
+		if (hitPosition)
+			DirectX::XMStoreFloat3(hitPosition, DirectX::XMVectorScale(
+				DirectX::XMVectorAdd(point1, point2), 0.5f));
+		if (hitNormal)
+			DirectX::XMStoreFloat3(hitNormal, DirectX::XMVector3Normalize(vec));
+		if (penetration)
+			*penetration = radiusAdd - sqrtf(distSq);
 
 		return true;
 	}
@@ -1754,7 +1816,14 @@ bool Collision3D::IntersectRayVsSphere(
 }
 
 // レイVsAABB
-bool Collision3D::IntersectRayVsAABB(const DirectX::XMVECTOR& rayStart, const DirectX::XMVECTOR& rayDirection, float rayDist, const DirectX::XMVECTOR& aabbPos, const DirectX::XMVECTOR& aabbRadii, HitResultVector* resultNear, HitResultVector* resultFar)
+bool Collision3D::IntersectRayVsAABB(
+	const DirectX::XMVECTOR& rayStart,
+	const DirectX::XMVECTOR& rayDirection,
+	float rayDist,
+	const DirectX::XMVECTOR& aabbPos,
+	const DirectX::XMVECTOR& aabbRadii,
+	HitResultVector* resultNear,
+	HitResultVector* resultFar)
 {
 	HitResultVector nearPoint = {};
 	HitResultVector farPoint = {};
@@ -1763,13 +1832,10 @@ bool Collision3D::IntersectRayVsAABB(const DirectX::XMVECTOR& rayStart, const Di
 		if (nearPoint.distance < farPoint.distance)
 		{
 			if (resultNear)
-			{
 				*resultNear = nearPoint;
-				if (resultFar)
-				{
-					*resultFar = farPoint;
-				}
-			}
+			if (resultFar)
+				*resultFar = farPoint;
+
 			return true;
 		}
 	}
@@ -1910,7 +1976,11 @@ bool Collision3D::IntersectRayVsTriangle(
 }
 
 // 外部の点に対するAABB内部の最近点を取得する
-DirectX::XMVECTOR Collision3D::GetClosestPoint_PointAABB(const DirectX::XMVECTOR& point, const DirectX::XMVECTOR& aabbPos, const DirectX::XMVECTOR& aabbRadii, bool surfaceFlg)
+DirectX::XMVECTOR Collision3D::GetClosestPoint_PointAABB(
+	const DirectX::XMVECTOR& point,
+	const DirectX::XMVECTOR& aabbPos,
+	const DirectX::XMVECTOR& aabbRadii,
+	bool surfaceFlg)
 {
 	float aabbPosArray[3] = { DirectX::XMVectorGetX(aabbPos), DirectX::XMVectorGetY(aabbPos), DirectX::XMVectorGetZ(aabbPos) };
 	float aabbRadArray[3] = { DirectX::XMVectorGetX(aabbRadii), DirectX::XMVectorGetY(aabbRadii), DirectX::XMVectorGetZ(aabbRadii) };
@@ -1970,7 +2040,15 @@ DirectX::XMVECTOR Collision3D::GetClosestPoint_PointAABB(const DirectX::XMVECTOR
 }
 
 // レイVs円柱
-bool Collision3D::IntersectRayVsOrientedCylinder(const DirectX::XMVECTOR& rayStart, const DirectX::XMVECTOR& rayDirection, float rayDist, const DirectX::XMVECTOR& startCylinder, const DirectX::XMVECTOR& endCylinder, float RADIUS, HitResultVector* result, DirectX::XMVECTOR* onCenterLinPos)
+bool Collision3D::IntersectRayVsOrientedCylinder(
+	const DirectX::XMVECTOR& rayStart,
+	const DirectX::XMVECTOR& rayDirection,
+	float rayDist,
+	const DirectX::XMVECTOR& startCylinder,
+	const DirectX::XMVECTOR& endCylinder,
+	float radius,
+	HitResultVector* result,
+	DirectX::XMVECTOR* onCenterLinPos)
 {
 	const DirectX::XMVECTOR d = DirectX::XMVectorSubtract(endCylinder, startCylinder);
 	const DirectX::XMVECTOR m = DirectX::XMVectorSubtract(rayStart, startCylinder);
@@ -1999,9 +2077,7 @@ bool Collision3D::IntersectRayVsOrientedCylinder(const DirectX::XMVECTOR& raySta
 	const float nn = DirectX::XMVectorGetX(DirectX::XMVector3Dot(n, n));
 	const float a = nn * dd - (nd * nd);
 	const float mm = DirectX::XMVectorGetX(DirectX::XMVector3Dot(m, m));
-	const float k = mm - RADIUS * RADIUS;
-	//float c = mm * dd - (md * md) - (radius * radius) * dd;
-	//float c = mm * dd - (radius * radius) * dd - (md * md);
+	const float k = mm - radius * radius;
 	// ddで括る
 	const float c = dd * k - (md * md);
 
@@ -2092,7 +2168,7 @@ bool Collision3D::IntersectRayVsOrientedCylinder(const DirectX::XMVECTOR& raySta
 		DirectX::XMVECTOR AX = DirectX::XMVectorAdd(rayStart, DirectX::XMVectorScale(rayDirection, hitDistance));
 		float tnDush = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Normalize(d), AX));
 		float tDush = -md / nd;
-		if (mm + 2.0f * tDush * mn + tDush * tDush * nn <= RADIUS * RADIUS)
+		if (mm + 2.0f * tDush * mn + tDush * tDush * nn <= radius * radius)
 		{
 			if (tDush < 0.0f)// なぜか -md / nd がマイナスになる
 				return false;
@@ -2107,7 +2183,7 @@ bool Collision3D::IntersectRayVsOrientedCylinder(const DirectX::XMVECTOR& raySta
 	{
 		// 上面との交差を確認し、交差していればhitDistanceを更新
 		float tDush = (dd - md) / nd;
-		if (mm + 2.0f * tDush * mn - 2.0f * md + tDush * tDush * nn - 2.0f * tDush * nd + dd <= RADIUS * RADIUS)
+		if (mm + 2.0f * tDush * mn - 2.0f * md + tDush * tDush * nn - 2.0f * tDush * nd + dd <= radius * radius)
 		{
 			if (tDush < 0.0f)// なぜか (dd - md) / nd がマイナスになる
 				return false;

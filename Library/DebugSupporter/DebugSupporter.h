@@ -263,4 +263,10 @@ namespace Debug
 	/// </summary>
 	/// <returns></returns>
 	DebugRenderer* GetDebugRenderer();
+
+	/// <summary>
+	/// デバッグ用ゲームスピード取得
+	/// </summary>
+	/// <returns></returns>
+	float GetGameSpeed();
 }

@@ -32,10 +32,7 @@ enum class ActorTag
 	ActorTagMax
 };
 
-
-/// <summary>
-/// ゲームオブジェクトの基底クラス
-/// </summary>
+// ゲームオブジェクトの基底クラス
 class Actor : public std::enable_shared_from_this<Actor>
 {
 public:
@@ -212,42 +209,42 @@ public:
 	/// <returns></returns>
 	virtual std::weak_ptr<Model> LoadModel(const char* filename);
 
-	ActorTag GetTag() const { return _tag; }
-	Scene* GetScene() { return _scene; }
-	const char* GetName() const { return _name.c_str(); }
-	Transform& GetTransform() { return _transform; }
-	std::weak_ptr<Model> GetModel() { return _model; }
+	ActorTag				GetTag() const	{ return _tag; }
+	Scene*					GetScene()		{ return _scene; }
+	const char*				GetName() const { return _name.c_str(); }
+	Transform&				GetTransform()	{ return _transform; }
+	std::weak_ptr<Model>	GetModel()		{ return _model; }
 	std::unordered_map<CollisionLayer, std::vector<Actor*>>& GetLastContactActors() { return _lastContactActors; }
 
-	void SetScene(Scene* scene) { this->_scene = scene; }
-	void SetName(const char* name) { this->_name = name; }
-	void SetTransform(const Transform& t) { this->_transform = t; }
+	void SetScene(Scene* scene)					{ this->_scene = scene; }
+	void SetName(const char* name)				{ this->_name = name; }
+	void SetTransform(const Transform& t)		{ this->_transform = t; }
 	void SetModel(std::shared_ptr<Model> model) { this->_model = model; }
 
 	// フォルダパス取得
-	const std::string& GetFolderPath() const { return _folderPath; }
+	const std::string& GetFolderPath() const			{ return _folderPath; }
 	// フォルダパス設定
-	void SetFolderPath(const std::string& folderPath) { _folderPath = folderPath; }
+	void SetFolderPath(const std::string& folderPath)	{ _folderPath = folderPath; }
 #pragma endregion
 
 #pragma region フラグ関係
 	void SetIsActive(bool b);
-	void SetIsDrawingTransformGui(bool b) { this->_isDrawingTransformGui = b; }
-	void SetIsShowing(bool b) { this->_isShowing = b; }
-	void SetIsCastingShadow(bool b) { this->_isCastingShadow = b; }
-	void SetIsDrawingDebug(bool b) { this->_isDrawingDebug = b; }
-	void SetIsUsingGuizmo(bool b) { this->_isUsingGuizmo = b; }
-	void SetIsDrawingHierarchy(bool b) { this->_isDrawingHierarchy = b; }
-	void SetInheritParentTransform(bool b) { this->_isInheritParentTransform = b; }
+	void SetIsDrawingTransformGui(bool b)	{ this->_isDrawingTransformGui = b; }
+	void SetIsShowing(bool b)				{ this->_isShowing = b; }
+	void SetIsCastingShadow(bool b)			{ this->_isCastingShadow = b; }
+	void SetIsDrawingDebug(bool b)			{ this->_isDrawingDebug = b; }
+	void SetIsUsingGuizmo(bool b)			{ this->_isUsingGuizmo = b; }
+	void SetIsDrawingHierarchy(bool b)		{ this->_isDrawingHierarchy = b; }
+	void SetInheritParentTransform(bool b)	{ this->_isInheritParentTransform = b; }
 
-	bool IsActive()const { return _isActive; }
-	bool IsDrawingTransformGui()const { return _isDrawingTransformGui; }
-	bool IsShowing()const { return _isShowing; }
-	bool IsCastingShadow()const { return _isCastingShadow; }
-	bool IsDrawingDebug()const { return _isDrawingDebug; }
-	bool IsUsingGuizmo()const { return _isUsingGuizmo; }
-	bool IsDrawingHierarchy()const { return _isDrawingHierarchy; }
-	bool IsInheritParentTransform()const { return _isInheritParentTransform; }
+	bool IsActive()const					{ return _isActive; }
+	bool IsDrawingTransformGui()const		{ return _isDrawingTransformGui; }
+	bool IsShowing()const					{ return _isShowing; }
+	bool IsCastingShadow()const				{ return _isCastingShadow; }
+	bool IsDrawingDebug()const				{ return _isDrawingDebug; }
+	bool IsUsingGuizmo()const				{ return _isUsingGuizmo; }
+	bool IsDrawingHierarchy()const			{ return _isDrawingHierarchy; }
+	bool IsInheritParentTransform()const	{ return _isInheritParentTransform; }
 #pragma endregion
 
 #pragma region 親子関係
@@ -265,10 +262,20 @@ public:
 	/// 親関係解除
 	/// </summary>
 	virtual void ReleaseParent();
-
+	/// <summary>
+	/// 親取得
+	/// </summary>
+	/// <returns></returns>
 	Actor* GetParent() { return _parent; }
+	/// <summary>
+	/// 子供取得
+	/// </summary>
+	/// <returns></returns>
 	std::vector<std::shared_ptr<Actor>>& GetChildren() { return _children; }
-
+	/// <summary>
+	/// 親の名前取得　親がなければ空文字
+	/// </summary>
+	/// <returns></returns>
 	virtual std::string GetParentName()
 	{
 		return _parent ? _parent->GetName() : "";
@@ -345,6 +352,14 @@ protected:
 	/// </summary>
 	virtual void OnDrawGui() {};
 	/// <summary>
+	/// コンポーネントGUI描画
+	/// </summary>
+	virtual void DrawComponentGui();
+	/// <summary>
+	/// コライダーGUI描画
+	/// </summary>
+	virtual void DrawColliderGui();
+	/// <summary>
 	/// 接触時処理
 	/// </summary>
 	/// <param name="collisionData">接触情報</param>
@@ -415,7 +430,12 @@ protected:
 	bool				_isOpenProfiler = false;
 #pragma endregion
 
-#pragma region プロファイル
+#pragma region デバッグ用
+	static Vector4 OpenHeaderColor;
+	static Vector4 OpenHeaderHoveredColor;
+	static Vector4 OpenHeaderActiveColor;
+
+	// プロファイラー
 	ImGuiControl::Profiler _profiler;
 #pragma endregion
 };

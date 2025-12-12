@@ -199,6 +199,7 @@ void SceneManager::SceneMenuGui()
 
 			ImGui::EndMenu();
 		}
+		ImGui::Separator();
 
 		ImGui::EndMainMenuBar();
 	}

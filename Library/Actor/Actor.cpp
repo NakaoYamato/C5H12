@@ -12,7 +12,12 @@
 
 #include <ImGuizmo.h>
 
+#pragma region デバッグ用
+Vector4 Actor::OpenHeaderColor			= Vector4(0.2f, 0.7f, 0.2f, 1.0f);
+Vector4 Actor::OpenHeaderHoveredColor	= Vector4(0.3f, 0.8f, 0.3f, 1.0f);
+Vector4 Actor::OpenHeaderActiveColor	= Vector4(0.2f, 0.7f, 0.2f, 1.0f);
 static bool ActorProfilerIsPause = false;
+#pragma endregion
 
 #pragma region ActorManagerで呼ぶ関数
 /// 生成処理
@@ -274,6 +279,14 @@ void Actor::DrawGui()
 		ImGui::Checkbox(u8"OpenProfiler", &_isOpenProfiler);
 	}
 
+	// GUI表示
+	if (ImGui::CollapsingHeader("GUI"))
+	{
+		ImGui::ColorEdit4("OpenHeaderColor", &OpenHeaderColor.x);
+		ImGui::ColorEdit4("OpenHeaderHoveredColor", &OpenHeaderHoveredColor.x);
+		ImGui::ColorEdit4("OpenHeaderActiveColor", &OpenHeaderActiveColor.x);
+	}
+
 	// トランスフォーム
 	if (_isDrawingTransformGui)
 		DrawTransformGui();
@@ -286,77 +299,12 @@ void Actor::DrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"コンポーネント"))
 		{
-			// 各コンポーネントのGUI
-			for (std::shared_ptr<Component>& component : _components)
-			{
-				ImGui::Spacing();
-				ImGui::Separator();
-
-				ImGui::PushID(&component);
-
-				bool isOpen = ImGui::CollapsingHeader(component->GetName(), ImGuiTreeNodeFlags_DefaultOpen);
-
-				// 右クリックされたとき
-				if (ImGui::BeginPopupContextItem())
-				{
-					if (ImGui::MenuItem("Save"))
-					{
-						component->SaveToFile();
-					}
-
-					if (ImGui::MenuItem("Load"))
-					{
-						component->LoadFromFile();
-					}
-
-					ImGui::EndPopup();
-				}
-
-				if (isOpen)
-				{
-					component->DrawGui();
-				}
-
-				ImGui::PopID();
-			}
+			DrawComponentGui();
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem(u8"コライダー"))
 		{
-			int index = 0;
-			for (std::shared_ptr<ColliderBase>& collider : _colliders)
-			{
-				ImGui::Spacing();
-				ImGui::Separator();
-
-				ImGui::PushID(&collider);
-
-				std::string headerName = std::to_string(index++) + ":" + std::string(collider->GetName());
-				bool isOpen = ImGui::CollapsingHeader(headerName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
-
-				// 右クリックされたとき
-				if (ImGui::BeginPopupContextItem())
-				{
-					if (ImGui::MenuItem("Save"))
-					{
-						collider->SaveToFile();
-					}
-
-					if (ImGui::MenuItem("Load"))
-					{
-						collider->LoadFromFile();
-					}
-
-					ImGui::EndPopup();
-				}
-
-				if (isOpen)
-				{
-					collider->DrawGui();
-				}
-
-				ImGui::PopID();
-			}
+			DrawColliderGui();
 			ImGui::EndTabItem();
 		}
 
@@ -530,6 +478,114 @@ void Actor::DrawGuizmo()
 		_transform.SetPosition(t);
 		_transform.SetScale(s);
 		_transform.SetAngle(r);
+	}
+}
+/// コンポーネントGUI描画
+void Actor::DrawComponentGui()
+{
+	// 各コンポーネントのGUI
+	for (std::shared_ptr<Component>& component : _components)
+	{
+		ImGui::Spacing();
+		ImGui::Separator();
+
+		ImGui::PushID(&component);
+
+		const char* headerName = component->GetName();
+
+		// ImGuiの内部ストレージから、このIDが開いているか確認
+		bool isOpenedInStorage = ImGui::GetStateStorage()->GetInt(ImGui::GetID(headerName), 1) != 0;
+		// 状態に応じて色をプッシュ
+		if (isOpenedInStorage)
+		{
+			// 開いている時の色
+			ImGui::PushStyleColor(ImGuiCol_Header,			ImVec4(OpenHeaderColor.x, OpenHeaderColor.y, OpenHeaderColor.z, OpenHeaderColor.w));
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered,	ImVec4(OpenHeaderHoveredColor.x, OpenHeaderHoveredColor.y, OpenHeaderHoveredColor.z, OpenHeaderHoveredColor.w));
+			ImGui::PushStyleColor(ImGuiCol_HeaderActive,	ImVec4(OpenHeaderActiveColor.x, OpenHeaderActiveColor.y, OpenHeaderActiveColor.z, OpenHeaderActiveColor.w));
+		}
+
+		bool isOpen = ImGui::CollapsingHeader(headerName, ImGuiTreeNodeFlags_DefaultOpen);
+
+		if (isOpenedInStorage)
+			// 色設定を戻す (3つPushしたので3つPop)
+			ImGui::PopStyleColor(3);
+
+		// 右クリックされたとき
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Save"))
+			{
+				component->SaveToFile();
+			}
+
+			if (ImGui::MenuItem("Load"))
+			{
+				component->LoadFromFile();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		if (isOpen)
+		{
+			component->DrawGui();
+		}
+
+		ImGui::PopID();
+	}
+}
+/// コライダーGUI描画
+void Actor::DrawColliderGui()
+{
+	int index = 0;
+	for (std::shared_ptr<ColliderBase>& collider : _colliders)
+	{
+		ImGui::Spacing();
+		ImGui::Separator();
+
+		ImGui::PushID(&collider);
+
+		std::string headerName = std::to_string(index++) + ":" + std::string(collider->GetName());
+
+		// ImGuiの内部ストレージから、このIDが開いているか確認
+		bool isOpenedInStorage = ImGui::GetStateStorage()->GetInt(ImGui::GetID(headerName.c_str()), 1) != 0;
+		// 状態に応じて色をプッシュ
+		if (isOpenedInStorage)
+		{
+			// 開いている時の色
+			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(OpenHeaderColor.x, OpenHeaderColor.y, OpenHeaderColor.z, OpenHeaderColor.w));
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(OpenHeaderHoveredColor.x, OpenHeaderHoveredColor.y, OpenHeaderHoveredColor.z, OpenHeaderHoveredColor.w));
+			ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(OpenHeaderActiveColor.x, OpenHeaderActiveColor.y, OpenHeaderActiveColor.z, OpenHeaderActiveColor.w));
+		}
+
+		bool isOpen = ImGui::CollapsingHeader(headerName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+
+		if (isOpenedInStorage)
+			// 色設定を戻す (3つPushしたので3つPop)
+			ImGui::PopStyleColor(3);
+
+		// 右クリックされたとき
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Save"))
+			{
+				collider->SaveToFile();
+			}
+
+			if (ImGui::MenuItem("Load"))
+			{
+				collider->LoadFromFile();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		if (isOpen)
+		{
+			collider->DrawGui();
+		}
+
+		ImGui::PopID();
 	}
 }
 /// 起動フラグが変化したときの処理

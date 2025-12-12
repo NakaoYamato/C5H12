@@ -219,9 +219,8 @@ void Framework::Update(float elapsedTime)
     // F5キー有効化で時間停止
     if (Debug::Input::IsActive(DebugInput::BTN_F5))
         elapsedTime = 0.0f;
-    // F3キー有効化で低速化
-    if (Debug::Input::IsActive(DebugInput::BTN_F3))
-        elapsedTime = elapsedTime / 10.0f;
+    // デバッグ用ゲーム速度適応
+    elapsedTime = elapsedTime * Debug::GetGameSpeed();
 
     // 入力監視クラスの更新
     {

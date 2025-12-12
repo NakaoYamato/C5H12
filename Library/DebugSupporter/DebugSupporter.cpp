@@ -21,6 +21,9 @@ namespace Debug
     std::unique_ptr<DebugRenderer> _debugRenderer;
 	std::mutex                 _debugMutex;
 
+	// ゲーム速度
+	float _debugGameSpeed = 1.0f;
+
     bool _showDemoGui = false;
     bool _showNodeDemoGui = false;
     bool _showCameraGui = false;
@@ -445,6 +448,7 @@ namespace Debug
 
                 ImGui::EndMenu();
             }
+            ImGui::Separator();
 
             {
                 auto DrawDebugFlagGui = [&](unsigned int key, std::string name)
@@ -462,10 +466,16 @@ namespace Debug
                         ImGui::PopStyleColor();
                     };
 
-                DrawDebugFlagGui(DebugInput::BTN_F3, u8"更新1/10");
+				static float test = 0.0f;
+                ImGui::SetNextItemWidth(50.0f);
+				ImGui::SliderFloat(u8"更新速度", &_debugGameSpeed, 0.0f, 1.0f);
+                ImGui::Separator();
                 DrawDebugFlagGui(DebugInput::BTN_F4, u8"デバッグカメラ");
+                ImGui::Separator();
                 DrawDebugFlagGui(DebugInput::BTN_F5, u8"更新停止");
+                ImGui::Separator();
                 DrawDebugFlagGui(DebugInput::BTN_F7, u8"デバッグ表示");
+                ImGui::Separator();
             }
 
             ImGui::EndMainMenuBar();
@@ -531,5 +541,10 @@ namespace Debug
     DebugRenderer* GetDebugRenderer()
     {
         return _debugRenderer.get();
+    }
+    /// デバッグ用ゲームスピード取得
+    float GetGameSpeed()
+    {
+        return _debugGameSpeed;
     }
 }

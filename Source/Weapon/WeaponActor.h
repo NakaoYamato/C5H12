@@ -5,6 +5,7 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/LocusRenderer.h"
+#include "SharpnessController.h"
 
 #include "../../Source/User/UserDataManager.h"
 
@@ -39,8 +40,12 @@ protected:
 	int _weaponIndex = 0;
 
 	std::weak_ptr<ModelRenderer>	_modelRenderer;
-	std::weak_ptr<ModelCollider>	_ownerModelCollider; // 親のモデルコライダー
-	std::weak_ptr<LocusRenderer>	_locusRenderer; // 軌跡レンダラー
+	// 親のモデルコライダー
+	std::weak_ptr<ModelCollider>	_ownerModelCollider;
+	// 軌跡レンダラー
+	std::weak_ptr<LocusRenderer>	_locusRenderer;
+	// 切れ味コントローラー
+	std::weak_ptr<SharpnessController> _sharpnessController;
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
 

@@ -69,6 +69,26 @@ void StageManager::OnStart()
 // 更新処理
 void StageManager::OnUpdate(float elapsedTime)
 {
+	// 編集で表示する用の環境アクターのみ表示
+	int size = static_cast<int>(_editingEnvironmentActors.size());
+	for (int i = 0; i < size; ++i)
+	{
+		auto actor = _editingEnvironmentActors[i].lock();
+		if (!actor)
+			continue;
+		if (_isEditing && _selectedEnvironmentIndex == i)
+		{
+			actor->SetIsActive(true);
+			actor->GetTransform().SetPosition(_intersectionWorldPoint);
+			actor->GetTransform().SetAngle(_creationAngle);
+			actor->GetTransform().SetScale(_creationScale);
+		}
+		else
+		{
+			actor->SetIsActive(false);
+		}
+	}
+
 	if (_isEditing)
 	{
 		// 編集用GUI描画
@@ -127,25 +147,6 @@ void StageManager::OnUpdate(float elapsedTime)
 			}
 		}
 
-		// 編集で表示する用の環境アクターのみ表示
-		for (int i = 0; i < size; ++i)
-		{
-			auto actor = _editingEnvironmentActors[i].lock();
-			if (!actor)
-				continue;
-			if (_selectedEnvironmentIndex == i)
-			{
-				actor->SetIsActive(true);
-				actor->GetTransform().SetPosition(_intersectionWorldPoint);
-				actor->GetTransform().SetAngle(_creationAngle);
-				actor->GetTransform().SetScale(_creationScale);
-			}
-			else
-			{
-				actor->SetIsActive(false);
-			}
-		}
-
 		// ダブルクリックされたときにアクター生成
 		if (_isDoubleClick)
 		{
@@ -161,18 +162,6 @@ void StageManager::OnUpdate(float elapsedTime)
 				_intersectionWorldPoint,
 				_creationAngle,
 				_creationScale);
-		}
-	}
-	else
-	{
-		// 編集で表示する用の環境アクター非表示
-		int size = static_cast<int>(_editingEnvironmentActors.size());
-		for (int i = 0; i < size; ++i)
-		{
-			auto actor = _editingEnvironmentActors[i].lock();
-			if (!actor)
-				continue;
-			actor->SetIsActive(false);
 		}
 	}
 }
@@ -220,11 +209,18 @@ void StageManager::OnDrawGui()
 					Vector3 degree = Vector3::ToDegrees(layout.angle);
 					ImGui::DragFloat3("angle", &degree.x);
 					layout.angle = Vector3::ToRadians(degree);
-					if (ImGui::Button(u8"更新"))
+					if (ImGui::Button(u8"反映"))
 					{
 						actor->GetTransform().SetPosition(layout.position);
 						actor->GetTransform().SetAngle(layout.angle);
 						actor->GetTransform().SetScale(layout.scale);
+					}
+					ImGui::SameLine();
+					if (ImGui::Button(u8"更新"))
+					{
+						layout.position = actor->GetTransform().GetPosition();
+						layout.angle	= actor->GetTransform().GetAngle();
+						layout.scale	= actor->GetTransform().GetScale();
 					}
 					ImGui::Separator();
 
@@ -422,6 +418,7 @@ void StageManager::CreateEditingEnvironmentActors()
 			ActorTag::Stage);
 		actor->SetIsActive(false);
 		actor->SetParent(this);
+		actor->SetIsDrawingHierarchy(false);
 		_editingEnvironmentActors.push_back(actor);
 	}
 }

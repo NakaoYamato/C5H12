@@ -235,6 +235,7 @@ public:
 	void SetIsDrawingDebug(bool b)			{ this->_isDrawingDebug = b; }
 	void SetIsUsingGuizmo(bool b)			{ this->_isUsingGuizmo = b; }
 	void SetIsDrawingHierarchy(bool b)		{ this->_isDrawingHierarchy = b; }
+	void SetIsDrawingInspector(bool b)		{ this->_isDrawingInspector = b; }
 	void SetInheritParentTransform(bool b)	{ this->_isInheritParentTransform = b; }
 
 	bool IsActive()const					{ return _isActive; }
@@ -244,6 +245,7 @@ public:
 	bool IsDrawingDebug()const				{ return _isDrawingDebug; }
 	bool IsUsingGuizmo()const				{ return _isUsingGuizmo; }
 	bool IsDrawingHierarchy()const			{ return _isDrawingHierarchy; }
+	bool IsDrawingInspector()const			{ return _isDrawingInspector; }
 	bool IsInheritParentTransform()const	{ return _isInheritParentTransform; }
 #pragma endregion
 
@@ -423,7 +425,9 @@ protected:
 	// ギズモ使用フラグ
 	bool				_isUsingGuizmo = true;
 	// ヒエラルキー描画フラグ
-	bool 				_isDrawingHierarchy = false;
+	bool 				_isDrawingHierarchy = true;
+	// インスペクター描画フラグ
+	bool				_isDrawingInspector = false;
 	// 親のトランスフォームを反映するか
 	bool				_isInheritParentTransform = true;
 	// プロファイラーを開くか

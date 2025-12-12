@@ -9,8 +9,8 @@
 void LightController::DebugRender(const RenderContext& rc)
 {
     DirectX::XMFLOAT4X4 transform = GetActor()->GetTransform().GetMatrix();
-    // ヒエラルキーに表示中のみ描画
-    if (GetActor()->IsDrawingHierarchy())
+    // インスペクターに表示中のみ描画
+    if (GetActor()->IsDrawingInspector())
     {
         const DirectX::XMFLOAT4X4& view = GetActor()->GetScene()->GetMainCamera()->GetView();
         const DirectX::XMFLOAT4X4& projection = GetActor()->GetScene()->GetMainCamera()->GetProjection();

@@ -390,6 +390,7 @@
     <ClCompile Include="Source\Scene\Test\SceneWyvernIKDebug.cpp" />
     <ClCompile Include="Source\Title\UI\TitleUIcontroller.cpp" />
     <ClCompile Include="Source\Title\Wyvern\TitleWyvernActor.cpp" />
+    <ClCompile Include="Source\Weapon\SharpnessController.cpp" />
     <ClCompile Include="Source\Weapon\WeaponActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.cpp" />
@@ -681,6 +682,7 @@
     <ClInclude Include="Source\Scene\Test\SceneWyvernIKDebug.h" />
     <ClInclude Include="Source\Title\UI\TitleUIcontroller.h" />
     <ClInclude Include="Source\Title\Wyvern\TitleWyvernActor.h" />
+    <ClInclude Include="Source\Weapon\SharpnessController.h" />
     <ClInclude Include="Source\Weapon\WeaponActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernActionDerived.h" />
     <ClInclude Include="Source\Enemy\Wyvern\BehaviorTree\WyvernBehaviorTree.h" />

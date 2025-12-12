@@ -78,7 +78,7 @@ void WeaponManager::DrawGui()
 
 			for (size_t i = 0; i < dataVec.size(); ++i)
 			{
-				if (ImGui::TreeNode((typeName + "##" + std::to_string(i)).c_str()))
+				if (ImGui::TreeNode(std::to_string(i).c_str()))
 				{
 					dataVec[i].DrawGui();
 					ImGui::TreePop();

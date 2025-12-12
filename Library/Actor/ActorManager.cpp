@@ -178,9 +178,19 @@ void ActorManager::DelayedRender(RenderContext& rc)
 // Gui描画
 void ActorManager::DrawGui()
 {
+	// ヒエラルキーで非表示にするアクターリスト
+	std::vector<std::shared_ptr<Actor>> hierarchyHideActors;
+
 	// アクターのGUI表示
 	std::function<void(std::shared_ptr<Actor>)>DrawActorGui = [&](std::shared_ptr<Actor> actor) -> void
 		{
+			// ヒエラルキーで非表示ならリストに追加して終了
+			if (!actor->IsDrawingHierarchy())
+			{
+				hierarchyHideActors.emplace_back(actor);
+				return;
+			}
+
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
 			// 子供がいるなら矢印表示
 			if (actor->GetChildren().size() > 0)
@@ -201,7 +211,7 @@ void ActorManager::DrawGui()
 
 			if (isOpen)
 			{
-				actor->SetIsDrawingHierarchy(false);
+				actor->SetIsDrawingInspector(false);
 
 				// 子供の表示
 				for (auto& child : actor->GetChildren())
@@ -217,7 +227,7 @@ void ActorManager::DrawGui()
 	// 登録しているオブジェクトの一覧
 	ImGui::SetNextWindowBgAlpha(0.0f);
 	ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
-	if (ImGui::Begin(u8"ゲームオブジェクト一覧"))
+	if (ImGui::Begin(u8"ヒエラルキー"))
 	{
 		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
@@ -237,6 +247,55 @@ void ActorManager::DrawGui()
 			}
 			ImGui::PopStyleColor();
 		}
+		ImGui::Separator();
+
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 0.0f, 1.0f, 1.0f));
+		if (ImGui::TreeNodeEx(u8"非表示アクター"))
+		{
+			std::function<void(std::shared_ptr<Actor>)>DrawUndrawActorGui = [&](std::shared_ptr<Actor> actor) -> void
+				{
+					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_DefaultOpen;
+					// 子供がいるなら矢印表示
+					if (actor->GetChildren().size() > 0)
+						nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+
+					// 選択中のオブジェクトは色を変える
+					if (_showGuiObj == actor->GetName())
+						ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+					else
+						ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+					bool isOpen = ImGui::TreeNodeEx(actor.get(), nodeFlags, actor->GetName());
+
+					// ダブルクリックで選択
+					if (ImGui::IsItemClicked())
+					{
+						_showGuiObj = actor->GetName();
+					}
+
+					if (isOpen)
+					{
+						actor->SetIsDrawingInspector(false);
+
+						// 子供の表示
+						for (auto& child : actor->GetChildren())
+						{
+							DrawUndrawActorGui(child);
+						}
+
+						ImGui::TreePop();
+					}
+					ImGui::PopStyleColor();
+				};
+
+			for (auto& actor : hierarchyHideActors)
+			{
+				DrawUndrawActorGui(actor);
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopStyleColor();
+
 		// GUIが埋まってしまう問題を解決するためのスペース
 		ImGui::Dummy(ImVec2(0.0f, 100.0f));
 	}
@@ -249,7 +308,7 @@ void ActorManager::DrawGui()
 		Actor* object = FindByName(_showGuiObj).get();
 		if (object)
 		{
-			object->SetIsDrawingHierarchy(true);
+			object->SetIsDrawingInspector(true);
 
 			object->DrawGui();
 		}

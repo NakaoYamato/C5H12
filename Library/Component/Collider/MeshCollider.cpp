@@ -62,7 +62,7 @@ void MeshCollider::Update(float elapsedTime)
 void MeshCollider::DebugRender(const RenderContext& rc)
 {
 	// ƒAƒNƒ^[‚ª•`‰æŠK‘w‚ð•`‰æ‚µ‚Ä‚¢‚È‚¢ê‡‚Í‰½‚à‚µ‚È‚¢
-	if (!GetActor()->IsDrawingHierarchy())return;
+	if (!GetActor()->IsDrawingInspector())return;
 
 	// —LŒø‚Å‚È‚¯‚ê‚Î•`‰æ‚µ‚È‚¢
 	if (!IsActive())

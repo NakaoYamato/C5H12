@@ -1,6 +1,7 @@
 #include "WeaponActor.h"
 
 #include "../../Library/Scene/Scene.h"
+
 #include <imgui.h>
 
 // 生成時処理
@@ -9,20 +10,21 @@ void WeaponActor::OnCreate()
 	// コンポーネント追加
 	_modelRenderer = this->AddComponent<ModelRenderer>();
 	_locusRenderer = this->AddComponent<LocusRenderer>();
-}
-// 開始時処理
-void WeaponActor::OnStart()
-{
-	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
-	// 親のモデルコライダーを取得
-	_ownerModelCollider = GetParent()->GetCollider<ModelCollider>();
+	_sharpnessController = this->AddComponent<SharpnessController>();
 
+	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
 	// タイプ設定
 	if (auto userDataManager = _userDataManager.lock())
 	{
 		userDataManager->SetEquippedWeaponType(_weaponType);
 		BuildData(_weaponIndex);
 	}
+}
+// 開始時処理
+void WeaponActor::OnStart()
+{
+	// 親のモデルコライダーを取得
+	_ownerModelCollider = GetParent()->GetCollider<ModelCollider>();
 }
 // 遅延更新時処理
 void WeaponActor::OnLateUpdate(float elapsedTime)
@@ -111,6 +113,13 @@ void WeaponActor::BuildData(int index)
 	{
 		// モデル読み込み
 		LoadModel(data->GetBaseData()->modelFilePath.c_str());
+
+		// 切れ味コントローラーにデータ設定
+		auto sharpnessController = _sharpnessController.lock();
+		if (sharpnessController)
+		{
+			sharpnessController->SetSharpnessGauge(data->GetBaseData()->sharpnessGauge);
+		}
 	}
 	else
 	{

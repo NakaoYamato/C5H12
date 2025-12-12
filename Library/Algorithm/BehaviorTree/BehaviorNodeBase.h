@@ -105,6 +105,7 @@ public:
 		}
 		_children.clear();
 	}
+
 #pragma endregion
 	// ノード追加
 	NodeTempPtr AddNode(
@@ -365,15 +366,25 @@ public:
 			_action->Exit();
 	}
 protected:
-	std::string		_name;			// 名前
-	SelectRule		_selectRule;	// 選択ルール
-	JudgmentTempPtr	_judgment;		// 判定クラス
-	ActionTempPtr	_action;		// 実行クラス
-	unsigned int	_priority;		// 優先順位
-	NodeTempPtr		_parent;		// 親ノード
-	NodeTempPtr		_sibling;		// 兄弟ノード
-	int				_hierarchyNo;	// 階層番号
-	std::vector<NodeTempPtr>		_children;		// 子ノード
+	// 名前
+	std::string		_name;
+	// 選択ルール
+	SelectRule		_selectRule;
+	// 判定クラス
+	JudgmentTempPtr	_judgment;
+	// 実行クラス
+	ActionTempPtr	_action;
+	// 優先順位
+	unsigned int	_priority;
+	// 親ノード
+	NodeTempPtr		_parent;
+	// 兄弟ノード
+	NodeTempPtr		_sibling;
+	// 階層番号
+	int				_hierarchyNo;
+	// 子ノード
+	std::vector<NodeTempPtr>		_children;
 
-	std::string _lastInferenceNode = ""; // 最後に推論したノード名
+	// 最後に推論したノード名
+	std::string _lastInferenceNode = "";
 };

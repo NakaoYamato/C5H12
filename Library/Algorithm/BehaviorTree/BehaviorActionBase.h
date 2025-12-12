@@ -27,5 +27,4 @@ public:
 	virtual void Exit() {};
 protected:
 	T*	_owner;
-	int _step = 0;
 };

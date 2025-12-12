@@ -13,7 +13,10 @@ class BehaviorData
 {
 public:
 	// コンストラクタ
-	BehaviorData() { Init(); }
+	BehaviorData() 
+	{
+		Init();
+	}
 	// シーケンスノードのプッシュ
 	void PushSequenceNode(BehaviorNodeBase<T>* node) { _sequenceStack.push(node); }
 	// シーケンスノードのポップ
@@ -56,6 +59,7 @@ public:
 			_sequenceStack.pop();
 		}
 	}
+
 private:
 	// 実行する中間ノードをスタック
 	std::stack<BehaviorNodeBase<T>*>	_sequenceStack;

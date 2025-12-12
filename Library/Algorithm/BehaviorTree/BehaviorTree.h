@@ -94,12 +94,14 @@ public:
 		// 現状維持
 		return actionNode;
 	}
+
 private:
 	// ノード全削除
 	void NodeAllClear(BehaviorNodeBase<T>* delNode)
 	{
 		delNode->ClearChildren();
 	}
+
 private:
 	T* _owner = nullptr;
 	// ルートノード

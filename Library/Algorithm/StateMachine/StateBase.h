@@ -40,26 +40,19 @@ public:
 	HierarchicalStateBase(T* owner) : StateBase<T>(owner) {}
 	virtual ~HierarchicalStateBase() {}
 
-	/// <summary>
-	/// 開始処理
-	/// </summary>
+	// 開始処理
 	virtual void Enter()
 	{
 		OnEnter();
 	}
-	/// <summary>
-	/// 更新処理
-	/// </summary>
-	/// <param name="elapsedTime"></param>
+	// 更新処理
 	virtual void Execute(float elapsedTime)
 	{
 		if (_subState)
 			_subState->OnExecute(elapsedTime);
 		OnExecute(elapsedTime);
 	}
-	/// <summary>
-	/// 終了処理
-	/// </summary>
+	// 終了処理
 	virtual void Exit()
 	{
 		if (_subState)
@@ -101,6 +94,7 @@ public:
 		return _subState->GetName();
 	}
 #pragma endregion
+
 protected:
 #pragma region 仮想関数
 	// ステートに入った時のメソッド
@@ -110,6 +104,7 @@ protected:
 	// ステートから出ていくときのメソッド
 	virtual void OnExit() {};
 #pragma endregion
+
 protected:
 	using StateMap = std::unordered_map<std::string, std::shared_ptr<StateBase<T>>>;
 	StateMap _stateMap;

@@ -170,7 +170,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 		}
 	}
 
-	_behaviorTreeEditor.LoadFile("./Data/Debug/Behavior/Wyvern.json");
+	_behaviorTreeEditor.LoadFromFile("./Data/Debug/Behavior/Wyvern.json");
 }
 // ŠJnˆ—
 void WyvernBehaviorTree::Start()

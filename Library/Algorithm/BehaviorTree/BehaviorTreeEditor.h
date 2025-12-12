@@ -24,9 +24,20 @@ private:
     // 新しい Vertical (Y) Spacing
     const float VerticalSpacing = 100.0f; // 兄弟ノード間の垂直距離
 
-    //--------------------------------------------------------------------------------
+    // デフォルト色(複合ノード)
+	ImVec4 _defaultNodeColor = ImVec4(50 / 255.0f, 50 / 255.0f, 50 / 255.0f, 200 / 255.0f);
+    // デフォルト枠線色
+	ImVec4 _borderColor = ImVec4(100 / 255.0f, 100 / 255.0f, 100 / 255.0f, 255 / 255.0f);
+    // 実行中色
+	ImVec4 _activeNodeColor = ImVec4(200 / 255.0f, 100 / 255.0f, 30 / 255.0f, 200 / 255.0f);
+	// 実行中ノード枠線色
+	ImVec4 _activeNodeBorderColor = ImVec4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f);
+    // 行動ノード色
+	ImVec4 _actionNodeColor = ImVec4(30 / 255.0f, 100 / 255.0f, 30 / 255.0f, 200 / 255.0f);
+    // 判定ノード色
+	ImVec4 _judgmentNodeColor = ImVec4(30 / 255.0f, 30 / 255.0f, 100 / 255.0f, 200 / 255.0f);
+
     // String ハッシュ関数
-    //--------------------------------------------------------------------------------
     unsigned long HashString(const std::string& str) {
         unsigned long hash = 5381;
         for (char c : str) {
@@ -35,9 +46,7 @@ private:
         return hash;
     }
 
-    //--------------------------------------------------------------------------------
     // SelectRule の名前を文字列に変換するヘルパー関数
-    //--------------------------------------------------------------------------------
     std::string GetRuleName(SelectRule rule)
     {
         switch (rule)
@@ -69,9 +78,7 @@ private:
         return (ne::PinId)((size_t)GetNodeId(node) + offset);
     }
 
-    //--------------------------------------------------------------------------------
-    // 再帰的なノード描画関数 (左から右のレイアウト)
-    //--------------------------------------------------------------------------------
+    // 再帰的なノード描画関数
     // 戻り値: このノードが占める垂直方向の最終Y座標
     float DrawNodeRecursive(
         BehaviorNodeBase<T>* node,
@@ -81,13 +88,12 @@ private:
     {
         if (node == nullptr) return position.y;
 
-        // 1. ノードIDとピンIDの決定
+        // ノードIDとピンIDの決定
         ne::NodeId nodeId = GetNodeId(node);
         ne::PinId outputPinId = GetPinId(node, 1);
         ne::PinId inputPinId = GetPinId(node, 2);
 
-        // 2. 初期位置の設定 (初回のみ)
-        // Y軸の配置は子ノードの位置に影響を与えるため、初回は固定
+        // 初期位置の設定 (初回のみ)
         if (ne::GetNodePosition(nodeId).x == FLT_MAX)
         {
             if (_nodePositions.find((size_t)nodeId) == _nodePositions.end())
@@ -103,36 +109,35 @@ private:
             _nodePositions[(size_t)nodeId] = ne::GetNodePosition(nodeId);
         }
 
-        // 3. ノードの描画 (色分けロジックは以前と同じ)
-        // ... (色の決定ロジックは省略 - 以前のコードを参照) ...
+        // ノードの描画
         bool isRunning = (node == activeNode);
         bool hasAction = node->HasAction();
         bool hasJudgment = (node->GetJudgment() != nullptr);
 
-        ImVec4 bgColor = ImVec4(50 / 255.0f, 50 / 255.0f, 50 / 255.0f, 200 / 255.0f); // デフォルト (複合ノード)
-        ImVec4 borderColor = ImVec4(100 / 255.0f, 100 / 255.0f, 100 / 255.0f, 255 / 255.0f); // デフォルトの枠線
+        ImVec4 bgColor = _defaultNodeColor;
+        ImVec4 borderColor = _borderColor;
 
-        if (hasAction) {
-            bgColor = ImVec4(30 / 255.0f, 100 / 255.0f, 30 / 255.0f, 200 / 255.0f); // 行動ノード (緑)
-        }
-        else if (hasJudgment) {
-            bgColor = ImVec4(30 / 255.0f, 30 / 255.0f, 100 / 255.0f, 200 / 255.0f); // 判定ノード (青)
-        }
+        if (hasAction)
+            bgColor = _actionNodeColor;
+        else if (hasJudgment)
+            bgColor = _judgmentNodeColor;
 
         // 実行中のノードはハイライト (最優先)
-        if (isRunning) {
-            bgColor = ImVec4(200 / 255.0f, 100 / 255.0f, 30 / 255.0f, 200 / 255.0f); // 実行中 (オレンジ)
-            borderColor = ImVec4(255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f); // 白い枠線で強調
+        if (isRunning)
+        {
+            bgColor = _activeNodeColor;
+            borderColor = _activeNodeBorderColor;
         }
         ne::PushStyleColor(ne::StyleColor_NodeBg, bgColor);
         ne::PushStyleColor(ne::StyleColor_NodeBorder, borderColor);
         // 実行中のノードは枠線を太くして強調
-        if (isRunning) {
+        if (isRunning) 
+        {
             ne::PushStyleVar(ne::StyleVar_NodeBorderWidth, 3.0f);
         }
         ne::BeginNode(nodeId);
 
-        // --- 入力ピン (左側に配置) ---
+        // 入力ピン (左側に配置)
         if (node->GetParent() != nullptr)
         {
             ne::BeginPin(inputPinId, ne::PinKind::Input);
@@ -146,15 +151,17 @@ private:
         ImGui::Text("%d: %s", node->GetHirerchyNo(), node->GetName().c_str());
         std::string ruleName = GetRuleName(node->GetSelectRule());
         ImGui::TextDisabled("Rule: %s", ruleName.c_str());
-        if (hasAction) {
+        if (hasAction)
+        {
             ImGui::TextDisabled("Action / Priority: %d", node->GetPriority());
         }
-        if (hasJudgment) {
+        if (hasJudgment)
+        {
             ImGui::TextDisabled("Has Judgment");
         }
         ImGui::EndGroup();
 
-        // --- 出力ピン (右側に配置) ---
+        // 出力ピン (右側に配置)
         if (node->GetChild(0) != nullptr)
         {
             ImGui::SameLine();
@@ -165,12 +172,13 @@ private:
 
         ne::EndNode();
 
-        if (isRunning) {
+        if (isRunning)
+        {
             ne::PopStyleVar(1);
         }
         ne::PopStyleColor(2); // NodeBg と NodeBorder を Pop
 
-        // 4. 子ノードの描画とリンクの作成
+        // 子ノードの描画とリンクの作成
         if (node->GetChild(0) != nullptr)
         {
             // ノードのサイズとピンの配置に必要なスペースを取得
@@ -214,7 +222,6 @@ private:
     }
 
 public:
-    // コンストラクタ
     BehaviorTreeEditor()
     {
         ne::Config config;
@@ -222,7 +229,6 @@ public:
         _editorContext = ne::CreateEditor(&config);
     }
 
-    // デストラクタ
     ~BehaviorTreeEditor()
     {
         if (_editorContext)
@@ -230,12 +236,10 @@ public:
             ne::DestroyEditor(_editorContext);
         }
 
-        SaveFile();
+        SaveToFile();
     }
 
-    //--------------------------------------------------------------------------------
-    // メインの描画関数
-    //--------------------------------------------------------------------------------
+    // 描画関数
     void Draw(BehaviorTreeBase<T>* tree, BehaviorNodeBase<T>* activeNode)
     {
         if (tree == nullptr || _editorContext == nullptr) return;
@@ -272,7 +276,8 @@ public:
         ImGui::End();
     }
 
-    void LoadFile(const std::string& filename)
+    // ファイル読み込み
+    void LoadFromFile(const std::string& filename)
     {
         _filename = filename;
 
@@ -291,7 +296,8 @@ public:
         }
     }
 
-    void SaveFile()
+    // ファイル保存
+    void SaveToFile()
     {
         if (_filename.empty()) return;
 

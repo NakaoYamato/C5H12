@@ -171,7 +171,7 @@ public:
 	// グリッド表示フラグ取得
 	void SetShowGrid(bool show) { _showGrid = show; }
 	// 準備完了しているか
-	bool IsReady()const { return _completionLoading >= 1.0f; }
+	bool IsReady()const { return _isReady; }
 	// ロード進捗率取得
 	float GetCompletionLoading() const
 	{
@@ -208,7 +208,9 @@ private:
 
 	// 経過時間
 	float							_time = 0.0f;
-
+	
+	// 準備完了フラグ
+	bool							_isReady = false;
 	// ロード進捗率
 	float							_completionLoading = 0.0f;
 	// グリッド表示フラグ

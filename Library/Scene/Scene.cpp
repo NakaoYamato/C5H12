@@ -71,6 +71,7 @@ void Scene::Initialize()
 
     // ロード進行度を1に設定
     SetCompletionLoading(1.0f);
+	_isReady = true;
 }
 
 // 終了化

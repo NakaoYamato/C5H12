@@ -37,7 +37,7 @@ void SceneTitle::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto wyvern = RegisterActor<TitleWyvernActor>("Wyvern", ActorTag::Enemy);
-        wyvern->GetTransform().SetPosition(Vector3(0.0f, 0.23f, 7.0f));
+        wyvern->GetTransform().SetPosition(Vector3(50.0f, 0.23f, 50.0f));
         wyvern->GetTransform().SetAngleY(DirectX::XMConvertToRadians(180.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
@@ -57,10 +57,14 @@ void SceneTitle::OnInitialize()
 // 更新処理
 void SceneTitle::OnUpdate(float elapsedTime)
 {
-    // カメラ
-    GetMainCameraActor()->SetLookAt(
-        Vector3(0.0f, 1.0f, -7.0f),
-        Vector3(1.2f, 2.5f, 3.0f),
-        Vector3(0.0f, 1.0f, 0.0f)
-    );
+    // デバッグ用カメラ起動チェック
+    if (!Debug::Input::IsActive(DebugInput::BTN_F4))
+    {
+        // カメラ固定
+        GetMainCameraActor()->SetLookAt(
+            Vector3(52.0f, 1.0f, 35.0f),
+            Vector3(52.0f, 3.3f, 45.0f),
+            Vector3(0.0f, 1.0f, 0.0f)
+        );
+    }
 }

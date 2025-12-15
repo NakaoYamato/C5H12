@@ -18,7 +18,7 @@ enum class WeaponType
 };
 
 // 斬れ味ゲージの最大値
-static constexpr float WeaponSharpnessGaugeMax = 100.0f;
+static constexpr float WeaponSharpnessGaugeMax = 450.0f;
 // 斬れ味レベルの最大値
 static constexpr int WeaponSharpnessLevelMax = 7;
 
@@ -34,12 +34,12 @@ struct WeaponData
 
 	// レア度から色取得
 	static Vector4 GetRarityColor(int rarity);
-	// 切れ味から色取得
+	// 斬れ味から色取得
 	static Vector4 GetSharpnessColor(int sharpnessLevel);
 
 	// GUI描画
 	void DrawGui();
-	// 切れ味ゲージGUI描画
+	// 斬れ味ゲージGUI描画
 	static void DrawSharpnessGaugeGui(std::vector<float>& sharpnessGauge, bool canEdit);
 	// データ保存
 	void Load(nlohmann::json_abi_v3_12_0::json& json);

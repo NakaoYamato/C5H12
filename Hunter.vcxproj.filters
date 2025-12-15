@@ -1673,6 +1673,9 @@
     <ClInclude Include="Source\InGame\UI\Player\PlayerShapnessUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Algorithm\CallBack\CallBack.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />

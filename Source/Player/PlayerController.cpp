@@ -82,6 +82,7 @@ void PlayerController::Start()
 	);
 	// ダメージを与えた時のコールバック設定
 	damageSender->SetOnSendDamageCallback(
+		"PlayerController",
 		[&](DamageSender* myself, CollisionData& collisionData)
 		{
 			// ゲームパッド振動
@@ -93,6 +94,7 @@ void PlayerController::Start()
 
 	// ステージ接触時のコールバック設定
 	damageSender->SetOnStageContactCallback(
+		"PlayerController",
 		[&](StageEffectEmitter* target, CollisionData& collisionData)
 		{
 			// ゲームパッド振動

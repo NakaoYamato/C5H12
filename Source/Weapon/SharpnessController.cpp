@@ -16,7 +16,19 @@ float SharpnessController::SharpnessRateTable[WeaponSharpnessLevelMax] = {
 void SharpnessController::Start()
 {
 	// 親からダメージ送信コンポーネント取得
-	_damageSender = GetActor()->GetComponent<DamageSender>();
+	_damageSender = GetActor()->GetParent()->GetComponent<DamageSender>();
+	if (auto damageSender = _damageSender.lock())
+	{
+		// 攻撃時のコールバック設定
+		damageSender->SetOnSendDamageCallback(
+			GetName(),
+			[&](DamageSender* self, CollisionData& data)
+			{
+				// 斬れ味消費
+				this->ConsumeSharpness(_consumeAmount);
+			}
+		);
+	}
 }
 
 // 更新処理
@@ -24,7 +36,7 @@ void SharpnessController::Update(float elapsedTime)
 {
 	if (auto damageSender = _damageSender.lock())
 	{
-		// 切れ味倍率設定
+		// 斬れ味倍率設定
 		damageSender->SetSharpnessFactor(GetSharpnessRate());
 	}
 }
@@ -32,32 +44,34 @@ void SharpnessController::Update(float elapsedTime)
 // Gui描画
 void SharpnessController::DrawGui()
 {
-	// 切れ味ゲージGUI描画
-	ImGui::Text(u8"現在の切れ味ゲージ");
+	// 斬れ味ゲージGUI描画
+	ImGui::Text(u8"現在の斬れ味ゲージ");
 	WeaponData::DrawSharpnessGaugeGui(_currentSharpnessGauge, false);
-	if (ImGui::Button(u8"切れ味消費"))
+	if (ImGui::Button(u8"斬れ味消費"))
 	{
 		ConsumeSharpness(10.0f);
 	}
 	ImGui::SameLine();
-	if (ImGui::Button(u8"切れ味回復"))
+	if (ImGui::Button(u8"斬れ味回復"))
 	{
 		RecoverSharpness(10.0f);
 	}
 	ImGui::Separator();
-	if (ImGui::Button(u8"切れ味ゲージリセット"))
+	ImGui::DragFloat(u8"斬れ味消費量", &_consumeAmount, 0.1f, 0.0f, 100.0f);
+	ImGui::Separator();
+	if (ImGui::Button(u8"斬れ味ゲージリセット"))
 	{
 		_currentSharpnessGauge = _baseSharpnessGauge;
 	}
 	ImGui::Separator();
-	ImGui::Text(u8"基本の切れ味ゲージ");
+	ImGui::Text(u8"基本の斬れ味ゲージ");
 	WeaponData::DrawSharpnessGaugeGui(_baseSharpnessGauge, false);
 }
 
 // 消費
 void SharpnessController::ConsumeSharpness(float amount)
 {
-	// 切れ味ゲージが無ければ終了
+	// 斬れ味ゲージが無ければ終了
 	if (_currentSharpnessGauge.size() == 0)
 		return;
 
@@ -99,7 +113,7 @@ void SharpnessController::RecoverSharpness(float amount)
 	}
 }
 
-// 切れ味倍率取得
+// 斬れ味倍率取得
 float SharpnessController::GetSharpnessRate()
 {
 	size_t sharpnessLevel = _currentSharpnessGauge.size();

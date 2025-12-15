@@ -24,7 +24,7 @@ public:
 	// ‰ñ•œ
 	void RecoverSharpness(float amount);
 
-	// Ø‚ê–¡”{—¦æ“¾
+	// a‚ê–¡”{—¦æ“¾
 	float GetSharpnessRate();
 	// a‚ê–¡ƒQ[ƒWİ’è
 	void SetSharpnessGauge(const std::vector<float>& gauge)
@@ -38,11 +38,13 @@ public:
 	const std::vector<float>& GetCurrentSharpnessGauge() const { return _currentSharpnessGauge; }
 private:
 	static float SharpnessRateTable[WeaponSharpnessLevelMax];
-
 	std::weak_ptr<DamageSender> _damageSender;
 
 	// •Ší‚Ì‚à‚Æ‚à‚Æ‚Ìa‚ê–¡ƒQ[ƒW
 	std::vector<float> _baseSharpnessGauge;
 	// Œ»İ‚Ìa‚ê–¡ƒQ[ƒW
 	std::vector<float> _currentSharpnessGauge;
+
+	// a‚ê–¡Á”ï—Ê
+	float _consumeAmount = 1.0f;
 };

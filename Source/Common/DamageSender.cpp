@@ -154,13 +154,22 @@ void DamageSender::OnContact(CollisionData& collisionData)
 				}
 
 				// コールバック
-				if (_onSendDamageCallback)
-				{
-					_onSendDamageCallback(this, collisionData);
-				}
+				_onSendDamageCallbackHandler.Call(this, collisionData);
 			}
 		}
 	}
+}
+
+// ダメージを与えた時のコールバック関数のセット
+void DamageSender::SetOnSendDamageCallback(const std::string name, CallBack<void, DamageSender*, CollisionData&> callback)
+{
+	_onSendDamageCallbackHandler.RegisterCallBack(name, callback);
+}
+
+// ステージとの接触時のコールバック関数のセット
+void DamageSender::SetOnStageContactCallback(const std::string name, CallBack<void, StageEffectEmitter*, CollisionData&> callback)
+{
+	_onStageContactCallbackHandler.RegisterCallBack(name, callback);
 }
 
 // 攻撃力の計算
@@ -185,8 +194,5 @@ void DamageSender::ContactStage(StageEffectEmitter* target, CollisionData& colli
 	_stageEffectTimer = _stageEffectInterval;
 
 	// コールバック
-	if (_onStageContactCallback)
-	{
-		_onStageContactCallback(target, collisionData);
-	}
+	_onStageContactCallbackHandler.Call(target, collisionData);
 }

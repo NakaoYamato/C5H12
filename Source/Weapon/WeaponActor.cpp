@@ -114,7 +114,7 @@ void WeaponActor::BuildData(int index)
 		// モデル読み込み
 		LoadModel(data->GetBaseData()->modelFilePath.c_str());
 
-		// 切れ味コントローラーにデータ設定
+		// 斬れ味コントローラーにデータ設定
 		auto sharpnessController = _sharpnessController.lock();
 		if (sharpnessController)
 		{

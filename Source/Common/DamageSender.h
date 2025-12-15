@@ -1,10 +1,11 @@
 #pragma once
 
+#include "../../Library/Algorithm/CallBack/CallBack.h"
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
 #include "../../Library/Component/EffectController.h"
-#include "../../Source/Common/Targetable.h"
 #include "../../Library/Component/StageEffectEmitter.h"
+#include "../../Source/Common/Targetable.h"
 
 #include <functional>
 
@@ -64,16 +65,9 @@ public:
 	// テキスト描画するかどうか
 	void SetDrawText(bool f) { _drawText = f; }
 	// ダメージを与えた時のコールバック関数のセット
-	void SetOnSendDamageCallback(std::function<void(DamageSender*, CollisionData&)> callback)
-	{
-		_onSendDamageCallback = callback;
-	}
+	void SetOnSendDamageCallback(const std::string name, CallBack<void, DamageSender*, CollisionData&> callback);
 	// ステージとの接触時のコールバック関数のセット
-	void SetOnStageContactCallback(std::function<void(StageEffectEmitter*, CollisionData&)> callback)
-	{
-		_onStageContactCallback = callback;
-	}
-
+	void SetOnStageContactCallback(const std::string name, CallBack<void, StageEffectEmitter*, CollisionData&> callback);
 
 	// 基本攻撃力の取得
 	float GetBaseATK() const { return _baseATK; }
@@ -123,9 +117,9 @@ private:
 	float _stageShakeMotionFactor = 1.0f;
 
 	// ダメージを与えた時のコールバック関数
-	std::function<void(DamageSender*, CollisionData&)> _onSendDamageCallback;
+	CallBackHandler<void, DamageSender*, CollisionData&> _onSendDamageCallbackHandler;
 	// ステージとの接触時のコールバック関数
-	std::function<void(StageEffectEmitter*, CollisionData&)> _onStageContactCallback;
+	CallBackHandler<void, StageEffectEmitter*, CollisionData&> _onStageContactCallbackHandler;
 #pragma endregion
 
 #pragma region ヘイト値関係

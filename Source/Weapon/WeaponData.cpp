@@ -31,7 +31,7 @@ Vector4 WeaponData::GetRarityColor(int rarity)
 	}
 }
 
-// 切れ味から色取得
+// 斬れ味から色取得
 Vector4 WeaponData::GetSharpnessColor(int sharpnessLevel)
 {
 	switch (sharpnessLevel)
@@ -91,12 +91,12 @@ void WeaponData::DrawGui()
 	ImGui::InputInt(u8"レア度", &rarity);
     ImGui::Separator();
 
-    // 切れ味ゲージGUI描画
-    ImGui::Text(u8"切れ味ゲージ設定");
+    // 斬れ味ゲージGUI描画
+    ImGui::Text(u8"斬れ味ゲージ設定");
     DrawSharpnessGaugeGui(sharpnessGauge, true);
 }
 
-// 切れ味ゲージGUI描画
+// 斬れ味ゲージGUI描画
 void WeaponData::DrawSharpnessGaugeGui(std::vector<float>& sharpnessGauge, bool canEdit)
 {
     ImGui::Spacing();
@@ -213,11 +213,29 @@ void WeaponData::DrawSharpnessGaugeGui(std::vector<float>& sharpnessGauge, bool 
         // 次の描画開始位置へ
         currentPixelX += (sharpnessGauge[i] / WeaponSharpnessGaugeMax) * barWidth;
     }
+    // 描画後のカーソル位置調整（InvisibleButton等でカーソルが変な位置にあるため）
+    ImGui::SetCursorScreenPos(ImVec2(startPos.x, startPos.y + barHeight + 5.0f));
+
+    // GUIでの表示
+	for (int i = 0; i < sharpnessGauge.size(); ++i)
+	{
+		ImGui::PushID(i);
+        if (canEdit)
+        {
+			std::string label = u8"レベル " + std::to_string(i + 1) + ": ";
+			ImGui::DragFloat(label.c_str(), &sharpnessGauge[i], 1.0f, 0.0f, WeaponSharpnessGaugeMax);
+        }
+        else
+        {
+            ImGui::Text(u8"レベル %d: ", i + 1);
+            ImGui::SameLine();
+            ImGui::Text("%.1f", sharpnessGauge[i]);
+        }
+		ImGui::PopID();
+	}
 
     ImGui::PopID();
 
-    // 描画後のカーソル位置調整（InvisibleButton等でカーソルが変な位置にあるため）
-    ImGui::SetCursorScreenPos(ImVec2(startPos.x, startPos.y + barHeight + 5.0f));
 }
 
 // データ保存

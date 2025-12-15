@@ -44,7 +44,7 @@ protected:
 	std::weak_ptr<ModelCollider>	_ownerModelCollider;
 	// 軌跡レンダラー
 	std::weak_ptr<LocusRenderer>	_locusRenderer;
-	// 切れ味コントローラー
+	// 斬れ味コントローラー
 	std::weak_ptr<SharpnessController> _sharpnessController;
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;

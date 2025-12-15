@@ -100,6 +100,7 @@ void InGameCanvasActor::RegisterPlayerActor(Actor* playerActor)
 	if (!playerUIActor)
 		return;
 
+	// 各UIコントローラーにプレイヤーのコンポーネントを設定
 	for (auto& child : playerUIActor->GetChildren())
 	{
 		if (auto healthUIController = child->GetComponent<PlayerHealthUIController>())
@@ -119,8 +120,14 @@ void InGameCanvasActor::RegisterPlayerActor(Actor* playerActor)
 		}
 		else if (auto shapnessUIController = child->GetComponent<PlayerShapnessUIController>())
 		{
-			//auto equipmentController = playerActor->GetComponent<EquipmentController>();
-			//shapnessUIController->SetEquipmentController(equipmentController);
+			for (auto& weaponActor : playerActor->GetChildren())
+			{
+				if (auto sharpnessController = weaponActor->GetComponent<SharpnessController>())
+				{
+					shapnessUIController->SetSharpnessController(sharpnessController);
+					break;
+				}
+			}
 		}
 	}
 }

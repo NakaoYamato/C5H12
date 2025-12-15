@@ -8,19 +8,6 @@
 void PlayerHealthUIController::Start()
 {
     _spriteRenderer = this->GetActor()->GetComponent<SpriteRenderer>();
-	if (auto spriteRenderer = _spriteRenderer.lock())
-	{
-		if (!spriteRenderer->IsLoaded())
-		{
-			// ‰æ‘œ“Ç‚İ‚İ
-			spriteRenderer->LoadTexture(FrameSprite, L"Data/Texture/UI/Player/Frame.png", Sprite::CenterAlignment::LeftCenter);
-			spriteRenderer->LoadTexture(DamageGaugeMaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
-			spriteRenderer->LoadTexture(DamageGaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
-			spriteRenderer->LoadTexture(MaskSprite, L"", Sprite::CenterAlignment::LeftCenter);
-			spriteRenderer->LoadTexture(GaugeSprite, L"Data/Texture/UI/Player/Mask.png", Sprite::CenterAlignment::LeftCenter);
-			spriteRenderer->LoadTexture(GaugeEndSprite, L"Data/Texture/UI/Player/GaugeEnd.png", Sprite::CenterAlignment::CenterCenter);
-		}
-	}
 }
 // XVˆ—
 void PlayerHealthUIController::Update(float elapsedTime)

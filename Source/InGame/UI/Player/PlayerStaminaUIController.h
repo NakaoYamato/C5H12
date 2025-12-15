@@ -7,9 +7,7 @@
 class PlayerStaminaUIController : public Component
 {
 public:
-    PlayerStaminaUIController(std::shared_ptr<StaminaController> staminaController) :
-        _staminaController(staminaController) {
-    }
+	PlayerStaminaUIController() = default;
     ~PlayerStaminaUIController() override {}
     // –¼‘OŽæ“¾
     const char* GetName() const override { return "PlayerStaminaUIController"; }
@@ -19,6 +17,8 @@ public:
     void Update(float elapsedTime) override;
     // GUI•`‰æ
     void DrawGui() override;
+
+	void SetStaminaController(std::shared_ptr<StaminaController> staminaController) { _staminaController = staminaController; }
 
 private:
     std::weak_ptr<SpriteRenderer> _spriteRenderer;

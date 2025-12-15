@@ -1,20 +1,12 @@
 #include "PlayerBuffUIController.h"
 
 #include "../../Library/Scene/Scene.h"
-#include "../../Source/InGame/InGameCanvasActor.h"
 
 #include <imgui.h>
 
 // 開始処理
 void PlayerBuffUIController::Start()
 {
-	// キャンバスがあるか確認
-	if (auto canvas = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI))
-	{
-		// 親設定
-		GetActor()->SetParent(canvas.get());
-	}
-
 	_buffIconSprite.LoadTexture(L"Data/Texture/UI/Player/BuffIcon.png", Sprite::CenterAlignment::CenterCenter);
 	_buffIconSprite.GetRectTransform().SetLocalScale(Vector2(0.25f, 0.25f));
 	_buffIconSprite.SetTexSize(Vector2(256.0f, 256.0f));

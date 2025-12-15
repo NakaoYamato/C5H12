@@ -1,19 +1,11 @@
 #include "PlayerStaminaUIController.h"
 
 #include "../../Library/Scene/Scene.h"
-#include "../../Source/InGame/InGameCanvasActor.h"
 
 #include <imgui.h>
 
 void PlayerStaminaUIController::Start()
 {
-	// キャンバスがあるか確認
-	if (auto canvas = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI))
-	{
-		// 親設定
-        GetActor()->SetParent(canvas.get());
-	}
-
     _spriteRenderer = this->GetActor()->GetComponent<SpriteRenderer>();
 
 	if (auto spriteRenderer = _spriteRenderer.lock())

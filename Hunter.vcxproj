@@ -360,8 +360,9 @@
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
     <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
-    <ClCompile Include="Source\Player\UI\PlayerBuffUIController.cpp" />
-    <ClCompile Include="Source\Player\UI\PlayerStaminaUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Player\PlayerBuffUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Player\PlayerShapnessUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Player\PlayerStaminaUIController.cpp" />
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Scene\Editor\SceneArmorEditor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneUIDebug.cpp" />
@@ -379,7 +380,7 @@
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\InGame\Input\Menu\MenuInput.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
-    <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Player\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Result\ResultToExitUI.cpp" />
     <ClCompile Include="Source\Result\ResultToTitleUI.cpp" />
     <ClCompile Include="Source\Scene\Game\SceneGame.cpp" />
@@ -652,8 +653,9 @@
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
     <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />
-    <ClInclude Include="Source\Player\UI\PlayerBuffUIController.h" />
-    <ClInclude Include="Source\Player\UI\PlayerStaminaUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Player\PlayerBuffUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Player\PlayerShapnessUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Player\PlayerStaminaUIController.h" />
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Scene\Editor\SceneArmorEditor.h" />
     <ClInclude Include="Source\Scene\Test\SceneUIDebug.h" />
@@ -671,7 +673,7 @@
     <ClInclude Include="Source\Stage\SafetyZone.h" />
     <ClInclude Include="Source\InGame\Input\Menu\MenuInput.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
-    <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Player\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Result\ResultToExitUI.h" />
     <ClInclude Include="Source\Result\ResultToTitleUI.h" />
     <ClInclude Include="Source\Scene\Game\SceneGame.h" />

@@ -1,14 +1,12 @@
 #pragma once
 
-#include "../../Source/InGame/InGameCanvasActor.h"
+#include "../../Library/Component/SpriteRenderer.h"
 #include "../../Source/Common/Damageable.h"
 
 class PlayerHealthUIController : public Component
 {
 public:
-	PlayerHealthUIController(bool isUserControlled, std::shared_ptr<Damageable> damageable) :
-		_isUserControlled(isUserControlled),
-		_damageable(damageable) {}
+	PlayerHealthUIController() = default;
 	~PlayerHealthUIController() override {}
 	// 名前取得
 	const char* GetName() const override { return "PlayerHPUIController"; }
@@ -18,9 +16,10 @@ public:
 	void Update(float elapsedTime) override;
 	// GUI描画
 	void DrawGui() override;
+
+	void SetDamageable(std::shared_ptr<Damageable> damageable) { _damageable = damageable; }
+
 private:
-	// ユーザーが操作するプレイヤーか
-	const bool _isUserControlled = true;
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
 

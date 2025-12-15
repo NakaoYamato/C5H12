@@ -7,29 +7,25 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/EffectController.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
+#include "../../Library/Shader/Model/ModelShaderResource.h"
 
 #include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/StaminaController.h"
+#include "../../Source/Armor/ArmorActor.h"
+#include "../../Source/Camera/PlayerCameraController.h"
+#include "../../Source/InGame/InGameCanvasActor.h"
 #include "PlayerItemController.h"
 #include "PlayerInput.h"
 #include "PlayerEquipmentController.h"
 #include "BuffController.h"
 #include "StateMachine/PlayerStateMachine.h"
-#include "UI/PlayerHealthUIController.h"
-#include "UI/PlayerStaminaUIController.h"
-#include "UI/PlayerBuffUIController.h"
 
 #include "Weapon/GreatSword/PlayerGreatSwordActor.h"
-
-#include "../../Source/Armor/ArmorActor.h"
-
-#include "../../Source/Camera/PlayerCameraController.h"
 
 #include "../../Source/Network/NetworkReceiver.h"
 #include "PlayerNetworkSender.h"
 
-#include "../../Library/Shader/Model/ModelShaderResource.h"
 
 // 生成時処理
 void PlayerActor::OnCreate()
@@ -57,27 +53,6 @@ void PlayerActor::OnCreate()
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
 
-	// UI生成
-	{
-        auto hpUIActor = this->_scene->RegisterActor<UIActor>("Player" + std::string(u8"HPUI"), ActorTag::UI);
-		hpUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 50.0f));
-		hpUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
-		auto hpUIController = hpUIActor->AddComponent<PlayerHealthUIController>(_isUserControlled, damageable);
-
-		if (_isUserControlled)
-		{
-			// スタミナUI
-			auto staminaUIActor = this->_scene->RegisterActor<UIActor>("Player" + std::string(u8"StaminaUI"), ActorTag::UI);
-			staminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 74.0f));
-			staminaUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
-			auto staminaUIController = staminaUIActor->AddComponent<PlayerStaminaUIController>(staminaController);
-
-			// バフUI
-			auto buffUIActor = this->_scene->RegisterActor<UIActor>("Player" + std::string(u8"BuffUI"), ActorTag::UI);
-			auto buffUIController = buffUIActor->AddComponent<PlayerBuffUIController>(buffController);
-		}
-	}
-
 	// エフェクト読み込み
 	{
 		effectController->LoadEffekseerEffect(PlayerController::EffectType::HitEffect, "./Data/Effect/Effekseer/Player/Attack_Impact.efk");
@@ -102,13 +77,6 @@ void PlayerActor::OnCreate()
 			effectData->SetAllColor(Vector4::Red);
 			effectData->SetScale(Vector3(0.3f, 0.3f, 0.3f));
 		}
-	}
-
-	// プレイヤーが操作する場合は、プレイヤーインプットを追加
-	if (_isUserControlled)
-	{
-		auto input = this->AddComponent<PlayerInput>();
-		input->Swich();
 	}
 
     // ネットワーク受信イベントの設定
@@ -180,9 +148,6 @@ void PlayerActor::OnCreate()
 	damageSender->SetDrawText(true);
 	damageSender->SetHitEffectIndex(PlayerController::EffectType::HitEffect);
     staminaController->SetStaminaRecoverSpeed(10.0f);
-	// 操作対象でなければ攻撃力の倍率を0にしてダメージを与えられないようにする
-	if (!_isUserControlled)
-		damageSender->SetBaseATK(0.0f);
 
 	targetable->SetFaction(Targetable::Faction::Player);
 
@@ -247,15 +212,40 @@ void PlayerActor::OnCreate()
 		equipmentController->SetArmorActor(ArmorType::Leg, Leg);
 	}
 
-	// カメラ作成
+	// ユーザー操作プレイヤーの場合
 	if (_isUserControlled)
 	{
+		// プレイヤーインプット追加
+		auto input = this->AddComponent<PlayerInput>();
+		input->Swich();
+
+		// カメラ設定
 		if (!GetScene()->GetMainCameraActor()->IsControllerRegistered("PlayerCameraController"))
 		{
 			auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
 			camera->AddComponent<PlayerCameraController>(this);
 
 			GetScene()->GetMainCameraActor()->SwitchController("PlayerCameraController");
+		}
+	}
+	else
+	{
+		// 操作対象でなければ攻撃力の倍率を0にしてダメージを与えられないようにする
+		damageSender->SetBaseATK(0.0f);
+	}
+}
+
+// 開始時処理
+void PlayerActor::OnStart()
+{
+	// ユーザー操作プレイヤーの場合
+	if (_isUserControlled)
+	{
+		// UI設定
+		auto inGameCanvas = this->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI);
+		if (inGameCanvas)
+		{
+			inGameCanvas->RegisterPlayerActor(this);
 		}
 	}
 }

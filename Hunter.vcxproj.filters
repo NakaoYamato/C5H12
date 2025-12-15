@@ -348,7 +348,7 @@
     <ClCompile Include="Source\Enemy\EnemyActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\UI\PlayerHealthUIController.cpp">
+    <ClCompile Include="Source\InGame\UI\Player\PlayerHealthUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.cpp">
@@ -600,7 +600,7 @@
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\UI\PlayerStaminaUIController.cpp">
+    <ClCompile Include="Source\InGame\UI\Player\PlayerStaminaUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Library\Shader\Model\Player\PlayerShader.cpp">
@@ -768,7 +768,7 @@
     <ClCompile Include="Source\Camera\HuntingSuccessCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player\UI\PlayerBuffUIController.cpp">
+    <ClCompile Include="Source\InGame\UI\Player\PlayerBuffUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\InGame\UI\Menu\MenuUIController.cpp">
@@ -793,6 +793,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\Weapon\SharpnessController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\InGame\UI\Player\PlayerShapnessUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1181,7 +1184,7 @@
     <ClInclude Include="Source\Enemy\EnemyActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\UI\PlayerHealthUIController.h">
+    <ClInclude Include="Source\InGame\UI\Player\PlayerHealthUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Enemy\Wyvern\Breath\WyvernBreathActor.h">
@@ -1451,7 +1454,7 @@
     <ClInclude Include="Source\InGame\UI\TimerUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\UI\PlayerStaminaUIController.h">
+    <ClInclude Include="Source\InGame\UI\Player\PlayerStaminaUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Library\Shader\Model\Player\PlayerShader.h">
@@ -1640,7 +1643,7 @@
     <ClInclude Include="Source\Camera\HuntingSuccessCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player\UI\PlayerBuffUIController.h">
+    <ClInclude Include="Source\InGame\UI\Player\PlayerBuffUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\InGame\UI\Menu\MenuUIController.h">
@@ -1665,6 +1668,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\Weapon\SharpnessController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\InGame\UI\Player\PlayerShapnessUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,15 +3,15 @@
 #include "../../Library/Graphics/Graphics.h"
 
 #include "UI/TimerUIController.h"
-
 #include "UI/Chest/ChestUIController.h"
-
 #include "UI/Item/ItemUIController.h"
 #include "UI/Item/Slider/ItemSliderController.h"
-
 #include "UI/Operate/OperateUIController.h"
-
 #include "UI/Menu/MenuUIController.h"
+#include "UI/Player/PlayerHealthUIController.h"
+#include "UI/Player/PlayerStaminaUIController.h"
+#include "UI/Player/PlayerBuffUIController.h"
+#include "UI/Player/PlayerShapnessUIController.h"
 
 // 生成時処理
 void InGameCanvasActor::OnCreate()
@@ -60,4 +60,67 @@ void InGameCanvasActor::OnCreate()
     auto menuUIActor = GetScene()->RegisterActor<UIActor>("MenuUI", ActorTag::UI);
     menuUIActor->SetParent(this);
     menuUIActor->AddComponent<MenuUIController>();
+
+	// プレイヤーUI生成
+	auto playerUIActor = GetScene()->RegisterActor<UIActor>("PlayerUI", ActorTag::UI);
+	playerUIActor->SetParent(this);
+	{
+		auto playerHPUIActor = GetScene()->RegisterActor<UIActor>("PlayerHPUI", ActorTag::UI);
+		playerHPUIActor->SetParent(playerUIActor.get());
+		playerHPUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 50.0f));
+		playerHPUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
+		playerHPUIActor->AddComponent<PlayerHealthUIController>();
+		auto playerStaminaUIActor = GetScene()->RegisterActor<UIActor>("PlayerStaminaUI", ActorTag::UI);
+		playerStaminaUIActor->SetParent(playerUIActor.get());
+		playerStaminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 74.0f));
+		playerStaminaUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
+		playerStaminaUIActor->AddComponent<PlayerStaminaUIController>();
+		auto playerBuffUIActor = GetScene()->RegisterActor<UIActor>("PlayerBuffUI", ActorTag::UI);
+		playerBuffUIActor->SetParent(playerUIActor.get());
+		playerBuffUIActor->AddComponent<PlayerBuffUIController>();
+		auto playerShapnessUIActor = GetScene()->RegisterActor<UIActor>("PlayerShapnessUI", ActorTag::UI);
+		playerShapnessUIActor->SetParent(playerUIActor.get());
+		playerShapnessUIActor->AddComponent<PlayerShapnessUIController>();
+	}
+}
+
+// プレイヤー設定
+void InGameCanvasActor::RegisterPlayerActor(Actor* playerActor)
+{
+	Actor* playerUIActor = nullptr;
+	for (auto& actor : this->GetChildren())
+	{
+		std::string name = actor->GetName();
+		if (name == "PlayerUI")
+		{
+			playerUIActor = actor.get();
+			break;
+		}
+	}
+	if (!playerUIActor)
+		return;
+
+	for (auto& child : playerUIActor->GetChildren())
+	{
+		if (auto healthUIController = child->GetComponent<PlayerHealthUIController>())
+		{
+			auto damageable = playerActor->GetComponent<Damageable>();
+			healthUIController->SetDamageable(damageable);
+		}
+		else if (auto staminaUIController = child->GetComponent<PlayerStaminaUIController>())
+		{
+			auto staminaController = playerActor->GetComponent<StaminaController>();
+			staminaUIController->SetStaminaController(staminaController);
+		}
+		else if (auto buffUIController = child->GetComponent<PlayerBuffUIController>())
+		{
+			auto buffController = playerActor->GetComponent<BuffController>();
+			buffUIController->SetBuffController(buffController);
+		}
+		else if (auto shapnessUIController = child->GetComponent<PlayerShapnessUIController>())
+		{
+			//auto equipmentController = playerActor->GetComponent<EquipmentController>();
+			//shapnessUIController->SetEquipmentController(equipmentController);
+		}
+	}
 }

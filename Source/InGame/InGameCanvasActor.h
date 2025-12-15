@@ -13,4 +13,7 @@ public:
 
 	// ¶¬ˆ—
 	void OnCreate() override;
+
+	// ƒvƒŒƒCƒ„[İ’è
+	void RegisterPlayerActor(Actor* playerActor);
 };

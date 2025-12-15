@@ -294,7 +294,7 @@ protected:
 	/// </summary>
 	virtual void OnDeleted() {};
 	/// <summary>
-	// 開始時処理
+	/// 開始時処理
 	/// </summary>
 	virtual void OnStart() {};
 	/// <summary>

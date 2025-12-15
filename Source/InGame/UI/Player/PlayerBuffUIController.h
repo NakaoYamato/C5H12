@@ -1,14 +1,12 @@
 #pragma once
 
 #include "../../Library/Actor/UI/UIActor.h"
-#include "../BuffController.h"
+#include "../../Source/Player/BuffController.h"
 
 class PlayerBuffUIController : public Component
 {
 public:
-	PlayerBuffUIController(std::shared_ptr<BuffController> buffController) :
-		_buffController(buffController) {
-	}
+	PlayerBuffUIController() = default;
 	~PlayerBuffUIController() override {}
 	// –¼‘OŽæ“¾
 	const char* GetName() const override { return "PlayerBuffUIController"; }
@@ -20,6 +18,8 @@ public:
 	void DelayedRender(const RenderContext& rc) override;
 	// GUI•`‰æ
 	void DrawGui() override;
+
+	void SetBuffController(std::shared_ptr<BuffController> buffController) { _buffController = buffController; }
 
 private:
 	std::weak_ptr<BuffController> _buffController;

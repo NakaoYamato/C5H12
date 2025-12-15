@@ -3,7 +3,7 @@
 #include "../../CBuffer/B3/CascadedShadowCB.hlsli"
 
 // カスケードシャドウマップの書き込む先の数
-#define CASCADED_SHADOW_MAPS_SIZE 3
+#define CASCADED_SHADOW_MAPS_SIZE 4
 
 // CASCADED_SHADOW_MAPS
 struct VS_OUT_CSM

@@ -294,6 +294,7 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 
 	for (auto& alphaDrawInfo : _alphaDrawInfomap)
 	{
+		auto material = alphaDrawInfo.drawInfo.material;
 		switch (alphaDrawInfo.renderType)
 		{
 		case ModelRenderType::Dynamic:
@@ -305,7 +306,7 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 
 			auto* shader = shaders
 				[static_cast<int>(ModelRenderType::Dynamic)]
-				[alphaDrawInfo.drawInfo.material->GetShaderName()].get();
+				[material->GetShaderName()].get();
 			// シェーダーがnullptrの場合はPhongシェーダーを使用
 			if (shader == nullptr)
 			{

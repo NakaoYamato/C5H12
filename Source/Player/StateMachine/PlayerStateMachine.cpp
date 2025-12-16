@@ -35,6 +35,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDeathState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatDrinkState>(this));
 	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatFatigueState>(this));
+	_stateMachine.RegisterState(std::make_shared<PlayerNonCombatGrindState>(this));
 
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordIdleState>(this));
     _stateMachine.RegisterState(std::make_shared<PlayerGreatSwordRunState>(this));
@@ -198,6 +199,11 @@ void PlayerStateMachine::ChangeItemState()
         break;
     case ItemType::Useable:
 
+        break;
+    case ItemType::GrindingStone:
+        // “uÎg—p
+        if (GetItemController()->Use())
+            GetStateMachine().ChangeState("Grind");
         break;
     }
 }

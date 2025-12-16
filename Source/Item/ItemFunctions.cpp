@@ -2,6 +2,7 @@
 
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Player/BuffController.h"
+#include "../../Source/Weapon/SharpnessController.h"
 
 #pragma region 回復薬
 // 開始処理
@@ -162,6 +163,53 @@ ItemData::ParameterMap ElixirPotionFunc::GetParameterKeys()
 {
 	ItemData::ParameterMap p;
 	p[u8"効果"] = 0;
+	p[u8"必要時間"] = 0.0f;
+	return p;
+}
+#pragma endregion
+
+#pragma region 砥石
+void GrindingStoneFunc::Start(ItemData* item, Actor* user)
+{
+	ItemFunctionBase::Start(item, user);
+	_timer = 0.0f;
+	// パラメータ取得
+	auto it = _item->parameters.find(u8"必要時間");
+	if (it != _item->parameters.end())
+	{
+		_requiredTime = std::get<float>(it->second);
+	}
+	it = _item->parameters.find(u8"効果量");
+	if (it != _item->parameters.end())
+	{
+		_sharpenAmount = std::get<float>(it->second);
+	}
+}
+
+void GrindingStoneFunc::Execute(float elapsedTime)
+{
+	_timer += elapsedTime;
+	if (_timer >= _requiredTime)
+	{
+        // 砥石効果付与
+		for (auto& child : _user->GetChildren())
+		{
+			auto sharpnessController = child->GetComponent<SharpnessController>();
+			if (sharpnessController)
+			{
+				sharpnessController->RecoverSharpness(_sharpenAmount);
+				break;
+			}
+        }
+
+		_state = State::End;
+	}
+}
+
+ItemData::ParameterMap GrindingStoneFunc::GetParameterKeys()
+{
+	ItemData::ParameterMap p;
+	p[u8"効果量"] = 0.0f;
 	p[u8"必要時間"] = 0.0f;
 	return p;
 }

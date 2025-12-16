@@ -13,6 +13,7 @@ enum class ItemType
 	Drinkable,
 	Useable,
 	Installable,
+	GrindingStone,
 
 	Material,
 

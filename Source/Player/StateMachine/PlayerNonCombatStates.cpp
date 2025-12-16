@@ -4,6 +4,7 @@
 #include "../PlayerController.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Source/Player/PlayerEquipmentController.h"
+#include "../../Source/Weapon/SharpnessController.h"
 
 #define NON_TURN
 
@@ -1150,6 +1151,130 @@ void PlayerNonCombatFatigueState::OnExecute(float elapsedTime)
 }
 
 void PlayerNonCombatFatigueState::OnExit()
+{
+}
+#pragma endregion
+
+#pragma region 砥石
+namespace PlayerGrindSubState
+{
+	class GrindStartSubState : public PlayerSSB
+	{
+	public:
+		GrindStartSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"GrindStart",
+				u8"SharpenStart",
+				1.0f,
+				false,
+				true)
+		{
+		}
+		~GrindStartSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlaying())
+				_owner->GetStateMachine().ChangeSubState("Grinding");
+        }
+	};
+
+	class GrindingSubState : public PlayerSSB
+	{
+	public:
+		GrindingSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine, 
+				"Grinding", 
+				"SharpenLoop",
+				1.0f, 
+				false,
+				true)
+		{
+		}
+		~GrindingSubState() override {}
+
+		void OnEnter() override
+		{
+			PlayerSSB::OnEnter();
+			// コントローラー取得
+			for (auto& child : _owner->GetPlayer()->GetActor()->GetChildren())
+			{
+				auto sharpnessController = child->GetComponent<SharpnessController>();
+				if (sharpnessController)
+				{
+                    _sharpnessController = sharpnessController;
+					break;
+				}
+			}
+		}
+		void OnExecute(float elapsedTime) override
+		{
+			// アイテム効果処理
+			auto type = _owner->GetItemController()->ExecuteItemFunction(elapsedTime);
+
+            // アニメーションが終了したタイミングで定時間経過していたら遷移
+			if (!_owner->GetAnimator()->IsPlaying())
+			{
+				if (type == ItemFunctionBase::State::End)
+				{
+					_owner->GetStateMachine().ChangeSubState("GrindEnd");
+				}
+				else
+				{
+					// アニメーションを再生
+					_owner->GetAnimator()->PlayAnimation(u8"SharpenLoop", false, 0.0f);
+				}
+			}
+		}
+		void OnExit() override
+		{
+		}
+
+	private:
+		std::weak_ptr<SharpnessController> _sharpnessController;
+	};
+
+	class GrindEndSubState : public PlayerSSB
+    {
+		public:
+		GrindEndSubState(PlayerStateMachine* stateMachine) :
+			PlayerSSB(stateMachine,
+				"GrindEnd",
+				u8"SharpenEnd",
+				1.0f,
+				false,
+				true)
+		{
+		}
+		~GrindEndSubState() override {}
+		void OnExecute(float elapsedTime) override
+		{
+			// アニメーションが終了していたら遷移
+			if (!_owner->GetAnimator()->IsPlaying())
+				_owner->GetStateMachine().ChangeState("Idle");
+		}
+    };
+}
+PlayerNonCombatGrindState::PlayerNonCombatGrindState(PlayerStateMachine* stateMachine) :
+	HierarchicalStateBase(stateMachine)
+{
+	RegisterSubState(std::make_shared<PlayerGrindSubState::GrindStartSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerGrindSubState::GrindingSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerGrindSubState::GrindEndSubState>(stateMachine));
+}
+void PlayerNonCombatGrindState::OnEnter()
+{
+    ChangeSubState("GrindStart");
+}
+
+void PlayerNonCombatGrindState::OnExecute(float elapsedTime)
+{
+	// 回避移行
+	if (_owner->GetPlayer()->IsEvade())
+		_owner->GetStateMachine().ChangeState("Evade");
+}
+
+void PlayerNonCombatGrindState::OnExit()
 {
 }
 #pragma endregion

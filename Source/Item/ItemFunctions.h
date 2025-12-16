@@ -128,3 +128,24 @@ private:
 	float _requiredTime = 0.0f;
 };
 #pragma endregion
+
+#pragma region 砥石
+class GrindingStoneFunc : public ItemFunctionBase
+{
+	public:
+	GrindingStoneFunc() = default;
+	~GrindingStoneFunc() override = default;
+	// 名前取得
+	std::string GetName() const override { return "GrindingStoneFunc"; }
+	// 開始処理
+	void Start(ItemData* item, Actor* user) override;
+	// 効果発動
+	void Execute(float elapsedTime) override;
+	// パラメータマップ取得
+    ItemData::ParameterMap GetParameterKeys() override;
+private:
+	float _timer = 0.0f;
+	float _sharpenAmount = 0.0f;
+	float _requiredTime = 0.0f;
+};
+#pragma endregion

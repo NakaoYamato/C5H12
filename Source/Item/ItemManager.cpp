@@ -26,6 +26,7 @@ bool ItemManager::Initialize()
 	_itemFunctionList.push_back(std::make_unique<HealingPotionFunc>());
 	_itemFunctionList.push_back(std::make_unique<StrengthPotionFunc>());
 	_itemFunctionList.push_back(std::make_unique<ElixirPotionFunc>());
+	_itemFunctionList.push_back(std::make_unique<GrindingStoneFunc>());
 
 	return true;
 }

@@ -176,3 +176,16 @@ private:
 };
 #pragma endregion
 
+#pragma region 砥石
+class PlayerNonCombatGrindState final : public HierarchicalStateBase<PlayerStateMachine>
+{
+public:
+	PlayerNonCombatGrindState(PlayerStateMachine* stateMachine);
+	~PlayerNonCombatGrindState() override {}
+	// ステート名取得
+	const char* GetName() const override { return "Grind"; }
+	void OnEnter() override;
+	void OnExecute(float elapsedTime) override;
+	void OnExit() override;
+};
+#pragma endregion

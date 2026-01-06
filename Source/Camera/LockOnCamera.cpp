@@ -62,49 +62,57 @@ void LockOnCamera::OnUpdate(float elapsedTime)
     }
 
 	// ターゲットの目標画面位置を更新
-	_targetScreenPosition.x += moveX;
-	_targetScreenPosition.y += moveY;
+	_targetScreenPosition.x -= moveX;
+	_targetScreenPosition.y -= moveY;
     // 制限
 	_targetScreenPosition.x = MathF::Clamp(_targetScreenPosition.x, _targetScreenMinPosition.x, _targetScreenMaxPosition.x);
 	_targetScreenPosition.y = MathF::Clamp(_targetScreenPosition.y, _targetScreenMinPosition.y, _targetScreenMaxPosition.y);
 
-    // Y軸回転
-    angle.y += moveX * 0.5f;
-    // X軸回転
-    angle.x -= moveY * 0.5f;
+    // プレイヤーの画面位置を取得
+    Vector3 playerScreenPos = _playerActor->GetTransform().GetWorldPosition().Project(
+        Graphics::Instance().GetScreenWidth(),
+        Graphics::Instance().GetScreenHeight(),
+        GetActor()->GetScene()->GetMainCamera()->GetView(),
+        GetActor()->GetScene()->GetMainCamera()->GetProjection());
 
-	// ターゲットが画面外に出ているか確認
-	Vector3 targetScreenPos = _target->GetActor()->GetTransform().GetWorldPosition().Project(
+	// ターゲットの画面位置を取得
+	Vector3 currentTargetScreenPos = _target->GetActor()->GetTransform().GetWorldPosition().Project(
 		Graphics::Instance().GetScreenWidth(),
 		Graphics::Instance().GetScreenHeight(),
 		GetActor()->GetScene()->GetMainCamera()->GetView(),
 		GetActor()->GetScene()->GetMainCamera()->GetProjection());
-    // 裏側の時
-    if (targetScreenPos.z < 0.0f)
+    // ターゲットがプレイヤーより前にいる場合
+    if (currentTargetScreenPos.z < playerScreenPos.z)
     {
         // 画面左側
-        if (targetScreenPos.x < Graphics::Instance().GetScreenWidth() / 2.0f)
+        if (currentTargetScreenPos.x < Graphics::Instance().GetScreenWidth() / 2.0f)
             // 現在の前方向から左回転
-			angle.y -= DirectX::XMConvertToRadians(_behindTargetHorizontalMovePower);
+			angle.y -= DirectX::XMConvertToRadians(_behindTargetHorizontalMovePower) * elapsedTime;
         else
 			// 現在の前方向から右回転
-			angle.y += DirectX::XMConvertToRadians(_behindTargetHorizontalMovePower);
+			angle.y += DirectX::XMConvertToRadians(_behindTargetHorizontalMovePower) * elapsedTime;
     }
     else
     {
-		if (targetScreenPos.x < 0.0f)
+        // 目標位置とのずれから回転量を計算
+        Vector3 currentTargetNDC = Vector3(
+            (currentTargetScreenPos.x / Graphics::Instance().GetScreenWidth()) * 2.0f - 1.0f,
+            -((currentTargetScreenPos.y / Graphics::Instance().GetScreenHeight()) * 2.0f - 1.0f),
+            0.0f);
+        Vector3 screenPosDiff = currentTargetNDC - Vector3(_targetScreenPosition.x, _targetScreenPosition.y, 0.0f);
+		if (screenPosDiff.x < -_targetScreenPositionTolerance)
             // 画面左外
-			angle.y -= DirectX::XMConvertToRadians(_outOfScreenHorizontalMovePower);
-		else if (targetScreenPos.x > Graphics::Instance().GetScreenWidth())
+			angle.y -= DirectX::XMConvertToRadians(_outOfScreenHorizontalMovePower) * elapsedTime;
+		else if (screenPosDiff.x > _targetScreenPositionTolerance)
 			// 画面右外
-			angle.y += DirectX::XMConvertToRadians(_outOfScreenHorizontalMovePower);
+			angle.y += DirectX::XMConvertToRadians(_outOfScreenHorizontalMovePower) * elapsedTime;
 
-		if (targetScreenPos.y < 0.0f)
+		if (screenPosDiff.y < -_targetScreenPositionTolerance)
 			// 画面上外
-			angle.x -= DirectX::XMConvertToRadians(_outOfScreenVerticalMovePower);
-		else if (targetScreenPos.y > Graphics::Instance().GetScreenHeight())
+			angle.x += DirectX::XMConvertToRadians(_outOfScreenVerticalMovePower) * elapsedTime;
+		else if (screenPosDiff.y > _targetScreenPositionTolerance)
 			// 画面下外
-			angle.x += DirectX::XMConvertToRadians(_outOfScreenVerticalMovePower);
+			angle.x -= DirectX::XMConvertToRadians(_outOfScreenVerticalMovePower) * elapsedTime;
     }
 
     if (angle.y > DirectX::XM_PI)
@@ -170,9 +178,44 @@ void LockOnCamera::OnUpdate(float elapsedTime)
 // GUI描画
 void LockOnCamera::DrawGui()
 {
+    ImGui::DragFloat2(u8"ターゲット画面位置", &_targetScreenPosition.x, 0.01f, -1.0f, 1.0f);
+    ImGui::DragFloat2(u8"ターゲット画面位置最小値", &_targetScreenMinPosition.x, 0.01f, -1.0f, 1.0f);
+    ImGui::DragFloat2(u8"ターゲット画面位置最大値", &_targetScreenMaxPosition.x, 0.01f, -1.0f, 1.0f);
+    ImGui::DragFloat(u8"ターゲット画面位置許容範囲", &_targetScreenPositionTolerance, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat(u8"ターゲット裏側時水平回転速度(度)", &_behindTargetHorizontalMovePower, 0.1f, 0.0f, 100.0f, "%.1f", ImGuiSliderFlags_None);
+    ImGui::DragFloat(u8"ターゲット画面外時水平回転速度(度)", &_outOfScreenHorizontalMovePower, 0.1f, 0.0f, 100.0f, "%.1f", ImGuiSliderFlags_None);
+    ImGui::DragFloat(u8"ターゲット画面外時垂直回転速度(度)", &_outOfScreenVerticalMovePower, 0.1f, 0.0f, 100.0f, "%.1f", ImGuiSliderFlags_None);
+
+    ImGui::Separator();
+    ImGui::DragFloat(u8"プレイヤー注視点オフセット", &_playerOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"注視点水平オフセット", &_focusHorizontalOffset, 0.01f, -10.0f, 10.0f);
+    ImGui::DragFloat(u8"カメラ距離", &_cameraDistance, 0.1f, 0.1f, 100.0f);
+
+
     ImGui::DragFloat(u8"水平入力補正値", &_horizontalMovePower, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"垂直入力補正値", &_verticalMovePower, 0.1f, 0.0f, 100.0f);
     ImGui::DragFloat(u8"カメラの半径", &_cameraRadius, 0.01f, 0.01f, 1.0f);
+
+    ImGui::Separator();
+    ImGui::Checkbox(u8"ターゲット位置デバッグ表示", &_isDrawTargetDebug);
+}
+
+// デバッグ表示
+void LockOnCamera::DebugRender(const RenderContext& rc)
+{
+    if (_isDrawTargetDebug)
+    {
+        Vector2 targetScreenPos{};
+        targetScreenPos.x = (_targetScreenPosition.x * 0.5f + 0.5f) * Graphics::Instance().GetScreenWidth();
+        targetScreenPos.y = (-_targetScreenPosition.y * 0.5f + 0.5f) * Graphics::Instance().GetScreenHeight();
+        GetActor()->GetScene()->GetPrimitive()->Circle(
+            rc.deviceContext,
+            targetScreenPos,
+            _debugTargetSize,
+            Vector2::One,
+            0.0f,
+            Vector4::Red);
+    }
 }
 
 // ターゲット設定

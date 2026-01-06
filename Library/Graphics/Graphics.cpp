@@ -192,6 +192,21 @@ void Graphics::Initialize(HWND hwnd, HINSTANCE instance, const BOOL FULLSCREEN)
 		// GBuffer生成
 		_gBuffer = std::make_unique<GBuffer>(_device.Get(), width, height);
 	}
+
+	// サンプラーステート設定
+	{
+		ID3D11DeviceContext* dc = GetDeviceContext();
+		std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		RenderState* renderState = GetRenderState();
+		std::vector<ID3D11SamplerState*> samplerStates;
+		for (size_t index = 0; index < static_cast<int>(SamplerState::EnumCount); ++index)
+		{
+			samplerStates.push_back(renderState->GetSamplerState(static_cast<SamplerState>(index)));
+		}
+		dc->DSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+		dc->GSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+		dc->PSSetSamplers(0, static_cast<UINT>(samplerStates.size()), samplerStates.data());
+	}
 }
 
 // フルスクリーンの切り替え

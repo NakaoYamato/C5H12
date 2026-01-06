@@ -32,7 +32,7 @@ const OutputPatch<DS_IN, 4> patch)
     
     // 現在地点の高さを取得
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_LINEAR_CLAMP_SAMPLER_INDEX], texcoord, 0);
-    float height = parameter.r + parameter.b;
+    float height = parameter.r + parameter.b * 0.25f;
 
     // 微分法を用いて、ハイトマップの形状に沿った正しい法線を計算する
     float w, h;

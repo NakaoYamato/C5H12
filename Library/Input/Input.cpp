@@ -18,6 +18,7 @@ Input::Input()
 	_buttonActionMap["ItemSelect"] = { {InputType::Keyboard, VK_CONTROL}, {InputType::XboxPad,XINPUT_GAMEPAD_LEFT_SHOULDER}, {InputType::DirectPad, DIRECTPAD_BUTTON_L1} };
 	_buttonActionMap["Menu"] = { {InputType::Keyboard, VK_ESCAPE}, {InputType::XboxPad,XINPUT_GAMEPAD_BACK}, {InputType::DirectPad, DIRECTPAD_BUTTON_BACK} };
 	_buttonActionMap["Start"] = { {InputType::Keyboard, VK_TAB}, {InputType::XboxPad,XINPUT_GAMEPAD_START}, {InputType::DirectPad, DIRECTPAD_BUTTON_START} };
+	_buttonActionMap["LockOn"] = { {InputType::Mouse,VK_MBUTTON}, {InputType::XboxPad,XINPUT_GAMEPAD_RIGHT_THUMB}, {InputType::DirectPad, DIRECTPAD_BUTTON_R3} };
 	
 	_buttonActionMap["1"] = { {InputType::Keyboard, '1'} };
 	_buttonActionMap["2"] = { {InputType::Keyboard, '2'} };

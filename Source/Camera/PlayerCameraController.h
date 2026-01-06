@@ -15,7 +15,7 @@
 class PlayerCameraController : public CameraControllerBase
 {
 public:
-    PlayerCameraController(PlayerActor* playerActor) : _playerActor(playerActor) {}
+    PlayerCameraController() {}
     ~PlayerCameraController() override {}
     // 名前取得
     const char* GetName() const override { return "PlayerCameraController"; }
@@ -27,8 +27,11 @@ public:
     // 更新時処理
     void OnUpdate(float elapsedTime) override;
 
+	// プレイヤーアクター設定
+    void SetPlayerActor(PlayerActor* playerActor);
+
 private:
-    PlayerActor* _playerActor;
+    PlayerActor* _playerActor = nullptr;
 	std::weak_ptr<InputManager> _inputManager;
 
 	std::weak_ptr<StateController> _stateController;

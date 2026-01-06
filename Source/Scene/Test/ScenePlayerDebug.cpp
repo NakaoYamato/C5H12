@@ -16,7 +16,7 @@
 
 void ScenePlayerDebug::OnInitialize()
 {
-	static const float CompletionLoadingRate = 1.0f / 8.0f;
+	static const float CompletionLoadingRate = 1.0f / 9.0f;
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     SetSkyMap(L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/sheen_pmrem.dds",
@@ -32,6 +32,17 @@ void ScenePlayerDebug::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto inputManager = RegisterActor<InputManager>("InputManager", ActorTag::System);
+    }
+    AddCompletionLoading(CompletionLoadingRate);
+    {
+        auto enemy = RegisterActor<Actor>("Target", ActorTag::Enemy);
+        enemy->GetTransform().SetPosition(Vector3(50.0f, 2.0f, 50.0f));
+        auto target = enemy->AddComponent<Targetable>();
+		target->SetFaction(Targetable::Faction::Enemy);
+		target->SetTargetable(true);
+		target->SetRadius(0.5f);
+		auto sp = enemy->AddCollider<SphereCollider>();
+		sp->SetRadius(0.5f);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

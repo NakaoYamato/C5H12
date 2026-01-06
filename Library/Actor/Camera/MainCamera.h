@@ -32,14 +32,41 @@ public:
 
 	// コントローラーの登録
 	void RegisterCameraController(CameraControllerRef controller);
-	// 切り替え(直前のコントローラーに戻す)
-	void SwitchPreviousController();
-	// 切り替え
-	void SwitchController(const std::string& nextControllerName);
 	// コントローラーが設定されているかどうか
 	bool IsControllerRegistered(const std::string& controllerName) const
 	{
 		return _cameraControllers.find(controllerName) != _cameraControllers.end();
+	}
+
+	// 切り替え(直前のコントローラーに戻す)
+	void SwitchPreviousController();
+	// 切り替え
+	void SwitchController(const std::string& nextControllerName);
+
+	// 現在のコントローラー名取得
+	std::string GetCurrentControllerName() const
+	{
+		return _currentCameraControllerName;
+	}
+	// 現在のコントローラー取得
+	CameraControllerRef GetCurrentController() const
+	{
+		auto it = _cameraControllers.find(_currentCameraControllerName);
+		if (it != _cameraControllers.end())
+		{
+			return it->second;
+		}
+		return nullptr;
+	}
+	// 指定のコントローラー取得
+	CameraControllerRef GetControllerByName(const std::string& controllerName) const
+	{
+		auto it = _cameraControllers.find(controllerName);
+		if (it != _cameraControllers.end())
+		{
+			return it->second;
+		}
+		return nullptr;
 	}
 
 	// 更新処理追加

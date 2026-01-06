@@ -33,6 +33,10 @@ public:
 	Faction GetFaction() const { return _faction; }
 	// w‰cİ’è
 	void SetFaction(Faction faction) { _faction = faction; }
+	// ”¼Œaæ“¾
+	float GetRadius() const { return _radius; }
+	// ”¼Œaİ’è
+	void SetRadius(float radius) { _radius = radius; }
 	// ƒwƒCƒg’læ“¾
 	float GetHateValue() const { return _hateValue; }
 	// ƒwƒCƒg’lİ’è

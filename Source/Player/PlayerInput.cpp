@@ -95,6 +95,12 @@ void PlayerInput::OnUpdate(float elapsedTime)
 	{
 		_inputManager->SwitchInput("MenuInput");
 	}
+
+	// ロックオンカメラ切り替え入力
+	if (_INPUT_TRIGGERD("LockOn"))
+	{
+		playerController->SetLockOnCameraTransition(true);
+	}
 }
 
 // GUI描画

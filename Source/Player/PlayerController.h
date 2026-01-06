@@ -6,6 +6,7 @@
 #include "../../Library/Component/EffectController.h"
 #include "../../Library/Component/ModelRenderer.h"
 
+#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/Targetable.h"
 #include "StateMachine/PlayerStateMachine.h"
@@ -106,6 +107,7 @@ public:
 	void SetIsSelect(bool isSelect) { _isSelect = isSelect; }
 	void SetIsDrawingWeapon(bool isDrawingWeapon) { _isDrawingWeapon = isDrawingWeapon; }
 	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
+	void SetLockOnCameraTransition(bool isTransition) { _isLockOnCameraTransition = isTransition; }
 
 	void SetStageContactVibration(float left, float right, float time)
 	{
@@ -140,6 +142,8 @@ private:
 	std::weak_ptr<PlayerItemController> _playerItemController;
 
 	std::weak_ptr<InputManager> _inputManager;
+
+	std::weak_ptr<MetaAI> _metaAI;
 #pragma region 各種フラグ
 	bool _callInputBufferingEvent = false;
 	bool _callCancelAttackEvent = false;
@@ -173,6 +177,9 @@ private:
 	int _chargeLevel = 0;
 	// 最後に移動してからの時間
 	float _timeSinceLastMove = 0.0f;
+
+	// ロックオンカメラ遷移
+	bool _isLockOnCameraTransition = false;
 #pragma endregion
 
 	// ダッシュ時の回転補正値

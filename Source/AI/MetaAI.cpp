@@ -133,6 +133,10 @@ Targetable* MetaAI::SearchTarget(Targetable::Faction faction, const Vector3& sea
 	{
 		if (auto target = targetable.lock())
 		{
+			// アクターがアクティブでない場合はスキップ
+			if (!target->GetActor()->IsActive())
+				continue;
+
 			if (target->GetFaction() == faction && target->IsTargetable())
 			{
 				// 範囲内かチェック

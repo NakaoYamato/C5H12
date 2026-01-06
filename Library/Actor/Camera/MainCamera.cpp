@@ -3,6 +3,7 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Component/CameraControllerBase.h"
 
+#include "../../Source/Camera/PlayerCameraController.h"
 #include "../../Source/Camera/HuntingSuccessCamera.h"
 #include "../../Source/Camera/LockOnCamera.h"
 #include "../../Source/Camera/ChangeArmorCamera.h"
@@ -30,6 +31,10 @@ void MainCamera::OnCreate()
 	);
 
 	// カメラ子アクター生成
+	{
+		auto playerCamera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
+		playerCamera->AddComponent<PlayerCameraController>();
+	}
 	{
 		auto huntingSuccessCamera = GetScene()->RegisterActor<Actor>("HuntingSuccessCamera", ActorTag::System);
 		huntingSuccessCamera->AddComponent<HuntingSuccessCamera>();

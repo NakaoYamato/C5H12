@@ -8,27 +8,7 @@
 // 開始時処理
 void PlayerCameraController::OnStart()
 {
-    _stateController = _playerActor->GetComponent<StateController>();
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
-
-    // 初期設定
-    GetActor()->GetTransform().SetAngle(_stateController.lock()->GetActor()->GetTransform().GetAngle());
-
-    Vector3 angle = GetActor()->GetTransform().GetAngle();
-    // カメラ回転値を回転行列に変換
-    DirectX::XMMATRIX Transform =
-        DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
-
-    // 回転行列から前方向ベクトルを取り出す
-    DirectX::XMVECTOR Front = Transform.r[2];
-    Vector3 front{};
-    DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(Front));
-
-    _currentFocus = _playerActor->GetTransform().GetPosition();
-    _currentFocus.y += _focusVerticalOffset;
-    _currentEye = _currentFocus - front * _cameraDistance;
-    GetActor()->GetTransform().SetPosition(_currentEye);
-    GetActor()->GetScene()->GetMainCamera()->SetLookAt(_currentEye, _currentFocus, Vector3::Up);
 }
 
 void PlayerCameraController::DrawGui()
@@ -62,6 +42,11 @@ void PlayerCameraController::DrawGui()
 // 更新時処理
 void PlayerCameraController::OnUpdate(float elapsedTime)
 {
+	if (!_playerActor)
+	{
+		return;
+	}
+
     // 入力情報を取得
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
     float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
@@ -119,7 +104,6 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
         angle.x = _angleXLimitHigh;
     else if (angle.x < _angleXLimitLow)
         angle.x = _angleXLimitLow;
-    GetActor()->GetTransform().SetAngle(angle);
 
     Vector3 newFocus = _playerActor->GetTransform().GetPosition();
     // オフセット処理
@@ -168,10 +152,36 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 
+    GetActor()->GetTransform().SetAngle(angle);
     _currentFocus = focus;
     _currentEye = eye;
     GetActor()->GetTransform().SetPosition(eye);
     // マウスの位置を画面内に修正
     _Mouse->ClipCursorInWindow();
     _Mouse->UpdatePosition();
+}
+
+// プレイヤーアクター設定
+void PlayerCameraController::SetPlayerActor(PlayerActor* playerActor)
+{
+	_playerActor = playerActor;
+    _stateController = _playerActor->GetComponent<StateController>();
+    // 初期設定
+    GetActor()->GetTransform().SetAngle(_stateController.lock()->GetActor()->GetTransform().GetAngle());
+
+    Vector3 angle = GetActor()->GetTransform().GetAngle();
+    // カメラ回転値を回転行列に変換
+    DirectX::XMMATRIX Transform =
+        DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+
+    // 回転行列から前方向ベクトルを取り出す
+    DirectX::XMVECTOR Front = Transform.r[2];
+    Vector3 front{};
+    DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(Front));
+
+    _currentFocus = _playerActor->GetTransform().GetPosition();
+    _currentFocus.y += _focusVerticalOffset;
+    _currentEye = _currentFocus - front * _cameraDistance;
+    GetActor()->GetTransform().SetPosition(_currentEye);
+    GetActor()->GetScene()->GetMainCamera()->SetLookAt(_currentEye, _currentFocus, Vector3::Up);
 }

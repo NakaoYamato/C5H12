@@ -14,6 +14,7 @@
 #include "../../Source/Common/StaminaController.h"
 #include "../../Source/Armor/ArmorActor.h"
 #include "../../Source/Camera/PlayerCameraController.h"
+#include "../../Source/Camera/LockOnCamera.h"
 #include "../../Source/InGame/InGameCanvasActor.h"
 #include "PlayerItemController.h"
 #include "PlayerInput.h"
@@ -218,15 +219,6 @@ void PlayerActor::OnCreate()
 		// プレイヤーインプット追加
 		auto input = this->AddComponent<PlayerInput>();
 		input->Swich();
-
-		// カメラ設定
-		if (!GetScene()->GetMainCameraActor()->IsControllerRegistered("PlayerCameraController"))
-		{
-			auto camera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
-			camera->AddComponent<PlayerCameraController>(this);
-
-			GetScene()->GetMainCameraActor()->SwitchController("PlayerCameraController");
-		}
 	}
 	else
 	{
@@ -246,6 +238,19 @@ void PlayerActor::OnStart()
 		if (inGameCanvas)
 		{
 			inGameCanvas->RegisterPlayerActor(this);
+		}
+
+		// カメラ設定
+		auto playerCamera = dynamic_cast<PlayerCameraController*>(GetScene()->GetMainCameraActor()->GetControllerByName("PlayerCameraController"));
+		if (playerCamera)
+		{
+			playerCamera->SetPlayerActor(this);
+			playerCamera->Swich();
+		}
+		auto lockOnCamera = dynamic_cast<LockOnCamera*>(GetScene()->GetMainCameraActor()->GetControllerByName("LockOnCamera"));
+		if (lockOnCamera)
+		{
+			lockOnCamera->SetPlayerActor(this);
 		}
 	}
 }

@@ -6,6 +6,8 @@
 #include "../../Source/Stage/Props/Chest/ChestController.h"
 #include "../../Library/Graphics/Graphics.h"
 
+#include "../../Source/Camera/LockOnCamera.h"
+
 #include <imgui.h>
 
 void PlayerController::Start()
@@ -25,6 +27,13 @@ void PlayerController::Start()
 	_stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
 
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
+
+	// メタAI取得
+	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
+	if (metaAIActor)
+	{
+		_metaAI = metaAIActor->GetComponent<MetaAI>();
+	}
 #pragma region コールバック設定
 	// 被ダメージコールバック設定
 	_damageable.lock()->SetTakeableDamageCallback(
@@ -213,6 +222,38 @@ void PlayerController::Update(float elapsedTime)
 		_timeSinceLastMove = 0.0f;
 	else
 		_timeSinceLastMove += elapsedTime;
+
+	// ロックオンカメラ遷移
+	if (_isLockOnCameraTransition)
+	{
+		auto lockOnCamera = dynamic_cast<LockOnCamera*>(GetActor()->GetScene()->GetMainCameraActor()->GetControllerByName("LockOnCamera"));
+
+		if (lockOnCamera)
+		{
+			// ロックオンカメラを起動しているかどうか
+			if (GetActor()->GetScene()->GetMainCameraActor()->GetCurrentControllerName() == "LockOnCamera")
+			{
+				// プレイヤーカメラに戻す
+				lockOnCamera->SetTarget(nullptr);
+				GetActor()->GetScene()->GetMainCameraActor()->SwitchController("PlayerCameraController");
+			}
+			else
+			{
+				// メタAIからターゲットを取得
+				auto target = _metaAI.lock()->SearchTarget(Targetable::Faction::Enemy,
+					GetActor()->GetTransform().GetWorldPosition(),
+					100.0f);
+				if (target)
+				{
+					// ロックオンカメラに切り替え
+					lockOnCamera->SetTarget(target);
+					lockOnCamera->Swich();
+				}
+			}
+		}
+
+		_isLockOnCameraTransition = false;
+	}
 }
 
 // 3D描画後の描画処理

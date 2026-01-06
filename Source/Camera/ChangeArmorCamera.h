@@ -9,8 +9,8 @@ public:
 	~ChangeArmorCamera() override {}
 	// 名前取得
 	const char* GetName() const override { return "ChangeArmorCamera"; }
-	// 開始処理
-	void Start() override;
+	// 開始時処理
+	void OnStart() override;
 	// 更新時処理
 	void OnUpdate(float elapsedTime) override;
 	// Gui描画

@@ -19,8 +19,8 @@ public:
     ~PlayerCameraController() override {}
     // 名前取得
     const char* GetName() const override { return "PlayerCameraController"; }
-    // 開始処理
-    void Start() override;
+    // 開始時処理
+    void OnStart() override;
     // GUI描画
     void DrawGui() override;
 

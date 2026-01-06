@@ -5,7 +5,8 @@
 
 #include <imgui.h>
 
-void PlayerCameraController::Start()
+// ŠJŽnŽžˆ—
+void PlayerCameraController::OnStart()
 {
     _stateController = _playerActor->GetComponent<StateController>();
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);

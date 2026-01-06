@@ -17,10 +17,10 @@ public:
 
 	// 生成時処理
 	void OnCreate() override;
-
+	// 開始時処理
+	void OnStart() override;
 	// 更新処理
 	void OnUpdate(float elapsedTime) override;
-
 	// GUI描画
 	void OnDrawGui() override;
 

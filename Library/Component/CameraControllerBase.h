@@ -6,8 +6,8 @@ class CameraControllerBase : public Component
 public:
 	CameraControllerBase() = default;
 	~CameraControllerBase() override {}
-	// 生成時処理
-	void OnCreate() final override;
+	// 開始処理
+	void Start() final override;
 	// 更新処理
 	void LateUpdate(float elapsedTime) final override;
 	// 起動時関数
@@ -31,6 +31,8 @@ public:
 #pragma endregion
 
 protected:
+	// 開始時処理
+	virtual void OnStart() = 0;
 	// 更新時処理
 	virtual void OnUpdate(float elapsedTime) = 0;
 

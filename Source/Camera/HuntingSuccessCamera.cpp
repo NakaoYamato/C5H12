@@ -4,8 +4,8 @@
 
 #include <imgui.h>
 
-// 開始処理
-void HuntingSuccessCamera::Start()
+// 開始時処理
+void HuntingSuccessCamera::OnStart()
 {
 }
 

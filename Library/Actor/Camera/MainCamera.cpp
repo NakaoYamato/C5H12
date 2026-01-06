@@ -3,7 +3,9 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Component/CameraControllerBase.h"
 
-#include "../../Source/Camera/PlayerCameraController.h"
+#include "../../Source/Camera/HuntingSuccessCamera.h"
+#include "../../Source/Camera/LockOnCamera.h"
+#include "../../Source/Camera/ChangeArmorCamera.h"
 
 #include "../../Scene/Scene.h"
 
@@ -26,6 +28,25 @@ void MainCamera::OnCreate()
         0.1f,								// ニアクリップ
         1000.0f								// ファークリップ
 	);
+
+	// カメラ子アクター生成
+	{
+		auto huntingSuccessCamera = GetScene()->RegisterActor<Actor>("HuntingSuccessCamera", ActorTag::System);
+		huntingSuccessCamera->AddComponent<HuntingSuccessCamera>();
+	}
+	{
+		auto lockOnCamera = GetScene()->RegisterActor<Actor>("LockOnCamera", ActorTag::System);
+		lockOnCamera->AddComponent<LockOnCamera>();
+	}
+	{
+		auto changeArmorCamera = GetScene()->RegisterActor<Actor>("ChangeArmorCamera", ActorTag::System);
+		changeArmorCamera->AddComponent<ChangeArmorCamera>();
+	}
+}
+
+// 開始時処理
+void MainCamera::OnStart()
+{
 }
 
 // 更新処理
@@ -81,10 +102,18 @@ void MainCamera::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"カメラマネージャー"))
 		{
-			int index = 0;
-			for (auto& history : _cameraControllerHistory)
+			ImGui::Text(u8"使用中のカメラ:");
+			ImGui::SameLine();
+			ImGui::Text(_currentCameraControllerName.c_str());
+
+			if (ImGui::TreeNode(u8"変更履歴"))
 			{
-				ImGui::Text((std::to_string(index++) + ": " + history.c_str()).c_str());
+				int index = 0;
+				for (auto& history : _cameraControllerHistory)
+				{
+					ImGui::Text((std::to_string(index++) + ": " + history.c_str()).c_str());
+				}
+				ImGui::TreePop();
 			}
 			ImGui::EndTabItem();
 		}
@@ -167,7 +196,8 @@ void MainCamera::SwitchPreviousController()
 // コントローラーの登録
 void MainCamera::SwitchController(const std::string& nextControllerName)
 {
-	_cameraControllerHistory.push_back(_currentCameraControllerName);
+	if (!_currentCameraControllerName.empty())
+		_cameraControllerHistory.push_back(_currentCameraControllerName);
 	_nextCameraControllerName = nextControllerName;
 	if (!_currentCameraControllerName.empty() &&
 		_cameraControllers[_currentCameraControllerName] != nullptr)

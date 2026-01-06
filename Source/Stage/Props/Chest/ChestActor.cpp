@@ -4,8 +4,6 @@
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/SphereCollider.h"
 
-#include "../../Source/Camera/ChangeArmorCamera.h"
-
 #include "ChestController.h"
 
 // 生成時処理
@@ -43,11 +41,4 @@ void ChestActor::OnCreate()
 	top->GetTransform().SetPositionZ(0.245f);
 	// コンポーネント追加
 	top->AddComponent<ModelRenderer>();
-
-	// カメラ生成
-	if (GetScene()->GetMainCameraActor()->IsControllerRegistered("ChangeArmorCamera") == false)
-	{
-		auto camera = GetScene()->RegisterActor<Actor>("ChangeArmorCamera", ActorTag::System);
-		camera->AddComponent<ChangeArmorCamera>();
-	}
 }

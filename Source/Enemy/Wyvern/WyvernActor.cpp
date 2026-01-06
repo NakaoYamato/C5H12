@@ -18,8 +18,6 @@
 #include "../../Source/Stage/EnvironmentDestroyer.h"
 #include "../BodyPartController.h"
 
-#include "../../Source/Camera/HuntingSuccessCamera.h"
-
 #include <imgui.h>
 
 // ¶¬ˆ—
@@ -93,13 +91,6 @@ void WyvernActor::OnCreate()
 		auto& material = modelRenderer->GetMaterial("LWing_M");
 		material.SetColor("Diffuse", Vector4::Red);
 		});
-
-	// ƒJƒƒ‰¶¬
-	if (GetScene()->GetMainCameraActor()->IsControllerRegistered("HuntingSuccessCamera") == false)
-	{
-		auto camera = GetScene()->RegisterActor<Actor>("HuntingSuccessCamera", ActorTag::System);
-		camera->AddComponent<HuntingSuccessCamera>();
-	}
 }
 // XVˆ—
 void WyvernActor::OnUpdate(float elapsedTime)

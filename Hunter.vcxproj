@@ -317,6 +317,7 @@
     <ClCompile Include="Source\Armor\ArmorManager.cpp" />
     <ClCompile Include="Source\Camera\ChangeArmorCamera.cpp" />
     <ClCompile Include="Source\Camera\HuntingSuccessCamera.cpp" />
+    <ClCompile Include="Source\Camera\LockOnCamera.cpp" />
     <ClCompile Include="Source\Common\CombatStatusController.cpp" />
     <ClCompile Include="Source\Common\DamageableChild.cpp" />
     <ClCompile Include="Source\Common\DamageSender.cpp" />
@@ -607,6 +608,7 @@
     <ClInclude Include="Source\Armor\ArmorManager.h" />
     <ClInclude Include="Source\Camera\ChangeArmorCamera.h" />
     <ClInclude Include="Source\Camera\HuntingSuccessCamera.h" />
+    <ClInclude Include="Source\Camera\LockOnCamera.h" />
     <ClInclude Include="Source\Common\CombatStatusController.h" />
     <ClInclude Include="Source\Common\DamageableChild.h" />
     <ClInclude Include="Source\Common\DamageSender.h" />

@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-void ChangeArmorCamera::Start()
+void ChangeArmorCamera::OnStart()
 {
 }
 

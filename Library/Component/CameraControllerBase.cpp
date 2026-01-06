@@ -4,12 +4,15 @@
 
 #include <imgui.h>
 
-// 生成時処理
-void CameraControllerBase::OnCreate()
+// 開始処理
+void CameraControllerBase::Start()
 {
 	GetActor()->GetScene()->GetMainCameraActor()->RegisterCameraController(this);
 	// 親設定
 	GetActor()->SetParent(GetActor()->GetScene()->GetMainCameraActor().get());
+
+	// 開始時処理
+	OnStart();
 }
 
 // 更新処理

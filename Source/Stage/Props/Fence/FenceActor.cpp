@@ -28,7 +28,8 @@ void FenceActor::OnCreate()
         auto fence = GetScene()->RegisterActor<Actor>(name, GetTag());
         fence->LoadModel("./Data/Model/Stage/Props/Fence/Fence.fbx");
         fence->SetParent(this);
-        fence->AddComponent<ModelRenderer>();
+        auto modelRenderer = fence->AddComponent<ModelRenderer>();
+        modelRenderer->SetRenderType(ModelRenderType::Static);
 
         Vector3 positions[4] =
         {
@@ -60,7 +61,8 @@ void FenceActor::OnCreate()
         fenceGateL->GetTransform().SetPositionZ(202.0f);
         fenceGateL->LoadModel("./Data/Model/Stage/Props/Fence/FenceGateL.fbx");
         fenceGateL->SetParent(this);
-        fenceGateL->AddComponent<ModelRenderer>();
+        auto modelRendererL = fenceGateL->AddComponent<ModelRenderer>();
+        modelRendererL->SetRenderType(ModelRenderType::Static);
         fenceGateL->AddComponent<GeteController>();
         auto boxL = fenceGateL->AddCollider<BoxCollider>();
         boxL->SetLayer(CollisionLayer::Stage);
@@ -73,7 +75,8 @@ void FenceActor::OnCreate()
         fenceGateR->GetTransform().SetPositionZ(-202.0f);
         fenceGateR->LoadModel("./Data/Model/Stage/Props/Fence/FenceGateR.fbx");
         fenceGateR->SetParent(this);
-        fenceGateR->AddComponent<ModelRenderer>();
+        auto modelRendererR = fenceGateR->AddComponent<ModelRenderer>();
+        modelRendererR->SetRenderType(ModelRenderType::Static);
         fenceGateR->AddComponent<GeteController>();
         auto boxR = fenceGateR->AddCollider<BoxCollider>();
         boxR->SetLayer(CollisionLayer::Stage);

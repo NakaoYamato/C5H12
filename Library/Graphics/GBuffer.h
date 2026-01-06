@@ -7,6 +7,7 @@
 #include "../Math/Vector.h"
 #include "../PostProcess/FrameBuffer.h"
 #include "../../Library/Renderer/TextureRenderer.h"
+#include "../../Library/Graphics/ConstantBuffer.h"
 
 // GBufferで使用するレンダーターゲットの枚数
 static constexpr UINT GBUFFER_RTV_COUNT = 4;
@@ -112,15 +113,15 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> _depthWritePS;
 	std::unique_ptr<FrameBuffer> _frameBuffer;
 
-	// フォグ
-	struct CbFog _fogConstants;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _fogConstantBuffer;
-
 	int _renderingType = RenderingType::PBR;
 	bool _useSSR = false;
+
+	// フォグ
+	CbFog _fogConstants;
+	ConstantBuffer _fogConstantBuffer;
 
 	// SSR用
 	SSRConstants _ssrConstants;
 	std::unique_ptr<SpriteResource> _ssrFullscreenQuad;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> _ssrConstantBuffer;
+	ConstantBuffer _ssrConstantBuffer;
 };

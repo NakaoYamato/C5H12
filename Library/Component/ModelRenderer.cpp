@@ -25,12 +25,26 @@ void ModelRenderer::LateUpdate(float elapsedTime)
 		// モデルが存在するならセット
 		SetModel(GetActor()->GetModel());
 	}
+
+	if (_cameraDistanceAlphaEnabled)
+	{
+		// カメラに近ければ透明化
+		auto position = GetActor()->GetTransform().GetWorldPosition();
+		auto& eyePosition = GetActor()->GetScene()->GetMainCamera()->GetEye();
+		_cameraDistanceAlpha = std::clamp(
+			Vector3::Length(position - eyePosition) / _cameraDistanceAlphaStart,
+			_cameraDistanceAlphaMin,
+			1.0f);
+		_cameraDistanceAlpha = std::powf(_cameraDistanceAlpha, 2.0f);
+	}
 }
 // 描画処理
 void ModelRenderer::Render(const RenderContext& rc)
 {
 	if (_model.lock() == nullptr) return;
 
+	Vector4 color = _color;
+	color.w *= _cameraDistanceAlpha;
 	const ModelResource* resource = _model.lock()->GetResource();
 	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
 	{
@@ -43,7 +57,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
 			&mesh,
 			_model.lock().get(),
-			_color, 
+			color,
 			material,
 			_renderType);
 	}
@@ -81,6 +95,14 @@ void ModelRenderer::DrawGui()
 	auto modelShaderResource = ResourceManager::Instance().GetResourceAs<ModelShaderResource>();
 
 	ImGui::ColorEdit4("color", &_color.x);
+	ImGui::Separator();
+	ImGui::Checkbox(u8"カメラ距離による透明化", &_cameraDistanceAlphaEnabled);
+	if (_cameraDistanceAlphaEnabled)
+	{
+		ImGui::DragFloat(u8"カメラ距離によるアルファ補正値", &_cameraDistanceAlpha, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat(u8"カメラ距離によるアルファ補正最小値", &_cameraDistanceAlphaMin, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat(u8"カメラ距離によるアルファ補正開始距離(m)", &_cameraDistanceAlphaStart, 0.01f, 0.0f, 100.0f);
+	}
 	ImGui::Separator();
 	int rId = static_cast<int>(_renderType);
 	if (ImGui::Combo(u8"描画タイプ", &rId, renderTypeName, _countof(renderTypeName)))

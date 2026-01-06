@@ -113,11 +113,6 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height) :
 	_frameBuffer = std::make_unique<FrameBuffer>(device,
 		width, height);
 
-	// フォグ定数バッファの作成
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(CbFog),
-		_fogConstantBuffer.ReleaseAndGetAddressOf());
-
 	// SSR用変数初期化
 	_ssrFullscreenQuad = std::make_unique<SpriteResource>(device,
 		L"",
@@ -125,9 +120,8 @@ GBuffer::GBuffer(ID3D11Device* device, UINT width, UINT height) :
 		"./Data/Shader/HLSL/GBuffer/ScreenSpaceReflectionPS.cso");
 
 	// 定数バッファ作成
-	(void)GpuResourceManager::CreateConstantBuffer(device,
-		sizeof(SSRConstants),
-		_ssrConstantBuffer.ReleaseAndGetAddressOf());
+	_fogConstantBuffer.Create(device, sizeof(CbFog));
+	_ssrConstantBuffer.Create(device, sizeof(SSRConstants));
 }
 
 GBuffer::~GBuffer()

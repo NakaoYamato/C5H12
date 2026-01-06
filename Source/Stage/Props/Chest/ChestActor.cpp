@@ -13,7 +13,7 @@ void ChestActor::OnCreate()
 	LoadModel("./Data/Model/Stage/Props/Chest/ChestBottom.fbx");
 
 	// コンポーネント追加
-	this->AddComponent<ModelRenderer>();
+	auto modelRenderer = this->AddComponent<ModelRenderer>();
 	auto controller = this->AddComponent<ChestController>();
 
 	// コライダー追加
@@ -22,6 +22,7 @@ void ChestActor::OnCreate()
 
 	// パラメータ設定
 	GetTransform().SetScale(2.0f);
+	modelRenderer->SetRenderType(ModelRenderType::Static);
 	bodyCollider->SetLayer(CollisionLayer::Stage);
 	bodyCollider->SetLayerMask(GetCollisionLayerMaskExcept(CollisionLayer::Stage));
 	bodyCollider->SetTrigger(false);
@@ -40,5 +41,6 @@ void ChestActor::OnCreate()
 	top->GetTransform().SetPositionY(0.538f);
 	top->GetTransform().SetPositionZ(0.245f);
 	// コンポーネント追加
-	top->AddComponent<ModelRenderer>();
+	auto topModelRenderer = top->AddComponent<ModelRenderer>();
+	topModelRenderer->SetRenderType(ModelRenderType::Static);
 }

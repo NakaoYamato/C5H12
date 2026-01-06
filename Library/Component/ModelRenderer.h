@@ -50,6 +50,22 @@ public:
 		}
 		return false;
 	}
+	// カメラ距離による透明化が有効か
+	bool IsCameraDistanceAlphaEnabled() const { return _cameraDistanceAlphaEnabled; }
+	// カメラ距離によるアルファ値補正
+	float GetCameraDistanceAlpha() const { return _cameraDistanceAlpha; }
+	// カメラ距離によるアルファ値補正最小値
+	float GetCameraDistanceAlphaMin() const { return _cameraDistanceAlphaMin; }
+	// カメラ距離によるアルファ値補正開始距離(m)
+	float GetCameraDistanceAlphaStart() const { return _cameraDistanceAlphaStart; }
+
+	// カメラ距離による透明化設定
+	void SetCameraDistanceAlphaEnabled(bool enabled) { _cameraDistanceAlphaEnabled = enabled; }
+	// カメラ距離によるアルファ値補正最小値設定
+	void SetCameraDistanceAlphaMin(float min) { _cameraDistanceAlphaMin = min; }
+	// カメラ距離によるアルファ値補正開始距離(m)設定
+	void SetCameraDistanceAlphaStart(float start) { _cameraDistanceAlphaStart = start; }
+
 	// メッシュの描画非表示リスト取得
 	const std::unordered_map<std::string, bool>& GetHiddenMeshMap() const { return _hiddenMeshMap; }
 
@@ -67,6 +83,15 @@ private:
 
 	ModelRenderType _renderType = ModelRenderType::Dynamic;
 	Vector4 _color{ 1,1,1,1 };
+
+	// カメラ距離による透明化を行うか
+	bool _cameraDistanceAlphaEnabled = true;
+	// カメラ距離によるアルファ値補正
+	float _cameraDistanceAlpha = 1.0f;
+	// カメラ距離によるアルファ値補正最小値
+	float _cameraDistanceAlphaMin = 0.3f;
+	// カメラ距離によるアルファ値補正開始距離(m)
+	float _cameraDistanceAlphaStart = 3.0f;
 
 	// マテリアル
 	std::vector<Material> _materialMap;

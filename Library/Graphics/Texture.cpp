@@ -13,11 +13,19 @@ void Texture::Load(ID3D11Device* device, const wchar_t* filepath)
 	// 読み込みに失敗した場合はダミーテクスチャを作成
 	if (!res)
 	{
-		Debug::Output::String(L"テクスチャの読み込みに失敗しました: ");
-		Debug::Output::String(filepath);
-		Debug::Output::String(L"\n");
-		// 赤色の16x16ダミーテクスチャを作成
-		MakeDummyTexture(device, 0xFF0000FF, 16);
+		// 空のパスの場合は白でロード
+		if (filepath == nullptr)
+		{
+			MakeDummyTexture(device, 0xFFFFFFFF, 16);
+		}
+		else
+		{
+			Debug::Output::String(L"テクスチャの読み込みに失敗しました: ");
+			Debug::Output::String(filepath);
+			Debug::Output::String(L"\n");
+			// 赤色の16x16ダミーテクスチャを作成
+			MakeDummyTexture(device, 0xFF0000FF, 16);
+		}
 	}
 }
 

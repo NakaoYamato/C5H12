@@ -10,23 +10,37 @@
 
 #include <Mygui.h>
 
+LONG Terrain::MaterialMapSize[static_cast<size_t>(TextureQuality::Max)] = 
+{
+    1024 * 1,
+    1024 * 2,
+    1024 * 4
+};
+
 Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
 	_serializePath(serializePath)
 {
+    static_assert(static_cast<size_t>(TextureQuality::Max) == 3, "品質は現状3段階まで");
+
     // 地形メッシュの頂点とインデックスを生成
     CreateTerrainMesh(device);
 
     // マテリアルマップ作成
-	_materialMapFB = std::make_unique<FrameBuffer>(
-		device,
-        MaterialMapSize, MaterialMapSize, true,
-		std::vector<DXGI_FORMAT>(
-			{ 
-                DXGI_FORMAT_R8G8B8A8_UNORM, // BaseColor 
-                DXGI_FORMAT_R8G8B8A8_UNORM, // Normal
-                DXGI_FORMAT_R16G16B16A16_FLOAT, // Parameter
-            })
-    );
+    for (size_t i = 0; i < static_cast<size_t>(TextureQuality::Max); ++i)
+    {
+		LONG size = MaterialMapSize[i];
+        _materialMapFB[i] = std::make_unique<FrameBuffer>(
+            device,
+            size, size, true,
+            std::vector<DXGI_FORMAT>(
+                {
+                    DXGI_FORMAT_R8G8B8A8_UNORM, // BaseColor 
+                    DXGI_FORMAT_R8G8B8A8_UNORM, // Normal
+                    DXGI_FORMAT_R16G16B16A16_FLOAT, // Parameter
+                })
+                );
+    }
+
 	// 頂点情報をGPUに送るためのバッファ、SRV作成
 	{
 		D3D11_BUFFER_DESC desc{};
@@ -56,9 +70,12 @@ bool Terrain::UpdateTextures(TextureRenderer& textureRenderer, ID3D11DeviceConte
     // マテリアルマップ、パラメータマップのリセット
     if (_resetMap)
     {
-        _materialMapFB->Clear(BaseColorTextureIndex, dc, Vector4::White);
-        _materialMapFB->Clear(NormalTextureIndex, dc, Vector4::Blue);
-        _materialMapFB->Clear(ParameterTextureIndex, dc, Vector4::Black);
+        for (size_t i = 0; i < static_cast<size_t>(TextureQuality::Max); ++i)
+        {
+            _materialMapFB[i]->Clear(BaseColorTextureIndex, dc, Vector4::White);
+            _materialMapFB[i]->Clear(NormalTextureIndex, dc, Vector4::Blue);
+            _materialMapFB[i]->Clear(ParameterTextureIndex, dc, Vector4::Black);
+        }
         _resetMap = false;
         _baseColorTexturePath.clear();
 		_normalTexturePath.clear();
@@ -71,25 +88,34 @@ bool Terrain::UpdateTextures(TextureRenderer& textureRenderer, ID3D11DeviceConte
     {
         if (_loadBaseColorSRV)
         {
-            _materialMapFB->ClearAndActivate(BaseColorTextureIndex, dc);
-            textureRenderer.Blit(dc, _loadBaseColorSRV.GetAddressOf(), 0, 1);
-            _materialMapFB->Deactivate(dc);
+            for (size_t i = 0; i < static_cast<size_t>(TextureQuality::Max); ++i)
+            {
+                _materialMapFB[i]->ClearAndActivate(BaseColorTextureIndex, dc);
+                textureRenderer.Blit(dc, _loadBaseColorSRV.GetAddressOf(), 0, 1);
+                _materialMapFB[i]->Deactivate(dc);
+            }
             _loadBaseColorSRV.Reset();
             res = true;
         }
         if (_loadNormalSRV)
         {
-            _materialMapFB->ClearAndActivate(NormalTextureIndex, dc);
-            textureRenderer.Blit(dc, _loadNormalSRV.GetAddressOf(), 0, 1);
-            _materialMapFB->Deactivate(dc);
+            for (size_t i = 0; i < static_cast<size_t>(TextureQuality::Max); ++i)
+            {
+                _materialMapFB[i]->ClearAndActivate(NormalTextureIndex, dc);
+                textureRenderer.Blit(dc, _loadNormalSRV.GetAddressOf(), 0, 1);
+                _materialMapFB[i]->Deactivate(dc);
+            }
             _loadNormalSRV.Reset();
             res = true;
         }
         if (_loadParameterSRV)
         {
-            _materialMapFB->ClearAndActivate(ParameterTextureIndex, dc);
-            textureRenderer.Blit(dc, _loadParameterSRV.GetAddressOf(), 0, 1);
-            _materialMapFB->Deactivate(dc);
+            for (size_t i = 0; i < static_cast<size_t>(TextureQuality::Max); ++i)
+            {
+                _materialMapFB[i]->ClearAndActivate(ParameterTextureIndex, dc);
+                textureRenderer.Blit(dc, _loadParameterSRV.GetAddressOf(), 0, 1);
+                _materialMapFB[i]->Deactivate(dc);
+            }
             _loadParameterSRV.Reset();
             res = true;
         }
@@ -106,7 +132,17 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
         if (ImGui::TreeNode(u8"基本色"))
         {
             ImGui::Text(ToString(_baseColorTexturePath).c_str());
-            ImGui::Image(_materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::Low)]->GetColorSRV(BaseColorTextureIndex).Get(), 
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::SameLine();
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::Medium)]->GetColorSRV(BaseColorTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::SameLine();
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::High)]->GetColorSRV(BaseColorTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 
             std::string resultPath = "";
             if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
@@ -141,7 +177,17 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
         if (ImGui::TreeNode(u8"法線"))
         {
             ImGui::Text(ToString(_normalTexturePath).c_str());
-            ImGui::Image(_materialMapFB->GetColorSRV(NormalTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::Low)]->GetColorSRV(NormalTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::SameLine();
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::Medium)]->GetColorSRV(NormalTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::SameLine();
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::High)]->GetColorSRV(NormalTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 
             std::string resultPath = "";
             if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
@@ -173,7 +219,17 @@ void Terrain::DrawGui(ID3D11Device* device, ID3D11DeviceContext* dc)
         if (ImGui::TreeNode(u8"パラメータ"))
         {
             ImGui::Text(ToString(_parameterTexturePath).c_str());
-            ImGui::Image(_materialMapFB->GetColorSRV(ParameterTextureIndex).Get(), ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::Low)]->GetColorSRV(ParameterTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::SameLine();
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::Medium)]->GetColorSRV(ParameterTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::SameLine();
+            ImGui::Image(
+                _materialMapFB[static_cast<size_t>(TextureQuality::High)]->GetColorSRV(ParameterTextureIndex).Get(),
+                ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
 
             std::string resultPath = "";
             if (ImGui::OpenDialogBotton(u8"読み込み", &resultPath, ImGui::DDSTextureFilter))
@@ -277,7 +333,7 @@ bool Terrain::Raycast(
 void Terrain::SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* baseColorPath)
 {
     if (Exporter::SaveDDSFile(device, dc,
-        _materialMapFB->GetColorSRV(BaseColorTextureIndex).Get(),
+        _materialMapFB[static_cast<size_t>(TextureQuality::High)]->GetColorSRV(BaseColorTextureIndex).Get(),
         baseColorPath))
     {
         // 基本色テクスチャのパスを更新
@@ -288,7 +344,7 @@ void Terrain::SaveBaseColorTexture(ID3D11Device* device, ID3D11DeviceContext* dc
 void Terrain::SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* normalPath)
 {
     if (Exporter::SaveDDSFile(device, dc,
-        _materialMapFB->GetColorSRV(NormalTextureIndex).Get(),
+        _materialMapFB[static_cast<size_t>(TextureQuality::High)]->GetColorSRV(NormalTextureIndex).Get(),
         normalPath))
     {
         // 基本色テクスチャのパスを更新
@@ -299,7 +355,7 @@ void Terrain::SaveNormalTexture(ID3D11Device* device, ID3D11DeviceContext* dc, c
 void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, const wchar_t* parameterMapPath)
 {
     if (Exporter::SaveDDSFile(device, dc,
-        _materialMapFB->GetColorSRV(ParameterTextureIndex).Get(),
+        _materialMapFB[static_cast<size_t>(TextureQuality::High)]->GetColorSRV(ParameterTextureIndex).Get(),
         parameterMapPath))
     {
 		// パラメータマップのパスを更新

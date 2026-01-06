@@ -37,9 +37,10 @@ void TerrainDeformer::OnCreate()
         _constantBuffer.ReleaseAndGetAddressOf());
 
     // マテリアルマップのコピーバッファを作成
+	LONG materialMapSize = Terrain::MaterialMapSize[static_cast<size_t>(Terrain::TextureQuality::High)];
     _copyMaterialMapFB = std::make_unique<FrameBuffer>(
         device,
-        Terrain::MaterialMapSize, Terrain::MaterialMapSize, true,
+        materialMapSize, materialMapSize, true,
         std::vector<DXGI_FORMAT>(
             { 
                 DXGI_FORMAT_R8G8B8A8_UNORM,

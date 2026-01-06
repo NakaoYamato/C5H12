@@ -75,6 +75,12 @@ public:
     void CastShadow(const RenderContext& rc);
 	// GUI描画
 	void DrawGui();
+
+	// テクスチャ品質取得
+	Terrain::TextureQuality GetTextureQuality() const { return _currentTextureQuality; }
+	// テクスチャ品質設定
+	void SetTextureQuality(Terrain::TextureQuality quality) { _currentTextureQuality = quality; }
+
 private:
     void RenderStreamOut(const RenderContext& rc);
     void RenderDynamic(const RenderContext& rc, bool writeGBuffer);
@@ -130,6 +136,9 @@ private:
 	std::vector<DrawInfo> _grassDrawInfos;
     // 影描画用情報配列
     std::vector<DrawInfo> _shadowDrawInfos;
+
+	// 現在のテクスチャ品質設定
+	Terrain::TextureQuality _currentTextureQuality = Terrain::TextureQuality::High;
 
 	// 定数バッファのデータ
 	ConstantBuffer                          _data;

@@ -377,6 +377,12 @@ void TerrainRenderer::DrawGui()
 			ImGui::Checkbox(u8"ワイヤーフレーム", &_isWireFrame);
 			ImGui::Checkbox(u8"Mipmapを使用", &_isUsingMipmap);
 			ImGui::Separator();
+			int textureQuality = static_cast<int>(_currentTextureQuality);
+			if (ImGui::Combo(u8"テクスチャ品質", &textureQuality, u8"低\0中\0高\0"))
+			{
+				_currentTextureQuality = static_cast<Terrain::TextureQuality>(textureQuality);
+			}
+			ImGui::Separator();
 
             if (ImGui::TreeNode(u8"定数バッファ"))
             {
@@ -448,9 +454,9 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
         // シェーダーリソースビューの設定
         ID3D11ShaderResourceView* srvs[] =
         {
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
+            drawInfo.terrain->GetMaterialMapFB(Terrain::TextureQuality::High)->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB(Terrain::TextureQuality::High)->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB(Terrain::TextureQuality::High)->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
 		// Mipmapを使用するかどうか設定
         if (_isUsingMipmap)
@@ -538,9 +544,9 @@ void TerrainRenderer::RenderDynamic(const RenderContext& rc, bool writeGBuffer)
         // シェーダーリソースビューの設定
         ID3D11ShaderResourceView* srvs[] =
         {
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::ParameterTextureIndex).Get()
+            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::ParameterTextureIndex).Get()
         };
         // Mipmapを使用するかどうか設定
         if (_isUsingMipmap)
@@ -591,8 +597,8 @@ void TerrainRenderer::RenderStatic(const RenderContext& rc, bool writeGBuffer)
         // シェーダーリソースビューの設定
         ID3D11ShaderResourceView* srvs[] =
         {
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB()->GetColorSRV(Terrain::NormalTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
+            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::NormalTextureIndex).Get(),
             drawInfo.terrain->GetStreamOutSRV().Get(),
         };
         // Mipmapを使用するかどうか設定

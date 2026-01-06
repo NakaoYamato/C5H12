@@ -34,6 +34,9 @@ void LockOnCamera::OnUpdate(float elapsedTime)
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
     float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
 
+	// TODO : ターゲットを画面座標に変換してその方向に移動する
+    // 入力は画面座標位置を変えるようにする
+
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform =
@@ -57,6 +60,13 @@ void LockOnCamera::OnUpdate(float elapsedTime)
             moveY = 0.0f;
         }
     }
+
+	// ターゲットの目標画面位置を更新
+	_targetScreenPosition.x += moveX;
+	_targetScreenPosition.y += moveY;
+    // 制限
+	_targetScreenPosition.x = MathF::Clamp(_targetScreenPosition.x, _targetScreenMinPosition.x, _targetScreenMaxPosition.x);
+	_targetScreenPosition.y = MathF::Clamp(_targetScreenPosition.y, _targetScreenMinPosition.y, _targetScreenMaxPosition.y);
 
     // Y軸回転
     angle.y += moveX * 0.5f;

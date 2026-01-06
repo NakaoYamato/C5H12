@@ -41,6 +41,9 @@ private:
 
 	// ターゲットの画面位置(NDC座標)
 	Vector2 _targetScreenPosition{};
+	// ターゲットの画面最小最大位置(NDC座標)
+	Vector2 _targetScreenMinPosition{ -0.2f, -0.2f };
+	Vector2 _targetScreenMaxPosition{ 0.2f, 0.2f };
 
 	// X軸の回転制限
 	float _angleXLimitHigh = DirectX::XMConvertToRadians(80.0f);

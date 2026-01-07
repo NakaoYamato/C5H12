@@ -287,7 +287,7 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     if (_isWireFrame)
         dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::WireCullNone));
     else
-        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+        dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));
 	// MRTのブレンドステートを設定
     if (writeGBuffer)
         dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::MultipleRenderTargets), nullptr, 0xFFFFFFFF);

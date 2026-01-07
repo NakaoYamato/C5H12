@@ -188,6 +188,8 @@ void ParticleRenderer::Initialize(ID3D11Device* device, ID3D11DeviceContext* dc,
 /// パーティクル生成
 void ParticleRenderer::Emit(const ParticleEmitData& data)
 {
+	std::lock_guard<std::mutex> lock(_emitMutex);
+
 	// 生成数が制限を超えている場合は何もしない
 	if (_emitParticles.size() >= _numEmitParticles)
 		return;

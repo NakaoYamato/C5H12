@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <mutex>
 
 #include "../Model/Model.h"
 #include "../Material/Material.h"
@@ -42,8 +43,8 @@ private:
 	// 描画用情報
     struct DrawInfo
     {
-        Model*                      model       = nullptr;
         const ModelResource::Mesh*  mesh        = nullptr;
+        const std::vector<DirectX::XMFLOAT4X4>* boneTransforms = nullptr;
         Vector4				        color       = Vector4::White;
         Material*                   material    = nullptr;
     };
@@ -82,13 +83,14 @@ public:
     /// メッシュ描画
     /// </summary>
     /// <param name="mesh"></param>
-    /// <param name="model"></param>
+    /// <param name="boneTransforms"></param>
     /// <param name="color"></param>
     /// <param name="material"></param>
     /// <param name="renderType"></param>
     /// <param name="parameter"></param>
-    void Draw(const ModelResource::Mesh* mesh,
-        Model* model,
+    void Draw(
+        const ModelResource::Mesh* mesh,
+        const std::vector<DirectX::XMFLOAT4X4>* boneTransforms,
         const Vector4& color,
         Material* material,
         ModelRenderType renderType);
@@ -97,9 +99,12 @@ public:
 	/// メッシュのテスト描画
 	/// </summary>
 	/// <param name="mesh"></param>
-	/// <param name="model"></param>
+	/// <param name="boneTransforms"></param>
 	/// <param name="renderType"></param>
-	void DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType);
+	void DrawTest(
+        const ModelResource::Mesh* mesh, 
+        const std::vector<DirectX::XMFLOAT4X4>* boneTransforms,
+        ModelRenderType renderType);
 	/// <summary>
 	/// メッシュのテスト描画
 	/// </summary>
@@ -111,13 +116,13 @@ public:
 	/// 影描画
 	/// </summary>
 	/// <param name="mesh"></param>
-	/// <param name="model"></param>
+	/// <param name="boneTransforms"></param>
 	/// <param name="color"></param>
 	/// <param name="material"></param>
 	/// <param name="renderType"></param>
 	/// <param name="parameter"></param>
 	void DrawShadow(const ModelResource::Mesh* mesh,
-        Model* model,
+        const std::vector<DirectX::XMFLOAT4X4>* boneTransforms,
         const Vector4& color,
         Material* material,
         ModelRenderType renderType);
@@ -176,6 +181,9 @@ private:
     DrawInfoMap                 _dynamicInfomap;
     DrawInfoMap                 _staticInfomap;
     std::vector<AlphaDrawInfo>	_alphaDrawInfomap;
+	// 描画登録時の排他制御用
+	std::mutex                  _drawInfoMutex;
+
     // Key : シェーダー名+モデルファイル名
     using InstancingDrawInfoMap = std::unordered_map<std::string, InstancingDrawInfo>;
     InstancingDrawInfoMap       _instancingInfoMap;

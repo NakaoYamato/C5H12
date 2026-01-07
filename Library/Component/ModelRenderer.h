@@ -80,6 +80,8 @@ public:
 #pragma endregion
 private:
 	std::weak_ptr<Model> _model;
+	// モデルのボーン行列
+	std::unordered_map<int, std::vector<DirectX::XMFLOAT4X4>> _boneTransformMap;
 
 	ModelRenderType _renderType = ModelRenderType::Dynamic;
 	Vector4 _color{ 1,1,1,1 };

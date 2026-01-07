@@ -26,9 +26,9 @@ void ModelRenderer::LateUpdate(float elapsedTime)
 		SetModel(GetActor()->GetModel());
 	}
 
+	// カメラに近ければ透明化
 	if (_cameraDistanceAlphaEnabled)
 	{
-		// カメラに近ければ透明化
 		auto position = GetActor()->GetTransform().GetWorldPosition();
 		auto& eyePosition = GetActor()->GetScene()->GetMainCamera()->GetEye();
 		_cameraDistanceAlpha = std::clamp(
@@ -36,6 +36,31 @@ void ModelRenderer::LateUpdate(float elapsedTime)
 			_cameraDistanceAlphaMin,
 			1.0f);
 		_cameraDistanceAlpha = std::powf(_cameraDistanceAlpha, 2.0f);
+	}
+
+	// ボーン行列計算
+	if (auto model = _model.lock())
+	{
+		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
+		for (auto& mesh : model->GetResource()->GetMeshes())
+		{
+			auto& boneTransform = _boneTransformMap[mesh.nodeIndex];
+			if (mesh.bones.size() > 0)
+			{
+				for (size_t i = 0; i < mesh.bones.size(); ++i)
+				{
+					const ModelResource::Bone& bone = mesh.bones.at(i);
+					DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
+					DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+					DirectX::XMMATRIX Bone = Offset * World;
+					DirectX::XMStoreFloat4x4(&boneTransform[i], Bone);
+				}
+			}
+			else
+			{
+				boneTransform[0] = nodes[mesh.nodeIndex].worldTransform;
+			}
+		}
 	}
 }
 // 描画処理
@@ -56,7 +81,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 
 		GetActor()->GetScene()->GetMeshRenderer().Draw(
 			&mesh,
-			_model.lock().get(),
+			&_boneTransformMap[mesh.nodeIndex],
 			color,
 			material,
 			_renderType);
@@ -77,8 +102,8 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 			continue;
 
 		GetActor()->GetScene()->GetMeshRenderer().DrawShadow(
-			&mesh, 
-			_model.lock().get(),
+			&mesh,
+			&_boneTransformMap[mesh.nodeIndex],
 			Vector4::White,
 			material,
 			_renderType);
@@ -202,6 +227,12 @@ void ModelRenderer::SetModel(std::weak_ptr<Model> model)
 			isDeferred));
 
 		_hiddenMeshMap[material.GetName()] = false;
+	}
+	// ボーン行列用配列確保
+	_boneTransformMap.clear();
+	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+	{
+		_boneTransformMap[mesh.nodeIndex].resize(std::max<size_t>(mesh.bones.size(), static_cast<size_t>(1)));
 	}
 }
 

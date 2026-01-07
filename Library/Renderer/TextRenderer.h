@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <mutex>
 
 enum class FontType
 {
@@ -157,9 +158,11 @@ private:
 	std::unique_ptr<DirectX::SpriteFont>	_spriteFonts[static_cast<int>(FontType::FontTypeMax)];
 	std::unique_ptr<DirectX::SpriteBatch>	_spriteBatch;
 	// 描画するテキストデータ
-	std::vector<TextDrawData> _textDrawDatas;
+	std::vector<TextDrawData>	_textDrawDatas;
 	// 描画する3Dテキストデータ
 	std::vector<Text3DDrawData> _text3DDrawDatas;
+	// 描画登録時の排他制御用
+	std::mutex					_drawMutex;
 	// 各フォントの大きさ
 	float _fontScale[static_cast<int>(FontType::FontTypeMax)]{};
 

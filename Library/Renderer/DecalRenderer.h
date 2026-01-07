@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <mutex>
 
 #include "../../Library/Decal/Decal.h"
 #include "../../Library/Graphics/RenderContext.h"
@@ -109,6 +110,9 @@ private:
 #pragma endregion
 	// 描画情報のリスト
 	std::vector<DrawInfo>							_drawInfos;
+	// 描画登録時の排他制御用
+	std::mutex										_drawInfoMutex;
+
 	std::unique_ptr<SpriteResource>					_fullscreenQuad;
 	// デカールの法線マップがない場合のダミー
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _dummyNormalMap;

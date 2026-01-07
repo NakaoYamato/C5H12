@@ -50,25 +50,29 @@ void MeshRenderer::Initialize(ID3D11Device* device)
 
 /// メッシュ描画
 void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
-	Model* model,
+	const std::vector<DirectX::XMFLOAT4X4>* boneTransforms,
 	const Vector4& color,
 	Material* material,
 	ModelRenderType renderType)
 {
+	assert(mesh != nullptr);
+	assert(boneTransforms != nullptr);
+	std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
 	// 描画タイプに応じて登録
 	switch (renderType)
 	{
 	case ModelRenderType::Dynamic:
 		if (material->GetBlendType() == BlendType::Alpha)
-			_alphaDrawInfomap.push_back({ model, mesh, color, material, renderType, 0.0f });
+			_alphaDrawInfomap.push_back({ mesh, boneTransforms, color, material, renderType, 0.0f });
 		else
-			_dynamicInfomap[material->GetShaderName()].push_back({ model, mesh, color, material });
+			_dynamicInfomap[material->GetShaderName()].push_back({ mesh, boneTransforms, color, material });
 		break;
 	case ModelRenderType::Static:
 		if (material->GetBlendType() == BlendType::Alpha)
-			_alphaDrawInfomap.push_back({ model, mesh, color, material, renderType, 0.0f });
+			_alphaDrawInfomap.push_back({ mesh, boneTransforms, color, material, renderType, 0.0f });
 		else
-			_staticInfomap[material->GetShaderName()].push_back({ model, mesh, color,  material });
+			_staticInfomap[material->GetShaderName()].push_back({ mesh, boneTransforms, color,  material });
 		break;
 	case ModelRenderType::Instancing:
 		assert(!"Please Call \"DrawInstancing\"");
@@ -80,9 +84,11 @@ void MeshRenderer::Draw(const ModelResource::Mesh* mesh,
 }
 
 /// メッシュのテスト描画
-void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh, Model* model, ModelRenderType renderType)
+void MeshRenderer::DrawTest(const ModelResource::Mesh* mesh,
+	const std::vector<DirectX::XMFLOAT4X4>* boneTransforms,
+	ModelRenderType renderType)
 {
-	MeshRenderer::Draw(mesh, model, Vector4::White, &_testMaterial, renderType);
+	MeshRenderer::Draw(mesh, boneTransforms, Vector4::White, &_testMaterial, renderType);
 }
 /// メッシュのテスト描画
 void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
@@ -93,19 +99,23 @@ void MeshRenderer::DrawTest(Model* model, const DirectX::XMFLOAT4X4& world)
 /// 影描画
 void MeshRenderer::DrawShadow(
 	const ModelResource::Mesh* mesh,
-	Model* model,
+	const std::vector<DirectX::XMFLOAT4X4>* boneTransforms,
 	const Vector4& color,
 	Material* material,
 	ModelRenderType renderType)
 {
+	assert(mesh != nullptr);
+	assert(boneTransforms != nullptr);
+	std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
 	// 描画タイプに応じて登録
 	switch (renderType)
 	{
 	case ModelRenderType::Dynamic:
-		_dynamicInfomap["CascadedShadowMap"].push_back({ model, mesh, color, material });
+		_dynamicInfomap["CascadedShadowMap"].push_back({ mesh, boneTransforms, color, material });
 		break;
 	case ModelRenderType::Static:
-		_staticInfomap["CascadedShadowMap"].push_back({ model, mesh, color,  material });
+		_staticInfomap["CascadedShadowMap"].push_back({ mesh, boneTransforms, color,  material });
 		break;
 	case ModelRenderType::Instancing:
 		// TODO
@@ -183,8 +193,6 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 				Debug::Output::String(L"\tシェーダーがnullptrのためPhongシェーダーを使用\n");
 				shader = shaders[static_cast<int>(ModelRenderType::Dynamic)]["Phong"].get();
 			}
-			ProfileScopedSection_3(0, drawInfomap.first.c_str(), ImGuiControl::Profiler::Blue);
-
 			shader->Begin(rc);
 
 			for (auto& drawInfo : drawInfomap.second)
@@ -221,7 +229,6 @@ void MeshRenderer::RenderOpaque(const RenderContext& rc, bool writeGBuffer)
 				Debug::Output::String(L"\tシェーダーがnullptrのためPhongシェーダーを使用\n");
 				shader = shaders[static_cast<int>(ModelRenderType::Static)]["Phong"].get();
 			}
-			ProfileScopedSection_3(0, drawInfomap.first.c_str(), ImGuiControl::Profiler::Blue);
 			shader->Begin(rc);
 
 			for (auto& drawInfo : drawInfomap.second)
@@ -270,12 +277,12 @@ void MeshRenderer::RenderAlpha(const RenderContext& rc)
 		DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
 		for (auto& alphaDrawInfo : _alphaDrawInfomap)
 		{
-			const std::vector<ModelResource::Node>& nodes = alphaDrawInfo.drawInfo.model->GetPoseNodes();
+			const std::vector<DirectX::XMFLOAT4X4>* boneTransforms = alphaDrawInfo.drawInfo.boneTransforms;
 			const ModelResource::Mesh* mesh = alphaDrawInfo.drawInfo.mesh;
 			DirectX::XMVECTOR Position = DirectX::XMVectorSet(
-				nodes[mesh->nodeIndex].worldTransform._41,
-				nodes[mesh->nodeIndex].worldTransform._42,
-				nodes[mesh->nodeIndex].worldTransform._43,
+				boneTransforms->at(mesh->nodeIndex)._41,
+				boneTransforms->at(mesh->nodeIndex)._42,
+				boneTransforms->at(mesh->nodeIndex)._43,
 				0.0f);
 			DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Position, CameraPosition);
 			alphaDrawInfo.distance = DirectX::XMVectorGetX(DirectX::XMVector3Dot(CameraFront, Vec));
@@ -395,43 +402,28 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 			for (auto& drawInfo : drawInfomap.second)
 			{
 				// メッシュ描画
-				auto model = drawInfo.model;
+				auto& boneTransforms = *drawInfo.boneTransforms;
 				auto& color = drawInfo.color;
-				const ModelResource* resource = model->GetResource();
-				const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
-				for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+				auto& mesh = drawInfo.mesh;
+				uint32_t stride{ sizeof(ModelResource::Vertex) };
+				uint32_t offset{ 0 };
+				dc->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
+				dc->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+				dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+				// スケルトン用定数バッファ
+				size_t size = std::min<size_t>(boneTransforms.size(), static_cast<size_t>(FBX_MAX_BONES));
+				for (size_t i = 0; i < size; ++i)
 				{
-					uint32_t stride{ sizeof(ModelResource::Vertex) };
-					uint32_t offset{ 0 };
-					dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-					dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-					dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-					// スケルトン用定数バッファ
-					if (mesh.bones.size() > 0)
-					{
-						for (size_t i = 0; i < mesh.bones.size(); ++i)
-						{
-							const ModelResource::Bone& bone = mesh.bones.at(i);
-							DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
-							DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
-							DirectX::XMMATRIX Bone = Offset * World;
-							DirectX::XMStoreFloat4x4(&_cbDynamicSkeleton.boneTransforms[i], Bone);
-						}
-					}
-					else
-					{
-						_cbDynamicSkeleton.boneTransforms[0] = nodes[mesh.nodeIndex].worldTransform;
-					}
-					_cbDynamicSkeleton.materialColor = color;
-
-					dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);
-
-					// シェーダーの更新処理
-					shader->Update(rc, drawInfo.material);
-
-					dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
+					_cbDynamicSkeleton.boneTransforms[i] = boneTransforms[i];
 				}
+
+				dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);
+
+				// シェーダーの更新処理
+				shader->Update(rc, drawInfo.material);
+
+				dc->DrawIndexedInstanced(static_cast<UINT>(mesh->indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 			}
 		}
 		shader->End(rc);
@@ -454,28 +446,24 @@ void MeshRenderer::CastShadow(const RenderContext& rc)
 			for (auto& drawInfo : drawInfomap.second)
 			{
 				// メッシュ描画
-				auto model = drawInfo.model;
+				auto& boneTransforms = *drawInfo.boneTransforms;
 				auto& color = drawInfo.color;
-				const ModelResource* resource = model->GetResource();
-				const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
-				for (const ModelResource::Mesh& mesh : resource->GetMeshes())
-				{
-					uint32_t stride{ sizeof(ModelResource::Vertex) };
-					uint32_t offset{ 0 };
-					dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
-					dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-					dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				auto& mesh = drawInfo.mesh;
+				uint32_t stride{ sizeof(ModelResource::Vertex) };
+				uint32_t offset{ 0 };
+				dc->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
+				dc->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+				dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-					// スケルトン用定数バッファ
-					_cbStaticSkeleton.world = nodes[mesh.nodeIndex].worldTransform;
-					_cbStaticSkeleton.materialColor = color;
-					dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
+				// スケルトン用定数バッファ
+				_cbStaticSkeleton.world = boneTransforms[0];
+				_cbStaticSkeleton.materialColor = color;
+				dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
 
-					// シェーダーの更新処理
-					shader->Update(rc, drawInfo.material);
+				// シェーダーの更新処理
+				shader->Update(rc, drawInfo.material);
 
-					dc->DrawIndexedInstanced(static_cast<UINT>(mesh.indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
-				}
+				dc->DrawIndexedInstanced(static_cast<UINT>(mesh->indices.size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0, 0);
 			}
 		}
 		shader->End(rc);
@@ -581,11 +569,10 @@ void MeshRenderer::RenderInstancing(const RenderContext& rc)
 void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ModelShaderBase* shader, DrawInfo& drawInfo)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
-	Model* model = drawInfo.model;
+	auto& boneTransforms = *drawInfo.boneTransforms;
 	const ModelResource::Mesh* mesh = drawInfo.mesh;
 	const Vector4& materialColor = drawInfo.color;
 	Material* material = drawInfo.material;
-	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 
 	uint32_t stride{ sizeof(ModelResource::Vertex) };
 	uint32_t offset{ 0 };
@@ -594,20 +581,10 @@ void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ModelShaderBase*
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// スケルトン用定数バッファ
-	if (mesh->bones.size() > 0)
+	size_t size = std::min<size_t>(boneTransforms.size(), static_cast<size_t>(FBX_MAX_BONES));
+	for (size_t i = 0; i < size; ++i)
 	{
-		for (size_t i = 0; i < mesh->bones.size(); ++i)
-		{
-			const ModelResource::Bone& bone = mesh->bones.at(i);
-			DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
-			DirectX::XMMATRIX Offset = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
-			DirectX::XMMATRIX Bone = Offset * World;
-			DirectX::XMStoreFloat4x4(&_cbDynamicSkeleton.boneTransforms[i], Bone);
-		}
-	}
-	else
-	{
-		_cbDynamicSkeleton.boneTransforms[0] = nodes[mesh->nodeIndex].worldTransform;
+		_cbDynamicSkeleton.boneTransforms[i] = boneTransforms[i];
 	}
 	_cbDynamicSkeleton.materialColor = materialColor;
 
@@ -623,12 +600,10 @@ void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ModelShaderBase*
 void MeshRenderer::DrawStaticBoneModel(const RenderContext& rc, ModelShaderBase* shader, DrawInfo& drawInfo)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
-	Model* model = drawInfo.model;
+	auto& boneTransforms = *drawInfo.boneTransforms;
 	const ModelResource::Mesh* mesh = drawInfo.mesh;
 	const Vector4& materialColor = drawInfo.color;
 	Material* material = drawInfo.material;
-	const ModelResource* resource = model->GetResource();
-	const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 
 	uint32_t stride{ sizeof(ModelResource::Vertex) };
 	uint32_t offset{ 0 };
@@ -637,7 +612,7 @@ void MeshRenderer::DrawStaticBoneModel(const RenderContext& rc, ModelShaderBase*
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// スケルトン用定数バッファ
-	_cbStaticSkeleton.world = nodes[mesh->nodeIndex].worldTransform;
+	_cbStaticSkeleton.world = boneTransforms[0];
 	_cbStaticSkeleton.materialColor = materialColor;
 	dc->UpdateSubresource(_staticBoneCB.Get(), 0, 0, &_cbStaticSkeleton, 0, 0);
 

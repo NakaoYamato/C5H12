@@ -27,6 +27,8 @@ void TextRenderer::Draw(FontType type,
 	const Vector2& origin,
 	const Vector2& scale)
 {
+	std::lock_guard<std::mutex> lock(_drawMutex);
+
 	// 文字数取得
 	float length = static_cast<float>(wcslen(text));
 
@@ -64,6 +66,8 @@ void TextRenderer::Draw(FontType type,
 /// テキスト描画
 void TextRenderer::Draw(TextDrawData data)
 {
+	std::lock_guard<std::mutex> lock(_drawMutex);
+
 	// 文字数取得
 	float length = static_cast<float>(wcslen(data.text.c_str()));
 	data.origin.x = data.origin.x * length * _fontScale[static_cast<int>(data.type)];
@@ -80,6 +84,8 @@ void TextRenderer::Draw3D(FontType type,
 	const Vector2& origin,
 	const Vector2& scale)
 {
+	std::lock_guard<std::mutex> lock(_drawMutex);
+
 	Text3DDrawData drawData;
 	drawData.type = type;
 	drawData.text = ToString(text);
@@ -113,6 +119,8 @@ void TextRenderer::Draw3D(FontType type,
 /// 3Dテキスト描画
 void TextRenderer::Draw3D(Text3DDrawData data)
 {
+	std::lock_guard<std::mutex> lock(_drawMutex);
+
 	_text3DDrawDatas.push_back(data);
 }
 

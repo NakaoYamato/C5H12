@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "../../Library/Particle/ParticleDefine.h"
 #include "../../Library/2D/Canvas.h"
 
@@ -225,6 +227,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>				_particleHeaderBuffer;
 	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView>	_particleHeaderUAV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	_particleHeaderSRV;
+
+	// 登録時の排他制御用
+	std::mutex											_emitMutex;
 
 	// デバッグ表示用
 	bool _debugDraw = false;

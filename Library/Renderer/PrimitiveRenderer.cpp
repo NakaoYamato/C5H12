@@ -38,6 +38,8 @@ void PrimitiveRenderer::Initialize(ID3D11Device* device)
 // •`‰æ
 void PrimitiveRenderer::Draw(const RenderInfo& info)
 {
+	std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
 	_renderInfos.push_back(info);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <mutex>
 
 #include "../../Library/Terrain/Terrain.h"
 
@@ -136,6 +137,8 @@ private:
 	std::vector<DrawInfo> _grassDrawInfos;
     // ‰e•`‰æ—pî•ñ”z—ñ
     std::vector<DrawInfo> _shadowDrawInfos;
+    // •`‰æ“o˜^‚Ì”r‘¼§Œä—p
+    std::mutex			  _drawInfoMutex;
 
 	// Œ»İ‚ÌƒeƒNƒXƒ`ƒƒ•i¿İ’è
 	Terrain::TextureQuality _currentTextureQuality = Terrain::TextureQuality::High;

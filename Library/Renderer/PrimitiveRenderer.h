@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 #include <unordered_map>
 #include <memory>
+#include <mutex>
 
 #include "../../Library/Math/Vector.h"
 #include "../../Library/Math/Quaternion.h"
@@ -61,6 +62,9 @@ public:
 
 private:
 	std::vector<RenderInfo>						_renderInfos;
+	// •`‰æ“o˜^‚Ì”r‘¼§Œä—p
+	std::mutex									_drawInfoMutex;
+
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		_vertexBuffer;
 	ConstantBuffer 								_constantBuffer;
 	std::unordered_map<std::string, std::unique_ptr<PrimitiveShaderBase>> _shaders;

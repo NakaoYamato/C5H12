@@ -81,6 +81,8 @@ void DecalRenderer::Initialize(ID3D11Device* device, UINT width, UINT height)
 // •`‰æ\¿
 void DecalRenderer::Draw(std::string shaderName, Decal* decal, const DirectX::XMFLOAT4X4& world)
 {
+	std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
 	// •`‰æî•ñ‚ğ’Ç‰Á
 	_drawInfos.push_back(
 		{ 
@@ -99,6 +101,8 @@ void DecalRenderer::Draw(std::string shaderName,
 	const Vector4& color,
 	int mask)
 {
+	std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
 	// •`‰æî•ñ‚ğ’Ç‰Á
 	_drawInfos.push_back(
 		{

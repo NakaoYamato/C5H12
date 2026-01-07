@@ -213,6 +213,8 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
 // ’¸“_î•ñ‘‚«o‚µ“o˜^
 void TerrainRenderer::ExportVertices(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
 {
+    std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
     DrawInfo drawInfo;
     drawInfo.terrain = terrain;
     drawInfo.world = world;
@@ -222,6 +224,8 @@ void TerrainRenderer::ExportVertices(Terrain* terrain, const DirectX::XMFLOAT4X4
 // •`‰æ“o˜^
 void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
 {
+    std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
 	DrawInfo drawInfo;
 	drawInfo.terrain = terrain;
 	drawInfo.world = world;
@@ -243,6 +247,8 @@ void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
 // ‰e•`‰æ“o˜^
 void TerrainRenderer::DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
 {
+    std::lock_guard<std::mutex> lock(_drawInfoMutex);
+
     // ’¸“_î•ñ‚ğ‘‚«o‚µ‚Ä‚¢‚È‚¢ê‡‚Í“o˜^‚µ‚È‚¢
     if (terrain->GetStreamOutData().size() == 0)
         return;

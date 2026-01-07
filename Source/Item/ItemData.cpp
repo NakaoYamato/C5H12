@@ -108,55 +108,55 @@ void ItemData::Load(nlohmann::json_abi_v3_12_0::json& json)
 // データ出力
 void ItemData::Save(nlohmann::json_abi_v3_12_0::json& json) const
 {
-	json["name"] = name;
-	json["description"] = description;
-	json["iconIndex"] = iconIndex;
-	json["colorX"] = color.x;
-	json["colorY"] = color.y;
-	json["colorZ"] = color.z;
-	json["colorW"] = color.w;
-	json["type"] = static_cast<int>(type);
-	json["isInPouch"] = isInPouch;
-	json["maxCountInpouch"] = maxCountInpouch;
-	json["rarity"] = rarity;
-	json["overlayIconIndex"] = overlayIconIndex;
+	json["name"]				= name;
+	json["description"]			= description;
+	json["iconIndex"]			= iconIndex;
+	json["colorX"]				= color.x;
+	json["colorY"]				= color.y;
+	json["colorZ"]				= color.z;
+	json["colorW"]				= color.w;
+	json["type"]				= static_cast<int>(type);
+	json["isInPouch"]			= isInPouch;
+	json["maxCountInpouch"]		= maxCountInpouch;
+	json["rarity"]				= rarity;
+	json["overlayIconIndex"]	= overlayIconIndex;
 	json["executeProcessIndex"] = executeProcessIndex;
-	json["parametersSize"] = parameters.size();
+	json["parametersSize"]		= parameters.size();
 	int index = 0;
 	for (auto& [parmName, parm] : parameters)
 	{
-		auto& sub = json["parameter" + std::to_string(index)];
+		auto& sub	= json["parameter" + std::to_string(index)];
 		sub["name"] = parmName;
 		if (auto p = std::get_if<int>(&parm))
 		{
-			sub["type"] = "int";
-			sub["value"] = *p;
+			sub["type"]		= "int";
+			sub["value"]	= *p;
 		}
 		else if (auto p = std::get_if<float>(&parm))
 		{
-			sub["type"] = "float";
-			sub["value"] = *p;
+			sub["type"]		= "float";
+			sub["value"]	= *p;
 		}
 		else if (auto p = std::get_if<Vector2>(&parm))
 		{
-			sub["type"] = "Vector2";
-			sub["value0"] = p->x;
-			sub["value1"] = p->y;
+			sub["type"]		= "Vector2";
+			sub["value0"]	= p->x;
+			sub["value1"]	= p->y;
 		}
 		else if (auto p = std::get_if<Vector3>(&parm))
 		{
-			sub["type"] = "Vector3";
-			sub["value0"] = p->x;
-			sub["value1"] = p->y;
-			sub["value2"] = p->z;
+			sub["type"]		= "Vector3";
+			sub["value0"]	= p->x;
+			sub["value1"]	= p->y;
+			sub["value2"]	= p->z;
 		}
 		else if (auto p = std::get_if<Vector4>(&parm))
 		{
-			sub["type"] = "Vector4";
-			sub["value0"] = p->x;
-			sub["value1"] = p->y;
-			sub["value2"] = p->z;
-			sub["value3"] = p->w;
+			sub["type"]		= "Vector4";
+			sub["value0"]	= p->x;
+			sub["value1"]	= p->y;
+			sub["value2"]	= p->z;
+			sub["value3"]	= p->w;
 		}
 		index++;
 	}

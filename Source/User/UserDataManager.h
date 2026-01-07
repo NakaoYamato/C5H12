@@ -3,11 +3,12 @@
 #include "../../Source/Item/ItemManager.h"
 #include "../../Source/Armor/ArmorManager.h"
 #include "../../Source/Weapon/WeaponManager.h"
+#include "../../Source/Quest/QuestManager.h"
 
 class UserDataManager : public ResourceBase
 {
 public:
-	// 武器ユーザーデータ
+#pragma region 武器ユーザーデータ
 	struct WeaponUserData
 	{
 		WeaponType	type = WeaponType::GreatSword;	// 武器の種類
@@ -19,8 +20,9 @@ public:
 		// Gui描画
 		inline void DrawGui();
 	};
+#pragma endregion
 
-	// 防具ユーザーデータ
+#pragma region 防具ユーザーデータ
 	struct ArmorUserData
 	{
 		ArmorType	type			= ArmorType::Head;	// 防具の種類
@@ -35,8 +37,9 @@ public:
 		// Gui描画
 		inline void DrawGui();
 	};
+#pragma endregion
 
-	// アイテムユーザーデータ
+#pragma region アイテムユーザーデータ
 	struct ItemUserData
 	{
 		int			index			= 0;	// アイテムデータインデックス
@@ -57,6 +60,22 @@ public:
 		int			itemIndex	= -1;	// アイテムデータインデックス
 		int 		quantity	= 0;	// アイテム所持数
 	};
+#pragma endregion
+
+#pragma region クエストユーザーデータ
+	struct QuestUserData
+	{
+		int			index		= 0;	// クエストデータインデックス
+		int			orderCount	= 0;	// クエスト受注回数
+		int			clearCount	= 0;	// クエストクリア回数
+		float		bestClearTime = 0.0f; // 最速クリアタイム(s)
+
+		// マネージャーから元データ取得
+		inline QuestData* GetBaseData() const;
+		// Gui描画
+		inline void DrawGui();
+	};
+#pragma endregion
 
 public:
 	UserDataManager() = default;
@@ -133,6 +152,22 @@ public:
 	void SetPouchItemIndex(int pouchIndex, int itemIndex);
 #pragma endregion
 
+#pragma region クエスト
+	// 受注カウント増加
+	void IncreaseQuestOrderCount(int questIndex);
+	// クリアカウント増加
+	// clearTime : クリアタイム(s)
+	void IncreaseQuestClearCount(int questIndex, float clearTime);
+
+	// 受注カウント取得
+	int GetQuestOrderCount(int questIndex);
+	// クリアカウント取得
+	int GetQuestClearCount(int questIndex);
+	// 最速クリアタイム取得
+	float GetQuestBestClearTime(int questIndex);
+#pragma endregion
+
+
 private:
 	// 武器Gui描画
 	void DrawWeaponGui();
@@ -140,6 +175,8 @@ private:
 	void DrawAromrGui();
 	// アイテムGui描画
 	void DrawItemGui();
+	// クエストGui描画
+	void DrawQuestGui();
 
 private:
 	std::string _filePath = "./Data/Resource/UserData/UserDataManager.json";
@@ -163,6 +200,9 @@ private:
 	PouchItemData _pouchItems[MaxPouchItemCount];
 	// 空のポーチアイテムデータ
 	PouchItemData _emptyPouchItemData;
+
+	// 所持しているすべてのクエストデータ
+	std::unordered_map<int, QuestUserData> _questUserDataMap;
 };
 
 // リソース設定

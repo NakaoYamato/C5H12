@@ -4,6 +4,7 @@
 
 #include <Mygui.h>
 
+#pragma region 武器ユーザーデータ
 // マネージャーから元データ取得
 inline WeaponData* UserDataManager::WeaponUserData::GetBaseData() const
 {
@@ -35,7 +36,9 @@ inline void UserDataManager::WeaponUserData::DrawGui()
 		}
 	}
 }
+#pragma endregion
 
+#pragma region 防具ユーザーデータ
 // マネージャーから元データ取得
 inline ArmorData* UserDataManager::ArmorUserData::GetBaseData() const
 {
@@ -71,7 +74,9 @@ inline void UserDataManager::ArmorUserData::DrawGui()
 		}
 	}
 }
+#pragma endregion
 
+#pragma region アイテムユーザーデータ
 // マネージャーから元データ取得
 inline ItemData* UserDataManager::ItemUserData::GetBaseData() const
 {
@@ -108,6 +113,42 @@ inline void UserDataManager::ItemUserData::DrawGui()
 		}
 	}
 }
+#pragma endregion
+
+#pragma region クエストユーザーデータ
+// マネージャーから元データ取得
+inline QuestData* UserDataManager::QuestUserData::GetBaseData() const
+{
+	auto questManager = ResourceManager::Instance().GetResourceAs<QuestManager>("QuestManager");
+	if (!questManager)
+		return nullptr;
+	return questManager->GetQuestData(index);
+}
+
+// Gui描画
+inline void UserDataManager::QuestUserData::DrawGui()
+{
+	auto questManager = ResourceManager::Instance().GetResourceAs<QuestManager>("QuestManager");
+	if (!questManager)
+		return;
+	QuestData* baseData = GetBaseData();
+	if (baseData)
+	{
+		ImGui::Text(baseData->name.c_str());
+	}
+	ImGui::InputInt(u8"受注回数", &orderCount);
+	ImGui::InputInt(u8"クリア回数", &clearCount);
+	ImGui::DragFloat(u8"最速クリアタイム(s)", &bestClearTime, 0.01f);
+	if (baseData)
+	{
+		if (ImGui::TreeNode((std::string("Base") + std::to_string(index)).c_str()))
+		{
+			baseData->DrawGui();
+			ImGui::TreePop();
+		}
+	}
+}
+#pragma endregion
 
 // 初期化処理
 bool UserDataManager::Initialize()
@@ -199,36 +240,56 @@ bool UserDataManager::LoadFromFile()
 #pragma endregion
 
 #pragma region アイテムデータ読み込み
-		if (!jsonData.contains("AcquiredItemListSize"))
-			return false;
-		int itemListSize = static_cast<int>(jsonData["AcquiredItemListSize"].get<std::size_t>());
-		for (int i = 0; i < itemListSize; ++i)
+		if (jsonData.contains("AcquiredItemListSize"))
 		{
-			auto& sub = jsonData["AcquiredItemList" + std::to_string(i)];
-			ItemUserData data;
-			data.index = sub.value("index", data.index);
-			data.quantity = sub.value("quantity", data.quantity);
-			data.acquisitionTime = sub.value("acquisitionTime", data.acquisitionTime);
-			_acquiredItemMap[i] = data;
-		}
-		for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
-		{
-			std::string key = "EquippedArmorIndex" + std::to_string(i);
-			if (jsonData.contains(key))
+			int itemListSize = static_cast<int>(jsonData["AcquiredItemListSize"].get<std::size_t>());
+			for (int i = 0; i < itemListSize; ++i)
 			{
-				_equippedArmorIndices[i] = jsonData[key].get<int>();
+				auto& sub = jsonData["AcquiredItemList" + std::to_string(i)];
+				ItemUserData data;
+				data.index = sub.value("index", data.index);
+				data.quantity = sub.value("quantity", data.quantity);
+				data.acquisitionTime = sub.value("acquisitionTime", data.acquisitionTime);
+				_acquiredItemMap[i] = data;
+			}
+			for (size_t i = 0; i <= static_cast<size_t>(ArmorType::Leg); ++i)
+			{
+				std::string key = "EquippedArmorIndex" + std::to_string(i);
+				if (jsonData.contains(key))
+				{
+					_equippedArmorIndices[i] = jsonData[key].get<int>();
+				}
+			}
+			for (int i = 0; i < MaxPouchItemCount; ++i)
+			{
+				auto& sub = jsonData["PouchItem" + std::to_string(i)];
+				_pouchItems[i].pouchIndex = i;
+				if (!sub.is_object())
+					continue;
+				_pouchItems[i].itemIndex = sub.value("itemIndex", -1);
+				_pouchItems[i].quantity = sub.value("quantity", 0);
 			}
 		}
-		for (int i = 0; i < MaxPouchItemCount; ++i)
+#pragma endregion
+
+#pragma region クエストデータ読み込み
+		if (jsonData.contains("QuestUserDataListSize"))
 		{
-			auto& sub = jsonData["PouchItem" + std::to_string(i)];
-			_pouchItems[i].pouchIndex = i;
-			if (!sub.is_object())
-				continue;
-			_pouchItems[i].itemIndex = sub.value("itemIndex", -1);
-			_pouchItems[i].quantity = sub.value("quantity", 0);
+			int questListSize = static_cast<int>(jsonData["QuestUserDataListSize"].get<std::size_t>());
+			_questUserDataMap.clear();
+			for (int i = 0; i < questListSize; ++i)
+			{
+				auto& sub = jsonData["QuestUserDataList" + std::to_string(i)];
+				QuestUserData data;
+				data.index			= sub.value("index", data.index);
+				data.orderCount		= sub.value("orderCount", data.orderCount);
+				data.clearCount		= sub.value("clearCount", data.clearCount);
+				data.bestClearTime	= sub.value("bestClearTime", data.bestClearTime);
+				_questUserDataMap[data.index] = data;
+			}
 		}
 #pragma endregion
+
 		return true;
 	}
 	return false;
@@ -297,6 +358,19 @@ bool UserDataManager::SaveToFile()
 	}
 #pragma endregion
 
+#pragma region クエストデータ保存
+	jsonData["QuestUserDataListSize"] = _questUserDataMap.size();
+	for (auto& [index, data] : _questUserDataMap)
+	{
+		auto& sub = jsonData["QuestUserDataList" + std::to_string(index)];
+		sub["index"]			= index;
+		sub["orderCount"]		= _questUserDataMap[index].orderCount;
+		sub["clearCount"]		= _questUserDataMap[index].clearCount;
+		sub["bestClearTime"]	= _questUserDataMap[index].bestClearTime;
+	}
+#pragma endregion
+
+
 	return Exporter::SaveJsonFile(_filePath, jsonData);
 }
 
@@ -319,6 +393,12 @@ void UserDataManager::DrawGui()
 	{
 		// アイテムGui描画
 		DrawItemGui();
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode(u8"クエストGUI"))
+	{
+		// クエストGui描画
+		DrawQuestGui();
 		ImGui::TreePop();
 	}
 }
@@ -574,6 +654,48 @@ void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 }
 #pragma endregion
 
+#pragma region クエスト
+// 受注カウント増加
+void UserDataManager::IncreaseQuestOrderCount(int questIndex)
+{
+	if (questIndex < 0)
+		return;
+	_questUserDataMap[questIndex].orderCount++;
+}
+// クリアカウント増加
+void UserDataManager::IncreaseQuestClearCount(int questIndex, float clearTime)
+{
+	if (questIndex < 0)
+		return;
+	_questUserDataMap[questIndex].clearCount++;
+	if (_questUserDataMap[questIndex].bestClearTime <= 0.0f || clearTime < _questUserDataMap[questIndex].bestClearTime)
+	{
+		_questUserDataMap[questIndex].bestClearTime = clearTime;
+	}
+}
+// 受注カウント取得
+int UserDataManager::GetQuestOrderCount(int questIndex)
+{
+	if (questIndex < 0)
+		return 0;
+	return _questUserDataMap[questIndex].orderCount;
+}
+// クリアカウント取得
+int UserDataManager::GetQuestClearCount(int questIndex)
+{
+	if (questIndex < 0)
+		return 0;
+	return _questUserDataMap[questIndex].clearCount;
+}
+// 最速クリアタイム取得
+float UserDataManager::GetQuestBestClearTime(int questIndex)
+{
+	if (questIndex < 0)
+		return 0.0f;
+	return _questUserDataMap[questIndex].bestClearTime;
+}
+#pragma endregion
+
 // 武器Gui描画
 void UserDataManager::DrawWeaponGui()
 {
@@ -769,6 +891,47 @@ void UserDataManager::DrawItemGui()
 
 		ImGui::Columns(1);
 
+		ImGui::TreePop();
+	}
+}
+
+// クエストGui描画
+void UserDataManager::DrawQuestGui()
+{
+	auto questManager = ResourceManager::Instance().GetResourceAs<QuestManager>("QuestManager");
+	if (!questManager)
+		return;
+
+	if (ImGui::TreeNode(u8"クエスト受注・クリア状況"))
+	{
+		if (ImGui::Button("Add"))
+		{
+			QuestUserData data{};
+			data.index = static_cast<int>(_questUserDataMap.size());
+			_questUserDataMap[data.index] = data;
+		}
+		ImGui::Separator();
+
+		for (auto& [index, userData] : _questUserDataMap)
+		{
+			std::string label = "Quest" + std::to_string(index);
+			if (auto baseData = userData.GetBaseData())
+			{
+				label += baseData->name;
+			}
+
+			if (ImGui::TreeNode(label.c_str()))
+			{
+				userData.DrawGui();
+				if (ImGui::Button(u8"削除"))
+				{
+					_questUserDataMap.erase(index);
+					ImGui::TreePop();
+					break;
+				}
+				ImGui::TreePop();
+			}
+		}
 		ImGui::TreePop();
 	}
 }

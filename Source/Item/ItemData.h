@@ -39,10 +39,8 @@ struct ItemData
 
 	// GUI描画
 	void DrawGui(int itemIconTextureIndex);
-
 	// データ保存
 	void Load(nlohmann::json_abi_v3_12_0::json& json);
-
 	// データ出力
 	void Save(nlohmann::json_abi_v3_12_0::json& json) const;
 };

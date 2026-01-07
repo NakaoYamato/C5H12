@@ -124,6 +124,7 @@ void Model::DrawGui()
     {
         if (ImGui::TreeNode(u8"ノード"))
         {
+			ImGui::Text(u8"ノード数:%d", static_cast<int>(_poseNodes.size()));
             std::function<void(ModelResource::Node&)> NodeGui = [&](ModelResource::Node& node)
                 {
                     if (ImGui::TreeNodeEx(&node, ImGuiTreeNodeFlags_DefaultOpen, node.name.c_str()))

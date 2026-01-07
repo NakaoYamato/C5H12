@@ -99,22 +99,57 @@ void ActorManager::LateUpdate(float elapsedTime)
 {
 	//----------------------------------------------------------------
 	// LateUpdate処理
-	for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+	if (JobSystem::Instance().UseMultiThread())
 	{
-		float deltaTime = elapsedTime;
-		auto& [timeScale, duration] = _gameSpeeds[i];
-		if (duration > 0.0f)
+		std::vector<std::future<void>> jobResults;
+
+		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
 		{
-			duration -= elapsedTime;
-			deltaTime *= timeScale;
+			float deltaTime = elapsedTime;
+			auto& [timeScale, duration] = _gameSpeeds[i];
+			if (duration > 0.0f)
+			{
+				duration -= elapsedTime;
+				deltaTime *= timeScale;
+			}
+
+			for (auto& actor : _updateActors[i])
+			{
+				jobResults.emplace_back(JobSystem::Instance().EnqueueJob(actor->GetName(),
+					ImGuiControl::Profiler::Color::Green,
+					[&]()
+					{
+						actor->LateUpdate(deltaTime);
+					}
+				));
+			}
 		}
 
-		for (auto& actor : _updateActors[i])
+		// すべてのジョブの終了を待機
+		for (auto& result : jobResults)
 		{
-			// 各アクターの計算時間
-			ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Green);
+			result.get();
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < static_cast<size_t>(ActorTag::ActorTagMax); ++i)
+		{
+			float deltaTime = elapsedTime;
+			auto& [timeScale, duration] = _gameSpeeds[i];
+			if (duration > 0.0f)
+			{
+				duration -= elapsedTime;
+				deltaTime *= timeScale;
+			}
 
-			actor->LateUpdate(deltaTime);
+			for (auto& actor : _updateActors[i])
+			{
+				// 各アクターの計算時間
+				ProfileScopedSection_3(0, actor->GetName(), ImGuiControl::Profiler::Green);
+
+				actor->LateUpdate(deltaTime);
+			}
 		}
 	}
 	//----------------------------------------------------------------

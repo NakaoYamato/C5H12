@@ -3,16 +3,15 @@
 #include "../../Library/Actor/Actor.h"
 #include "../../Library/Actor/ActorFactory.h"
 
-// アイテム、装備のチェスト
-class ChestActor : public Actor
+class QuestBoardActor : public Actor
 {
 public:
-	ChestActor() = default;
-	~ChestActor() override {}
+	QuestBoardActor() = default;
+	~QuestBoardActor() override {}
 
 	// 生成時処理
 	void OnCreate() override;
 };
 
 // ActorFactoryに登録
-_REGISTER_ACTOR_FACTORY(ChestActor, "ChestActor")
+_REGISTER_ACTOR_FACTORY(QuestBoardActor, "QuestBoardActor")

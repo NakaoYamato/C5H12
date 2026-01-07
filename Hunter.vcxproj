@@ -379,6 +379,8 @@
     <ClCompile Include="Source\InGame\Input\ChestInput.cpp" />
     <ClCompile Include="Source\Stage\Props\Fence\FenceActor.cpp" />
     <ClCompile Include="Source\Stage\Props\Fence\GeteController.cpp" />
+    <ClCompile Include="Source\Stage\Props\QuestBoard\QuestBoardActor.cpp" />
+    <ClCompile Include="Source\Stage\Props\QuestBoard\QuestBoardController.cpp" />
     <ClCompile Include="Source\Stage\SafetyZone.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\InGame\Input\Menu\MenuInput.cpp" />
@@ -676,6 +678,8 @@
     <ClInclude Include="Source\InGame\Input\ChestInput.h" />
     <ClInclude Include="Source\Stage\Props\Fence\FenceActor.h" />
     <ClInclude Include="Source\Stage\Props\Fence\GeteController.h" />
+    <ClInclude Include="Source\Stage\Props\QuestBoard\QuestBoardActor.h" />
+    <ClInclude Include="Source\Stage\Props\QuestBoard\QuestBoardController.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Stage\SafetyZone.h" />
     <ClInclude Include="Source\InGame\Input\Menu\MenuInput.h" />

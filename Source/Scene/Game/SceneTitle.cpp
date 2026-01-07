@@ -20,7 +20,7 @@ void SceneTitle::OnInitialize()
         L"./Data/SkyMap/kloofendal_48d_partly_cloudy_puresky_4k/specular_pmrem.dds");
 
     // ƒJƒƒ‰‚Ì‰Šú‰»
-    GetMainCameraActor()->SetLookAt(
+    GetMainCamera()->SetLookAt(
         Vector3(0.0f, 1.0f, -7.0f),
         Vector3(1.2f, 2.5f, 3.0f),
         Vector3(0.0f, 1.0f, 0.0f)
@@ -61,7 +61,7 @@ void SceneTitle::OnUpdate(float elapsedTime)
     if (!Debug::Input::IsActive(DebugInput::BTN_F4))
     {
         // ƒJƒƒ‰ŒÅ’è
-        GetMainCameraActor()->SetLookAt(
+        GetMainCamera()->SetLookAt(
             Vector3(52.0f, 1.0f, 35.0f),
             Vector3(52.0f, 3.3f, 45.0f),
             Vector3(0.0f, 1.0f, 0.0f)

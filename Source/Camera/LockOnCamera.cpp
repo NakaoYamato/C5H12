@@ -13,13 +13,12 @@ void LockOnCamera::OnStart()
 }
 
 // 起動時関数
-void LockOnCamera::OnEntry()
+void LockOnCamera::OnActivate()
 {
 	_targetScreenPosition = Vector2::Zero;
 	// 現在の注視点と視点を取得
     _currentFocus = GetActor()->GetScene()->GetMainCamera()->GetFocus();
 	_currentEye = GetActor()->GetScene()->GetMainCamera()->GetEye();
-
 }
 
 // 更新時処理
@@ -33,9 +32,6 @@ void LockOnCamera::OnUpdate(float elapsedTime)
     // 入力情報を取得
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
     float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
-
-	// TODO : ターゲットを画面座標に変換してその方向に移動する
-    // 入力は画面座標位置を変えるようにする
 
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換
@@ -162,7 +158,7 @@ void LockOnCamera::OnUpdate(float elapsedTime)
 
     // 補完処理
     Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, _focusLerpSpeed * elapsedTime);
-    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, _eyeLerpSpeed * elapsedTime);
+    Vector3 eye = Vector3::Lerp(_currentEye, newEye, _eyeLerpSpeed * elapsedTime);
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 

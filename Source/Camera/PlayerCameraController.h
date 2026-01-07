@@ -21,6 +21,8 @@ public:
     const char* GetName() const override { return "PlayerCameraController"; }
     // ŠJnˆ—
     void OnStart() override;
+    // ‹N“®ŠÖ”
+    void OnActivate() override;
     // GUI•`‰æ
     void DrawGui() override;
 

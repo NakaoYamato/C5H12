@@ -24,14 +24,8 @@ public:
 	// GUI描画
 	void OnDrawGui() override;
 
-	// 指定方向を向く
-	void SetLookAt(const Vector3& eye, const Vector3& focus, const Vector3& up);
-
-	// パースペクティブ設定
-	void SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ);
-
 	// コントローラーの登録
-	void RegisterCameraController(CameraControllerRef controller);
+	void RegisterController(CameraControllerRef controller);
 	// コントローラーが設定されているかどうか
 	bool IsControllerRegistered(const std::string& controllerName) const
 	{
@@ -46,12 +40,12 @@ public:
 	// 現在のコントローラー名取得
 	std::string GetCurrentControllerName() const
 	{
-		return _currentCameraControllerName;
+		return _currentControllerName;
 	}
 	// 現在のコントローラー取得
 	CameraControllerRef GetCurrentController() const
 	{
-		auto it = _cameraControllers.find(_currentCameraControllerName);
+		auto it = _cameraControllers.find(_currentControllerName);
 		if (it != _cameraControllers.end())
 		{
 			return it->second;
@@ -65,6 +59,20 @@ public:
 		if (it != _cameraControllers.end())
 		{
 			return it->second;
+		}
+		return nullptr;
+	}
+	// 指定のコントローラー取得(型指定)
+	template<class T>
+	T* GetControllerByClass() const
+	{
+		for (auto& [name, cont] : _cameraControllers)
+		{
+			T* controller = dynamic_cast<T*>(cont);
+			if (controller)
+			{
+				return controller;
+			}
 		}
 		return nullptr;
 	}
@@ -86,10 +94,10 @@ public:
 private:
 	// コントローラー群
 	std::unordered_map<std::string, CameraControllerRef> _cameraControllers;
-	// 現在の入力コントローラー名
-	std::string _currentCameraControllerName;
-	// 次の入力コントローラー名
-	std::string _nextCameraControllerName;
+	// 現在のコントローラー名
+	std::string _currentControllerName;
+	// 次のコントローラー名
+	std::string _nextControllerName;
 
 	// コントローラー変更履歴
 	std::vector<std::string> _cameraControllerHistory;

@@ -11,9 +11,9 @@ public:
 	// 更新処理
 	void LateUpdate(float elapsedTime) final override;
 	// 起動時関数
-	virtual void OnEntry() {}
+	virtual void OnActivate() {}
 	// 終了時処理
-	virtual void OnExit() {}
+	virtual void OnDeactivate() {}
 	// Gui描画
 	virtual void DrawGui() override;
 

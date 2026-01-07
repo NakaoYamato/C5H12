@@ -16,37 +16,25 @@
 void MainCamera::OnCreate()
 {
 	// カメラの初期化
-	SetLookAt(
+	GetScene()->GetMainCamera()->SetLookAt(
 		Vector3(0.0f, 10.0f, -10.0f),
 		Vector3(0.0f, 0.0f, 0.0f),
 		Vector3(0.0f, 1.0f, 0.0f)
 	);
     float screenWidth = Graphics::Instance().GetScreenWidth();
     float screenHeight = Graphics::Instance().GetScreenHeight();
-	SetPerspectiveFov(
+	GetScene()->GetMainCamera()->SetPerspectiveFov(
         DirectX::XMConvertToRadians(50),	// 画角
         screenWidth / screenHeight,			// 画面アスペクト比
         0.1f,								// ニアクリップ
         1000.0f								// ファークリップ
 	);
 
-	// カメラ子アクター生成
-	{
-		auto playerCamera = this->_scene->RegisterActor<Actor>(u8"PlayerCamera", ActorTag::System);
-		playerCamera->AddComponent<PlayerCameraController>();
-	}
-	{
-		auto huntingSuccessCamera = GetScene()->RegisterActor<Actor>("HuntingSuccessCamera", ActorTag::System);
-		huntingSuccessCamera->AddComponent<HuntingSuccessCamera>();
-	}
-	{
-		auto lockOnCamera = GetScene()->RegisterActor<Actor>("LockOnCamera", ActorTag::System);
-		lockOnCamera->AddComponent<LockOnCamera>();
-	}
-	{
-		auto changeArmorCamera = GetScene()->RegisterActor<Actor>("ChangeArmorCamera", ActorTag::System);
-		changeArmorCamera->AddComponent<ChangeArmorCamera>();
-	}
+	// カメラコンポーネント生成
+	this->AddComponent<PlayerCameraController>();
+	this->AddComponent<HuntingSuccessCamera>();
+	this->AddComponent<LockOnCamera>();
+	this->AddComponent<ChangeArmorCamera>();
 }
 
 // 開始時処理
@@ -57,21 +45,22 @@ void MainCamera::OnStart()
 // 更新処理
 void MainCamera::OnUpdate(float elapsedTime)
 {
-	if (!_nextCameraControllerName.empty())
+	// コントローラーの更新
+	if (!_nextControllerName.empty())
 	{
 		for (auto& [name, controller] : _cameraControllers)
 		{
-			if (name == _nextCameraControllerName)
+			if (name == _nextControllerName)
 			{
 				controller->SetActive(true);
-				controller->OnEntry();
+				controller->OnActivate();
 			}
 			else
 			{
 				controller->SetActive(false);
 			}
 		}
-		_nextCameraControllerName.clear();
+		_nextControllerName.clear();
 	}
 	
 	// シェイクマネージャーの更新
@@ -92,8 +81,8 @@ void MainCamera::OnUpdate(float elapsedTime)
 	
 	// シェイクによるオフセットを取得して
 	Vector3 shakeOffset = _shakeManager.GetTotalOffset(_transform.GetPosition());
-
-	_callbackEyeOffset += shakeOffset; // 既存の_eyeOffsetに合成
+	// 既存の_eyeOffsetに合成
+	_callbackEyeOffset += shakeOffset;
 }
 
 // GUI描画
@@ -109,7 +98,7 @@ void MainCamera::OnDrawGui()
 		{
 			ImGui::Text(u8"使用中のカメラ:");
 			ImGui::SameLine();
-			ImGui::Text(_currentCameraControllerName.c_str());
+			ImGui::Text(_currentControllerName.c_str());
 
 			if (ImGui::TreeNode(u8"変更履歴"))
 			{
@@ -122,6 +111,7 @@ void MainCamera::OnDrawGui()
 			}
 			ImGui::EndTabItem();
 		}
+
 		if (ImGui::BeginTabItem(u8"コールバック"))
 		{
 			if (ImGui::Button("Test1"))
@@ -165,26 +155,8 @@ void MainCamera::OnDrawGui()
 	}
 }
 
-void MainCamera::SetLookAt(const Vector3& eye, const Vector3& focus, const Vector3& up)
-{
-	GetScene()->GetMainCamera()->SetLookAt(eye, focus, up);
-    // アクターのトランスフォームに適応
-	_transform.SetPosition(eye);
-    DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&GetScene()->GetMainCamera()->GetView()));
-    DirectX::XMVECTOR S, R, T;
-    DirectX::XMMatrixDecompose(&S, &R, &T, World);
-    Vector3 s, r, t;
-    r = Quaternion::ToRollPitchYaw(R);
-    _transform.SetAngle(r);
-}
-
-void MainCamera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ)
-{
-	GetScene()->GetMainCamera()->SetPerspectiveFov(fovY, aspect, nearZ, farZ);
-}
-
 // コントローラーの登録
-void MainCamera::RegisterCameraController(CameraControllerRef controller)
+void MainCamera::RegisterController(CameraControllerRef controller)
 {
 	_cameraControllers[controller->GetName()] = controller;
 }
@@ -201,17 +173,19 @@ void MainCamera::SwitchPreviousController()
 // コントローラーの登録
 void MainCamera::SwitchController(const std::string& nextControllerName)
 {
-	if (!_currentCameraControllerName.empty())
-		_cameraControllerHistory.push_back(_currentCameraControllerName);
-	_nextCameraControllerName = nextControllerName;
-	if (!_currentCameraControllerName.empty() &&
-		_cameraControllers[_currentCameraControllerName] != nullptr)
+	// 履歴に追加
+	if (!_currentControllerName.empty())
+		_cameraControllerHistory.push_back(_currentControllerName);
+
+	_nextControllerName = nextControllerName;
+	if (!_currentControllerName.empty() &&
+		_cameraControllers[_currentControllerName] != nullptr)
 	{
-		_cameraControllers[_currentCameraControllerName]->OnExit();
-		_cameraControllers[_currentCameraControllerName]->SetActive(false);
+		_cameraControllers[_currentControllerName]->OnDeactivate();
+		_cameraControllers[_currentControllerName]->SetActive(false);
 	}
 
-	_currentCameraControllerName = nextControllerName;
+	_currentControllerName = nextControllerName;
 }
 
 // 更新処理追加

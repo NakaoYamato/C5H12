@@ -11,6 +11,14 @@ void PlayerCameraController::OnStart()
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 }
 
+// ‹N“®ŽžŠÖ”
+void PlayerCameraController::OnActivate()
+{
+    // Œ»Ý‚Ì’Ž‹“_‚ÆŽ‹“_‚ðŽæ“¾
+    _currentFocus = GetActor()->GetScene()->GetMainCamera()->GetFocus();
+    _currentEye = GetActor()->GetScene()->GetMainCamera()->GetEye();
+}
+
 void PlayerCameraController::DrawGui()
 {
     CameraControllerBase::DrawGui();
@@ -148,7 +156,7 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
 
     // •âŠ®ˆ—
     Vector3 focus = Vector3::Lerp(_currentFocus, newFocus, focusLerpSpeed * elapsedTime);
-    Vector3 eye = Vector3::Lerp(GetActor()->GetTransform().GetPosition(), newEye, eyeLerpSpeed * elapsedTime);
+    Vector3 eye = Vector3::Lerp(_currentEye, newEye, eyeLerpSpeed * elapsedTime);
 
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(eye, focus, Vector3::Up);
 

@@ -32,15 +32,7 @@ void ChestUIController::Start()
 		}
 	}
 
-	for (auto& child : GetActor()->GetScene()->GetMainCameraActor()->GetChildren())
-	{
-		auto changeArmorCamera = child->GetComponent<ChangeArmorCamera>();
-		if (changeArmorCamera)
-		{
-			_changeArmorCamera = changeArmorCamera;
-			break;
-		}
-	}
+    _changeArmorCamera = GetActor()->GetScene()->GetMainCameraActor()->GetControllerByClass<ChangeArmorCamera>();
 }
 
 // 更新処理
@@ -237,6 +229,8 @@ void ChestUIController::ItemMenuInput()
 
 void ChestUIController::UpdateToArmorMenu(float elapsedTime)
 {
+    assert(_changeArmorCamera != nullptr);
+
     if (!GetActor()->GetScene()->GetFade()->IsFading())
     {
         GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, _fadeTime);
@@ -263,10 +257,10 @@ void ChestUIController::UpdateToArmorMenu(float elapsedTime)
             player->GetTransform().SetAngleY(chestActor->GetTransform().GetAngle().y + DirectX::XMConvertToRadians(180.0f));
 		}
 		// カメラをチェスト用に切り替え
-		if (auto changeArmorCamera = _changeArmorCamera.lock())
+		if (_changeArmorCamera)
 		{
-			changeArmorCamera->Swich();
-			changeArmorCamera->SetChestActor(chestActor);
+            _changeArmorCamera->Swich();
+            _changeArmorCamera->SetChestActor(chestActor);
 		}
     }
 }

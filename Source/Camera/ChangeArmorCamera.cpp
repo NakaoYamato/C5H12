@@ -4,8 +4,28 @@
 
 #include <imgui.h>
 
+// 開始時処理
 void ChangeArmorCamera::OnStart()
 {
+}
+
+// 起動時関数
+void ChangeArmorCamera::OnActivate()
+{
+	// 元のカメラ情報を保存
+	auto mainCamera = GetActor()->GetScene()->GetMainCamera();
+	_previousCameraEye = mainCamera->GetEye();
+	_previousCameraFocus = mainCamera->GetFocus();
+	_previousCameraAngle = GetActor()->GetTransform().GetAngle();
+}
+
+// 終了時処理
+void ChangeArmorCamera::OnDeactivate()
+{
+	// 元のカメラ情報に戻す
+	auto mainCamera = GetActor()->GetScene()->GetMainCamera();
+	mainCamera->SetLookAt(_previousCameraEye, _previousCameraFocus, Vector3::Up);
+	GetActor()->GetTransform().SetAngle(_previousCameraAngle);
 }
 
 void ChangeArmorCamera::OnUpdate(float elapsedTime)

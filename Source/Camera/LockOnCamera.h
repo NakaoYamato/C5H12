@@ -17,7 +17,7 @@ public:
 	// 開始時処理
 	void OnStart() override;
 	// 起動時関数
-	void OnEntry() override;
+	void OnActivate() override;
 	// 更新時処理
 	void OnUpdate(float elapsedTime) override;
 	// GUI描画

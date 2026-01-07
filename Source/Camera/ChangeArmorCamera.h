@@ -11,6 +11,10 @@ public:
 	const char* GetName() const override { return "ChangeArmorCamera"; }
 	// 開始時処理
 	void OnStart() override;
+	// 起動時関数
+	void OnActivate() override;
+	// 終了時処理
+	void OnDeactivate() override;
 	// 更新時処理
 	void OnUpdate(float elapsedTime) override;
 	// Gui描画
@@ -27,4 +31,9 @@ private:
 	float _cameraOffsetX = -0.7f;
 	float _cameraOffsetY = 1.0f;
 	float _cameraLength = 2.5f;
+
+	// 元のカメラ情報
+	Vector3 _previousCameraEye{};
+	Vector3 _previousCameraFocus{};
+	Vector3 _previousCameraAngle{};
 };

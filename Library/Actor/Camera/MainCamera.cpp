@@ -7,6 +7,7 @@
 #include "../../Source/Camera/HuntingSuccessCamera.h"
 #include "../../Source/Camera/LockOnCamera.h"
 #include "../../Source/Camera/ChangeArmorCamera.h"
+#include "../../Source/Camera/PlayerDeathCamera.h"
 
 #include "../../Scene/Scene.h"
 
@@ -35,6 +36,7 @@ void MainCamera::OnCreate()
 	this->AddComponent<HuntingSuccessCamera>();
 	this->AddComponent<LockOnCamera>();
 	this->AddComponent<ChangeArmorCamera>();
+	this->AddComponent<PlayerDeathCamera>();
 }
 
 // ŠJnˆ—

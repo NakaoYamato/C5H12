@@ -6,6 +6,7 @@
 #include "../../Source/Common/InteractionController.h"
 
 #include "../../Source/Camera/LockOnCamera.h"
+#include "../../Source/Camera/PlayerDeathCamera.h"
 
 #include <imgui.h>
 
@@ -95,9 +96,15 @@ void PlayerController::Start()
 		"PlayerController",
 		[&]() -> void
 		{
+			// 死亡ステートへ変更
 			_stateMachine.lock()->ChangeState("Death", nullptr);
 			// ステートの変更を受け付けないようにする
 			_stateMachine.lock()->SetCanChangeState(false);
+
+			// カメラを死亡カメラに変更
+			auto deathCamera = GetActor()->GetScene()->GetMainCameraActor()->GetControllerByClass<PlayerDeathCamera>();
+			deathCamera->SetNextControllerName("PlayerCameraController");
+			deathCamera->Swich();
 		}
 	);
 
@@ -238,8 +245,7 @@ void PlayerController::Update(float elapsedTime)
 	// ロックオンカメラ遷移
 	if (_isLockOnCameraTransition)
 	{
-		auto lockOnCamera = dynamic_cast<LockOnCamera*>(GetActor()->GetScene()->GetMainCameraActor()->GetControllerByName("LockOnCamera"));
-
+		auto lockOnCamera = GetActor()->GetScene()->GetMainCameraActor()->GetControllerByClass<LockOnCamera>();
 		if (lockOnCamera)
 		{
 			// ロックオンカメラを起動しているかどうか

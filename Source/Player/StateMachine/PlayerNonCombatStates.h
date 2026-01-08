@@ -135,14 +135,11 @@ class PlayerNonCombatDeathState   final : public PlayerHSB
 {
 public:
 	PlayerNonCombatDeathState(PlayerStateMachine* stateMachine) :
-		PlayerHSB(stateMachine, u8"HitCombatDeath", 0.2f, false, true) 
+		PlayerHSB(stateMachine, u8"HitCombatDeath", 0.0f, false, true) 
 	{}
 	~PlayerNonCombatDeathState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Death"; }
-	void OnEnter() override {}
-	void OnExecute(float elapsedTime) override {}
-	void OnExit() override {}
 };
 #pragma endregion
 

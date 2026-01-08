@@ -14,6 +14,7 @@
 #include "../../Source/Common/StaminaController.h"
 #include "../../Source/Armor/ArmorActor.h"
 #include "../../Source/Camera/PlayerCameraController.h"
+#include "../../Source/Camera/PlayerDeathCamera.h"
 #include "../../Source/Camera/LockOnCamera.h"
 #include "../../Source/InGame/InGameCanvasActor.h"
 #include "PlayerItemController.h"
@@ -241,16 +242,21 @@ void PlayerActor::OnStart()
 		}
 
 		// ÉJÉÅÉâê›íË
-		auto playerCamera = dynamic_cast<PlayerCameraController*>(GetScene()->GetMainCameraActor()->GetControllerByName("PlayerCameraController"));
+		auto playerCamera = GetScene()->GetMainCameraActor()->GetControllerByClass<PlayerCameraController>();
 		if (playerCamera)
 		{
 			playerCamera->SetPlayerActor(this);
 			playerCamera->Swich();
 		}
-		auto lockOnCamera = dynamic_cast<LockOnCamera*>(GetScene()->GetMainCameraActor()->GetControllerByName("LockOnCamera"));
+		auto lockOnCamera = GetScene()->GetMainCameraActor()->GetControllerByClass<LockOnCamera>();
 		if (lockOnCamera)
 		{
 			lockOnCamera->SetPlayerActor(this);
+		}
+		auto deathCamera = GetScene()->GetMainCameraActor()->GetControllerByClass<PlayerDeathCamera>();
+		if (deathCamera)
+		{
+			deathCamera->SetPlayerActor(this);
 		}
 	}
 }

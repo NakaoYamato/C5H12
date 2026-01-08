@@ -340,6 +340,7 @@
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
     <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
+    <ClCompile Include="Source\InGame\Input\QuestBoard\QuestBoardInput.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestItemMenuController.cpp" />
@@ -635,6 +636,7 @@
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
     <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
+    <ClInclude Include="Source\InGame\Input\QuestBoard\QuestBoardInput.h" />
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestItemMenuController.h" />

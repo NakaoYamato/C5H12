@@ -20,6 +20,7 @@ class Input;
 #define _INPUT_TRIGGERD(action) Input::Instance().IsTriggerd(action)
 #define _INPUT_RELEASED(action) Input::Instance().IsReleased(action)
 #define _INPUT_VALUE(action)	Input::Instance().IsValue(action)
+#define _INPUT_REPEAT(action) Input::Instance().IsRepeat(action)
 #define _Mouse Input::Instance().GetMouseInput()
 
 /// <summary>
@@ -71,7 +72,7 @@ public:
 	/// <summary>
 	/// 更新処理
 	/// </summary>
-	void Update();
+	void Update(float elapsedTime);
 	/// <summary>
 	/// デバッグGUI表示
 	/// </summary>
@@ -101,6 +102,12 @@ public:
 	/// <param name="action">調べたいアクションの名前</param>
 	/// <returns></returns>
 	float IsValue(const std::string& action)const;
+	/// <summary>
+	/// リピート判定
+	/// </summary>
+	/// <param name="action">調べたいアクションの名前</param>
+	/// <returns></returns>
+	bool IsRepeat(const std::string& action) const;
 
 	/// <summary>
 	/// 現在の入力デバイス取得
@@ -128,6 +135,8 @@ private:
 	std::unordered_map<std::string, BOOL>	_lastInput;
 	// 入力量があるアクション
 	InputActionMap							_valueActionMap;
+	// リピート用タイマー
+	std::unordered_map<std::string, float>	_inputRepeatTimer;
 
 	// 現在の入力量
 	std::unordered_map<std::string, float>	_currentMovedParameter;
@@ -143,6 +152,10 @@ private:
 
 	// 現在の入力デバイス
 	InputType _currentInputDevice = InputType::Keyboard;
+	// リピート開始時間
+	float _repeatStartTime = 0.25f;
+	// リピート間隔時間
+	float _repeatInterval = 0.1f;
 
 	// ウィンドウのハンドル
 	HWND _hwnd{};

@@ -225,7 +225,7 @@ void Framework::Update(float elapsedTime)
     // 入力監視クラスの更新
     {
         ProfileScopedSection_3(0, "Input::Update", ImGuiControl::Profiler::Dark);
-        Input::Instance().Update();
+        Input::Instance().Update(elapsedTime);
     }
 
     // デバッグの更新

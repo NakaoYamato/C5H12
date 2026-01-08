@@ -56,6 +56,7 @@ Input::Input()
 	{
 		_lastInput[mapInfo.first] = FALSE;
 		_currentInput[mapInfo.first] = FALSE;
+		_inputRepeatTimer[mapInfo.first] = 0.0f;
 	}
 }
 
@@ -69,7 +70,7 @@ void Input::Initialize(HWND hwnd, HINSTANCE instance)
 }
 
 /// 更新処理
-void Input::Update()
+void Input::Update(float elapsedTime)
 {
 	// 直前の入力情報を保存
 	_lastInput = _currentInput;
@@ -163,6 +164,27 @@ void Input::Update()
 	{
 		_currentInputDevice = InputType::Keyboard;
 	}
+
+	// リピート処理
+	for (auto& [action, isPressed] : _currentInput)
+	{
+		if (isPressed)
+		{
+			// 現在が閾値＋リピート間隔以上ならoffにする
+			if (_inputRepeatTimer[action] >= _repeatStartTime + _repeatInterval)
+			{
+				_inputRepeatTimer[action] = _repeatStartTime;
+			}
+			else
+			{
+				_inputRepeatTimer[action] += elapsedTime;
+			}
+		}
+		else
+		{
+			_inputRepeatTimer[action] = 0.0f;
+		}
+	}
 }
 
 /// デバッグGUI表示
@@ -189,6 +211,8 @@ void Input::DrawGui()
 				_currentInputDevice == InputType::XboxPad ? u8"ゲームパッド" :
 				_currentInputDevice == InputType::Mouse ? u8"マウス" :
 				_currentInputDevice == InputType::DirectPad ? u8"ダイレクトパッド" : u8"不明");
+			ImGui::DragFloat(u8"リピート開始時間", &_repeatStartTime, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat(u8"リピート間隔", &_repeatInterval, 0.01f, 0.0f, 1.0f);
 			ImGui::Separator();
 
 			if (ImGui::TreeNode(u8"押下情報"))
@@ -306,6 +330,17 @@ float Input::IsValue(const std::string& action) const
 	assert(it != _currentMovedParameter.end());
 
 	return it->second;
+}
+
+/// リピート判定
+bool Input::IsRepeat(const std::string& action) const
+{
+	auto it = _inputRepeatTimer.find(action);
+	// 要素があるかチェック
+	assert(it != _inputRepeatTimer.end());
+
+	// 押された瞬間かリピート時間を超えたらtrue
+	return IsTriggerd(action) || it->second >= _repeatStartTime + _repeatInterval;
 }
 
 void Input::ClearMapData()

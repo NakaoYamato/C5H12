@@ -30,9 +30,6 @@ void ChestInput::Start()
 // GUI描画
 void ChestInput::DrawGui()
 {
-	ImGui::Text(u8"入力の継続時間 :%f", _inputHoldTime);
-	ImGui::DragFloat(u8"連続入力までの時間", &_inputHoldThreshold, 0.01f, 0.0f, 1.0f);
-	ImGui::DragFloat(u8"連続入力時の入力間隔時間", &_inputRepeatInterval, 0.01f, 0.0f, 1.0f);
 }
 
 // 起動時関数
@@ -55,39 +52,15 @@ void ChestInput::OnUpdate(float elapsedTime)
 		return;
 
 	unsigned int currentInputDirection = 0;
-
-	if (_INPUT_PRESSED("Up"))
+	if (_INPUT_REPEAT("Up"))
 		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Up);
-	if (_INPUT_PRESSED("Down"))
+	if (_INPUT_REPEAT("Down"))
 		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Down);
-	if (_INPUT_PRESSED("Left"))
+	if (_INPUT_REPEAT("Left"))
 		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Left);
-	if (_INPUT_PRESSED("Right"))
+	if (_INPUT_REPEAT("Right"))
 		currentInputDirection |= static_cast<unsigned int>(ChestUIController::InputDirection::Right);
-
-	// 連続入力処理
-	if (currentInputDirection != 0 &&
-		currentInputDirection & _previousInputDirection)
-	{
-		if (_inputHoldTime >= _inputHoldThreshold)
-		{
-			_inputHoldTime -= _inputRepeatInterval;
-			chestUIController->SetInputDirection(currentInputDirection);
-		}
-		else
-		{
-			chestUIController->SetInputDirection(0);
-		}
-
-		_inputHoldTime += elapsedTime;
-	}
-	else
-	{
-		_inputHoldTime = 0.0f;
-		chestUIController->SetInputDirection(currentInputDirection);
-	}
-
-	_previousInputDirection = currentInputDirection;
+	chestUIController->SetInputDirection(currentInputDirection);
 
 	if (_INPUT_TRIGGERD("Select"))
 		chestUIController->SetInputState(ChestUIController::InputState::Select);

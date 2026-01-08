@@ -90,12 +90,6 @@ void PlayerStateMachine::Execute(float elapsedTime)
         _player->GetDamageable()->SetInvisible(false);
 	}
 
-    // 死亡処理
-	if (_player->IsDead() && _stateMachine.GetStateName() != "Death")
-	{
-		_stateMachine.ChangeState("Death");
-	}
-
     _stateMachine.Update(elapsedTime);
 
 	// 現在のステート名にcombatが含まれているかで戦闘状態を設定
@@ -113,11 +107,6 @@ void PlayerStateMachine::Execute(float elapsedTime)
 // Gui描画
 void PlayerStateMachine::DrawGui()
 {
-    if (ImGui::Button(u8"死亡"))
-    {
-        _player->SetIsDead(true);
-    }
-
     if (ImGui::TreeNode(u8"ステートマシン"))
     {
         std::string str = u8"現在のステート:";
@@ -152,6 +141,10 @@ void PlayerStateMachine::RotationMovement(float elapsedTime, float rotationSpeed
 // ステート変更
 void PlayerStateMachine::ChangeState(const char* mainStateName, const char* subStateName)
 {
+	// ステートの変更を受け付けない場合は何もしない
+	if (!CanChangeState())
+		return;
+
     // 遷移先が無効な場合は何もしない
     if (mainStateName == nullptr || mainStateName[0] == '\0')
         return;

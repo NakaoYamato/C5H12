@@ -83,7 +83,6 @@ public:
 	bool IsHoldingAttackKey() const { return _isHoldingAttackKey; }
 	bool IsSpecialAttack() const { return _isSpecialAttack; }
 	bool IsGuard()	const { return _isGuard; }
-	bool IsDead()	const { return _isDead; }
 	bool IsAbleToUseItem() const { return _isAbleToUseItem; }
 	bool IsUsingItem() const { return _isUsingItem; }
 	bool IsSelect()	const { return _isSelect; }
@@ -101,7 +100,6 @@ public:
 	void SetIsHoldingAttackKey(bool isHoldingAttackKey) { _isHoldingAttackKey = isHoldingAttackKey; }
 	void SetIsSpecialAttack(bool isSpecialAttack) { _isSpecialAttack = isSpecialAttack; }
 	void SetIsGuard(bool isGuard) { _isGuard = isGuard; }
-	void SetIsDead(bool isDead) { _isDead = isDead; }
 	void SetIsAbleToUseItem(bool isAbleToUseItem) { _isAbleToUseItem = isAbleToUseItem; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
 	void SetIsSelect(bool isSelect) { _isSelect = isSelect; }
@@ -161,7 +159,6 @@ private:
 	bool _isHoldingAttackKey = false;
 	bool _isSpecialAttack = false;
 	bool _isGuard = false;
-	bool _isDead = false;
 	// アイテムを使用可能か
 	bool _isAbleToUseItem = true;
 	// アイテム使用中か

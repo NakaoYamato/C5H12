@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Library/Algorithm/CallBack/CallBack.h"
 
 #include <functional>
 
@@ -57,10 +58,6 @@ public:
 	void SetMaxHealth(float maxHealth) { _maxHealth = maxHealth; }
 	// 被弾位置を設定
 	void SetHitPosition(const Vector3& position) { _hitPosition = position; }
-	// ダメージを受ける判定のコールバック関数を設定
-	void SetTakeableDamageCallback(std::function<bool(float, Vector3)> callback) { _takeableDamageCallback = callback; }
-	// ダメージを受けたときのコールバック関数を設定
-	void SetOnDamageCallback(std::function<void(float, Vector3)> callback) { _onDamageCallback = callback; }
 	// 最後にダメージを与えてきたアクターを設定
     void SetLastDamageActor(std::shared_ptr<Actor> actor) { _lastDamageActor = actor; }
 	// 防御力を設定
@@ -68,6 +65,23 @@ public:
 	// 防御倍率を設定
 	void SetDefenseFactor(float factor) { _defenseFactor = factor; }
 #pragma endregion
+
+#pragma region コールバック設定
+	// ダメージを受ける判定のコールバック関数を設定
+	void RegisterTakeableDamageCallback(const std::string& name, CallBack<bool, float, Vector3> callback) { _takeableDamageCallback.RegisterCallBack(name, callback); }
+	// ダメージを受けたときのコールバック関数を設定
+	void RegisterOnDamageCallback(const std::string& name, CallBack<void, float, Vector3> callback) { _onDamageCallback.RegisterCallBack(name, callback); }
+	// 死亡時のコールバック関数を設定
+	void RegisterOnDeathCallback(const std::string& name, CallBack<void> callback) { _onDeathCallback.RegisterCallBack(name, callback); }
+
+	// ダメージを受ける判定のコールバック関数を解除
+	void UnregisterTakeableDamageCallback(const std::string& name) { _takeableDamageCallback.UnregisterCallBack(name); }
+	// ダメージを受けたときのコールバック関数を解除
+	void UnregisterOnDamageCallback(const std::string& name) { _onDamageCallback.UnregisterCallBack(name); }
+	// 死亡時のコールバック関数を解除
+	void UnregisterOnDeathCallback(const std::string& name) { _onDeathCallback.UnregisterCallBack(name); }
+#pragma endregion
+
 
 protected:
 	// 無敵状態タイマー
@@ -90,9 +104,11 @@ protected:
 	float _defenseFactor = 1.0f;
 
 	// ダメージを受ける判定のコールバック関数
-	std::function<bool(float, Vector3)> _takeableDamageCallback;
+	CallBackHandler<bool, float, Vector3> _takeableDamageCallback;
 	// ダメージを受けたときのコールバック関数
-	std::function<void(float, Vector3)> _onDamageCallback;
+	CallBackHandler<void, float, Vector3> _onDamageCallback;
+	// 死亡時のコールバック関数
+	CallBackHandler<void> _onDeathCallback;
 
     // 最後にダメージを与えてきたアクター
     std::weak_ptr<Actor> _lastDamageActor;

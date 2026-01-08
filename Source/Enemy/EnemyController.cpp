@@ -17,7 +17,8 @@ void EnemyController::Start()
 	if (_damageable.lock())
 	{
 		// ƒ_ƒ[ƒW‚ðŽó‚¯‚½Žž‚Ìˆ—
-		_damageable.lock()->SetOnDamageCallback(
+		_damageable.lock()->RegisterOnDamageCallback(
+			"EnemyController",
 			[&](float damage, Vector3 hitPosition) -> void
 			{
 				_damageCounter += damage;

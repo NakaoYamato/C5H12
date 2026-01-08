@@ -38,10 +38,46 @@ void Damageable::DrawGui()
 	{
 		AddDamage(_health / 2.0f, Vector3::Zero);
 	}
+	if (ImGui::Button(u8"死亡"))
+	{
+		AddDamage(FLT_MAX, Vector3::Zero);
+	}
 	if (ImGui::Button(u8"体力全回復"))
 	{
 		Heal(_maxHealth);
 	}
+	ImGui::Separator();
+
+	if (ImGui::TreeNode(u8"ダメージを受ける判定のコールバック関数"))
+	{
+		auto names = _takeableDamageCallback.GetCallBackNames();
+		for (auto& name : names)
+		{
+			ImGui::Text("%s", name.c_str());
+		}
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
+	if (ImGui::TreeNode(u8"ダメージを受けたときのコールバック関数"))
+	{
+		auto names = _onDamageCallback.GetCallBackNames();
+		for (auto& name : names)
+		{
+			ImGui::Text("%s", name.c_str());
+		}
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
+	if (ImGui::TreeNode(u8"死亡時のコールバック関数"))
+	{
+		auto names = _onDeathCallback.GetCallBackNames();
+		for (auto& name : names)
+		{
+			ImGui::Text("%s", name.c_str());
+		}
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
 }
 // HP初期化
 void Damageable::ResetHealth(float maxHealth)
@@ -60,25 +96,39 @@ bool Damageable::AddDamage(float damage, Vector3 hitPosition, bool networkData)
 		// 今フレームでダメージを受けている場合はダメージを受けない
 		if (_lastDamage > 0.0f) return false;
 		// ダメージを受ける判定のコールバック関数がfalseを返した場合はダメージを受けない
-		if (_takeableDamageCallback)
-			if (_takeableDamageCallback(damage, hitPosition) == false) return false;
+		auto names = _takeableDamageCallback.GetCallBackNames();
+		for (auto& name : names)
+		{
+			if (!_takeableDamageCallback.Call(name, damage, hitPosition))
+			{
+				return false;
+			}
+		}
 	}
 
 	// ダメージ計算
 	float def = 80.0f / (80.0f + _defense * _defenseFactor);
 	damage = damage * def;
 
+	// まだ生存していて、ダメージによって死亡する場合はonDeathをtrueにする
+	bool onDeath = _health > 0.0f && (_health - damage) <= 0.0f;
+
 	_health -= damage;
 	_hitPosition = hitPosition;
 	_totalDamage += damage;
 
 	if (_health < 0.0f)
+	{
 		_health = 0.0f;
+	}
 	// ダメージを受けたときのコールバック関数呼び出し
-	if (_onDamageCallback)
-		_onDamageCallback(damage, hitPosition);
+	_onDamageCallback.Call(damage, hitPosition);
 	// 受けたダメージ量を記録
 	_lastDamage += damage;
+
+	if (onDeath)
+		// 死亡時のコールバック関数呼び出し
+		_onDeathCallback.Call();
 	return true;
 }
 

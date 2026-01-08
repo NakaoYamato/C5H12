@@ -7,7 +7,8 @@ void DummyEnemyController::Start()
 	_shapeController = GetActor()->GetComponent<ShapeController>();
 
 	// ƒ_ƒ[ƒW‚ðŽó‚¯‚½Žž‚Ìˆ—
-	_damageable.lock()->SetOnDamageCallback(
+	_damageable.lock()->RegisterOnDamageCallback(
+		"DummyEnemyController",
 		[&](float damage, Vector3 hitPosition) -> void
 		{
 			_shapeController.lock()->SetColor(Vector4::Red);

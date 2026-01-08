@@ -35,7 +35,8 @@ void PlayerController::Start()
 	}
 #pragma region コールバック設定
 	// 被ダメージコールバック設定
-	_damageable.lock()->SetTakeableDamageCallback(
+	_damageable.lock()->RegisterTakeableDamageCallback(
+		"PlayerController",
 		[&](float damage, Vector3 hitPosition) -> bool
 		{
 			Vector3 vec = hitPosition - GetActor()->GetTransform().GetPosition().Normalize();
@@ -53,8 +54,9 @@ void PlayerController::Start()
 		}
 	);
 	// ダメージ時コールバック設定
-	_damageable.lock()->SetOnDamageCallback(
-		[&](float damage, Vector3 hitPosition)
+	_damageable.lock()->RegisterOnDamageCallback(
+		"PlayerController",
+		[&](float damage, Vector3 hitPosition) -> void
 		{
 			bool isCombat = false;
 			{
@@ -88,6 +90,17 @@ void PlayerController::Start()
 			}
 		}
 	);
+	// 死亡時のコールバック設定
+	_damageable.lock()->RegisterOnDeathCallback(
+		"PlayerController",
+		[&]() -> void
+		{
+			_stateMachine.lock()->ChangeState("Death", nullptr);
+			// ステートの変更を受け付けないようにする
+			_stateMachine.lock()->SetCanChangeState(false);
+		}
+	);
+
 	// ダメージを与えた時のコールバック設定
 	damageSender->SetOnSendDamageCallback(
 		"PlayerController",

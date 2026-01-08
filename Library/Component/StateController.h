@@ -24,9 +24,15 @@ public:
 	bool IsSetup() const { return _isSetup; }
 	// セットアップ済みフラグを設定
 	void SetSetup(bool isSetup) { _isSetup = isSetup; }
+	// ステートの変更を受け付けるか取得
+	bool CanChangeState() const { return _canChangeState; }
+	// ステートの変更を受け付けるか設定
+	void SetCanChangeState(bool canChangeState) { _canChangeState = canChangeState; }
 private:
 	// セットアップ済みフラグ
 	bool _isSetup = false;
+	// ステートの変更を受け付けるか
+	bool _canChangeState = true;
 };
 
 class StateController : public Component

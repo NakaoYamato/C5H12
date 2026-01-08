@@ -9,7 +9,9 @@ void NodeShaker::Start()
     if (damageable)
     {
         // ダメージを受けたときのコールバック設定
-        damageable->SetOnDamageCallback([this](float damage, Vector3 hitPosition)
+        damageable->RegisterOnDamageCallback(
+			"NodeShaker",
+            [this](float damage, Vector3 hitPosition)
             {
                 // シェイク開始
                 StartShake(hitPosition, _damageShakeDuration, _damageShakeMagnitude);

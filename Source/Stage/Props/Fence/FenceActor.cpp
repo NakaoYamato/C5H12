@@ -5,6 +5,7 @@
 #include "../../Library/Component/Collider/BoxCollider.h"
 
 #include "../../Source/Stage/SafetyZone.h"
+#include "../../Source/Stage/RespawnZone.h"
 
 #include "GeteController.h"
 
@@ -21,6 +22,11 @@ void FenceActor::OnCreate()
     safetyBox->SetTrigger(true);
     safetyBox->SetPosition(Vector3(-350.0f, 50.0f, 0.0f));
     safetyBox->SetRadius(Vector3(3.4f, 1.0f, 8.4f));
+
+    // 仮でリスポーン地点設定
+	auto respawnZone = AddComponent<RespawnZone>();
+    respawnZone->SetCenter(Vector3(-5.0f, 0.0f, 0.0f));
+    respawnZone->SetRadius(1.0f);
 
     // フェンス生成
     {

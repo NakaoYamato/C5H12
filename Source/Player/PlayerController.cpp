@@ -5,6 +5,7 @@
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/InteractionController.h"
 
+#include "../../Source/Camera/PlayerCameraController.h"
 #include "../../Source/Camera/LockOnCamera.h"
 #include "../../Source/Camera/PlayerDeathCamera.h"
 
@@ -105,6 +106,8 @@ void PlayerController::Start()
 			auto deathCamera = GetActor()->GetScene()->GetMainCameraActor()->GetControllerByClass<PlayerDeathCamera>();
 			deathCamera->SetNextControllerName("PlayerCameraController");
 			deathCamera->Swich();
+
+			_respawnTimer = 0.0f;
 		}
 	);
 
@@ -151,6 +154,30 @@ void PlayerController::Start()
 // 更新処理
 void PlayerController::Update(float elapsedTime)
 {
+	// 死亡している時
+	if (_damageable.lock()->IsDead())
+	{
+		_respawnTimer += elapsedTime;
+		if (_respawnTimer >= _respawnTimeMax)
+		{
+			// メタAIからリスポーン位置を取得
+			RespawnZone* respawnZone = _metaAI.lock()->SearchNearestRespawnZone(GetActor()->GetTransform().GetWorldPosition());
+			if (respawnZone)
+			{
+				Vector3 respawnPosition = respawnZone->GetActor()->GetTransform().GetWorldPosition() + respawnZone->GetCenter();
+				Vector3 respawnAngle = respawnZone->GetAngle();
+				Respawn(respawnPosition, respawnAngle);
+			}
+			else
+			{
+				// リスポーン位置が見つからなかった場合、現在位置にリスポーン
+				Respawn(GetActor()->GetTransform().GetWorldPosition(), GetActor()->GetTransform().GetWorldAngle());
+			}
+		}
+
+		return;
+	}
+
 	auto animator = _animator.lock();
 
 	_callInputBufferingEvent = false;
@@ -313,6 +340,8 @@ void PlayerController::DrawGui()
 	ImGui::DragFloat(u8"ステージ接触時のLモーター値", &_stageContactVibrationL, 0.01f, 0.0f, 1.0f);
 	ImGui::DragFloat(u8"ステージ接触時のRモーター値", &_stageContactVibrationR, 0.01f, 0.0f, 1.0f);
 	ImGui::DragFloat(u8"ステージ接触時の時間", &_stageContactVibrationTime, 0.01f, 0.0f, 1.0f);
+	ImGui::Separator();
+	ImGui::DragFloat(u8"リスポーン時間", &_respawnTimeMax, 0.1f, 0.0f, 10.0f);
 }
 
 // 接触処理
@@ -353,4 +382,32 @@ void PlayerController::SetVibration(float left, float right, float time)
 	{
 		inputManager->SetVibration(left, right, time);
 	}
+}
+
+// テレポート
+void PlayerController::Teleport(const Vector3& position, const Vector3& angle)
+{
+	// 座標と角度を設定
+	GetActor()->GetTransform().SetWorldPosition(position);
+	GetActor()->GetTransform().SetWorldAngle(angle);
+
+	// カメラを更新
+	// 通常カメラに切り替え
+	auto playerCamera = GetActor()->GetScene()->GetMainCameraActor()->GetControllerByClass<PlayerCameraController>();
+	playerCamera->Swich();
+	playerCamera->Reset(angle);
+}
+
+// リスポーン
+void PlayerController::Respawn(const Vector3& position, const Vector3& angle)
+{
+	// 体力を全回復
+	_damageable.lock()->ResetHealth(_damageable.lock()->GetMaxHealth());
+
+	// ステートの変更を受け付けるようにする
+	_stateMachine.lock()->SetCanChangeState(true);
+	_stateMachine.lock()->ChangeState("Idle", nullptr);
+
+	// テレポート
+	Teleport(position, angle);
 }

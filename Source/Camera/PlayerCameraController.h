@@ -31,6 +31,8 @@ public:
 
 	// プレイヤーアクター設定
     void SetPlayerActor(PlayerActor* playerActor);
+    // リセット
+	void Reset(const Vector3& angle);
 
 private:
     PlayerActor* _playerActor = nullptr;

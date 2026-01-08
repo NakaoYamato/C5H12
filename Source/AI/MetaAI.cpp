@@ -106,6 +106,7 @@ void MetaAI::DrawGui()
 	}
 }
 
+#pragma region ターゲット
 /// ターゲット登録
 void MetaAI::RegisterTargetable(std::weak_ptr<Targetable> targetable)
 {
@@ -174,3 +175,42 @@ Vector3 MetaAI::GetRandomPositionInRange(const Vector3& center, float range) con
 	randomPosition = randomPosition.ClampSphere(center, range);
 	return randomPosition;
 }
+#pragma endregion
+
+#pragma region リスポーン
+void MetaAI::RegisterRespawnZone(std::weak_ptr<RespawnZone> respawnZone)
+{
+	if (auto zone = respawnZone.lock())
+	{
+		_respawnZones.push_back(respawnZone);
+	}
+}
+/// リスポーンゾーン削除
+void MetaAI::RemoveRespawnZone(std::weak_ptr<RespawnZone> respawnZone)
+{
+	auto it = std::remove_if(_respawnZones.begin(), _respawnZones.end(),
+		[&respawnZone](const std::weak_ptr<RespawnZone>& t) { return t.lock() == respawnZone.lock(); });
+	_respawnZones.erase(it, _respawnZones.end());
+}
+/// 指定の位置から最も近いリスポーンゾーンを検索
+RespawnZone* MetaAI::SearchNearestRespawnZone(const Vector3& position) const
+{
+	RespawnZone* result = nullptr;
+	float nearestDistanceSq = FLT_MAX;
+
+	for (const auto& respawnZoneWeak : _respawnZones)
+	{
+		if (auto respawnZone = respawnZoneWeak.lock())
+		{
+			float distanceSq = Vector3::LengthSq(respawnZone->GetActor()->GetTransform().GetWorldPosition() + respawnZone->GetCenter() - position);
+			if (distanceSq < nearestDistanceSq)
+			{
+				nearestDistanceSq = distanceSq;
+				result = respawnZone.get();
+			}
+		}
+	}
+
+	return result;
+}
+#pragma endregion

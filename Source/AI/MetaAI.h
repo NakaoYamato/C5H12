@@ -2,6 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Source/Common/Targetable.h"
+#include "../../Source/Stage/RespawnZone.h"
 
 #include <vector>
 #include <memory>
@@ -21,6 +22,7 @@ public:
 	// GUI描画
 	void DrawGui() override;
 
+#pragma region ターゲット
 	/// <summary>
 	/// ターゲット登録
 	/// </summary>
@@ -53,10 +55,36 @@ public:
 	/// <param name="range"></param>
 	/// <returns></returns>
 	Vector3 GetRandomPositionInRange(const Vector3& center, float range) const;
+#pragma endregion
+
+#pragma region リスポーン
+	/// <summary>
+	/// リスポーンゾーン登録
+	/// </summary>
+	/// <param name="respawnZone"></param>
+	void RegisterRespawnZone(std::weak_ptr<RespawnZone> respawnZone);
+
+	/// <summary>
+	/// リスポーンゾーン削除
+	/// </summary>
+	/// <param name="respawnZone"></param>
+	void RemoveRespawnZone(std::weak_ptr<RespawnZone> respawnZone);
+
+	/// <summary>
+	/// 指定の位置から最も近いリスポーンゾーンを検索
+	/// </summary>
+	/// <param name="position"></param>
+	/// <returns></returns>
+	RespawnZone* SearchNearestRespawnZone(const Vector3& position) const;
+#pragma endregion
+
 
 private:
 	// ターゲット可能なオブジェクトのリスト
 	std::vector<std::weak_ptr<Targetable>> _targetables;
+
+	// リスポーンゾーンのリスト
+	std::vector<std::weak_ptr<RespawnZone>> _respawnZones;
 
 	// ゲームクリアフラグ
 	bool _gameClear = false;

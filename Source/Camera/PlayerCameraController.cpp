@@ -193,3 +193,41 @@ void PlayerCameraController::SetPlayerActor(PlayerActor* playerActor)
     GetActor()->GetTransform().SetPosition(_currentEye);
     GetActor()->GetScene()->GetMainCamera()->SetLookAt(_currentEye, _currentFocus, Vector3::Up);
 }
+
+// リセット
+void PlayerCameraController::Reset(const Vector3& angle)
+{
+    // カメラ回転値を回転行列に変換
+    DirectX::XMMATRIX Transform =
+        DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
+
+    // 回転行列から右方向、上方向、前方向ベクトルを取り出す
+    DirectX::XMVECTOR Right = Transform.r[0];
+    DirectX::XMVECTOR Up = Transform.r[1];
+    DirectX::XMVECTOR Front = Transform.r[2];
+    Vector3 front{}, right{}, up{};
+    DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(Front));
+    DirectX::XMStoreFloat3(&right, DirectX::XMVector3Normalize(Right));
+    DirectX::XMStoreFloat3(&up, DirectX::XMVector3Normalize(Up));
+
+    Vector3 newFocus = _playerActor->GetTransform().GetPosition();
+    // オフセット処理
+    newFocus.y += _focusVerticalOffset;
+    // 下から見るときはオフセットの影響を薄くする
+    float lookingUpValue = angle.x - _lookingUpStartAngle;
+    float horizontalRate = lookingUpValue < 0.0f ?
+        1.0f - std::clamp(std::fabsf(lookingUpValue / _lookingUpAngleValue), 0.0f, 1.0f) :
+        1.0f;
+    newFocus.x += horizontalRate * right.x * _focusHorizontalOffset;
+    newFocus.z += horizontalRate * right.z * _focusHorizontalOffset;
+
+    // 注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
+    Vector3 newEye = newFocus - front * _cameraDistance;
+
+    GetActor()->GetScene()->GetMainCamera()->SetLookAt(newEye, newFocus, Vector3::Up);
+
+    GetActor()->GetTransform().SetAngle(angle);
+    _currentFocus = newFocus;
+    _currentEye = newEye;
+    GetActor()->GetTransform().SetPosition(_currentEye);
+}

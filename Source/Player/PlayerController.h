@@ -49,6 +49,10 @@ public:
 
 	// ゲームパッド振動
 	void SetVibration(float left, float right, float time);
+	// テレポート
+	void Teleport(const Vector3& position, const Vector3& angle);
+	// リスポーン
+	void Respawn(const Vector3& position, const Vector3& angle);
 
 #pragma region アクセサ
 	// キャラクターコントローラー取得
@@ -205,4 +209,9 @@ private:
 	float _stageContactVibrationL = 0.2f;
 	float _stageContactVibrationR = 0.2f;
 	float _stageContactVibrationTime = 0.1f;
+
+	// リスポーンタイマー
+	float _respawnTimer = 0.0f;
+	// リスポーン最大時間
+	float _respawnTimeMax = 3.5f;
 };

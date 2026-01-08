@@ -4,6 +4,7 @@
 
 #include "Input/ChestInput.h"
 #include "Input/Menu/MenuInput.h"
+#include "Input/QuestBoard/QuestBoardInput.h"
 
 #include <imgui.h>
 
@@ -19,6 +20,11 @@ void InputManager::OnCreate()
     auto menuInputController = GetScene()->RegisterActor<Actor>("MenuInput", ActorTag::System);
     menuInputController->SetParent(this);
     auto menuInput = menuInputController->AddComponent<MenuInput>();
+
+	// クエストボード用入力コントローラー登録
+	auto questBoardInputController = GetScene()->RegisterActor<Actor>("QuestBoardInput", ActorTag::System);
+	questBoardInputController->SetParent(this);
+	auto questBoardInput = questBoardInputController->AddComponent<QuestBoardInput>();
 }
 
 // 開始関数

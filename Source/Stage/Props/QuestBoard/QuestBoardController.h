@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Source/InGame/Input/QuestBoard/QuestBoardInput.h"
+#include "../../Source/Common/InteractionController.h"
 
 class QuestBoardController : public Component
 {
@@ -16,9 +18,10 @@ public:
 	// GUI描画処理
 	void DrawGui() override;
 
-	// 開く処理
-	bool Open();
-	// 開いているか
-	bool IsOpen() const;
 private:
+	std::weak_ptr<QuestBoardInput> _questBoardInput;
+	std::weak_ptr<InteractionController> _interactionController;
+
+	// 選択UIのオフセット
+	Vector3 _selectUIOffset = Vector3(0.0f, 1.5f, 0.0f);
 };

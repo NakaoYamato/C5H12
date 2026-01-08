@@ -3,6 +3,7 @@
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Component/ModelRenderer.h"
 #include "../../Library/Component/Collider/SphereCollider.h"
+#include "../../Source/Common/InteractionController.h"
 
 #include "ChestController.h"
 
@@ -15,6 +16,7 @@ void ChestActor::OnCreate()
 	// コンポーネント追加
 	auto modelRenderer = this->AddComponent<ModelRenderer>();
 	auto controller = this->AddComponent<ChestController>();
+	auto interactionController = this->AddComponent<InteractionController>();
 
 	// コライダー追加
 	auto bodyCollider = this->AddCollider<SphereCollider>();

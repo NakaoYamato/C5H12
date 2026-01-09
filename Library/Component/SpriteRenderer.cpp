@@ -56,6 +56,12 @@ void SpriteRenderer::DelayedRender(const RenderContext& rc)
         auto& spriteData = _sprites.at(spriteName);
 
 		SpriteRender(spriteName, rc);
+		// 文字描画
+		if (!spriteData._textData.text.empty())
+		{
+			auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
+			textRenderer.Draw(spriteData._textData);
+		}
 
 		if (GetActor()->IsDrawingDebug() && !Debug::Input::IsActive(DebugInput::BTN_F7))
 		{
@@ -111,6 +117,7 @@ void SpriteRenderer::DrawGui()
 
 			ImGui::Separator();
 			spriteData.DrawGui();
+			spriteData._textData.DrawGui(u8"テキスト");
 			ImGui::Separator();
 			if (ImGui::Button(u8"削除"))
 			{
@@ -243,13 +250,23 @@ bool SpriteRenderer::LoadFromFile()
 		// マテリアルデータ
 		_sprites[name].GetMaterial().LoadFromFile(sub);
 
-		_sprites[name].SetCenterAlignment(sub.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
-		_sprites[name].SetTexPos(sub.value("texPos", _sprites[name].GetTexPos()));
-		_sprites[name].SetTexSize(sub.value("texSize", _sprites[name].GetTexSize()));
-		_sprites[name].SetCenter(sub.value("center", _sprites[name].GetCenter()));
-		_sprites[name].SetColor(sub.value("color", _sprites[name].GetColor()));
-		_sprites[name].SetDepthState(sub.value("depthState", DepthState::TestAndWrite));
-		_sprites[name].SetStencil(sub.value("stencil", 0));
+		_sprites[name].SetCenterAlignment(	sub.value("centerAlignment",	Sprite::CenterAlignment::CenterCenter));
+		_sprites[name].SetTexPos(			sub.value("texPos",				_sprites[name].GetTexPos()));
+		_sprites[name].SetTexSize(			sub.value("texSize",			_sprites[name].GetTexSize()));
+		_sprites[name].SetCenter(			sub.value("center",				_sprites[name].GetCenter()));
+		_sprites[name].SetColor(			sub.value("color",				_sprites[name].GetColor()));
+		_sprites[name].SetDepthState(		sub.value("depthState",			DepthState::TestAndWrite));
+		_sprites[name].SetStencil(			sub.value("stencil",			0));
+
+		// 文字データ
+		std::string text = sub.value("text", "");
+		_sprites[name]._textData.type		= sub.value("textType",		TextRenderer::TextDrawData().type);
+		_sprites[name]._textData.text		= ToUtf16(text);
+		_sprites[name]._textData.position	= sub.value("textPosition", TextRenderer::TextDrawData().position);
+		_sprites[name]._textData.color		= sub.value("textColor",	TextRenderer::TextDrawData().color);
+		_sprites[name]._textData.rotation	= sub.value("textRotation", TextRenderer::TextDrawData().rotation);
+		_sprites[name]._textData.origin		= sub.value("textOrigin",	TextRenderer::TextDrawData().origin);
+		_sprites[name]._textData.scale		= sub.value("textScale",	TextRenderer::TextDrawData().scale);
 	}
 
 	// 描画順読みこみ
@@ -302,13 +319,22 @@ bool SpriteRenderer::SaveToFile()
 		// マテリアルデータ
 		spriteData.GetMaterial().SaveToFile(sub);
 
-		sub["centerAlignment"] = spriteData.GetCenterAlignment();
-		sub["texPos"] = spriteData.GetTexPos();
-		sub["texSize"] = spriteData.GetTexSize();
-		sub["center"] = spriteData.GetCenter();
-		sub["color"] = spriteData.GetColor();
-		sub["depthState"] = spriteData.GetDepthState();
-		sub["stencil"] = spriteData.GetStencil();
+		sub["centerAlignment"]	= spriteData.GetCenterAlignment();
+		sub["texPos"]			= spriteData.GetTexPos();
+		sub["texSize"]			= spriteData.GetTexSize();
+		sub["center"]			= spriteData.GetCenter();
+		sub["color"]			= spriteData.GetColor();
+		sub["depthState"]		= spriteData.GetDepthState();
+		sub["stencil"]			= spriteData.GetStencil();
+
+		// 文字データ
+		sub["textType"]			= spriteData._textData.type;
+		sub["text"]				= ToString(spriteData._textData.text);
+		sub["textPosition"]		= spriteData._textData.position;
+		sub["textColor"]		= spriteData._textData.color;
+		sub["textRotation"]		= spriteData._textData.rotation;
+		sub["textOrigin"]		= spriteData._textData.origin;
+		sub["textScale"]		= spriteData._textData.scale;
 
 		index++;
 	}

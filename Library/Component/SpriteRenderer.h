@@ -2,6 +2,7 @@
 
 #include "Component.h"
 #include "../../Library/2D/Sprite.h"
+#include "../../Library/Renderer/TextRenderer.h"
 
 #include <unordered_map>
 
@@ -16,6 +17,7 @@ public:
 	public:
 		bool		_isActive = true;
 		std::string _parentName = "";
+		TextRenderer::TextDrawData _textData;
 	};
 
 public:

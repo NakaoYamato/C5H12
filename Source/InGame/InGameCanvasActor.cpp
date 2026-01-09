@@ -12,6 +12,10 @@
 #include "UI/Player/PlayerStaminaUIController.h"
 #include "UI/Player/PlayerBuffUIController.h"
 #include "UI/Player/PlayerShapnessUIController.h"
+#include "UI/QuestBoard/QuestBoardUIController.h"
+#include "UI/QuestBoard/Menu/QuestBoardSelectMenuController.h"
+#include "UI/QuestBoard/Menu/QuestBoardNewOrderMenuController.h"
+#include "UI/QuestBoard/Menu/QuestBoardAcceptMenuController.h"
 
 // 生成時処理
 void InGameCanvasActor::OnCreate()
@@ -81,6 +85,24 @@ void InGameCanvasActor::OnCreate()
 		auto playerShapnessUIActor = GetScene()->RegisterActor<UIActor>("PlayerShapnessUI", ActorTag::UI);
 		playerShapnessUIActor->SetParent(playerUIActor.get());
 		playerShapnessUIActor->AddComponent<PlayerShapnessUIController>();
+	}
+
+	// クエストボードUI生成
+	auto questBoardUIActor = GetScene()->RegisterActor<UIActor>("QuestBoardUI", ActorTag::UI);
+	questBoardUIActor->SetParent(this);
+	auto questBoardUI = questBoardUIActor->AddComponent<QuestBoardUIController>();
+	{
+		auto selectMenuUI = GetScene()->RegisterActor<UIActor>("QuestBoardSelectMenuUI", ActorTag::UI);
+		selectMenuUI->SetParent(questBoardUIActor.get());
+		questBoardUI->SetSelectMenu(selectMenuUI->AddComponent<QuestBoardSelectMenuController>());
+
+		auto newOrderMenuUI = GetScene()->RegisterActor<UIActor>("QuestBoardNewOrderMenuUI", ActorTag::UI);
+		newOrderMenuUI->SetParent(questBoardUIActor.get());
+		questBoardUI->SetNewOrderMenu(newOrderMenuUI->AddComponent<QuestBoardNewOrderMenuController>());
+
+		auto acceptMenuUI = GetScene()->RegisterActor<UIActor>("QuestBoardAcceptMenuUI", ActorTag::UI);
+		acceptMenuUI->SetParent(questBoardUIActor.get());
+		questBoardUI->SetAcceptMenu(acceptMenuUI->AddComponent<QuestBoardAcceptMenuController>());
 	}
 }
 

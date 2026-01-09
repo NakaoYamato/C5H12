@@ -83,7 +83,7 @@ private:
 	std::weak_ptr<ChestArmorMenuController> _armorUI;
 	std::weak_ptr<ChestItemMenuController> _itemUI;
 
-	ChangeArmorCamera* _changeArmorCamera;
+	ChangeArmorCamera* _changeArmorCamera = nullptr;
 
 	// ƒƒjƒ…[ó‘Ô
 	State _state = State::SelectMenu;

@@ -14,7 +14,7 @@ void Texture::Load(ID3D11Device* device, const wchar_t* filepath)
 	if (!res)
 	{
 		// 空のパスの場合は白でロード
-		if (filepath == nullptr)
+		if (filepath == nullptr || filepath[0] == L'\0')
 		{
 			MakeDummyTexture(device, 0xFFFFFFFF, 16);
 		}

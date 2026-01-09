@@ -170,6 +170,15 @@ void InputControllerBase::OnCreate()
 // 更新処理
 void InputControllerBase::Update(float elapsedTime)
 {
+#ifdef USE_IMGUI
+	//	ウィンドウにフォーカス中の場合は処理しない
+	if (ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
+	{
+		return;
+	}
+#endif // USE_IMGUI
+
+
 	if (_isActive)
 	{
 		OnUpdate(elapsedTime);

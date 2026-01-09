@@ -37,7 +37,5 @@ private:
 
     SelectType _selectType = SelectType::ToGame;
 
-    TextRenderer::TextDrawData _textData{};
-    Vector2 _textOffset = Vector2(-245.0f, -20.0f);
     Vector2 _inputUIOffset = Vector2(-300.0f, 0.0f);
 };

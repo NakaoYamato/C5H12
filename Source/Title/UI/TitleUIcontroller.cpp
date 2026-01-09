@@ -26,13 +26,19 @@ void TitleUIcontroller::Start()
             spriteRenderer->LoadTexture(FrontSpr, L"Data/Texture/Title/Front.png");
         }
     }
-
-    _textData.scale = Vector2(1.3f, 1.3f);
 }
 
 // 更新処理
 void TitleUIcontroller::Update(float elapsedTime)
 {
+#ifdef USE_IMGUI
+    //	ウィンドウにフォーカス中の場合は処理しない
+    if (ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
+    {
+        return;
+    }
+#endif // USE_IMGUI
+
     auto spriteRenderer = _spriteRenderer.lock();
     if (!spriteRenderer)
         return;
@@ -90,17 +96,6 @@ void TitleUIcontroller::Update(float elapsedTime)
         break;
     }
 
-    // 文字描画
-    _textData.text = L"ゲーム開始";
-    _textData.position = spriteRenderer->GetRectTransform(ToGameSpr).GetWorldPosition() + _textOffset;
-    GetActor()->GetScene()->GetTextRenderer().Draw(_textData);
-    _textData.text = L"プレイヤーデバッグ";
-    _textData.position = spriteRenderer->GetRectTransform(ToPlayerDebugSpr).GetWorldPosition() + _textOffset;
-    GetActor()->GetScene()->GetTextRenderer().Draw(_textData);
-    _textData.text = L"終了";
-    _textData.position = spriteRenderer->GetRectTransform(QuitSpr).GetWorldPosition() + _textOffset;
-    GetActor()->GetScene()->GetTextRenderer().Draw(_textData);
-
 	// 入力UI描画
 	InputUI::DrawInfo drawInfo;
 	drawInfo.keyboardKey = 'F';
@@ -126,7 +121,5 @@ void TitleUIcontroller::Update(float elapsedTime)
 // GUI描画
 void TitleUIcontroller::DrawGui()
 {
-    _textData.DrawGui(u8"テキスト");
-    ImGui::DragFloat2(u8"テキストオフセット", &_textOffset.x, 0.1f);
     ImGui::DragFloat2(u8"入力UIオフセット", &_inputUIOffset.x, 0.1f);
 }

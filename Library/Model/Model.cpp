@@ -384,6 +384,14 @@ void Model::RemoveUnusedNodes(ID3D11Device* device)
         // 頂点の boneIndex を更新
         for (ModelResource::Vertex& v : mesh.vertices)
         {
+            // ボーンが0の場合
+			if (mesh.bones.size() == 0)
+			{
+				v.boneIndex = { 0,0,0,0 };
+				v.boneWeight = { 0.0f,0.0f,0.0f,0.0f };
+				continue;
+			}
+
             // ウェイトが 0 のインデックスは参照先が不定でも問題ないため、
             // 安全のために 0 (通常はルートボーン等) に設定する。
             v.boneIndex.x = (v.boneWeight.x > 0.0f) ? oldToNewMeshBoneIndex[v.boneIndex.x] : 0;

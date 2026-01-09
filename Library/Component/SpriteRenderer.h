@@ -76,7 +76,6 @@ public:
 	bool SaveToFile() override;
 #pragma endregion
 
-protected:
 	// スプライト描画
 	virtual void SpriteRender(
 		const std::string& spriteName,

@@ -54,22 +54,10 @@ void SpriteRenderer::DelayedRender(const RenderContext& rc)
 		if (_sprites.find(spriteName) == _sprites.end())
             continue;
         auto& spriteData = _sprites.at(spriteName);
+		if (!spriteData._isActive)
+			continue;
 
 		SpriteRender(spriteName, rc);
-		// •¶Žš•`‰æ
-		if (!spriteData._textData.text.empty())
-		{
-			auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
-			textRenderer.Draw(spriteData._textData);
-		}
-
-		if (GetActor()->IsDrawingDebug() && !Debug::Input::IsActive(DebugInput::BTN_F7))
-		{
-			// ’†S‚ðƒfƒoƒbƒO•`‰æ
-			GetActor()->GetScene()->GetPrimitive()->Circle(rc.deviceContext,
-				spriteData.GetRectTransform().GetWorldPosition(),
-				5.0f);
-		}
     }
 }
 // GUI•`‰æ
@@ -356,7 +344,18 @@ void SpriteRenderer::SpriteRender(const std::string& spriteName,
 	const RenderContext& rc)
 {
 	auto& textureRenderer = GetActor()->GetScene()->GetTextureRenderer();
-	if (!_sprites[spriteName]._isActive)
-		return;
 	_sprites[spriteName].Render(rc, textureRenderer, _overallAlpha);
+	// •¶Žš•`‰æ
+	if (!_sprites[spriteName]._textData.text.empty())
+	{
+		auto& textRenderer = GetActor()->GetScene()->GetTextRenderer();
+		textRenderer.Draw(_sprites[spriteName]._textData);
+	}
+	if (GetActor()->IsDrawingDebug() && !Debug::Input::IsActive(DebugInput::BTN_F7))
+	{
+		// ’†S‚ðƒfƒoƒbƒO•`‰æ
+		GetActor()->GetScene()->GetPrimitive()->Circle(rc.deviceContext,
+			_sprites[spriteName].GetRectTransform().GetWorldPosition(),
+			5.0f);
+	}
 }

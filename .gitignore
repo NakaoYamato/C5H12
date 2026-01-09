@@ -366,7 +366,7 @@ FodyWeavers.xsd
 *.cso
 *.ini
 *.zip
-/Data/
-/Data/Shader/
-/External/
 imgui.ini
+/External/*
+/Data/*
+!Data/Resource

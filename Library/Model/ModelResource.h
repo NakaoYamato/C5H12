@@ -233,6 +233,34 @@ public:
 	void BuildBone(std::vector<Mesh>& meshes, std::vector<Node>& nodes);
 #pragma endregion
 
+#pragma region LOD
+	// LOD用メッシュデータ取得
+	const std::vector<Mesh>& GetMiddleLODMeshes() const { return _middleLODMeshes; }
+	const std::vector<Mesh>& GetLowLODMeshes() const { return _lowLODMeshes; }
+	// LOD用メッシュデータ取得（アドレス）
+	std::vector<Mesh>& GetAddressMiddleLODMeshes() { return _middleLODMeshes; }
+	std::vector<Mesh>& GetAddressLowLODMeshes() { return _lowLODMeshes; }
+    // LOD用ファイルパス取得
+    const std::string& GetMiddleLODFilepath() const { return _middleLODFilepath; }
+    const std::string& GetLowLODFilepath() const { return _lowLODFilepath; }
+    // LODデータの有無取得
+    bool HasMiddleLODData() const { return _hasMiddleLODData; }
+    bool HasLowLODData() const { return _hasLowLODData; }
+
+    // 中間LODメッシュの読み込み
+	void AppendMiddleLODMeshes(const char* filename);
+    // 低LODメッシュの読み込み
+    void AppendLowLODMeshes(const char* filename);
+
+
+	// LODシリアライズ
+	void SerializeLOD(const char* filename);
+
+	// LODデシリアライズ
+	void DeserializeLOD(const char* filename);
+#pragma endregion
+
+
 private:
 	// ノードインデックス取得
 	static int GetNodeIndex(const std::vector<Node>& nodes, const char* name);
@@ -252,4 +280,14 @@ private:
 	std::vector<Animation> _animations;
 
 	std::map<const aiNode*, int> _nodeIndexMap;
+
+    // 中間LODメッシュデータ
+    std::vector<Mesh> _middleLODMeshes;
+    std::string _middleLODFilepath{};
+    bool _hasMiddleLODData = false;
+
+    // 低LODメッシュデータ
+    std::vector<Mesh> _lowLODMeshes;
+    std::string _lowLODFilepath{};
+    bool _hasLowLODData = false;
 };

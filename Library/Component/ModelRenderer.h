@@ -50,6 +50,8 @@ public:
 		}
 		return false;
 	}
+	// カメラからの距離取得
+    float GetCameraDistance() const { return _cameraDistance; }
 	// カメラ距離による透明化が有効か
 	bool IsCameraDistanceAlphaEnabled() const { return _cameraDistanceAlphaEnabled; }
 	// カメラ距離によるアルファ値補正
@@ -78,6 +80,22 @@ public:
 		_hiddenMeshMap[meshName] = hidden;
 	}
 #pragma endregion
+
+#pragma region LOD
+    // 中LODメッシュ適応距離(m)取得
+    float GetMidLodDistance() const { return _midLodDistance; }
+    // 低LODメッシュ適応距離(m)取得
+    float GetLowLodDistance() const { return _lowLodDistance; }
+    // 中LODメッシュ適応距離(m)設定
+    void SetMidLodDistance(float distance) { _midLodDistance = distance; }
+    // 低LODメッシュ適応距離(m)設定
+    void SetLowLodDistance(float distance) { _lowLodDistance = distance; }
+    // 中LODメッシュ使用中か取得
+    bool IsMidLod() const { return _isMidLod; }
+    // 低LODメッシュ使用中か取得
+    bool IsLowLod() const { return _isLowLod; }
+#pragma endregion
+
 private:
 	std::weak_ptr<Model> _model;
 	// モデルのボーン行列
@@ -85,6 +103,9 @@ private:
 
 	ModelRenderType _renderType = ModelRenderType::Dynamic;
 	Vector4 _color{ 1,1,1,1 };
+
+	// カメラからの距離
+    float _cameraDistance = 0.0f;
 
 	// カメラ距離による透明化を行うか
 	bool _cameraDistanceAlphaEnabled = true;
@@ -100,4 +121,14 @@ private:
 
 	// メッシュの描画非表示リスト
 	std::unordered_map<std::string, bool> _hiddenMeshMap;
+
+	// 中LODメッシュ適応距離(m)
+    float _midLodDistance = 25.0f;
+    // 低LODメッシュ適応距離(m)
+    float _lowLodDistance = 50.0f;
+
+    // 中LODメッシュ使用中か
+    bool _isMidLod = false;
+    // 低LODメッシュ使用中か
+    bool _isLowLod = false;
 };

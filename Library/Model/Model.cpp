@@ -156,12 +156,140 @@ void Model::DrawGui()
             NodeGui(_poseNodes.at(0));
             ImGui::TreePop();
         }
-        ImGui::TreePop();
+
+        if (ImGui::TreeNode(u8"メッシュ"))
+        {
+            size_t vertexCount = 0;
+            for (size_t i = 0; i < _resource->GetMeshes().size(); ++i)
+            {
+                ModelResource::Mesh& mesh = _resource->GetAddressMeshes().at(i);
+                if (ImGui::TreeNode(std::to_string(i).c_str()))
+                {
+                    ImGui::Text(u8"マテリアル番号:%d", mesh.materialIndex);
+                    ImGui::Text(u8"頂点数:%d", static_cast<int>(mesh.vertices.size()));
+                    ImGui::Text(u8"インデックス数:%d", static_cast<int>(mesh.indices.size()));
+                    ImGui::TreePop();
+                }
+                vertexCount += mesh.vertices.size();
+            }
+            ImGui::Text(u8"合計頂点数:%d", static_cast<int>(vertexCount));
+
+            if (ImGui::TreeNode(u8"中間LOD"))
+            {
+                vertexCount = 0;
+                for (size_t i = 0; i < _resource->GetMiddleLODMeshes().size(); ++i)
+                {
+                    ModelResource::Mesh& mesh = _resource->GetAddressMiddleLODMeshes().at(i);
+                    if (ImGui::TreeNode(std::to_string(i).c_str()))
+                    {
+                        ImGui::Text(u8"マテリアル番号:%d", mesh.materialIndex);
+                        ImGui::Text(u8"頂点数:%d", static_cast<int>(mesh.vertices.size()));
+                        ImGui::Text(u8"インデックス数:%d", static_cast<int>(mesh.indices.size()));
+                        ImGui::TreePop();
+                    }
+                    vertexCount += mesh.vertices.size();
+                }
+                ImGui::Text(u8"合計頂点数:%d", static_cast<int>(vertexCount));
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode(u8"低LOD"))
+            {
+                vertexCount = 0;
+                for (size_t i = 0; i < _resource->GetLowLODMeshes().size(); ++i)
+                {
+                    ModelResource::Mesh& mesh = _resource->GetAddressLowLODMeshes().at(i);
+                    if (ImGui::TreeNode(std::to_string(i).c_str()))
+                    {
+                        ImGui::Text(u8"マテリアル番号:%d", mesh.materialIndex);
+                        ImGui::Text(u8"頂点数:%d", static_cast<int>(mesh.vertices.size()));
+                        ImGui::Text(u8"インデックス数:%d", static_cast<int>(mesh.indices.size()));
+                        ImGui::TreePop();
+                    }
+                    vertexCount += mesh.vertices.size();
+                }
+                ImGui::Text(u8"合計頂点数:%d", static_cast<int>(vertexCount));
+                ImGui::TreePop();
+            }
+
+            ImGui::TreePop();
+        }
+
+        if (ImGui::TreeNode(u8"LOD"))
+        {
+            ImGui::Text(u8"中間LOD:");
+            ImGui::SameLine();
+            ImGui::Text(_resource->GetMiddleLODFilepath().c_str());
+            ImGui::SameLine();
+            if (ImGui::Button(u8"割り当て##MidLOD"))
+            {
+                // ダイアログを開く
+                std::string filepath;
+                std::string currentDirectory;
+                Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
+                // ファイルを選択したら
+                if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                {
+                    try
+                    {
+                        // 相対パス取得
+                        std::filesystem::path path =
+                            std::filesystem::relative(filepath, currentDirectory);
+                        filepath = path.u8string();
+                    }
+                    catch (...)
+                    {
+
+                    }
+
+                    _resource->AppendMiddleLODMeshes(filepath.c_str());
+                }
+            }
+            ImGui::Separator();
+            ImGui::Text(u8"低LOD:");
+            ImGui::SameLine();
+            ImGui::Text(_resource->GetLowLODFilepath().c_str());
+            ImGui::SameLine();
+            if (ImGui::Button(u8"割り当て##LowLOD"))
+            {
+                // ダイアログを開く
+                std::string filepath;
+                std::string currentDirectory;
+                Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
+                // ファイルを選択したら
+                if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                {
+                    try
+                    {
+                        // 相対パス取得
+                        std::filesystem::path path =
+                            std::filesystem::relative(filepath, currentDirectory);
+                        filepath = path.u8string();
+                    }
+                    catch (...)
+                    {
+
+                    }
+
+                    _resource->AppendLowLODMeshes(filepath.c_str());
+                }
+            }
+
+            if (ImGui::Button(u8"シリアライズ"))
+            {
+                _resource->SerializeLOD(_filename.c_str());
+            }
+
+            ImGui::TreePop();
+        }
+
         ImGui::InputText(u8"ファイルパス", &_filename);
         if (ImGui::Button(u8"シリアライズ"))
         {
             ReSerialize();
         }
+
+        ImGui::TreePop();
     }
 
     if (_debugNodeIndex != -1 && _debugNodeIndex < _poseNodes.size())
@@ -465,29 +593,7 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbxFilename)
 {
     for (ModelResource::Mesh& mesh : _resource->GetAddressMeshes())
     {
-        HRESULT hr{ S_OK };
-        D3D11_BUFFER_DESC buffer_desc{};
-        D3D11_SUBRESOURCE_DATA subresource_data{};
-        buffer_desc.ByteWidth = static_cast<UINT>(sizeof(ModelResource::Vertex) * mesh.vertices.size());
-        buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-        buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        buffer_desc.CPUAccessFlags = 0;
-        buffer_desc.MiscFlags = 0;
-        buffer_desc.StructureByteStride = 0;
-        subresource_data.pSysMem = mesh.vertices.data();
-        subresource_data.SysMemPitch = 0;
-        subresource_data.SysMemSlicePitch = 0;
-        hr = device->CreateBuffer(&buffer_desc, &subresource_data,
-            mesh.vertexBuffer.ReleaseAndGetAddressOf());
-        _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-        buffer_desc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh.indices.size());
-        buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-        buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        subresource_data.pSysMem = mesh.indices.data();
-        hr = device->CreateBuffer(&buffer_desc, &subresource_data,
-            mesh.indexBuffer.ReleaseAndGetAddressOf());
-        _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+        CreateMeshResources(device, mesh);
     }
     for (ModelResource::Material& modelMaterial : _resource->GetAddressMaterials())
     {
@@ -529,4 +635,48 @@ void Model::CreateComObject(ID3D11Device* device, const char* fbxFilename)
         // シェーダーの初期設定
         material.SetShaderName("PBR");
     }
+
+    // LODメッシュのCOMオブジェクト生成
+    if (_resource->HasMiddleLODData())
+    {
+        for (ModelResource::Mesh& mesh : _resource->GetAddressMiddleLODMeshes())
+        {
+            CreateMeshResources(device, mesh);
+        }
+    }
+    if (_resource->HasLowLODData())
+    {
+        for (ModelResource::Mesh& mesh : _resource->GetAddressLowLODMeshes())
+        {
+            CreateMeshResources(device, mesh);
+        }
+    }
+}
+
+/// メッシュリソース作成
+void Model::CreateMeshResources(ID3D11Device* device, ModelResource::Mesh& mesh) const
+{
+    HRESULT hr{ S_OK };
+    D3D11_BUFFER_DESC buffer_desc{};
+    D3D11_SUBRESOURCE_DATA subresource_data{};
+    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(ModelResource::Vertex) * mesh.vertices.size());
+    buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+    buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    buffer_desc.CPUAccessFlags = 0;
+    buffer_desc.MiscFlags = 0;
+    buffer_desc.StructureByteStride = 0;
+    subresource_data.pSysMem = mesh.vertices.data();
+    subresource_data.SysMemPitch = 0;
+    subresource_data.SysMemSlicePitch = 0;
+    hr = device->CreateBuffer(&buffer_desc, &subresource_data,
+        mesh.vertexBuffer.ReleaseAndGetAddressOf());
+    _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh.indices.size());
+    buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+    buffer_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    subresource_data.pSysMem = mesh.indices.data();
+    hr = device->CreateBuffer(&buffer_desc, &subresource_data,
+        mesh.indexBuffer.ReleaseAndGetAddressOf());
+    _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }

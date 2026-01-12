@@ -26,21 +26,39 @@ void ModelRenderer::LateUpdate(float elapsedTime)
 		SetModel(GetActor()->GetModel());
 	}
 
+    // カメラ距離計算
+	auto position = GetActor()->GetTransform().GetWorldPosition();
+	auto& eyePosition = GetActor()->GetScene()->GetMainCamera()->GetEye();
+	_cameraDistance = Vector3::Length(position - eyePosition);
+
 	// カメラに近ければ透明化
 	if (_cameraDistanceAlphaEnabled)
 	{
-		auto position = GetActor()->GetTransform().GetWorldPosition();
-		auto& eyePosition = GetActor()->GetScene()->GetMainCamera()->GetEye();
 		_cameraDistanceAlpha = std::clamp(
-			Vector3::Length(position - eyePosition) / _cameraDistanceAlphaStart,
+			_cameraDistance / _cameraDistanceAlphaStart,
 			_cameraDistanceAlphaMin,
 			1.0f);
 		_cameraDistanceAlpha = std::powf(_cameraDistanceAlpha, 2.0f);
 	}
 
-	// ボーン行列計算
 	if (auto model = _model.lock())
 	{
+		// LOD判定
+		_isMidLod = false;
+		_isLowLod = false;
+		if (_cameraDistance > _midLodDistance && model->GetResource()->HasMiddleLODData())
+		{
+			if (_cameraDistance > _lowLodDistance && model->GetResource()->HasLowLODData())
+			{
+                _isLowLod = true;
+			}
+			else
+			{
+                _isMidLod = true;
+			}
+		}
+
+		// ボーン行列計算
 		const std::vector<ModelResource::Node>& nodes = model->GetPoseNodes();
 		for (auto& mesh : model->GetResource()->GetMeshes())
 		{
@@ -71,7 +89,12 @@ void ModelRenderer::Render(const RenderContext& rc)
 	Vector4 color = _color;
 	color.w *= _cameraDistanceAlpha;
 	const ModelResource* resource = _model.lock()->GetResource();
-	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+	const std::vector<ModelResource::Mesh>& meshes = _isMidLod ?
+		resource->GetMiddleLODMeshes() :
+		_isLowLod ?
+		resource->GetLowLODMeshes() :
+        resource->GetMeshes();
+	for (const ModelResource::Mesh& mesh : meshes)
 	{
 		Material* material = &_materialMap.at(mesh.materialIndex);
 
@@ -93,7 +116,12 @@ void ModelRenderer::CastShadow(const RenderContext& rc)
 	if (_model.lock() == nullptr) return;
 
 	const ModelResource* resource = _model.lock()->GetResource();
-	for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+	const std::vector<ModelResource::Mesh>& meshes = _isMidLod ?
+		resource->GetMiddleLODMeshes() :
+		_isLowLod ?
+		resource->GetLowLODMeshes() :
+		resource->GetMeshes();
+	for (const ModelResource::Mesh& mesh : meshes)
 	{
 		Material* material = &_materialMap.at(mesh.materialIndex);
 
@@ -168,6 +196,12 @@ void ModelRenderer::DrawGui()
 
 		ImGui::TreePop();
 	}
+    ImGui::Text(u8"カメラからの距離: %.2f m", _cameraDistance);
+
+    ImGui::DragFloat(u8"中LODメッシュ適応距離(m)", &_midLodDistance, 0.1f, 0.0f, 1000.0f);
+    ImGui::DragFloat(u8"低LODメッシュ適応距離(m)", &_lowLodDistance, 0.1f, 0.0f, 1000.0f);
+    ImGui::Checkbox(u8"中LODメッシュ使用中", &_isMidLod);
+    ImGui::Checkbox(u8"低LODメッシュ使用中", &_isLowLod);
 	ImGui::Separator();
 
 	auto model = GetActor()->GetModel().lock();

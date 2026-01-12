@@ -18,6 +18,8 @@ static const char* ANIMATION_EVENT_EXTENSION = ".animEvent";
 static const char* ANIMATION_CURVE_EXTENSION = ".animCurve";
 // 当たり判定のファイル拡張子
 static const char* MODEL_COLLISION_EXTENSION = ".modelCollision";
+// LODデータのファイル拡張子
+static const char* MODEL_LOD_EXTENSION = ".modelLOD";
 #pragma endregion
 
 

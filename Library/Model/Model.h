@@ -78,6 +78,13 @@ protected:
 	/// <param name="fbx_filename"></param>
 	void CreateComObject(ID3D11Device* device, const char* fbxFilename);
 
+    /// <summary>
+    /// メッシュリソース作成
+    /// </summary>
+    /// <param name="device"></param>
+    /// <param name="mesh"></param>
+    void CreateMeshResources(ID3D11Device* device, ModelResource::Mesh& mesh) const;
+
 protected:
 	// ファイルパス
 	std::string _filename;

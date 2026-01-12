@@ -869,6 +869,85 @@ void ModelResource::BuildBone(std::vector<Mesh>& meshes, std::vector<Node>& node
 }
 #pragma endregion
 
+#pragma region LOD
+// 中間LODメッシュの読み込み
+void ModelResource::AppendMiddleLODMeshes(const char* filename)
+{
+    // モデル読み込み
+    ModelResource lodModel;
+    lodModel.Load(filename);
+
+    _middleLODMeshes = lodModel.GetMeshes();
+    _middleLODFilepath = filename;
+    _hasMiddleLODData = _middleLODMeshes.size() > 0;
+}
+// 低LODメッシュの読み込み
+void ModelResource::AppendLowLODMeshes(const char* filename)
+{
+    // モデル読み込み
+    ModelResource lodModel;
+    lodModel.Load(filename);
+
+    _lowLODMeshes = lodModel.GetMeshes();
+    _lowLODFilepath = filename;
+    _hasLowLODData = _lowLODMeshes.size() > 0;
+}
+// LODシリアライズ
+void ModelResource::SerializeLOD(const char* filename)
+{
+    if (!_hasMiddleLODData || !_hasLowLODData) return;
+
+    std::filesystem::path serializePath = std::filesystem::path(filename).replace_extension(MODEL_LOD_EXTENSION);
+    std::ofstream ostream(serializePath.string().c_str(), std::ios::binary);
+    if (ostream.is_open())
+    {
+        cereal::BinaryOutputArchive archive(ostream);
+
+        try
+        {
+            archive(
+                CEREAL_NVP(_middleLODMeshes),
+                CEREAL_NVP(_middleLODFilepath),
+                CEREAL_NVP(_lowLODMeshes),
+                CEREAL_NVP(_lowLODFilepath)
+            );
+        }
+        catch (...)
+        {
+            _ASSERT_EXPR_A(false, "Model LOD serialize failed");
+        }
+    }
+
+}
+// LODデシリアライズ
+void ModelResource::DeserializeLOD(const char* filename)
+{
+    std::filesystem::path serializePath = std::filesystem::path(filename).replace_extension(MODEL_LOD_EXTENSION);
+    std::ifstream istream(serializePath.string().c_str(), std::ios::binary);
+    if (istream.is_open())
+    {
+        cereal::BinaryInputArchive archive(istream);
+
+        try
+        {
+            archive(
+                CEREAL_NVP(_middleLODMeshes),
+                CEREAL_NVP(_middleLODFilepath),
+                CEREAL_NVP(_lowLODMeshes),
+                CEREAL_NVP(_lowLODFilepath)
+            );
+
+            _hasMiddleLODData = _middleLODMeshes.size() > 0;
+            _hasLowLODData = _lowLODMeshes.size() > 0;
+        }
+        catch (...)
+        {
+            _ASSERT_EXPR_A(false, "Model LOD deserialize failed");
+        }
+    }
+}
+#pragma endregion
+
 // ノードインデックス取得
 int ModelResource::GetNodeIndex(const std::vector<Node>& nodes, const char* name)
 {
@@ -906,6 +985,9 @@ void ModelResource::Serialize(const char* filename)
             _ASSERT_EXPR_A(false, "Model serialize failed");
         }
     }
+
+    // LODシリアライズ
+    SerializeLOD(filename);
 }
 
 // デシリアライズ
@@ -934,6 +1016,9 @@ void ModelResource::Deserialize(const char* filename)
     {
         _ASSERT_EXPR_A(false, "Model File not found");
     }
+
+    // LODデシリアライズ
+    DeserializeLOD(filename);
 }
 
 template<class T>

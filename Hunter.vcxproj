@@ -160,6 +160,7 @@
     <ClCompile Include="Library\Actor\Stage\Terrain\TerrainActor.cpp" />
     <ClCompile Include="Library\Actor\UI\Menu\MenuUIActor.cpp" />
     <ClCompile Include="Library\Actor\UI\UIActor.cpp" />
+    <ClCompile Include="Library\Algorithm\UIWidget\UIWidget.cpp" />
     <ClCompile Include="Library\Audio\AudioLoader.cpp" />
     <ClCompile Include="Library\Audio\AudioResource.cpp" />
     <ClCompile Include="Library\Audio\AudioSystem.cpp" />
@@ -446,6 +447,7 @@
     <ClInclude Include="Library\Algorithm\BehaviorTree\BehaviorTreeEditor.h" />
     <ClInclude Include="Library\Algorithm\CallBack\CallBack.h" />
     <ClInclude Include="Library\Algorithm\EventBus\EventBus.h" />
+    <ClInclude Include="Library\Algorithm\UIWidget\UIWidget.h" />
     <ClInclude Include="Library\Audio\AudioLoader.h" />
     <ClInclude Include="Library\Audio\AudioResource.h" />
     <ClInclude Include="Library\Audio\AudioSystem.h" />

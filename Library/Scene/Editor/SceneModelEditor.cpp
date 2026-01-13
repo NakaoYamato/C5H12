@@ -223,6 +223,7 @@ void SceneModelEditor::DrawModelGui()
                 model->ApplyPoseToResource(Graphics::Instance().GetDevice());
 				// トランスフォームをリセット
 				_modelActor.lock()->GetTransform().Reset();
+				_modelRenderer.lock()->SetModel(model);
             }
         }
         ImGui::Separator();
@@ -232,6 +233,7 @@ void SceneModelEditor::DrawModelGui()
 			if (model)
 			{
 				model->RemoveUnusedNodes(Graphics::Instance().GetDevice());
+                _modelRenderer.lock()->SetModel(model);
 			}
         }
 

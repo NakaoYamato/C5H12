@@ -168,6 +168,7 @@ void Model::DrawGui()
                     ImGui::Text(u8"マテリアル番号:%d", mesh.materialIndex);
                     ImGui::Text(u8"頂点数:%d", static_cast<int>(mesh.vertices.size()));
                     ImGui::Text(u8"インデックス数:%d", static_cast<int>(mesh.indices.size()));
+					ImGui::Text(u8"ボーン数:%d", static_cast<int>(mesh.bones.size()));
                     ImGui::TreePop();
                 }
                 vertexCount += mesh.vertices.size();
@@ -185,6 +186,7 @@ void Model::DrawGui()
                         ImGui::Text(u8"マテリアル番号:%d", mesh.materialIndex);
                         ImGui::Text(u8"頂点数:%d", static_cast<int>(mesh.vertices.size()));
                         ImGui::Text(u8"インデックス数:%d", static_cast<int>(mesh.indices.size()));
+                        ImGui::Text(u8"ボーン数:%d", static_cast<int>(mesh.bones.size()));
                         ImGui::TreePop();
                     }
                     vertexCount += mesh.vertices.size();
@@ -204,6 +206,7 @@ void Model::DrawGui()
                         ImGui::Text(u8"マテリアル番号:%d", mesh.materialIndex);
                         ImGui::Text(u8"頂点数:%d", static_cast<int>(mesh.vertices.size()));
                         ImGui::Text(u8"インデックス数:%d", static_cast<int>(mesh.indices.size()));
+                        ImGui::Text(u8"ボーン数:%d", static_cast<int>(mesh.bones.size()));
                         ImGui::TreePop();
                     }
                     vertexCount += mesh.vertices.size();

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <stack>
-#include <functional>
 
 #include "../UIActor.h"
 #include "../../Library/2D/Sprite.h"
+#include "../../Library/Algorithm/CallBack/CallBack.h"
 
 class MenuWidget;
 
@@ -19,31 +19,68 @@ public:
 	void OnUpdate(float elapsedTime) override;
 	// 3D描画後の描画時処理
 	void OnDelayedRender(const RenderContext& rc) override;
-	// トランスフォーム更新
-	void UpdateTransform() override;
-
 	// GUI描画時処理
 	void OnDrawGui() override;
 
+	// ウィジェット登録
+	void RegisterWidget(std::shared_ptr<MenuWidget> widget);
+	// コールバック登録
+	void RegisterOptionSelectedCallback(const std::string& name, CallBack<void, MenuUIActor*> callback);
 	// 新しいページをスタックの一番上に積む
-	void PushPage(std::unique_ptr<MenuWidget> page);
+	void PushPage(std::string name);
 	// 一番上のページを破棄して戻る
 	void PopPage();
+	// オプションが選択された時のコールバックを呼び出す
+	void CallOptionSelected(const std::string& callbackName);
+
+#pragma region アクセサ
+	// 現在のウィジェットを取得
+	MenuWidget* GetCurrentWidget();
+	// スタック取得
+	std::stack<std::string> GetWidgetStack() const { return _widgetStackNames; }
+	// 登録ウィジェット取得
+	const std::unordered_map<std::string, std::shared_ptr<MenuWidget>>& GetRegisteredWidgets() const { return _registeredWidgets; }
+	// コールバックハンドラ取得
+	CallBackHandler<void, MenuUIActor*>& GetOptionSelectedCallbackHandler() { return onOptionSelected; }
+#pragma endregion
+
+#pragma region ファイル
+	// ファイル読み込み
+	virtual void LoadFromFile(const char* filepath);
+	// ファイル保存
+	virtual void SaveToFile(const char* filepath);
+#pragma endregion
+
 private:
-	std::stack<std::unique_ptr<MenuWidget>> _widgetStack;
+	// GUI描画処理
+	void DrawWidgetGui();
+
+private:
+	// ウィジェットスタック
+	std::stack<std::string> _widgetStackNames;
+
+	// 登録しているウィジェット
+	std::unordered_map<std::string, std::shared_ptr<MenuWidget>> _registeredWidgets;
+	// オプションが選択された時のコールバック関数
+	CallBackHandler<void, MenuUIActor*> onOptionSelected;
+
+	// ロードされたか
+	bool _isLoaded = false;
 };
 
 // メニューUIのウィジェット基底クラス
 class MenuWidget 
 {
 public:
-	// オプションが選択された時のコールバック関数
-	using OnSelectCallback = std::function<void(MenuUIActor*)>;
-
+	// オプション構造体
 	struct Option
 	{
+		// 表示名
 		std::string label{};
-		OnSelectCallback onSelect{};
+		// 選択時コールバック名
+		std::string onSelectedCallbackName{};
+		// 選択時の遷移先名
+		std::string nextWidgetName{};
 	};
 
 public:
@@ -64,9 +101,14 @@ public:
 #pragma endregion
 
 #pragma region オプション
-	void AddOption(const std::string& label, const OnSelectCallback& onSelect)
+	void AddOption(const std::string& label, 
+		const std::string& onSelectedCallbackName = "",
+		const std::string& nextWidgetName = "")
 	{
-		_options.push_back({ label, onSelect });
+		auto& option = _options.emplace_back();
+		option.label = label;
+		option.onSelectedCallbackName = onSelectedCallbackName;
+		option.nextWidgetName = nextWidgetName;
 	}
 #pragma endregion
 
@@ -74,6 +116,13 @@ public:
 	std::string GetName() const { return _name; }
 
 	RectTransform& GetRectTransform() { return _rectTransform; }
+#pragma endregion
+
+#pragma region ファイル
+	// ファイル読み込み
+	virtual void LoadFromFile(nlohmann::json* json);
+	// ファイル保存
+	virtual void SaveToFile(nlohmann::json* json);
 #pragma endregion
 
 protected:

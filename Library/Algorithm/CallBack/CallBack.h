@@ -44,6 +44,15 @@ public:
 		}
 		throw std::runtime_error("Callback not found: " + name);
 	}
+	// コールバック関数呼び出し
+	void CallVoid(const std::string& name, Args... args)
+	{
+		auto it = _callbacks.find(name);
+		if (it != _callbacks.end())
+		{
+			it->second(args...);
+		}
+	}
 	// コールバック関数呼び出し(全て)
 	void Call(Args... args)
 	{

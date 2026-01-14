@@ -23,7 +23,7 @@ public:
 	void OnDrawGui() override;
 
 	// ウィジェット登録
-	void RegisterWidget(std::shared_ptr<MenuWidget> widget);
+	std::shared_ptr<MenuWidget> RegisterWidget(std::shared_ptr<MenuWidget> widget);
 	// コールバック登録
 	void RegisterOptionSelectedCallback(const std::string& name, CallBack<void, MenuUIActor*> callback);
 	// 新しいページをスタックの一番上に積む
@@ -42,6 +42,11 @@ public:
 	const std::unordered_map<std::string, std::shared_ptr<MenuWidget>>& GetRegisteredWidgets() const { return _registeredWidgets; }
 	// コールバックハンドラ取得
 	CallBackHandler<void, MenuUIActor*>& GetOptionSelectedCallbackHandler() { return onOptionSelected; }
+
+	// ロード済みか
+	bool IsLoaded() const { return _isLoaded; }
+	// ウィジェット追加中か
+	bool IsAddingWidget() const { return _isAddingWidget; }
 #pragma endregion
 
 #pragma region ファイル
@@ -66,13 +71,15 @@ private:
 
 	// ロードされたか
 	bool _isLoaded = false;
+	// GUIでのウィジェット追加用フラグ
+	bool _isAddingWidget = false;
 };
 
 // メニューUIのウィジェット基底クラス
 class MenuWidget 
 {
 public:
-	// オプション構造体
+	// 選択肢
 	struct Option
 	{
 		// 表示名
@@ -100,22 +107,26 @@ public:
 	virtual void DrawGui(MenuUIActor* owner);
 #pragma endregion
 
-#pragma region オプション
-	void AddOption(const std::string& label, 
+#pragma region 選択肢
+	void AddOption(const std::string& label,
 		const std::string& onSelectedCallbackName = "",
-		const std::string& nextWidgetName = "")
-	{
-		auto& option = _options.emplace_back();
-		option.label = label;
-		option.onSelectedCallbackName = onSelectedCallbackName;
-		option.nextWidgetName = nextWidgetName;
-	}
+		const std::string& nextWidgetName = "");
+	// 選択肢インデックス増加
+	virtual size_t AddSelectedOptionIndex();
+	// 選択肢インデックス減少
+	virtual size_t SubSelectedOptionIndex();
+	// 選択肢選択処理
+	virtual void SelectOption(MenuUIActor* owner);
+	// 戻る選択肢選択処理
+	virtual void BackOption(MenuUIActor* owner);
 #pragma endregion
 
 #pragma region アクセサ
 	std::string GetName() const { return _name; }
 
 	RectTransform& GetRectTransform() { return _rectTransform; }
+	size_t GetOptionSize() const { return _options.size(); }
+	size_t GetSelectedOptionIndex() const { return _selectedOptionIndex; }
 #pragma endregion
 
 #pragma region ファイル
@@ -129,13 +140,13 @@ protected:
     std::string _name;
 	RectTransform _rectTransform;
 
-	// オプションリスト
+	// 選択肢リスト
 	std::vector<Option> _options;
-	// オプションの背景画像
+	// 選択肢の背景画像
 	Sprite _optionSprite;
-	// 選択中のオプション画像
+	// 選択中の選択肢画像
 	Sprite _selectedOptionSprite;
-	// オプション間の垂直間隔
+	// 選択肢間の垂直間隔
 	float _optionVerticalSpacing = 40.0f;
 	// ラベルのフォントサイズ
 	Vector2 _optionFontSize = Vector2::One;
@@ -146,6 +157,6 @@ protected:
 	// ラベルの選択中の色
 	Vector4 _optionLabelSelectedColor = Vector4::Red;
 
-	// 選択中のオプションインデックス
+	// 選択中の選択肢インデックス
 	size_t _selectedOptionIndex = 0;
 };

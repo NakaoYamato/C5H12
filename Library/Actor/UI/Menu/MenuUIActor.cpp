@@ -5,33 +5,31 @@
 
 #include <Mygui.h>
 
+#define DEBUG_MENUUIACTOR 1 // 使用例
+
 // 生成時処理
 void MenuUIActor::OnCreate()
 {
 	UIActor::OnCreate();
 
+#if DEBUG_MENUUIACTOR // 使用例
 	// コールバック登録
 	RegisterOptionSelectedCallback("PopPage", [this](MenuUIActor* owner) -> void
 		{
 			owner->PopPage();
 		});
 
-	// ウィジェット登録
-	std::shared_ptr<MenuWidget> mainMenu = std::make_shared<MenuWidget>("MainMenu");
-	RegisterWidget(mainMenu);
-	std::shared_ptr<MenuWidget> pop001 = std::make_shared<MenuWidget>("Pop001");
-	RegisterWidget(pop001);
-	std::shared_ptr<MenuWidget> pop002 = std::make_shared<MenuWidget>("Pop002");
-	RegisterWidget(pop002);
-	std::shared_ptr<MenuWidget> pop003 = std::make_shared<MenuWidget>("Pop003");
-	RegisterWidget(pop003);
-	std::shared_ptr<MenuWidget> pop004 = std::make_shared<MenuWidget>("Pop004");
-	RegisterWidget(pop004);
-
-	LoadFromFile("./Data/Resource/Actor/MenuUI.json");
+	LoadFromFile("./Data/Resource/Actor/TestMenuUI/MenuUI.json");
 
 	if (!_isLoaded)
 	{
+		// ウィジェット登録
+		std::shared_ptr<MenuWidget> mainMenu = RegisterWidget(std::make_shared<MenuWidget>("MainMenu"));
+		std::shared_ptr<MenuWidget> pop001 = RegisterWidget(std::make_shared<MenuWidget>("Pop001"));
+		std::shared_ptr<MenuWidget> pop002 = RegisterWidget(std::make_shared<MenuWidget>("Pop002"));
+		std::shared_ptr<MenuWidget> pop003 = RegisterWidget(std::make_shared<MenuWidget>("Pop003"));
+		std::shared_ptr<MenuWidget> pop004 = RegisterWidget(std::make_shared<MenuWidget>("Pop004"));
+
 		mainMenu->AddOption("Pop001", "", "Pop001");
 		mainMenu->AddOption("Pop002", "", "Pop002");
 		mainMenu->AddOption("Pop003", "", "Pop003");
@@ -47,16 +45,32 @@ void MenuUIActor::OnCreate()
 	}
 
 	PushPage("MainMenu");
+#endif
 }
 
 // 更新時処理
 void MenuUIActor::OnUpdate(float elapsedTime)
 {
 	UIActor::OnUpdate(elapsedTime);
-	if (!_widgetStackNames.empty())
+	if (auto currentWidget = GetCurrentWidget())
 	{
-		if (auto& currentWidget = _registeredWidgets.at(_widgetStackNames.top()))
-			currentWidget->Update(elapsedTime, this);
+#if DEBUG_MENUUIACTOR // 使用例
+		// 入力処理
+		if (_INPUT_REPEAT("Up"))
+			currentWidget->SubSelectedOptionIndex();
+		if (_INPUT_REPEAT("Down"))
+			currentWidget->AddSelectedOptionIndex();
+
+		if (_INPUT_TRIGGERD("Select"))
+		{
+			currentWidget->SelectOption(this);
+		}
+		if (_INPUT_TRIGGERD("Back") || _INPUT_TRIGGERD("Menu"))
+		{
+			currentWidget->BackOption(this);
+		}
+#endif
+		currentWidget->Update(elapsedTime, this);
 	}
 }
 
@@ -64,10 +78,9 @@ void MenuUIActor::OnUpdate(float elapsedTime)
 void MenuUIActor::OnDelayedRender(const RenderContext& rc)
 {
 	UIActor::OnDelayedRender(rc);
-	if (!_widgetStackNames.empty())
+	if (auto currentWidget = GetCurrentWidget())
 	{
-		if (auto& currentWidget = _registeredWidgets.at(_widgetStackNames.top()))
-			currentWidget->Render(rc, this);
+		currentWidget->Render(rc, this);
 	}
 }
 
@@ -88,12 +101,33 @@ void MenuUIActor::OnDrawGui()
 		}
 		ImGui::EndTabBar();
 	}
+
+	// ウィジェット追加処理
+	if (_isAddingWidget)
+	{
+		if (ImGui::Begin(u8"ウィジェット追加", &_isAddingWidget))
+		{
+			static std::string newWidgetName = "NewWidget";
+			ImGui::InputText(u8"新規ウィジェット名", &newWidgetName);
+			if (ImGui::Button(u8"追加"))
+			{
+				if (_registeredWidgets.find(newWidgetName) == _registeredWidgets.end())
+				{
+					auto newWidget = std::make_shared<MenuWidget>(newWidgetName);
+					RegisterWidget(newWidget);
+				}
+				_isAddingWidget = false;
+			}
+		}
+		ImGui::End();
+	}
 }
 
 // ウィジェット登録
-void MenuUIActor::RegisterWidget(std::shared_ptr<MenuWidget> widget)
+std::shared_ptr<MenuWidget> MenuUIActor::RegisterWidget(std::shared_ptr<MenuWidget> widget)
 {
-	_registeredWidgets[widget->GetName()] = std::move(widget);
+	_registeredWidgets[widget->GetName()] = widget;
+	return widget;
 }
 
 // コールバック登録
@@ -186,7 +220,7 @@ void MenuUIActor::LoadFromFile(const char* filepath)
 		}
 		else
 		{
-			widget = std::make_shared<MenuWidget>(name);
+			widget = RegisterWidget(std::make_shared<MenuWidget>(name));
 			widget->LoadFromFile(&sub);
 		}
 	}
@@ -222,11 +256,10 @@ void MenuUIActor::DrawWidgetGui()
 	{
 		if (ImGui::BeginTabItem(u8"現在のページ"))
 		{
-			if (!_widgetStackNames.empty())
+			if (auto currentWidget = GetCurrentWidget())
 			{
 				ImGui::Text(_widgetStackNames.top().c_str());
-				if (auto& currentWidget = _registeredWidgets.at(_widgetStackNames.top()))
-					currentWidget->DrawGui(this);
+				currentWidget->DrawGui(this);
 			}
 
 			ImGui::EndTabItem();
@@ -234,6 +267,12 @@ void MenuUIActor::DrawWidgetGui()
 
 		if (ImGui::BeginTabItem(u8"登録ウィジェット一覧"))
 		{
+			if (ImGui::Button(u8"ウィジェット追加"))
+			{
+				_isAddingWidget = true;
+			}
+			ImGui::Separator();
+
 			for (auto& [name, widget] : _registeredWidgets)
 			{
 				if (ImGui::TreeNode(name.c_str()))
@@ -246,6 +285,7 @@ void MenuUIActor::DrawWidgetGui()
 						PushPage(name);
 					}
 
+					ImGui::Separator();
 					ImGui::PopID();
 					ImGui::TreePop();
 				}
@@ -278,33 +318,6 @@ void MenuUIActor::DrawWidgetGui()
 // 更新処理
 void MenuWidget::Update(float elapsedTime, MenuUIActor* owner)
 {
-	// 入力処理
-	if (_INPUT_REPEAT("Up"))
-		_selectedOptionIndex--;
-	if (_INPUT_REPEAT("Down"))
-		_selectedOptionIndex++;
-	// インデックス範囲制限
-	_selectedOptionIndex = _selectedOptionIndex % (static_cast<int>(_options.size()));
-	if (_selectedOptionIndex < 0)
-		_selectedOptionIndex += static_cast<int>(_options.size());
-
-	if (_INPUT_TRIGGERD("Select"))
-	{
-		auto& option = _options[_selectedOptionIndex];
-		if (!option.onSelectedCallbackName.empty())
-		{
-			owner->CallOptionSelected(option.onSelectedCallbackName);
-		}
-		if (!option.nextWidgetName.empty())
-		{
-			owner->PushPage(option.nextWidgetName);
-		}
-	}
-	if (_INPUT_TRIGGERD("Back") || _INPUT_TRIGGERD("Menu"))
-	{
-		owner->PopPage();
-	}
-
 	// トランスフォーム更新
 	_rectTransform.UpdateTransform(&owner->GetRectTransform());
 }
@@ -339,7 +352,7 @@ void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 			Vector2::Zero,
 			_optionFontSize);
 
-		// 次のオプション位置計算
+		// 次の選択肢位置計算
 		Vector2 position = rect.GetLocalPosition();
 		position.y += _optionVerticalSpacing;
 		rect.SetLocalPosition(position);
@@ -357,11 +370,11 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 
 	ImGui::Separator();
 
-	if (ImGui::TreeNode(u8"オプションリスト"))
+	if (ImGui::TreeNode(u8"選択肢"))
 	{
 		static std::string newOptionLabel = "NewOption";
-		ImGui::InputText(u8"新規オプションラベル", &newOptionLabel);
-		if (ImGui::Button(u8"オプション追加"))
+		ImGui::InputText(u8"新規選択肢", &newOptionLabel);
+		if (ImGui::Button(u8"選択肢追加"))
 		{
 			AddOption(newOptionLabel);
 		}
@@ -412,13 +425,13 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 		ImGui::TreePop();
 	}
 
-	if (ImGui::TreeNode(u8"オプションの背景画像"))
+	if (ImGui::TreeNode(u8"選択肢の背景画像"))
 	{
 		_optionSprite.DrawGui();
 		ImGui::TreePop();
 	}
 
-	if (ImGui::TreeNode(u8"選択中オプション画像"))
+	if (ImGui::TreeNode(u8"選択肢の選択中画像"))
 	{
 		_selectedOptionSprite.DrawGui();
 		ImGui::TreePop();
@@ -426,17 +439,73 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 
 	if (ImGui::TreeNode(u8"パラメータ"))
 	{
-		ImGui::DragFloat(u8"オプション垂直間隔", &_optionVerticalSpacing);
+		ImGui::DragFloat(u8"選択肢垂直間隔", &_optionVerticalSpacing);
 		ImGui::DragFloat2(u8"ラベルフォントサイズ", &_optionFontSize.x);
 		ImGui::DragFloat2(u8"ラベルオフセット", &_optionLabelOffset.x);
 		ImGui::ColorEdit4(u8"ラベル色", &_optionLabelColor.x);
 		ImGui::ColorEdit4(u8"選択中ラベル色", &_optionLabelSelectedColor.x);
 
-		ImGui::Text(u8"選択中オプションインデックス: %d", static_cast<int>(_selectedOptionIndex));
+		ImGui::Text(u8"選択中選択肢インデックス: %d", static_cast<int>(_selectedOptionIndex));
 		
 		ImGui::TreePop();
 	}
 }
+
+#pragma region 選択肢
+void MenuWidget::AddOption(const std::string& label, const std::string& onSelectedCallbackName, const std::string& nextWidgetName)
+{
+	auto& option = _options.emplace_back();
+	option.label = label;
+	option.onSelectedCallbackName = onSelectedCallbackName;
+	option.nextWidgetName = nextWidgetName;
+}
+// 選択肢インデックス増加
+size_t MenuWidget::AddSelectedOptionIndex()
+{
+	if (_options.empty())
+		return 0;
+	_selectedOptionIndex++;
+	// インデックス範囲制限
+	_selectedOptionIndex = _selectedOptionIndex % (static_cast<int>(_options.size()));
+	if (_selectedOptionIndex < 0)
+		_selectedOptionIndex += static_cast<int>(_options.size());
+	return _selectedOptionIndex;
+}
+// 選択肢インデックス減少
+size_t MenuWidget::SubSelectedOptionIndex()
+{
+	if (_options.empty())
+		return 0;
+	_selectedOptionIndex--;
+	// インデックス範囲制限
+	_selectedOptionIndex = _selectedOptionIndex % (static_cast<int>(_options.size()));
+	if (_selectedOptionIndex < 0)
+		_selectedOptionIndex += static_cast<int>(_options.size());
+	return _selectedOptionIndex;
+}
+// 選択肢選択処理
+void MenuWidget::SelectOption(MenuUIActor* owner)
+{
+	if (_options.empty())
+		return;
+
+	auto& option = _options[_selectedOptionIndex];
+	if (!option.onSelectedCallbackName.empty())
+	{
+		owner->CallOptionSelected(option.onSelectedCallbackName);
+	}
+	if (!option.nextWidgetName.empty())
+	{
+		owner->PushPage(option.nextWidgetName);
+	}
+}
+// 戻る選択肢選択処理
+void MenuWidget::BackOption(MenuUIActor* owner)
+{
+	owner->PopPage();
+}
+#pragma endregion
+
 #pragma region ファイル
 // ファイル読み込み
 void MenuWidget::LoadFromFile(nlohmann::json* json)
@@ -479,8 +548,9 @@ void MenuWidget::LoadFromFile(nlohmann::json* json)
 		auto& sprJosn = sub["selectedOptionSprite"];
 		// テクスチャデータ
 		std::string textureFilePath = sprJosn.value("textureFilePath", "");
-		_selectedOptionSprite.LoadTexture(ToWString(textureFilePath).c_str(),
-			static_cast<Sprite::CenterAlignment>(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
+		if (!textureFilePath.empty())
+			_selectedOptionSprite.LoadTexture(ToWString(textureFilePath).c_str(),
+				static_cast<Sprite::CenterAlignment>(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
 		// トランスフォームデータ
 		_selectedOptionSprite.GetRectTransform() = sprJosn.value
 		("RectTransform", RectTransform());

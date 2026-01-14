@@ -43,6 +43,7 @@ public:
 	// コールバックハンドラ取得
 	CallBackHandler<void, MenuUIActor*>& GetOptionSelectedCallbackHandler() { return onOptionSelected; }
 
+	void SetFilePath(const std::string& filepath) { _filepath = filepath; }
 	// ロード済みか
 	bool IsLoaded() const { return _isLoaded; }
 	// ウィジェット追加中か
@@ -51,9 +52,9 @@ public:
 
 #pragma region ファイル
 	// ファイル読み込み
-	virtual void LoadFromFile(const char* filepath);
+	virtual void LoadFromFile();
 	// ファイル保存
-	virtual void SaveToFile(const char* filepath);
+	virtual void SaveToFile();
 #pragma endregion
 
 private:
@@ -69,6 +70,7 @@ private:
 	// オプションが選択された時のコールバック関数
 	CallBackHandler<void, MenuUIActor*> onOptionSelected;
 
+	std::string _filepath{};
 	// ロードされたか
 	bool _isLoaded = false;
 	// GUIでのウィジェット追加用フラグ

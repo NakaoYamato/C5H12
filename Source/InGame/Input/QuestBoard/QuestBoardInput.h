@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Source/InGame/InputManager.h"
-#include "../../UI/QuestBoard/QuestBoardUIController.h"
+#include "../../UI/QuestBoard/QuestBoardUIActor.h"
 
 class QuestBoardInput : public InputControllerBase
 {
@@ -22,5 +22,5 @@ public:
 	void OnUpdate(float elapsedTime)  override;
 
 private:
-	std::weak_ptr<QuestBoardUIController> _questBoardUIController;
+	std::weak_ptr<QuestBoardUIActor> _questBoardUIActor;
 };

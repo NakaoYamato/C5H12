@@ -825,19 +825,10 @@
     <ClCompile Include="Source\Stage\RespawnZone.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\InGame\UI\QuestBoard\QuestBoardUIController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardSelectMenuController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardNewOrderMenuController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardAcceptMenuController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Library\Actor\UI\Menu\MenuUIActor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1745,22 +1736,10 @@
     <ClInclude Include="Source\Stage\RespawnZone.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\InGame\UI\QuestBoard\QuestBoardUIController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardSelectMenuController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardNewOrderMenuController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardAcceptMenuController.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\InGame\UI\QuestBoard\Menu\QuestBoardMenuControllerBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Library\Actor\UI\Menu\MenuUIActor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

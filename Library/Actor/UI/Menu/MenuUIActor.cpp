@@ -5,7 +5,7 @@
 
 #include <Mygui.h>
 
-#define DEBUG_MENUUIACTOR 1 // 使用例
+#define DEBUG_MENUUIACTOR 0 // 使用例
 
 // 生成時処理
 void MenuUIActor::OnCreate()
@@ -19,7 +19,8 @@ void MenuUIActor::OnCreate()
 			owner->PopPage();
 		});
 
-	LoadFromFile("./Data/Resource/Actor/TestMenuUI/MenuUI.json");
+	SetFilePath("./Data/Resource/Actor/TestMenuUI/MenuUI.json");
+	LoadFromFile();
 
 	if (!_isLoaded)
 	{
@@ -199,10 +200,10 @@ MenuWidget* MenuUIActor::GetCurrentWidget()
 
 #pragma region ファイル
 // ファイル読み込み
-void MenuUIActor::LoadFromFile(const char* filepath)
+void MenuUIActor::LoadFromFile()
 {
 	nlohmann::json json;
-	if (!Exporter::LoadJsonFile(filepath, &json))
+	if (!Exporter::LoadJsonFile(_filepath.c_str(), &json))
 		return;
 
 	// 各ウィジェット読み込み
@@ -228,7 +229,7 @@ void MenuUIActor::LoadFromFile(const char* filepath)
 	_isLoaded = true;
 }
 // ファイル保存
-void MenuUIActor::SaveToFile(const char* filepath)
+void MenuUIActor::SaveToFile()
 {
 	nlohmann::json json;
 	json["widgetSize"] = _registeredWidgets.size();
@@ -242,7 +243,7 @@ void MenuUIActor::SaveToFile(const char* filepath)
 		index++;
 	}
 
-	Exporter::SaveJsonFile(filepath, json);
+	Exporter::SaveJsonFile(_filepath.c_str(), json);
 }
 #pragma endregion
 
@@ -304,9 +305,12 @@ void MenuUIActor::DrawWidgetGui()
 			ImGui::EndTabItem();
 		}
 
+		// ファイル操作
+		ImGui::Separator();
+		ImGui::InputText(u8"ファイルパス", &_filepath);
 		if (ImGui::Button(u8"メニューUI保存"))
 		{
-			SaveToFile("./Data/Resource/Actor/MenuUI.json");
+			SaveToFile();
 		}
 
 

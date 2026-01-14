@@ -30,6 +30,10 @@ public:
 	void PushPage(std::string name);
 	// 一番上のページを破棄して戻る
 	void PopPage();
+	// すべてのページを破棄して最初のページに戻る
+	void PopToRootPage();
+	// すべてのページを破棄して戻る
+	void PopAllPages();
 	// オプションが選択された時のコールバックを呼び出す
 	void CallOptionSelected(const std::string& callbackName);
 
@@ -110,13 +114,16 @@ public:
 #pragma endregion
 
 #pragma region 選択肢
-	void AddOption(const std::string& label,
+	// 選択肢追加
+	virtual void AddOption(const std::string& label,
 		const std::string& onSelectedCallbackName = "",
 		const std::string& nextWidgetName = "");
 	// 選択肢インデックス増加
 	virtual size_t AddSelectedOptionIndex();
 	// 選択肢インデックス減少
 	virtual size_t SubSelectedOptionIndex();
+	// インデックス範囲制限
+	virtual size_t ClampSelectedOptionIndex(size_t index);
 	// 選択肢選択処理
 	virtual void SelectOption(MenuUIActor* owner);
 	// 戻る選択肢選択処理

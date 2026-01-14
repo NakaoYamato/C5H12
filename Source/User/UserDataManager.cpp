@@ -655,24 +655,41 @@ void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 #pragma endregion
 
 #pragma region クエスト
-// 受注カウント増加
-void UserDataManager::IncreaseQuestOrderCount(int questIndex)
+// クエスト受注
+void UserDataManager::AcceptQuest(int questIndex)
 {
 	if (questIndex < 0)
 		return;
-	_questUserDataMap[questIndex].orderCount++;
+	// 受注中のインデックスを保存
+	_currentAcceptedQuestIndex = questIndex;
 }
-// クリアカウント増加
-void UserDataManager::IncreaseQuestClearCount(int questIndex, float clearTime)
+// クエスト開始
+void UserDataManager::StartQuest()
 {
-	if (questIndex < 0)
+	if (_currentAcceptedQuestIndex)
 		return;
-	_questUserDataMap[questIndex].clearCount++;
-	if (_questUserDataMap[questIndex].bestClearTime <= 0.0f || clearTime < _questUserDataMap[questIndex].bestClearTime)
+	// 受注カウント増加
+	_questUserDataMap[_currentAcceptedQuestIndex].orderCount++;
+	// 履歴に追加
+	_currentAcceptedQuestHistory.push_back(_currentAcceptedQuestIndex);
+}
+// クエスト終了
+void UserDataManager::EndQuest(bool clear, float time)
+{
+	if (!_currentAcceptedQuestIndex)
+		return;
+	if (clear)
 	{
-		_questUserDataMap[questIndex].bestClearTime = clearTime;
+		_questUserDataMap[_currentAcceptedQuestIndex].clearCount++;
+		if (_questUserDataMap[_currentAcceptedQuestIndex].bestClearTime <= 0.0f ||
+			time < _questUserDataMap[_currentAcceptedQuestIndex].bestClearTime)
+		{
+			_questUserDataMap[_currentAcceptedQuestIndex].bestClearTime = time;
+		}
 	}
+	_currentAcceptedQuestIndex = -1;
 }
+
 // 受注カウント取得
 int UserDataManager::GetQuestOrderCount(int questIndex)
 {
@@ -904,6 +921,31 @@ void UserDataManager::DrawQuestGui()
 
 	if (ImGui::TreeNode(u8"クエスト受注・クリア状況"))
 	{
+		if (_currentAcceptedQuestIndex != -1)
+		{
+			ImGui::Text(u8"現在受注中のクエスト: %s",
+				questManager->GetQuestData(_currentAcceptedQuestIndex)->name.c_str());
+		}
+		else
+		{
+			ImGui::Text(u8"現在受注中のクエスト: なし");
+		}
+		ImGui::Separator();
+
+		if (ImGui::TreeNode(u8"受注クエスト履歴"))
+		{
+			for (auto questIndex : _currentAcceptedQuestHistory)
+			{
+				auto questData = questManager->GetQuestData(questIndex);
+				if (questData)
+				{
+					ImGui::Text(u8"%s", questData->name.c_str());
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::Separator();
+
 		if (ImGui::Button("Add"))
 		{
 			QuestUserData data{};

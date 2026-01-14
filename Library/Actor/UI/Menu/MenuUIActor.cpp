@@ -180,6 +180,25 @@ void MenuUIActor::PopPage()
 	}
 }
 
+// すべてのページを破棄して最初のページに戻る
+void MenuUIActor::PopToRootPage()
+{
+	size_t stackSize = _widgetStackNames.size();
+	for (size_t i = 0; i < stackSize - 1; ++i)
+	{
+		PopPage();
+	}
+}
+
+// すべてのページを破棄して戻る
+void MenuUIActor::PopAllPages()
+{
+	while (!_widgetStackNames.empty())
+	{
+		PopPage();
+	}
+}
+
 // オプションが選択された時のコールバックを呼び出す
 void MenuUIActor::CallOptionSelected(const std::string& callbackName)
 {
@@ -466,26 +485,28 @@ void MenuWidget::AddOption(const std::string& label, const std::string& onSelect
 // 選択肢インデックス増加
 size_t MenuWidget::AddSelectedOptionIndex()
 {
-	if (_options.empty())
-		return 0;
 	_selectedOptionIndex++;
 	// インデックス範囲制限
-	_selectedOptionIndex = _selectedOptionIndex % (static_cast<int>(_options.size()));
-	if (_selectedOptionIndex < 0)
-		_selectedOptionIndex += static_cast<int>(_options.size());
+	_selectedOptionIndex = ClampSelectedOptionIndex(_selectedOptionIndex);
 	return _selectedOptionIndex;
 }
 // 選択肢インデックス減少
 size_t MenuWidget::SubSelectedOptionIndex()
 {
-	if (_options.empty())
-		return 0;
 	_selectedOptionIndex--;
 	// インデックス範囲制限
-	_selectedOptionIndex = _selectedOptionIndex % (static_cast<int>(_options.size()));
-	if (_selectedOptionIndex < 0)
-		_selectedOptionIndex += static_cast<int>(_options.size());
+	_selectedOptionIndex = ClampSelectedOptionIndex(_selectedOptionIndex);
 	return _selectedOptionIndex;
+}
+// インデックス範囲制限
+size_t MenuWidget::ClampSelectedOptionIndex(size_t index)
+{
+	if (_options.empty())
+		return 0;
+	index = index % (static_cast<int>(_options.size()));
+	if (index < 0)
+		index += static_cast<int>(_options.size());
+	return index;
 }
 // 選択肢選択処理
 void MenuWidget::SelectOption(MenuUIActor* owner)

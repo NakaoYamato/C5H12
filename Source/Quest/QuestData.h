@@ -9,6 +9,31 @@
 
 struct QuestData
 {
+	enum class QuestType
+	{
+		Normal,
+		Event,
+
+		QuestTypeMax
+	};
+
+	enum class TargetType
+	{
+		// 狩猟
+		Hunt,
+		// 討伐
+		Extermination,
+		// 捕獲
+		Capture,
+		// 採取
+		Gather,
+		// 配達
+		Delivery,
+
+		TargetTypeMax
+	};
+
+	// ターゲットデータ
 	struct TargetData
 	{
 		int index			= -1;	// ターゲットのインデックス
@@ -18,6 +43,8 @@ struct QuestData
 
 	std::string				name		= "";	// クエストの名前
 	std::string				description = "";	// クエストの説明
+	QuestType 				questType	= QuestType::Normal;// クエストの種類
+	TargetType 				targetType	= TargetType::Hunt;	// ターゲットの種類
 	std::vector<TargetData> targets;			// クエストターゲットリスト
 	int						stageIndex = 0;		// クエストステージインデックス
 	int						level		= 1;	// クエストのレベル

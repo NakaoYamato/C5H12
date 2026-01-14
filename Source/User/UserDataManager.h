@@ -153,11 +153,12 @@ public:
 #pragma endregion
 
 #pragma region クエスト
-	// 受注カウント増加
-	void IncreaseQuestOrderCount(int questIndex);
-	// クリアカウント増加
-	// clearTime : クリアタイム(s)
-	void IncreaseQuestClearCount(int questIndex, float clearTime);
+	// クエスト受注
+	void AcceptQuest(int questIndex);
+	// 受注中のクエスト開始
+	void StartQuest();
+	// 受注中のクエスト終了
+	void EndQuest(bool clear, float time);
 
 	// 受注カウント取得
 	int GetQuestOrderCount(int questIndex);
@@ -165,6 +166,9 @@ public:
 	int GetQuestClearCount(int questIndex);
 	// 最速クリアタイム取得
 	float GetQuestBestClearTime(int questIndex);
+
+	// 所持しているクエストデータリスト取得
+	std::unordered_map<int, QuestUserData>& GetQuestUserDataMap() { return _questUserDataMap; }
 #pragma endregion
 
 
@@ -203,6 +207,10 @@ private:
 
 	// 所持しているすべてのクエストデータ
 	std::unordered_map<int, QuestUserData> _questUserDataMap;
+	// 受注中のクエストインデックス
+	int _currentAcceptedQuestIndex = -1;
+	// 現在の受注履歴
+	std::vector<int> _currentAcceptedQuestHistory;
 };
 
 // リソース設定

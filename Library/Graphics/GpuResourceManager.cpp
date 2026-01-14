@@ -588,53 +588,53 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 		metadata, shaderResourceView);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	//size_t maxTextureSize = 2048; // 最大テクスチャサイズの上限 (必要に応じて変更可能)
-	//if (maxTextureSize > 0 && (metadata.width > maxTextureSize || metadata.height > maxTextureSize))
-	//{
-	//	// アスペクト比を維持して新しいサイズを計算
-	//	float scale = static_cast<float>(maxTextureSize) / std::max<size_t>(metadata.width, metadata.height);
-	//	size_t targetWidth = static_cast<size_t>(metadata.width * scale);
-	//	size_t targetHeight = static_cast<size_t>(metadata.height * scale);
+	size_t maxTextureSize = 2048; // 最大テクスチャサイズの上限 (必要に応じて変更可能)
+	if (maxTextureSize > 0 && (metadata.width > maxTextureSize || metadata.height > maxTextureSize))
+	{
+		// アスペクト比を維持して新しいサイズを計算
+		float scale = static_cast<float>(maxTextureSize) / std::max<size_t>(metadata.width, metadata.height);
+		size_t targetWidth = static_cast<size_t>(metadata.width * scale);
+		size_t targetHeight = static_cast<size_t>(metadata.height * scale);
 
-	//	DirectX::ScratchImage resizedImage;
+		DirectX::ScratchImage resizedImage;
 
-	//	// 圧縮フォーマットかどうか確認 (BC1, BC7などはそのままResizeできないため)
-	//	if (DirectX::IsCompressed(metadata.format))
-	//	{
-	//		//// 圧縮されている場合、一度展開してからリサイズする必要がある
-	//		//DirectX::ScratchImage decompressedImage;
-	//		//hr = DirectX::Decompress(scratch_image.GetImages(), scratch_image.GetImageCount(), metadata, DXGI_FORMAT_UNKNOWN, decompressedImage);
+		// 圧縮フォーマットかどうか確認 (BC1, BC7などはそのままResizeできないため)
+		if (DirectX::IsCompressed(metadata.format))
+		{
+			//// 圧縮されている場合、一度展開してからリサイズする必要がある
+			//DirectX::ScratchImage decompressedImage;
+			//hr = DirectX::Decompress(scratch_image.GetImages(), scratch_image.GetImageCount(), metadata, DXGI_FORMAT_UNKNOWN, decompressedImage);
 
-	//		//if (SUCCEEDED(hr))
-	//		//{
-	//		//	// 展開成功したら、その画像を使ってリサイズ
-	//		//	const DirectX::Image* srcParams = decompressedImage.GetImage(0, 0, 0);
-	//		//	hr = DirectX::Resize(*srcParams, targetWidth, targetHeight, DirectX::TEX_FILTER_DEFAULT, resizedImage);
-	//		//}
+			//if (SUCCEEDED(hr))
+			//{
+			//	// 展開成功したら、その画像を使ってリサイズ
+			//	const DirectX::Image* srcParams = decompressedImage.GetImage(0, 0, 0);
+			//	hr = DirectX::Resize(*srcParams, targetWidth, targetHeight, DirectX::TEX_FILTER_DEFAULT, resizedImage);
+			//}
 
-	//		//if (SUCCEEDED(hr))
-	//		//{
-	//		//	// scratch_image をリサイズ後のものに差し替え
-	//		//	scratch_image = std::move(resizedImage);
-	//		//	// メタデータも更新
-	//		//	metadata = scratch_image.GetMetadata();
-	//		//}
-	//	}
-	//	else
-	//	{
-	//		// 非圧縮ならそのままリサイズ
-	//		const DirectX::Image* srcParams = scratch_image.GetImage(0, 0, 0);
-	//		hr = DirectX::Resize(*srcParams, targetWidth, targetHeight, DirectX::TEX_FILTER_DEFAULT, resizedImage);
+			//if (SUCCEEDED(hr))
+			//{
+			//	// scratch_image をリサイズ後のものに差し替え
+			//	scratch_image = std::move(resizedImage);
+			//	// メタデータも更新
+			//	metadata = scratch_image.GetMetadata();
+			//}
+		}
+		else
+		{
+			// 非圧縮ならそのままリサイズ
+			const DirectX::Image* srcParams = scratch_image.GetImage(0, 0, 0);
+			hr = DirectX::Resize(*srcParams, targetWidth, targetHeight, DirectX::TEX_FILTER_DEFAULT, resizedImage);
 
-	//		if (SUCCEEDED(hr))
-	//		{
-	//			// scratch_image をリサイズ後のものに差し替え
-	//			scratch_image = std::move(resizedImage);
-	//			// メタデータも更新
-	//			metadata = scratch_image.GetMetadata();
-	//		}
-	//	}
-	//}
+			if (SUCCEEDED(hr))
+			{
+				// scratch_image をリサイズ後のものに差し替え
+				scratch_image = std::move(resizedImage);
+				// メタデータも更新
+				metadata = scratch_image.GetMetadata();
+			}
+		}
+	}
 
 	// 生成したデータをセット
 	resources.insert(std::make_pair(filepath.wstring(), *shaderResourceView));

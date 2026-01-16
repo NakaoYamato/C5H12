@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "../../Library/Graphics/RenderContext.h"
+#include "../../Library/JobSystem/JobSystem.h"
 #include "../../Library/2D/SkyMap.h"
 #include "../../Library/2D/Primitive.h"
 #include "../../Library/2D/Fade.h"
@@ -91,6 +92,7 @@ public:
 	virtual void OnDrawGui() {}
 #pragma endregion
 
+#pragma region アクター
 	/// <summary>
 	/// アクター登録
 	/// </summary>
@@ -104,10 +106,12 @@ public:
 		std::shared_ptr<T> actor = std::make_shared<T>(args...);
 		actor->SetName(name.c_str());
 		actor->SetScene(this);
-		_actorManager.Register(actor, tag);
 		actor->Create(tag);
+		_actorManager.Register(actor, tag);
 		return actor;
 	}
+#pragma endregion
+
 #pragma region 各種レンダラー取得	
 	// メッシュレンダラー取得
 	MeshRenderer& GetMeshRenderer();

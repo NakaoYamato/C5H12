@@ -408,6 +408,9 @@ std::shared_ptr<Actor> StageManager::CreateEnvironmentActor(
 	actor->GetTransform().SetAngle(angle);
 	actor->GetTransform().SetScale(scale);
 
+	// フォルダパス設定
+	actor->SetFolderPath(name);
+
 	EnvironmentLayout layout{};
 	layout.actor = actor;
 	layout.actorType = actorType;

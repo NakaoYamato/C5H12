@@ -18,6 +18,7 @@ PlayerStateMachine::PlayerStateMachine(Actor* owner)
 	_player = owner->GetComponent<PlayerController>().get();
 	_animator = owner->GetComponent<Animator>().get();
 	_effect = owner->GetComponent<EffectController>().get();
+	_targetable = owner->GetComponent<Targetable>().get();
 	_damageSender = owner->GetComponent<DamageSender>().get();
     _staminaController = owner->GetComponent<StaminaController>().get();
 	_itemController = owner->GetComponent<PlayerItemController>().get();
@@ -96,7 +97,19 @@ void PlayerStateMachine::Execute(float elapsedTime)
 	std::string stateName = _stateMachine.GetStateName();
 	if (stateName.find("Combat") != std::string::npos)
 	{
-		_player->SetIsDrawingWeapon(true);
+        // ƒZ[ƒtƒ][ƒ“‚É‚¢‚é‚Æ‚«‚Í”[“‚³‚¹‚é
+		if (_targetable && _targetable->IsInSafetyZone())
+		{
+            if (_stateMachine.GetStateName() != "ToNonCombat")
+            {
+                _player->SetIsDrawingWeapon(false);
+                _stateMachine.ChangeState("ToNonCombat");
+            }
+		}
+        else
+        {
+            _player->SetIsDrawingWeapon(true);
+        }
 	}
 	else
 	{

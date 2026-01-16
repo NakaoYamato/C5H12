@@ -422,3 +422,13 @@ void PlayerController::Respawn(const Vector3& position, const Vector3& angle)
 	// テレポート
 	Teleport(position, angle);
 }
+
+bool PlayerController::IsAttack() const
+{
+	// セーフゾーンにいるときは攻撃状態にしない
+	auto targetable = _targetable.lock();
+	if (targetable && targetable->IsInSafetyZone())
+		return false;
+
+	return _isAttack;
+}

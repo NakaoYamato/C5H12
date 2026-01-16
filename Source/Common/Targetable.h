@@ -47,6 +47,8 @@ public:
 	bool IsTargetable() const { return _isTargetable; }
 	// ターゲット可能か設定
 	void SetTargetable(bool isTargetable) { _isTargetable = isTargetable; }
+	// セーフゾーンの中にいるか
+	bool IsInSafetyZone() const { return _isInSafetyZone; }
 #pragma endregion
 
 private:
@@ -61,6 +63,8 @@ private:
 	// ターゲット可能か
 	bool _isTargetable = true;
 
+	// セーフゾーンにいるかどうか
+	bool _isInSafetyZone = false;
     // セーフティタイマー
     float _sefetyTimer = 0.0f;
 };

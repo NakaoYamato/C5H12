@@ -5,6 +5,7 @@
 #include "../../Library/Component/EffectController.h"
 #include "../../Library/Math/Vector.h"
 
+#include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/StaminaController.h"
 #include "../../Source/InGame/UI/Operate/OperateUIController.h"
@@ -61,6 +62,7 @@ public:
 private:
 	StateMachineBase<PlayerStateMachine> _stateMachine;
 	PlayerController*					_player = nullptr;
+	Targetable*							_targetable = nullptr;
 	DamageSender*						_damageSender = nullptr;
     StaminaController*					_staminaController = nullptr;
 	Animator*							_animator = nullptr;

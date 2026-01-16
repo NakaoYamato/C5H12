@@ -30,12 +30,14 @@ void Targetable::Update(float elapsedTime)
 	if (_sefetyTimer > 0.0f)
 	{
 		_sefetyTimer -= elapsedTime;
-		if (_sefetyTimer <= 0.0f)
-		{
-			SetTargetable(true);
-			_sefetyTimer = 0.0f;
-		}
     }
+	// 処理順やFPSの関係で_isInSafetyZoneがtrueにならない場合があるため、フラグチェックの後にタイマー処理
+	else
+	{
+		SetTargetable(true);
+		_sefetyTimer = 0.0f;
+		_isInSafetyZone = false;
+	}
 }
 // Gui描画処理
 void Targetable::DrawGui()
@@ -63,5 +65,6 @@ void Targetable::OnContact(CollisionData& collisionData)
 	{
         SetTargetable(false);
         _sefetyTimer = safetyZone->GetSafetyTimer();
+		_isInSafetyZone = true;
     }
 }

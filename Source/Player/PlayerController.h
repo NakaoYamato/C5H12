@@ -83,7 +83,7 @@ public:
 	bool IsDash()	const { return _isDash; }
 	bool IsEvade()	const { return _isEvade; }
 	bool IsInCombat() const { return _isInCombat; }
-	bool IsAttack() const { return _isAttack; }
+	bool IsAttack() const;
 	bool IsHoldingAttackKey() const { return _isHoldingAttackKey; }
 	bool IsSpecialAttack() const { return _isSpecialAttack; }
 	bool IsGuard()	const { return _isGuard; }

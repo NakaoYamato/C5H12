@@ -54,6 +54,9 @@ private:
 	// 編集用GUI描画
 	void DrawEditingGui();
 
+	// 編集中の環境アクターGUI表示
+	void DrawEditingEnvironmentActorGui(int index);
+
 private:
 	// ActorFactoryへの参照
 	std::weak_ptr<ActorFactory> _actorFactory;
@@ -88,5 +91,8 @@ private:
 	float _doubleClickThreshold = 0.3f;
 	// 左クリック時間
 	float _leftClickTime = 0.0f;
+
+	// 最後に生成したアクター番号
+	int _lastCreatedActorIndex = -1;
 #pragma endregion
 };

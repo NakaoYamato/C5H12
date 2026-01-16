@@ -96,6 +96,23 @@ void StageManager::OnUpdate(float elapsedTime)
 
 	if (_isEditing)
 	{
+		// 最後に生成したアクターのGUI
+		if (_lastCreatedActorIndex != -1)
+		{
+#ifdef USE_IMGUI
+			bool open = true;
+			if (ImGui::Begin(u8"最後に生成したアクター", &open))
+			{
+				DrawEditingEnvironmentActorGui(_lastCreatedActorIndex);
+			}
+			ImGui::End();
+			if (!open)
+			{
+				_lastCreatedActorIndex = -1;
+			}
+#endif
+		}
+
 		// 編集用GUI描画
 		DrawEditingGui();
 
@@ -160,6 +177,8 @@ void StageManager::OnUpdate(float elapsedTime)
 			if (ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
 				return;
 #endif
+			// 生成した番号を取得
+			_lastCreatedActorIndex = _creationEnvironmentIndex;
 
 			auto actor = CreateEnvironmentActor(
 				actorFactory->GetRegisteredActorTypes()[_selectedEnvironmentIndex],
@@ -207,26 +226,7 @@ void StageManager::OnDrawGui()
 
 
 					ImGui::PushID(i);
-
-					ImGui::Text("%d: %s", i, actor->GetName());
-					ImGui::DragFloat3("position", &layout.position.x, 0.1f);
-					ImGui::DragFloat3("scale", &layout.scale.x, 0.1f);
-					Vector3 degree = Vector3::ToDegrees(layout.angle);
-					ImGui::DragFloat3("angle", &degree.x);
-					layout.angle = Vector3::ToRadians(degree);
-					if (ImGui::Button(u8"反映"))
-					{
-						actor->GetTransform().SetPosition(layout.position);
-						actor->GetTransform().SetAngle(layout.angle);
-						actor->GetTransform().SetScale(layout.scale);
-					}
-					ImGui::SameLine();
-					if (ImGui::Button(u8"更新"))
-					{
-						layout.position = actor->GetTransform().GetPosition();
-						layout.angle	= actor->GetTransform().GetAngle();
-						layout.scale	= actor->GetTransform().GetScale();
-					}
+					DrawEditingEnvironmentActorGui(i);
 					ImGui::Separator();
 
 					if (ImGui::Button(u8"削除"))
@@ -235,6 +235,19 @@ void StageManager::OnDrawGui()
 						// 配置情報リストから削除
 						_createdEnvironmentLayouts.erase(
 							_createdEnvironmentLayouts.begin() + i);
+						--_creationEnvironmentIndex;
+						// 登録済みのアクターの名前を修正
+						for (size_t j = i; j < _createdEnvironmentLayouts.size(); ++j)
+						{
+							auto tempActor = _createdEnvironmentLayouts[j].actor.lock();
+							if (tempActor)
+							{
+								std::string name = "Env" + std::to_string(j);
+								tempActor->SetName(name.c_str());
+							}
+						}
+						_lastCreatedActorIndex = -1;
+
 						ImGui::PopID();
 						break;
 					}
@@ -252,6 +265,20 @@ void StageManager::OnDrawGui()
 			if (ImGui::Button(u8"保存"))
 			{
 				SaveToFile();
+
+				// 登録した各アクターも保存
+				for (auto& layout : _createdEnvironmentLayouts)
+				{
+					auto actor = layout.actor.lock();
+					if (actor)
+					{
+						for (auto& component : actor->GetComponents())
+						{
+							component->SaveToFile();
+						}
+						actor->SaveColliderFromFile();
+					}
+				}
 			}
 			ImGui::SameLine();
 			if (ImGui::Button(u8"読み込み"))
@@ -451,4 +478,31 @@ void StageManager::DrawEditingGui()
 		}
 	}
 	ImGui::End();
+}
+
+// 編集中の環境アクターGUI表示
+void StageManager::DrawEditingEnvironmentActorGui(int index)
+{
+	auto& layout = _createdEnvironmentLayouts[index];
+	auto actor = layout.actor.lock();
+
+	ImGui::Text("%d: %s", index, actor->GetName());
+	ImGui::DragFloat3("position", &layout.position.x, 0.1f);
+	ImGui::DragFloat3("scale", &layout.scale.x, 0.1f);
+	Vector3 degree = Vector3::ToDegrees(layout.angle);
+	ImGui::DragFloat3("angle", &degree.x);
+	layout.angle = Vector3::ToRadians(degree);
+	if (ImGui::Button(u8"反映"))
+	{
+		actor->GetTransform().SetPosition(layout.position);
+		actor->GetTransform().SetAngle(layout.angle);
+		actor->GetTransform().SetScale(layout.scale);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button(u8"更新"))
+	{
+		layout.position = actor->GetTransform().GetPosition();
+		layout.angle = actor->GetTransform().GetAngle();
+		layout.scale = actor->GetTransform().GetScale();
+	}
 }

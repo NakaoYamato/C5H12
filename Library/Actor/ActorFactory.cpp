@@ -5,6 +5,9 @@
 #include "../../Library/Component/EnvironmentController.h"
 #include "../../Library/Component/InstancingModelRenderer.h"
 
+#include "../../Source/Stage/SafetyZone.h"
+#include "../../Source/Stage/EntryZone.h"
+
 #include <Mygui.h>
 
 std::unordered_map<std::string, ActorFactory::CreatorInfo> ActorFactory::_creators;
@@ -62,6 +65,36 @@ bool ActorFactory::SaveToFile()
     }
 
     return Exporter::SaveJsonFile(filePath, jsonData);
+}
+
+// 初期化処理
+bool ActorFactory::Initialize()
+{
+	Register("EntryZone",
+		[]()->std::shared_ptr<Actor>
+		{
+			return std::make_shared<Actor>();
+		},
+		[&](std::shared_ptr<Actor> actor)
+		{
+			// コンポーネント追加
+			auto entryZone = actor->AddComponent<EntryZone>();
+		}
+	);
+	Register("SafetyZone",
+		[]()->std::shared_ptr<Actor>
+		{
+			return std::make_shared<Actor>();
+		},
+		[&](std::shared_ptr<Actor> actor)
+		{
+			// コンポーネント追加
+			auto safetyZone = actor->AddComponent<SafetyZone>();
+			auto box = actor->AddCollider<BoxCollider>();
+		}
+	);
+
+	return true;
 }
 
 // Gui描画

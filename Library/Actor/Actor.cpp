@@ -1,6 +1,6 @@
 #include "Actor.h"
 
-#include <imgui.h>
+#include <Mygui.h>
 
 #include "ActorManager.h"
 #include "../Graphics/Graphics.h"
@@ -380,13 +380,17 @@ void Actor::LoadColliderFromFile()
 		for (int i = 0; i < colliderCount; ++i)
 		{
 			auto& sub = jsonData[std::to_string(i)];
-			_colliders[i]->LoadFromFile(&sub);
+			if (i < static_cast<int>(_colliders.size()))
+				_colliders[i]->LoadFromFile(&sub);
 		}
 	}
 }
 /// ファイルへコライダー保存
 void Actor::SaveColliderFromFile()
 {
+	// コライダーがなければ保存しない
+	if (_colliders.size() == 0)return;
+
 	// アクター名からファイルパスを生成
 	std::string directory = "./Data/Resource/Actor/";
 	std::string filePath = directory + this->GetName() + "/";
@@ -590,6 +594,29 @@ void Actor::DrawColliderGui()
 	if (ImGui::Button(u8"読み込み"))
 	{
 		LoadColliderFromFile();
+	}
+	ImGui::Separator();
+	if (ImGui::Button(u8"ファイルから読み込み"))
+	{
+		// ダイアログを開く
+		std::string filepath;
+		std::string currentDirectory;
+		Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory, ImGui::JsonFilter);
+		// ファイルを選択したら
+		if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+		{
+			nlohmann::json jsonData;
+			if (Exporter::LoadJsonFile(filepath.c_str(), &jsonData))
+			{
+				int colliderCount = jsonData.value("colliderCount", 0);
+				for (int i = 0; i < colliderCount; ++i)
+				{
+					auto& sub = jsonData[std::to_string(i)];
+					if (i < static_cast<int>(_colliders.size()))
+						_colliders[i]->LoadFromFile(&sub);
+				}
+			}
+		}
 	}
 	ImGui::Separator();
 

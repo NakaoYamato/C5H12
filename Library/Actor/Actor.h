@@ -153,6 +153,12 @@ public:
 	}
 
 	/// <summary>
+	/// コンポーネント一覧取得
+	/// </summary>
+	/// <returns></returns>
+	std::vector<std::shared_ptr<Component>>& GetComponents() { return _components; }
+
+	/// <summary>
 	/// 当たり判定コンポーネント追加
 	/// </summary>
 	/// <typeparam name="T">Colliderを継承したコンポーネント</typeparam>

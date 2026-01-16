@@ -34,6 +34,8 @@ public:
 	bool LoadFromFile() override;
 	// ƒtƒ@ƒCƒ‹•Û‘¶
 	bool SaveToFile() override;
+	// ‰Šú‰»ˆ—
+	bool Initialize() override;
 	// Gui•`‰æ
 	void DrawGui() override;
 

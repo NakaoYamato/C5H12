@@ -19,6 +19,8 @@ void EntryZone::Start()
 			metaAI->RegisterEntryZone(shared_from_this());
 		}
 	}
+	// データ読み込み
+	LoadFromFile();
 }
 
 // GUI描画
@@ -38,10 +40,26 @@ void EntryZone::DebugRender(const RenderContext& rc)
 {
 	if (!_debugRender)
 		return;
+	Vector4 color = Vector4::White;
+	switch (_faction)
+	{
+	case Targetable::Faction::Player:
+		color = Vector4::Blue;
+		break;
+	case Targetable::Faction::Enemy:
+		color = Vector4::Red;
+		break;
+	case Targetable::Faction::Neutral:
+		color = Vector4::Green;
+		break;
+	default:
+		color = Vector4::White;
+		break;
+	}
 	Debug::Renderer::DrawSphere(
 		GetActor()->GetTransform().GetWorldPosition() + _center,
 		_radius,
-		Vector4::Purple);
+		color);
 }
 
 #pragma region 入出力

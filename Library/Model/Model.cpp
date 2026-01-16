@@ -17,7 +17,8 @@
 Model::Model(ID3D11Device* device, const char* filename)
 {
     // ÉäÉ\Å[ÉXì«Ç›çûÇ›
-    _resource = ModelResourceManager::Instance().LoadModelResource(filename);
+	auto modelResourceManager = ResourceManager::Instance().GetResourceAs<ModelResourceManager>("ModelResourceManager");
+	_resource = modelResourceManager->LoadModelResource(filename);
 
     assert(_resource != nullptr);
 

@@ -6,7 +6,6 @@
 #include "../Input/Input.h"
 #include "../Audio/AudioSystem.h"
 #include "../DebugSupporter/DebugSupporter.h"
-#include "../Model/ModelResourceManager.h"
 #include "../PostProcess/PostProcessManager.h"
 #include "../JobSystem/JobSystem.h"
 #include "../Scene/SceneManager.h"
@@ -290,9 +289,6 @@ void Framework::Render()
 
 		// リソース管理クラスのGui描画
 		GpuResourceManager::DrawGui(Graphics::Instance().GetDevice());
-
-        // モデルリソース管理クラスのGui描画
-        ModelResourceManager::Instance().DrawGui();
 
         // シーンのGui描画
         SceneManager::Instance().DrawGui();

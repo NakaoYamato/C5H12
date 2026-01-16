@@ -23,6 +23,14 @@ public:
 	void SetPosition(const Vector3& position) { _center = position; }
 	void SetRadius(float radius) { _radius = radius; }
 #pragma endregion
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile() override;
+	// ファイル保存
+	bool SaveToFile() override;
+#pragma endregion
+
 private:
 	Vector3 _center = Vector3::Zero; // 中心座標
 	float	_radius = 1.0f; // 半径

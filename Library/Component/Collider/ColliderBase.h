@@ -52,6 +52,14 @@ public:
 	bool IsTrigger() const { return _isTrigger; }
 	// コライダーのトリガー状態設定
 	void SetTrigger(bool isTrigger) { _isTrigger = isTrigger; }
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile() override;
+	// ファイル保存
+	bool SaveToFile() override;
+#pragma endregion
+
 private:
 	// レイヤー
 	CollisionLayer	_layer = CollisionLayer::None;

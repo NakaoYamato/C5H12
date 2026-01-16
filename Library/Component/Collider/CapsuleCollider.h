@@ -26,6 +26,14 @@ public:
 	void SetEnd(const Vector3& end) { _end = end; }
 	void SetRadius(float radius) { _radius = radius; }
 #pragma endregion
+
+#pragma region 入出力
+	// ファイル読み込み
+	bool LoadFromFile() override;
+	// ファイル保存
+	bool SaveToFile() override;
+#pragma endregion
+
 private:
 	Vector3 _start = Vector3::Zero; // 開始座標
 	Vector3 _end = Vector3::Up; // 終了座標

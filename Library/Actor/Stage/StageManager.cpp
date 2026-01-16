@@ -22,15 +22,20 @@ void StageManager::OnCreate()
 	collider->SetLayer(CollisionLayer::Stage);
 
 	// Žq‹Ÿ’Ç‰Á
+	auto camp = this->GetScene()->RegisterActor<TerrainActor>("Camp",
+		ActorTag::Stage,
+		"./Data/Terrain/Save/Camp.json",
+		Vector3(0.0f, 0.0f, 0.0f));
+	this->AddChild(camp);
 	auto stage0 = this->GetScene()->RegisterActor<TerrainActor>("Stage0",
 		ActorTag::Stage,
 		"./Data/Terrain/Save/001.json",
-		Vector3(0.0f, 0.0f, 0.0f));
+		Vector3(100.0f, 0.0f, 0.0f));
 	this->AddChild(stage0);
 	auto stage1 = this->GetScene()->RegisterActor<TerrainActor>("Stage1",
 		ActorTag::Stage,
 		"./Data/Terrain/Save/002.json",
-		Vector3(100.0f, 0.0f, 0.0f));
+		Vector3(200.0f, 0.0f, 0.0f));
 	this->AddChild(stage1);
 
 	_actorFactory = ResourceManager::Instance().GetResourceAs<ActorFactory>("ActorFactory");

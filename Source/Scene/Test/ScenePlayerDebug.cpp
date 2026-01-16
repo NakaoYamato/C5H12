@@ -51,7 +51,7 @@ void ScenePlayerDebug::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
     {
         auto player = RegisterActor<PlayerActor>("Player", ActorTag::Player);
-        player->GetTransform().SetPosition(Vector3(4.5f, 0.0f, 50.0f));
+        player->GetTransform().SetPosition(Vector3(54.5f, 0.0f, 50.0f));
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

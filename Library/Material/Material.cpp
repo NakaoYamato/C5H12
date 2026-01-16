@@ -233,6 +233,10 @@ void Material::DrawTextureMapGui()
 		ImGui::Image(textureData.Get(), { textureSize,textureSize });
 		ImGui::PushID(textureData.GetFilepath().data());
 		ImGui::SameLine();
+		ImGui::Text(u8"サイズ:");
+		ImGui::SameLine();
+		ImGui::Text("x : %f y : %f", textureData.GetTextureSize().x, textureData.GetTextureSize().y);
+		ImGui::SameLine();
 		if (ImGui::Button("..."))
 		{
 			// ダイアログを開く

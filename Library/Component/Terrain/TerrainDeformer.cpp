@@ -66,7 +66,10 @@ void TerrainDeformer::Update(float elapsedTime)
 {
     // ブラシのGUI描画
     DrawBrushGui();
-
+}
+// 一定間隔更新処理
+void TerrainDeformer::FixedUpdate()
+{
     // ブラシ使用フラグがオフの場合は何もしない
     if (!_useBrush)
         return;
@@ -129,22 +132,22 @@ void TerrainDeformer::Update(float elapsedTime)
         // 接触点からブラシの半径内のTerrainを検索
         auto actors = GetActor()->GetScene()->GetCollisionManager().OverlapSphere(hitPosition, selectedBrush->second->GetBrushRadius());
 
-		for (auto& actor : actors)
-		{
-			// 接触したアクターがTerrainControllerを持っているか確認
-			auto terrainController = actor->GetComponent<TerrainController>();
-			if (terrainController)
-			{
-				// TerrainControllerを取得
-				terrainControllers.push_back(terrainController);
-			}
-		}
+        for (auto& actor : actors)
+        {
+            // 接触したアクターがTerrainControllerを持っているか確認
+            auto terrainController = actor->GetComponent<TerrainController>();
+            if (terrainController)
+            {
+                // TerrainControllerを取得
+                terrainControllers.push_back(terrainController);
+            }
+        }
     }
 
     // 選択中のブラシを更新
-    selectedBrush->second->Update(terrainControllers, elapsedTime, &intersectWorldPosition);
+    selectedBrush->second->Update(terrainControllers, _FIXED_UPDATE_RATE, &intersectWorldPosition);
 
-	// ブラシの行列を更新    
+    // ブラシの行列を更新    
     if (selectedBrush->second->IsDrawDebugBrush())
     {
         DirectX::XMMATRIX M{}, S{}, R{}, T{};
@@ -163,7 +166,7 @@ void TerrainDeformer::Update(float elapsedTime)
     }
     else
     {
-		// ブラシの行列をリセット
+        // ブラシの行列をリセット
         _brushMatrix = {};
     }
 }

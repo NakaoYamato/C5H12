@@ -49,6 +49,8 @@ public:
     void OnCreate() override;
     // XVˆ—
     void Update(float elapsedTime) override;
+	// ˆê’èŠÔŠuXVˆ—
+	void FixedUpdate() override;
     // •`‰æˆ—
     void Render(const RenderContext& rc) override;
     // GUI•`‰æ

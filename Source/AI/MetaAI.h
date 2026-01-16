@@ -2,7 +2,7 @@
 
 #include "../../Library/Component/Component.h"
 #include "../../Source/Common/Targetable.h"
-#include "../../Source/Stage/RespawnZone.h"
+#include "../../Source/Stage/EntryZone.h"
 
 #include <vector>
 #include <memory>
@@ -57,25 +57,26 @@ public:
 	Vector3 GetRandomPositionInRange(const Vector3& center, float range) const;
 #pragma endregion
 
-#pragma region リスポーン
+#pragma region 開始地点
 	/// <summary>
-	/// リスポーンゾーン登録
+	/// 開始地点登録
 	/// </summary>
-	/// <param name="respawnZone"></param>
-	void RegisterRespawnZone(std::weak_ptr<RespawnZone> respawnZone);
+	/// <param name="entryZone"></param>
+	void RegisterEntryZone(std::weak_ptr<EntryZone> entryZone);
 
 	/// <summary>
-	/// リスポーンゾーン削除
+	/// 開始地点削除
 	/// </summary>
-	/// <param name="respawnZone"></param>
-	void RemoveRespawnZone(std::weak_ptr<RespawnZone> respawnZone);
+	/// <param name="entryZone"></param>
+	void RemoveEntryZone(std::weak_ptr<EntryZone> entryZone);
 
 	/// <summary>
-	/// 指定の位置から最も近いリスポーンゾーンを検索
+	/// 指定の位置から最も近い開始地点を検索
 	/// </summary>
+	/// <param name="faction"></param>
 	/// <param name="position"></param>
 	/// <returns></returns>
-	RespawnZone* SearchNearestRespawnZone(const Vector3& position) const;
+	EntryZone* SearchNearestEntryZone(Targetable::Faction faction, const Vector3& position) const;
 #pragma endregion
 
 
@@ -83,8 +84,8 @@ private:
 	// ターゲット可能なオブジェクトのリスト
 	std::vector<std::weak_ptr<Targetable>> _targetables;
 
-	// リスポーンゾーンのリスト
-	std::vector<std::weak_ptr<RespawnZone>> _respawnZones;
+	// 開始地点
+	std::vector<std::weak_ptr<EntryZone>> _entryZones;
 
 	// ゲームクリアフラグ
 	bool _gameClear = false;

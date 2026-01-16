@@ -54,10 +54,19 @@ public:
 	void SetTrigger(bool isTrigger) { _isTrigger = isTrigger; }
 
 #pragma region 入出力
+	// ファイル読み込み(普段は使わない)
+	bool LoadFromFile() override { return false; }
+	// ファイル保存(普段は使わない)
+	bool SaveToFile() override { return false; }
 	// ファイル読み込み
-	bool LoadFromFile() override;
+	void LoadFromFile(nlohmann::json* json);
 	// ファイル保存
-	bool SaveToFile() override;
+	void SaveToFile(nlohmann::json* json);
+
+	// JSON読み込み
+	virtual void OnLoad(nlohmann::json* json) {}
+	// JSON保存
+	virtual void OnSave(nlohmann::json* json) {}
 #pragma endregion
 
 private:

@@ -40,51 +40,17 @@ void SphereCollider::DrawGui()
 
 #pragma region 入出力
 // ファイル読み込み
-bool SphereCollider::LoadFromFile()
+void SphereCollider::OnLoad(nlohmann::json* json)
 {
-	// 現在のシーン名、アクター名からファイルパスを生成
-	std::string filePath = this->GetDirectory();
-	filePath += this->GetName();
-	filePath += ".json";
-
-	nlohmann::json jsonData;
-	if (!Exporter::LoadJsonFile(filePath.c_str(), &jsonData))
-		return false;
 	// 各データ読み込み
-	SetLayer(jsonData.value("layer", CollisionLayer::None));
-	SetLayerMask(jsonData.value("layerMask", CollisionLayerMaskAll));
-	SetActive(jsonData.value("isActive", true));
-	SetTrigger(jsonData.value("isTrigger", false));
-	_center = jsonData.value("center", Vector3(0.0f, 0.0f, 0.0f));
-	_radius = jsonData.value("radius", 1.0f);
-	return true;
+	_center = json->value("center", Vector3(0.0f, 0.0f, 0.0f));
+	_radius = json->value("radius", 1.0f);
 }
 
 // ファイル保存
-bool SphereCollider::SaveToFile()
+void SphereCollider::OnSave(nlohmann::json* json)
 {
-	// 現在のシーン名、アクター名からファイルパスを生成
-	std::string filePath = this->GetDirectory();
-
-	// ディレクトリ確保
-	std::filesystem::path outputDirPath(filePath);
-	if (!std::filesystem::exists(outputDirPath))
-	{
-		// なかったらディレクトリ作成
-		std::filesystem::create_directories(outputDirPath);
-	}
-
-	filePath += this->GetName();
-	filePath += ".json";
-
-	nlohmann::json jsonData;
-	jsonData["layer"]		= GetLayer();
-	jsonData["layerMask"]	= GetLayerMask();
-	jsonData["isActive"]	= IsActive();
-	jsonData["isTrigger"]	= IsTrigger();
-	jsonData["center"]		= _center;
-	jsonData["radius"]		= _radius;
-
-	return Exporter::SaveJsonFile(filePath.c_str(), jsonData);
+	(*json)["center"]		= _center;
+	(*json)["radius"]		= _radius;
 }
 #pragma endregion

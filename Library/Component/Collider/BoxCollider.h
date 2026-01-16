@@ -26,9 +26,9 @@ public:
 
 #pragma region 入出力
 	// ファイル読み込み
-	bool LoadFromFile() override;
+	void OnLoad(nlohmann::json* json) override;
 	// ファイル保存
-	bool SaveToFile() override;
+	void OnSave(nlohmann::json* json) override;
 #pragma endregion
 
 private:

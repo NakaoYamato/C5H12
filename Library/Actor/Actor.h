@@ -110,6 +110,14 @@ public:
 	{
 		_lastContactActors.clear();
 	}
+	/// <summary>
+	/// ファイルからコライダー読み込み
+	/// </summary>
+	void LoadColliderFromFile();
+	/// <summary>
+	/// ファイルへコライダー保存
+	/// </summary>
+	void SaveColliderFromFile();
 #pragma endregion
 
 #pragma region コンポーネント関係

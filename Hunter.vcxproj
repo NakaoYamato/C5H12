@@ -378,6 +378,7 @@
     <ClCompile Include="Source\Scene\Test\SceneWyvernDecalDebug.cpp" />
     <ClCompile Include="Source\Skill\SkillData.cpp" />
     <ClCompile Include="Source\Skill\SkillManager.cpp" />
+    <ClCompile Include="Source\Stage\EntryZone.cpp" />
     <ClCompile Include="Source\Stage\EnvironmentDestroyer.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestActor.cpp" />
     <ClCompile Include="Source\Stage\Props\Chest\ChestController.cpp" />
@@ -386,7 +387,6 @@
     <ClCompile Include="Source\Stage\Props\Fence\GeteController.cpp" />
     <ClCompile Include="Source\Stage\Props\QuestBoard\QuestBoardActor.cpp" />
     <ClCompile Include="Source\Stage\Props\QuestBoard\QuestBoardController.cpp" />
-    <ClCompile Include="Source\Stage\RespawnZone.cpp" />
     <ClCompile Include="Source\Stage\SafetyZone.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
     <ClCompile Include="Source\InGame\Input\Menu\MenuInput.cpp" />
@@ -683,6 +683,7 @@
     <ClInclude Include="Source\Scene\Test\SceneWyvernDecalDebug.h" />
     <ClInclude Include="Source\Skill\SkillData.h" />
     <ClInclude Include="Source\Skill\SkillManager.h" />
+    <ClInclude Include="Source\Stage\EntryZone.h" />
     <ClInclude Include="Source\Stage\EnvironmentDestroyer.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestActor.h" />
     <ClInclude Include="Source\Stage\Props\Chest\ChestController.h" />
@@ -691,7 +692,6 @@
     <ClInclude Include="Source\Stage\Props\Fence\GeteController.h" />
     <ClInclude Include="Source\Stage\Props\QuestBoard\QuestBoardActor.h" />
     <ClInclude Include="Source\Stage\Props\QuestBoard\QuestBoardController.h" />
-    <ClInclude Include="Source\Stage\RespawnZone.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Stage\SafetyZone.h" />
     <ClInclude Include="Source\InGame\Input\Menu\MenuInput.h" />

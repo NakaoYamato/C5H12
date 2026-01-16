@@ -1,0 +1,1 @@
+{"0":{"center":{"x":0.0,"y":0.30000001192092896,"z":0.0},"isActive":true,"isTrigger":false,"layer":8,"layerMask":4294967287,"radius":1.0},"1":{"center":{"x":0.0,"y":0.30000001192092896,"z":0.0},"isActive":true,"isTrigger":true,"layer":8,"layerMask":4294967287,"radius":2.0},"colliderCount":2}

@@ -36,11 +36,11 @@ void PlayerController::Start()
 		_metaAI = metaAIActor->GetComponent<MetaAI>();
 
 		// メタAIからリスポーン位置を取得
-		RespawnZone* respawnZone = _metaAI.lock()->SearchNearestRespawnZone(GetActor()->GetTransform().GetWorldPosition());
-		if (respawnZone)
+		EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
+		if (entryZone)
 		{
-			Vector3 respawnPosition = respawnZone->GetActor()->GetTransform().GetWorldPosition() + respawnZone->GetCenter();
-			Vector3 respawnAngle = respawnZone->GetAngle();
+			Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
+			Vector3 respawnAngle = entryZone->GetAngle();
 			// 座標と角度を設定
 			GetActor()->GetTransform().SetWorldPosition(respawnPosition);
 			GetActor()->GetTransform().SetWorldAngle(respawnAngle);
@@ -172,11 +172,11 @@ void PlayerController::Update(float elapsedTime)
 		if (_respawnTimer >= _respawnTimeMax)
 		{
 			// メタAIからリスポーン位置を取得
-			RespawnZone* respawnZone = _metaAI.lock()->SearchNearestRespawnZone(GetActor()->GetTransform().GetWorldPosition());
-			if (respawnZone)
+			EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
+			if (entryZone)
 			{
-				Vector3 respawnPosition = respawnZone->GetActor()->GetTransform().GetWorldPosition() + respawnZone->GetCenter();
-				Vector3 respawnAngle = respawnZone->GetAngle();
+				Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
+				Vector3 respawnAngle = entryZone->GetAngle();
 				Respawn(respawnPosition, respawnAngle);
 			}
 			else

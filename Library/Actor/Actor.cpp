@@ -62,6 +62,9 @@ void Actor::Deleted()
 /// 開始処理
 void Actor::Start()
 {
+	// コライダー読み込み
+	LoadColliderFromFile();
+
 	// Transform内のmatrixを生成するために行列を更新
 	UpdateTransform();
 
@@ -364,6 +367,49 @@ void Actor::ContactEnter(CollisionData& collisionData)
 
 	OnContactEnter(collisionData);
 }
+/// ファイルからコライダー読み込み
+void Actor::LoadColliderFromFile()
+{
+	// アクター名からファイルパスを生成
+	std::string directory = "./Data/Resource/Actor/";
+	std::string filePath = directory + this->GetName() + "/Colliders.json";
+	nlohmann::json jsonData;
+	if (Exporter::LoadJsonFile(filePath.c_str(), &jsonData))
+	{
+		int colliderCount = jsonData.value("colliderCount", 0);
+		for (int i = 0; i < colliderCount; ++i)
+		{
+			auto& sub = jsonData[std::to_string(i)];
+			_colliders[i]->LoadFromFile(&sub);
+		}
+	}
+}
+/// ファイルへコライダー保存
+void Actor::SaveColliderFromFile()
+{
+	// アクター名からファイルパスを生成
+	std::string directory = "./Data/Resource/Actor/";
+	std::string filePath = directory + this->GetName() + "/";
+
+	// ディレクトリ確保
+	std::filesystem::path outputDirPath(filePath);
+	if (!std::filesystem::exists(outputDirPath))
+	{
+		// なかったらディレクトリ作成
+		std::filesystem::create_directories(outputDirPath);
+	}
+
+	filePath += "Colliders.json";
+
+	nlohmann::json jsonData;
+	jsonData["colliderCount"] = static_cast<int>(_colliders.size());
+	for (size_t i = 0; i < _colliders.size(); ++i)
+	{
+		auto& sub = jsonData[std::to_string(i)];
+		_colliders[i]->SaveToFile(&sub);
+	}
+	Exporter::SaveJsonFile(filePath.c_str(), jsonData);
+}
 #pragma endregion
 /// 削除処理
 void Actor::Remove()
@@ -537,6 +583,16 @@ void Actor::DrawComponentGui()
 /// コライダーGUI描画
 void Actor::DrawColliderGui()
 {
+	if (ImGui::Button(u8"保存"))
+	{
+		SaveColliderFromFile();
+	}
+	if (ImGui::Button(u8"読み込み"))
+	{
+		LoadColliderFromFile();
+	}
+	ImGui::Separator();
+
 	int index = 0;
 	for (std::shared_ptr<ColliderBase>& collider : _colliders)
 	{
@@ -563,22 +619,6 @@ void Actor::DrawColliderGui()
 		if (isOpenedInStorage)
 			// 色設定を戻す (3つPushしたので3つPop)
 			ImGui::PopStyleColor(3);
-
-		// 右クリックされたとき
-		if (ImGui::BeginPopupContextItem())
-		{
-			if (ImGui::MenuItem("Save"))
-			{
-				collider->SaveToFile();
-			}
-
-			if (ImGui::MenuItem("Load"))
-			{
-				collider->LoadFromFile();
-			}
-
-			ImGui::EndPopup();
-		}
 
 		if (isOpen)
 		{

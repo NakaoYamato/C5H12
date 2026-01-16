@@ -177,40 +177,45 @@ Vector3 MetaAI::GetRandomPositionInRange(const Vector3& center, float range) con
 }
 #pragma endregion
 
-#pragma region リスポーン
-void MetaAI::RegisterRespawnZone(std::weak_ptr<RespawnZone> respawnZone)
+#pragma region 開始地点
+/// 開始地点登録
+void MetaAI::RegisterEntryZone(std::weak_ptr<EntryZone> entryZone)
 {
-	if (auto zone = respawnZone.lock())
-	{
-		_respawnZones.push_back(respawnZone);
-	}
+	_entryZones.push_back(entryZone);
 }
-/// リスポーンゾーン削除
-void MetaAI::RemoveRespawnZone(std::weak_ptr<RespawnZone> respawnZone)
-{
-	auto it = std::remove_if(_respawnZones.begin(), _respawnZones.end(),
-		[&respawnZone](const std::weak_ptr<RespawnZone>& t) { return t.lock() == respawnZone.lock(); });
-	_respawnZones.erase(it, _respawnZones.end());
-}
-/// 指定の位置から最も近いリスポーンゾーンを検索
-RespawnZone* MetaAI::SearchNearestRespawnZone(const Vector3& position) const
-{
-	RespawnZone* result = nullptr;
-	float nearestDistanceSq = FLT_MAX;
 
-	for (const auto& respawnZoneWeak : _respawnZones)
+/// 開始地点削除
+void MetaAI::RemoveEntryZone(std::weak_ptr<EntryZone> entryZone)
+{
+	auto it = std::remove_if(_entryZones.begin(), _entryZones.end(),
+		[&entryZone](const std::weak_ptr<EntryZone>& e) { return e.lock() == entryZone.lock(); });
+	_entryZones.erase(it, _entryZones.end());
+}
+
+/// 指定の位置から最も近い開始地点を検索
+EntryZone* MetaAI::SearchNearestEntryZone(Targetable::Faction faction, const Vector3& position) const
+{
+	EntryZone* result = nullptr;
+	float nearestDistanceSq = FLT_MAX;
+	for (const auto& entryZoneWeak : _entryZones)
 	{
-		if (auto respawnZone = respawnZoneWeak.lock())
+		if (auto entryZone = entryZoneWeak.lock())
 		{
-			float distanceSq = Vector3::LengthSq(respawnZone->GetActor()->GetTransform().GetWorldPosition() + respawnZone->GetCenter() - position);
-			if (distanceSq < nearestDistanceSq)
+			// アクターがアクティブでない場合はスキップ
+			if (!entryZone->GetActor()->IsActive())
+				continue;
+			// 陣営が一致するかチェック
+			if (entryZone->GetFaction() == faction)
 			{
-				nearestDistanceSq = distanceSq;
-				result = respawnZone.get();
+				float distanceSq = Vector3::LengthSq(entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter() - position);
+				if (distanceSq < nearestDistanceSq)
+				{
+					nearestDistanceSq = distanceSq;
+					result = entryZone.get();
+				}
 			}
 		}
 	}
-
 	return result;
 }
 #pragma endregion

@@ -56,9 +56,9 @@ public:
 
 #pragma region ファイル
 	// ファイル読み込み
-	virtual void LoadFromFile();
+	virtual bool LoadFromFile();
 	// ファイル保存
-	virtual void SaveToFile();
+	virtual bool SaveToFile();
 #pragma endregion
 
 private:

@@ -295,7 +295,7 @@ void StageManager::OnDrawGui()
 
 #pragma region 入出力
 // ファイルパス取得
-std::string StageManager::GetFilePath() const
+std::string StageManager::GetFilePath()
 {
 	return "./Data/Resource/Actor/StageManager/";
 }

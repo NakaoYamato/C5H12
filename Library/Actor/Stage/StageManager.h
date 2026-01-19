@@ -31,12 +31,12 @@ public:
 
 #pragma region 入出力
 	// ファイルパス取得
-	std::string GetFilePath() const;
+	std::string GetFilePath() override;
 
 	// ファイル読み込み
-	bool LoadFromFile();
+	bool LoadFromFile() override;
 	// ファイル保存
-	bool SaveToFile();
+	bool SaveToFile() override;
 #pragma endregion
 
 private:

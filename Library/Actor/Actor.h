@@ -297,6 +297,17 @@ public:
 		return _parent ? _parent->GetName() : "";
 	}
 #pragma endregion
+
+#pragma region 入出力
+	// ファイルパス取得
+	virtual std::string GetFilePath();
+
+	// ファイル読み込み
+	virtual bool LoadFromFile() { return false; }
+	// ファイル保存
+	virtual bool SaveToFile() { return false; }
+#pragma endregion
+
 protected:
 #pragma region 仮想関数
 	/// <summary>

@@ -219,11 +219,11 @@ MenuWidget* MenuUIActor::GetCurrentWidget()
 
 #pragma region ファイル
 // ファイル読み込み
-void MenuUIActor::LoadFromFile()
+bool MenuUIActor::LoadFromFile()
 {
 	nlohmann::json json;
 	if (!Exporter::LoadJsonFile(_filepath.c_str(), &json))
-		return;
+		return false;
 
 	// 各ウィジェット読み込み
 	size_t widgetSize = json["widgetSize"].get<size_t>();
@@ -246,9 +246,11 @@ void MenuUIActor::LoadFromFile()
 	}
 
 	_isLoaded = true;
+
+	return true;
 }
 // ファイル保存
-void MenuUIActor::SaveToFile()
+bool MenuUIActor::SaveToFile()
 {
 	nlohmann::json json;
 	json["widgetSize"] = _registeredWidgets.size();
@@ -262,7 +264,7 @@ void MenuUIActor::SaveToFile()
 		index++;
 	}
 
-	Exporter::SaveJsonFile(_filepath.c_str(), json);
+	return Exporter::SaveJsonFile(_filepath.c_str(), json);
 }
 #pragma endregion
 

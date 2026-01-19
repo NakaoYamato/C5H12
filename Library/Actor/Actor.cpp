@@ -484,6 +484,16 @@ void Actor::ReleaseParent()
 	}
 }
 #pragma endregion
+
+#pragma region 入出力
+std::string Actor::GetFilePath()
+{
+    std::string directory = "./Data/Resource/Actor/";
+    std::string filePath = directory + this->GetName() + "/";
+	return filePath;
+}
+#pragma endregion
+
 #pragma region 仮想関数
 /// モデルのトランスフォーム更新
 void Actor::UpdateModelTransform()

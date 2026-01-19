@@ -1,11 +1,8 @@
 #pragma once
 
-#include <variant>
 #include "../../Library/Component/StateController.h"
 #include "../../Library/Component/EffectController.h"
-#include "../../Library/Math/Vector.h"
 
-#include "../../Source/Common/Targetable.h"
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Common/StaminaController.h"
 #include "../../Source/InGame/UI/Operate/OperateUIController.h"
@@ -16,18 +13,21 @@ class PlayerController;
 class Animator;
 
 // プレイヤーの状態遷移を管理するクラス
-class PlayerStateMachine : public StateMachine
+class PlayerStateController : public StateController2<PlayerStateController>
 {
 public:
-    PlayerStateMachine(Actor* owner);
-    ~PlayerStateMachine() {}
+	PlayerStateController() : StateController2<PlayerStateController>() {}
+	~PlayerStateController() override {}
 
-	// 開始処理
-	void Start();
-	// 実行処理
-	void Execute(float elapsedTime) override;
-	// Gui描画
-	void DrawGui() override;
+	// 名前取得
+	const char* GetName() const override { return "PlayerStateController"; }
+	// オブジェクトとの接触時の処理
+	void OnContact(CollisionData& collisionData) override;
+
+	// 抜刀移行
+	void ChangeToCombatState(const std::string& mainStateName);
+	// 納刀移行
+	void ChangeToNonCombatState(const std::string& mainStateName);
 
 	/// <summary>
 	/// 移動方向に向く
@@ -36,20 +36,17 @@ public:
 	/// <param name="rotationSpeed">回転速度</param>
 	void RotationMovement(float elapsedTime, float rotationSpeed = 1.0f);
 #pragma region アクセサ
-	StateMachineBase<PlayerStateMachine>& GetStateMachine() { return _stateMachine; }
-	PlayerController*	GetPlayer()			{ return _player; }
-	DamageSender*		GetDamageSender()	{ return _damageSender; }
-    StaminaController*	GetStaminaController() { return _staminaController; }
-	Animator*			GetAnimator()		{ return _animator; }
-	EffectController*	GetEffect()			{ return _effect; }
-    OperateUIController* GetOperateUIController() { return _operateUIController; }
+	// ステートマシン取得
+	std::shared_ptr<SM> GetStateMachine() override;
+	PlayerController* GetPlayer() { return _player; }
+	DamageSender* GetDamageSender() { return _damageSender; }
+	StaminaController* GetStaminaController() { return _staminaController; }
+	Animator* GetAnimator() { return _animator; }
+	EffectController* GetEffect() { return _effect; }
+	OperateUIController* GetOperateUIController() { return _operateUIController; }
 	PlayerItemController* GetItemController() { return _itemController; }
-	// ステート変更
-	void ChangeState(const char* mainStateName, const char* subStateName) override;
-    // ステート名取得
-	const char* GetStateName() override;
-    // サブステート名取得
-	const char* GetSubStateName() override;
+
+	bool IsCombatState() const { return _isCombatState; }
 #pragma endregion
 
 	// 汎用遷移
@@ -59,16 +56,33 @@ public:
 	void SetNextBranchSubStateName(const std::string& subStateName) { _nextBranchSubStateName = subStateName; }
 	std::string GetNextSubStateName() const { return _nextSubStateName; }
 	std::string GetNextBranchSubStateName() const { return _nextBranchSubStateName; }
+
+#pragma region 武器種ごとのステートマシン設定
+	void SetGreatSwordStateMachine();
+#pragma endregion
+
+protected:
+	// 開始時処理
+	void OnStart() override;
+	// 遅延更新処理
+	void OnLateUpdate(float elapsedTime) override;
+	// GUI描画
+	void OnDrawGui() override;
+
 private:
-	StateMachineBase<PlayerStateMachine> _stateMachine;
-	PlayerController*					_player = nullptr;
-	Targetable*							_targetable = nullptr;
-	DamageSender*						_damageSender = nullptr;
-    StaminaController*					_staminaController = nullptr;
-	Animator*							_animator = nullptr;
-	EffectController*					_effect = nullptr;
-    OperateUIController*				_operateUIController = nullptr;
-	PlayerItemController*				_itemController = nullptr;
+	// 抜刀時のステートマシン
+	std::shared_ptr<SM> _combatStateMachine = nullptr;
+
+	// 抜刀状態か
+	bool _isCombatState = false;
+
+	PlayerController*		_player				= nullptr;
+	DamageSender*			_damageSender		= nullptr;
+	StaminaController*		_staminaController	= nullptr;
+	Animator*				_animator			= nullptr;
+	EffectController*		_effect				= nullptr;
+	OperateUIController*	_operateUIController = nullptr;
+	PlayerItemController*	_itemController		= nullptr;
 
 	// 先行入力遷移先
 	std::string _nextSubStateName = "";
@@ -77,23 +91,26 @@ private:
 
 // プレイヤーのヒエラルキカルステートのベースクラス
 #pragma region ベースステート
+using PlayerHSBBase = HierarchicalStateBase<PlayerStateController>;
+using PlayerSSBBase = StateBase<PlayerStateController>;
+
 // OnEnterでアニメーションを再生するだけの簡易ステート
-class PlayerHSB : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerAnimationHSB : public PlayerHSBBase
 {
 public:
-	PlayerHSB(PlayerStateMachine* stateMachine,
+	PlayerAnimationHSB(PlayerStateController* owner,
 		const std::string& animationName,
 		float blendSeconds,
 		bool isLoop,
 		bool isUsingRootMotion) :
-		HierarchicalStateBase(stateMachine),
+		HierarchicalStateBase(owner),
 		_animationName(animationName),
 		_blendSeconds(blendSeconds),
 		_isLoop(isLoop),
 		_isUsingRootMotion(isUsingRootMotion)
 	{
 	}
-	~PlayerHSB() override {}
+	~PlayerAnimationHSB() override {}
 	virtual void OnEnter() override;
 	virtual void OnExecute(float elapsedTime) override {}
 	virtual void OnExit() override {}
@@ -105,7 +122,7 @@ private:
 };
 
 // 8方向のサブステートを持つヒエラルキカルステート
-class Player8WayHSB : public HierarchicalStateBase<PlayerStateMachine>
+class Player8WayHSB : public PlayerHSBBase
 {
 public:
 	enum Direction
@@ -123,7 +140,7 @@ public:
 	};
 
 public:
-	Player8WayHSB(PlayerStateMachine* stateMachine,
+	Player8WayHSB(PlayerStateController* owner,
 		std::vector<std::string> animationNames,
 		float blendSeconds,
 		bool isUsingRootMotion);
@@ -135,16 +152,16 @@ public:
 };
 
 // アニメーション再生のみの簡易サブステート
-class PlayerSSB : public StateBase<PlayerStateMachine>
+class PlayerSSB : public PlayerSSBBase
 {
 public:
-	PlayerSSB(PlayerStateMachine* stateMachine,
+	PlayerSSB(PlayerStateController* owner,
 		const std::string& name,
 		const std::string& animationName,
 		float blendSeconds,
 		bool isLoop,
 		bool isUsingRootMotion) :
-		StateBase(stateMachine),
+		StateBase(owner),
 		_name(name),
 		_animationName(animationName),
 		_blendSeconds(blendSeconds),

@@ -35,6 +35,8 @@ public:
 	void SetIsOverrideRimLight(bool isOverride) { _isOverrideRimLight = isOverride; }
 	// ã‘‚«‚·‚éƒŠƒ€ƒ‰ƒCƒg‚ÌFİ’è
 	void SetRimLightColor(const Vector4& color) { _rimLightColor = color; }
+
+	WeaponType GetWeaponType() const { return _weaponType; }
 protected:
 	WeaponType _weaponType = WeaponType::GreatSword;
 	int _weaponIndex = 0;

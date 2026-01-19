@@ -8,6 +8,7 @@
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/DamageSender.h"
 #include "../../Source/Skill/SkillManager.h"
+#include "../../Source/Player/StateMachine/PlayerStateController.h"
 
 class PlayerEquipmentController : public Component
 {
@@ -32,7 +33,7 @@ public:
 	// 武器アクター取得
 	std::shared_ptr<WeaponActor> GetWeaponActor() const { return _weaponActor.lock(); }
 	// 武器アクター設定
-	void SetWeaponActor(std::shared_ptr<WeaponActor> actor) { _weaponActor = actor; }
+	void SetWeaponActor(std::shared_ptr<WeaponActor> actor);
 	// 防具インデックス取得
 	int GetArmorIndex(ArmorType type) const;
 	// 防具インデックス設定
@@ -56,6 +57,9 @@ private:
 	// パラメータの再計算
 	void RecalculateParameters();
 
+	// ステートマシンの構築
+	void BuildStateMachine();
+
 #pragma region ファイル
 	void SaveArmorData();
 #pragma endregion
@@ -72,6 +76,7 @@ private:
 	std::weak_ptr<SkillManager> _skillManager;
 	std::weak_ptr<Damageable> _damageable;
 	std::weak_ptr<DamageSender> _damageSender;
+	std::weak_ptr<PlayerStateController> _stateController;
 
 	// 基礎攻撃力
 	float _baseAttack = 0.0f;

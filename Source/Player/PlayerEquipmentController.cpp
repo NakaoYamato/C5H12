@@ -8,8 +8,6 @@
 // 生成時処理
 void PlayerEquipmentController::OnCreate()
 {
-	_damageable = GetActor()->GetComponent<Damageable>();
-	_damageSender = GetActor()->GetComponent<DamageSender>();
 	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
 	_skillManager = ResourceManager::Instance().GetResourceAs<SkillManager>("SkillManager");
 }
@@ -17,8 +15,14 @@ void PlayerEquipmentController::OnCreate()
 // 開始時処理
 void PlayerEquipmentController::Start()
 {
+	_damageable = GetActor()->GetComponent<Damageable>();
+	_damageSender = GetActor()->GetComponent<DamageSender>();
+	_stateController = GetActor()->GetComponent<PlayerStateController>();
+
 	// パラメータの再計算
 	RecalculateParameters();
+	// ステートマシンの構築
+	BuildStateMachine();
 }
 
 // 更新処理
@@ -100,6 +104,14 @@ void PlayerEquipmentController::SetWeaponIndex(int index)
 
 	// パラメータの再計算
 	RecalculateParameters();
+}
+
+// 武器アクター設定
+void PlayerEquipmentController::SetWeaponActor(std::shared_ptr<WeaponActor> actor)
+{
+	_weaponActor = actor;
+	// ステートマシンの構築
+	BuildStateMachine();
 }
 
 // 防具インデックス取得
@@ -216,6 +228,25 @@ void PlayerEquipmentController::RecalculateParameters()
 		_totalAttack = attack;
 
 		damageSender->SetBaseATK(_totalAttack);
+	}
+}
+
+// ステートマシンの構築
+void PlayerEquipmentController::BuildStateMachine()
+{
+	// 武器に応じたステートマシン設定
+	auto actor = GetWeaponActor();
+	auto stateController = _stateController.lock();
+	if (stateController && actor)
+	{
+		switch (actor->GetWeaponType())
+		{
+		case WeaponType::GreatSword:
+			stateController->SetGreatSwordStateMachine();
+			break;
+		default:
+			break;
+		}
 	}
 }
 

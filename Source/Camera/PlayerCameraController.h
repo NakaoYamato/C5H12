@@ -5,6 +5,7 @@
 #include "../../Library/Camera/Camera.h"
 
 #include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Player/StateMachine/PlayerStateController.h"
 #include "../../Source/InGame/InputManager.h"
 
 /// <summary>
@@ -38,7 +39,7 @@ private:
     PlayerActor* _playerActor = nullptr;
 	std::weak_ptr<InputManager> _inputManager;
 
-	std::weak_ptr<StateController> _stateController;
+	std::weak_ptr<PlayerStateController> _stateController;
 
     Vector3 _currentFocus{};
     Vector3 _currentEye{};

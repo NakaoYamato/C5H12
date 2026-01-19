@@ -76,8 +76,8 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
     // 抜刀状態か確認
     bool isCombat = false;
     {
-        if (std::string(_stateController.lock()->GetStateName()).find("Combat") != std::string::npos)
-            isCombat = true;
+        if (auto stateController = _stateController.lock())
+            isCombat = stateController->IsCombatState();
     }
 
     float focusVerticalOffset = isCombat ? _combatFocusVerticalOffset : _focusVerticalOffset;
@@ -173,9 +173,9 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
 void PlayerCameraController::SetPlayerActor(PlayerActor* playerActor)
 {
 	_playerActor = playerActor;
-    _stateController = _playerActor->GetComponent<StateController>();
+    _stateController = _playerActor->GetComponent<PlayerStateController>();
     // 初期設定
-    GetActor()->GetTransform().SetAngle(_stateController.lock()->GetActor()->GetTransform().GetAngle());
+    GetActor()->GetTransform().SetAngle(_playerActor->GetTransform().GetAngle());
 
     Vector3 angle = GetActor()->GetTransform().GetAngle();
     // カメラ回転値を回転行列に変換

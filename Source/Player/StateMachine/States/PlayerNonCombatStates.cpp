@@ -1,7 +1,6 @@
 #include "PlayerNonCombatStates.h"
-
 #include "../../Library/Component/Animator.h"
-#include "../PlayerController.h"
+#include "../../PlayerController.h"
 #include "../../Library/Algorithm/Converter.h"
 #include "../../Source/Player/PlayerEquipmentController.h"
 #include "../../Source/Weapon/SharpnessController.h"
@@ -17,19 +16,19 @@ void PlayerNonCombatIdleState::OnExecute(float elapsedTime)
 		// 移動しながらか、最後の移動からの経過時間が一定値以下なら抜刀攻撃
 		if (_owner->GetPlayer()->IsMoving() ||
 			_owner->GetPlayer()->GetTimeSinceLastMove() <= 0.4f)
-			_owner->GetStateMachine().ChangeState("CombatAttack1");
+			_owner->ChangeToCombatState("CombatAttack1");
 		else
-			_owner->GetStateMachine().ChangeState("ToCombat");
+			_owner->ChangeState("ToCombat");
 	}
 	// 移動
 	else if (_owner->GetPlayer()->IsMoving())
-		_owner->GetStateMachine().ChangeState("Walk");
+		_owner->ChangeState("Walk");
 	// 回避移行
 	else if (_owner->GetPlayer()->IsEvade())
-		_owner->GetStateMachine().ChangeState("Evade");
+		_owner->ChangeState("Evade");
 	// ガード移行
 	else if (_owner->GetPlayer()->IsGuard())
-		_owner->GetStateMachine().ChangeState("CombatGuard");
+		_owner->ChangeToCombatState("CombatGuard");
 	// アイテム使用
 	else if (_owner->GetPlayer()->IsUsingItem())
 		_owner->ChangeItemState();
@@ -37,13 +36,12 @@ void PlayerNonCombatIdleState::OnExecute(float elapsedTime)
 #pragma endregion
 
 #pragma region 振り向き
-PlayerNonCombatTurnState::PlayerNonCombatTurnState(PlayerStateMachine* stateMachine) :
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatTurnState::PlayerNonCombatTurnState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	RegisterSubState(std::make_shared<PlayerSSB>(stateMachine, "TurnL", "Turn180L", 0.5f, false, true));
-	RegisterSubState(std::make_shared<PlayerSSB>(stateMachine, "TurnR", "Turn180R", 0.5f, false, true));
+	RegisterSubState(std::make_shared<PlayerSSB>(owner, "TurnL", "Turn180L", 0.5f, false, true));
+	RegisterSubState(std::make_shared<PlayerSSB>(owner, "TurnR", "Turn180R", 0.5f, false, true));
 }
-
 void PlayerNonCombatTurnState::OnEnter()
 {
 	_owner->GetAnimator()->SetIsRemoveRootMovement(true);
@@ -60,21 +58,19 @@ void PlayerNonCombatTurnState::OnEnter()
 		angle += 360.0f;
 
 	if (angle < 180.0f)
-		_owner->GetStateMachine().ChangeSubState("TurnR");
+		_owner->ChangeSubState("TurnR");
 	else
-		_owner->GetStateMachine().ChangeSubState("TurnL");
+		_owner->ChangeSubState("TurnL");
 }
-
 void PlayerNonCombatTurnState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
 		// 待機に移行
-		_owner->GetStateMachine().ChangeState("Idle");
+		_owner->ChangeState("Idle");
 	}
 }
-
 void PlayerNonCombatTurnState::OnExit()
 {
 	// 現在のアニメーションの回転量を取り除き、アクターの回転に反映する
@@ -93,19 +89,19 @@ void PlayerNonCombatTurnState::OnExit()
 #pragma endregion
 
 #pragma region 歩き
-namespace NonCombatWalkSubState
+namespace PlayerNonCombatWalkSubState
 {
 	// 歩き開始
-    class WalkStartSubState : public PlayerSSB
-    {
-    public:
-		WalkStartSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+	class WalkStartSubState : public PlayerSSB
+	{
+	public:
+		WalkStartSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"WalkStart",
-                u8"RunStartF0", 0.2f, 
-                false, 
-                true) 
-        {
+				u8"RunStartF0", 0.2f,
+				false,
+				true)
+		{
 		}
 		~WalkStartSubState() override {}
 		void OnExecute(float elapsedTime) override
@@ -130,7 +126,7 @@ namespace NonCombatWalkSubState
 				if (angle > 135.0f && angle <= 225.0f)
 				{
 					// 後ろに回転
-					_owner->GetStateMachine().ChangeState("Turn");
+					_owner->ChangeState("Turn");
 					return;
 				}
 			}
@@ -140,18 +136,18 @@ namespace NonCombatWalkSubState
 			_owner->RotationMovement(elapsedTime);
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeSubState("Walking");
+				_owner->ChangeSubState("Walking");
 			// 移動していなければ終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
-				_owner->GetStateMachine().ChangeSubState("WalkStop");
+				_owner->ChangeSubState("WalkStop");
 		}
-    };
+	};
 	// 歩きループ
 	class WalkingSubState : public PlayerSSB
 	{
 	public:
-		WalkingSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		WalkingSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"Walking",
 				u8"RunLoopF0", 0.2f,
 				true,
@@ -165,7 +161,7 @@ namespace NonCombatWalkSubState
 			_owner->RotationMovement(elapsedTime);
 			// 移動していなければ終了に遷移
 			if (!_owner->GetPlayer()->IsMoving())
-				_owner->GetStateMachine().ChangeSubState("WalkStop");
+				_owner->ChangeSubState("WalkStop");
 #ifndef NON_TURN
 			// プレイヤーの正面と移動方向から振り向きが必要か判定
 			Vector2 movement = _owner->GetPlayer()->GetMovement();
@@ -196,8 +192,8 @@ namespace NonCombatWalkSubState
 	class WalkStopSubState : public PlayerSSB
 	{
 	public:
-		WalkStopSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		WalkStopSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"WalkStop",
 				u8"RunStopF0", 0.2f,
 				false,
@@ -211,20 +207,21 @@ namespace NonCombatWalkSubState
 			_owner->RotationMovement(elapsedTime);
 			// 移動があれば遷移
 			if (_owner->GetPlayer()->IsMoving())
-				_owner->GetStateMachine().ChangeSubState("Walking");
+				_owner->ChangeSubState("Walking");
 			// アニメーションが終了していたら遷移
 			else if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeState("Idle");
+				_owner->ChangeState("Idle");
 		}
 	};
 }
-PlayerNonCombatWalkState::PlayerNonCombatWalkState(PlayerStateMachine* stateMachine) : 
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatWalkState::PlayerNonCombatWalkState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	RegisterSubState(std::make_shared<NonCombatWalkSubState::WalkStartSubState>(stateMachine));
-	RegisterSubState(std::make_shared<NonCombatWalkSubState::WalkingSubState>(stateMachine));
-	RegisterSubState(std::make_shared<NonCombatWalkSubState::WalkStopSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatWalkSubState::WalkStartSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatWalkSubState::WalkingSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatWalkSubState::WalkStopSubState>(owner));
 }
+
 void PlayerNonCombatWalkState::OnEnter()
 {
 	// フラグを立てる
@@ -240,32 +237,33 @@ void PlayerNonCombatWalkState::OnExecute(float elapsedTime)
 	{
 		if (std::string(this->GetSubStateName()) != "WalkStart")
 		{
-			_owner->GetStateMachine().ChangeState("Run");
-			_owner->GetStateMachine().ChangeSubState("Running");
+			_owner->ChangeState("Run");
+			_owner->ChangeSubState("Running");
 		}
 	}
 
 	// 回避移行
 	if (_owner->GetPlayer()->IsEvade())
-		_owner->GetStateMachine().ChangeState("Evade");
+		_owner->ChangeState("Evade");
 	// ガード移行
 	else if (_owner->GetPlayer()->IsGuard())
-		_owner->GetStateMachine().ChangeState("CombatGuard");
+		_owner->ChangeToCombatState("CombatGuard");
 	// 攻撃移行
 	else if (_owner->GetPlayer()->IsAttack())
 	{
 		// 移動しながらか、最後の移動からの経過時間が一定値以下なら抜刀攻撃
 		if (_owner->GetPlayer()->IsMoving() ||
 			_owner->GetPlayer()->GetTimeSinceLastMove() <= 0.4f)
-			_owner->GetStateMachine().ChangeState("CombatAttack1");
+			_owner->ChangeToCombatState("CombatAttack1");
 		// 移動していなければ抜刀
 		else
-			_owner->GetStateMachine().ChangeState("ToCombat");
+			_owner->ChangeState("ToCombat");
 	}
 	// アイテム使用
 	else if (_owner->GetPlayer()->IsUsingItem())
 		_owner->ChangeItemState();
 }
+
 void PlayerNonCombatWalkState::OnExit()
 {
 	// フラグをおろす
@@ -275,14 +273,14 @@ void PlayerNonCombatWalkState::OnExit()
 #pragma endregion
 
 #pragma region 走り
-namespace NonCombatRunSubState
+namespace PlayerNonCombatRunSubState
 {
 	// 走り開始
 	class RunStartSubState : public PlayerSSB
 	{
 	public:
-		RunStartSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		RunStartSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"RunStart",
 				u8"RunStartF0", 0.2f,
 				false,
@@ -296,18 +294,18 @@ namespace NonCombatRunSubState
 			_owner->RotationMovement(_owner->GetPlayer()->GetDashRotationFactor() * elapsedTime);
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeSubState("Running");
+				_owner->ChangeSubState("Running");
 			// 移動していなければ終了に遷移
-			else if (!_owner->GetPlayer()->IsMoving())
-				_owner->GetStateMachine().ChangeSubState("RunStop");
+			if (!_owner->GetPlayer()->IsMoving())
+				_owner->ChangeSubState("RunStop");
 		}
 	};
 	// 走りループ
 	class RunningSubState : public PlayerSSB
 	{
 	public:
-		RunningSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		RunningSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"Running",
 				u8"RunFastLoop", 1.0f,
 				true,
@@ -329,7 +327,7 @@ namespace NonCombatRunSubState
 			{
 				_timer += elapsedTime;
 				if (_timer >= _runningTime)
-					_owner->GetStateMachine().ChangeSubState("RunStop");
+					_owner->ChangeSubState("RunStop");
 			}
 			else
 			{
@@ -354,13 +352,13 @@ namespace NonCombatRunSubState
 				if (180.0f > angle && angle > 135.0f)
 				{
 					// 後ろに回転
-					_owner->GetStateMachine().ChangeSubState("RunTurnL");
+					_owner->ChangeSubState("RunTurnL");
 					return;
 				}
 				else if (180.0f <= angle && angle < 225.0f)
 				{
 					// 後ろに回転
-					_owner->GetStateMachine().ChangeSubState("RunTurnR");
+					_owner->ChangeSubState("RunTurnR");
 					return;
 				}
 			}
@@ -373,8 +371,8 @@ namespace NonCombatRunSubState
 	class RunStopSubState : public PlayerSSB
 	{
 	public:
-		RunStopSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		RunStopSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"RunStop",
 				u8"RunFastStop", 0.5f,
 				false,
@@ -388,18 +386,18 @@ namespace NonCombatRunSubState
 			_owner->RotationMovement(_owner->GetPlayer()->GetDashRotationFactor() * elapsedTime);
 			// 移動があれば遷移
 			if (_owner->GetPlayer()->IsMoving())
-				_owner->GetStateMachine().ChangeSubState("Running");
+				_owner->ChangeSubState("Running");
 			// アニメーションが終了していたら遷移
 			else if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeState("Idle");
+				_owner->ChangeState("Idle");
 		}
 	};
 	// 走りながら回転L
 	class RunTurnLSubState : public PlayerSSB
 	{
 	public:
-		RunTurnLSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		RunTurnLSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"RunTurnL",
 				u8"RunFastTurnL", 0.2f,
 				false,
@@ -411,7 +409,7 @@ namespace NonCombatRunSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeSubState("Running");
+				_owner->ChangeSubState("Running");
 		}
 		void OnExit() override
 		{
@@ -432,8 +430,8 @@ namespace NonCombatRunSubState
 	class RunTurnRSubState : public PlayerSSB
 	{
 	public:
-		RunTurnRSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		RunTurnRSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"RunTurnR",
 				u8"RunFastTurnR", 0.2f,
 				false,
@@ -445,7 +443,7 @@ namespace NonCombatRunSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeSubState("Running");
+				_owner->ChangeSubState("Running");
 		}
 		void OnExit() override
 		{
@@ -463,15 +461,16 @@ namespace NonCombatRunSubState
 		}
 	};
 }
-PlayerNonCombatRunState::PlayerNonCombatRunState(PlayerStateMachine* stateMachine) : 
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatRunState::PlayerNonCombatRunState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	RegisterSubState(std::make_shared<NonCombatRunSubState::RunStartSubState>(stateMachine));
-	RegisterSubState(std::make_shared<NonCombatRunSubState::RunningSubState>(stateMachine));
-	RegisterSubState(std::make_shared<NonCombatRunSubState::RunStopSubState>(stateMachine));
-	RegisterSubState(std::make_shared<NonCombatRunSubState::RunTurnLSubState>(stateMachine));
-	RegisterSubState(std::make_shared<NonCombatRunSubState::RunTurnRSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatRunSubState::RunStartSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatRunSubState::RunningSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatRunSubState::RunStopSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatRunSubState::RunTurnLSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatRunSubState::RunTurnRSubState>(owner));
 }
+
 void PlayerNonCombatRunState::OnEnter()
 {
 	// フラグを立てる
@@ -479,8 +478,8 @@ void PlayerNonCombatRunState::OnEnter()
 	//_owner->GetPlayer()->SetIsMoving(true);
 	ChangeSubState("RunStart");
 
-    // スタミナ自動回復を停止
-    _owner->GetStaminaController()->SetIsStaminaRecover(false);
+	// スタミナ自動回復を停止
+	_owner->GetStaminaController()->SetIsStaminaRecover(false);
 }
 
 void PlayerNonCombatRunState::OnExecute(float elapsedTime)
@@ -493,37 +492,38 @@ void PlayerNonCombatRunState::OnExecute(float elapsedTime)
 	// スタミナが尽きたら遷移
 	if (_owner->GetStaminaController()->GetStamina() <= 0.0f)
 	{
-		_owner->GetStateMachine().ChangeState("Fatigue");
+		_owner->ChangeState("Fatigue");
 		return;
-    }
+	}
 
 	// ダッシュ入力がなければ歩きへ遷移
 	if (!_owner->GetPlayer()->IsDash())
 	{
-		_owner->GetStateMachine().ChangeState("Walk");
-		_owner->GetStateMachine().ChangeSubState("Walking");
+		_owner->ChangeState("Walk");
+		_owner->ChangeSubState("Walking");
 	}
 
 	// 回避移行
 	if (_owner->GetPlayer()->IsEvade())
-		_owner->GetStateMachine().ChangeState("Evade");
+		_owner->ChangeState("Evade");
 	// ガード移行
 	else if (_owner->GetPlayer()->IsGuard())
-		_owner->GetStateMachine().ChangeState("CombatGuard");
+		_owner->ChangeToCombatState("CombatGuard");
 	// 攻撃移行
 	else if (_owner->GetPlayer()->IsAttack())
 	{
 		// 移動していたら攻撃へ
 		if (_owner->GetPlayer()->IsMoving())
-			_owner->GetStateMachine().ChangeState("CombatAttack1");
+			_owner->ChangeToCombatState("CombatAttack1");
 		// 移動していなければ抜刀
 		else
-			_owner->GetStateMachine().ChangeState("ToCombat");
+			_owner->ChangeState("ToCombat");
 	}
 	// アイテム使用
 	else if (_owner->GetPlayer()->IsUsingItem())
 		_owner->ChangeItemState();
 }
+
 void PlayerNonCombatRunState::OnExit()
 {
 	// フラグをおろす
@@ -535,9 +535,9 @@ void PlayerNonCombatRunState::OnExit()
 #pragma endregion
 
 #pragma region 回避
-PlayerNonCombatEvadeState::PlayerNonCombatEvadeState(PlayerStateMachine* stateMachine) :
+PlayerNonCombatEvadeState::PlayerNonCombatEvadeState(PlayerStateController* owner) :
 	Player8WayHSB(
-		stateMachine,
+		owner,
 		{ u8"RollF0",
 		u8"RollFR45",
 		u8"RollR90",
@@ -550,6 +550,7 @@ PlayerNonCombatEvadeState::PlayerNonCombatEvadeState(PlayerStateMachine* stateMa
 		true)
 {
 }
+
 void PlayerNonCombatEvadeState::OnEnter()
 {
 	// 入力方向から回避方向を決定
@@ -593,30 +594,31 @@ void PlayerNonCombatEvadeState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了していたら遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetStateMachine().ChangeState("Idle");
+		_owner->ChangeState("Idle");
 	else if (_owner->GetPlayer()->CallCancelEvent())
 	{
 		// スタミナが尽きたら遷移
 		if (_owner->GetStaminaController()->GetStamina() <= 0.0f)
 		{
-			_owner->GetStateMachine().ChangeState("Fatigue");
+			_owner->ChangeState("Fatigue");
 			return;
 		}
 
 		// 攻撃移行
 		if (_owner->GetPlayer()->IsAttack())
-			_owner->GetStateMachine().ChangeState("CombatAttack1");
+			_owner->ChangeToCombatState("CombatAttack1");
 		// 回避移行
 		else if (_owner->GetPlayer()->IsEvade())
-			_owner->GetStateMachine().ChangeState("Evade");
+			_owner->ChangeState("Evade");
 		// 移動移行
 		else if (_owner->GetPlayer()->IsMoving())
-			_owner->GetStateMachine().ChangeState("Walk");
+			_owner->ChangeState("Walk");
 		// ガード移行
 		else if (_owner->GetPlayer()->IsGuard())
-			_owner->GetStateMachine().ChangeState("CombatGuard");
+			_owner->ChangeToCombatState("CombatGuard");
 	}
 }
+
 void PlayerNonCombatEvadeState::OnExit()
 {
 	// スタミナ自動回復を再開
@@ -631,19 +633,19 @@ void PlayerNonCombatToCombatState::OnExecute(float elapsedTime)
 	{
 		// 攻撃をもう一度押しているなら攻撃へ遷移
 		if (_owner->GetPlayer()->IsAttack() || _owner->GetPlayer()->IsHoldingAttackKey())
-			_owner->GetStateMachine().ChangeState("CombatAttack1");
+			_owner->ChangeToCombatState("CombatAttack1");
 
 	}
 	// アニメーションが終了していたら遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetStateMachine().ChangeState("CombatIdle");
+		_owner->ChangeToCombatState("CombatIdle");
 }
 #pragma endregion
 
 #pragma region 被弾
-PlayerNonCombatHitState::PlayerNonCombatHitState(PlayerStateMachine* stateMachine) :
+PlayerNonCombatHitState::PlayerNonCombatHitState(PlayerStateController* owner) :
 	Player8WayHSB(
-		stateMachine,
+		owner,
 		{ u8"HitF",
 		u8"HitF",
 		u8"HitR",
@@ -692,7 +694,7 @@ void PlayerNonCombatHitState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了していたら遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetStateMachine().ChangeState("Idle");
+		_owner->ChangeState("Idle");
 }
 
 void PlayerNonCombatHitState::OnExit()
@@ -705,9 +707,9 @@ void PlayerNonCombatHitState::OnExit()
 	}
 }
 
-PlayerNonCombatHitKnockDownState::PlayerNonCombatHitKnockDownState(PlayerStateMachine* stateMachine) :
+PlayerNonCombatHitKnockDownState::PlayerNonCombatHitKnockDownState(PlayerStateController* owner) :
 	Player8WayHSB(
-		stateMachine,
+		owner,
 		{ u8"HitLargeF",
 		u8"HitLargeF",
 		u8"HitLargeR",
@@ -756,7 +758,7 @@ void PlayerNonCombatHitKnockDownState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了していたら遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetStateMachine().ChangeState("Idle");
+		_owner->ChangeState("Idle");
 }
 
 void PlayerNonCombatHitKnockDownState::OnExit()
@@ -776,8 +778,8 @@ namespace PlayerNonCombatDownSubState
 	class DownStartSubState : public PlayerSSB
 	{
 	public:
-		DownStartSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		DownStartSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"DownStart",
 				u8"HitLargeDeath",
 				1.2f,
@@ -793,7 +795,7 @@ namespace PlayerNonCombatDownSubState
 			{
 				if (_owner->GetPlayer()->IsMoving())
 				{
-					_owner->GetStateMachine().ChangeSubState("DownEnd");
+					_owner->ChangeSubState("DownEnd");
 					return;
 				}
 			}
@@ -802,8 +804,8 @@ namespace PlayerNonCombatDownSubState
 	class DownEndSubState : public PlayerSSB
 	{
 	public:
-		DownEndSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		DownEndSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"DownEnd",
 				u8"GetUp",
 				1.2f,
@@ -816,26 +818,27 @@ namespace PlayerNonCombatDownSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeState("Idle");
+				_owner->ChangeState("Idle");
 			// キャンセルイベントが呼ばれたら
 			if (_owner->GetPlayer()->CallCancelEvent())
 			{
 				// 移動移行
 				if (_owner->GetPlayer()->IsMoving())
-					_owner->GetStateMachine().ChangeState("Walk");
+					_owner->ChangeState("Walk");
 				// ガード移行
 				else if (_owner->GetPlayer()->IsGuard())
-					_owner->GetStateMachine().ChangeState("CombatGuard");
+					_owner->ChangeToCombatState("CombatGuard");
 			}
 		}
 	};
 }
-PlayerNonCombatDownState::PlayerNonCombatDownState(PlayerStateMachine* stateMachine) :
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatDownState::PlayerNonCombatDownState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	RegisterSubState(std::make_shared<PlayerNonCombatDownSubState::DownStartSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerNonCombatDownSubState::DownEndSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatDownSubState::DownStartSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatDownSubState::DownEndSubState>(owner));
 }
+
 void PlayerNonCombatDownState::OnEnter()
 {
 	// ダメージを受けた方向を向く
@@ -855,6 +858,7 @@ void PlayerNonCombatDownState::OnEnter()
 		charactorController->SetIsPushable(false);
 	}
 }
+
 void PlayerNonCombatDownState::OnExit()
 {
 	// 押し出されれるようにする
@@ -867,13 +871,13 @@ void PlayerNonCombatDownState::OnExit()
 #pragma endregion
 
 #pragma region 飲む
-namespace PlayerDrinkSubState
+namespace PlayerNonCombatDrinkSubState
 {
-	class DrinkStartSubState : public StateBase<PlayerStateMachine>
+	class DrinkStartSubState : public PlayerSSBBase
 	{
 	public:
-		DrinkStartSubState(PlayerStateMachine* stateMachine) :
-			StateBase(stateMachine)
+		DrinkStartSubState(PlayerStateController* owner) :
+			PlayerSSBBase(owner)
 		{
 		}
 		~DrinkStartSubState() override {}
@@ -888,15 +892,15 @@ namespace PlayerDrinkSubState
 		{
 			// 部分アニメーションが終了していたら遷移
 			if (_owner->GetAnimator()->IsPartialAnimationPlaying() == false)
-				_owner->GetStateMachine().ChangeSubState("Drinking");
+				_owner->ChangeSubState("Drinking");
 		}
 		void OnExit() override {}
 	};
-	class DrinkingSubState : public StateBase<PlayerStateMachine>
+	class DrinkingSubState : public PlayerSSBBase
 	{
 	public:
-		DrinkingSubState(PlayerStateMachine* stateMachine) :
-			StateBase(stateMachine)
+		DrinkingSubState(PlayerStateController* owner) :
+			PlayerSSBBase(owner)
 		{
 		}
 		~DrinkingSubState() override {}
@@ -923,7 +927,7 @@ namespace PlayerDrinkSubState
 			{
 				if (type == ItemFunctionBase::State::End)
 				{
-					_owner->GetStateMachine().ChangeSubState("DrinkEnd");
+					_owner->ChangeSubState("DrinkEnd");
 				}
 				else
 				{
@@ -966,11 +970,11 @@ namespace PlayerDrinkSubState
 		std::weak_ptr<PlayerEquipmentController> _equipment;
 		float _timer = 0.0f;
 	};
-	class DrinkEndSubState : public StateBase<PlayerStateMachine>
+	class DrinkEndSubState : public PlayerSSBBase
 	{
 	public:
-		DrinkEndSubState(PlayerStateMachine* stateMachine) :
-			StateBase(stateMachine)
+		DrinkEndSubState(PlayerStateController* owner) :
+			PlayerSSBBase(owner)
 		{
 		}
 		~DrinkEndSubState() override {}
@@ -988,24 +992,22 @@ namespace PlayerDrinkSubState
 			{
 				if (_owner->GetPlayer()->IsMoving())
 				{
-					_owner->GetStateMachine().ChangeState("Walk");
-                    _owner->GetStateMachine().ChangeSubState("Walking");
+					_owner->ChangeState("Walk");
+					_owner->ChangeSubState("Walking");
 				}
-                else
-                    _owner->GetStateMachine().ChangeState("Idle");
+				else
+					_owner->ChangeState("Idle");
 			}
 		}
 		void OnExit() override {}
 	};
 }
-
-PlayerNonCombatDrinkState::PlayerNonCombatDrinkState(PlayerStateMachine* stateMachine) :
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatDrinkState::PlayerNonCombatDrinkState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	// サブステート登録
-	RegisterSubState(std::make_shared<PlayerDrinkSubState::DrinkStartSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerDrinkSubState::DrinkingSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerDrinkSubState::DrinkEndSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatDrinkSubState::DrinkStartSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatDrinkSubState::DrinkingSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatDrinkSubState::DrinkEndSubState>(owner));
 }
 
 void PlayerNonCombatDrinkState::OnEnter()
@@ -1045,7 +1047,7 @@ void PlayerNonCombatDrinkState::OnExecute(float elapsedTime)
 
 	// 回避移行
 	if (_owner->GetPlayer()->IsEvade())
-		_owner->GetStateMachine().ChangeState("Evade");
+		_owner->ChangeState("Evade");
 }
 
 void PlayerNonCombatDrinkState::OnExit()
@@ -1056,14 +1058,14 @@ void PlayerNonCombatDrinkState::OnExit()
 #pragma endregion
 
 #pragma region 疲労
-namespace PlayerFatigueSubState
+namespace PlayerNonCombatFatigueSubState
 {
 	class FatigueStartSubState : public PlayerSSB
 	{
 	public:
-		FatigueStartSubState(PlayerStateMachine* stateMachine) :
+		FatigueStartSubState(PlayerStateController* owner) :
 			PlayerSSB(
-				stateMachine,
+				owner,
 				"FatigueStart",
 				u8"KnockDownStart",
 				1.0f,
@@ -1077,15 +1079,15 @@ namespace PlayerFatigueSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeSubState("FatigueLoop");
+				_owner->ChangeSubState("FatigueLoop");
 		}
 	};
 	class FatigueLoopSubState : public PlayerSSB
 	{
 	public:
-		FatigueLoopSubState(PlayerStateMachine* stateMachine) :
+		FatigueLoopSubState(PlayerStateController* owner) :
 			PlayerSSB(
-				stateMachine,
+				owner,
 				"FatigueLoop",
 				u8"KnockDownLoop",
 				0.0f,
@@ -1101,7 +1103,7 @@ namespace PlayerFatigueSubState
 			if (_owner->GetStaminaController()->GetStamina() >=
 				_owner->GetStaminaController()->GetMaxStamina())
 			{
-				_owner->GetStateMachine().ChangeSubState("FatigueEnd");
+				_owner->ChangeSubState("FatigueEnd");
 				return;
 			}
 		}
@@ -1109,9 +1111,9 @@ namespace PlayerFatigueSubState
 	class FatigueEndSubState : public PlayerSSB
 	{
 	public:
-		FatigueEndSubState(PlayerStateMachine* stateMachine) :
+		FatigueEndSubState(PlayerStateController* owner) :
 			PlayerSSB(
-				stateMachine,
+				owner,
 				"FatigueEnd",
 				u8"KnockDownEnd",
 				0.5f,
@@ -1125,16 +1127,16 @@ namespace PlayerFatigueSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeState("Idle");
+				_owner->ChangeState("Idle");
 		}
 	};
 }
-PlayerNonCombatFatigueState::PlayerNonCombatFatigueState(PlayerStateMachine* stateMachine) :
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatFatigueState::PlayerNonCombatFatigueState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	RegisterSubState(std::make_shared<PlayerFatigueSubState::FatigueStartSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerFatigueSubState::FatigueLoopSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerFatigueSubState::FatigueEndSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatFatigueSubState::FatigueStartSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatFatigueSubState::FatigueLoopSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatFatigueSubState::FatigueEndSubState>(owner));
 }
 
 void PlayerNonCombatFatigueState::OnEnter()
@@ -1156,13 +1158,13 @@ void PlayerNonCombatFatigueState::OnExit()
 #pragma endregion
 
 #pragma region 砥石
-namespace PlayerGrindSubState
+namespace PlayerNonCombatGrindSubState
 {
 	class GrindStartSubState : public PlayerSSB
 	{
 	public:
-		GrindStartSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+		GrindStartSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"GrindStart",
 				u8"SharpenStart",
 				1.0f,
@@ -1175,18 +1177,18 @@ namespace PlayerGrindSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeSubState("Grinding");
-        }
+				_owner->ChangeSubState("Grinding");
+		}
 	};
 
 	class GrindingSubState : public PlayerSSB
 	{
 	public:
-		GrindingSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine, 
-				"Grinding", 
+		GrindingSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
+				"Grinding",
 				"SharpenLoop",
-				1.0f, 
+				1.0f,
 				false,
 				true)
 		{
@@ -1202,7 +1204,7 @@ namespace PlayerGrindSubState
 				auto sharpnessController = child->GetComponent<SharpnessController>();
 				if (sharpnessController)
 				{
-                    _sharpnessController = sharpnessController;
+					_sharpnessController = sharpnessController;
 					break;
 				}
 			}
@@ -1212,12 +1214,12 @@ namespace PlayerGrindSubState
 			// アイテム効果処理
 			auto type = _owner->GetItemController()->ExecuteItemFunction(elapsedTime);
 
-            // アニメーションが終了したタイミングで定時間経過していたら遷移
+			// アニメーションが終了したタイミングで定時間経過していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
 			{
 				if (type == ItemFunctionBase::State::End)
 				{
-					_owner->GetStateMachine().ChangeSubState("GrindEnd");
+					_owner->ChangeSubState("GrindEnd");
 				}
 				else
 				{
@@ -1235,10 +1237,10 @@ namespace PlayerGrindSubState
 	};
 
 	class GrindEndSubState : public PlayerSSB
-    {
-		public:
-		GrindEndSubState(PlayerStateMachine* stateMachine) :
-			PlayerSSB(stateMachine,
+	{
+	public:
+		GrindEndSubState(PlayerStateController* owner) :
+			PlayerSSB(owner,
 				"GrindEnd",
 				u8"SharpenEnd",
 				1.0f,
@@ -1251,27 +1253,28 @@ namespace PlayerGrindSubState
 		{
 			// アニメーションが終了していたら遷移
 			if (!_owner->GetAnimator()->IsPlaying())
-				_owner->GetStateMachine().ChangeState("Idle");
+				_owner->ChangeState("Idle");
 		}
-    };
+	};
 }
-PlayerNonCombatGrindState::PlayerNonCombatGrindState(PlayerStateMachine* stateMachine) :
-	HierarchicalStateBase(stateMachine)
+PlayerNonCombatGrindState::PlayerNonCombatGrindState(PlayerStateController* owner) :
+	PlayerHSBBase(owner)
 {
-	RegisterSubState(std::make_shared<PlayerGrindSubState::GrindStartSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerGrindSubState::GrindingSubState>(stateMachine));
-	RegisterSubState(std::make_shared<PlayerGrindSubState::GrindEndSubState>(stateMachine));
+	RegisterSubState(std::make_shared<PlayerNonCombatGrindSubState::GrindStartSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatGrindSubState::GrindingSubState>(owner));
+	RegisterSubState(std::make_shared<PlayerNonCombatGrindSubState::GrindEndSubState>(owner));
 }
+
 void PlayerNonCombatGrindState::OnEnter()
 {
-    ChangeSubState("GrindStart");
+	ChangeSubState("GrindStart");
 }
 
 void PlayerNonCombatGrindState::OnExecute(float elapsedTime)
 {
 	// 回避移行
 	if (_owner->GetPlayer()->IsEvade())
-		_owner->GetStateMachine().ChangeState("Evade");
+		_owner->ChangeState("Evade");
 }
 
 void PlayerNonCombatGrindState::OnExit()

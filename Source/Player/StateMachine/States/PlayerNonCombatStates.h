@@ -1,15 +1,14 @@
 #pragma once
 
-#include "PlayerStateMachine.h"
+#include "../PlayerStateController.h"
 
 // 納刀状態のプレイヤーステート
-
 #pragma region 待機
-class PlayerNonCombatIdleState final : public PlayerHSB
+class PlayerNonCombatIdleState final : public PlayerAnimationHSB
 {
 public:
-	PlayerNonCombatIdleState(PlayerStateMachine* stateMachine) :
-		PlayerHSB(stateMachine, u8"Idle", 0.2f, true, false) {
+	PlayerNonCombatIdleState(PlayerStateController* owner) :
+		PlayerAnimationHSB(owner, u8"Idle", 0.2f, true, false) {
 	}
 	~PlayerNonCombatIdleState() override {}
 	// ステート名取得
@@ -19,10 +18,10 @@ public:
 #pragma endregion
 
 #pragma region 振り向き
-class PlayerNonCombatTurnState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatTurnState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatTurnState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatTurnState(PlayerStateController* owner);
 	~PlayerNonCombatTurnState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Turn"; }
@@ -33,10 +32,10 @@ public:
 #pragma endregion
 
 #pragma region 歩き
-class PlayerNonCombatWalkState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatWalkState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatWalkState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatWalkState(PlayerStateController* owner);
 	~PlayerNonCombatWalkState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Walk"; }
@@ -47,10 +46,10 @@ public:
 #pragma endregion
 
 #pragma region 走り
-class PlayerNonCombatRunState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatRunState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatRunState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatRunState(PlayerStateController* owner);
 	~PlayerNonCombatRunState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Run"; }
@@ -64,7 +63,7 @@ public:
 class PlayerNonCombatEvadeState final : public Player8WayHSB
 {
 public:
-	PlayerNonCombatEvadeState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatEvadeState(PlayerStateController* owner);
 	~PlayerNonCombatEvadeState() override {}
 
 	// ステート名取得
@@ -76,11 +75,11 @@ public:
 #pragma endregion
 
 #pragma region 抜刀
-class PlayerNonCombatToCombatState  final : public PlayerHSB
+class PlayerNonCombatToCombatState final : public PlayerAnimationHSB
 {
 public:
-	PlayerNonCombatToCombatState(PlayerStateMachine* stateMachine) :
-		PlayerHSB(stateMachine, u8"IdleToIdleCombat", 0.2f, false, true) {
+	PlayerNonCombatToCombatState(PlayerStateController* owner) :
+		PlayerAnimationHSB(owner, u8"IdleToIdleCombat", 0.2f, false, true) {
 	}
 	~PlayerNonCombatToCombatState() override {}
 	// ステート名取得
@@ -95,7 +94,7 @@ private:
 class PlayerNonCombatHitState final : public Player8WayHSB
 {
 public:
-	PlayerNonCombatHitState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatHitState(PlayerStateController* owner);
 	~PlayerNonCombatHitState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Hit"; }
@@ -106,7 +105,7 @@ public:
 class PlayerNonCombatHitKnockDownState final : public Player8WayHSB
 {
 public:
-	PlayerNonCombatHitKnockDownState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatHitKnockDownState(PlayerStateController* owner);
 	~PlayerNonCombatHitKnockDownState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "HitKnockDown"; }
@@ -117,10 +116,10 @@ public:
 #pragma endregion
 
 #pragma region ダウン
-class PlayerNonCombatDownState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatDownState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatDownState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatDownState(PlayerStateController* owner);
 	~PlayerNonCombatDownState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Down"; }
@@ -131,12 +130,13 @@ public:
 #pragma endregion
 
 #pragma region 死亡
-class PlayerNonCombatDeathState   final : public PlayerHSB
+class PlayerNonCombatDeathState final : public PlayerAnimationHSB
 {
 public:
-	PlayerNonCombatDeathState(PlayerStateMachine* stateMachine) :
-		PlayerHSB(stateMachine, u8"HitCombatDeath", 0.0f, false, true) 
-	{}
+	PlayerNonCombatDeathState(PlayerStateController* owner) :
+		PlayerAnimationHSB(owner, u8"HitCombatDeath", 0.0f, false, true)
+	{
+	}
 	~PlayerNonCombatDeathState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Death"; }
@@ -144,10 +144,10 @@ public:
 #pragma endregion
 
 #pragma region 飲む
-class PlayerNonCombatDrinkState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatDrinkState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatDrinkState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatDrinkState(PlayerStateController* owner);
 	~PlayerNonCombatDrinkState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Drink"; }
@@ -158,10 +158,10 @@ public:
 #pragma endregion
 
 #pragma region 疲労
-class PlayerNonCombatFatigueState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatFatigueState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatFatigueState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatFatigueState(PlayerStateController* owner);
 	~PlayerNonCombatFatigueState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Fatigue"; }
@@ -174,10 +174,10 @@ private:
 #pragma endregion
 
 #pragma region 砥石
-class PlayerNonCombatGrindState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerNonCombatGrindState final : public PlayerHSBBase
 {
 public:
-	PlayerNonCombatGrindState(PlayerStateMachine* stateMachine);
+	PlayerNonCombatGrindState(PlayerStateController* owner);
 	~PlayerNonCombatGrindState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "Grind"; }

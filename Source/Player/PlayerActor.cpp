@@ -21,7 +21,7 @@
 #include "PlayerInput.h"
 #include "PlayerEquipmentController.h"
 #include "BuffController.h"
-#include "StateMachine/PlayerStateMachine.h"
+#include "StateMachine/PlayerStateController.h"
 
 #include "Weapon/GreatSword/PlayerGreatSwordActor.h"
 
@@ -51,7 +51,7 @@ void PlayerActor::OnCreate()
 	auto itemController			= this->AddComponent<PlayerItemController>();
 	auto buffController			= this->AddComponent<BuffController>();
 	auto effectController		= this->AddComponent<EffectController>();
-	auto stateController		= this->AddComponent<StateController>(std::make_shared<PlayerStateMachine>(this));
+	auto playerStateController	= this->AddComponent<PlayerStateController>();
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
 
@@ -108,11 +108,12 @@ void PlayerActor::OnCreate()
                 if (stateController)
                 { 
 					// プレイヤーの状態を更新
-                    auto playerStateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
-                    if (playerStateMachine)
-                    {
-                        playerStateMachine->ChangeState(move.mainState, move.subState);
-                    }
+					// TODO
+                    //auto playerStateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
+                    //if (playerStateMachine)
+                    //{
+                    //    playerStateMachine->ChangeState(move.mainState, move.subState);
+                    //}
                 }
             });
 		networkReceiver->GetEventBus().Subscribe<Network::CharacterApplyDamage>([this](const Network::CharacterApplyDamage& applyDamage)

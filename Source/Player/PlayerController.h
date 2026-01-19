@@ -9,7 +9,7 @@
 #include "../../Source/AI/MetaAI.h"
 #include "../../Source/Common/Damageable.h"
 #include "../../Source/Common/Targetable.h"
-#include "StateMachine/PlayerStateMachine.h"
+#include "StateMachine/PlayerStateController.h"
 
 #include "../../Source/InGame/InputManager.h"
 
@@ -90,7 +90,6 @@ public:
 	bool IsAbleToUseItem() const { return _isAbleToUseItem; }
 	bool IsUsingItem() const { return _isUsingItem; }
 	bool IsSelect()	const { return _isSelect; }
-	bool IsDrawingWeapon() const { return _isDrawingWeapon; }
 	float GetAttackMotionFactor() const { return _attackMotionFactor; }
 	int GetChargeLevel() const { return _chargeLevel; }
 	float GetTimeSinceLastMove() const { return _timeSinceLastMove; }
@@ -107,7 +106,6 @@ public:
 	void SetIsAbleToUseItem(bool isAbleToUseItem) { _isAbleToUseItem = isAbleToUseItem; }
 	void SetIsUsingItem(bool isUsingItem) { _isUsingItem = isUsingItem; }
 	void SetIsSelect(bool isSelect) { _isSelect = isSelect; }
-	void SetIsDrawingWeapon(bool isDrawingWeapon) { _isDrawingWeapon = isDrawingWeapon; }
 	void SetChargeLevel(int chargeLevel) { _chargeLevel = chargeLevel; }
 	void SetLockOnCameraTransition(bool isTransition) { _isLockOnCameraTransition = isTransition; }
 
@@ -132,7 +130,7 @@ public:
 #pragma endregion
 
 private:
-	std::weak_ptr<PlayerStateMachine> _stateMachine;
+	std::weak_ptr<PlayerStateController> _stateController;
 	std::weak_ptr<CharactorController> _charactorController;
 	std::weak_ptr<Animator> _animator;
 	std::weak_ptr<EffectController> _effectController;
@@ -168,9 +166,6 @@ private:
 	// アイテム使用中か
 	bool _isUsingItem = false;
 	bool _isSelect = false;
-
-	// 抜刀状態か
-	bool _isDrawingWeapon = false;
 
 	// アニメーションの攻撃モーション値
 	float _attackMotionFactor = 1.0f;

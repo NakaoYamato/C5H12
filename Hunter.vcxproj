@@ -364,11 +364,12 @@
     <ClCompile Include="Source\Player\PlayerEquipmentController.cpp" />
     <ClCompile Include="Source\Player\PlayerItemController.cpp" />
     <ClCompile Include="Source\Player\PlayerNetworkSender.cpp" />
-    <ClCompile Include="Source\Player\StateMachine\PlayerGreatSwordStates.cpp" />
-    <ClCompile Include="Source\Player\StateMachine\PlayerNonCombatStates.cpp" />
+    <ClCompile Include="Source\Player\StateMachine\States\GreatSword\PlayerGreatSwordStates.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerBuffUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerShapnessUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerStaminaUIController.cpp" />
+    <ClCompile Include="Source\Player\StateMachine\PlayerStateController.cpp" />
+    <ClCompile Include="Source\Player\StateMachine\States\PlayerNonCombatStates.cpp" />
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Quest\QuestData.cpp" />
     <ClCompile Include="Source\Quest\QuestManager.cpp" />
@@ -417,7 +418,6 @@
     <ClCompile Include="Source\Scene\Test\SceneCollisionDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneNetworkDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\ScenePlayerDebug.cpp" />
-    <ClCompile Include="Source\Player\StateMachine\PlayerStateMachine.cpp" />
     <ClCompile Include="Source\User\UserDataManager.cpp" />
     <ClCompile Include="Source\Weapon\WeaponData.cpp" />
     <ClCompile Include="Source\Weapon\WeaponManager.cpp" />
@@ -669,11 +669,12 @@
     <ClInclude Include="Source\Player\PlayerEquipmentController.h" />
     <ClInclude Include="Source\Player\PlayerItemController.h" />
     <ClInclude Include="Source\Player\PlayerNetworkSender.h" />
-    <ClInclude Include="Source\Player\StateMachine\PlayerGreatSwordStates.h" />
-    <ClInclude Include="Source\Player\StateMachine\PlayerNonCombatStates.h" />
+    <ClInclude Include="Source\Player\StateMachine\States\GreatSword\PlayerGreatSwordStates.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerBuffUIController.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerShapnessUIController.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerStaminaUIController.h" />
+    <ClInclude Include="Source\Player\StateMachine\PlayerStateController.h" />
+    <ClInclude Include="Source\Player\StateMachine\States\PlayerNonCombatStates.h" />
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Quest\QuestData.h" />
     <ClInclude Include="Source\Quest\QuestManager.h" />
@@ -722,7 +723,6 @@
     <ClInclude Include="Source\Scene\Test\SceneCollisionDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneNetworkDebug.h" />
     <ClInclude Include="Source\Scene\Test\ScenePlayerDebug.h" />
-    <ClInclude Include="Source\Player\StateMachine\PlayerStateMachine.h" />
     <ClInclude Include="Source\User\UserDataManager.h" />
     <ClInclude Include="Source\Weapon\WeaponData.h" />
     <ClInclude Include="Source\Weapon\WeaponManager.h" />

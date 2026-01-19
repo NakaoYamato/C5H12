@@ -72,6 +72,13 @@ public:
 	{
 		_stateMap.at(key)->RegisterSubState(subState);
 	}
+	// 2層目ステートの名前取得
+	virtual std::string GetSubStateName()
+	{
+		if (_currentState == nullptr)
+			return "";
+		return _currentState->GetSubStateName();
+	}
 	// ステート取得
 	HierarchicalStateBase<T>* GetState() { return _currentState; }
 	// ステートマップ取得

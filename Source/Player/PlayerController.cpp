@@ -24,8 +24,7 @@ void PlayerController::Start()
 
 	_playerItemController = GetActor()->GetComponent<PlayerItemController>();
 
-	auto stateController = GetActor()->GetComponent<StateController>();
-	_stateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
+	_stateController = GetActor()->GetComponent<PlayerStateController>();
 
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 
@@ -52,15 +51,19 @@ void PlayerController::Start()
 		"PlayerController",
 		[&](float damage, Vector3 hitPosition) -> bool
 		{
+			auto stateController = _stateController.lock();
+			if (!stateController)
+				return true;
+
 			Vector3 vec = hitPosition - GetActor()->GetTransform().GetPosition().Normalize();
 			Vector3 front = GetActor()->GetTransform().GetAxisZ().Normalize();
 			// プレイヤーがガード状態ならダメージを受けない
-			if (_stateMachine.lock()->GetStateName() == "CombatGuard" &&
+			if (stateController->GetStateName() == "CombatGuard" &&
 				vec.Dot(front) > -0.5f)
 			{
 				// ガード成功
 				//_stateMachine.lock()->GetStateMachine().ChangeSubState("GuardHit");
-				_stateMachine.lock()->GetStateMachine().ChangeSubState("GuardHit");
+				stateController->ChangeSubState("GuardHit");
 				return false;
 			}
 			return true;
@@ -71,9 +74,13 @@ void PlayerController::Start()
 		"PlayerController",
 		[&](float damage, Vector3 hitPosition) -> void
 		{
+			auto stateController = _stateController.lock();
+			if (!stateController)
+				return;
+
 			bool isCombat = false;
 			{
-				if (std::string(_stateMachine.lock()->GetStateName()).find("Combat") != std::string::npos)
+				if (std::string(stateController->GetStateName()).find("Combat") != std::string::npos)
 					isCombat = true;
 			}
 
@@ -81,25 +88,25 @@ void PlayerController::Start()
 			{
 				// 大きくのけぞる
 				if (isCombat)
-					_stateMachine.lock()->ChangeState("CombatDown", nullptr);
+					stateController->ChangeState("CombatDown");
 				else
-					_stateMachine.lock()->ChangeState("Down", nullptr);
+					stateController->ChangeState("Down");
 			}
 			else if (damage >= 2.0f)
 			{
 				// 中くらいにのけぞる
 				if (isCombat)
-					_stateMachine.lock()->ChangeState("CombatHitKnockDown", nullptr);
+					stateController->ChangeState("CombatHitKnockDown");
 				else
-					_stateMachine.lock()->ChangeState("HitKnockDown", nullptr);
+					stateController->ChangeState("HitKnockDown");
 			}
 			else
 			{
 				// 軽くのけぞる
 				if (isCombat)
-					_stateMachine.lock()->ChangeState("CombatHit", nullptr);
+					stateController->ChangeState("CombatHit");
 				else
-					_stateMachine.lock()->ChangeState("Hit", nullptr);
+					stateController->ChangeState("Hit");
 			}
 		}
 	);
@@ -108,10 +115,14 @@ void PlayerController::Start()
 		"PlayerController",
 		[&]() -> void
 		{
+			auto stateController = _stateController.lock();
+			if (!stateController)
+				return;
+
 			// 死亡ステートへ変更
-			_stateMachine.lock()->ChangeState("Death", nullptr);
+			stateController->ChangeState("Death");
 			// ステートの変更を受け付けないようにする
-			_stateMachine.lock()->SetCanChangeState(false);
+			stateController->SetCanChangeState(false);
 
 			// カメラを死亡カメラに変更
 			auto deathCamera = GetActor()->GetScene()->GetMainCameraActor()->GetControllerByClass<PlayerDeathCamera>();
@@ -358,6 +369,10 @@ void PlayerController::DrawGui()
 // 接触処理
 void PlayerController::OnContact(CollisionData& collisionData)
 {
+	auto stateController = _stateController.lock();
+	if (!stateController)
+		return;
+
 	if (collisionData.otherLayer == CollisionLayer::Stage &&
 		collisionData.otherIsTrigger)
 	{
@@ -373,7 +388,7 @@ void PlayerController::OnContact(CollisionData& collisionData)
 				if (interactionController->IsUsable(GetActor().get()))
 				{
 					// 納刀状態、アイテム使用中でない場合のみ可能
-					if (!IsDrawingWeapon() && !IsUsingItem())
+					if (!stateController->IsCombatState() && !IsUsingItem())
 					{
 						if (IsSelect())
 						{
@@ -412,12 +427,16 @@ void PlayerController::Teleport(const Vector3& position, const Vector3& angle)
 // リスポーン
 void PlayerController::Respawn(const Vector3& position, const Vector3& angle)
 {
+	auto stateController = _stateController.lock();
+	if (!stateController)
+		return;
+
 	// 体力を全回復
 	_damageable.lock()->ResetHealth(_damageable.lock()->GetMaxHealth());
 
 	// ステートの変更を受け付けるようにする
-	_stateMachine.lock()->SetCanChangeState(true);
-	_stateMachine.lock()->ChangeState("Idle", nullptr);
+	stateController->SetCanChangeState(true);
+	stateController->ChangeState("Idle");
 
 	// テレポート
 	Teleport(position, angle);

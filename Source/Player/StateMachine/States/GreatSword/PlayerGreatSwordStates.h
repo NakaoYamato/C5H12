@@ -1,14 +1,14 @@
 #pragma once
 
-#include "PlayerStateMachine.h"
+#include "../../PlayerStateController.h"
 
 // 大剣装備状態のプレイヤーステート
 #pragma region 待機
-class PlayerGreatSwordIdleState final : public PlayerHSB
+class PlayerGreatSwordIdleState final : public PlayerAnimationHSB
 {
 public:
-	PlayerGreatSwordIdleState(PlayerStateMachine* stateMachine) : 
-		PlayerHSB(stateMachine, u8"IdleCombat", 0.2f, true, false) {}
+	PlayerGreatSwordIdleState(PlayerStateController* owner) : 
+		PlayerAnimationHSB(owner, u8"IdleCombat", 0.2f, true, false) {}
 	~PlayerGreatSwordIdleState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "CombatIdle"; }
@@ -17,10 +17,10 @@ public:
 #pragma endregion
 
 #pragma region 走り
-class PlayerGreatSwordRunState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerGreatSwordRunState final : public PlayerHSBBase
 {
 public:
-	PlayerGreatSwordRunState(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordRunState(PlayerStateController* owner);
 	~PlayerGreatSwordRunState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "CombatRun"; }
@@ -34,7 +34,7 @@ public:
 class PlayerGreatSwordEvadeState final : public Player8WayHSB
 {
 public:
-	PlayerGreatSwordEvadeState(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordEvadeState(PlayerStateController* owner);
 	~PlayerGreatSwordEvadeState() override {}
 
 	// ステート名取得
@@ -46,10 +46,10 @@ public:
 #pragma endregion
 
 #pragma region 攻撃1
-class PlayerGreatSwordAttack1State final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerGreatSwordAttack1State final : public PlayerHSBBase
 {
 public:
-	PlayerGreatSwordAttack1State(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordAttack1State(PlayerStateController* owner);
 	~PlayerGreatSwordAttack1State() override {}
 
 	// ステート名取得
@@ -65,10 +65,10 @@ private:
 #pragma endregion
 
 #pragma region 攻撃2
-class PlayerGreatSwordAttack2State final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerGreatSwordAttack2State final : public PlayerHSBBase
 {
 public:
-	PlayerGreatSwordAttack2State(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordAttack2State(PlayerStateController* owner);
 	~PlayerGreatSwordAttack2State() override {}
 
 	// ステート名取得
@@ -82,10 +82,10 @@ private:
 #pragma endregion
 
 #pragma region ガード
-class PlayerGreatSwordGuardState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerGreatSwordGuardState final : public PlayerHSBBase
 {
 public:
-	PlayerGreatSwordGuardState(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordGuardState(PlayerStateController* owner);
 	~PlayerGreatSwordGuardState() override {}
 
 	// ステート名取得
@@ -100,7 +100,7 @@ public:
 class PlayerGreatSwordHitState final : public Player8WayHSB
 {
 public:
-	PlayerGreatSwordHitState(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordHitState(PlayerStateController* owner);
 	~PlayerGreatSwordHitState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "CombatHit"; }
@@ -111,7 +111,7 @@ public:
 class PlayerGreatSwordHitKnockDownState final : public Player8WayHSB
 {
 public:
-	PlayerGreatSwordHitKnockDownState(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordHitKnockDownState(PlayerStateController* owner);
 	~PlayerGreatSwordHitKnockDownState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "CombatHitKnockDown"; }
@@ -122,10 +122,10 @@ public:
 #pragma endregion
 
 #pragma region ダウン
-class PlayerGreatSwordDownState final : public HierarchicalStateBase<PlayerStateMachine>
+class PlayerGreatSwordDownState final : public PlayerHSBBase
 {
 public:
-	PlayerGreatSwordDownState(PlayerStateMachine* stateMachine);
+	PlayerGreatSwordDownState(PlayerStateController* owner);
 	~PlayerGreatSwordDownState() override {}
 	// ステート名取得
 	const char* GetName() const override { return "CombatDown"; }
@@ -136,11 +136,11 @@ public:
 #pragma endregion
 
 #pragma region 納刀
-class PlayerGreatSwordToNonCombatState  final : public PlayerHSB
+class PlayerGreatSwordToNonCombatState  final : public PlayerAnimationHSB
 {
 public:
-	PlayerGreatSwordToNonCombatState(PlayerStateMachine* stateMachine) :
-		PlayerHSB(stateMachine, u8"IdleCombatToIdle", 0.2f, false, true) {
+	PlayerGreatSwordToNonCombatState(PlayerStateController* owner) :
+		PlayerAnimationHSB(owner, u8"IdleCombatToIdle", 0.2f, false, true) {
 	}
 	~PlayerGreatSwordToNonCombatState() override {}
 	// ステート名取得

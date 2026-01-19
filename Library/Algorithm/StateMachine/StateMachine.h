@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "StateBase.h"
 
 template<typename T>
@@ -7,6 +9,7 @@ class StateMachineBase
 {
 public:
 	using HierarchicalStateMap = std::unordered_map<std::string, std::shared_ptr<HierarchicalStateBase<T>>>;
+	using StatePairName = std::pair<std::string, std::string>;
 public:
 	// コンストラクタ
 	StateMachineBase() {}
@@ -62,23 +65,58 @@ public:
 			return "";
 		return _currentState->GetName();
 	}
-	// 2層目ステート変更
+
+#pragma region サブステート
+	// サブステート変更
 	virtual void ChangeSubState(std::string key)
 	{
 		_currentState->ChangeSubState(key);
 	}
-	// 2層目ステート登録
+	// サブステート登録
 	virtual void RegisterSubState(std::string key, std::shared_ptr<StateBase<T>> subState)
 	{
 		_stateMap.at(key)->RegisterSubState(subState);
 	}
-	// 2層目ステートの名前取得
+	// サブステート名前取得
 	virtual std::string GetSubStateName()
 	{
 		if (_currentState == nullptr)
 			return "";
 		return _currentState->GetSubStateName();
 	}
+#pragma endregion
+
+#pragma region スタックステート
+	// スタックしているステートに変更
+	// スタックが空ならステートを終了
+	virtual void ChangeStateStack()
+	{
+		// スタックが空ならステートを終了
+		if (_stateStack.empty())
+		{
+			EndState();
+			return;
+		}
+		auto& stateNames = _stateStack.top();
+		_stateStack.pop();
+		ChangeState(stateNames.first);
+		if (!stateNames.second.empty())
+			ChangeSubState(stateNames.second);
+	}
+	// スタックにステートを追加
+	virtual void PushStateStack(const std::string& stateName, const std::string& subStateName = "")
+	{
+		_stateStack.push(std::make_pair(stateName, subStateName));
+	}
+	// スタックをクリア
+	virtual void ClearStateStack()
+	{
+		while (!_stateStack.empty())
+			_stateStack.pop();
+	}
+#pragma endregion
+
+#pragma region アクセサ
 	// ステート取得
 	HierarchicalStateBase<T>* GetState() { return _currentState; }
 	// ステートマップ取得
@@ -87,6 +125,9 @@ public:
 	const std::string& GetPreviousStateName() const { return _previousStateName; }
 	// 前のサブステート名取得
 	const std::string& GetPreviousSubStateName() const { return _previousSubStateName; }
+	// スタックステート取得
+	std::stack<StatePairName>& GetStateStack() { return _stateStack; }
+#pragma endregion
 
 protected:
 	// ステートのマップ
@@ -98,4 +139,7 @@ protected:
 	std::string _previousStateName = "";
     // 前のサブステート名
     std::string _previousSubStateName = "";
+
+	// スタックステート
+	std::stack<StatePairName> _stateStack;
 };

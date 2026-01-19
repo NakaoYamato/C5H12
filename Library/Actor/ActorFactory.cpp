@@ -19,34 +19,6 @@ bool ActorFactory::LoadFromFile()
 	nlohmann::json jsonData;
 	if (Exporter::LoadJsonFile(filePath, &jsonData))
 	{
-		// 登録されたモデルファイルパス一覧読み込み
-		size_t size = jsonData["RegisteredModelFilepaths"].size();
-		_registeredModelFilepaths.clear();
-		for (size_t i = 0; i < size; ++i)
-		{
-			std::string typeName = "Env" + std::to_string(_registeredModelFilepaths.size());
-			std::string filepath = jsonData["RegisteredModelFilepaths"][i].get<std::string>();
-			_registeredModelFilepaths.push_back(filepath);
-			Register(typeName,
-				[]()->std::shared_ptr<Actor>
-				{
-					return std::make_shared<Actor>();
-				},
-				[&](std::shared_ptr<Actor> actor)
-				{
-					// モデル情報があるか確認
-					auto it = _registeredModels.find(filepath);
-					if (it == _registeredModels.end())
-					{
-						ID3D11Device* device = Graphics::Instance().GetDevice();
-						_registeredModels[filepath] = std::make_shared<Model>(device, filepath.c_str());
-					}
-
-					auto renderer = actor->AddComponent<InstancingModelRenderer>(_registeredModels[filepath]);
-					auto controller = actor->AddComponent<EnvironmentController>();
-				}
-			);
-		}
         return true;
 	}
 	return false;
@@ -57,12 +29,6 @@ bool ActorFactory::SaveToFile()
 {
 	std::string filePath = GetFilePath();
 	nlohmann::json jsonData;
-	// 登録されたモデルファイルパス一覧保存
-    jsonData["RegisteredModelFilepaths"] = nlohmann::json::array();
-	for (size_t i = 0; i < _registeredModelFilepaths.size(); ++i)
-	{
-		jsonData["RegisteredModelFilepaths"][i] = _registeredModelFilepaths[i];
-    }
 
     return Exporter::SaveJsonFile(filePath, jsonData);
 }
@@ -70,6 +36,8 @@ bool ActorFactory::SaveToFile()
 // 初期化処理
 bool ActorFactory::Initialize()
 {
+#pragma region アクター登録
+	// 開始、初期位置ゾーン
 	Register("EntryZone",
 		[]()->std::shared_ptr<Actor>
 		{
@@ -81,6 +49,7 @@ bool ActorFactory::Initialize()
 			auto entryZone = actor->AddComponent<EntryZone>();
 		}
 	);
+	// 安全地帯
 	Register("SafetyZone",
 		[]()->std::shared_ptr<Actor>
 		{
@@ -93,6 +62,8 @@ bool ActorFactory::Initialize()
 			auto box = actor->AddCollider<BoxCollider>();
 		}
 	);
+#pragma endregion
+
 
 	return true;
 }
@@ -104,33 +75,6 @@ void ActorFactory::DrawGui()
 	{
 		ImGui::BulletText("%s", typeName.c_str());
 	}
-	ImGui::Separator();
-	std::string filepath{};
-	if (ImGui::OpenDialogBotton(u8"オブジェクト追加", &filepath, ImGui::ModelFilter))
-	{
-        std::string typeName = "Env" + std::to_string(_registeredModelFilepaths.size());
-        _registeredModelFilepaths.push_back(filepath);
-		Register(typeName,
-			[]()->std::shared_ptr<Actor>
-			{
-				return std::make_shared<Actor>();
-			},
-			[&](std::shared_ptr<Actor> actor)
-			{
-				// モデル情報があるか確認
-                auto it = _registeredModels.find(filepath);
-				if (it == _registeredModels.end())
-				{
-					ID3D11Device* device = Graphics::Instance().GetDevice();
-					_registeredModels[filepath] = std::make_shared<Model>(device, filepath.c_str());
-				}
-
-				auto renderer = actor->AddComponent<InstancingModelRenderer>(_registeredModels[filepath]);
-				auto controller = actor->AddComponent<EnvironmentController>();
-			}
-		);
-	}
-	ImGui::Separator();
 }
 
 // アクター生成
@@ -142,7 +86,8 @@ std::shared_ptr<Actor> ActorFactory::CreateActor(Scene* scene,
     auto it = _creators.find(actorType);
     if (it != _creators.end())
     {
-		auto actor = it->second.createFunc(); // クリエーター関数を呼び出してインスタンスを生成
+		// クリエーター関数を呼び出してインスタンスを生成
+		auto actor = it->second.makeFunc();
 		actor->SetName(name.c_str());
 		actor->SetScene(scene);
 		actor->SetFolderPath(actorType);

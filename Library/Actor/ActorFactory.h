@@ -12,13 +12,13 @@ class ActorFactory : public ResourceBase
 {
 public:
 	// 生成関数
-	using CreateFunc = std::function<std::shared_ptr<Actor>()>;
+	using MakeFunc = std::function<std::shared_ptr<Actor>()>;
     // 初期化関数
 	using InitFunc = std::function<void(std::shared_ptr<Actor>)>;
 
 	struct CreatorInfo
 	{
-		CreateFunc	createFunc;
+		MakeFunc	makeFunc;
         InitFunc	initFunc;
     };
 
@@ -44,7 +44,7 @@ public:
 	static void Register(const std::string& typeName)
 	{
 		// ラムダ式で生成ロジックを保存
-        _creators[typeName].createFunc = []() -> std::shared_ptr<Actor>
+        _creators[typeName].makeFunc = []() -> std::shared_ptr<Actor>
 			{
 				return std::make_shared<T>();
 			};
@@ -53,10 +53,10 @@ public:
 
 	// アクター登録
 	void Register(const std::string& typeName, 
-		CreateFunc createFunc,
+		MakeFunc makeFunc,
 		InitFunc initFunc)
 	{
-		_creators[typeName].createFunc = createFunc;
+		_creators[typeName].makeFunc = makeFunc;
 		_creators[typeName].initFunc = initFunc;
 	}
 
@@ -74,8 +74,6 @@ private:
 
 	static std::unordered_map<std::string, CreatorInfo> _creators;
 
-    // 登録されたモデルファイルパス一覧
-    std::vector<std::string> _registeredModelFilepaths;
 	// モデルの実体
 	std::unordered_map<std::string, std::shared_ptr<Model>> _registeredModels;
 };

@@ -180,6 +180,9 @@ public:
 	void AppendAnimations(ModelResource* animationResource,
 		std::string animationName = "");
 
+	// メッシュの変更
+	void ReplaceMeshes(const char* filename);
+
 #pragma region アクセサ
 	const std::vector<Node>& GetNodes() const { return _nodes; }
 	const std::vector<Mesh>& GetMeshes() const { return _meshes; }

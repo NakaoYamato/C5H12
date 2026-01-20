@@ -336,6 +336,17 @@ void ModelResource::AppendAnimations(ModelResource* animationResource,
     }
 }
 
+// メッシュの変更
+void ModelResource::ReplaceMeshes(const char* filename)
+{
+    // モデル読み込み
+    ModelResource lodModel;
+    lodModel.Load(filename);
+
+	// メッシュ置き換え
+	_meshes = lodModel.GetMeshes();
+}
+
 int ModelResource::FindNodeByName(std::string name)
 {
     int i = 0;

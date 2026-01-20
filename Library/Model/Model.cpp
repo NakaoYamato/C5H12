@@ -176,6 +176,33 @@ void Model::DrawGui()
             }
             ImGui::Text(u8"合計頂点数:%d", static_cast<int>(vertexCount));
 
+            ImGui::Separator();
+            if (ImGui::Button(u8"メッシュ変更"))
+            {
+                // ダイアログを開く
+                std::string filepath;
+                std::string currentDirectory;
+                Debug::Dialog::DialogResult result = Debug::Dialog::OpenFileName(filepath, currentDirectory);
+                // ファイルを選択したら
+                if (result == Debug::Dialog::DialogResult::Yes || result == Debug::Dialog::DialogResult::OK)
+                {
+                    try
+                    {
+                        // 相対パス取得
+                        std::filesystem::path path =
+                            std::filesystem::relative(filepath, currentDirectory);
+                        filepath = path.u8string();
+                    }
+                    catch (...)
+                    {
+
+                    }
+
+                    _resource->ReplaceMeshes(filepath.c_str());
+                }
+            }
+            ImGui::Separator();
+
             if (ImGui::TreeNode(u8"中間LOD"))
             {
                 vertexCount = 0;

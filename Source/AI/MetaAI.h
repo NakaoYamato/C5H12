@@ -3,6 +3,7 @@
 #include "../../Library/Component/Component.h"
 #include "../../Source/Common/Targetable.h"
 #include "../../Source/Stage/EntryZone.h"
+#include "../../Source/Stage/StageController.h"
 
 #include <vector>
 #include <memory>
@@ -79,6 +80,28 @@ public:
 	EntryZone* SearchNearestEntryZone(Targetable::Faction faction, const Vector3& position) const;
 #pragma endregion
 
+#pragma region ステージ
+	/// <summary>
+	/// ステージコントローラー登録
+	/// </summary>
+	/// <param name="stageController"></param>
+	void RegisterStageController(std::weak_ptr<StageController> stageController);
+
+	/// <summary>
+	/// ステージコントローラー削除
+	/// </summary>
+	/// <param name="stageController"></param>
+	void RemoveStageController(std::weak_ptr<StageController> stageController);
+
+	/// <summary>
+	/// 指定の位置が含まれる開始地点を検索
+	/// </summary>
+	/// <param name="faction"></param>
+	/// <param name="stageIndex"></param>
+	/// <returns></returns>
+	EntryZone* SearchEntryZoneFromStage(Targetable::Faction faction, int stageIndex) const;
+#pragma endregion
+
 
 private:
 	// ターゲット可能なオブジェクトのリスト
@@ -86,6 +109,9 @@ private:
 
 	// 開始地点
 	std::vector<std::weak_ptr<EntryZone>> _entryZones;
+
+	// ステージコントローラーリスト
+	std::vector<std::weak_ptr<StageController>> _stageControllers;
 
 	// ゲームクリアフラグ
 	bool _gameClear = false;

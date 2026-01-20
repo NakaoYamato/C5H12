@@ -63,8 +63,6 @@ private:
 
 	// 現在受注中のクエストデータ
 	QuestData* _currentQuestData = nullptr;
-	// ターゲットの名前一覧
-	std::vector<std::string> _targetNameList;
 	// クエストインデックス
 	int _questIndex = -1;
 	bool _isInQuest = false;

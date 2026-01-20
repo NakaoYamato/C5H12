@@ -4,9 +4,10 @@
 #include "../../Library/Graphics/Graphics.h"
 
 #include "../../Library/Component/Collider/TransparentWallCollider.h"
-
 #include "../../Library/Component/Terrain/TerrainDeformer.h"
 #include "Terrain/TerrainActor.h"
+
+#include "../../Source/Stage/StageController.h"
 
 #include <Mygui.h>
 
@@ -27,16 +28,19 @@ void StageManager::OnCreate()
 		"./Data/Terrain/Save/Camp.json",
 		Vector3(0.0f, 0.0f, 0.0f));
 	this->AddChild(camp);
+	camp->AddComponent<StageController>(0);
 	auto stage0 = this->GetScene()->RegisterActor<TerrainActor>("Stage0",
 		ActorTag::Stage,
 		"./Data/Terrain/Save/001.json",
 		Vector3(100.0f, 0.0f, 0.0f));
 	this->AddChild(stage0);
+	stage0->AddComponent<StageController>(1);
 	auto stage1 = this->GetScene()->RegisterActor<TerrainActor>("Stage1",
 		ActorTag::Stage,
 		"./Data/Terrain/Save/002.json",
 		Vector3(200.0f, 0.0f, 0.0f));
 	this->AddChild(stage1);
+	stage1->AddComponent<StageController>(2);
 
 	_actorFactory = ResourceManager::Instance().GetResourceAs<ActorFactory>("ActorFactory");
 

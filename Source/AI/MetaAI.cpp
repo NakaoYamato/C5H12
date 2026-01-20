@@ -233,3 +233,48 @@ EntryZone* MetaAI::SearchNearestEntryZone(Targetable::Faction faction, const Vec
 	return result;
 }
 #pragma endregion
+
+#pragma region ステージ
+/// ステージコントローラー登録
+void MetaAI::RegisterStageController(std::weak_ptr<StageController> stageController)
+{
+	_stageControllers.push_back(stageController);
+}
+/// ステージコントローラー削除
+void MetaAI::RemoveStageController(std::weak_ptr<StageController> stageController)
+{
+	auto it = std::remove_if(_stageControllers.begin(), _stageControllers.end(),
+		[&stageController](const std::weak_ptr<StageController>& s) { return s.lock() == stageController.lock(); });
+	_stageControllers.erase(it, _stageControllers.end());
+}
+/// 指定の位置が含まれる開始地点を検索
+EntryZone* MetaAI::SearchEntryZoneFromStage(Targetable::Faction faction, int stageIndex) const
+{
+	for (const auto& stageControllerWeak : _stageControllers)
+	{
+		if (auto stageController = stageControllerWeak.lock())
+		{
+			// アクターがアクティブでない場合はスキップ
+			if (!stageController->GetActor()->IsActive())
+				continue;
+			// ステージ番号が一致するかチェック
+			if (stageController->GetAreaNumber() == stageIndex)
+			{
+				// エントリーゾーンリストを走査
+				for (auto& entryZone : stageController->GetEntryZones())
+				{
+					if (!entryZone.lock())
+						continue;
+
+					// 陣営が一致するかチェック
+					if (entryZone.lock()->GetFaction() == faction)
+					{
+						return entryZone.lock().get();
+					}
+				}
+			}
+		}
+	}
+	return nullptr;
+}
+#pragma endregion

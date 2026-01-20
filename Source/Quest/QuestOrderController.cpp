@@ -49,10 +49,22 @@ void QuestOrderController::Update(float elapsedTime)
 			}
 
 			int index = 0;
-			for (const auto& targetName : _targetNameList)
+			for (const auto& target : _currentQuestData->targets)
 			{
 				std::string name = "Target" + std::to_string(index++);
-				enemyDataManager->CreateActor(GetActor()->GetScene(), targetName, name);
+				enemyDataManager->CreateActor(GetActor()->GetScene(), target.name, name);
+
+				// メタAIからスポーン位置を取得
+				EntryZone* entryZone = _metaAI.lock()->SearchEntryZoneFromStage(Targetable::Faction::Enemy, target.spawnAreaIndex);
+				if (entryZone)
+				{
+					Vector3 spawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
+					auto enemyActor = GetActor()->GetScene()->GetActorManager().FindByName(name);
+					if (enemyActor)
+					{
+						enemyActor->GetTransform().SetPosition(spawnPosition);
+					}
+				}
 			}
 
 			_startQuestFlag = false;
@@ -65,6 +77,27 @@ void QuestOrderController::Update(float elapsedTime)
 // Gui描画
 void QuestOrderController::DrawGui()
 {
+	ImGui::Text(u8"現在の状態: ");
+	ImGui::SameLine();
+	switch (_currentState)
+	{
+	case State::Idle:
+		ImGui::Text(u8"待機中");
+		break;
+	case State::Accepted:
+		ImGui::Text(u8"受注中");
+		break;
+	case State::InQuest:
+		ImGui::Text(u8"クエスト中");
+		break;
+	case State::Completed:
+		ImGui::Text(u8"完了");
+		break;
+	default:
+		ImGui::Text(u8"不明");
+		break;
+	}
+
 	ImGui::Text(u8"受注中: %s", _isInQuest ? u8"はい" : u8"いいえ");
 	ImGui::Text(u8"クエスト開始可能: %s", CanStartQuest() ? u8"はい" : u8"いいえ");
 
@@ -105,7 +138,6 @@ void QuestOrderController::AcceptQuest(int questIndex)
 	// 受注中フラグON
 	_isInQuest = true;
 
-	_targetNameList.clear();
 	_currentQuestData = questManager->GetQuestData(static_cast<size_t>(questIndex));
 	if (_currentQuestData)
 	{
@@ -113,7 +145,6 @@ void QuestOrderController::AcceptQuest(int questIndex)
 		for (const auto& target : _currentQuestData->targets)
 		{
 			enemyDataManager->LoadModel(target.name);
-			_targetNameList.push_back(target.name);
 		}
 	}
 
@@ -192,9 +223,9 @@ bool QuestOrderController::CanStartQuest() const
 	auto enemyDataManager = _enemyDataManager.lock();
 	if (!enemyDataManager)
 		return false;
-	for (const auto& targetName : _targetNameList)
+	for (const auto& target : _currentQuestData->targets)
 	{
-		if (!enemyDataManager->IsModelLoaded(targetName))
+		if (!enemyDataManager->IsModelLoaded(target.name))
 			return false;
 	}
 

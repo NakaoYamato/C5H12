@@ -136,13 +136,21 @@ public:
 	RectTransform& GetRectTransform() { return _rectTransform; }
 	size_t GetOptionSize() const { return _options.size(); }
 	size_t GetSelectedOptionIndex() const { return _selectedOptionIndex; }
+	bool CanChangeIndex() const { return _canChangeIndex; }
+
+	void SetCanChangeIndex(bool canChange) { _canChangeIndex = canChange; }
 #pragma endregion
 
 #pragma region ファイル
 	// ファイル読み込み
-	virtual void LoadFromFile(nlohmann::json* json);
+	void LoadFromFile(nlohmann::json* json);
 	// ファイル保存
-	virtual void SaveToFile(nlohmann::json* json);
+	void SaveToFile(nlohmann::json* json);
+
+	// ファイル読み込み処理
+	virtual void OnLoadFromFile(nlohmann::json* json) {}
+	// ファイル保存処理
+	virtual void OnSaveToFile(nlohmann::json* json) {}
 #pragma endregion
 
 protected:
@@ -168,4 +176,7 @@ protected:
 
 	// 選択中の選択肢インデックス
 	size_t _selectedOptionIndex = 0;
+
+	// インデックス変更可能フラグ
+	bool _canChangeIndex = true;
 };

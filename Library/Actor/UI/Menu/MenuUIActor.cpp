@@ -355,14 +355,19 @@ void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 	{
 		auto& option = _options[i];
 
-		Sprite* spr = i == _selectedOptionIndex ?
-			&_selectedOptionSprite :
-			&_optionSprite;
 		// 子要素のトランスフォーム設定
-		spr->UpdateTransform(&rect);
-		
+		_optionSprite.UpdateTransform(&rect);
 		// 背景描画
-		spr->Render(rc, owner->GetScene()->GetTextureRenderer());
+		_optionSprite.Render(rc, owner->GetScene()->GetTextureRenderer());
+
+		// 選択中処理
+		if (i == _selectedOptionIndex)
+		{
+			// 子要素のトランスフォーム設定
+			_selectedOptionSprite.UpdateTransform(&rect);
+			// 背景描画
+			_selectedOptionSprite.Render(rc, owner->GetScene()->GetTextureRenderer());
+		}
 
 		// ラベル描画
 		std::wstring text = ToUtf16(option.label);
@@ -471,6 +476,8 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 		ImGui::ColorEdit4(u8"選択中ラベル色", &_optionLabelSelectedColor.x);
 
 		ImGui::Text(u8"選択中選択肢インデックス: %d", static_cast<int>(_selectedOptionIndex));
+
+		ImGui::Checkbox(u8"インデックス変更可能", &_canChangeIndex);
 		
 		ImGui::TreePop();
 	}
@@ -487,6 +494,9 @@ void MenuWidget::AddOption(const std::string& label, const std::string& onSelect
 // 選択肢インデックス増加
 size_t MenuWidget::AddSelectedOptionIndex()
 {
+	if (!_canChangeIndex)
+		return _selectedOptionIndex;
+
 	_selectedOptionIndex++;
 	// インデックス範囲制限
 	_selectedOptionIndex = ClampSelectedOptionIndex(_selectedOptionIndex);
@@ -495,6 +505,9 @@ size_t MenuWidget::AddSelectedOptionIndex()
 // 選択肢インデックス減少
 size_t MenuWidget::SubSelectedOptionIndex()
 {
+	if (!_canChangeIndex)
+		return _selectedOptionIndex;
+
 	_selectedOptionIndex--;
 	// インデックス範囲制限
 	_selectedOptionIndex = ClampSelectedOptionIndex(_selectedOptionIndex);
@@ -597,6 +610,8 @@ void MenuWidget::LoadFromFile(nlohmann::json* json)
 	_optionLabelColor = sub.value("optionLabelColor", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 	_optionLabelSelectedColor = sub.value("optionLabelSelectedColor", Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 
+	// ファイル読み込み処理
+	OnLoadFromFile(json);
 }
 // ファイル保存
 void MenuWidget::SaveToFile(nlohmann::json* json)
@@ -657,6 +672,8 @@ void MenuWidget::SaveToFile(nlohmann::json* json)
 	sub["optionLabelColor"] = _optionLabelColor;
 	sub["optionLabelSelectedColor"] = _optionLabelSelectedColor;
 
+	// ファイル保存処理
+	OnSaveToFile(json);
 }
 #pragma endregion
 #pragma endregion

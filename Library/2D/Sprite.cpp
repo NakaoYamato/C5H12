@@ -71,6 +71,10 @@ void Sprite::DrawGui()
 				LoadTexture(ToWString(resultPath).c_str(), _centerAlignment);
 			}
 		}
+		if (ImGui::Button(u8"ダミー"))
+		{
+			LoadTexture(L"", _centerAlignment);
+		}
 	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"マテリアル"))

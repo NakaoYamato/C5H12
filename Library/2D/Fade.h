@@ -29,6 +29,11 @@ public:
 		if (!_isActive)
 			return;
 
+		// ローディング等で時間が飛ぶ場合があるので
+		// 0.5秒以上の経過時間は無視する
+		if (elapsedTime > 0.5f)
+			return;
+
 		if (_elapsedTime < _duration)
 		{
 			_elapsedTime += elapsedTime;

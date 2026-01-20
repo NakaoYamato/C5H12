@@ -42,6 +42,8 @@ private:
 
 	// ロードバーの進捗速度
 	float _loadingBarSpeed = 3.0f;
+	// ロードバーの進捗
+	float _loadingBarRate = 0.0f;
 
 	float _timer = 0.0f;
 	float _intervalTimer = 0.0f;

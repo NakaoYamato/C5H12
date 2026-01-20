@@ -48,19 +48,18 @@ void LoadingSprController::Update(float elapsedTime)
 		return;
 
 	// 進捗バー
-	float rate = _loadingScene->GetCompletionLoading();
 	float maxScale = spriteRenderer->GetRectTransform(LoadingBarBackSpr).GetLocalScale().x;
-	float scale = EasingLerp(spriteRenderer->GetRectTransform(LoadingBarSpr).GetLocalScale().x,
-		rate * maxScale,
-		_loadingBarSpeed * elapsedTime);
-    scale = std::clamp(scale, 0.0f, maxScale);
-	// 最初のフェードイン中は進捗バーを伸ばさない
-	if (_loadingScene && !_loadingScene->IsNextSceneReady() && _loadingScene->GetFade()->IsFading())
-		scale = 0.0f;
+	float rate = _loadingScene->GetCompletionLoading();
+	_loadingBarRate = EasingLerp(_loadingBarRate,
+		rate,
+		elapsedTime * _loadingBarSpeed);
+	_loadingBarRate = MathF::Clamp01(_loadingBarRate);
+	float scale = EasingLerp(0.0f, maxScale, _loadingBarRate);
+    scale = MathF::Clamp(scale, 0.0f, maxScale);
 	spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(Vector2(scale, 1.0f));
 
 	// フェーズ処理
-	if (_loadingScene && _loadingScene->IsNextSceneReady() && rate >= 1.0f)
+	if (_loadingScene && _loadingScene->IsNextSceneReady() && _loadingBarRate >= 1.0f - FLT_EPSILON)
 	{
 		if (!_loadingScene->GetFade()->IsFading())
 		{

@@ -1,6 +1,8 @@
 #include "GeteController.h"
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/Component/CharactorController.h"
+#include "../../Source/Quest/QuestOrderController.h"
 
 #include <imgui.h>
 
@@ -8,11 +10,30 @@
 void GeteController::Start()
 {
     _boxCollider = GetActor()->GetCollider<BoxCollider>();
+
+    // ゲームマネージャーからクエスト受注コントローラー取得
+    auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+    if (gameManager)
+    {
+        if (auto cont = gameManager->GetComponent<QuestOrderController>())
+        {
+            _questOrderController = cont;
+        }
+    }
 }
 
 // 更新処理
 void GeteController::Update(float elapsedTime)
 {
+    // クエスト受注中はゲートを閉じて固定する
+	auto questOrderController = _questOrderController.lock();
+    if (questOrderController && questOrderController->IsInQuest())
+    {
+		GetActor()->GetTransform().SetAngleY(0.0f);
+
+        return;
+    }
+
     // ゲート回転
     float angleY = DirectX::XMConvertToDegrees(GetActor()->GetTransform().GetAngle().y);
 

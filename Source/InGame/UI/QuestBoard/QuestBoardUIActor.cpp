@@ -9,6 +9,16 @@ void QuestBoardUIActor::OnCreate()
 
 	GetRectTransform().SetLocalPosition(Vector2(200.0f, 200.0f));
 
+	// ゲームマネージャーからクエスト受注コントローラー取得
+	auto gameManager = GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+	if (gameManager)
+	{
+		if (auto cont = gameManager->GetComponent<QuestOrderController>())
+		{
+			_questOrderController = cont;
+		}
+	}
+
 	// コールバック登録
 	RegisterOptionSelectedCallback("PopPage", [this](MenuUIActor* owner) -> void
 		{
@@ -27,10 +37,19 @@ void QuestBoardUIActor::OnCreate()
 	LoadFromFile();
 }
 
+// クエスト受注
+// 成功でtrue
+bool QuestBoardUIActor::AcceptQuest(int questIndex)
+{
+	auto questOrderController = _questOrderController.lock();
+	if (!questOrderController)
+		return false;
+	questOrderController->AcceptQuest(questIndex);
+	return true;
+}
+
 QuestBoardUIWidget::QuestBoardUIWidget(std::string name) : MenuWidget(name)
 {
-	// ユーザーデータマネージャー取得
-	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
 	// クエストデータマネージャー取得
 	_questManager = ResourceManager::Instance().GetResourceAs<QuestManager>("QuestManager");
 }
@@ -80,15 +99,17 @@ void QuestBoardUIWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 // 選択肢選択処理
 void QuestBoardUIWidget::SelectOption(MenuUIActor* owner)
 {
-	auto userDataManager = _userDataManager.lock();
-	if (!userDataManager)
+	auto questBoardUIActor = dynamic_cast<QuestBoardUIActor*>(owner);
+	if (!questBoardUIActor)
 		return;
 
 	// クエスト選択処理呼び出し
-	userDataManager->AcceptQuest(static_cast<int>(_selectedOptionIndex));
-
-	// メニュー閉じる
-	owner->PopAllPages();
+	if (questBoardUIActor->AcceptQuest(static_cast<int>(_selectedOptionIndex)))
+	{
+		// 受注成功したらメニュー閉じる
+		owner->PopAllPages();
+		return;
+	}
 }
 
 // インデックス範囲制限

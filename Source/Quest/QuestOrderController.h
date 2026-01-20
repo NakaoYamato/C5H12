@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/Component.h"
+#include "../../Source/User/UserDataManager.h"
 
 class QuestOrderController : public Component
 {
@@ -15,6 +16,8 @@ public:
 	void Start() override;
 	// 更新処理
 	void Update(float elapsedTime) override;
+	// Gui描画
+	void DrawGui() override;
 
 	// クエスト受注
 	void AcceptQuest(int questIndex);
@@ -22,10 +25,16 @@ public:
 	void StartQuest();
 	// 受注中のクエスト終了
 	void EndQuest(bool clear, float time);
+	// クエストキャンセル
+	void CancelQuest();
 	// クエスト中か
 	bool IsInQuest() const { return _isInQuest; }
 
 private:
-	float _elapsedTime = 0.0f;
+	// ユーザーデータマネージャー
+	std::weak_ptr<UserDataManager> _userDataManager;
+	// クエストデータマネージャー
+	std::weak_ptr<QuestManager> _questManager;
+
 	bool _isInQuest = false;
 };

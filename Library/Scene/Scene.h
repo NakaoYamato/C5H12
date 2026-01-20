@@ -106,8 +106,8 @@ public:
 		std::shared_ptr<T> actor = std::make_shared<T>(args...);
 		actor->SetName(name.c_str());
 		actor->SetScene(this);
-		actor->Create(tag);
 		_actorManager.Register(actor, tag);
+		actor->Create(tag);
 		return actor;
 	}
 #pragma endregion

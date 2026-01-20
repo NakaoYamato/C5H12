@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Library/Actor/UI/Menu/MenuUIActor.h"
-#include "../../Source/User/UserDataManager.h"
+#include "../../Source/Quest/QuestOrderController.h"
 
 class QuestBoardUIActor : public MenuUIActor
 {
@@ -10,6 +10,12 @@ public:
 	~QuestBoardUIActor() override {}
 	// 生成時処理
 	void OnCreate() override;
+
+	// クエスト受注
+	// 成功でtrue
+	bool AcceptQuest(int questIndex);
+private:
+	std::weak_ptr<QuestOrderController> _questOrderController;
 };
 
 // クエスト掲示板UIウィジェット
@@ -36,8 +42,6 @@ public:
 
 	void SetDisplayQuestType(QuestData::QuestType type) { _displayQuestType = type; }
 protected:
-	// ユーザーデータマネージャー
-	std::weak_ptr<UserDataManager> _userDataManager;
 	// クエストデータマネージャー
 	std::weak_ptr<QuestManager> _questManager;
 

@@ -29,10 +29,10 @@ void PlayerController::Start()
 	_inputManager = GetActor()->GetScene()->GetActorManager().FindByClass<InputManager>(ActorTag::System);
 
 	// メタAI取得
-	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
-	if (metaAIActor)
+	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+	if (gameManager)
 	{
-		_metaAI = metaAIActor->GetComponent<MetaAI>();
+		_metaAI = gameManager->GetComponent<MetaAI>();
 
 		// メタAIからリスポーン位置を取得
 		EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());

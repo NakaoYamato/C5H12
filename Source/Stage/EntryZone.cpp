@@ -9,11 +9,11 @@
 void EntryZone::Start()
 {
 	// ƒƒ^AI‚ðŽæ“¾
-	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
-	if (metaAIActor)
+	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+	if (gameManager)
 	{
 		// ƒƒ^AI‚É“o˜^
-		auto metaAI = metaAIActor->GetComponent<MetaAI>();
+		auto metaAI = gameManager->GetComponent<MetaAI>();
 		if (metaAI)
 		{
 			metaAI->RegisterEntryZone(shared_from_this());

@@ -6,8 +6,8 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Actor/Stage/StageManager.h"
 
-#include "../../Source/AI/MetaAI.h"
 #include "../../InGame/InGameCanvasActor.h"
+#include "../../InGame/GameManager.h"
 
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
@@ -23,8 +23,7 @@ void SceneNetworkDebug::OnInitialize()
 
     // オブジェクト作成
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
-        metaAI->AddComponent<MetaAI>();
+        auto gameManager = RegisterActor<GameManager>("GameManager", ActorTag::System);
     }
     {
         auto networkMediator = RegisterActor<NetworkMediator>("NetworkMediator", ActorTag::System);

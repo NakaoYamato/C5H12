@@ -9,10 +9,10 @@
 void CombatStatusController::Start()
 {	
 	// ƒƒ^AIæ“¾
-	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
-	if (metaAIActor)
+	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+	if (gameManager)
 	{
-		_metaAI = metaAIActor->GetComponent<MetaAI>();
+		_metaAI = gameManager->GetComponent<MetaAI>();
 	}
 
 	// Œ»İ‚ÌˆÊ’u‚ğ“ê’£‚è‚Æ‚·‚é

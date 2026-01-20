@@ -6,15 +6,12 @@
 #include "../../Library/Graphics/Graphics.h"
 #include "../../Library/Actor/Stage/StageManager.h"
 
-#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Stage/StageController.h"
-#include "../../Source/Stage/Props/Chest/ChestActor.h"
-#include "../../Source/Stage/Props/Fence/FenceActor.h"
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
+#include "../../InGame/GameManager.h"
 
 // ネットワーク有効フラグ
 bool SceneGame::NetworkEnabled = false;
@@ -38,8 +35,7 @@ void SceneGame::OnInitialize()
 
     // オブジェクト作成
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
-        metaAI->AddComponent<MetaAI>();
+        auto gameManager = RegisterActor<GameManager>("GameManager", ActorTag::System);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

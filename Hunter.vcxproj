@@ -342,6 +342,7 @@
     <ClCompile Include="Source\Enemy\Wyvern\WyvernActor.cpp" />
     <ClCompile Include="Source\Common\Damageable.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
+    <ClCompile Include="Source\InGame\GameManager.cpp" />
     <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
     <ClCompile Include="Source\InGame\Input\QuestBoard\QuestBoardInput.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp" />
@@ -373,6 +374,7 @@
     <ClCompile Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.cpp" />
     <ClCompile Include="Source\Quest\QuestData.cpp" />
     <ClCompile Include="Source\Quest\QuestManager.cpp" />
+    <ClCompile Include="Source\Quest\QuestOrderController.cpp" />
     <ClCompile Include="Source\Scene\Editor\SceneArmorEditor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneUIDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
@@ -643,6 +645,7 @@
     <ClInclude Include="Source\Enemy\Wyvern\WyvernActor.h" />
     <ClInclude Include="Source\Common\Damageable.h" />
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
+    <ClInclude Include="Source\InGame\GameManager.h" />
     <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
     <ClInclude Include="Source\InGame\Input\QuestBoard\QuestBoardInput.h" />
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
@@ -678,6 +681,7 @@
     <ClInclude Include="Source\Player\Weapon\GreatSword\PlayerGreatSwordActor.h" />
     <ClInclude Include="Source\Quest\QuestData.h" />
     <ClInclude Include="Source\Quest\QuestManager.h" />
+    <ClInclude Include="Source\Quest\QuestOrderController.h" />
     <ClInclude Include="Source\Scene\Editor\SceneArmorEditor.h" />
     <ClInclude Include="Source\Scene\Test\SceneUIDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />

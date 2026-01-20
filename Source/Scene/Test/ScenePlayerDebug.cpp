@@ -4,15 +4,11 @@
 #include "../../Library/Actor/Stage/StageManager.h"
 
 // コンポーネント
-#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
-#include "../../Source/Enemy/Dummy/DummyActor.h"
-#include "../../Source/Enemy/Wyvern/WyvernActor.h"
-#include "../../Source/Stage/Props/Chest/ChestActor.h"
-#include "../../Source/Stage/Props/Fence/FenceActor.h"
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
+#include "../../InGame/GameManager.h"
 
 void ScenePlayerDebug::OnInitialize()
 {
@@ -26,8 +22,7 @@ void ScenePlayerDebug::OnInitialize()
 
     // オブジェクト作成
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
-		metaAI->AddComponent<MetaAI>();
+        auto gameManager = RegisterActor<GameManager>("GameManager", ActorTag::System);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

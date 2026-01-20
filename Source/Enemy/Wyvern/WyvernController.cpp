@@ -17,10 +17,10 @@ void WyvernController::Start()
 	_damageable = GetActor()->GetComponent<Damageable>();
 	_staminaController = GetActor()->GetComponent<StaminaController>();
 	// メタAI取得
-	auto metaAIActor = GetActor()->GetScene()->GetActorManager().FindByName("MetaAI", ActorTag::System);
-	if (metaAIActor)
+	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+	if (gameManager)
 	{
-		_metaAI = metaAIActor->GetComponent<MetaAI>();
+		_metaAI = gameManager->GetComponent<MetaAI>();
 	}
 
 	// ダメージ間隔を設定

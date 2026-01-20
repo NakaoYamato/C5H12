@@ -4,12 +4,12 @@
 #include "../../Library/Actor/Stage/StageManager.h"
 
 // コンポーネント
-#include "../../Source/AI/MetaAI.h"
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 
 #include "../../InGame/InputManager.h"
 #include "../../InGame/InGameCanvasActor.h"
+#include "../../InGame/GameManager.h"
 
 void SceneWyvernDebug::OnInitialize()
 {
@@ -20,8 +20,7 @@ void SceneWyvernDebug::OnInitialize()
     AddCompletionLoading(CompletionLoadingRate);
 
     {
-        auto metaAI = RegisterActor<Actor>("MetaAI", ActorTag::System);
-        metaAI->AddComponent<MetaAI>();
+        auto gameManager = RegisterActor<GameManager>("GameManager", ActorTag::System);
     }
     AddCompletionLoading(CompletionLoadingRate);
     {

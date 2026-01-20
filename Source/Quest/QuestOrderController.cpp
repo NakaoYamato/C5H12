@@ -1,5 +1,7 @@
 #include "QuestOrderController.h"
 
+#include "../../Library/Scene/Scene.h"
+
 #include <Mygui.h>
 
 // 開始処理
@@ -11,11 +13,53 @@ void QuestOrderController::Start()
 	_questManager = ResourceManager::Instance().GetResourceAs<QuestManager>("QuestManager");
 	// 敵データマネージャー取得
 	_enemyDataManager = ResourceManager::Instance().GetResourceAs<EnemyDataManager>("EnemyDataManager");
+
+	// メタAI取得
+	_metaAI = GetActor()->GetComponent<MetaAI>();
 }
 
 // 更新処理
 void QuestOrderController::Update(float elapsedTime)
 {
+	auto metaAI = _metaAI.lock();
+	if (!metaAI)
+		return;
+	auto enemyDataManager = _enemyDataManager.lock();
+	if (!enemyDataManager)
+		return;
+
+	if (_startQuestFlag)
+	{
+		// フェードが完了したらプレイヤーを初期位置に移動、ターゲットの生成
+		if (!GetActor()->GetScene()->GetFade()->IsFading())
+		{
+			if (auto playerActor = GetActor()->GetScene()->GetActorManager().FindByClass<PlayerActor>(ActorTag::Player))
+			{
+				if (auto playerController = playerActor->GetComponent<PlayerController>())
+				{
+					// メタAIからリスポーン位置を取得
+					EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
+					if (entryZone)
+					{
+						Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
+						Vector3 respawnAngle = entryZone->GetAngle();
+						playerController->Respawn(respawnPosition, respawnAngle);
+					}
+				}
+			}
+
+			int index = 0;
+			for (const auto& targetName : _targetNameList)
+			{
+				std::string name = "Target" + std::to_string(index++);
+				enemyDataManager->CreateActor(GetActor()->GetScene(), targetName, name);
+			}
+
+			_startQuestFlag = false;
+			// フェードイン開始
+			GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, 1.0f);
+		}
+	}
 }
 
 // Gui描画
@@ -45,6 +89,10 @@ void QuestOrderController::DrawGui()
 // クエスト受注
 void QuestOrderController::AcceptQuest(int questIndex)
 {
+	// すでに受注中の場合は処理しない
+	if (_currentState != State::Idle)
+		return;
+
 	auto questManager = _questManager.lock();
 	if (!questManager)
 		return;
@@ -68,22 +116,40 @@ void QuestOrderController::AcceptQuest(int questIndex)
 			_targetNameList.push_back(target.name);
 		}
 	}
+
+	// 状態を受注中に変更
+	_currentState = State::Accepted;
 }
 
 // クエスト開始
 void QuestOrderController::StartQuest()
 {
+	// 受注中以外の場合は処理しない
+	if (_currentState != State::Accepted)
+		return;
+
 	auto userDataManager = _userDataManager.lock();
 	if (!userDataManager)
 		return;
 
 	// 受注回数増加
 	userDataManager->IncreaseQuestOrderCount(_questIndex);
+
+	_startQuestFlag = true;
+	// 状態をクエスト中に変更
+	_currentState = State::InQuest;
+
+	// フェードアウト開始
+	GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, 1.0f);
 }
 
 // 受注中のクエスト終了
 void QuestOrderController::EndQuest(bool clear, float time)
 {
+	// クエスト中以外の場合は処理しない
+	if (_currentState != State::InQuest)
+		return;
+
 	auto userDataManager = _userDataManager.lock();
 	if (!userDataManager)
 		return;
@@ -93,12 +159,22 @@ void QuestOrderController::EndQuest(bool clear, float time)
 		userDataManager->IncreaseQuestClearCount(_questIndex);
 		userDataManager->UpdateQuestBestClearTime(_questIndex, time);
 	}
+
+	// 状態を完了に変更
+	_currentState = State::Completed;
 }
 
 // クエストキャンセル
 void QuestOrderController::CancelQuest()
 {
+	// 受注中以外の場合は処理しない
+	if (_currentState != State::Accepted)
+		return;
+
 	_isInQuest = false;
+
+	// 状態を待機に変更
+	_currentState = State::Idle;
 }
 
 // クエスト開始可能か

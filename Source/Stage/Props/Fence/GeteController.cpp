@@ -27,7 +27,7 @@ void GeteController::Update(float elapsedTime)
 {
     // クエスト受注中はゲートを閉じて固定する
 	auto questOrderController = _questOrderController.lock();
-    if (questOrderController && questOrderController->IsInQuest())
+    if (questOrderController && questOrderController->GetCurrentState() == QuestOrderController::State::Accepted)
     {
 		GetActor()->GetTransform().SetAngleY(0.0f);
 
@@ -86,6 +86,22 @@ void GeteController::DrawGui()
 // オブジェクトとの接触時の処理
 void GeteController::OnContact(CollisionData& collisionData)
 {
+    // トリガーの接触
+    if (collisionData.isTrigger)
+    {
+        // クエスト受注中に接触していてキー入力があればクエスト開始
+        auto questOrderController = _questOrderController.lock();
+        if (questOrderController && questOrderController->GetCurrentState() == QuestOrderController::State::Accepted)
+        {
+			if (_INPUT_TRIGGERD("Action1"))
+			{
+				questOrderController->StartQuest();
+			}
+        }
+
+		return;
+    }
+
     auto boxCollider = _boxCollider.lock();
     if (!boxCollider)
         return;

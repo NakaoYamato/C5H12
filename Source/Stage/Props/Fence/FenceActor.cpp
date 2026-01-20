@@ -50,6 +50,8 @@ void FenceActor::OnCreate()
         modelRendererL->SetRenderType(ModelRenderType::Static);
         fenceGateL->AddComponent<GeteController>();
         auto boxL = fenceGateL->AddCollider<BoxCollider>();
+        auto boxTriggerL = fenceGateL->AddCollider<BoxCollider>();
+		boxTriggerL->SetTrigger(true);
 
         std::string nameR = std::string(GetName()) + "FenceGateR";
         auto fenceGateR = GetScene()->RegisterActor<Actor>(nameR, GetTag());
@@ -60,5 +62,7 @@ void FenceActor::OnCreate()
         modelRendererR->SetRenderType(ModelRenderType::Static);
         fenceGateR->AddComponent<GeteController>();
         auto boxR = fenceGateR->AddCollider<BoxCollider>();
+        auto boxTriggerR = fenceGateR->AddCollider<BoxCollider>();
+        boxTriggerR->SetTrigger(true);
     }
 }

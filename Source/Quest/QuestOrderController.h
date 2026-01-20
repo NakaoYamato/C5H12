@@ -3,8 +3,22 @@
 #include "../../Library/Component/Component.h"
 #include "../../Source/User/UserDataManager.h"
 
+#include "../../Source/AI/MetaAI.h"
+
+#include "../../Source/Player/PlayerActor.h"
+#include "../../Source/Player/PlayerController.h"
+
 class QuestOrderController : public Component
 {
+public:
+	enum class State
+	{
+		Idle,
+		Accepted,
+		InQuest,
+		Completed,
+	};
+
 public:
 	QuestOrderController() = default;
 	~QuestOrderController() override {}
@@ -31,6 +45,8 @@ public:
 	bool CanStartQuest() const;
 	// クエスト中か
 	bool IsInQuest() const { return _isInQuest; }
+	// 現在の状態取得
+	State GetCurrentState() const { return _currentState; }
 
 private:
 	// ユーザーデータマネージャー
@@ -39,6 +55,11 @@ private:
 	std::weak_ptr<QuestManager> _questManager;
 	// 敵情報
 	std::weak_ptr<EnemyDataManager> _enemyDataManager;
+	// メタAI
+	std::weak_ptr<MetaAI> _metaAI;
+
+	// 現在の状態
+	State _currentState = State::Idle;
 
 	// 現在受注中のクエストデータ
 	QuestData* _currentQuestData = nullptr;
@@ -47,4 +68,8 @@ private:
 	// クエストインデックス
 	int _questIndex = -1;
 	bool _isInQuest = false;
+
+	// クエスト開始時用パラメータ
+	bool _startQuestFlag = false;
+	float _timer = 0.0f;
 };

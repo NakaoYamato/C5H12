@@ -12,6 +12,7 @@
 #include "UI/Player/PlayerStaminaUIController.h"
 #include "UI/Player/PlayerBuffUIController.h"
 #include "UI/Player/PlayerShapnessUIController.h"
+#include "UI/Player/PlayerQuestOrderUIController.h"
 #include "UI/QuestBoard/QuestBoardUIActor.h"
 
 // 生成時処理
@@ -71,17 +72,24 @@ void InGameCanvasActor::OnCreate()
 		playerHPUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 50.0f));
 		playerHPUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
 		playerHPUIActor->AddComponent<PlayerHealthUIController>();
+
 		auto playerStaminaUIActor = GetScene()->RegisterActor<UIActor>("PlayerStaminaUI", ActorTag::UI);
 		playerStaminaUIActor->SetParent(playerUIActor.get());
 		playerStaminaUIActor->GetRectTransform().SetLocalPosition(Vector2(50.0f, 74.0f));
 		playerStaminaUIActor->GetRectTransform().SetLocalScale(Vector2(1.0f, 0.5f));
 		playerStaminaUIActor->AddComponent<PlayerStaminaUIController>();
+
 		auto playerBuffUIActor = GetScene()->RegisterActor<UIActor>("PlayerBuffUI", ActorTag::UI);
 		playerBuffUIActor->SetParent(playerUIActor.get());
 		playerBuffUIActor->AddComponent<PlayerBuffUIController>();
+
 		auto playerShapnessUIActor = GetScene()->RegisterActor<UIActor>("PlayerShapnessUI", ActorTag::UI);
 		playerShapnessUIActor->SetParent(playerUIActor.get());
 		playerShapnessUIActor->AddComponent<PlayerShapnessUIController>();
+
+		auto playerQuestOrderUIActor = GetScene()->RegisterActor<UIActor>("PlayerQuestOrderUI", ActorTag::UI);
+		playerQuestOrderUIActor->SetParent(playerUIActor.get());
+		playerQuestOrderUIActor->AddComponent<PlayerQuestOrderUIController>();
 	}
 
 	// クエストボードUI生成
@@ -133,6 +141,10 @@ void InGameCanvasActor::RegisterPlayerActor(Actor* playerActor)
 					break;
 				}
 			}
+		}
+		else if (auto questOrderUIController = child->GetComponent<PlayerQuestOrderUIController>())
+		{
+			questOrderUIController->SetPlayerActor(playerActor->shared_from_this());
 		}
 	}
 }

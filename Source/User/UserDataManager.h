@@ -4,6 +4,7 @@
 #include "../../Source/Armor/ArmorManager.h"
 #include "../../Source/Weapon/WeaponManager.h"
 #include "../../Source/Quest/QuestManager.h"
+#include "../../Source/Enemy/EnemyDataManager.h"
 
 class UserDataManager : public ResourceBase
 {
@@ -153,12 +154,12 @@ public:
 #pragma endregion
 
 #pragma region クエスト
-	// クエスト受注
-	void AcceptQuest(int questIndex);
-	// 受注中のクエスト開始
-	void StartQuest();
-	// 受注中のクエスト終了
-	void EndQuest(bool clear, float time);
+	// クエスト受注回数増加
+	void IncreaseQuestOrderCount(int questIndex);
+	// クエストクリア回数増加
+	void IncreaseQuestClearCount(int questIndex);
+	// クエスト最速クリアタイム更新
+	void UpdateQuestBestClearTime(int questIndex, float time);
 
 	// 受注カウント取得
 	int GetQuestOrderCount(int questIndex);
@@ -207,8 +208,6 @@ private:
 
 	// 所持しているすべてのクエストデータ
 	std::unordered_map<int, QuestUserData> _questUserDataMap;
-	// 受注中のクエストインデックス
-	int _currentAcceptedQuestIndex = -1;
 	// 現在の受注履歴
 	std::vector<int> _currentAcceptedQuestHistory;
 };

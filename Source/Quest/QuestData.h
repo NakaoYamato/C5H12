@@ -36,7 +36,7 @@ struct QuestData
 	// ターゲットデータ
 	struct TargetData
 	{
-		int index			= -1;	// ターゲットのインデックス
+		std::string name	= "";	// ターゲットの名前
 		int count			= 1;	// ターゲットの数
 		int spawnAreaIndex	= -1;	// ターゲットのスポーンエリアインデックス
 	};

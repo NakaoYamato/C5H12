@@ -655,39 +655,32 @@ void UserDataManager::SetPouchItemIndex(int pouchIndex, int itemIndex)
 #pragma endregion
 
 #pragma region クエスト
-// クエスト受注
-void UserDataManager::AcceptQuest(int questIndex)
+// クエスト受注回数増加
+void UserDataManager::IncreaseQuestOrderCount(int questIndex)
 {
 	if (questIndex < 0)
 		return;
-	// 受注中のインデックスを保存
-	_currentAcceptedQuestIndex = questIndex;
+	_questUserDataMap[questIndex].orderCount++;
 }
-// クエスト開始
-void UserDataManager::StartQuest()
+
+// クエストクリア回数増加
+void UserDataManager::IncreaseQuestClearCount(int questIndex)
 {
-	if (_currentAcceptedQuestIndex)
+	if (questIndex < 0)
 		return;
-	// 受注カウント増加
-	_questUserDataMap[_currentAcceptedQuestIndex].orderCount++;
-	// 履歴に追加
-	_currentAcceptedQuestHistory.push_back(_currentAcceptedQuestIndex);
+	_questUserDataMap[questIndex].clearCount++;
 }
-// クエスト終了
-void UserDataManager::EndQuest(bool clear, float time)
+
+// クエスト最速クリアタイム更新
+void UserDataManager::UpdateQuestBestClearTime(int questIndex, float time)
 {
-	if (!_currentAcceptedQuestIndex)
+	if (questIndex < 0)
 		return;
-	if (clear)
+	if (_questUserDataMap[questIndex].bestClearTime == 0.0f ||
+		time < _questUserDataMap[questIndex].bestClearTime)
 	{
-		_questUserDataMap[_currentAcceptedQuestIndex].clearCount++;
-		if (_questUserDataMap[_currentAcceptedQuestIndex].bestClearTime <= 0.0f ||
-			time < _questUserDataMap[_currentAcceptedQuestIndex].bestClearTime)
-		{
-			_questUserDataMap[_currentAcceptedQuestIndex].bestClearTime = time;
-		}
+		_questUserDataMap[questIndex].bestClearTime = time;
 	}
-	_currentAcceptedQuestIndex = -1;
 }
 
 // 受注カウント取得
@@ -921,17 +914,6 @@ void UserDataManager::DrawQuestGui()
 
 	if (ImGui::TreeNode(u8"クエスト受注・クリア状況"))
 	{
-		if (_currentAcceptedQuestIndex != -1)
-		{
-			ImGui::Text(u8"現在受注中のクエスト: %s",
-				questManager->GetQuestData(_currentAcceptedQuestIndex)->name.c_str());
-		}
-		else
-		{
-			ImGui::Text(u8"現在受注中のクエスト: なし");
-		}
-		ImGui::Separator();
-
 		if (ImGui::TreeNode(u8"受注クエスト履歴"))
 		{
 			for (auto questIndex : _currentAcceptedQuestHistory)

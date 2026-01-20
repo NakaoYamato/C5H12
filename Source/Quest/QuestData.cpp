@@ -1,5 +1,7 @@
 #include "QuestData.h"
 
+#include "../../Source/Enemy/EnemyDataManager.h"
+
 #include <Mygui.h>
 
 // GUI描画
@@ -27,6 +29,16 @@ void QuestData::DrawGui()
 				TargetTypeNames.push_back(c);
 			}
 			TargetTypeNames.push_back('\0');
+		}
+	}
+	static std::vector<std::string> EnemyNames;
+	if (EnemyNames.empty())
+	{
+		auto enemyDataManager = ResourceManager::Instance().GetResourceAs<EnemyDataManager>();
+		auto& enemyDataList = enemyDataManager->GetEnemyDataMap();
+		for (const auto& enemyData : enemyDataList)
+		{
+			EnemyNames.push_back(enemyData.first);
 		}
 	}
 
@@ -61,8 +73,13 @@ void QuestData::DrawGui()
 		auto& target = targets[i];
 		if (ImGui::TreeNode((u8"ターゲット" + std::to_string(i)).c_str()))
 		{
-			ImGui::SetNextItemWidth(100.0f);
-			ImGui::InputInt(u8"ターゲットインデックス", &target.index);
+			for (size_t j = 0; j < EnemyNames.size(); ++j)
+			{
+				if (ImGui::RadioButton(EnemyNames[j].c_str(), target.name == EnemyNames[j]))
+				{
+					target.name = EnemyNames[j];
+				}
+			}
 			ImGui::SetNextItemWidth(100.0f);
 			ImGui::InputInt(u8"ターゲット数", &target.count);
 			target.count = std::clamp<int>(target.count, 1, 999);
@@ -99,7 +116,7 @@ void QuestData::Load(nlohmann::json_abi_v3_12_0::json& json)
 	{
 		auto& sub = json["target" + std::to_string(i)];
 		TargetData target;
-		target.index			= sub.value("index", -1);
+		target.name				= sub.value("name", "");
 		target.count			= sub.value("count", 1);
 		target.spawnAreaIndex	= sub.value("spawnAreaIndex", -1);
 		targets.push_back(target);
@@ -123,7 +140,7 @@ void QuestData::Save(nlohmann::json_abi_v3_12_0::json& json) const
 	{
 		auto& target = targets[i];
 		auto& sub = json["target" + std::to_string(i)];
-		sub["index"]			= target.index;
+		sub["name"]				= target.name;
 		sub["count"]			= target.count;
 		sub["spawnAreaIndex"]	= target.spawnAreaIndex;
 	}

@@ -4,6 +4,9 @@
 #include "../../Library/Scene/SceneManager.h"
 #include "../../Library/Math/Random.h"
 
+#include "../../Source/Enemy/Wyvern/WyvernActor.h"
+#include "../../Library/Graphics/Graphics.h"
+
 #include <imgui.h>
 
 // 開始処理
@@ -103,6 +106,17 @@ void MetaAI::DrawGui()
 		{
 			ImGui::Text("Target: (expired)");
 		}
+	}
+
+	if (ImGui::Button(u8"モデル読み込み"))
+	{
+		static auto model = std::make_shared<Model>(Graphics::Instance().GetDevice(), WyvernActor::GetModelFilePath());
+	}
+
+	if (ImGui::Button(u8"ワイバーン生成"))
+	{
+		auto scene = GetActor()->GetScene();
+		auto wyvernActor = scene->RegisterActor<WyvernActor>("Wyvern", ActorTag::Enemy);
 	}
 }
 

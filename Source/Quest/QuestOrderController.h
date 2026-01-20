@@ -27,6 +27,8 @@ public:
 	void EndQuest(bool clear, float time);
 	// クエストキャンセル
 	void CancelQuest();
+	// クエスト開始可能か
+	bool CanStartQuest() const;
 	// クエスト中か
 	bool IsInQuest() const { return _isInQuest; }
 
@@ -35,6 +37,14 @@ private:
 	std::weak_ptr<UserDataManager> _userDataManager;
 	// クエストデータマネージャー
 	std::weak_ptr<QuestManager> _questManager;
+	// 敵情報
+	std::weak_ptr<EnemyDataManager> _enemyDataManager;
 
+	// 現在受注中のクエストデータ
+	QuestData* _currentQuestData = nullptr;
+	// ターゲットの名前一覧
+	std::vector<std::string> _targetNameList;
+	// クエストインデックス
+	int _questIndex = -1;
 	bool _isInQuest = false;
 };

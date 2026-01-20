@@ -331,6 +331,7 @@
     <ClCompile Include="Source\Enemy\BodyPartController.cpp" />
     <ClCompile Include="Source\Enemy\Dummy\DummyActor.cpp" />
     <ClCompile Include="Source\Enemy\EnemyActor.cpp" />
+    <ClCompile Include="Source\Enemy\EnemyDataManager.cpp" />
     <ClCompile Include="Source\Enemy\EnemyNetworkSender.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Ball\WyvernBallActor.cpp" />
     <ClCompile Include="Source\Enemy\Wyvern\Ball\WyvernBallController.cpp" />
@@ -634,6 +635,7 @@
     <ClInclude Include="Source\Enemy\BodyPartController.h" />
     <ClInclude Include="Source\Enemy\Dummy\DummyActor.h" />
     <ClInclude Include="Source\Enemy\EnemyActor.h" />
+    <ClInclude Include="Source\Enemy\EnemyDataManager.h" />
     <ClInclude Include="Source\Enemy\EnemyNetworkSender.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Ball\WyvernBallActor.h" />
     <ClInclude Include="Source\Enemy\Wyvern\Ball\WyvernBallController.h" />

@@ -62,4 +62,6 @@ private:
 
 	// フェードアウト時間
 	float							_fadeOutTime = 1.0f;
+
+	float _subTimer = 0.0f;
 };

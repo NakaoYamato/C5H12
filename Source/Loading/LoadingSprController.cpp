@@ -59,20 +59,25 @@ void LoadingSprController::Update(float elapsedTime)
 	spriteRenderer->GetRectTransform(LoadingBarSpr).SetLocalScale(Vector2(scale, 1.0f));
 
 	// フェーズ処理
-	if (_loadingScene && _loadingScene->IsNextSceneReady() && _loadingBarRate >= 1.0f - FLT_EPSILON)
+	if (_loadingScene && _loadingScene->IsNextSceneReady())
 	{
-		if (!_loadingScene->GetFade()->IsFading())
+        _subTimer += elapsedTime;
+
+		if (_loadingBarRate >= 1.0f - FLT_EPSILON || _subTimer >= 1.0f)
 		{
-			switch (_loadingScene->GetFade()->GetType())
+			if (!_loadingScene->GetFade()->IsFading())
 			{
-			case Fade::Type::FadeOut:
-                _loadingScene->ChangeNextScene();
-				// フェード開始
-				_loadingScene->GetFade()->Start(Fade::Type::FadeIn, _fadeInTime);
-                break;
-			default:
-				_loadingScene->GetFade()->Start(Fade::Type::FadeOut, _fadeOutTime);
-				break;
+				switch (_loadingScene->GetFade()->GetType())
+				{
+				case Fade::Type::FadeOut:
+					_loadingScene->ChangeNextScene();
+					// フェード開始
+					_loadingScene->GetFade()->Start(Fade::Type::FadeIn, _fadeInTime);
+					break;
+				default:
+					_loadingScene->GetFade()->Start(Fade::Type::FadeOut, _fadeOutTime);
+					break;
+				}
 			}
 		}
 	}

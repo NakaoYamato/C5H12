@@ -355,6 +355,7 @@
     <ClCompile Include="Source\InGame\UI\Operate\OperateUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerQuestOrderUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.cpp" />
+    <ClCompile Include="Source\InGame\UI\Quest\QuestUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
     <ClCompile Include="Source\Item\ItemData.cpp" />
@@ -661,6 +662,7 @@
     <ClInclude Include="Source\InGame\UI\Operate\OperateUIController.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerQuestOrderUIController.h" />
     <ClInclude Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.h" />
+    <ClInclude Include="Source\InGame\UI\Quest\QuestUIController.h" />
     <ClInclude Include="Source\InGame\UI\TimerUIController.h" />
     <ClInclude Include="Source\InGame\InputManager.h" />
     <ClInclude Include="Source\Item\ItemData.h" />

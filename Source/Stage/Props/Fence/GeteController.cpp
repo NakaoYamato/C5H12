@@ -86,6 +86,9 @@ void GeteController::DrawGui()
 // オブジェクトとの接触時の処理
 void GeteController::OnContact(CollisionData& collisionData)
 {
+    if (collisionData.isTrigger)
+		return;
+
     auto boxCollider = _boxCollider.lock();
     if (!boxCollider)
         return;

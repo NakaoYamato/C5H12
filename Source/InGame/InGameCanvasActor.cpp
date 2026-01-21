@@ -13,6 +13,7 @@
 #include "UI/Player/PlayerBuffUIController.h"
 #include "UI/Player/PlayerShapnessUIController.h"
 #include "UI/Player/PlayerQuestOrderUIController.h"
+#include "UI/Quest/QuestUIController.h"
 #include "UI/QuestBoard/QuestBoardUIActor.h"
 
 // 生成時処理
@@ -95,6 +96,12 @@ void InGameCanvasActor::OnCreate()
 	// クエストボードUI生成
 	auto questBoardUIActor = GetScene()->RegisterActor<QuestBoardUIActor>("QuestBoardUI", ActorTag::UI);
 	questBoardUIActor->SetParent(this);
+
+	// クエストUI生成
+	auto questUIActor = GetScene()->RegisterActor<UIActor>("QuestUI", ActorTag::UI);
+	questUIActor->SetParent(this);
+	questUIActor->AddComponent<QuestUIController>();
+	questUIActor->GetRectTransform().SetLocalPosition(Vector2(1950.0f, 340.0f));
 }
 
 // プレイヤー設定

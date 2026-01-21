@@ -67,7 +67,7 @@ void FenceActor::OnCreate()
 						if (questOrderController->GetCurrentState() != QuestOrderController::State::Accepted)
 							return false;
 
-						return true;
+						return questOrderController->CanStartQuest();
 					}
 				);
 				interactionController->RegisterOnSelectCallback(

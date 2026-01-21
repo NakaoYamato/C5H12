@@ -47,6 +47,7 @@ void QuestBoardInput::OnUpdate(float elapsedTime)
 	{
 		// 前の入力コントローラーに戻す
 		_inputManager->SwitchPreviousInput();
+		return;
 	}
 
 	if (_INPUT_REPEAT("Up"))

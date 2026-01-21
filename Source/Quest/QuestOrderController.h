@@ -47,6 +47,8 @@ public:
 	bool IsInQuest() const { return _isInQuest; }
 	// 現在の状態取得
 	State GetCurrentState() const { return _currentState; }
+	// 現在のクエストデータ取得
+	QuestData* GetCurrentQuestData() const { return _currentQuestData; }
 
 private:
 	// ユーザーデータマネージャー

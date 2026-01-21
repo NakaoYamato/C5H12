@@ -80,6 +80,15 @@ public:
 	void SetDepthState(DepthState depthState)	{ _depthState = depthState; }
     void SetStencil(UINT8 stencil)				{ _stencil = stencil; }
 #pragma endregion
+
+#pragma region ファイル
+	// ファイル読み込み
+	void LoadFromFile(nlohmann::json* json, const std::string& label);
+	// ファイル保存
+	void SaveToFile(nlohmann::json* json, const std::string& label);
+#pragma endregion
+
+
 private:
 	Texture			_texture;
 	RectTransform	_rectTransform;

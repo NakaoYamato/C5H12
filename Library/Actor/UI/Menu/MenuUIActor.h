@@ -154,8 +154,36 @@ public:
 #pragma endregion
 
 protected:
+	// タイトル描画処理
+	virtual void RenderTitle(const RenderContext& rc, MenuUIActor* owner);
+	// 説明文描画処理
+	virtual void RenderDescription(const RenderContext& rc, MenuUIActor* owner);
+
+protected:
     std::string _name;
 	RectTransform _rectTransform;
+
+	// タイトル名
+	std::string _title{};
+	// タイトル名描画位置
+	Vector2 _titleLabelOffset{ 50.0f, 10.0f };
+	// タイトル名フォントサイズ
+	Vector2 _titleFontSize{ 0.5f, 0.5f };
+	// タイトル名色
+	Vector4 _titleLabelColor = Vector4::White;
+	// タイトル背景
+	Sprite _titleSprite;
+
+	// 説明文
+	std::string _description{};
+	// 説明文の画像
+	Sprite _descriptionSprite;
+	// 説明文描画位置
+	Vector2 _descriptionLabelOffset{ 50.0f, 10.0f };
+	// 説明文フォントサイズ
+	Vector2 _descriptionFontSize{ 0.5f, 0.5f };
+	// 説明文色
+	Vector4 _descriptionLabelColor = Vector4::White;
 
 	// 選択肢リスト
 	std::vector<Option> _options;

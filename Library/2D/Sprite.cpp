@@ -7,6 +7,8 @@
 
 #include <Mygui.h>
 
+Sprite* CopySprite = nullptr;
+
 Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 {
 	LoadTexture(filename, alignment);
@@ -14,6 +16,28 @@ Sprite::Sprite(const wchar_t* filename, CenterAlignment alignment)
 // GUI描画
 void Sprite::DrawGui()
 {
+	if (ImGui::Button(u8"コピー"))
+	{
+		CopySprite = this;
+	}
+	ImGui::SameLine();
+	if (ImGui::Button(u8"ペースト"))
+	{
+		if (CopySprite)
+		{
+			_texture		= CopySprite->_texture;
+			_rectTransform	= CopySprite->_rectTransform;
+			_material		= CopySprite->_material;
+			_texPos			= CopySprite->_texPos;
+			_texSize		= CopySprite->_texSize;
+			_center			= CopySprite->_center;
+			_color			= CopySprite->_color;
+			_centerAlignment = CopySprite->_centerAlignment;
+			_depthState		= CopySprite->_depthState;
+			_stencil		= CopySprite->_stencil;
+		}
+	}
+	ImGui::Separator();
 	if (_texture.Get())
 	{
 		if (ImGui::ImageButton(_texture.Get(),
@@ -71,10 +95,10 @@ void Sprite::DrawGui()
 				LoadTexture(ToWString(resultPath).c_str(), _centerAlignment);
 			}
 		}
-		if (ImGui::Button(u8"ダミー"))
-		{
-			LoadTexture(L"", _centerAlignment);
-		}
+	}
+	if (ImGui::Button(u8"ダミー"))
+	{
+		LoadTexture(L"", _centerAlignment);
 	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"マテリアル"))
@@ -196,6 +220,51 @@ void Sprite::RecalcCenter(CenterAlignment alignment)
 		break;
 	}
 }
+#pragma region ファイル
+// ファイル読み込み
+void Sprite::LoadFromFile(nlohmann::json* json, const std::string& label)
+{
+	auto& sprJosn = (*json)[label];
+	if (sprJosn.is_null())
+		return;
+	// テクスチャデータ
+	std::string textureFilePath = sprJosn.value("textureFilePath", "");
+	LoadTexture(ToWString(textureFilePath).c_str(),
+		static_cast<Sprite::CenterAlignment>(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
+	// トランスフォームデータ
+	GetRectTransform() = sprJosn.value("RectTransform", RectTransform());
+	// マテリアルデータ
+	GetMaterial().LoadFromFile(sprJosn);
+	SetCenterAlignment(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
+	SetTexPos(sprJosn.value("texPos", GetTexPos()));
+	SetTexSize(sprJosn.value("texSize", GetTexSize()));
+	SetCenter(sprJosn.value("center", GetCenter()));
+	SetColor(sprJosn.value("color", GetColor()));
+	SetDepthState(sprJosn.value("depthState", DepthState::TestAndWrite));
+	SetStencil(sprJosn.value("stencil", 0));
+}
+// ファイル保存
+void Sprite::SaveToFile(nlohmann::json* json, const std::string& label)
+{
+	auto& sprJosn = (*json)[label];
+	// テクスチャデータ
+	sprJosn["textureFilePath"] = ToString(GetTexture().GetFilepath());
+
+	// トランスフォームデータ
+	sprJosn["RectTransform"] = GetRectTransform();
+
+	// マテリアルデータ
+	GetMaterial().SaveToFile(sprJosn);
+
+	sprJosn["centerAlignment"]	= GetCenterAlignment();
+	sprJosn["texPos"]			= GetTexPos();
+	sprJosn["texSize"]			= GetTexSize();
+	sprJosn["center"]			= GetCenter();
+	sprJosn["color"]			= GetColor();
+	sprJosn["depthState"]		= GetDepthState();
+	sprJosn["stencil"]			= GetStencil();
+}
+#pragma endregion
 // トランスフォーム更新
 void Sprite::UpdateTransform(RectTransform* parent)
 {

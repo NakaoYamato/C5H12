@@ -28,7 +28,6 @@ void QuestBoardInput::DrawGui()
 void QuestBoardInput::OnEntry()
 {
 	_questBoardUIActor.lock()->SetIsActive(true);
-	_questBoardUIActor.lock()->PushPage("SelectMenu");
 }
 
 // I—¹ŠÖ”

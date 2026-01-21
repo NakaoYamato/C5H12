@@ -26,6 +26,24 @@ void QuestBoardUIActor::OnCreate()
 		{
 			owner->PopPage();
 		});
+	RegisterOptionSelectedCallback("QuestCancel", [this](MenuUIActor* owner) -> void
+		{
+			auto questOrderController = _questOrderController.lock();
+			if (!questOrderController)
+				return;
+			questOrderController->CancelQuest();
+			// 終了
+			owner->PopAllPages();
+		});
+	RegisterOptionSelectedCallback("QuestRetire", [this](MenuUIActor* owner) -> void
+		{
+			auto questOrderController = _questOrderController.lock();
+			if (!questOrderController)
+				return;
+			questOrderController->EndQuest(false, 0.0f);
+			// 終了
+			owner->PopAllPages();
+		});
 
 	// ウィジェット登録
 	std::shared_ptr<QuestBoardUIWidget> normalQuest = std::make_shared<QuestBoardUIWidget>("NormalQuest");
@@ -34,9 +52,47 @@ void QuestBoardUIActor::OnCreate()
 	std::shared_ptr<QuestBoardUIWidget> eventQuest = std::make_shared<QuestBoardUIWidget>("EventQuest");
 	eventQuest->SetDisplayQuestType(QuestData::QuestType::Event);
 	RegisterWidget(eventQuest);
+	std::shared_ptr<InQuestStatusUIWidget> inQuestStatus = std::make_shared<InQuestStatusUIWidget>("InQuestStatus");
+	inQuestStatus->SetQuestOrderController(_questOrderController);
+	RegisterWidget(inQuestStatus);
 
 	SetFilePath("./Data/Resource/Actor/QuestBoardUIActor/MenuUI.json");
 	LoadFromFile();
+}
+
+// 起動フラグが変化したときの処理
+void QuestBoardUIActor::OnChangedActive(bool isActive)
+{
+	MenuUIActor::OnChangedActive(isActive);
+	auto questOrderController = _questOrderController.lock();
+	if (!questOrderController)
+		return;
+
+	if (isActive)
+	{
+		// クエスト受注状態によって最初のページを変更
+		switch (questOrderController->GetCurrentState())
+		{
+		case QuestOrderController::State::Accepted:
+			// 受注のキャンセル画面へ
+			PushPage("CancelAcceptQuest");
+			break;
+		case QuestOrderController::State::InQuest:
+			// 受注中クエスト確認画面へ
+			PushPage("InQuestStatus");
+			break;
+		default:
+			// メニュー選択画面へ
+			PushPage("SelectMenu");
+			break;
+		}
+	}
+	else
+	{
+		// すべてのページを破棄して戻る
+		PopAllPages();
+
+	}
 }
 
 // クエスト受注
@@ -141,26 +197,20 @@ void QuestBoardUIWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 			Vector2::Zero,
 			_confirmFontSize);
 	}
+
+	// タイトル描画処理
+	RenderTitle(rc, owner);
 }
 
 // GUI描画処理
 void QuestBoardUIWidget::DrawGui(MenuUIActor* owner)
 {
 	MenuWidget::DrawGui(owner);
-	if (ImGui::TreeNode(u8"説明文"))
-	{
-		_descriptionSprite.DrawGui();
-		ImGui::DragFloat2(u8"説明文オフセット", &_descriptionLabelOffset.x);
-		ImGui::DragFloat2(u8"説明文フォントサイズ", &_descriptionFontSize.x);
-		ImGui::ColorEdit4(u8"説明文色", &_descriptionLabelColor.x);
+	ImGui::Separator();
+	ImGui::Checkbox(u8"クエスト選択確認中", &_isConfirmingQuest);
 
-		ImGui::Checkbox(u8"クエスト選択確認中", &_isConfirmingQuest);
-
-		ImGui::DragFloat2(u8"確認文オフセット", &_confirmLabelOffset.x);
-		ImGui::DragFloat2(u8"確認文フォントサイズ", &_confirmFontSize.x);
-
-		ImGui::TreePop();
-	}
+	ImGui::DragFloat2(u8"確認文オフセット", &_confirmLabelOffset.x);
+	ImGui::DragFloat2(u8"確認文フォントサイズ", &_confirmFontSize.x);
 }
 
 // 選択肢選択処理
@@ -238,31 +288,6 @@ size_t QuestBoardUIWidget::ClampSelectedOptionIndex(size_t index)
 // ファイル読み込み処理
 void QuestBoardUIWidget::OnLoadFromFile(nlohmann::json* json)
 {
-	{
-		auto& sprJosn = (*json)["descriptionSprite"];
-		if (!sprJosn.is_null())
-		{
-			// テクスチャデータ
-			std::string textureFilePath = sprJosn.value("textureFilePath", "");
-			_descriptionSprite.LoadTexture(ToWString(textureFilePath).c_str(),
-				static_cast<Sprite::CenterAlignment>(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
-			// トランスフォームデータ
-			_descriptionSprite.GetRectTransform() = sprJosn.value("RectTransform", RectTransform());
-			// マテリアルデータ
-			_descriptionSprite.GetMaterial().LoadFromFile(sprJosn);
-			_descriptionSprite.SetCenterAlignment(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
-			_descriptionSprite.SetTexPos(sprJosn.value("texPos", _descriptionSprite.GetTexPos()));
-			_descriptionSprite.SetTexSize(sprJosn.value("texSize", _descriptionSprite.GetTexSize()));
-			_descriptionSprite.SetCenter(sprJosn.value("center", _descriptionSprite.GetCenter()));
-			_descriptionSprite.SetColor(sprJosn.value("color", _descriptionSprite.GetColor()));
-			_descriptionSprite.SetDepthState(sprJosn.value("depthState", DepthState::TestAndWrite));
-			_descriptionSprite.SetStencil(sprJosn.value("stencil", 0));
-		}
-	}
-	_descriptionLabelOffset = (*json).value("descriptionLabelOffset", Vector2(50.0f, 10.0f));
-	_descriptionFontSize = (*json).value("descriptionFontSize", Vector2(0.5f, 0.5f));
-	_descriptionLabelColor = (*json).value("descriptionLabelColor", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-
 	_confirmLabelOffset = (*json).value("confirmLabelOffset", Vector2(50.0f, 200.0f));
 	_confirmFontSize = (*json).value("confirmFontSize", Vector2(0.5f, 0.5f));
 }
@@ -270,30 +295,81 @@ void QuestBoardUIWidget::OnLoadFromFile(nlohmann::json* json)
 // ファイル保存処理
 void QuestBoardUIWidget::OnSaveToFile(nlohmann::json* json)
 {
-	{
-		auto& sprJosn = (*json)["descriptionSprite"];
-		// テクスチャデータ
-		sprJosn["textureFilePath"] = ToString(_descriptionSprite.GetTexture().GetFilepath());
-
-		// トランスフォームデータ
-		sprJosn["RectTransform"] = _descriptionSprite.GetRectTransform();
-
-		// マテリアルデータ
-		_descriptionSprite.GetMaterial().SaveToFile(sprJosn);
-
-		sprJosn["centerAlignment"] = _descriptionSprite.GetCenterAlignment();
-		sprJosn["texPos"] = _descriptionSprite.GetTexPos();
-		sprJosn["texSize"] = _descriptionSprite.GetTexSize();
-		sprJosn["center"] = _descriptionSprite.GetCenter();
-		sprJosn["color"] = _descriptionSprite.GetColor();
-		sprJosn["depthState"] = _descriptionSprite.GetDepthState();
-		sprJosn["stencil"] = _descriptionSprite.GetStencil();
-	}
-	(*json)["descriptionLabelOffset"] = _descriptionLabelOffset;
-	(*json)["descriptionFontSize"] = _descriptionFontSize;
-	(*json)["descriptionLabelColor"] = _descriptionLabelColor;
-
 	(*json)["confirmLabelOffset"] = _confirmLabelOffset;
 	(*json)["confirmFontSize"] = _confirmFontSize;
+}
+#pragma endregion
+
+// 開始処理
+void InQuestStatusUIWidget::OnEnter()
+{
+	// 説明文を更新
+	auto questOrderController = _questOrderController.lock();
+	if (!questOrderController)
+		return;
+	auto currentQuestData = questOrderController->GetCurrentQuestData();
+	if (currentQuestData)
+	{
+		_questTitle = currentQuestData->name;
+		_questDescription = currentQuestData->description;
+	}
+}
+
+// 描画処理
+void InQuestStatusUIWidget::Render(const RenderContext& rc, MenuUIActor* owner)
+{
+	MenuWidget::Render(rc, owner);
+
+	// クエストタイトル描画
+	TextRenderer& textRenderer = owner->GetScene()->GetTextRenderer();
+	std::wstring titleText = ToUtf16(_questTitle);
+	textRenderer.Draw(
+		FontType::MSGothic,
+		titleText.c_str(),
+		_questTitleOffset,
+		_titleLabelColor,
+		0.0f,
+		Vector2::Zero,
+		_questTitleFontSize);
+	// クエスト説明文描画
+	std::wstring descriptionText = ToUtf16(_questDescription);
+	textRenderer.Draw(
+		FontType::MSGothic,
+		descriptionText.c_str(),
+		_questDescriptionOffset,
+		_descriptionLabelColor,
+		0.0f,
+		Vector2::Zero,
+		_questDescriptionFontSize);
+}
+
+// GUI描画処理
+void InQuestStatusUIWidget::DrawGui(MenuUIActor* owner)
+{
+	MenuWidget::DrawGui(owner);
+	ImGui::Separator();
+	ImGui::DragFloat2(u8"クエストタイトルオフセット", &_questTitleOffset.x);
+	ImGui::DragFloat2(u8"クエストタイトルフォントサイズ", &_questTitleFontSize.x);
+	ImGui::DragFloat2(u8"クエスト説明文オフセット", &_questDescriptionOffset.x);
+	ImGui::DragFloat2(u8"クエスト説明文フォントサイズ", &_questDescriptionFontSize.x);
+}
+
+#pragma region ファイル
+// ファイル読み込み処理
+void InQuestStatusUIWidget::OnLoadFromFile(nlohmann::json* json)
+{
+	_questTitleOffset = (*json).value("questTitleOffset", Vector2(50.0f, 50.0f));
+	_questTitleFontSize = (*json).value("questTitleFontSize", Vector2(1.0f, 1.0f));
+	_questDescriptionOffset = (*json).value("questDescriptionOffset", Vector2(50.0f, 120.0f));
+	_questDescriptionFontSize = (*json).value("questDescriptionFontSize", Vector2(0.7f, 0.7f));
+}
+
+// ファイル保存処理
+void InQuestStatusUIWidget::OnSaveToFile(nlohmann::json* json)
+{
+	(*json)["questTitleOffset"] = _questTitleOffset;
+	(*json)["questTitleFontSize"] = _questTitleFontSize;
+	(*json)["questDescriptionOffset"] = _questDescriptionOffset;
+	(*json)["questDescriptionFontSize"] = _questDescriptionFontSize;
 }
 #pragma endregion

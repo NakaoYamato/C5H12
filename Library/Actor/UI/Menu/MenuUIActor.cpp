@@ -345,10 +345,15 @@ void MenuWidget::Update(float elapsedTime, MenuUIActor* owner)
 {
 	// トランスフォーム更新
 	_rectTransform.UpdateTransform(&owner->GetRectTransform());
+	_titleSprite.UpdateTransform(&_rectTransform);
+	_descriptionSprite.UpdateTransform(&_rectTransform);
 }
 // 描画処理
 void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 {
+	TextureRenderer& textureRenderer = owner->GetScene()->GetTextureRenderer();
+	TextRenderer& textRenderer = owner->GetScene()->GetTextRenderer();
+
 	int childSize = static_cast<int>(_options.size());
 	RectTransform rect = _rectTransform;
 	for (int i = 0; i < childSize; ++i)
@@ -358,7 +363,7 @@ void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 		// 子要素のトランスフォーム設定
 		_optionSprite.UpdateTransform(&rect);
 		// 背景描画
-		_optionSprite.Render(rc, owner->GetScene()->GetTextureRenderer());
+		_optionSprite.Render(rc, textureRenderer);
 
 		// 選択中処理
 		if (i == _selectedOptionIndex)
@@ -366,13 +371,12 @@ void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 			// 子要素のトランスフォーム設定
 			_selectedOptionSprite.UpdateTransform(&rect);
 			// 背景描画
-			_selectedOptionSprite.Render(rc, owner->GetScene()->GetTextureRenderer());
+			_selectedOptionSprite.Render(rc, textureRenderer);
 		}
 
 		// ラベル描画
 		std::wstring text = ToUtf16(option.label);
 		Vector2 labelPos = rect.GetWorldPosition() + _optionLabelOffset;
-		TextRenderer& textRenderer = owner->GetScene()->GetTextRenderer();
 		textRenderer.Draw(
 			FontType::MSGothic,
 			text.c_str(),
@@ -388,6 +392,12 @@ void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 		rect.SetLocalPosition(position);
 		rect.UpdateTransform(&owner->GetRectTransform());
 	}
+
+	// タイトル描画
+	RenderTitle(rc, owner);
+
+	// 説明文描画
+	RenderDescription(rc, owner);
 }
 // GUI描画処理
 void MenuWidget::DrawGui(MenuUIActor* owner)
@@ -481,6 +491,27 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 		
 		ImGui::TreePop();
 	}
+
+	if (ImGui::TreeNode(u8"タイトル"))
+	{
+		ImGui::InputText(u8"タイトルテキスト", &_title);
+		_titleSprite.DrawGui();
+		ImGui::DragFloat2(u8"タイトルオフセット", &_titleLabelOffset.x);
+		ImGui::DragFloat2(u8"タイトルフォントサイズ", &_titleFontSize.x);
+		ImGui::ColorEdit4(u8"タイトル色", &_titleLabelColor.x);
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode(u8"説明文"))
+	{
+		ImGui::InputText(u8"説明文テキスト", &_description);
+		_descriptionSprite.DrawGui();
+		ImGui::DragFloat2(u8"説明文オフセット", &_descriptionLabelOffset.x);
+		ImGui::DragFloat2(u8"説明文フォントサイズ", &_descriptionFontSize.x);
+		ImGui::ColorEdit4(u8"説明文色", &_descriptionLabelColor.x);
+
+		ImGui::TreePop();
+	}
 }
 
 #pragma region 選択肢
@@ -565,45 +596,22 @@ void MenuWidget::LoadFromFile(nlohmann::json* json)
 		option.nextWidgetName = optionSub.value("nextWidgetName", "");
 		_options.push_back(option);
 	}
-	{
-		auto& sprJosn = sub["optionSprite"];
-		// テクスチャデータ
-		std::string textureFilePath = sprJosn.value("textureFilePath", "");
-		if (!textureFilePath.empty())
-			_optionSprite.LoadTexture(ToWString(textureFilePath).c_str(),
-				static_cast<Sprite::CenterAlignment>(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
-		// トランスフォームデータ
-		_optionSprite.GetRectTransform() = sprJosn.value("RectTransform", RectTransform());
-		// マテリアルデータ
-		_optionSprite.GetMaterial().LoadFromFile(sprJosn);
-		_optionSprite.SetCenterAlignment(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
-		_optionSprite.SetTexPos(sprJosn.value("texPos", _optionSprite.GetTexPos()));
-		_optionSprite.SetTexSize(sprJosn.value("texSize", _optionSprite.GetTexSize()));
-		_optionSprite.SetCenter(sprJosn.value("center", _optionSprite.GetCenter()));
-		_optionSprite.SetColor(sprJosn.value("color", _optionSprite.GetColor()));
-		_optionSprite.SetDepthState(sprJosn.value("depthState", DepthState::TestAndWrite));
-		_optionSprite.SetStencil(sprJosn.value("stencil", 0));
-	}
-	{
-		auto& sprJosn = sub["selectedOptionSprite"];
-		// テクスチャデータ
-		std::string textureFilePath = sprJosn.value("textureFilePath", "");
-		if (!textureFilePath.empty())
-			_selectedOptionSprite.LoadTexture(ToWString(textureFilePath).c_str(),
-				static_cast<Sprite::CenterAlignment>(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter)));
-		// トランスフォームデータ
-		_selectedOptionSprite.GetRectTransform() = sprJosn.value
-		("RectTransform", RectTransform());
-		// マテリアルデータ
-		_selectedOptionSprite.GetMaterial().LoadFromFile(sprJosn);
-		_selectedOptionSprite.SetCenterAlignment(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
-		_selectedOptionSprite.SetTexPos(sprJosn.value("texPos", _selectedOptionSprite.GetTexPos()));
-		_selectedOptionSprite.SetTexSize(sprJosn.value("texSize", _selectedOptionSprite.GetTexSize()));
-		_selectedOptionSprite.SetCenter(sprJosn.value("center", _selectedOptionSprite.GetCenter()));
-		_selectedOptionSprite.SetColor(sprJosn.value("color", _selectedOptionSprite.GetColor()));
-		_selectedOptionSprite.SetDepthState(sprJosn.value("depthState", DepthState::TestAndWrite));
-		_selectedOptionSprite.SetStencil(sprJosn.value("stencil", 0));
-	}
+
+	_titleSprite.LoadFromFile(&sub, "titleSprite");
+	_descriptionSprite.LoadFromFile(&sub, "descriptionSprite");
+	_optionSprite.LoadFromFile(&sub, "optionSprite");
+	_selectedOptionSprite.LoadFromFile(&sub, "selectedOptionSprite");
+
+	_title = sub.value("title", "");
+	_titleLabelOffset = sub.value("titleLabelOffset", Vector2(50.0f, 10.0f));
+	_titleFontSize = sub.value("titleFontSize", Vector2(0.5f, 0.5f));
+	_titleLabelColor = sub.value("titleLabelColor", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	_description = sub.value("description", "");
+	_descriptionLabelOffset = sub.value("descriptionLabelOffset", Vector2(50.0f, 10.0f));
+	_descriptionFontSize = sub.value("descriptionFontSize", Vector2(0.5f, 0.5f));
+	_descriptionLabelColor = sub.value("descriptionLabelColor", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+
+
 	_optionVerticalSpacing = sub.value("optionVerticalSpacing", 40.0f);
 	_optionFontSize = sub.value("optionFontSize", Vector2(1.0f, 1.0f));
 	_optionLabelOffset = sub.value("optionLabelOffset", Vector2(20.0f, 10.0f));
@@ -628,44 +636,21 @@ void MenuWidget::SaveToFile(nlohmann::json* json)
 		optionSub["onSelectedCallbackName"] = _options[i].onSelectedCallbackName;
 		optionSub["nextWidgetName"] = _options[i].nextWidgetName;
 	}
-	{
-		auto& sprJosn = sub["optionSprite"];
-		// テクスチャデータ
-		sprJosn["textureFilePath"] = ToString(_optionSprite.GetTexture().GetFilepath());
 
-		// トランスフォームデータ
-		sprJosn["RectTransform"] = _optionSprite.GetRectTransform();
+	_titleSprite.SaveToFile(&sub, "titleSprite");
+	_descriptionSprite.SaveToFile(&sub, "descriptionSprite");
+	_optionSprite.SaveToFile(&sub, "optionSprite");
+	_selectedOptionSprite.SaveToFile(&sub, "selectedOptionSprite");
 
-		// マテリアルデータ
-		_optionSprite.GetMaterial().SaveToFile(sprJosn);
+	sub["title"] = _title;
+	sub["titleLabelOffset"] = _titleLabelOffset;
+	sub["titleFontSize"] = _titleFontSize;
+	sub["titleLabelColor"] = _titleLabelColor;
+	sub["description"] = _description;
+	sub["descriptionLabelOffset"] = _descriptionLabelOffset;
+	sub["descriptionFontSize"] = _descriptionFontSize;
+	sub["descriptionLabelColor"] = _descriptionLabelColor;
 
-		sprJosn["centerAlignment"] = _optionSprite.GetCenterAlignment();
-		sprJosn["texPos"] = _optionSprite.GetTexPos();
-		sprJosn["texSize"] = _optionSprite.GetTexSize();
-		sprJosn["center"] = _optionSprite.GetCenter();
-		sprJosn["color"] = _optionSprite.GetColor();
-		sprJosn["depthState"] = _optionSprite.GetDepthState();
-		sprJosn["stencil"] = _optionSprite.GetStencil();
-	}
-	{
-		auto& sprJosn = sub["selectedOptionSprite"];
-		// テクスチャデータ
-		sprJosn["textureFilePath"] = ToString(_selectedOptionSprite.GetTexture().GetFilepath());
-
-		// トランスフォームデータ
-		sprJosn["RectTransform"] = _selectedOptionSprite.GetRectTransform();
-
-		// マテリアルデータ
-		_selectedOptionSprite.GetMaterial().SaveToFile(sprJosn);
-
-		sprJosn["centerAlignment"] = _selectedOptionSprite.GetCenterAlignment();
-		sprJosn["texPos"] = _selectedOptionSprite.GetTexPos();
-		sprJosn["texSize"] = _selectedOptionSprite.GetTexSize();
-		sprJosn["center"] = _selectedOptionSprite.GetCenter();
-		sprJosn["color"] = _selectedOptionSprite.GetColor();
-		sprJosn["depthState"] = _selectedOptionSprite.GetDepthState();
-		sprJosn["stencil"] = _selectedOptionSprite.GetStencil();
-	}
 	sub["optionVerticalSpacing"] = _optionVerticalSpacing;
 	sub["optionFontSize"] = _optionFontSize;
 	sub["optionLabelOffset"] = _optionLabelOffset;
@@ -676,4 +661,42 @@ void MenuWidget::SaveToFile(nlohmann::json* json)
 	OnSaveToFile(json);
 }
 #pragma endregion
+// タイトル描画処理
+void MenuWidget::RenderTitle(const RenderContext& rc, MenuUIActor* owner)
+{
+	// タイトル背景
+	_titleSprite.Render(rc, owner->GetScene()->GetTextureRenderer());
+	if (!_title.empty())
+	{
+		// タイトルラベル描画
+		std::wstring titleText = ToUtf16(_title);
+		owner->GetScene()->GetTextRenderer().Draw(
+			FontType::MSGothic,
+			titleText.c_str(),
+			_titleSprite.GetRectTransform().GetWorldPosition() + _titleLabelOffset,
+			_titleLabelColor,
+			0.0f,
+			Vector2::Zero,
+			_titleFontSize);
+	}
+}
+// 説明文描画処理
+void MenuWidget::RenderDescription(const RenderContext& rc, MenuUIActor* owner)
+{
+	// 説明文背景
+	_descriptionSprite.Render(rc, owner->GetScene()->GetTextureRenderer());
+	if (!_description.empty())
+	{
+		// 説明文ラベル描画
+		std::wstring descriptionText = ToUtf16(_description);
+		owner->GetScene()->GetTextRenderer().Draw(
+			FontType::MSGothic,
+			descriptionText.c_str(),
+			_descriptionSprite.GetRectTransform().GetWorldPosition() + _descriptionLabelOffset,
+			_descriptionLabelColor,
+			0.0f,
+			Vector2::Zero,
+			_descriptionFontSize);
+	}
+}
 #pragma endregion

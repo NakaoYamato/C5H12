@@ -6,8 +6,13 @@
 #include "../../Library/2D/Sprite.h"
 #include "../../Library/Algorithm/CallBack/CallBack.h"
 
-class MenuWidget;
+#include <imgui.h>
+#include <imgui_node_editor.h>
 
+class MenuWidget;
+class MenuNodeEditor;
+
+// メニューUIアクタークラス
 class MenuUIActor : public UIActor
 {
 public:
@@ -61,6 +66,11 @@ public:
 	virtual bool SaveToFile();
 #pragma endregion
 
+#pragma region デバッグ用
+	std::unordered_map<std::string, std::shared_ptr<MenuWidget>>& GetRegisteredWidgetsForEdit() { return _registeredWidgets; }
+#pragma endregion
+
+
 private:
 	// GUI描画処理
 	void DrawWidgetGui();
@@ -79,6 +89,8 @@ private:
 	bool _isLoaded = false;
 	// GUIでのウィジェット追加用フラグ
 	bool _isAddingWidget = false;
+
+	std::unique_ptr<MenuNodeEditor> _menuNodeEditor;
 };
 
 // メニューUIのウィジェット基底クラス
@@ -132,6 +144,7 @@ public:
 
 #pragma region アクセサ
 	std::string GetName() const { return _name; }
+	void SetName(const std::string& name) { _name = name; }
 
 	RectTransform& GetRectTransform() { return _rectTransform; }
 	size_t GetOptionSize() const { return _options.size(); }
@@ -151,6 +164,10 @@ public:
 	virtual void OnLoadFromFile(nlohmann::json* json) {}
 	// ファイル保存処理
 	virtual void OnSaveToFile(nlohmann::json* json) {}
+#pragma endregion
+
+#pragma region デバッグ用
+	std::vector<Option>& GetOptions() { return _options; }
 #pragma endregion
 
 protected:
@@ -207,4 +224,64 @@ protected:
 
 	// インデックス変更可能フラグ
 	bool _canChangeIndex = true;
+};
+
+// メニューUIノードエディタクラス
+namespace ne = ax::NodeEditor;
+class MenuNodeEditor
+{
+public:
+    MenuNodeEditor();
+    ~MenuNodeEditor();
+
+	// GUI描画処理
+	void DrawGui(MenuUIActor* menuActor);
+
+	// ファイルパス設定
+	void SetLayoutFilePath(const std::string& filename) { _filename = filename; }
+	// ファイル読み込み
+	void LoadFromFile();
+	// ファイル保存
+	void SaveToFile();
+
+private:
+#pragma region ヘルパー
+	// 文字列ハッシュ
+	unsigned long HashString(const std::string& str) const;
+	// ウィジェット名からノードID生成
+	ne::NodeId GetNodeId(const std::string& widgetName) const;
+	// ウィジェット名から入力ピンID生成 (左側)
+	ne::PinId GetInputPinId(const std::string& widgetName) const;
+	// ウィジェット名とオプションインデックスから出力ピンID生成 (右側)
+	ne::PinId GetOutputPinId(const std::string& widgetName, int optionIndex) const;
+	// リンクID生成 (遷移元ウィジェット名 + インデックス -> 遷移先ウィジェット名)
+	ne::LinkId GetLinkId(const std::string& sourceWidget, int optionIndex, const std::string& targetWidget) const;
+#pragma endregion
+
+private:
+	ne::EditorContext* _editorContext = nullptr;
+	std::string _filename = "";
+
+	// ノード位置のキャッシュ (NodeId -> ImVec2)
+	std::unordered_map<size_t, ImVec2> _nodePositions;
+	bool _isFirstFrame = true;
+
+	// コンテキストメニュー用リンクID
+	ne::LinkId _contextLinkId = 0;
+	// 新規ウィジェット名
+	std::string _newWidgetName = "NewWidget";
+	// 選択中のウィジェット名
+	std::string _selectedWidgetName{};
+	// ポップアップ出現位置
+	ImVec2 _popupSpawnPos{};
+
+	// ノードのスタイル設定
+	const float PIN_WIDTH = 24.0f;
+	const float NODE_WIDTH = 200.0f;
+
+	// 色設定
+	const ImVec4 _nodeBgColor = ImVec4(40 / 255.0f, 40 / 255.0f, 45 / 255.0f, 230 / 255.0f);
+	const ImVec4 _nodeBorderColor = ImVec4(100 / 255.0f, 100 / 255.0f, 100 / 255.0f, 255 / 255.0f);
+	const ImVec4 _rootNodeColor = ImVec4(200 / 255.0f, 50 / 255.0f, 50 / 255.0f, 230 / 255.0f); // MainMenuなどを強調
+
 };

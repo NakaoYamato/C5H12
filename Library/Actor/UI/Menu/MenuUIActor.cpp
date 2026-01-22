@@ -7,6 +7,9 @@
 
 #define DEBUG_MENUUIACTOR 0 // 使用例
 
+// コピー用ポインタ
+MenuWidget* CopyMenuWidgetPtr = nullptr;
+
 // 生成時処理
 void MenuUIActor::OnCreate()
 {
@@ -47,6 +50,10 @@ void MenuUIActor::OnCreate()
 
 	PushPage("MainMenu");
 #endif
+
+	_menuNodeEditor = std::make_unique<MenuNodeEditor>();
+	_menuNodeEditor->SetLayoutFilePath("./Data/Resource/Actor/TestMenuUI/MenuLayout.json");
+	_menuNodeEditor->LoadFromFile();
 }
 
 // 更新時処理
@@ -100,6 +107,12 @@ void MenuUIActor::OnDrawGui()
 
 			ImGui::EndTabItem();
 		}
+		if (ImGui::BeginTabItem(u8"ウィジェットNode"))
+		{
+			_menuNodeEditor->DrawGui(this);
+
+			ImGui::EndTabItem();
+		}
 		ImGui::EndTabBar();
 	}
 
@@ -127,6 +140,21 @@ void MenuUIActor::OnDrawGui()
 // ウィジェット登録
 std::shared_ptr<MenuWidget> MenuUIActor::RegisterWidget(std::shared_ptr<MenuWidget> widget)
 {
+	// すでに登録されている場合は名前を変更する
+	if (_registeredWidgets.find(widget->GetName()) != _registeredWidgets.end())
+	{
+		int index = 0;
+		while (true)
+		{
+			std::string name = widget->GetName() + "_" + std::to_string(index++);
+			if (_registeredWidgets.find(name) == _registeredWidgets.end())
+			{
+				// 名前が存在しないなら変更して抜ける
+				widget->SetName(widget->GetName() + "_1");
+				break;
+			}
+		}
+	}
 	_registeredWidgets[widget->GetName()] = widget;
 	return widget;
 }
@@ -233,14 +261,16 @@ bool MenuUIActor::LoadFromFile()
 		std::string name = sub.value("name", "");
 		if (name.empty())
 			continue;
-		auto& widget = _registeredWidgets[name];
-		if (widget)
+		// すでに登録されているか確認
+		if (_registeredWidgets.find(name) != _registeredWidgets.end())
 		{
-			widget->LoadFromFile(&sub);
+			// 登録されている場合はそれを使用
+			_registeredWidgets[name]->LoadFromFile(&sub);
 		}
 		else
 		{
-			widget = RegisterWidget(std::make_shared<MenuWidget>(name));
+			// 登録されていない場合は新規作成して登録
+			auto widget = RegisterWidget(std::make_shared<MenuWidget>(name));
 			widget->LoadFromFile(&sub);
 		}
 	}
@@ -402,6 +432,38 @@ void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 // GUI描画処理
 void MenuWidget::DrawGui(MenuUIActor* owner)
 {
+	if (ImGui::Button(u8"コピー"))
+	{
+		CopyMenuWidgetPtr = this;
+	}
+	if (CopyMenuWidgetPtr)
+	{
+		ImGui::SameLine();
+		if (ImGui::Button(u8"ペースト"))
+		{
+			this->_rectTransform = CopyMenuWidgetPtr->_rectTransform;
+			this->_title = CopyMenuWidgetPtr->_title;
+			this->_titleLabelOffset = CopyMenuWidgetPtr->_titleLabelOffset;
+			this->_titleFontSize = CopyMenuWidgetPtr->_titleFontSize;
+			this->_titleLabelColor = CopyMenuWidgetPtr->_titleLabelColor;
+			this->_titleSprite = CopyMenuWidgetPtr->_titleSprite;
+			this->_description = CopyMenuWidgetPtr->_description;
+			this->_descriptionLabelOffset = CopyMenuWidgetPtr->_descriptionLabelOffset;
+			this->_descriptionFontSize = CopyMenuWidgetPtr->_descriptionFontSize;
+			this->_descriptionLabelColor = CopyMenuWidgetPtr->_descriptionLabelColor;
+			this->_descriptionSprite = CopyMenuWidgetPtr->_descriptionSprite;
+			this->_options = CopyMenuWidgetPtr->_options;
+			this->_optionSprite = CopyMenuWidgetPtr->_optionSprite;
+			this->_selectedOptionSprite = CopyMenuWidgetPtr->_selectedOptionSprite;
+			this->_optionVerticalSpacing = CopyMenuWidgetPtr->_optionVerticalSpacing;
+			this->_optionFontSize = CopyMenuWidgetPtr->_optionFontSize;
+			this->_optionLabelOffset = CopyMenuWidgetPtr->_optionLabelOffset;
+			this->_optionLabelColor = CopyMenuWidgetPtr->_optionLabelColor;
+			this->_optionLabelSelectedColor = CopyMenuWidgetPtr->_optionLabelSelectedColor;
+		}
+	}
+	ImGui::Separator();
+
 	if (ImGui::TreeNode(u8"トランスフォーム"))
 	{
 		_rectTransform.DrawGui();
@@ -700,3 +762,439 @@ void MenuWidget::RenderDescription(const RenderContext& rc, MenuUIActor* owner)
 	}
 }
 #pragma endregion
+
+#pragma region メニューUIノードエディタクラス
+// 文字列ハッシュ
+unsigned long MenuNodeEditor::HashString(const std::string& str) const
+{
+	unsigned long hash = 5381;
+	for (char c : str) {
+		hash = ((hash << 5) + hash) + c;
+	}
+	return hash;
+}
+// ウィジェット名からノードID生成
+ne::NodeId MenuNodeEditor::GetNodeId(const std::string& widgetName) const
+{
+	return (ne::NodeId)HashString("Node_" + widgetName);
+}
+// ウィジェット名から入力ピンID生成 (左側)
+ne::PinId MenuNodeEditor::GetInputPinId(const std::string& widgetName) const
+{
+	return (ne::PinId)HashString("InPin_" + widgetName);
+}
+// ウィジェット名とオプションインデックスから出力ピンID生成 (右側)
+ne::PinId MenuNodeEditor::GetOutputPinId(const std::string& widgetName, int optionIndex) const
+{
+	return (ne::PinId)HashString("OutPin_" + widgetName + "_" + std::to_string(optionIndex));
+}
+// リンクID生成 (遷移元ウィジェット名 + インデックス -> 遷移先ウィジェット名)
+ne::LinkId MenuNodeEditor::GetLinkId(const std::string& sourceWidget, int optionIndex, const std::string& targetWidget) const
+{
+	return (ne::LinkId)HashString("Link_" + sourceWidget + "_" + std::to_string(optionIndex) + "_" + targetWidget);
+}
+
+MenuNodeEditor::MenuNodeEditor()
+{
+	ne::Config config;
+	config.SettingsFile = ""; // ImGui側で保存しない（自前でJSON管理するため）
+	_editorContext = ne::CreateEditor(&config);
+}
+MenuNodeEditor::~MenuNodeEditor()
+{
+	if (_editorContext)
+	{
+		ne::DestroyEditor(_editorContext);
+	}
+}
+
+// GUI描画処理
+void MenuNodeEditor::DrawGui(MenuUIActor* menuActor)
+{
+	if (!menuActor || !_editorContext) return;
+
+	ne::SetCurrentEditor(_editorContext);
+
+	// ウィンドウ開始
+	ImGui::Begin("Menu Node Editor", nullptr, ImGuiWindowFlags_MenuBar);
+
+	// メニューバー
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("View"))
+		{
+			if (ImGui::MenuItem("Fit View")) ne::NavigateToContent();
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Save Layout")) SaveToFile();
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+	
+	// カラムで画面を分割 (左: エディタ, 右: インスペクタ)
+	ImGui::Columns(2, "NodeEditorColumns", true);
+
+	ne::Begin("MenuNodeEditorSpace");
+
+	// ノードとピンの描画
+	auto& widgets = menuActor->GetRegisteredWidgetsForEdit();
+
+	// 逆引き用マップ (PinID -> {WidgetName, OptionIndex})
+	// リンク作成時のコールバックで使用
+	struct PinInfo { std::string widgetName{}; int optionIndex{}; bool isInput{}; };
+	std::unordered_map<size_t, PinInfo> pinLookup;
+
+	int nodeCount = 0;
+	for (auto& [name, widget] : widgets)
+	{
+		ne::NodeId nodeId = GetNodeId(name);
+
+		// 初回位置設定
+		if (_isFirstFrame)
+		{
+			if (_nodePositions.find((size_t)nodeId) != _nodePositions.end())
+			{
+				ne::SetNodePosition(nodeId, _nodePositions[(size_t)nodeId]);
+			}
+			else
+			{
+				// デフォルト配置: 数が増えると重なるので適当にずらす
+				ne::SetNodePosition(nodeId, ImVec2(50.0f + (nodeCount % 5) * 300.0f, 50.0f + (nodeCount / 5) * 200.0f));
+			}
+		}
+		else
+		{
+			// 位置を記録
+			_nodePositions[(size_t)nodeId] = ne::GetNodePosition(nodeId);
+		}
+
+		// 色設定
+		bool isCurrent = (menuActor->GetCurrentWidget() == widget.get());
+		bool isSelectedInEditor = (name == _selectedWidgetName); // エディタでの選択状態
+		ImVec4 headerColor = (name == "MainMenu") ? _rootNodeColor : _nodeBgColor;
+		float borderWidth = 1.0f;
+
+		if (isCurrent)
+		{
+			// 現在のアクティブページ
+			headerColor = ImVec4(0.8f, 0.4f, 0.0f, 1.0f);
+			borderWidth = 3.0f;
+		}
+		else if (isSelectedInEditor)
+		{
+			// エディタで選択中
+			headerColor = ImVec4(0.5f, 1.0f, 0.5f, 1.0f);
+			borderWidth = 2.0f;
+		}
+
+		ne::PushStyleColor(ne::StyleColor_NodeBg, _nodeBgColor);
+		ne::PushStyleColor(ne::StyleColor_NodeBorder, isCurrent ? ImVec4(1, 1, 0, 1) : _nodeBorderColor);
+		ne::PushStyleVar(ne::StyleVar_NodeBorderWidth, borderWidth);
+
+		ne::BeginNode(nodeId);
+
+		// ヘッダー
+		ImGui::BeginGroup();
+
+		// 入力ピン (左上)
+		ne::PinId inPinId = GetInputPinId(name);
+		ne::BeginPin(inPinId, ne::PinKind::Input);
+		// 入力ピンの見た目
+		ImGui::Text(" > ");
+		ne::EndPin();
+		pinLookup[(size_t)inPinId] = { name, -1, true };
+
+		ImGui::SameLine();
+		ImGui::TextColored(ImVec4(1, 1, 1, 1), "%s", name.c_str());
+		ImGui::EndGroup();
+
+		auto& options = widget->GetOptions();
+		for (int i = 0; i < options.size(); ++i)
+		{
+			auto& option = options[i];
+
+			ne::PinId outPinId = GetOutputPinId(name, i);
+
+			// ラベル表示
+			ImGui::Text("%d: %s", i, option.label.c_str());
+			if (!option.onSelectedCallbackName.empty())
+			{
+				ImGui::SameLine();
+				ImGui::TextDisabled("(cb: %s)", option.onSelectedCallbackName.c_str());
+			}
+
+			ImGui::SameLine();
+
+			// 出力ピン (右側)
+			ne::BeginPin(outPinId, ne::PinKind::Output);
+			ImGui::Text(" >");
+			ne::EndPin();
+
+			pinLookup[(size_t)outPinId] = { name, i, false };
+		}
+
+		ne::EndNode();
+
+		ne::PopStyleVar(1);
+		ne::PopStyleColor(2);
+
+		nodeCount++;
+	}
+
+	_isFirstFrame = false;
+
+	// リンクの描画
+	for (auto& [name, widget] : widgets)
+	{
+		auto& options = widget->GetOptions();
+		for (int i = 0; i < options.size(); ++i)
+		{
+			auto& option = options[i];
+			if (!option.nextWidgetName.empty() && widgets.find(option.nextWidgetName) != widgets.end())
+			{
+				// 遷移先が存在する場合、リンクを描画
+				if (widgets.find(option.nextWidgetName) != widgets.end())
+				{
+					ne::LinkId linkId = GetLinkId(name, i, option.nextWidgetName);
+					ne::PinId startPin = GetOutputPinId(name, i);
+					ne::PinId endPin = GetInputPinId(option.nextWidgetName);
+
+					ne::Link(linkId, startPin, endPin);
+				}
+			}
+		}
+	}
+
+	// リンクの作成・削除処理
+	if (ne::BeginCreate())
+	{
+		ne::PinId startPinId, endPinId;
+		if (ne::QueryNewLink(&startPinId, &endPinId))
+		{
+			if (startPinId && endPinId && pinLookup.count((size_t)startPinId) && pinLookup.count((size_t)endPinId))
+			{
+				auto& startInfo = pinLookup[(size_t)startPinId];
+				auto& endInfo = pinLookup[(size_t)endPinId];
+
+				// Input同士、Output同士でないか確認
+				if (startInfo.isInput != endInfo.isInput)
+				{
+					if (ne::AcceptNewItem())
+					{
+						auto* outInfo = startInfo.isInput ? &endInfo : &startInfo;
+						auto* inInfo = startInfo.isInput ? &startInfo : &endInfo;
+						auto& options = widgets[outInfo->widgetName]->GetOptions();
+						if (outInfo->optionIndex >= 0 && outInfo->optionIndex < options.size())
+							options[outInfo->optionIndex].nextWidgetName = inInfo->widgetName;
+					}
+				}
+				else
+				{
+					ne::RejectNewItem(ImVec4(1, 0, 0, 1), 2.0f);
+				}
+			}
+		}
+	}
+	ne::EndCreate();
+
+	// リンク削除
+	if (ne::BeginDelete())
+	{
+		ne::LinkId deletedLinkId;
+		while (ne::QueryDeletedLink(&deletedLinkId))
+		{
+			if (ne::AcceptDeletedItem())
+			{
+				// リンクIDからどのウィジェットのどのオプションかを逆算するのは難しいので、
+				// 全探索して該当するリンクを探して削除する
+				bool found = false;
+				for (auto& [name, widget] : widgets)
+				{
+					auto& options = widget->GetOptions();
+					for (int i = 0; i < options.size(); ++i)
+					{
+						if (options[i].nextWidgetName.empty()) continue;
+
+						ne::LinkId currentLinkId = GetLinkId(name, i, options[i].nextWidgetName);
+						if (currentLinkId == deletedLinkId)
+						{
+							// リンク解除
+							options[i].nextWidgetName = "";
+							found = true;
+							break;
+						}
+					}
+					if (found) break;
+				}
+			}
+		}
+	}
+	ne::EndDelete();
+
+	// コンテキストメニュー
+	ne::Suspend();
+	// リンク(線)の右クリックメニュー
+	if (ne::ShowLinkContextMenu(&_contextLinkId))
+	{
+		ImGui::OpenPopup("LinkContextMenu");
+	}
+
+	if (ImGui::BeginPopup("LinkContextMenu"))
+	{
+		if (ImGui::MenuItem("Delete Link"))
+		{
+			// 全ウィジェットを探索して、右クリックされたリンクIDに該当する接続を探す
+			bool found = false;
+			for (auto& [name, widget] : widgets)
+			{
+				auto& options = widget->GetOptions();
+				for (int i = 0; i < options.size(); ++i)
+				{
+					// 遷移先がないオプションはスキップ
+					if (options[i].nextWidgetName.empty()) continue;
+
+					// リンクIDを再計算して、右クリックされたIDと照合
+					ne::LinkId currentLinkId = GetLinkId(name, i, options[i].nextWidgetName);
+					if (currentLinkId == _contextLinkId)
+					{
+						options[i].nextWidgetName = ""; // 接続解除
+						found = true;
+						break;
+					}
+				}
+				if (found) break;
+			}
+		}
+		ImGui::EndPopup();
+	}
+
+	if (ne::ShowBackgroundContextMenu())
+	{
+		ImGui::OpenPopup("CreateWidgetContext");
+		_popupSpawnPos = ImGui::GetMousePos();
+	}
+
+	if (ImGui::BeginPopup("CreateWidgetContext"))
+	{
+		ImGui::Text("Create New Widget");
+		ImGui::InputText("Name", &_newWidgetName);
+		if (ImGui::Button("Create"))
+		{
+			auto newWidget = menuActor->RegisterWidget(std::make_shared<MenuWidget>(_newWidgetName));
+			// ウィジェットが重複していたら名前が変わる可能性があるので、再取得
+			_newWidgetName = newWidget->GetName();
+			ne::SetNodePosition(GetNodeId(_newWidgetName), ImVec2(50, 50));
+
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+	ne::Resume();
+
+	// 選択状態の更新
+	if (ne::GetSelectedObjectCount() > 0)
+	{
+		std::vector<ne::NodeId> selectedNodes(1);
+		ne::GetSelectedNodes(selectedNodes.data(), 1);
+		ne::NodeId selectedId = selectedNodes[0];
+
+		// IDから名前を逆引き
+		bool found = false;
+		for (auto& [name, widget] : widgets)
+		{
+			if (GetNodeId(name) == selectedId)
+			{
+				_selectedWidgetName = name;
+				found = true;
+				break;
+			}
+		}
+		if (!found) _selectedWidgetName.clear();
+	}
+	else
+	{
+		// 何も選択されていない場合
+		_selectedWidgetName.clear();
+	}
+
+	ne::End();
+
+	// インスペクタ
+	ImGui::NextColumn();
+
+	ImGui::Text("Inspector");
+	ImGui::Separator();
+
+	if (!_selectedWidgetName.empty())
+	{
+		auto it = widgets.find(_selectedWidgetName);
+		if (it != widgets.end())
+		{
+			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "[ %s ]", _selectedWidgetName.c_str());
+			it->second->DrawGui(menuActor);
+		}
+	}
+	else
+	{
+		ImGui::TextDisabled("Select a node to edit.");
+	}
+
+	ImGui::Columns(1);
+	ImGui::End();
+}
+
+// ファイル読み込み
+void MenuNodeEditor::LoadFromFile()
+{
+	if (_filename.empty()) return;
+
+	nlohmann::json jsonData;
+	if (Exporter::LoadJsonFile(_filename.c_str(), &jsonData))
+	{
+		if (jsonData.contains("Nodes"))
+		{
+			auto& nodes = jsonData["Nodes"];
+			for (auto& element : nodes)
+			{
+				size_t nodeId = element["ID"].get<size_t>();
+				float x = element["X"].get<float>();
+				float y = element["Y"].get<float>();
+
+				_nodePositions[nodeId] = ImVec2(x, y);
+			}
+		}
+	}
+	// 初回フレームフラグをリセットして、再適用させる
+	_isFirstFrame = true;
+}
+// ファイル保存
+void MenuNodeEditor::SaveToFile()
+{
+	if (_filename.empty()) return;
+
+	nlohmann::json jsonData;
+	nlohmann::json nodesArray = nlohmann::json::array();
+
+	// 現在のエディタ上の全ノードの位置を保存
+	for (auto& [id, pos] : _nodePositions)
+	{
+		// 最新の位置情報を取得して更新
+		ImVec2 currentPos = ne::GetNodePosition((ne::NodeId)id);
+		_nodePositions[id] = currentPos;
+
+		nlohmann::json node;
+		node["ID"] = id;
+		node["X"] = currentPos.x;
+		node["Y"] = currentPos.y;
+		nodesArray.push_back(node);
+	}
+	jsonData["Nodes"] = nodesArray;
+
+	Exporter::SaveJsonFile(_filename.c_str(), jsonData);
+}
+
+#pragma endregion
+

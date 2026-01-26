@@ -55,6 +55,7 @@ void QuestBoardUIActor::OnCreate()
 	std::shared_ptr<InQuestStatusUIWidget> inQuestStatus = std::make_shared<InQuestStatusUIWidget>("InQuestStatus");
 	inQuestStatus->SetQuestOrderController(_questOrderController);
 	RegisterWidget(inQuestStatus);
+	RegisterWidget(std::make_shared<MenuMatrixWidget>("Test"));
 
 	SetFilePath("./Data/Resource/Actor/QuestBoardUIActor/MenuUI.json");
 	LoadFromFile();
@@ -130,7 +131,7 @@ void QuestBoardUIWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 
 	TextRenderer& textRenderer = owner->GetScene()->GetTextRenderer();
 	RectTransform rect = _rectTransform;
-	size_t i = 0;
+	int i = 0;
 	for (auto& questData : questManager->GetQuestDataList())
 	{
 		if (questData.questType != _displayQuestType)
@@ -175,7 +176,7 @@ void QuestBoardUIWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 			i == _selectedOptionIndex ? _optionLabelSelectedColor : _optionLabelColor,
 			0.0f,
 			Vector2::Zero,
-			_optionFontSize);
+			_optionLabelFontSize);
 		// 次の選択肢位置計算
 		Vector2 position = rect.GetLocalPosition();
 		position.y += _optionVerticalSpacing;
@@ -260,14 +261,14 @@ void QuestBoardUIWidget::BackOption(MenuUIActor* owner)
 }
 
 // インデックス範囲制限
-size_t QuestBoardUIWidget::ClampSelectedOptionIndex(size_t index)
+int QuestBoardUIWidget::ClampSelectedOptionIndex(int index)
 {
 	auto questManager = _questManager.lock();
 	if (!questManager)
 		return 0;
 
 	// 何かしらの要因でクエスト数が変化する場合を考慮して毎回計算
-	size_t i = 0;
+	int i = 0;
 	for (auto& questData : questManager->GetQuestDataList())
 	{
 		if (questData.questType != _displayQuestType)

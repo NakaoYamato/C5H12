@@ -130,12 +130,15 @@ public:
 	virtual void AddOption(const std::string& label,
 		const std::string& onSelectedCallbackName = "",
 		const std::string& nextWidgetName = "");
+	// 選択肢削除
+	virtual void RemoveOption(size_t index);
+
 	// 選択肢インデックス増加
-	virtual size_t AddSelectedOptionIndex();
+	virtual int AddSelectedOptionIndex();
 	// 選択肢インデックス減少
-	virtual size_t SubSelectedOptionIndex();
+	virtual int SubSelectedOptionIndex();
 	// インデックス範囲制限
-	virtual size_t ClampSelectedOptionIndex(size_t index);
+	virtual int ClampSelectedOptionIndex(int index);
 	// 選択肢選択処理
 	virtual void SelectOption(MenuUIActor* owner);
 	// 戻る選択肢選択処理
@@ -148,7 +151,7 @@ public:
 
 	RectTransform& GetRectTransform() { return _rectTransform; }
 	size_t GetOptionSize() const { return _options.size(); }
-	size_t GetSelectedOptionIndex() const { return _selectedOptionIndex; }
+	int GetSelectedOptionIndex() const { return _selectedOptionIndex; }
 	bool CanChangeIndex() const { return _canChangeIndex; }
 
 	void SetCanChangeIndex(bool canChange) { _canChangeIndex = canChange; }
@@ -171,11 +174,15 @@ public:
 #pragma endregion
 
 protected:
+	// 選択肢描画処理
+	virtual void RenderOptions(const RenderContext& rc, MenuUIActor* owner);
 	// タイトル描画処理
 	virtual void RenderTitle(const RenderContext& rc, MenuUIActor* owner);
 	// 説明文描画処理
 	virtual void RenderDescription(const RenderContext& rc, MenuUIActor* owner);
 
+	// 各画像のGUI描画処理
+	virtual void DrawSpritesGui(MenuUIActor* owner);
 protected:
     std::string _name;
 	RectTransform _rectTransform;
@@ -211,7 +218,7 @@ protected:
 	// 選択肢間の垂直間隔
 	float _optionVerticalSpacing = 40.0f;
 	// ラベルのフォントサイズ
-	Vector2 _optionFontSize = Vector2::One;
+	Vector2 _optionLabelFontSize = Vector2::One;
 	// ラベルのオフセット
 	Vector2 _optionLabelOffset = Vector2(20.0f, 10.0f);
 	// ラベルの色
@@ -220,10 +227,106 @@ protected:
 	Vector4 _optionLabelSelectedColor = Vector4::Red;
 
 	// 選択中の選択肢インデックス
-	size_t _selectedOptionIndex = 0;
+	int _selectedOptionIndex = 0;
 
 	// インデックス変更可能フラグ
 	bool _canChangeIndex = true;
+};
+
+// 縦横に並ぶメニューUIノードエディタ用ウィジェットクラス
+class MenuMatrixWidget : public MenuWidget
+{
+public:
+	// 選択肢を管理するレイヤー
+	struct OptionLayer
+	{
+		// 表示名
+		std::string label{};
+		// 選択肢インデックスリスト
+		std::vector<size_t> optionIndices;
+	};
+
+public:
+	MenuMatrixWidget(std::string name) : MenuWidget(name) {}
+	~MenuMatrixWidget() override = default;
+
+#pragma region 共通インターフェース
+	// 更新処理
+	void Update(float elapsedTime, MenuUIActor* owner) override;
+	// 描画処理
+	void Render(const RenderContext& rc, MenuUIActor* owner) override;
+	// GUI描画処理
+	void DrawGui(MenuUIActor* owner) override;
+#pragma endregion
+
+#pragma region 選択肢
+	// 選択肢インデックス増加
+	virtual int AddSelectedOptionIndex() override;
+	// 選択肢インデックス減少
+	virtual int SubSelectedOptionIndex() override;
+	// インデックス範囲制限
+	virtual int ClampSelectedOptionIndex(int index) override;
+	// 選択肢選択処理
+	virtual void SelectOption(MenuUIActor* owner) override;
+#pragma endregion
+
+#pragma region 選択肢レイヤー
+	// 選択肢レイヤー追加
+	virtual void AddOptionLayer(const std::string& label);
+	// 選択肢レイヤー削除
+	virtual void RemoveOptionLayer(size_t layerIndex);
+	// 選択肢レイヤーの表示する選択肢番号追加
+	virtual void AddOptionIndexToLayer(size_t layerIndex, size_t optionIndex);
+	// 選択肢レイヤーの表示する選択肢番号削除
+	virtual void RemoveOptionIndexFromLayer(size_t layerIndex, size_t optionIndex);
+	
+	// 選択肢レイヤーインデックス増加
+	virtual int AddOptionLayerIndex();
+	// 選択肢レイヤーインデックス減少
+	virtual int SubOptionLayerIndex();
+	// 選択肢レイヤーインデックス範囲制限
+	virtual int ClampOptionLayerIndex(int index);
+#pragma endregion
+
+#pragma region ファイル
+	// ファイル読み込み処理
+	virtual void OnLoadFromFile(nlohmann::json* json) override;
+	// ファイル保存処理
+	virtual void OnSaveToFile(nlohmann::json* json) override;
+#pragma endregion
+protected:
+	// 選択肢描画処理
+	virtual void RenderOptions(const RenderContext& rc, MenuUIActor* owner) override;
+	// 選択肢レイヤー描画処理
+	virtual void RenderOptionLayers(const RenderContext& rc, MenuUIActor* owner);
+
+	// 各画像のGUI描画処理
+	virtual void DrawSpritesGui(MenuUIActor* owner);
+protected:
+	// 選択肢レイヤーリスト
+	std::vector<OptionLayer> _optionLayers;
+	// 現在のレイヤーインデックス
+	int _selectedOptionLayerIndex = 0;
+	// レイヤーの表示間隔
+	Vector2 _layerSpacing = Vector2(300.0f, 0.0f);
+
+	// レイヤーの背景
+	Sprite _layerBackgroundSprite;
+	// レイヤーの非選択時背景
+	Sprite _layerOptionSprite;
+	// レイヤーの選択時背景
+	Sprite _layerSelectedOptionSprite;
+	// レイヤーラベルのフォントサイズ
+	Vector2 _layerLabelFontSize = Vector2::One;
+	// レイヤーラベルのオフセット
+	Vector2 _layerLabelOffset = Vector2(20.0f, 10.0f);
+	// レイヤーラベルの色
+	Vector4 _layerLabelColor = Vector4::White;
+	// レイヤーラベルの選択中の色
+	Vector4 _layerLabelSelectedColor = Vector4::Red;
+
+	// レイヤー変更可能フラグ
+	bool _canChangeLayerIndex = true;
 };
 
 // メニューUIノードエディタクラス

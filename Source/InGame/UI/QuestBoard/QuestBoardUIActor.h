@@ -47,7 +47,7 @@ public:
 	// 戻る選択肢選択処理
 	void BackOption(MenuUIActor* owner) override;
 	// インデックス範囲制限
-	size_t ClampSelectedOptionIndex(size_t index) override;
+	int ClampSelectedOptionIndex(int index) override;
 
 	void SetDisplayQuestType(QuestData::QuestType type) { _displayQuestType = type; }
 

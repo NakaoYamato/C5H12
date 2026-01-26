@@ -19,6 +19,8 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         (DivisionCount * 2 - 1) * 
         ((MaxTess - 1) * (MaxTess - 2)) / 2;
 
+    _currentTextureQuality = Terrain::TextureQuality::Low;
+
     // 定数バッファデータ初期化
     _data.lodTessFactors = Vector4(31.0f, 19.0f, 9.0f, 7.0f);
     _data.lodTessDistance = 30.0f;

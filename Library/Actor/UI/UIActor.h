@@ -17,6 +17,9 @@ public:
 	/// トランスフォーム更新
 	/// </summary>
 	virtual void UpdateTransform() override;
+	// 起動フラグが変化したときの処理
+	// 子供にも伝播する
+	virtual void OnChangedActive(bool isActive) override;
 
 	/// <summary>
 	/// 3D描画後の描画時処理
@@ -31,7 +34,13 @@ public:
 	virtual void SetParent(Actor* parent) override;
 #pragma endregion
 
+#pragma region アクセサ
 	RectTransform& GetRectTransform() { return _rectTransform; }
+
+	bool GetPropagateActiveChange() const { return _propagateActiveChange; }
+	void SetPropagateActiveChange(bool propagate) { _propagateActiveChange = propagate; }
+#pragma endregion
+
 protected:
 	/// <summary>
 	/// トランスフォームGUI描画
@@ -41,4 +50,7 @@ protected:
 private:
 	RectTransform	_rectTransform;
 	RectTransform* _parentRectTransform = nullptr;
+
+	// 起動フラグが変化したに子供にも伝播するためのフラグ
+	bool			_propagateActiveChange = true;
 };

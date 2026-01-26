@@ -18,6 +18,24 @@ void UIActor::UpdateTransform()
 	_rectTransform.UpdateTransform(_parentRectTransform);
 }
 
+// 起動フラグが変化したときの処理
+// 子供にも伝播する
+void UIActor::OnChangedActive(bool isActive)
+{
+	if (!_propagateActiveChange)
+		return;
+
+	// 子供に伝播
+	for (auto& child : GetChildren())
+	{
+		UIActor* uiChild = dynamic_cast<UIActor*>(child.get());
+		if (uiChild)
+		{
+			uiChild->ChangedActive(isActive);
+		}
+	}
+}
+
 /// 3D描画後の描画時処理
 void UIActor::OnDelayedRender(const RenderContext& rc)
 {
@@ -67,6 +85,11 @@ void UIActor::SetParent(Actor* parent)
 /// トランスフォームGUI描画
 void UIActor::DrawTransformGui()
 {
+	if (ImGui::CollapsingHeader("Flags"))
+	{
+		ImGui::Checkbox(u8"PropagateActiveChange", &_propagateActiveChange);
+	}
+
 	if (ImGui::CollapsingHeader("RectTransform", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		_rectTransform.DrawGui();

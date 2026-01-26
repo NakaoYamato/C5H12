@@ -46,13 +46,13 @@ void NetworkMediator::OnPreUpdate(float elapsedTime)
                 CreatePlayer(0, myPlayerId == -1);
 				// TODO : ÉÅÉ^AIÇ…îCÇπÇÈ
 				// ìGÇÃê∂ê¨
-                CreateEnemy(
-                    0,
-                    0,
-                    Network::CharacterType::Wyvern,
-                    Vector3(54.0f, 0.3f, 50.0f),
-                    0.0f,
-                    100.0f);
+                //CreateEnemy(
+                //    0,
+                //    0,
+                //    Network::CharacterType::Wyvern,
+                //    Vector3(54.0f, 0.3f, 50.0f),
+                //    0.0f,
+                //    100.0f);
             }
             else
             {

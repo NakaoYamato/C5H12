@@ -588,7 +588,7 @@ bool GpuResourceManager::LoadTextureFromFile(ID3D11Device* device,
 		metadata, shaderResourceView);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	size_t maxTextureSize = 2048; // 最大テクスチャサイズの上限 (必要に応じて変更可能)
+	size_t maxTextureSize = 1024; // 最大テクスチャサイズの上限 (必要に応じて変更可能)
 	if (maxTextureSize > 0 && (metadata.width > maxTextureSize || metadata.height > maxTextureSize))
 	{
 		// アスペクト比を維持して新しいサイズを計算

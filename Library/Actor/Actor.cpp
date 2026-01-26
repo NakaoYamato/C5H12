@@ -272,13 +272,28 @@ void Actor::DrawGui()
 	// ƒtƒ‰ƒO
 	if (ImGui::CollapsingHeader("Flags"))
 	{
-		ImGui::Checkbox(u8"Active", &_isActive);
-		ImGui::Checkbox(u8"TransformGui", &_isDrawingTransformGui);
-		ImGui::Checkbox(u8"Show", &_isShowing);
-		ImGui::Checkbox(u8"CastShadow", &_isCastingShadow);
-		ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug);
-		ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo);
-		ImGui::Checkbox(u8"InheritParentTransform", &_isInheritParentTransform);
+		bool f = _isActive;
+		if (ImGui::Checkbox(u8"Active", &f))
+			SetIsActive(f);
+
+		f = _isDrawingTransformGui;
+		if (ImGui::Checkbox(u8"TransformGui", &_isDrawingTransformGui))
+			SetIsDrawingTransformGui(f);
+		f = _isShowing;
+		if (ImGui::Checkbox(u8"Show", &_isShowing))
+			SetIsShowing(f);
+		f = _isCastingShadow;
+		if (ImGui::Checkbox(u8"CastShadow", &_isCastingShadow))
+			SetIsCastingShadow(f);
+		f = _isDrawingDebug;
+		if (ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug))
+			SetIsDrawingDebug(f);
+		f = _isUsingGuizmo;
+		if (ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo))
+			SetIsUsingGuizmo(f);
+		f = _isInheritParentTransform;
+		if (ImGui::Checkbox(u8"InheritParentTransform", &_isInheritParentTransform))
+			SetInheritParentTransform(f);
 		ImGui::Checkbox(u8"OpenProfiler", &_isOpenProfiler);
 	}
 

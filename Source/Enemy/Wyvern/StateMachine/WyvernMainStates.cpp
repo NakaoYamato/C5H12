@@ -750,9 +750,9 @@ void WyvernDeathState::OnEnter()
 	_owner->GetEnemy()->GetCharactorController()->SetIsPushable(false);
 
     // ハンティング成功カメラを起動
-	for (auto& child : _owner->GetEnemy()->GetActor()->GetScene()->GetMainCameraActor()->GetChildren())
+	if (auto cameraActor = _owner->GetEnemy()->GetActor()->GetScene()->GetMainCameraActor())
 	{
-		auto huntingSuccessCamera = child->GetComponent<HuntingSuccessCamera>();
+		auto huntingSuccessCamera = cameraActor->GetComponent<HuntingSuccessCamera>();
 		if (huntingSuccessCamera)
 		{
 			Vector3 position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
@@ -765,7 +765,6 @@ void WyvernDeathState::OnEnter()
 			);
 			// プレイヤーカメラに戻すコントローラー名を設定
 			huntingSuccessCamera->SetNextControllerName("PlayerCameraController");
-			break;
 		}
     }
 

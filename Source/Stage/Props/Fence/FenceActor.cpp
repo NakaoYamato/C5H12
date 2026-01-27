@@ -74,6 +74,18 @@ void FenceActor::OnCreate()
 					"GeteController",
 					[&](Actor* target)
 					{
+						// クエスト受注中なら使用可能
+						auto gameManager = target->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+						if (!gameManager)
+							return;
+						auto questOrderController = gameManager->GetComponent<QuestOrderController>();
+						if (!questOrderController)
+							return;
+						if (questOrderController->GetCurrentState() != QuestOrderController::State::Accepted)
+							return;
+						if (!questOrderController->CanStartQuest())
+							return;
+
 						// 頭上にテキスト表示
 						TextRenderer::Text3DDrawData drawData;
 						drawData.type = FontType::MSGothic;

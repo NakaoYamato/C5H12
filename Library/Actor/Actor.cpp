@@ -452,12 +452,6 @@ void Actor::SetIsActive(bool b)
 {
 	this->_isActive = b;
 	ChangedActive(b);
-
-	// Žq‹Ÿ‚É‚à“`”d
-	for (std::shared_ptr<Actor>& child : _children)
-	{
-		child->SetIsActive(b);
-	}
 }
 #pragma region eŽqŠÖŒW
 /// eÝ’è
@@ -693,5 +687,14 @@ void Actor::ChangedActive(bool isActive)
 		collider->OnChangedActive(isActive);
 	}
 	OnChangedActive(isActive);
+
+	// Žq‹Ÿ‚É‚à“`”d
+	if (_propagateActiveChange)
+	{
+		for (std::shared_ptr<Actor>& child : _children)
+		{
+			child->SetIsActive(isActive);
+		}
+	}
 }
 #pragma endregion

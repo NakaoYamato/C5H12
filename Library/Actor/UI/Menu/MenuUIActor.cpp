@@ -96,6 +96,24 @@ void MenuUIActor::OnDelayedRender(const RenderContext& rc)
 	UIActor::OnDelayedRender(rc);
 	if (auto currentWidget = GetCurrentWidget())
 	{
+		// 直前のウィジェットを描画するか判定
+		if (currentWidget->IsDrawPreviousWidget())
+		{
+			// スタックから一時的に直前のウィジェットを取得して描画する
+			std::string currentWidgetName = _widgetStackNames.top();
+			_widgetStackNames.pop();
+			if (!_widgetStackNames.empty())
+			{
+				std::string previousWidgetName = _widgetStackNames.top();
+				auto it = _registeredWidgets.find(previousWidgetName);
+				if (it != _registeredWidgets.end())
+				{
+					it->second->Render(rc, this);
+				}
+			}
+			_widgetStackNames.push(currentWidgetName);
+		}
+
 		currentWidget->Render(rc, this);
 	}
 }
@@ -249,9 +267,13 @@ void MenuUIActor::PushPage(std::string name)
 			if (currentWidget) currentWidget->OnExit();
 		}
 
-		auto& widget = _registeredWidgets.at(name);
-		if (widget) widget->OnEnter();
-		_widgetStackNames.push(name);
+		// 要素があるか確認
+		if (_registeredWidgets.find(name) != _registeredWidgets.end())
+		{
+			auto& widget = _registeredWidgets.at(name);
+			if (widget) widget->OnEnter();
+			_widgetStackNames.push(name);
+		}
 	}
 }
 
@@ -327,6 +349,7 @@ bool MenuUIActor::LoadFromFile()
 	{
 		auto& sub = json[std::to_string(index)];
 		std::string name = sub.value("name", "");
+		std::string widgetName = sub.value("widgetName", ClassToString<MenuWidget>());
 		if (name.empty())
 			continue;
 		// すでに登録されているか確認
@@ -338,7 +361,7 @@ bool MenuUIActor::LoadFromFile()
 		else
 		{
 			// 登録されていない場合は新規作成して登録
-			auto widget = RegisterWidget(std::make_shared<MenuWidget>(name));
+			auto widget = RegisterWidget(widgetName, name);
 			widget->LoadFromFile(&sub);
 		}
 	}
@@ -358,6 +381,8 @@ bool MenuUIActor::SaveToFile()
 	{
 		auto& sub = json[std::to_string(index)];
 		sub["name"] = name;
+		// クラス名を保存
+		sub["widgetName"] = widget->GetWidgetName();
 		widget->SaveToFile(&sub);
 		index++;
 	}
@@ -471,14 +496,14 @@ void MenuWidget::Update(float elapsedTime, MenuUIActor* owner)
 // 描画処理
 void MenuWidget::Render(const RenderContext& rc, MenuUIActor* owner)
 {
-	// 選択肢描画
-	RenderOptions(rc, owner);
-
 	// タイトル描画
 	RenderTitle(rc, owner);
 
 	// 説明文描画
 	RenderDescription(rc, owner);
+
+	// 選択肢描画
+	RenderOptions(rc, owner);
 }
 // GUI描画処理
 void MenuWidget::DrawGui(MenuUIActor* owner)
@@ -511,6 +536,7 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 			this->_optionLabelOffset = CopyMenuWidgetPtr->_optionLabelOffset;
 			this->_optionLabelColor = CopyMenuWidgetPtr->_optionLabelColor;
 			this->_optionLabelSelectedColor = CopyMenuWidgetPtr->_optionLabelSelectedColor;
+			this->_isDrawPreviousWidget = CopyMenuWidgetPtr->_isDrawPreviousWidget;
 		}
 	}
 	ImGui::Separator();
@@ -577,6 +603,12 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 				}
 				ImGui::TreePop();
 			}
+			if (ImGui::Button(u8"選択肢削除"))
+			{
+				RemoveOption(i);
+				ImGui::PopID();
+				break;
+			}
 
 			ImGui::PopID();
 		}
@@ -595,6 +627,8 @@ void MenuWidget::DrawGui(MenuUIActor* owner)
 		ImGui::Text(u8"選択中選択肢インデックス: %d", static_cast<int>(_selectedOptionIndex));
 
 		ImGui::Checkbox(u8"インデックス変更可能", &_canChangeIndex);
+
+		ImGui::Checkbox(u8"以前のウィジェットを描画", &_isDrawPreviousWidget);
 		
 		ImGui::TreePop();
 	}
@@ -732,6 +766,8 @@ void MenuWidget::LoadFromFile(nlohmann::json* json)
 	_optionLabelColor = sub.value("optionLabelColor", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 	_optionLabelSelectedColor = sub.value("optionLabelSelectedColor", Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 
+	_isDrawPreviousWidget = sub.value("isDrawPreviousWidget", false);
+
 	// ファイル読み込み処理
 	OnLoadFromFile(json);
 }
@@ -770,6 +806,8 @@ void MenuWidget::SaveToFile(nlohmann::json* json)
 	sub["optionLabelOffset"] = _optionLabelOffset;
 	sub["optionLabelColor"] = _optionLabelColor;
 	sub["optionLabelSelectedColor"] = _optionLabelSelectedColor;
+
+	sub["isDrawPreviousWidget"] = _isDrawPreviousWidget;
 
 	// ファイル保存処理
 	OnSaveToFile(json);

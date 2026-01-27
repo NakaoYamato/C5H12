@@ -345,6 +345,7 @@
     <ClCompile Include="Source\Enemy\Wyvern\WyvernController.cpp" />
     <ClCompile Include="Source\InGame\GameManager.cpp" />
     <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
+    <ClCompile Include="Source\InGame\Input\Option\OptionInput.cpp" />
     <ClCompile Include="Source\InGame\Input\QuestBoard\QuestBoardInput.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.cpp" />
@@ -353,6 +354,7 @@
     <ClCompile Include="Source\InGame\UI\Item\ItemUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Item\Slider\ItemSliderController.cpp" />
     <ClCompile Include="Source\InGame\UI\Operate\OperateUIController.cpp" />
+    <ClCompile Include="Source\InGame\UI\Option\OptionUIActor.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerQuestOrderUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.cpp" />
     <ClCompile Include="Source\InGame\UI\Quest\QuestUIController.cpp" />
@@ -362,7 +364,6 @@
     <ClCompile Include="Source\Item\ItemFunctions.cpp" />
     <ClCompile Include="Source\Item\ItemManager.cpp" />
     <ClCompile Include="Source\Loading\LoadingSprController.cpp" />
-    <ClCompile Include="Source\InGame\UI\Menu\MenuUIController.cpp" />
     <ClCompile Include="Source\Armor\ArmorActor.cpp" />
     <ClCompile Include="Source\Player\BuffController.cpp" />
     <ClCompile Include="Source\Player\PlayerEquipmentController.cpp" />
@@ -395,7 +396,6 @@
     <ClCompile Include="Source\Stage\Props\QuestBoard\QuestBoardController.cpp" />
     <ClCompile Include="Source\Stage\SafetyZone.cpp" />
     <ClCompile Include="Source\Stage\StageController.cpp" />
-    <ClCompile Include="Source\InGame\Input\Menu\MenuInput.cpp" />
     <ClCompile Include="Source\Player\PlayerActor.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerHealthUIController.cpp" />
     <ClCompile Include="Source\Result\ResultToExitUI.cpp" />
@@ -651,6 +651,7 @@
     <ClInclude Include="Source\Enemy\Wyvern\WyvernController.h" />
     <ClInclude Include="Source\InGame\GameManager.h" />
     <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
+    <ClInclude Include="Source\InGame\Input\Option\OptionInput.h" />
     <ClInclude Include="Source\InGame\Input\QuestBoard\QuestBoardInput.h" />
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.h" />
@@ -660,6 +661,7 @@
     <ClInclude Include="Source\InGame\UI\Item\ItemUIController.h" />
     <ClInclude Include="Source\InGame\UI\Item\Slider\ItemSliderController.h" />
     <ClInclude Include="Source\InGame\UI\Operate\OperateUIController.h" />
+    <ClInclude Include="Source\InGame\UI\Option\OptionUIActor.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerQuestOrderUIController.h" />
     <ClInclude Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.h" />
     <ClInclude Include="Source\InGame\UI\Quest\QuestUIController.h" />
@@ -669,7 +671,6 @@
     <ClInclude Include="Source\Item\ItemFunctions.h" />
     <ClInclude Include="Source\Item\ItemManager.h" />
     <ClInclude Include="Source\Loading\LoadingSprController.h" />
-    <ClInclude Include="Source\InGame\UI\Menu\MenuUIController.h" />
     <ClInclude Include="Source\Network\NetworkReceiver.h" />
     <ClInclude Include="Source\Network\NetworkSender.h" />
     <ClInclude Include="Source\Armor\ArmorActor.h" />
@@ -705,7 +706,6 @@
     <ClInclude Include="Source\Stage\Props\QuestBoard\QuestBoardController.h" />
     <ClInclude Include="Source\Stage\StageController.h" />
     <ClInclude Include="Source\Stage\SafetyZone.h" />
-    <ClInclude Include="Source\InGame\Input\Menu\MenuInput.h" />
     <ClInclude Include="Source\Player\PlayerActor.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerHealthUIController.h" />
     <ClInclude Include="Source\Result\ResultToExitUI.h" />

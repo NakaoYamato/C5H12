@@ -94,7 +94,6 @@ void QuestBoardUIActor::OnChangedActive(bool isActive)
 	{
 		// ‚·‚×‚Ä‚Ìƒy[ƒW‚ğ”jŠü‚µ‚Ä–ß‚é
 		PopAllPages();
-
 	}
 }
 

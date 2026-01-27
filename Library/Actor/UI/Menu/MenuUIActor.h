@@ -79,7 +79,8 @@ public:
 		std::string className = ClassToString<T>();
 		_widgetCreateFuncMap[className] = [&](const std::string& name) -> std::shared_ptr<MenuWidget>
 			{
-				return std::make_shared<T>(name);
+				auto widget = std::make_shared<T>(name);
+				return widget;
 			};
 	}
 
@@ -133,7 +134,6 @@ protected:
 	bool InputRepeat(const std::vector<std::string>& actionNames);
 	// 入力判定処理
 	bool InputTrigger(const std::vector<std::string>& actionNames);
-
 
 private:
 	// GUI描画処理
@@ -195,6 +195,9 @@ public:
     MenuWidget(std::string name) : _name(name) {}
     virtual ~MenuWidget() = default;
 
+	// ウィジェット名取得
+	virtual std::string GetWidgetName() const { return ClassToString<MenuWidget>(); }
+
 #pragma region 共通インターフェース
 	// 開始処理
 	virtual void OnEnter() {}
@@ -238,6 +241,9 @@ public:
 	bool CanChangeIndex() const { return _canChangeIndex; }
 
 	void SetCanChangeIndex(bool canChange) { _canChangeIndex = canChange; }
+
+	bool IsDrawPreviousWidget() const { return _isDrawPreviousWidget; }
+	void SetDrawPreviousWidget(bool draw) { _isDrawPreviousWidget = draw; }
 #pragma endregion
 
 #pragma region ファイル
@@ -314,6 +320,8 @@ protected:
 
 	// インデックス変更可能フラグ
 	bool _canChangeIndex = true;
+	// 以前のウィジェットを描画するか
+	bool _isDrawPreviousWidget = false;
 };
 
 // 縦横に並ぶメニューUIノードエディタ用ウィジェットクラス
@@ -332,6 +340,9 @@ public:
 public:
 	MenuMatrixWidget(std::string name) : MenuWidget(name) {}
 	~MenuMatrixWidget() override = default;
+
+	// ウィジェット名取得
+	virtual std::string GetWidgetName() const { return ClassToString<MenuMatrixWidget>(); }
 
 #pragma region 共通インターフェース
 	// 更新処理
@@ -410,6 +421,22 @@ protected:
 
 	// レイヤー変更可能フラグ
 	bool _canChangeLayerIndex = true;
+};
+
+// チェストボックスウィジェット
+class MenuChestBoxWidget : public MenuWidget
+{
+public:
+	// チェストボックスのフラグが変更されたときのコールバック関数型
+	using OnChangedFlagCallBack = CallBack<void, MenuUIActor*, bool>;
+
+public:
+	MenuChestBoxWidget(std::string name) : MenuWidget(name) {}
+	~MenuChestBoxWidget() override = default;
+	// ウィジェット名取得
+	virtual std::string GetWidgetName() const { return ClassToString<MenuChestBoxWidget>(); }
+
+protected:
 };
 
 // メニューUIノードエディタクラス

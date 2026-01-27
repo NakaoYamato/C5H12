@@ -51,41 +51,41 @@ public:
 	/// <summary>
 	// 開始処理
 	/// </summary>
-	void Start();
+	virtual void Start();
 	/// <summary>
 	///	更新処理
 	/// </summary>
 	/// <param name="elapsedTime"></param>
-	void Update(float elapsedTime);
+	virtual void Update(float elapsedTime);
 	/// <summary>
 	/// Update後更新処理
 	/// </summary>
 	/// <param name="elapsedTime"></param>
-	void LateUpdate(float elapsedTime);
+	virtual void LateUpdate(float elapsedTime);
 	/// <summary>
 	/// 固定間隔更新処理
 	/// </summary>
-	void FixedUpdate();
+	virtual void FixedUpdate();
 	/// <summary>
 	/// 描画処理
 	/// </summary>
 	/// <param name="rc"></param>
-	void Render(const RenderContext& rc);
+	virtual void Render(const RenderContext& rc);
 	/// <summary>
 	// デバッグ表示
 	/// </summary>
 	/// <param name="rc"></param>
-	void DebugRender(const RenderContext& rc);
+	virtual void DebugRender(const RenderContext& rc);
 	/// <summary>
 	// 影描画
 	/// </summary>
 	/// <param name="rc"></param>
-	void CastShadow(const RenderContext& rc);
+	virtual void CastShadow(const RenderContext& rc);
 	/// <summary>
 	// 3D描画後の描画処理
 	/// </summary>
 	/// <param name="rc"></param>
-	void DelayedRender(const RenderContext& rc);
+	virtual void DelayedRender(const RenderContext& rc);
 	/// <summary>
 	// Gui描画
 	/// </summary>
@@ -251,6 +251,7 @@ public:
 	void SetIsDrawingHierarchy(bool b)		{ this->_isDrawingHierarchy = b; }
 	void SetIsDrawingInspector(bool b)		{ this->_isDrawingInspector = b; }
 	void SetInheritParentTransform(bool b)	{ this->_isInheritParentTransform = b; }
+	void SetPropagateActiveChange(bool propagate) { _propagateActiveChange = propagate; }
 
 	bool IsActive()const					{ return _isActive; }
 	bool IsDrawingTransformGui()const		{ return _isDrawingTransformGui; }
@@ -261,6 +262,7 @@ public:
 	bool IsDrawingHierarchy()const			{ return _isDrawingHierarchy; }
 	bool IsDrawingInspector()const			{ return _isDrawingInspector; }
 	bool IsInheritParentTransform()const	{ return _isInheritParentTransform; }
+	bool GetPropagateActiveChange() const { return _propagateActiveChange; }
 #pragma endregion
 
 #pragma region 親子関係
@@ -457,6 +459,8 @@ protected:
 	bool				_isInheritParentTransform = true;
 	// プロファイラーを開くか
 	bool				_isOpenProfiler = false;
+	// 起動フラグが変化したに子供にも伝播するためのフラグ
+	bool				_propagateActiveChange = true;
 #pragma endregion
 
 #pragma region デバッグ用

@@ -90,10 +90,10 @@ void PlayerInput::OnUpdate(float elapsedTime)
 		playerItemController->AddIndex(1);
 	}
 
-	// メニュー画面起動入力
+	// オプション画面起動入力
 	if (_INPUT_TRIGGERD("Menu"))
 	{
-		_inputManager->SwitchInput("MenuInput");
+		_inputManager->SwitchInput("OptionInput");
 	}
 
 	// ロックオンカメラ切り替え入力

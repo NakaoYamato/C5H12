@@ -3,7 +3,7 @@
 #include "../../Library/Scene/Scene.h"
 
 #include "Input/ChestInput.h"
-#include "Input/Menu/MenuInput.h"
+#include "Input/Option/OptionInput.h"
 #include "Input/QuestBoard/QuestBoardInput.h"
 
 #include <imgui.h>
@@ -16,10 +16,10 @@ void InputManager::OnCreate()
 	chestInputController->SetParent(this);
 	auto chestInput = chestInputController->AddComponent<ChestInput>();
 
-    // メニュー用入力コントローラー登録
-    auto menuInputController = GetScene()->RegisterActor<Actor>("MenuInput", ActorTag::System);
-    menuInputController->SetParent(this);
-    auto menuInput = menuInputController->AddComponent<MenuInput>();
+    // オプション用入力コントローラー登録
+    auto optionInputController = GetScene()->RegisterActor<Actor>("OptionInput", ActorTag::System);
+	optionInputController->SetParent(this);
+    auto menuInput = optionInputController->AddComponent<OptionInput>();
 
 	// クエストボード用入力コントローラー登録
 	auto questBoardInputController = GetScene()->RegisterActor<Actor>("QuestBoardInput", ActorTag::System);

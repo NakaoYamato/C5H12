@@ -12,28 +12,28 @@ void UIActor::OnCreate()
 	AddComponent<SpriteRenderer>();
 }
 
+/// 描画処理
+void UIActor::Render(const RenderContext& rc)
+{
+	// 親が存在する場合、親の起動状態を反映
+	if (!GetParentActive())
+		return;
+	Actor::Render(rc);
+}
+
+// 3D描画後の描画処理
+void UIActor::DelayedRender(const RenderContext& rc)
+{
+	// 親が存在する場合、親の起動状態を反映
+	if (!GetParentActive())
+		return;
+	Actor::DelayedRender(rc);
+}
+
 /// トランスフォーム更新
 void UIActor::UpdateTransform()
 {
 	_rectTransform.UpdateTransform(_parentRectTransform);
-}
-
-// 起動フラグが変化したときの処理
-// 子供にも伝播する
-void UIActor::OnChangedActive(bool isActive)
-{
-	if (!_propagateActiveChange)
-		return;
-
-	// 子供に伝播
-	for (auto& child : GetChildren())
-	{
-		UIActor* uiChild = dynamic_cast<UIActor*>(child.get());
-		if (uiChild)
-		{
-			uiChild->ChangedActive(isActive);
-		}
-	}
 }
 
 /// 3D描画後の描画時処理
@@ -94,4 +94,23 @@ void UIActor::DrawTransformGui()
 	{
 		_rectTransform.DrawGui();
 	}
+}
+
+/// 親の起動フラグを取得
+bool UIActor::GetParentActive() const
+{
+	if (auto parent = _parent)
+	{
+		while (true)
+		{
+			if (!parent->IsActive())
+				return false;
+
+			if (parent->GetParent() == nullptr)
+				break;
+
+			parent = parent->GetParent();
+		}
+	}
+	return true;
 }

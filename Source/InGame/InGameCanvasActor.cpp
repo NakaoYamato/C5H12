@@ -7,7 +7,7 @@
 #include "UI/Item/ItemUIController.h"
 #include "UI/Item/Slider/ItemSliderController.h"
 #include "UI/Operate/OperateUIController.h"
-#include "UI/Menu/MenuUIController.h"
+#include "UI/Option/OptionUIActor.h"
 #include "UI/Player/PlayerHealthUIController.h"
 #include "UI/Player/PlayerStaminaUIController.h"
 #include "UI/Player/PlayerBuffUIController.h"
@@ -16,17 +16,20 @@
 #include "UI/Quest/QuestUIController.h"
 #include "UI/QuestBoard/QuestBoardUIActor.h"
 
+#include <Mygui.h>
+
 // 生成時処理
 void InGameCanvasActor::OnCreate()
 {
+	// 起動フラグの子への反映をオフ
+	SetPropagateActiveChange(false);
+
     // タイマー生成
-    auto timerUIActor = GetScene()->RegisterActor<UIActor>("TimerUI", ActorTag::UI);
-    timerUIActor->SetParent(this);
-    auto timerUIController = timerUIActor->AddComponent<TimerUIController>();
+    auto timerUIActor = CreateUIActor<UIActor>("TimerUI");
+    timerUIActor->AddComponent<TimerUIController>();
 
 	// チェスト生成
-	auto chestUIActor = GetScene()->RegisterActor<UIActor>("ChestUI", ActorTag::UI);
-	chestUIActor->SetParent(this);
+	auto chestUIActor = CreateUIActor<UIActor>("ChestUI");
 	chestUIActor->AddComponent<ChestUIController>();
 	{
 		auto SelectState = GetScene()->RegisterActor<UIActor>("ChestSelectStateUI", ActorTag::UI);
@@ -43,10 +46,9 @@ void InGameCanvasActor::OnCreate()
 	}
 
 	// アイテムUI生成
-	auto itemUIActor = GetScene()->RegisterActor<UIActor>("ItemUI", ActorTag::UI);
+	auto itemUIActor = CreateUIActor<UIActor>("ItemUI");
 	itemUIActor->GetRectTransform().SetLocalPosition(Vector2(1800.0f, 940.0f));
 	itemUIActor->GetRectTransform().SetLocalScale(Vector2(0.8f, 0.8f));
-	itemUIActor->SetParent(this);
 	itemUIActor->AddComponent<ItemUIController>();
 	{
 		auto itemSliderActor = GetScene()->RegisterActor<UIActor>("ItemSliderUI", ActorTag::UI);
@@ -55,18 +57,11 @@ void InGameCanvasActor::OnCreate()
 	}
 
 	// 操作UI生成
-	auto operateUIActor = GetScene()->RegisterActor<UIActor>("OperateUI", ActorTag::UI);
-	operateUIActor->SetParent(this);
+	auto operateUIActor = CreateUIActor<UIActor>("OperateUI");
 	operateUIActor->AddComponent<OperateUIController>();
 
-	// メニューUI生成
-    auto menuUIActor = GetScene()->RegisterActor<UIActor>("MenuUI", ActorTag::UI);
-    menuUIActor->SetParent(this);
-    menuUIActor->AddComponent<MenuUIController>();
-
 	// プレイヤーUI生成
-	auto playerUIActor = GetScene()->RegisterActor<UIActor>("PlayerUI", ActorTag::UI);
-	playerUIActor->SetParent(this);
+	auto playerUIActor = CreateUIActor<UIActor>("PlayerUI");
 	{
 		auto playerHPUIActor = GetScene()->RegisterActor<UIActor>("PlayerHPUI", ActorTag::UI);
 		playerHPUIActor->SetParent(playerUIActor.get());
@@ -94,14 +89,42 @@ void InGameCanvasActor::OnCreate()
 	}
 
 	// クエストボードUI生成
-	auto questBoardUIActor = GetScene()->RegisterActor<QuestBoardUIActor>("QuestBoardUI", ActorTag::UI);
-	questBoardUIActor->SetParent(this);
+	auto questBoardUIActor = CreateUIActor<QuestBoardUIActor>("QuestBoardUI");
 
 	// クエストUI生成
-	auto questUIActor = GetScene()->RegisterActor<UIActor>("QuestUI", ActorTag::UI);
-	questUIActor->SetParent(this);
+	auto questUIActor = CreateUIActor<UIActor>("QuestUI");
 	questUIActor->AddComponent<QuestUIController>();
 	questUIActor->GetRectTransform().SetLocalPosition(Vector2(1950.0f, 340.0f));
+
+	// オプションUI生成
+	auto optionUIActor = CreateUIActor<OptionUIActor>("OptionUIActor");
+}
+
+// GUI描画
+void InGameCanvasActor::OnDrawGui()
+{
+	static ImGuiTabBarFlags tab_bar_flags =
+		ImGuiTabBarFlags_AutoSelectNewTabs |
+		ImGuiTabBarFlags_Reorderable |
+		ImGuiTabBarFlags_FittingPolicyResizeDown;
+	if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+	{
+		if (ImGui::BeginTabItem(u8"キャンバス"))
+		{
+			for (auto& [name, flag] : _uiActiveMap)
+			{
+				bool isActive = flag;
+				if (ImGui::Checkbox(name.c_str(), &isActive))
+				{
+					SetUIActive(name, isActive);
+				}
+			}
+
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
+	}
 }
 
 // プレイヤー設定
@@ -152,6 +175,35 @@ void InGameCanvasActor::RegisterPlayerActor(Actor* playerActor)
 		else if (auto questOrderUIController = child->GetComponent<PlayerQuestOrderUIController>())
 		{
 			questOrderUIController->SetPlayerActor(playerActor->shared_from_this());
+		}
+	}
+}
+
+// UI名前取得
+std::vector<std::string> InGameCanvasActor::GetUIActorNames() const
+{
+	std::vector<std::string> names;
+	for (const auto& [name, flag] : _uiActiveMap)
+	{
+		names.push_back(name);
+	}
+	return names;
+}
+
+// UI表示設定
+void InGameCanvasActor::SetUIActive(const std::string& name, bool isActive)
+{
+	auto it = _uiActiveMap.find(name);
+	if (it != _uiActiveMap.end())
+	{
+		it->second = isActive;
+		for (auto& actor : this->GetChildren())
+		{
+			if (actor->GetName() == name)
+			{
+				actor->SetIsActive(isActive);
+				break;
+			}
 		}
 	}
 }

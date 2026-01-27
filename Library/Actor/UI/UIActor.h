@@ -14,12 +14,19 @@ public:
 	/// </summary>
 	virtual void OnCreate() override;
 	/// <summary>
+	/// 描画処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void Render(const RenderContext& rc) override;
+	/// <summary>
+	// 3D描画後の描画処理
+	/// </summary>
+	/// <param name="rc"></param>
+	virtual void DelayedRender(const RenderContext& rc) override;
+	/// <summary>
 	/// トランスフォーム更新
 	/// </summary>
 	virtual void UpdateTransform() override;
-	// 起動フラグが変化したときの処理
-	// 子供にも伝播する
-	virtual void OnChangedActive(bool isActive) override;
 
 	/// <summary>
 	/// 3D描画後の描画時処理
@@ -36,9 +43,6 @@ public:
 
 #pragma region アクセサ
 	RectTransform& GetRectTransform() { return _rectTransform; }
-
-	bool GetPropagateActiveChange() const { return _propagateActiveChange; }
-	void SetPropagateActiveChange(bool propagate) { _propagateActiveChange = propagate; }
 #pragma endregion
 
 protected:
@@ -47,10 +51,13 @@ protected:
 	/// </summary>
 	virtual void DrawTransformGui() override;
 
+	/// <summary>
+	/// 親の起動フラグを取得
+	/// </summary>
+	/// <returns></returns>
+	bool GetParentActive() const;
+
 private:
 	RectTransform	_rectTransform;
 	RectTransform* _parentRectTransform = nullptr;
-
-	// 起動フラグが変化したに子供にも伝播するためのフラグ
-	bool			_propagateActiveChange = true;
 };

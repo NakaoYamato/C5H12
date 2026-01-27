@@ -28,6 +28,9 @@ public:
 	QuestBoardUIWidget(std::string name);
 	~QuestBoardUIWidget() override {}
 
+	// ウィジェット名取得
+	virtual std::string GetWidgetName() const { return ClassToString<QuestBoardUIWidget>(); }
+
 	// 開始処理
 	void OnEnter() override;
 	// 描画処理

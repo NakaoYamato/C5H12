@@ -46,6 +46,8 @@ void QuestBoardUIActor::OnCreate()
 		});
 
 	// ウィジェット登録
+	RegisterWidgetCreateFunc<QuestBoardUIWidget>();
+
 	std::shared_ptr<QuestBoardUIWidget> normalQuest = std::make_shared<QuestBoardUIWidget>("NormalQuest");
 	normalQuest->SetDisplayQuestType(QuestData::QuestType::Normal);
 	RegisterWidget(normalQuest);

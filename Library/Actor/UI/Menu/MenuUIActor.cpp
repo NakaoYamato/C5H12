@@ -1,7 +1,6 @@
 #include "MenuUIActor.h"
 
 #include "../../Library/Scene/Scene.h"
-#include "../../Library/Algorithm/Converter.h"
 
 #include <Mygui.h>
 
@@ -14,6 +13,10 @@ MenuWidget* CopyMenuWidgetPtr = nullptr;
 void MenuUIActor::OnCreate()
 {
 	UIActor::OnCreate();
+
+	// ウィジェット生成関数登録
+	RegisterWidgetCreateFunc<MenuWidget>();
+	RegisterWidgetCreateFunc<MenuMatrixWidget>();
 
 #if DEBUG_MENUUIACTOR // 使用例
 	// コールバック登録
@@ -62,22 +65,27 @@ void MenuUIActor::OnUpdate(float elapsedTime)
 	UIActor::OnUpdate(elapsedTime);
 	if (auto currentWidget = GetCurrentWidget())
 	{
-#if DEBUG_MENUUIACTOR // 使用例
-		// 入力処理
-		if (_INPUT_REPEAT("Up"))
-			currentWidget->SubSelectedOptionIndex();
-		if (_INPUT_REPEAT("Down"))
-			currentWidget->AddSelectedOptionIndex();
+		if (_isInputEnabled)
+		{
+			if (InputRepeat(_subOptionIndexActionNames))
+				currentWidget->SubSelectedOptionIndex();
+			if (InputRepeat(_addOptionIndexActionNames))
+				currentWidget->AddSelectedOptionIndex();
+			// 現在のウィジェットがMenuMatrixWidgetの場合横方向の入力も処理する
+			if (auto matrixWidget = dynamic_cast<MenuMatrixWidget*>(currentWidget))
+			{
+				if (InputRepeat(_subLayerIndexActionNames))
+					matrixWidget->SubOptionLayerIndex();
+				if (InputRepeat(_addLayerIndexActionNames))
+					matrixWidget->AddOptionLayerIndex();
+			}
 
-		if (_INPUT_TRIGGERD("Select"))
-		{
-			currentWidget->SelectOption(this);
+			if (InputTrigger(_selectActionNames))
+				currentWidget->SelectOption(this);
+			if (InputTrigger(_backActionNames))
+				currentWidget->BackOption(this);
 		}
-		if (_INPUT_TRIGGERD("Back") || _INPUT_TRIGGERD("Menu"))
-		{
-			currentWidget->BackOption(this);
-		}
-#endif
+
 		currentWidget->Update(elapsedTime, this);
 	}
 }
@@ -103,16 +111,70 @@ void MenuUIActor::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"ウィジェット"))
 		{
+			ImGui::Checkbox(u8"ノードエディター表示", &_isDrawNodeEditor);
+			ImGui::Checkbox(u8"入力有効化", &_isInputEnabled);
+			ImGui::Separator();
+
 			DrawWidgetGui();
 
 			ImGui::EndTabItem();
 		}
-		if (ImGui::BeginTabItem(u8"ウィジェットNode"))
+		if (ImGui::BeginTabItem(u8"ウィジェット入力"))
 		{
-			_menuNodeEditor->DrawGui(this);
+			ImGui::Text(u8"選択肢インデックス減少アクション名リスト");
+			for (auto& name : _subOptionIndexActionNames)
+			{
+				ImGui::Text(name.c_str());
+			}
+			ImGui::Separator();
+			ImGui::Text(u8"選択肢インデックス増加アクション名リスト");
+			for (auto& name : _addOptionIndexActionNames)
+			{
+				ImGui::Text(name.c_str());
+			}
+			ImGui::Separator();
+			ImGui::Text(u8"レイヤーインデックス減少アクション名リスト");
+			for (auto& name : _subLayerIndexActionNames)
+			{
+				ImGui::Text(name.c_str());
+			}
+			ImGui::Separator();
+			ImGui::Text(u8"レイヤーインデックス増加アクション名リスト");
+			for (auto& name : _addLayerIndexActionNames)
+			{
+				ImGui::Text(name.c_str());
+			}
+			ImGui::Text(u8"選択アクション名リスト");
+			for (auto& name : _selectActionNames)
+			{
+				ImGui::Text(name.c_str());
+			}
+			ImGui::Text(u8"戻るアクション名リスト");
+			for (auto& name : _backActionNames)
+			{
+				ImGui::Text(name.c_str());
+			}
 
 			ImGui::EndTabItem();
 		}
+
+		if (ImGui::BeginTabItem(u8"ウィジェット生成関数"))
+		{
+			for (auto& [className, func] : _widgetCreateFuncMap)
+			{
+				ImGui::PushID(className.c_str());
+				ImGui::Text(className.c_str());
+				ImGui::SameLine();
+				if (ImGui::Button(u8"生成"))
+				{
+					RegisterWidget(className, "Test");
+				}
+				ImGui::PopID();
+			}
+
+			ImGui::EndTabItem();
+		}
+
 		ImGui::EndTabBar();
 	}
 
@@ -134,6 +196,12 @@ void MenuUIActor::OnDrawGui()
 			}
 		}
 		ImGui::End();
+	}
+
+	// ノードエディター表示
+	if (_isDrawNodeEditor)
+	{
+		_menuNodeEditor->DrawGui(this, &_isDrawNodeEditor);
 	}
 }
 
@@ -297,6 +365,28 @@ bool MenuUIActor::SaveToFile()
 	return Exporter::SaveJsonFile(_filepath.c_str(), json);
 }
 #pragma endregion
+
+// 入力判定処理
+bool MenuUIActor::InputRepeat(const std::vector<std::string>& actionNames)
+{
+	for (auto& name : actionNames)
+	{
+		if (_INPUT_REPEAT(name))
+			return true;
+	}
+	return false;
+}
+
+// 入力判定処理
+bool MenuUIActor::InputTrigger(const std::vector<std::string>& actionNames)
+{
+	for (auto& name : actionNames)
+	{
+		if (_INPUT_TRIGGERD(name))
+			return true;
+	}
+	return false;
+}
 
 void MenuUIActor::DrawWidgetGui()
 {
@@ -1335,14 +1425,14 @@ MenuNodeEditor::~MenuNodeEditor()
 }
 
 // GUI描画処理
-void MenuNodeEditor::DrawGui(MenuUIActor* menuActor)
+void MenuNodeEditor::DrawGui(MenuUIActor* menuActor, bool* flag)
 {
 	if (!menuActor || !_editorContext) return;
 
 	ne::SetCurrentEditor(_editorContext);
 
 	// ウィンドウ開始
-	ImGui::Begin("Menu Node Editor", nullptr, ImGuiWindowFlags_MenuBar);
+	ImGui::Begin("Menu Node Editor", flag, ImGuiWindowFlags_MenuBar);
 
 	// メニューバー
 	if (ImGui::BeginMenuBar())
@@ -1603,21 +1693,41 @@ void MenuNodeEditor::DrawGui(MenuUIActor* menuActor)
 		_popupSpawnPos = ImGui::GetMousePos();
 	}
 
+	// 新規ウィジェット作成ポップアップ
 	if (ImGui::BeginPopup("CreateWidgetContext"))
 	{
 		ImGui::Text("Create New Widget");
 		ImGui::InputText("Name", &_newWidgetName);
+		// 作成するウィジェットのクラス選択
+		if (ImGui::BeginCombo(u8"ウィジェットのクラス", _newWidgetClassName.c_str()))
+		{
+			for (auto& [className, func] : menuActor->GetWidgetCreateFuncMap())
+			{
+				if (ImGui::Selectable(className.c_str(), _newWidgetClassName == className))
+				{
+					_newWidgetClassName = className;
+				}
+			}
+			ImGui::EndCombo();
+		}
+
 		if (ImGui::Button("Create"))
 		{
-			auto newWidget = menuActor->RegisterWidget(std::make_shared<MenuWidget>(_newWidgetName));
-			// ウィジェットが重複していたら名前が変わる可能性があるので、再取得
-			_newWidgetName = newWidget->GetName();
-			ne::SetNodePosition(GetNodeId(_newWidgetName), ImVec2(50, 50));
+			auto newWidget = menuActor->RegisterWidget(_newWidgetClassName, _newWidgetName);
+			if (newWidget)
+			{
+				// ウィジェット作成成功
+				// ウィジェットが重複していたら名前が変わる可能性があるので、再取得
+				_newWidgetName = newWidget->GetName();
+				ne::SetNodePosition(GetNodeId(_newWidgetName), ImVec2(50, 50));
+			}
 
 			ImGui::CloseCurrentPopup();
 		}
+
 		ImGui::EndPopup();
 	}
+
 	ne::Resume();
 
 	// 選択状態の更新
@@ -1661,6 +1771,11 @@ void MenuNodeEditor::DrawGui(MenuUIActor* menuActor)
 		{
 			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "[ %s ]", _selectedWidgetName.c_str());
 			it->second->DrawGui(menuActor);
+			ImGui::Separator();
+			if (ImGui::Button(u8"ページに移動"))
+			{
+				menuActor->PushPage(_selectedWidgetName);
+			}
 		}
 	}
 	else

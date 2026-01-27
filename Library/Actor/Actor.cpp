@@ -277,22 +277,22 @@ void Actor::DrawGui()
 			SetIsActive(f);
 
 		f = _isDrawingTransformGui;
-		if (ImGui::Checkbox(u8"TransformGui", &_isDrawingTransformGui))
+		if (ImGui::Checkbox(u8"TransformGui", &f))
 			SetIsDrawingTransformGui(f);
 		f = _isShowing;
-		if (ImGui::Checkbox(u8"Show", &_isShowing))
+		if (ImGui::Checkbox(u8"Show", &f))
 			SetIsShowing(f);
 		f = _isCastingShadow;
-		if (ImGui::Checkbox(u8"CastShadow", &_isCastingShadow))
+		if (ImGui::Checkbox(u8"CastShadow", &f))
 			SetIsCastingShadow(f);
 		f = _isDrawingDebug;
-		if (ImGui::Checkbox(u8"DrawDebug", &_isDrawingDebug))
+		if (ImGui::Checkbox(u8"DrawDebug", &f))
 			SetIsDrawingDebug(f);
 		f = _isUsingGuizmo;
-		if (ImGui::Checkbox(u8"UseGuizmo", &_isUsingGuizmo))
+		if (ImGui::Checkbox(u8"UseGuizmo", &f))
 			SetIsUsingGuizmo(f);
 		f = _isInheritParentTransform;
-		if (ImGui::Checkbox(u8"InheritParentTransform", &_isInheritParentTransform))
+		if (ImGui::Checkbox(u8"InheritParentTransform", &f))
 			SetInheritParentTransform(f);
 		ImGui::Checkbox(u8"OpenProfiler", &_isOpenProfiler);
 	}

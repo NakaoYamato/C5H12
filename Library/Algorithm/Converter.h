@@ -38,3 +38,16 @@ template<class E>
 std::string ToString(size_t index) {
 	return nameof::nameof_enum(magic_enum::enum_value<E>(index)).data();
 }
+
+/// <summary>
+/// クラス名を文字列に変換
+/// </summary>
+/// <returns>string</returns>
+template<class T>
+std::string ClassToString()
+{
+	std::string className = typeid(T).name();
+	// 不要な部分を削除
+	className = className.substr(6); // "class "分を削除
+	return className;
+}

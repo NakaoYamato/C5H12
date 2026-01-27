@@ -50,21 +50,5 @@ void QuestBoardInput::OnUpdate(float elapsedTime)
 		return;
 	}
 
-	if (_INPUT_REPEAT("Up"))
-		currentWidget->SubSelectedOptionIndex();
-	if (_INPUT_REPEAT("Down"))
-		currentWidget->AddSelectedOptionIndex();
-	// 現在のウィジェットがMenuMatrixWidgetの場合横方向の入力も処理する
-	if (auto matrixWidget = dynamic_cast<MenuMatrixWidget*>(currentWidget))
-	{
-		if (_INPUT_REPEAT("Left"))
-			matrixWidget->SubOptionLayerIndex();
-		if (_INPUT_REPEAT("Right"))
-			matrixWidget->AddOptionLayerIndex();
-	}
-
-	if (_INPUT_TRIGGERD("Select"))
-		currentWidget->SelectOption(questBoardUIActor.get());
-	if (_INPUT_TRIGGERD("Back") || _INPUT_TRIGGERD("Menu"))
-		currentWidget->BackOption(questBoardUIActor.get());
+	// 入力処理はMenuUIActor側で行う
 }

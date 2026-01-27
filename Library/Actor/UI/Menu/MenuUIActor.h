@@ -5,6 +5,7 @@
 #include "../UIActor.h"
 #include "../../Library/2D/Sprite.h"
 #include "../../Library/Algorithm/CallBack/CallBack.h"
+#include "../../Library/Algorithm/Converter.h"
 
 #include <imgui.h>
 #include <imgui_node_editor.h>
@@ -15,6 +16,10 @@ class MenuNodeEditor;
 // メニューUIアクタークラス
 class MenuUIActor : public UIActor
 {
+public:
+	// ウィジェット生成関数型
+	using WidgetCreateFunc = std::function<std::shared_ptr<MenuWidget>(const std::string&)>;
+
 public:
 	MenuUIActor() = default;
 	~MenuUIActor() override {}
@@ -29,6 +34,31 @@ public:
 
 	// ウィジェット登録
 	std::shared_ptr<MenuWidget> RegisterWidget(std::shared_ptr<MenuWidget> widget);
+	// ウィジェット登録
+	std::shared_ptr<MenuWidget> RegisterWidget(const std::string& className, const std::string& name)
+	{
+		auto it = _widgetCreateFuncMap.find(className);
+		if (it == _widgetCreateFuncMap.end())
+			return nullptr;
+
+		std::shared_ptr<MenuWidget> widget = it->second(name);
+		return RegisterWidget(widget);
+	}
+	// ウィジェット登録
+	template<class T>
+	std::shared_ptr<T> RegisterWidget(const std::string& name)
+	{
+		std::string className = ClassToString<T>();
+		auto it = _widgetCreateFuncMap.find(className);
+		if (it == _widgetCreateFuncMap.end())
+			return nullptr;
+		std::shared_ptr<MenuWidget> widget = it->second(name);
+		std::shared_ptr<T> castedWidget = std::dynamic_pointer_cast<T>(widget);
+		if (castedWidget == nullptr)
+			return nullptr;
+		RegisterWidget(castedWidget);
+		return castedWidget;
+	}
 	// コールバック登録
 	void RegisterOptionSelectedCallback(const std::string& name, CallBack<void, MenuUIActor*> callback);
 	// 新しいページをスタックの一番上に積む
@@ -42,6 +72,17 @@ public:
 	// オプションが選択された時のコールバックを呼び出す
 	void CallOptionSelected(const std::string& callbackName);
 
+	// ウィジェット生成関数登録
+	template<class T>
+	void RegisterWidgetCreateFunc()
+	{
+		std::string className = ClassToString<T>();
+		_widgetCreateFuncMap[className] = [&](const std::string& name) -> std::shared_ptr<MenuWidget>
+			{
+				return std::make_shared<T>(name);
+			};
+	}
+
 #pragma region アクセサ
 	// 現在のウィジェットを取得
 	MenuWidget* GetCurrentWidget();
@@ -51,12 +92,26 @@ public:
 	const std::unordered_map<std::string, std::shared_ptr<MenuWidget>>& GetRegisteredWidgets() const { return _registeredWidgets; }
 	// コールバックハンドラ取得
 	CallBackHandler<void, MenuUIActor*>& GetOptionSelectedCallbackHandler() { return onOptionSelected; }
+	// ファイルパス取得
+	const std::string& GetFilePath() const { return _filepath; }
+	// ウィジェット生成関数マップ取得
+	const std::unordered_map<std::string, WidgetCreateFunc>& GetWidgetCreateFuncMap() const { return _widgetCreateFuncMap; }
 
 	void SetFilePath(const std::string& filepath) { _filepath = filepath; }
 	// ロード済みか
 	bool IsLoaded() const { return _isLoaded; }
 	// ウィジェット追加中か
 	bool IsAddingWidget() const { return _isAddingWidget; }
+
+	bool IsInputEnabled() const { return _isInputEnabled; }
+	void SetInputEnabled(bool enabled) { _isInputEnabled = enabled; }
+
+	void SetSubOptionIndexActionNames(const std::vector<std::string>& actionNames) { _subOptionIndexActionNames = actionNames; }
+	void SetAddOptionIndexActionNames(const std::vector<std::string>& actionNames) { _addOptionIndexActionNames = actionNames; }
+	void SetSubLayerIndexActionNames(const std::vector<std::string>& actionNames) { _subLayerIndexActionNames = actionNames; }
+	void SetAddLayerIndexActionNames(const std::vector<std::string>& actionNames) { _addLayerIndexActionNames = actionNames; }
+	void SetSelectActionNames(const std::vector<std::string>& actionNames) { _selectActionNames = actionNames; }
+	void SetBackActionNames(const std::vector<std::string>& actionNames) { _backActionNames = actionNames; }
 #pragma endregion
 
 #pragma region ファイル
@@ -68,7 +123,16 @@ public:
 
 #pragma region デバッグ用
 	std::unordered_map<std::string, std::shared_ptr<MenuWidget>>& GetRegisteredWidgetsForEdit() { return _registeredWidgets; }
+
+	bool IsDrawNodeEditor() const { return _isDrawNodeEditor; }
+	void SetDrawNodeEditor(bool draw) { _isDrawNodeEditor = draw; }
 #pragma endregion
+
+protected:
+	// 入力判定処理
+	bool InputRepeat(const std::vector<std::string>& actionNames);
+	// 入力判定処理
+	bool InputTrigger(const std::vector<std::string>& actionNames);
 
 
 private:
@@ -83,14 +147,33 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<MenuWidget>> _registeredWidgets;
 	// オプションが選択された時のコールバック関数
 	CallBackHandler<void, MenuUIActor*> onOptionSelected;
+	// ウィジェット生成関数マップ
+	std::unordered_map<std::string, WidgetCreateFunc> _widgetCreateFuncMap;
 
 	std::string _filepath{};
 	// ロードされたか
 	bool _isLoaded = false;
+
+#pragma region 入力処理
+	// 入力処理を行うか
+	bool _isInputEnabled = true;
+
+	// 入力アクション名リスト
+	std::vector<std::string> _subOptionIndexActionNames{ "Up" };
+	std::vector<std::string> _addOptionIndexActionNames{ "Down" };
+	std::vector<std::string> _subLayerIndexActionNames{ "Left" };
+	std::vector<std::string> _addLayerIndexActionNames{ "Right" };
+	std::vector<std::string> _selectActionNames{ "Select" };
+	std::vector<std::string> _backActionNames{ "Back", "Menu" };
+#pragma endregion
+
+#pragma region デバッグ用
+	std::unique_ptr<MenuNodeEditor> _menuNodeEditor;
+	// ノードエディター表示フラグ
+	bool _isDrawNodeEditor = false;
 	// GUIでのウィジェット追加用フラグ
 	bool _isAddingWidget = false;
-
-	std::unique_ptr<MenuNodeEditor> _menuNodeEditor;
+#pragma endregion
 };
 
 // メニューUIのウィジェット基底クラス
@@ -338,7 +421,7 @@ public:
     ~MenuNodeEditor();
 
 	// GUI描画処理
-	void DrawGui(MenuUIActor* menuActor);
+	void DrawGui(MenuUIActor* menuActor, bool* flag = nullptr);
 
 	// ファイルパス設定
 	void SetLayoutFilePath(const std::string& filename) { _filename = filename; }
@@ -377,6 +460,8 @@ private:
 	std::string _selectedWidgetName{};
 	// ポップアップ出現位置
 	ImVec2 _popupSpawnPos{};
+	// 生成するウィジェットクラス名
+	std::string _newWidgetClassName = "MenuWidget";
 
 	// ノードのスタイル設定
 	const float PIN_WIDTH = 24.0f;

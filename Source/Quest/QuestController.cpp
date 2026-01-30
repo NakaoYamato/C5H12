@@ -1,4 +1,4 @@
-#include "QuestOrderController.h"
+#include "QuestController.h"
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Source/Camera/HuntingSuccessCamera.h"
@@ -7,7 +7,7 @@
 #include <Mygui.h>
 
 // 開始処理
-void QuestOrderController::Start()
+void QuestController::Start()
 {
 	// ユーザーデータマネージャー取得
 	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
@@ -21,7 +21,7 @@ void QuestOrderController::Start()
 }
 
 // 更新処理
-void QuestOrderController::Update(float elapsedTime)
+void QuestController::Update(float elapsedTime)
 {
 	auto metaAI = _metaAI.lock();
 	if (!metaAI)
@@ -81,14 +81,14 @@ void QuestOrderController::Update(float elapsedTime)
 
 	switch (_currentState)
 	{
-	case QuestOrderController::State::Idle:
+	case QuestController::State::Idle:
 		break;
-	case QuestOrderController::State::Accepted:
+	case QuestController::State::Accepted:
 		break;
-	case QuestOrderController::State::InQuest:
+	case QuestController::State::InQuest:
 		UpdateInQuest(elapsedTime);
 		break;
-	case QuestOrderController::State::Completed:
+	case QuestController::State::Completed:
 		UpdateCompleted(elapsedTime);
 		break;
 	default:
@@ -97,7 +97,7 @@ void QuestOrderController::Update(float elapsedTime)
 }
 
 // Gui描画
-void QuestOrderController::DrawGui()
+void QuestController::DrawGui()
 {
 	ImGui::Text(u8"現在の状態: ");
 	ImGui::SameLine();
@@ -142,7 +142,7 @@ void QuestOrderController::DrawGui()
 }
 
 // クエスト受注
-void QuestOrderController::AcceptQuest(int questIndex)
+void QuestController::AcceptQuest(int questIndex)
 {
 	// すでに受注中の場合は処理しない
 	if (_currentState != State::Idle)
@@ -172,10 +172,12 @@ void QuestOrderController::AcceptQuest(int questIndex)
 
 	// 状態を受注中に変更
 	_currentState = State::Accepted;
+	// 汎用タイマーリセット
+	_timer = 0.0f;
 }
 
 // クエスト開始
-void QuestOrderController::StartQuest()
+void QuestController::StartQuest()
 {
 	// 受注中以外の場合は処理しない
 	if (_currentState != State::Accepted)
@@ -191,13 +193,15 @@ void QuestOrderController::StartQuest()
 	_startQuestFlag = true;
 	// 状態をクエスト中に変更
 	_currentState = State::InQuest;
+	// 汎用タイマーリセット
+	_timer = 0.0f;
 
 	// フェードアウト開始
 	GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeOut, 1.0f);
 }
 
 // 受注中のクエスト終了
-void QuestOrderController::EndQuest(bool clear, float time)
+void QuestController::EndQuest(bool clear, float time)
 {
 	// クエスト中以外の場合は処理しない
 	if (_currentState != State::InQuest)
@@ -246,10 +250,12 @@ void QuestOrderController::EndQuest(bool clear, float time)
 
 	// 状態を完了に変更
 	_currentState = State::Completed;
+	// 汎用タイマーリセット
+	_timer = 0.0f;
 }
 
 // クエストキャンセル
-void QuestOrderController::CancelQuest()
+void QuestController::CancelQuest()
 {
 	// 受注中以外の場合は処理しない
 	if (_currentState != State::Accepted)
@@ -259,10 +265,12 @@ void QuestOrderController::CancelQuest()
 
 	// 状態を待機に変更
 	_currentState = State::Idle;
+	// 汎用タイマーリセット
+	_timer = 0.0f;
 }
 
 // クエスト開始可能か
-bool QuestOrderController::CanStartQuest() const
+bool QuestController::CanStartQuest() const
 {
 	// 受注中のクエストがない場合は開始不可
 	if (!_isInQuest)
@@ -286,13 +294,18 @@ bool QuestOrderController::CanStartQuest() const
 }
 
 // クエスト中の処理
-void QuestOrderController::UpdateInQuest(float elapsedTime)
+void QuestController::UpdateInQuest(float elapsedTime)
 {
 	auto metaAI = _metaAI.lock();
 	if (!metaAI)
 		return;
 
-	_inQuestTimer += elapsedTime;
+	// 経過時間を加算
+	_timer += elapsedTime;
+
+	// 生成した敵がいなければ処理しない
+	if (_spawnedEnemyNames.empty())
+		return;
 
 	// メタAIから倒した敵の名前リストを取得
 	const auto& defeatedEnemyNames = metaAI->GetDefeatedEnemyNames();
@@ -309,11 +322,44 @@ void QuestOrderController::UpdateInQuest(float elapsedTime)
 	if (allTargetsDefeated)
 	{
 		// クエストクリア
-		EndQuest(true, _inQuestTimer);
+		EndQuest(true, _timer);
 	}
 }
 
 // クエスト完了時の処理
-void QuestOrderController::UpdateCompleted(float elapsedTime)
+void QuestController::UpdateCompleted(float elapsedTime)
 {
+	auto metaAI = _metaAI.lock();
+	if (!metaAI)
+		return;
+	auto enemyDataManager = _enemyDataManager.lock();
+	if (!enemyDataManager)
+		return;
+
+	if (_INPUT_PRESSED("Start"))
+	{
+		_timer += elapsedTime;
+		if (_timer > _inputHoldTime)
+		{
+			// 通常時に戻す
+			// 敵情報をリセット
+			for (auto& enemyName : _spawnedEnemyNames)
+			{
+				if (auto enemyActor = GetActor()->GetScene()->GetActorManager().FindByName(enemyName))
+				{
+					enemyActor->Remove();
+				}
+			}
+			_spawnedEnemyNames.clear();
+			metaAI->ClearDefeatedEnemyNames();
+			for (const auto& target : _currentQuestData->targets)
+			{
+				enemyDataManager->ReleaseModel(target.name);
+			}
+			_currentState = State::Idle;
+			_isInQuest = false;
+			_currentQuestData = nullptr;
+			_timer = 0.0f;
+		}
+	}
 }

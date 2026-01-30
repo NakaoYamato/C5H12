@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Library/Component/SpriteRenderer.h"
-#include "../../Source/Quest/QuestOrderController.h"
+#include "../../Source/Quest/QuestController.h"
 
 class QuestUIController : public Component
 {
@@ -21,7 +21,7 @@ public:
 
 private:
 	std::weak_ptr<SpriteRenderer> _spriteRenderer;
-	std::weak_ptr<QuestOrderController> _questOrderController;
+	std::weak_ptr<QuestController> _questController;
 
 	const std::string Front = "FrontSpr";
 

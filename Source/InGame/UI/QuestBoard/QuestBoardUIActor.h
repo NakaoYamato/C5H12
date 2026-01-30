@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Library/Actor/UI/Menu/MenuUIActor.h"
-#include "../../Source/Quest/QuestOrderController.h"
+#include "../../Source/Quest/QuestController.h"
 
 class QuestBoardUIActor : public MenuUIActor
 {
@@ -18,7 +18,7 @@ public:
 	bool AcceptQuest(int questIndex);
 
 private:
-	std::weak_ptr<QuestOrderController> _questOrderController;
+	std::weak_ptr<QuestController> _questController;
 };
 
 // クエスト掲示板UIウィジェット
@@ -98,13 +98,13 @@ public:
 	void OnSaveToFile(nlohmann::json* json) override;
 #pragma endregion
 
-	void SetQuestOrderController(std::weak_ptr<QuestOrderController> controller)
+	void SetQuestController(std::weak_ptr<QuestController> controller)
 	{
-		_questOrderController = controller;
+		_questController = controller;
 	}
 private:
 	// クエスト受注コントローラー
-	std::weak_ptr<QuestOrderController> _questOrderController;
+	std::weak_ptr<QuestController> _questController;
 
 	// クエストタイトル
 	std::string _questTitle{};

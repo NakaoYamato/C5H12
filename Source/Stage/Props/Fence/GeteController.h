@@ -3,7 +3,7 @@
 #include "../../Library/Component/Component.h"
 #include "../../Library/Component/Collider/BoxCollider.h"
 
-#include "../../Source/Quest/QuestOrderController.h"
+#include "../../Source/Quest/QuestController.h"
 
 class GeteController : public Component
 {
@@ -24,7 +24,7 @@ public:
 
 private:
     std::weak_ptr<BoxCollider> _boxCollider;
-    std::weak_ptr<QuestOrderController> _questOrderController;
+    std::weak_ptr<QuestController> _questController;
 
     // 剛性モーメントの計算用
     float _forceY = 0.0f;

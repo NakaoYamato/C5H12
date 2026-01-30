@@ -15,9 +15,9 @@ void QuestBoardUIActor::OnCreate()
 	auto gameManager = GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
 	if (gameManager)
 	{
-		if (auto cont = gameManager->GetComponent<QuestOrderController>())
+		if (auto cont = gameManager->GetComponent<QuestController>())
 		{
-			_questOrderController = cont;
+			_questController = cont;
 		}
 	}
 
@@ -28,19 +28,19 @@ void QuestBoardUIActor::OnCreate()
 		});
 	RegisterOptionSelectedCallback("QuestCancel", [this](MenuUIActor* owner) -> void
 		{
-			auto questOrderController = _questOrderController.lock();
-			if (!questOrderController)
+			auto questController = _questController.lock();
+			if (!questController)
 				return;
-			questOrderController->CancelQuest();
+			questController->CancelQuest();
 			// 終了
 			owner->PopAllPages();
 		});
 	RegisterOptionSelectedCallback("QuestRetire", [this](MenuUIActor* owner) -> void
 		{
-			auto questOrderController = _questOrderController.lock();
-			if (!questOrderController)
+			auto questController = _questController.lock();
+			if (!questController)
 				return;
-			questOrderController->EndQuest(false, 0.0f);
+			questController->EndQuest(false, 0.0f);
 			// 終了
 			owner->PopAllPages();
 		});
@@ -55,7 +55,7 @@ void QuestBoardUIActor::OnCreate()
 	eventQuest->SetDisplayQuestType(QuestData::QuestType::Event);
 	RegisterWidget(eventQuest);
 	std::shared_ptr<InQuestStatusUIWidget> inQuestStatus = std::make_shared<InQuestStatusUIWidget>("InQuestStatus");
-	inQuestStatus->SetQuestOrderController(_questOrderController);
+	inQuestStatus->SetQuestController(_questController);
 	RegisterWidget(inQuestStatus);
 	RegisterWidget(std::make_shared<MenuMatrixWidget>("Test"));
 
@@ -67,20 +67,20 @@ void QuestBoardUIActor::OnCreate()
 void QuestBoardUIActor::OnChangedActive(bool isActive)
 {
 	MenuUIActor::OnChangedActive(isActive);
-	auto questOrderController = _questOrderController.lock();
-	if (!questOrderController)
+	auto questController = _questController.lock();
+	if (!questController)
 		return;
 
 	if (isActive)
 	{
 		// クエスト受注状態によって最初のページを変更
-		switch (questOrderController->GetCurrentState())
+		switch (questController->GetCurrentState())
 		{
-		case QuestOrderController::State::Accepted:
+		case QuestController::State::Accepted:
 			// 受注のキャンセル画面へ
 			PushPage("CancelAcceptQuest");
 			break;
-		case QuestOrderController::State::InQuest:
+		case QuestController::State::InQuest:
 			// 受注中クエスト確認画面へ
 			PushPage("InQuestStatus");
 			break;
@@ -101,10 +101,10 @@ void QuestBoardUIActor::OnChangedActive(bool isActive)
 // 成功でtrue
 bool QuestBoardUIActor::AcceptQuest(int questIndex)
 {
-	auto questOrderController = _questOrderController.lock();
-	if (!questOrderController)
+	auto questController = _questController.lock();
+	if (!questController)
 		return false;
-	questOrderController->AcceptQuest(questIndex);
+	questController->AcceptQuest(questIndex);
 	return true;
 }
 
@@ -306,10 +306,10 @@ void QuestBoardUIWidget::OnSaveToFile(nlohmann::json* json)
 void InQuestStatusUIWidget::OnEnter()
 {
 	// 説明文を更新
-	auto questOrderController = _questOrderController.lock();
-	if (!questOrderController)
+	auto questController = _questController.lock();
+	if (!questController)
 		return;
-	auto currentQuestData = questOrderController->GetCurrentQuestData();
+	auto currentQuestData = questController->GetCurrentQuestData();
 	if (currentQuestData)
 	{
 		_questTitle = currentQuestData->name;

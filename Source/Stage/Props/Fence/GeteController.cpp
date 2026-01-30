@@ -2,7 +2,7 @@
 
 #include "../../Library/Scene/Scene.h"
 #include "../../Library/Component/CharactorController.h"
-#include "../../Source/Quest/QuestOrderController.h"
+#include "../../Source/Quest/QuestController.h"
 
 #include <imgui.h>
 
@@ -15,9 +15,9 @@ void GeteController::Start()
     auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
     if (gameManager)
     {
-        if (auto cont = gameManager->GetComponent<QuestOrderController>())
+        if (auto cont = gameManager->GetComponent<QuestController>())
         {
-            _questOrderController = cont;
+            _questController = cont;
         }
     }
 }
@@ -26,8 +26,8 @@ void GeteController::Start()
 void GeteController::Update(float elapsedTime)
 {
     // クエスト受注中はゲートを閉じて固定する
-	auto questOrderController = _questOrderController.lock();
-    if (questOrderController && questOrderController->GetCurrentState() == QuestOrderController::State::Accepted)
+	auto questController = _questController.lock();
+    if (questController && questController->GetCurrentState() == QuestController::State::Accepted)
     {
 		GetActor()->GetTransform().SetAngleY(0.0f);
 

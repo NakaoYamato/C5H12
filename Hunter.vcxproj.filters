@@ -822,7 +822,7 @@
     <ClCompile Include="Source\Player\StateMachine\States\PlayerNonCombatStates.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Quest\QuestOrderController.cpp">
+    <ClCompile Include="Source\Quest\QuestController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\InGame\GameManager.cpp">
@@ -1751,7 +1751,7 @@
     <ClInclude Include="Source\Player\StateMachine\States\PlayerNonCombatStates.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Quest\QuestOrderController.h">
+    <ClInclude Include="Source\Quest\QuestController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\InGame\GameManager.h">

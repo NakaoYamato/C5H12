@@ -17,75 +17,6 @@ void MetaAI::Start()
 // 更新処理
 void MetaAI::Update(float elapsedTime)
 {
-	int deadCount = 0;
-	for (auto& target : _targetables)
-	{
-		// 無効なターゲットはスキップ
-		if (target.lock() == nullptr)
-			continue;
-
-		if (target.lock()->GetFaction() == Targetable::Faction::Enemy)
-		{
-			auto damageable = target.lock()->GetActor()->GetComponent<Damageable>();
-			if (damageable)
-			{
-				if (damageable->IsDead())
-				{
-					deadCount++;
-				}
-			}
-		}
-		else if (target.lock()->GetFaction() == Targetable::Faction::Player)
-		{
-			auto damageable = target.lock()->GetActor()->GetComponent<Damageable>();
-			if (damageable)
-			{
-				if (damageable->IsDead())
-				{
-					_gameOver = true;
-				}
-			}
-        }
-	}
-
-	if (deadCount > 0)
-		_gameClear = true;
-
-	if (_gameClear)
-	{
-		if (_INPUT_PRESSED("Start"))
-		{
-			_inputTimer += elapsedTime;
-			if (_inputTimer > _inputHoldTime)
-			{
-				// シーン遷移
-				SceneManager::Instance().ChangeScene(SceneMenuLevel::Game, "Title");
-			}
-		}
-	}
-
-	TextRenderer::TextDrawData textData;
-	textData.type = FontType::MSGothic;
-	textData.position = _textPosition;
-	textData.color = Vector4::White;
-	textData.scale = Vector2(1.0f, 1.0f);
-	if (_gameClear)
-	{
-		// タイトル画面へ戻るメッセージ表示
-		if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
-			textData.text = L"ゲームクリア：スタートボタン長押しでタイトル画面";
-		else
-			textData.text = L"ゲームクリア：Tabキー長押しでタイトル画面";
-	}
-	else if (_gameOver)
-	{
-		// ゲームオーバーメッセージ表示
-		if (Input::Instance().GetCurrentInputDevice() == Input::InputType::XboxPad)
-			textData.text = L"ゲームオーバー：スタートボタン長押しでタイトル画面";
-		else
-			textData.text = L"ゲームオーバー：Tabキー長押しでタイトル画面";
-	}
-	GetActor()->GetScene()->GetTextRenderer().Draw(textData);
 }
 
 // GUI描画
@@ -94,8 +25,6 @@ void MetaAI::DrawGui()
 	ImGui::DragFloat2(u8"テキスト位置", &_textPosition.x, 1.0f, 0.0f, 1920.0f);
 
 	ImGui::Separator();
-	ImGui::Checkbox(u8"ゲームクリアフラグ", &_gameClear);
-	ImGui::Checkbox(u8"ゲームオーバーフラグ", &_gameOver);
 	for (const auto& targetable : _targetables)
 	{
 		if (auto target = targetable.lock())

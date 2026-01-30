@@ -131,11 +131,5 @@ private:
 	// 倒した敵の名前リスト
 	std::vector<std::string> _defeatedEnemyNames;
 
-	// ゲームクリアフラグ
-	bool _gameClear = false;
-	bool _gameOver = false;
-	float _inputTimer = 0.0f;
-	float _inputHoldTime = 2.0f;
-
 	Vector2 _textPosition = Vector2(100.0f, 100.0f);
 };

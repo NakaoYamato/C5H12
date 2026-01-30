@@ -8,7 +8,7 @@
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Player/PlayerController.h"
 
-class QuestOrderController : public Component
+class QuestController : public Component
 {
 public:
 	enum class State
@@ -20,11 +20,11 @@ public:
 	};
 
 public:
-	QuestOrderController() = default;
-	~QuestOrderController() override {}
+	QuestController() = default;
+	~QuestController() override {}
 
 	// 名前取得
-	const char* GetName() const override { return "QuestOrderController"; }
+	const char* GetName() const override { return "QuestController"; }
 
 	// 開始処理
 	void Start() override;
@@ -73,7 +73,8 @@ private:
 	QuestData* _currentQuestData = nullptr;
 	// 生成した敵の名前リスト
 	std::vector<std::string> _spawnedEnemyNames;
-	float _inQuestTimer = 0.0f;
+	// 汎用タイマー
+	float _timer = 0.0f;
 
 	// クエストインデックス
 	int _questIndex = -1;
@@ -81,5 +82,8 @@ private:
 
 	// クエスト開始時用パラメータ
 	bool _startQuestFlag = false;
-	float _timer = 0.0f;
+
+
+	// クエスト完了用入力保持時間
+	float _inputHoldTime = 2.0f;
 };

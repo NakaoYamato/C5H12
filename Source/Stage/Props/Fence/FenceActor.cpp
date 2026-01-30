@@ -61,13 +61,13 @@ void FenceActor::OnCreate()
 						auto gameManager = target->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
 						if (!gameManager)
 							return false;
-						auto questOrderController = gameManager->GetComponent<QuestOrderController>();
-						if (!questOrderController)
+						auto questController = gameManager->GetComponent<QuestController>();
+						if (!questController)
 							return false;
-						if (questOrderController->GetCurrentState() != QuestOrderController::State::Accepted)
+						if (questController->GetCurrentState() != QuestController::State::Accepted)
 							return false;
 
-						return questOrderController->CanStartQuest();
+						return questController->CanStartQuest();
 					}
 				);
 				interactionController->RegisterOnSelectCallback(
@@ -78,12 +78,12 @@ void FenceActor::OnCreate()
 						auto gameManager = target->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
 						if (!gameManager)
 							return;
-						auto questOrderController = gameManager->GetComponent<QuestOrderController>();
-						if (!questOrderController)
+						auto questController = gameManager->GetComponent<QuestController>();
+						if (!questController)
 							return;
-						if (questOrderController->GetCurrentState() != QuestOrderController::State::Accepted)
+						if (questController->GetCurrentState() != QuestController::State::Accepted)
 							return;
-						if (!questOrderController->CanStartQuest())
+						if (!questController->CanStartQuest())
 							return;
 
 						// 頭上にテキスト表示
@@ -106,10 +106,10 @@ void FenceActor::OnCreate()
 						auto gameManager = target->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
 						if (!gameManager)
 							return;
-						auto questOrderController = gameManager->GetComponent<QuestOrderController>();
-						if (!questOrderController)
+						auto questController = gameManager->GetComponent<QuestController>();
+						if (!questController)
 							return;
-						questOrderController->StartQuest();
+						questController->StartQuest();
 					}
 				);
 				auto box = fenceGate->AddCollider<BoxCollider>();

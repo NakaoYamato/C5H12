@@ -19,11 +19,11 @@ void PlayerQuestOrderUIController::Start()
 		}
 	}
 
-	// GameManagerからQuestOrderControllerを取得
+	// GameManagerからQuestControllerを取得
 	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
 	if (gameManager)
 	{
-		_questOrderController = gameManager->GetComponent<QuestOrderController>();
+		_questController = gameManager->GetComponent<QuestController>();
 	}
 }
 
@@ -32,12 +32,12 @@ void PlayerQuestOrderUIController::Update(float elapsedTime)
 {
 	auto actor = _playerActor.lock();
 	auto spriteRenderer = _spriteRenderer.lock();
-	auto questOrderController = _questOrderController.lock();
-	if (!actor || !spriteRenderer || !questOrderController)
+	auto questController = _questController.lock();
+	if (!actor || !spriteRenderer || !questController)
 		return;
 
 	// クエスト受注中でなければ非表示にする
-	if (questOrderController->GetCurrentState() != QuestOrderController::State::Accepted)
+	if (questController->GetCurrentState() != QuestController::State::Accepted)
 	{
 		spriteRenderer->SetActive(FrameSpr, false);
 		return;

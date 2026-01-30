@@ -11,9 +11,9 @@ void QuestUIController::Start()
 	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
 	if (gameManager)
 	{
-		if (auto cont = gameManager->GetComponent<QuestOrderController>())
+		if (auto cont = gameManager->GetComponent<QuestController>())
 		{
-			_questOrderController = cont;
+			_questController = cont;
 		}
 	}
 
@@ -33,17 +33,17 @@ void QuestUIController::Update(float elapsedTime)
 	auto spriteRenderer = _spriteRenderer.lock();
 	if (!spriteRenderer)
 		return;
-	auto questOrderController = _questOrderController.lock();
-	if (!questOrderController)
+	auto questController = _questController.lock();
+	if (!questController)
 		return;
 
 	// クエスト受注状態に応じて処理を変える
-	switch (questOrderController->GetCurrentState())
+	switch (questController->GetCurrentState())
 	{
-	case QuestOrderController::State::Accepted:
+	case QuestController::State::Accepted:
 		spriteRenderer->SetActive(Front, true);
 		break;
-	case QuestOrderController::State::InQuest:
+	case QuestController::State::InQuest:
 		spriteRenderer->SetActive(Front, true);
 
 		break;
@@ -71,10 +71,10 @@ void QuestUIController::DelayedRender(const RenderContext& rc)
 	auto spriteRenderer = _spriteRenderer.lock();
 	if (!spriteRenderer)
 		return;
-	auto questOrderController = _questOrderController.lock();
-	if (!questOrderController)
+	auto questController = _questController.lock();
+	if (!questController)
 		return;
-	auto currentQuest = questOrderController->GetCurrentQuestData();
+	auto currentQuest = questController->GetCurrentQuestData();
 	if (!currentQuest)
 		return;
 
@@ -92,9 +92,9 @@ void QuestUIController::DelayedRender(const RenderContext& rc)
 		_titleScale);
 
 	// 受注中の処理
-	if (questOrderController->GetCurrentState() == QuestOrderController::State::Accepted)
+	if (questController->GetCurrentState() == QuestController::State::Accepted)
 	{
-		if (questOrderController->CanStartQuest())
+		if (questController->CanStartQuest())
 		{
 			textRenderer.Draw(
 				FontType::MSGothic,

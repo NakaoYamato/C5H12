@@ -302,6 +302,7 @@
     <ClCompile Include="Library\Shader\Model\Test\TestShader.cpp" />
     <ClCompile Include="Library\Shader\Primitive\Locus\LocusPrimitiveShader.cpp" />
     <ClCompile Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.cpp" />
+    <ClCompile Include="Library\Shader\Sprite\Dissolve\SpriteDissolveShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\Outline\SpriteOutlineShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.cpp" />
     <ClCompile Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.cpp" />
@@ -380,6 +381,7 @@
     <ClCompile Include="Source\Quest\QuestData.cpp" />
     <ClCompile Include="Source\Quest\QuestManager.cpp" />
     <ClCompile Include="Source\Quest\QuestController.cpp" />
+    <ClCompile Include="Source\Quest\UI\QuestStartUIController.cpp" />
     <ClCompile Include="Source\Scene\Editor\SceneArmorEditor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneUIDebug.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneWyvernDebug.cpp" />
@@ -609,6 +611,7 @@
     <ClInclude Include="Library\Shader\Primitive\PrimitiveShaderBase.h" />
     <ClInclude Include="Library\Shader\Primitive\Simple\SimplePrimitiveShader.h" />
     <ClInclude Include="Library\Shader\ShaderResourceBase.h" />
+    <ClInclude Include="Library\Shader\Sprite\Dissolve\SpriteDissolveShader.h" />
     <ClInclude Include="Library\Shader\Sprite\Outline\SpriteOutlineShader.h" />
     <ClInclude Include="Library\Shader\Sprite\Scroll\SpriteScrollShader.h" />
     <ClInclude Include="Library\Shader\Sprite\Simple\SpriteSimpleShader.h" />
@@ -691,6 +694,7 @@
     <ClInclude Include="Source\Quest\QuestData.h" />
     <ClInclude Include="Source\Quest\QuestManager.h" />
     <ClInclude Include="Source\Quest\QuestController.h" />
+    <ClInclude Include="Source\Quest\UI\QuestStartUIController.h" />
     <ClInclude Include="Source\Scene\Editor\SceneArmorEditor.h" />
     <ClInclude Include="Source\Scene\Test\SceneUIDebug.h" />
     <ClInclude Include="Source\Scene\Test\SceneWyvernDebug.h" />
@@ -1043,6 +1047,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\Sprite\FullscreenQuadPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\Sprite\SpriteDissolvePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

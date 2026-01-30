@@ -3,6 +3,7 @@
 #include "Simple/SpriteSimpleShader.h"
 #include "Scroll/SpriteScrollShader.h"
 #include "Outline/SpriteOutlineShader.h"
+#include "Dissolve/SpriteDissolveShader.h"
 
 #include <imgui.h>
 
@@ -30,6 +31,8 @@ void SpriteShaderResource::Initialize(ID3D11Device* device)
 		_shaders["Scroll"] = std::make_unique<SpriteScrollShader>(device,
 			input_element_desc, static_cast<UINT>(_countof(input_element_desc)));
 		_shaders["Outline"] = std::make_unique<SpriteOutlineShader>(device,
+			input_element_desc, static_cast<UINT>(_countof(input_element_desc)));
+		_shaders["Dissolve"] = std::make_unique<SpriteDissolveShader>(device,
 			input_element_desc, static_cast<UINT>(_countof(input_element_desc)));
 	}
 

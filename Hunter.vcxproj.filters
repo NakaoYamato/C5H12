@@ -849,6 +849,12 @@
     <ClCompile Include="Source\Enemy\Wyvern\StateMachine\WyvernStateController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Quest\UI\QuestStartUIController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Shader\Sprite\Dissolve\SpriteDissolveShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1778,6 +1784,12 @@
     <ClInclude Include="Source\Enemy\Wyvern\StateMachine\WyvernStateController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Quest\UI\QuestStartUIController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Shader\Sprite\Dissolve\SpriteDissolveShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1920,5 +1932,6 @@
     <FxCompile Include="HLSL\Sprite\Font\OutlineFontPS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteOutlinePS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainStreamOutDS.hlsl" />
+    <FxCompile Include="HLSL\Sprite\SpriteDissolvePS.hlsl" />
   </ItemGroup>
 </Project>

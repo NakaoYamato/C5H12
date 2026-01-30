@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "../../Library/Math/Vector.h"
 
 class Fade
@@ -23,6 +24,15 @@ public:
 		_type = type;
 		_isActive = true;
 	}
+	// フェード開始
+	void Start(Type type, float duration, std::function<void()> onComplete)
+	{
+		_duration = duration;
+		_elapsedTime = 0.0f;
+		_type = type;
+		_isActive = true;
+		_onComplete = onComplete;
+	}
 	// 更新処理
 	void Update(float elapsedTime)
 	{
@@ -41,6 +51,9 @@ public:
 			{
 				_elapsedTime = _duration;
 				_isActive = false;
+				// コールバック呼び出し
+				if (_onComplete)
+					_onComplete();
 			}
 		}
 	}
@@ -70,4 +83,7 @@ private:
 	float _elapsedTime = 0.0f;
 	Type _type = Type::None;
 	bool _isActive = false;
+
+	// フェード処理完了時のコールバック
+	std::function<void()> _onComplete = nullptr;
 };

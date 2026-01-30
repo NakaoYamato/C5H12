@@ -3,6 +3,7 @@
 #include "Component.h"
 #include "../../Library/2D/Sprite.h"
 #include "../../Library/Renderer/TextRenderer.h"
+#include "../../Library/Shader/Sprite/SpriteShaderResource.h"
 
 #include <unordered_map>
 
@@ -40,6 +41,7 @@ public:
 	bool IsHit(const std::string& name, const Vector2& pos) const;
 
 #pragma region アクセサ
+	SpriteData& GetSpriteData(const std::string& name) { return _sprites.at(name); }
 	Sprite::CenterAlignment GetCenterAlignment(const std::string& name) const { return _sprites.at(name).GetCenterAlignment(); }
 	RectTransform& GetRectTransform(const std::string& name) { return _sprites.at(name).GetRectTransform(); }
 	const Vector2& GetTexPos(const std::string& name)const { return _sprites.at(name).GetTexPos(); }

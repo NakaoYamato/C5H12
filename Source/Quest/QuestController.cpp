@@ -5,6 +5,8 @@
 #include "../../Source/Camera/HuntingSuccessCamera.h"
 #include "../../Library/Component/CharactorController.h"
 
+#include "UI/QuestStartUIController.h"
+
 #include <Mygui.h>
 
 // 開始処理
@@ -89,15 +91,20 @@ void QuestController::Update(float elapsedTime)
 
 			_startQuestFlag = false;
 			// フェードイン開始
-			GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, 1.0f);
+			GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, 1.0f, [&]()
+				{
+					// タイマーUI表示
+					if (auto timerUIController = _timerUIController.lock())
+					{
+						timerUIController->GetActor()->SetIsActive(true);
+						// 制限時間を設定
+						timerUIController->SetEndTimer(_currentQuestData->timeLimit);
+					}
 
-			// タイマーUI表示
-			if (auto timerUIController = _timerUIController.lock())
-			{
-				timerUIController->GetActor()->SetIsActive(true);
-				// 制限時間を設定
-				timerUIController->SetEndTimer(_currentQuestData->timeLimit);
-			}
+					// クエスト開始UI生成
+					auto startUIActor = GetActor()->GetScene()->RegisterActor<UIActor>("QuestStartUI", ActorTag::UI);
+					startUIActor->AddComponent<QuestStartUIController>();
+				});
 		}
 
 		return;

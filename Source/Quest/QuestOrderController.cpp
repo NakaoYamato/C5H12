@@ -1,6 +1,8 @@
 #include "QuestOrderController.h"
 
 #include "../../Library/Scene/Scene.h"
+#include "../../Source/Camera/HuntingSuccessCamera.h"
+#include "../../Library/Component/CharactorController.h"
 
 #include <Mygui.h>
 
@@ -52,7 +54,9 @@ void QuestOrderController::Update(float elapsedTime)
 			for (const auto& target : _currentQuestData->targets)
 			{
 				std::string name = "Target" + std::to_string(index++);
-				enemyDataManager->CreateActor(GetActor()->GetScene(), target.name, name);
+				auto enemy = enemyDataManager->CreateActor(GetActor()->GetScene(), target.name, name);
+				// 生成した敵の名前をリストに登録
+				_spawnedEnemyNames.push_back(enemy->GetName());
 
 				// メタAIからスポーン位置を取得
 				EntryZone* entryZone = _metaAI.lock()->SearchEntryZoneFromStage(Targetable::Faction::Enemy, target.spawnAreaIndex);
@@ -71,6 +75,24 @@ void QuestOrderController::Update(float elapsedTime)
 			// フェードイン開始
 			GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, 1.0f);
 		}
+
+		return;
+	}
+
+	switch (_currentState)
+	{
+	case QuestOrderController::State::Idle:
+		break;
+	case QuestOrderController::State::Accepted:
+		break;
+	case QuestOrderController::State::InQuest:
+		UpdateInQuest(elapsedTime);
+		break;
+	case QuestOrderController::State::Completed:
+		UpdateCompleted(elapsedTime);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -181,6 +203,9 @@ void QuestOrderController::EndQuest(bool clear, float time)
 	if (_currentState != State::InQuest)
 		return;
 
+	auto metaAI = _metaAI.lock();
+	if (!metaAI)
+		return;
 	auto userDataManager = _userDataManager.lock();
 	if (!userDataManager)
 		return;
@@ -189,6 +214,34 @@ void QuestOrderController::EndQuest(bool clear, float time)
 	{
 		userDataManager->IncreaseQuestClearCount(_questIndex);
 		userDataManager->UpdateQuestBestClearTime(_questIndex, time);
+
+		// ハンティング成功カメラを起動
+		if (auto cameraActor = GetActor()->GetScene()->GetMainCameraActor())
+		{
+			auto huntingSuccessCamera = cameraActor->GetComponent<HuntingSuccessCamera>();
+			if (huntingSuccessCamera)
+			{
+				// メタAIから倒した敵のうち、最後に倒した敵を取得
+				auto& lastEnemyName = metaAI->GetDefeatedEnemyNames().at(metaAI->GetDefeatedEnemyNames().size() - 1);
+				if (auto enemyActor = GetActor()->GetScene()->GetActorManager().FindByName(lastEnemyName))
+				{
+					Vector3 position = enemyActor->GetTransform().GetPosition();
+					// 地面にめり込まないように調整
+					if (auto charactorController = enemyActor->GetComponent<CharactorController>())
+					{
+						position.y -= charactorController->GetStepOffset();
+					}
+					huntingSuccessCamera->Swich();
+					huntingSuccessCamera->SetTarget(
+						position,
+						enemyActor->GetTransform().GetAxisZ(),
+						15.0f
+					);
+					// プレイヤーカメラに戻すコントローラー名を設定
+					huntingSuccessCamera->SetNextControllerName("PlayerCameraController");
+				}
+			}
+		}
 	}
 
 	// 状態を完了に変更
@@ -230,4 +283,37 @@ bool QuestOrderController::CanStartQuest() const
 	}
 
 	return true;
+}
+
+// クエスト中の処理
+void QuestOrderController::UpdateInQuest(float elapsedTime)
+{
+	auto metaAI = _metaAI.lock();
+	if (!metaAI)
+		return;
+
+	_inQuestTimer += elapsedTime;
+
+	// メタAIから倒した敵の名前リストを取得
+	const auto& defeatedEnemyNames = metaAI->GetDefeatedEnemyNames();
+	// クエストのターゲットがすべて倒されているかチェック
+	bool allTargetsDefeated = true;
+	for (auto& spawnedEnemyName : _spawnedEnemyNames)
+	{
+		if (std::find(defeatedEnemyNames.begin(), defeatedEnemyNames.end(), spawnedEnemyName) == defeatedEnemyNames.end())
+		{
+			allTargetsDefeated = false;
+			break;
+		}
+	}
+	if (allTargetsDefeated)
+	{
+		// クエストクリア
+		EndQuest(true, _inQuestTimer);
+	}
+}
+
+// クエスト完了時の処理
+void QuestOrderController::UpdateCompleted(float elapsedTime)
+{
 }

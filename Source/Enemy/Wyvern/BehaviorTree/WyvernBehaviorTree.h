@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "../../Library/Component/BehaviorController.h"
-#include "../StateMachine/WyvernStateMachine.h"
+#include "../StateMachine/WyvernStateController.h"
 #include "../../Source/Common/CombatStatusController.h"
 #include "../../Source/Common/StaminaController.h"
 #include "../../Source/Enemy/BodyPartController.h"
@@ -25,9 +25,7 @@ public:
 	static constexpr float RequiredStaminaForAttack = 20.0f;
 
 public:
-	WyvernBehaviorTree(
-		WyvernStateMachine* stateMachine,
-		Actor* owner);
+	WyvernBehaviorTree(Actor* owner);
 
 	// 開始処理
 	void Start() override;
@@ -39,8 +37,8 @@ public:
 	std::string GetActiveNodeName() const { return _activeNode ? _activeNode->GetName() : ""; }
 
 #pragma region アクセサ
-	// ステートマシンを取得
-	WyvernStateMachine* GetStateMachine() { return _stateMachine; }
+	// ステートコントローラー取得
+	WyvernStateController* GetStateController() { return _stateContoller; }
 	// アニメーターを取得
 	Animator* GetAnimator() { return _animator; }
 	// 戦闘状態を取得	
@@ -69,7 +67,7 @@ private:
 
 	Actor* 					_owner = nullptr;
 
-	WyvernStateMachine*		_stateMachine = nullptr;
+	WyvernStateController* _stateContoller = nullptr;
 	Animator*				_animator = nullptr;
 	CombatStatusController*	_combatStatus = nullptr;
 	StaminaController*		_staminaController = nullptr;

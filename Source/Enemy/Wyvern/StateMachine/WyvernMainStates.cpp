@@ -4,8 +4,6 @@
 #include "../../Library/Scene/Scene.h"
 #include "../WyvernController.h"
 
-#include "../../Source/Camera/HuntingSuccessCamera.h"
-
 #include <imgui.h>
 
 #pragma region 待機
@@ -14,7 +12,7 @@ void WyvernIdleState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 #pragma endregion
@@ -25,7 +23,7 @@ void WyvernThreatState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 #pragma endregion
@@ -37,13 +35,13 @@ void WyvernRoarState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 #pragma endregion
 
 #pragma region ターゲットに向く
-WyvernTurnState::WyvernTurnState(WyvernStateMachine* owner) :
+WyvernTurnState::WyvernTurnState(WyvernStateController* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
@@ -113,7 +111,7 @@ void WyvernTurnState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 
@@ -139,26 +137,26 @@ void WyvernToTargetState::OnExecute(float elapsedTime)
 	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
 	if (length < attackRange && angle < _owner->GetEnemy()->GetLookAtRadian() / 2.0f)
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 		return;
 	}
     // 極近距離ならステートの終了
 	if (length < attackRange / 2.0f)
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
         return;
 	}
 
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 #pragma endregion
 
 #pragma region 噛みつき攻撃
-WyvernBiteAttackState::WyvernBiteAttackState(WyvernStateMachine* owner) : 
+WyvernBiteAttackState::WyvernBiteAttackState(WyvernStateController* owner) : 
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
@@ -192,7 +190,7 @@ void WyvernBiteAttackState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 void WyvernBiteAttackState::OnExit()
@@ -201,7 +199,7 @@ void WyvernBiteAttackState::OnExit()
 #pragma endregion
 
 #pragma region かぎ爪攻撃
-WyvernClawAttackState::WyvernClawAttackState(WyvernStateMachine* owner) :
+WyvernClawAttackState::WyvernClawAttackState(WyvernStateController* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
@@ -319,7 +317,7 @@ void WyvernClawAttackState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 void WyvernClawAttackState::OnExit()
@@ -327,7 +325,7 @@ void WyvernClawAttackState::OnExit()
 }
 #pragma endregion
 #pragma region 尻尾攻撃
-WyvernTailAttackState::WyvernTailAttackState(WyvernStateMachine* owner) :
+WyvernTailAttackState::WyvernTailAttackState(WyvernStateController* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
@@ -363,7 +361,7 @@ void WyvernTailAttackState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 void WyvernTailAttackState::OnExit()
@@ -394,7 +392,7 @@ void WyvernChargeAttackState::OnExecute(float elapsedTime)
 		if (toCurrentVecLenSq >= toTargetVecLenSq)
 		{
 			// ターゲット位置を越しているならステートの終了
-			_owner->GetBase().EndState();
+			_owner->GetStateMachine()->EndState();
 			return;
 		}
 		else
@@ -426,7 +424,7 @@ void WyvernBackStepState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 #pragma endregion
@@ -466,7 +464,7 @@ void WyvernBreathAttackState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 void WyvernBreathAttackState::OnExit()
@@ -512,7 +510,7 @@ void WyvernFireBallAttackState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 
@@ -566,7 +564,7 @@ void WyvernBackJumpFireBallAttackState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 
@@ -600,7 +598,7 @@ void WyvernPursuitState::OnExecute(float elapsedTime)
 	if (targetDirection.Length() < nearAttackRange)
 	{
 		// 攻撃範囲内ならステートの終了
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 		return;
 	}
 }
@@ -612,7 +610,7 @@ void WyvernPursuitState::OnExit()
 #pragma endregion
 
 #pragma region ダメージを受ける
-WyvernDamageState::WyvernDamageState(WyvernStateMachine* owner) :
+WyvernDamageState::WyvernDamageState(WyvernStateController* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
@@ -633,7 +631,7 @@ void WyvernDamageState::OnExecute(float elapsedTime)
 	// アニメーションが終了しているときステートの終了
 	if (!_owner->GetAnimator()->IsPlaying())
 	{
-		_owner->GetBase().EndState();
+		_owner->GetStateMachine()->EndState();
 	}
 }
 void WyvernDamageState::OnExit()
@@ -648,7 +646,7 @@ namespace WyvernDownSubState
 	class WyvernDownStartState : public WyvernSSB
 	{
 	public:
-		WyvernDownStartState(WyvernStateMachine* owner,
+		WyvernDownStartState(WyvernStateController* owner,
 			const std::string& animationName,
 			const std::string& nextState) :
 			WyvernSSB(owner, animationName, animationName, 1.5f, false, false),
@@ -660,7 +658,7 @@ namespace WyvernDownSubState
 			// アニメーションが終了しているとき次の状態へ遷移
 			if (!_owner->GetAnimator()->IsPlaying())
 			{
-				_owner->GetBase().ChangeSubState(_nextState);
+				_owner->GetStateMachine()->ChangeSubState(_nextState);
 			}
 		}
 	private:
@@ -669,7 +667,7 @@ namespace WyvernDownSubState
 	class WyvernDownLoopState : public WyvernSSB
 	{
 	public:
-		WyvernDownLoopState(WyvernStateMachine* owner,
+		WyvernDownLoopState(WyvernStateController* owner,
 			const std::string& animationName,
 			const std::string& nextState,
 			float timer) :
@@ -690,7 +688,7 @@ namespace WyvernDownSubState
 			// タイマーが0以下になったら次の状態へ遷移
 			if (_timer <= 0.0f)
 			{
-				_owner->GetBase().ChangeSubState(_nextState);
+				_owner->GetStateMachine()->ChangeSubState(_nextState);
 			}
 		}
 	private:
@@ -701,7 +699,7 @@ namespace WyvernDownSubState
 	class WyvernDownEndState : public WyvernSSB
 	{
 	public:
-		WyvernDownEndState(WyvernStateMachine* owner,
+		WyvernDownEndState(WyvernStateController* owner,
 			const std::string& animationName) :
 			WyvernSSB(owner, animationName, animationName, 1.5f, false, false)
 		{
@@ -711,12 +709,12 @@ namespace WyvernDownSubState
 			// アニメーションが終了しているときステートの終了
 			if (!_owner->GetAnimator()->IsPlaying())
 			{
-				_owner->GetBase().EndState();
+				_owner->GetStateMachine()->EndState();
 			}
 		}
 	};
 }
-WyvernDownState::WyvernDownState(WyvernStateMachine* owner) :
+WyvernDownState::WyvernDownState(WyvernStateController* owner) :
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加
@@ -748,26 +746,6 @@ void WyvernDeathState::OnEnter()
 
 	// 押し出し判定を消す
 	_owner->GetEnemy()->GetCharactorController()->SetIsPushable(false);
-
-    // ハンティング成功カメラを起動
-	if (auto cameraActor = _owner->GetEnemy()->GetActor()->GetScene()->GetMainCameraActor())
-	{
-		auto huntingSuccessCamera = cameraActor->GetComponent<HuntingSuccessCamera>();
-		if (huntingSuccessCamera)
-		{
-			Vector3 position = _owner->GetEnemy()->GetActor()->GetTransform().GetPosition();
-			position.y -= _owner->GetEnemy()->GetCharactorController()->GetStepOffset();
-			huntingSuccessCamera->Swich();
-            huntingSuccessCamera->SetTarget(
-				position,
-                _owner->GetEnemy()->GetActor()->GetTransform().GetAxisZ(),
-				15.0f
-			);
-			// プレイヤーカメラに戻すコントローラー名を設定
-			huntingSuccessCamera->SetNextControllerName("PlayerCameraController");
-		}
-    }
-
 }
 void WyvernDeathState::OnExecute(float elapsedTime)
 {
@@ -779,7 +757,7 @@ void WyvernDeathState::OnExit()
 #pragma endregion
 
 #pragma region 位置調整
-WyvernPositionAdjustState::WyvernPositionAdjustState(WyvernStateMachine* owner) : 
+WyvernPositionAdjustState::WyvernPositionAdjustState(WyvernStateController* owner) : 
 	HierarchicalStateBase(owner)
 {
 	// サブステートを追加

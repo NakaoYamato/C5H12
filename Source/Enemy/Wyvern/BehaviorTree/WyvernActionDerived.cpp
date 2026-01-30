@@ -5,7 +5,7 @@
 #pragma region 指定のステートが完了するまで実行し続ける
 void WyvernCompleteStateAction::Enter()
 {
-	_owner->GetStateMachine()->GetBase().ChangeState(_stateName);
+	_owner->GetStateController()->ChangeState(_stateName);
 	// スタミナ消費
 	if (_requiredStamina > 0.0f)
 		_owner->GetStaminaController()->ConsumeStamina(_requiredStamina, true);
@@ -15,7 +15,7 @@ void WyvernCompleteStateAction::Enter()
 
 BehaviorActionState WyvernCompleteStateAction::Execute(float elapsedTime)
 {
-	std::string currentStateName = _owner->GetStateMachine()->GetStateName();
+	std::string currentStateName = _owner->GetStateController()->GetStateName();
 
 	// 現在のステート名が異なっているなら成功
 	if (currentStateName != _stateName)
@@ -34,7 +34,7 @@ void WyvernCompleteSubStateAction::Enter()
 	WyvernCompleteStateAction::Enter();
 	// サブステートも変更
 	if (_subStateName != nullptr)
-		_owner->GetStateMachine()->GetBase().ChangeSubState(_subStateName);
+		_owner->GetStateController()->ChangeSubState(_subStateName);
 }
 #pragma endregion
 
@@ -51,7 +51,7 @@ void WyvernRoarAction::Exit()
 // 開始処理
 void WyvernTimerAction::Enter()
 {
-	_owner->GetStateMachine()->GetBase().ChangeState(_startStateName);
+	_owner->GetStateController()->ChangeState(_startStateName);
 	_timer = 0.0f;
 }
 

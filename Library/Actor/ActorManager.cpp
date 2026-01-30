@@ -62,7 +62,8 @@ void ActorManager::Update(float elapsedTime)
 		// すべてのジョブの終了を待機
 		for (auto& result : jobResults)
 		{
-			result.get();
+			if (result.valid())
+				result.get();
 		}
 	}
 	else

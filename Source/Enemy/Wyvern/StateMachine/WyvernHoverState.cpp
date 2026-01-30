@@ -50,7 +50,7 @@ void WyvernHoverToTargetState::OnExecute(float elapsedTime)
 
 	// アニメーションが終了しているとき滞空状態へ遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetBase().ChangeState("HoverIdle");
+		_owner->GetStateMachine()->ChangeState("HoverIdle");
 }
 
 void WyvernHoverToTargetState::OnExit()
@@ -63,10 +63,10 @@ void WyvernHoverToTargetState::OnExit()
 #pragma region 空中回転
 namespace WyvernHoverTurnSubStates
 {
-	class TurnSubStateBase : public StateBase<WyvernStateMachine>
+	class TurnSubStateBase : public StateBase<WyvernStateController>
 	{
 	public:
-		TurnSubStateBase(WyvernStateMachine* owner,
+		TurnSubStateBase(WyvernStateController* owner,
 			const std::string& name,
 			const std::string& animationName) :
 			StateBase(owner),
@@ -91,7 +91,7 @@ namespace WyvernHoverTurnSubStates
 		std::string _animationName;
 	};
 }
-WyvernHoverTurnState::WyvernHoverTurnState(WyvernStateMachine* owner) : HierarchicalStateBase(owner)
+WyvernHoverTurnState::WyvernHoverTurnState(WyvernStateController* owner) : HierarchicalStateBase(owner)
 {
 	// サブステートを追加
 	RegisterSubState(std::make_unique<WyvernHoverTurnSubStates::TurnSubStateBase>(owner, u8"TurnLeft90", u8"DodgeFlyLeft"));
@@ -121,7 +121,7 @@ void WyvernHoverTurnState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき滞空状態へ遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetBase().ChangeState("HoverIdle");
+		_owner->GetStateMachine()->ChangeState("HoverIdle");
 }
 
 void WyvernHoverTurnState::OnExit()
@@ -185,7 +185,7 @@ void WyvernHoverFireBallAttackState::OnExecute(float elapsedTime)
 	}
 	// アニメーションが終了しているとき滞空状態へ遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetBase().ChangeState("HoverIdle");
+		_owner->GetStateMachine()->ChangeState("HoverIdle");
 }
 
 void WyvernHoverFireBallAttackState::OnExit()
@@ -207,7 +207,7 @@ void WyvernHoverClawAttackState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき滞空状態へ遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetBase().ChangeState("HoverIdle");
+		_owner->GetStateMachine()->ChangeState("HoverIdle");
 }
 
 void WyvernHoverClawAttackState::OnExit()
@@ -221,7 +221,7 @@ namespace WyvernHitFallSubState
 	class WyvernHitFallStartState : public WyvernSSB
 	{
 	public:
-		WyvernHitFallStartState(WyvernStateMachine* owner) :
+		WyvernHitFallStartState(WyvernStateController* owner) :
 			WyvernSSB(
 				owner,
 				u8"HitFallStart",
@@ -236,14 +236,14 @@ namespace WyvernHitFallSubState
 			// アニメーションが終了しているとき次の状態へ遷移
 			if (!_owner->GetAnimator()->IsPlaying())
 			{
-				_owner->GetBase().ChangeSubState(u8"HitFallLoop");
+				_owner->GetStateMachine()->ChangeSubState(u8"HitFallLoop");
 			}
 		}
 	};
 	class WyvernHitFallLoopState : public WyvernSSB
 	{
 	public:
-		WyvernHitFallLoopState(WyvernStateMachine* owner) :
+		WyvernHitFallLoopState(WyvernStateController* owner) :
 			WyvernSSB(
 				owner,
 				u8"HitFallLoop",
@@ -257,14 +257,14 @@ namespace WyvernHitFallSubState
 		{
 			if (_owner->GetEnemy()->GetCharactorController()->GetVelocity().y >= 0)
 			{
-				_owner->GetBase().ChangeSubState(u8"HitFallEnd");
+				_owner->GetStateMachine()->ChangeSubState(u8"HitFallEnd");
 			}
 		}
 	};
 	class WyvernHitFallEndState : public WyvernSSB
 	{
 	public:
-		WyvernHitFallEndState(WyvernStateMachine* owner) :
+		WyvernHitFallEndState(WyvernStateController* owner) :
 			WyvernSSB(
 				owner,
 				u8"HitFallEnd",
@@ -284,7 +284,7 @@ namespace WyvernHitFallSubState
 		}
 	};
 }
-WyvernHitFallState::WyvernHitFallState(WyvernStateMachine* owner) : 
+WyvernHitFallState::WyvernHitFallState(WyvernStateController* owner) : 
 	HierarchicalStateBase(owner)
 {
 	RegisterSubState(std::make_unique<WyvernHitFallSubState::WyvernHitFallStartState>(owner));
@@ -320,7 +320,7 @@ void WyvernLandState::OnExecute(float elapsedTime)
 {
 	// アニメーションが終了しているとき待機状態へ遷移
 	if (!_owner->GetAnimator()->IsPlaying())
-		_owner->GetBase().ChangeState("Idle");
+		_owner->GetStateMachine()->ChangeState("Idle");
 }
 
 void WyvernLandState::OnExit()

@@ -10,7 +10,7 @@ bool WyvernAlertJudgment::Judgment()
 bool WyvernTurnJudgment::Judgment()
 {
 	// ターゲット方向に向いているか判定
-	float angleToTarget = _owner->GetStateMachine()->GetEnemy()->GetAngleToTarget(
+	float angleToTarget = _owner->GetStateController()->GetEnemy()->GetAngleToTarget(
 		_owner->GetCombatStatus()->GetTargetPosition());
 	return (angleToTarget >= DirectX::XMConvertToRadians(90.0f));
 }
@@ -27,12 +27,12 @@ bool WyvernAngryJudgment::Judgment()
 {
 	bool res = false;
 
-	if (_owner->GetStateMachine()->GetEnemy()->IsAngry() && !_wasAngry)
+	if (_owner->GetStateController()->GetEnemy()->IsAngry() && !_wasAngry)
 	{
 		res = true;
 	}
 
-	_wasAngry = _owner->GetStateMachine()->GetEnemy()->IsAngry();
+	_wasAngry = _owner->GetStateController()->GetEnemy()->IsAngry();
 
 	return res;
 }
@@ -40,7 +40,7 @@ bool WyvernAngryJudgment::Judgment()
 // flightNodeに遷移できるか判定
 bool WyvernFlightJudgment::Judgment()
 {
-	return _owner->GetStateMachine()->GetWyvern()->IsDuringFlight();
+	return _owner->GetStateController()->GetWyvern()->IsDuringFlight();
 }
 
 // BattleNode遷移判定
@@ -62,9 +62,9 @@ bool WyvernConfrontJudgment::Judgment()
 {
 	auto& targetPosition = _owner->GetCombatStatus()->GetTargetPosition();
 	// ターゲット方向に向いているか判定
-	float angle = _owner->GetStateMachine()->GetEnemy()->GetAngleToTarget(targetPosition);
+	float angle = _owner->GetStateController()->GetEnemy()->GetAngleToTarget(targetPosition);
 	// 向いてるならfalse
-	if (angle < _owner->GetStateMachine()->GetEnemy()->GetLookAtRadian())
+	if (angle < _owner->GetStateController()->GetEnemy()->GetLookAtRadian())
 		return false;
 
 	return true;
@@ -83,7 +83,7 @@ bool WyvernAttackJudgment::Judgment()
 		return false;
 
 	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
-	float attackRange = _owner->GetStateMachine()->GetEnemy()->GetAttackRange();
+	float attackRange = _owner->GetStateController()->GetEnemy()->GetAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から攻撃できるか判定
 	return length < attackRange;
@@ -94,15 +94,15 @@ bool WyvernNearAttackJudgment::Judgment()
 {
 	auto vec = _owner->GetCombatStatus()->GetToTargetVec();
 	float length = vec.Length();
-	float nearAttackRange = _owner->GetStateMachine()->GetEnemy()->GetNearAttackRange();
+	float nearAttackRange = _owner->GetStateController()->GetEnemy()->GetNearAttackRange();
 
 	// 現在の位置とターゲットの位置の距離から近接攻撃できるか判定
 	if (length < nearAttackRange)
 	{
 		// 自身の向いている方向にターゲットがいるか判定
 		auto targetDirection = vec.Normalize();
-		auto front = _owner->GetStateMachine()->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
-		if (std::acosf(targetDirection.Dot(front)) < _owner->GetStateMachine()->GetWyvern()->GetNearAttackRadian())
+		auto front = _owner->GetStateController()->GetWyvern()->GetActor()->GetTransform().GetAxisZ().Normalize();
+		if (std::acosf(targetDirection.Dot(front)) < _owner->GetStateController()->GetWyvern()->GetNearAttackRadian())
 			return true;
 	}
 	return false;
@@ -118,7 +118,7 @@ bool WyvernWanderJudgment::Judgment()
 bool WyvernHoverNearJudgment::Judgment()
 {
 	float length = _owner->GetCombatStatus()->GetToTargetVec().Length();
-	float range = _owner->GetStateMachine()->GetWyvern()->GetFlightNearRange();
+	float range = _owner->GetStateController()->GetWyvern()->GetFlightNearRange();
 
 	return length < range;
 }
@@ -128,7 +128,7 @@ bool WyvernHoverEndJudgment::Judgment()
 {
 	// 滞空時間が経過しているかスタミナが無いなら遷移
 	return _owner->GetStaminaController()->GetStamina() <= 0.0f ||
-		_owner->GetStateMachine()->GetWyvern()->GetFlightTimer() >= _owner->GetStateMachine()->GetWyvern()->GetFlightDuration();
+		_owner->GetStateController()->GetWyvern()->GetFlightTimer() >= _owner->GetStateController()->GetWyvern()->GetFlightDuration();
 }
 
 // ターゲットが近距離か判定

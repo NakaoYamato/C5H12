@@ -10,7 +10,7 @@
 
 #include "../EnemyController.h"
 #include "WyvernController.h"
-#include "StateMachine/WyvernStateMachine.h"
+#include "StateMachine/WyvernStateController.h"
 #include "BehaviorTree/WyvernBehaviorTree.h"
 
 #include "../../Source/Common/DamageableChild.h"
@@ -40,10 +40,9 @@ void WyvernActor::OnCreate()
 	_animator					= AddComponent<Animator>();
 	auto enemyController		= AddComponent<EnemyController>();
 	auto wyvernController		= AddComponent<WyvernController>();
-	auto stateMachine			= std::make_shared<WyvernStateMachine>(this);
-	auto stateController		= AddComponent<StateController>(stateMachine);
+	auto wyvernStateController	= AddComponent<WyvernStateController>();
 	auto behaviorController		= AddComponent<BehaviorController>(
-		std::make_shared<WyvernBehaviorTree>(stateMachine.get(), this)
+		std::make_shared<WyvernBehaviorTree>(this)
 	);
 	auto effectController = this->AddComponent<EffectController>();
 
@@ -91,6 +90,22 @@ void WyvernActor::OnCreate()
 		auto& material = modelRenderer->GetMaterial("LWing_M");
 		material.SetColor("Diffuse", Vector4::Red);
 		});
+
+#pragma region コールバック関数設定
+	_damageable.lock()->RegisterOnDeathCallback("WyvernActor", [&]()
+		{
+			// 飛行終了判定
+			if (auto wyvernController = this->GetComponent<WyvernController>())
+			{
+				wyvernController->SetIsDuringFlight(false);
+			}
+			// 死亡遷移
+			if (auto stateController = this->GetComponent<WyvernStateController>())
+			{
+				stateController->ChangeState("Death");
+			}
+		});
+#pragma endregion
 }
 // 更新処理
 void WyvernActor::OnUpdate(float elapsedTime)

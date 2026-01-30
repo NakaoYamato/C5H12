@@ -51,6 +51,12 @@ public:
 	QuestData* GetCurrentQuestData() const { return _currentQuestData; }
 
 private:
+	// クエスト中の処理
+	void UpdateInQuest(float elapsedTime);
+	// クエスト完了時の処理
+	void UpdateCompleted(float elapsedTime);
+
+private:
 	// ユーザーデータマネージャー
 	std::weak_ptr<UserDataManager> _userDataManager;
 	// クエストデータマネージャー
@@ -65,6 +71,10 @@ private:
 
 	// 現在受注中のクエストデータ
 	QuestData* _currentQuestData = nullptr;
+	// 生成した敵の名前リスト
+	std::vector<std::string> _spawnedEnemyNames;
+	float _inQuestTimer = 0.0f;
+
 	// クエストインデックス
 	int _questIndex = -1;
 	bool _isInQuest = false;

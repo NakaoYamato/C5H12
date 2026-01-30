@@ -13,10 +13,10 @@ class PlayerController;
 class Animator;
 
 // プレイヤーの状態遷移を管理するクラス
-class PlayerStateController : public StateController2<PlayerStateController>
+class PlayerStateController : public StateController<PlayerStateController>
 {
 public:
-	PlayerStateController() : StateController2<PlayerStateController>() {}
+	PlayerStateController() : StateController<PlayerStateController>() {}
 	~PlayerStateController() override {}
 
 	// 名前取得

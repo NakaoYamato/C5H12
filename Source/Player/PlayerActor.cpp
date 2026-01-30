@@ -104,17 +104,17 @@ void PlayerActor::OnCreate()
 					Vector2 movement = Vector2(move.target.x, move.target.z);
 					playerController->SetMovement(movement);
 				}
-                auto stateController = this->GetComponent<StateController>();
-                if (stateController)
-                { 
-					// プレイヤーの状態を更新
-					// TODO
-                    //auto playerStateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
-                    //if (playerStateMachine)
-                    //{
-                    //    playerStateMachine->ChangeState(move.mainState, move.subState);
-                    //}
-                }
+     //           auto stateController = this->GetComponent<StateController>();
+     //           if (stateController)
+     //           { 
+					//// プレイヤーの状態を更新
+					//// TODO
+     //               //auto playerStateMachine = std::dynamic_pointer_cast<PlayerStateMachine>(stateController->GetStateMachine());
+     //               //if (playerStateMachine)
+     //               //{
+     //               //    playerStateMachine->ChangeState(move.mainState, move.subState);
+     //               //}
+     //           }
             });
 		networkReceiver->GetEventBus().Subscribe<Network::CharacterApplyDamage>([this](const Network::CharacterApplyDamage& applyDamage)
 			{

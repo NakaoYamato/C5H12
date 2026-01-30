@@ -107,6 +107,16 @@ void MetaAI::DrawGui()
 			ImGui::Text("Target: (expired)");
 		}
 	}
+	ImGui::Separator();
+	if (ImGui::TreeNode(u8"“|‚µ‚½“G"))
+	{
+		for (const auto& name : _defeatedEnemyNames)
+		{
+			ImGui::Text("%s", name.c_str());
+		}
+		ImGui::TreePop();
+	}
+	ImGui::Separator();
 
 	if (ImGui::Button(u8"ƒ‚ƒfƒ‹“Ç‚İ‚İ"))
 	{

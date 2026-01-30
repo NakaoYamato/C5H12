@@ -13,10 +13,16 @@
 
 typedef BehaviorCallbackJudgment<WyvernBehaviorTree> WyvernCallbackJudgment;
 
-WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* owner) :
-	_stateMachine(stateMachine),
+WyvernBehaviorTree::WyvernBehaviorTree(Actor* owner) :
 	_owner(owner)
 {
+	// オーナーからコンポーネントを取得
+	_stateContoller = _owner->GetComponent<WyvernStateController>().get();
+	_animator = _owner->GetComponent<Animator>().get();
+	_combatStatus = _owner->GetComponent<CombatStatusController>().get();
+	_staminaController = _owner->GetComponent<StaminaController>().get();
+	auto wyvernController = _owner->GetComponent<WyvernController>().get();
+
 	_behaviorData = std::make_unique<BehaviorData<WyvernBehaviorTree>>();
 	_behaviorTree = std::make_unique<BehaviorTreeBase<WyvernBehaviorTree>>(this);
 
@@ -136,7 +142,7 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 					farAttack->AddNode("Ball", 2, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "BallAttack", nullptr, BreathAttackStaminaCost));
 					auto chargeNode = farAttack->AddNode("Charge", 2, SelectRule::Sequence, nullptr, nullptr);
 					{
-						chargeNode->AddNode("Alignment", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "BackStep", GetStateMachine()->GetWyvern()->GetChargeAttackChargeTime()));
+						chargeNode->AddNode("Alignment", 1, SelectRule::Non, nullptr, std::make_shared<WyvernTimerAction>(this, "BackStep", wyvernController->GetChargeAttackChargeTime()));
 						chargeNode->AddNode("ChargeAttack", 2, SelectRule::Non, nullptr, std::make_shared<WyvernAttackAction>(this, "ChargeAttack", nullptr, AttackStaminaCost));
 					}
 				}
@@ -175,10 +181,6 @@ WyvernBehaviorTree::WyvernBehaviorTree(WyvernStateMachine* stateMachine, Actor* 
 // 開始処理
 void WyvernBehaviorTree::Start()
 {
-	// オーナーからコンポーネントを取得
-	_animator = _owner->GetComponent<Animator>().get();
-	_combatStatus = _owner->GetComponent<CombatStatusController>().get();
-	_staminaController = _owner->GetComponent<StaminaController>().get();
 	// 子供から部位コントローラー取得
 	for (auto& child : _owner->GetChildren())
 	{
@@ -192,7 +194,7 @@ void WyvernBehaviorTree::Start()
 // ビヘイビアツリー実行
 void WyvernBehaviorTree::Execute(float elapsedTime)
 {
-	std::string currentStateName = _stateMachine->GetStateName();
+	std::string currentStateName = _stateContoller->GetStateName();
 
 	// 死亡時は処理しない
 	if (currentStateName == "Death")
@@ -208,8 +210,8 @@ void WyvernBehaviorTree::Execute(float elapsedTime)
 			_activeNode->Exit();
 		// 推論
 		_activeNode = _behaviorTree->ActiveNodeInference(_behaviorData.get());
-		GetStateMachine()->GetEnemy()->SetPerformDamageReaction(false);
-		GetStateMachine()->GetEnemy()->SetPerformDownReaction(false);
+		_stateContoller->GetEnemy()->SetPerformDamageReaction(false);
+		_stateContoller->GetEnemy()->SetPerformDownReaction(false);
 	}
 
 	// 現在の実行ノードがなければ取得

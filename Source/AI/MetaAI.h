@@ -102,16 +102,34 @@ public:
 	EntryZone* SearchEntryZoneFromStage(Targetable::Faction faction, int stageIndex) const;
 #pragma endregion
 
+#pragma region 倒した敵
+	// 倒した敵の名前を登録
+	void RegisterDefeatedEnemyName(const std::string& name)
+	{
+		_defeatedEnemyNames.push_back(name);
+	}
+	// 倒した敵の名前リスト取得
+	const std::vector<std::string>& GetDefeatedEnemyNames() const
+	{
+		return _defeatedEnemyNames;
+	}
+	// 倒した敵の名前リストクリア
+	void ClearDefeatedEnemyNames()
+	{
+		_defeatedEnemyNames.clear();
+	}
+#pragma endregion
+
 
 private:
 	// ターゲット可能なオブジェクトのリスト
 	std::vector<std::weak_ptr<Targetable>> _targetables;
-
 	// 開始地点
 	std::vector<std::weak_ptr<EntryZone>> _entryZones;
-
 	// ステージコントローラーリスト
 	std::vector<std::weak_ptr<StageController>> _stageControllers;
+	// 倒した敵の名前リスト
+	std::vector<std::string> _defeatedEnemyNames;
 
 	// ゲームクリアフラグ
 	bool _gameClear = false;

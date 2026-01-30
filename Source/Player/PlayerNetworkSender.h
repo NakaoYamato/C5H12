@@ -25,6 +25,6 @@ public:
 	Network::CharacterApplyDamage GetApplyDamageData() override;
 private:
 	std::weak_ptr<PlayerController> _playerController; // プレイヤーコントローラーへの参照
-	std::weak_ptr<StateController> _stateController; // ステートコントローラーへの参照
+	//std::weak_ptr<StateController> _stateController; // ステートコントローラーへの参照
 	std::weak_ptr<Damageable> _damageable; // ダメージ可能コンポーネントへの参照
 };

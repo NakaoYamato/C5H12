@@ -54,19 +54,25 @@ void PlayerCameraController::OnUpdate(float elapsedTime)
 	{
 		return;
 	}
+    auto inputManager = _inputManager.lock();
+    if (!inputManager)
+        return;
+    auto mainCamera = GetActor()->GetScene()->GetMainCameraActor();
+
 
     // 入力情報を取得
     float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
     float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
-
-    if (auto inputManager = _inputManager.lock())
+    // 反転処理
+    if (mainCamera->IsInvertX())
+        moveX = -moveX;
+    if (mainCamera->IsInvertY())
+        moveY = -moveY;
+    // カメラを動かせないなら入力値を無効化
+    if (!inputManager->CanMoveCamera())
     {
-        // カメラを動かせないなら入力値を無効化
-        if (!inputManager->CanMoveCamera())
-        {
-            moveX = 0.0f;
-            moveY = 0.0f;
-        }
+        moveX = 0.0f;
+        moveY = 0.0f;
     }
 
     // フェード中は動かせないようにする

@@ -40,8 +40,9 @@ public:
 
 	// ‘I‘ðŽˆ’Ç‰Á
 	void AddOption(const std::string& label,
-		const std::string& onSelectedCallbackName = "",
-		const std::string& nextWidgetName = "") override
+		const std::string& nextWidgetName = "",
+		const std::string& canSelectCallbackName = "",
+		const std::string& onSelectedCallbackName = "") override
 	{
 		// ‰½‚à‚µ‚È‚¢
 	}

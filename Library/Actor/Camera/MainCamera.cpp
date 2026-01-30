@@ -98,6 +98,10 @@ void MainCamera::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"カメラマネージャー"))
 		{
+			ImGui::Checkbox(u8"垂直操作反転", &_isInvertY);
+			ImGui::Checkbox(u8"水平操作反転", &_isInvertX);
+
+			ImGui::SameLine();
 			ImGui::Text(u8"使用中のカメラ:");
 			ImGui::SameLine();
 			ImGui::Text(_currentControllerName.c_str());

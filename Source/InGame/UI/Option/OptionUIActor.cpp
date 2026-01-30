@@ -1,6 +1,9 @@
 #include "OptionUIActor.h"
 
+#include "../../Library/Scene/Scene.h"
 #include "../../Library/Graphics/Graphics.h"
+
+bool TestFlag = false;
 
 // 生成時処理
 void OptionUIActor::OnCreate()
@@ -10,6 +13,7 @@ void OptionUIActor::OnCreate()
 	GetRectTransform().SetLocalPosition(Vector2(50.0f, 200.0f));
 
 	// コールバック登録
+#pragma region 選択時コールバック
 	RegisterOptionSelectedCallback("PopPage", [this](MenuUIActor* owner) -> void
 		{
 			owner->PopPage();
@@ -29,6 +33,32 @@ void OptionUIActor::OnCreate()
 			// TODO セーブ処理
 
 		});
+	RegisterOptionSelectedCallback("CameraMoveX", [this](MenuUIActor* owner) -> void
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				mainCamera->SetInvertX(!mainCamera->IsInvertX());
+		});
+	RegisterOptionSelectedCallback("CameraMoveY", [this](MenuUIActor* owner) -> void
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				mainCamera->SetInvertY(!mainCamera->IsInvertY());
+		});
+#pragma endregion
+#pragma region 選択可能かのコールバック
+	RegisterCanSelectOptionCallback("CameraMoveX", [this](MenuUIActor* owner) -> bool
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				return mainCamera->IsInvertX();
+			return false;
+		});
+	RegisterCanSelectOptionCallback("CameraMoveY", [this](MenuUIActor* owner) -> bool
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				return mainCamera->IsInvertY();
+			return false;
+		});
+#pragma endregion
+
 
 	// ウィジェット登録
 	RegisterWidgetCreateFunc<PlayerEquipmentMenuWidget>();

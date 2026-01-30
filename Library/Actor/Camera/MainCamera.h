@@ -91,6 +91,27 @@ public:
 	// シェイクマネージャー取得
 	CameraShakeManager* GetShakeManager() { return &_shakeManager; }
 
+	// カメラの垂直操作反転設定
+	void SetInvertY(bool isInvert)
+	{
+		_isInvertY = isInvert;
+	}
+	// カメラの垂直操作反転取得
+	bool IsInvertY() const
+	{
+		return _isInvertY;
+	}
+	// カメラの水平操作反転設定
+	void SetInvertX(bool isInvert)
+	{
+		_isInvertX = isInvert;
+	}
+	// カメラの水平操作反転取得
+	bool IsInvertX() const
+	{
+		return _isInvertX;
+	}
+
 private:
 	// コントローラー群
 	std::unordered_map<std::string, CameraControllerRef> _cameraControllers;
@@ -108,4 +129,9 @@ private:
 
 	// カメラシェイク
 	CameraShakeManager _shakeManager;
+
+	// カメラの垂直操作反転フラグ
+	bool _isInvertY = false;
+	// カメラの水平操作反転フラグ
+	bool _isInvertX = false;
 };

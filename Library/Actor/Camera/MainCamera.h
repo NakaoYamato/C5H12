@@ -91,6 +91,17 @@ public:
 	// シェイクマネージャー取得
 	CameraShakeManager* GetShakeManager() { return &_shakeManager; }
 
+	// カメラ感度倍率設定
+	void SetCameraSensitivity(float sensitivity)
+	{
+		_cameraSensitivity = sensitivity;
+	}
+	// カメラ感度倍率取得
+	float GetCameraSensitivity() const
+	{
+		return _cameraSensitivity;
+	}
+
 	// カメラの垂直操作反転設定
 	void SetInvertY(bool isInvert)
 	{
@@ -129,6 +140,9 @@ private:
 
 	// カメラシェイク
 	CameraShakeManager _shakeManager;
+
+	// カメラ感度倍率
+	float _cameraSensitivity = 1.0f;
 
 	// カメラの垂直操作反転フラグ
 	bool _isInvertY = false;

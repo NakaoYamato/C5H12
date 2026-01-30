@@ -43,6 +43,21 @@ void OptionUIActor::OnCreate()
 			if (auto mainCamera = GetScene()->GetMainCameraActor())
 				mainCamera->SetInvertY(!mainCamera->IsInvertY());
 		});
+	RegisterOptionSelectedCallback("CameraHighSensi", [this](MenuUIActor* owner) -> void
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				mainCamera->SetCameraSensitivity(1.0f);
+		});
+	RegisterOptionSelectedCallback("CameraMiddleSensi", [this](MenuUIActor* owner) -> void
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				mainCamera->SetCameraSensitivity(0.6f);
+		});
+	RegisterOptionSelectedCallback("CameraLowSensi", [this](MenuUIActor* owner) -> void
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				mainCamera->SetCameraSensitivity(0.3f);
+		});
 #pragma endregion
 #pragma region 選択可能かのコールバック
 	RegisterCanSelectOptionCallback("CameraMoveX", [this](MenuUIActor* owner) -> bool
@@ -55,6 +70,24 @@ void OptionUIActor::OnCreate()
 		{
 			if (auto mainCamera = GetScene()->GetMainCameraActor())
 				return mainCamera->IsInvertY();
+			return false;
+		});
+	RegisterCanSelectOptionCallback("CameraHighSensi", [this](MenuUIActor* owner) -> bool
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				return mainCamera->GetCameraSensitivity() == 1.0f;
+			return false;
+		});
+	RegisterCanSelectOptionCallback("CameraMiddleSensi", [this](MenuUIActor* owner) -> bool
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				return mainCamera->GetCameraSensitivity() == 0.6f;
+			return false;
+		});
+	RegisterCanSelectOptionCallback("CameraLowSensi", [this](MenuUIActor* owner) -> bool
+		{
+			if (auto mainCamera = GetScene()->GetMainCameraActor())
+				return mainCamera->GetCameraSensitivity() == 0.3f;
 			return false;
 		});
 #pragma endregion

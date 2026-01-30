@@ -98,6 +98,7 @@ void MainCamera::OnDrawGui()
 	{
 		if (ImGui::BeginTabItem(u8"カメラマネージャー"))
 		{
+			ImGui::SliderFloat(u8"カメラ感度倍率", &_cameraSensitivity, 0.01f, 1.0f);
 			ImGui::Checkbox(u8"垂直操作反転", &_isInvertY);
 			ImGui::Checkbox(u8"水平操作反転", &_isInvertX);
 

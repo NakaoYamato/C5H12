@@ -33,9 +33,10 @@ void LockOnCamera::OnUpdate(float elapsedTime)
         return;
 	auto mainCamera = GetActor()->GetScene()->GetMainCameraActor();
 
+    float sensitivity = mainCamera->GetCameraSensitivity();
     // “ü—Íî•ñ‚ðŽæ“¾
-    float moveX = _INPUT_VALUE("AxisRX") * _horizontalMovePower * elapsedTime;
-    float moveY = _INPUT_VALUE("AxisRY") * _verticalMovePower * elapsedTime;
+    float moveX = _INPUT_VALUE("AxisRX") * sensitivity * _horizontalMovePower * elapsedTime;
+    float moveY = _INPUT_VALUE("AxisRY") * sensitivity * _verticalMovePower * elapsedTime;
     // ”½“]ˆ—
     if (mainCamera->IsInvertX())
 		moveX = -moveX;

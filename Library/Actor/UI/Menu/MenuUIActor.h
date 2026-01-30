@@ -99,6 +99,12 @@ public:
 	bool IsInputEnabled() const { return _isInputEnabled; }
 	void SetInputEnabled(bool enabled) { _isInputEnabled = enabled; }
 
+	const std::vector<std::string>& GetSubOptionIndexActionNames() const { return _subOptionIndexActionNames; }
+	const std::vector<std::string>& GetAddOptionIndexActionNames() const { return _addOptionIndexActionNames; }
+	const std::vector<std::string>& GetSubLayerIndexActionNames() const { return _subLayerIndexActionNames; }
+	const std::vector<std::string>& GetAddLayerIndexActionNames() const { return _addLayerIndexActionNames; }
+	const std::vector<std::string>& GetSelectActionNames() const { return _selectActionNames; }
+	const std::vector<std::string>& GetBackActionNames() const { return _backActionNames; }
 	void SetSubOptionIndexActionNames(const std::vector<std::string>& actionNames) { _subOptionIndexActionNames = actionNames; }
 	void SetAddOptionIndexActionNames(const std::vector<std::string>& actionNames) { _addOptionIndexActionNames = actionNames; }
 	void SetSubLayerIndexActionNames(const std::vector<std::string>& actionNames) { _subLayerIndexActionNames = actionNames; }

@@ -7,6 +7,8 @@
 // 開始時処理
 void HuntingSuccessCamera::OnStart()
 {
+    // スキップ可能
+	SetCanSkip(true);
 }
 
 // 更新時処理

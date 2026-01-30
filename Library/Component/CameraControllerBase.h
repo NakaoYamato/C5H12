@@ -28,6 +28,14 @@ public:
 	{
 		_isActive = isActive;
 	}
+	bool CanSkip() const
+	{
+		return _canSkip;
+	}
+	void SetCanSkip(bool canSkip)
+	{
+		_canSkip = canSkip;
+	}
 #pragma endregion
 
 protected:
@@ -37,5 +45,7 @@ protected:
 	virtual void OnUpdate(float elapsedTime) = 0;
 
 protected:
-	bool _isActive{ false };
+	bool _isActive = false;
+	// スキップ可能か
+	bool _canSkip = true;
 };

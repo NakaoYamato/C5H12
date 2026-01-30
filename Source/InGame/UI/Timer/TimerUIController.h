@@ -15,8 +15,10 @@ public:
     void Update(float elapsedTime) override;
     // GUI描画
     void DrawGui() override;
-
+    // 起動フラグが変化したときの処理
+    void OnChangedActive(bool isActive) override;
 #pragma region アクセサ
+	void SetTimer(float timer) { _timer = timer; }
     void SetEndTimer(float endTimer) { _endTimer = endTimer; }
 #pragma endregion
 

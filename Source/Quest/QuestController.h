@@ -8,6 +8,8 @@
 #include "../../Source/Player/PlayerActor.h"
 #include "../../Source/Player/PlayerController.h"
 
+#include "../../Source/InGame/UI/Timer/TimerUIController.h"
+
 class QuestController : public Component
 {
 public:
@@ -65,6 +67,9 @@ private:
 	std::weak_ptr<EnemyDataManager> _enemyDataManager;
 	// メタAI
 	std::weak_ptr<MetaAI> _metaAI;
+
+	// タイマーUIコントローラー
+	std::weak_ptr<TimerUIController> _timerUIController;
 
 	// 現在の状態
 	State _currentState = State::Idle;

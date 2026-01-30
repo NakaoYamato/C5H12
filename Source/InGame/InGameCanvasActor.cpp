@@ -2,7 +2,7 @@
 
 #include "../../Library/Graphics/Graphics.h"
 
-#include "UI/TimerUIController.h"
+#include "UI/Timer/TimerUIController.h"
 #include "UI/Chest/ChestUIController.h"
 #include "UI/Item/ItemUIController.h"
 #include "UI/Item/Slider/ItemSliderController.h"

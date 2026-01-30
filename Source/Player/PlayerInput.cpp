@@ -1,6 +1,7 @@
 #include "PlayerInput.h"
 
 #include "../../Library/Scene/Scene.h"
+#include "../../Library/Component/CameraControllerBase.h"
 #include <imgui.h>
 
 // 開始処理
@@ -90,10 +91,23 @@ void PlayerInput::OnUpdate(float elapsedTime)
 		playerItemController->AddIndex(1);
 	}
 
-	// オプション画面起動入力
+	// ESCキー
 	if (_INPUT_TRIGGERD("Menu"))
 	{
-		_inputManager->SwitchInput("OptionInput");
+		// 演出用カメラ起動中でスキップ可能ならスキップ
+		if (auto cameraController = GetActor()->GetScene()->GetMainCameraActor()->GetCurrentController())
+		{
+			if (cameraController->CanSkip())
+			{
+				// 前のコントローラーに戻す
+				GetActor()->GetScene()->GetMainCameraActor()->SwitchPreviousController();
+			}
+		}
+		else
+		{
+			// オプション画面起動入力
+			_inputManager->SwitchInput("OptionInput");
+		}
 	}
 
 	// ロックオンカメラ切り替え入力

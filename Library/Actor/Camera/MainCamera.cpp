@@ -168,7 +168,7 @@ void MainCamera::RegisterController(CameraControllerRef controller)
 	_cameraControllers[controller->GetName()] = controller;
 }
 
-// コントローラーの登録
+// 切り替え(直前のコントローラーに戻す)
 void MainCamera::SwitchPreviousController()
 {
 	if (_cameraControllers.size() == 0)
@@ -177,7 +177,7 @@ void MainCamera::SwitchPreviousController()
 	SwitchController(lastInput);
 }
 
-// コントローラーの登録
+// 切り替え
 void MainCamera::SwitchController(const std::string& nextControllerName)
 {
 	// 履歴に追加

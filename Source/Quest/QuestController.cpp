@@ -1,6 +1,7 @@
 #include "QuestController.h"
 
 #include "../../Library/Scene/Scene.h"
+#include "../../Source/InGame/InGameCanvasActor.h"
 #include "../../Source/Camera/HuntingSuccessCamera.h"
 #include "../../Library/Component/CharactorController.h"
 
@@ -15,6 +16,21 @@ void QuestController::Start()
 	_questManager = ResourceManager::Instance().GetResourceAs<QuestManager>("QuestManager");
 	// 敵データマネージャー取得
 	_enemyDataManager = ResourceManager::Instance().GetResourceAs<EnemyDataManager>("EnemyDataManager");
+
+	// キャンバスからタイマーUI取得
+	if (auto canvas = GetActor()->GetScene()->GetActorManager().FindByClass<InGameCanvasActor>(ActorTag::UI))
+	{
+		for (auto& child : canvas->GetChildren())
+		{
+			if (auto timerUIController = child->GetComponent<TimerUIController>())
+			{
+				_timerUIController = timerUIController;
+				// クエスト開始するまで非表示にしておく
+				_timerUIController.lock()->GetActor()->SetIsActive(false);
+				break;
+			}
+		}
+	}
 
 	// メタAI取得
 	_metaAI = GetActor()->GetComponent<MetaAI>();
@@ -74,6 +90,14 @@ void QuestController::Update(float elapsedTime)
 			_startQuestFlag = false;
 			// フェードイン開始
 			GetActor()->GetScene()->GetFade()->Start(Fade::Type::FadeIn, 1.0f);
+
+			// タイマーUI表示
+			if (auto timerUIController = _timerUIController.lock())
+			{
+				timerUIController->GetActor()->SetIsActive(true);
+				// 制限時間を設定
+				timerUIController->SetEndTimer(_currentQuestData->timeLimit);
+			}
 		}
 
 		return;
@@ -303,6 +327,10 @@ void QuestController::UpdateInQuest(float elapsedTime)
 	// 経過時間を加算
 	_timer += elapsedTime;
 
+	// タイマー設定
+	if (auto timerUIController = _timerUIController.lock())
+		timerUIController->SetTimer(_timer);
+
 	// 生成した敵がいなければ処理しない
 	if (_spawnedEnemyNames.empty())
 		return;
@@ -360,6 +388,12 @@ void QuestController::UpdateCompleted(float elapsedTime)
 			_isInQuest = false;
 			_currentQuestData = nullptr;
 			_timer = 0.0f;
+
+			// タイマーUI非表示
+			if (auto timerUIController = _timerUIController.lock())
+			{
+				timerUIController->GetActor()->SetIsActive(false);
+			}
 		}
 	}
 }

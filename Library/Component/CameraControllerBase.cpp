@@ -30,6 +30,7 @@ void CameraControllerBase::LateUpdate(float elapsedTime)
 void CameraControllerBase::DrawGui()
 {
 	ImGui::Checkbox("Active", &_isActive);
+	ImGui::Checkbox("CanSkip", &_canSkip);
 }
 
 // このコントローラーに切り替える

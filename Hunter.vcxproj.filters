@@ -585,7 +585,7 @@
     <ClCompile Include="Source\Scene\Test\SceneUIDebug.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Source\InGame\UI\TimerUIController.cpp">
+    <ClCompile Include="Source\InGame\UI\Timer\TimerUIController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Source\InGame\UI\Player\PlayerStaminaUIController.cpp">
@@ -1490,7 +1490,7 @@
     <ClInclude Include="Source\Scene\Test\SceneUIDebug.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Source\InGame\UI\TimerUIController.h">
+    <ClInclude Include="Source\InGame\UI\Timer\TimerUIController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Source\InGame\UI\Player\PlayerStaminaUIController.h">

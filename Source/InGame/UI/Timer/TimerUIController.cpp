@@ -4,6 +4,7 @@
 
 #include <imgui.h>
 
+// 開始処理
 void TimerUIController::Start()
 {
     _spriteRenderer =  this->GetActor()->GetComponent<SpriteRenderer>();
@@ -28,9 +29,9 @@ void TimerUIController::Start()
     }
 }
 
+// 更新処理
 void TimerUIController::Update(float elapsedTime)
 {
-    _timer += elapsedTime;
     if (_handRectTransform)
     {
         // 60分で1週
@@ -40,6 +41,15 @@ void TimerUIController::Update(float elapsedTime)
     }
 }
 
+// GUI描画
 void TimerUIController::DrawGui()
 {
+	ImGui::DragFloat(u8"タイマー", &_timer, 1.0f, 0.0f, _endTimer);
+	ImGui::DragFloat(u8"終了時間", &_endTimer, 10.0f, 0.0f, 3600.0f);
+}
+
+// 起動フラグが変化したときの処理
+void TimerUIController::OnChangedActive(bool isActive)
+{
+    _timer = 0.0f;
 }

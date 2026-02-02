@@ -5,6 +5,8 @@
 #include "../../Source/Camera/HuntingSuccessCamera.h"
 #include "../../Library/Component/CharactorController.h"
 
+#include "../../Source/Common/Damageable.h"
+
 #include "UI/QuestStartUIController.h"
 
 #include <Mygui.h>
@@ -401,6 +403,21 @@ void QuestController::UpdateCompleted(float elapsedTime)
 			{
 				timerUIController->GetActor()->SetIsActive(false);
 			}
+
+			// ƒvƒŒƒCƒ„[‚Ì‘Ì—Í‚ð–ß‚·
+			for (auto& playerController : metaAI->GetPlayerControllers())
+			{
+				if (!playerController.expired())
+                    continue;
+                auto playerActor = playerController.lock()->GetActor();
+				if (!playerActor)
+                    continue;
+
+				if (auto damageable = playerActor->GetComponent<Damageable>())
+				{
+					damageable->ResetHealth(damageable->GetMaxHealth());
+				}
+            }
 		}
 	}
 }

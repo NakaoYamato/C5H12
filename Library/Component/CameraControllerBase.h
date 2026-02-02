@@ -47,5 +47,5 @@ protected:
 protected:
 	bool _isActive = false;
 	// スキップ可能か
-	bool _canSkip = true;
+	bool _canSkip = false;
 };

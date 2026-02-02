@@ -4,6 +4,7 @@
 #include "../../Library/Scene/SceneManager.h"
 #include "../../Library/Math/Random.h"
 
+#include "../../Source/Player/PlayerController.h"
 #include "../../Source/Enemy/Wyvern/WyvernActor.h"
 #include "../../Library/Graphics/Graphics.h"
 
@@ -215,5 +216,21 @@ EntryZone* MetaAI::SearchEntryZoneFromStage(Targetable::Faction faction, int sta
 		}
 	}
 	return nullptr;
+}
+#pragma endregion
+
+#pragma region プレイヤー
+// プレイヤーコントローラー登録
+void MetaAI::RegisterPlayerController(std::weak_ptr<PlayerController> playerController)
+{
+    _playerControllers.push_back(playerController);
+}
+
+// プレイヤーコントローラー削除
+void MetaAI::RemovePlayerController(std::weak_ptr<PlayerController> playerController)
+{
+	auto it = std::remove_if(_playerControllers.begin(), _playerControllers.end(),
+		[&playerController](const std::weak_ptr<PlayerController>& p) { return p.lock() == playerController.lock(); });
+    _playerControllers.erase(it, _playerControllers.end());
 }
 #pragma endregion

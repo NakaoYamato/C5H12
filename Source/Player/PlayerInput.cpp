@@ -102,6 +102,11 @@ void PlayerInput::OnUpdate(float elapsedTime)
 				// 前のコントローラーに戻す
 				GetActor()->GetScene()->GetMainCameraActor()->SwitchPreviousController();
 			}
+			else
+			{
+				// オプション画面起動入力
+				_inputManager->SwitchInput("OptionInput");
+			}
 		}
 		else
 		{

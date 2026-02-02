@@ -9,6 +9,9 @@
 #include <memory>
 #include <functional>
 
+// 前方宣言
+class PlayerController;
+
 class MetaAI : public Component
 {
 public:
@@ -120,6 +123,18 @@ public:
 	}
 #pragma endregion
 
+#pragma region プレイヤー
+    // プレイヤーコントローラー登録
+	void RegisterPlayerController(std::weak_ptr<PlayerController> playerController);
+    // プレイヤーコントローラー削除
+    void RemovePlayerController(std::weak_ptr<PlayerController> playerController);
+    // プレイヤーコントローラーリスト取得
+	const std::vector<std::weak_ptr<PlayerController>>& GetPlayerControllers()
+	{
+		return _playerControllers;
+    }
+#pragma endregion
+
 
 private:
 	// ターゲット可能なオブジェクトのリスト
@@ -130,6 +145,8 @@ private:
 	std::vector<std::weak_ptr<StageController>> _stageControllers;
 	// 倒した敵の名前リスト
 	std::vector<std::string> _defeatedEnemyNames;
+	// プレイヤー情報
+    std::vector<std::weak_ptr<PlayerController>> _playerControllers;
 
 	Vector2 _textPosition = Vector2(100.0f, 100.0f);
 };

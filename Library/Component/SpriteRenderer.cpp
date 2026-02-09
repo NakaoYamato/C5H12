@@ -237,6 +237,11 @@ bool SpriteRenderer::LoadFromFile()
 
 		// マテリアルデータ
 		_sprites[name].GetMaterial().LoadFromFile(sub);
+		// シェーダ名が空ならSimpleを使用
+		if (_sprites[name].GetMaterial().GetShaderName().empty())
+		{
+			_sprites[name].GetMaterial().SetShaderName("Simple");
+		}
 
 		_sprites[name].SetCenterAlignment(	sub.value("centerAlignment",	Sprite::CenterAlignment::CenterCenter));
 		_sprites[name].SetTexPos(			sub.value("texPos",				_sprites[name].GetTexPos()));

@@ -100,6 +100,11 @@ void Sprite::DrawGui()
 	{
 		LoadTexture(L"", _centerAlignment);
 	}
+	ImGui::SameLine();
+	if (ImGui::Button(u8"íœ"))
+	{
+		_texture = {};
+	}
 	ImGui::Separator();
 	if (ImGui::TreeNode(u8"ƒ}ƒeƒŠƒAƒ‹"))
 	{

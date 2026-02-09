@@ -254,6 +254,7 @@ public:
 	void SetPropagateActiveChange(bool propagate) { _propagateActiveChange = propagate; }
 
 	bool IsActive()const					{ return _isActive; }
+	bool IsStarted()const					{ return _isStarted; }
 	bool IsDrawingTransformGui()const		{ return _isDrawingTransformGui; }
 	bool IsShowing()const					{ return _isShowing; }
 	bool IsCastingShadow()const				{ return _isCastingShadow; }
@@ -441,6 +442,8 @@ protected:
 #pragma region 各種フラグ
 	// アクティブフラグ
 	bool				_isActive = true;
+	// スタート処理を行ったか
+	bool				_isStarted = false;
 	// トランスフォームGUI描画フラグ
 	bool				_isDrawingTransformGui = true;
 	// 表示フラグ

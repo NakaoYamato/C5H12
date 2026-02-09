@@ -88,6 +88,9 @@ void Actor::Start()
 	}
 
 	OnStart();
+
+	// スタート処理完了
+	_isStarted = true;
 }
 ///	更新処理
 void Actor::Update(float elapsedTime)
@@ -169,6 +172,8 @@ void Actor::Render(const RenderContext& rc)
 	if (!_isActive)return;
 	// 表示チェック
 	if (!_isShowing)return;
+	// スタート処理チェック
+	if (!_isStarted)return;
 
 	// 各コンポーネントの描画処理
 	for (std::shared_ptr<Component>& component : _components)
@@ -192,6 +197,8 @@ void Actor::DebugRender(const RenderContext& rc)
 	if (!_isActive)return;
 	// デバッグ表示チェック
 	if (!_isDrawingDebug)return;
+	// スタート処理チェック
+	if (!_isStarted)return;
 
 	// 各コンポーネントの描画処理
 	for (std::shared_ptr<Component>& component : _components)
@@ -215,6 +222,8 @@ void Actor::CastShadow(const RenderContext& rc)
 	if (!_isActive)return;
 	// 影描画チェック
 	if (!_isCastingShadow)return;
+	// スタート処理チェック
+	if (!_isStarted)return;
 
 	for (std::shared_ptr<Component>& component : _components)
 	{
@@ -230,6 +239,8 @@ void Actor::DelayedRender(const RenderContext& rc)
 	if (!_isActive)return;
 	// 表示チェック
 	if (!_isShowing)return;
+	// スタート処理チェック
+	if (!_isStarted)return;
 
 	for (std::shared_ptr<Component>& component : _components)
 	{

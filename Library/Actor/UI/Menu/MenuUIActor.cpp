@@ -569,6 +569,35 @@ void MenuNodeEditor::DrawGui(MenuUIActor* menuActor, bool* flag)
 			if (ImGui::MenuItem("Save Layout")) SaveToFile();
 			ImGui::EndMenu();
 		}
+		if (ImGui::MenuItem("Reset Layout"))
+		{
+			// 登録されている全ウィジェットを取得
+			auto& widgets = menuActor->GetRegisteredWidgetsForEdit();
+			int count = 0;
+			const float spacingX = 350.0f; // 横の間隔
+			const float spacingY = 250.0f; // 縦の間隔
+			const int columns = 5;         // 横に並べる数
+
+			for (auto& [name, widget] : widgets)
+			{
+				// グリッド配置の座標計算
+				float x = 50.0f + (count % columns) * spacingX;
+				float y = 50.0f + (count / columns) * spacingY;
+				ImVec2 newPos(x, y);
+
+				ne::NodeId nodeId = GetNodeId(name);
+
+				// 1. 内部の座標キャッシュを更新
+				_nodePositions[(size_t)nodeId] = newPos;
+
+				// 2. エディタ上のノード位置を即時更新
+				ne::SetNodePosition(nodeId, newPos);
+
+				count++;
+			}
+			// 全体が映るようにビューを自動調整
+			ne::NavigateToContent();
+		}
 		ImGui::EndMenuBar();
 	}
 	

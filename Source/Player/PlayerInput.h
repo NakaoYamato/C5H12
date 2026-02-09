@@ -4,6 +4,8 @@
 #include "PlayerController.h"
 #include "PlayerItemController.h"
 
+#include "../../Source/Quest/QuestController.h"
+
 class PlayerInput : public InputControllerBase
 {
 public:
@@ -27,4 +29,5 @@ protected:
 private:
 	std::weak_ptr<PlayerController> _playerController;
 	std::weak_ptr<PlayerItemController> _playerItemController;
+	std::weak_ptr<QuestController> _questController;
 };

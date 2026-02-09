@@ -240,6 +240,12 @@ void Sprite::LoadFromFile(nlohmann::json* json, const std::string& label)
 	GetRectTransform() = sprJosn.value("RectTransform", RectTransform());
 	// マテリアルデータ
 	GetMaterial().LoadFromFile(sprJosn);
+	// シェーダ名が空ならSimpleを使用
+	if (GetMaterial().GetShaderName().empty())
+	{
+		GetMaterial().SetShaderName("Simple");
+	}
+
 	SetCenterAlignment(sprJosn.value("centerAlignment", Sprite::CenterAlignment::CenterCenter));
 	SetTexPos(sprJosn.value("texPos", GetTexPos()));
 	SetTexSize(sprJosn.value("texSize", GetTexSize()));

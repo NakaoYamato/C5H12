@@ -15,6 +15,7 @@
 #include "UI/Player/PlayerQuestOrderUIController.h"
 #include "UI/Quest/QuestUIController.h"
 #include "UI/QuestBoard/QuestBoardUIActor.h"
+#include "UI/QuestQueue/QuestQueueUIController.h"
 
 #include <Mygui.h>
 
@@ -95,6 +96,10 @@ void InGameCanvasActor::OnCreate()
 	auto questUIActor = CreateUIActor<UIActor>("QuestUI");
 	questUIActor->AddComponent<QuestUIController>();
 	questUIActor->GetRectTransform().SetLocalPosition(Vector2(1950.0f, 340.0f));
+
+	// クエスト待機UI生成
+	auto questQueueUIActor = CreateUIActor<UIActor>("QuestQueueUI");
+	questQueueUIActor->AddComponent<QuestQueueUIController>();
 
 	// オプションUI生成
 	auto optionUIActor = CreateUIActor<OptionUIActor>("OptionUIActor");

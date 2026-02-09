@@ -349,6 +349,7 @@
     <ClCompile Include="Source\InGame\InGameCanvasActor.cpp" />
     <ClCompile Include="Source\InGame\Input\Option\OptionInput.cpp" />
     <ClCompile Include="Source\InGame\Input\QuestBoard\QuestBoardInput.cpp" />
+    <ClCompile Include="Source\InGame\Input\QuestQueue\QuestQueueInput.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\ChestUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.cpp" />
     <ClCompile Include="Source\InGame\UI\Chest\Menu\ChestItemMenuController.cpp" />
@@ -359,6 +360,7 @@
     <ClCompile Include="Source\InGame\UI\Option\OptionUIActor.cpp" />
     <ClCompile Include="Source\InGame\UI\Player\PlayerQuestOrderUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.cpp" />
+    <ClCompile Include="Source\InGame\UI\QuestQueue\QuestQueueUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Quest\QuestUIController.cpp" />
     <ClCompile Include="Source\InGame\UI\Timer\TimerUIController.cpp" />
     <ClCompile Include="Source\InGame\InputManager.cpp" />
@@ -658,6 +660,7 @@
     <ClInclude Include="Source\InGame\InGameCanvasActor.h" />
     <ClInclude Include="Source\InGame\Input\Option\OptionInput.h" />
     <ClInclude Include="Source\InGame\Input\QuestBoard\QuestBoardInput.h" />
+    <ClInclude Include="Source\InGame\Input\QuestQueue\QuestQueueInput.h" />
     <ClInclude Include="Source\InGame\UI\Chest\ChestUIController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestArmorMenuController.h" />
     <ClInclude Include="Source\InGame\UI\Chest\Menu\ChestItemMenuController.h" />
@@ -669,6 +672,7 @@
     <ClInclude Include="Source\InGame\UI\Option\OptionUIActor.h" />
     <ClInclude Include="Source\InGame\UI\Player\PlayerQuestOrderUIController.h" />
     <ClInclude Include="Source\InGame\UI\QuestBoard\QuestBoardUIActor.h" />
+    <ClInclude Include="Source\InGame\UI\QuestQueue\QuestQueueUIController.h" />
     <ClInclude Include="Source\InGame\UI\Quest\QuestUIController.h" />
     <ClInclude Include="Source\InGame\UI\Timer\TimerUIController.h" />
     <ClInclude Include="Source\InGame\InputManager.h" />

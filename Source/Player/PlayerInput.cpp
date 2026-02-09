@@ -9,6 +9,16 @@ void PlayerInput::Start()
 {
 	_playerController = GetActor()->GetComponent<PlayerController>();
 	_playerItemController = GetActor()->GetComponent<PlayerItemController>();
+
+	// ゲームマネージャーからクエスト受注コントローラー取得
+	auto gameManager = GetActor()->GetScene()->GetActorManager().FindByName("GameManager", ActorTag::System);
+	if (gameManager)
+	{
+		if (auto cont = gameManager->GetComponent<QuestController>())
+		{
+			_questController = cont;
+		}
+	}
 }
 
 // 更新処理
@@ -112,6 +122,20 @@ void PlayerInput::OnUpdate(float elapsedTime)
 		{
 			// オプション画面起動入力
 			_inputManager->SwitchInput("OptionInput");
+		}
+		return;
+	}
+
+	// TABキー
+	if (_INPUT_TRIGGERD("Start"))
+	{
+		// クエスト受注中ならクエスト待機状態へ移動
+		auto questController = _questController.lock();
+		if (questController && questController->GetCurrentState() == QuestController::State::Accepted)
+		{
+			_inputManager->SwitchInput("QuestQueueInput");
+
+			return;
 		}
 	}
 

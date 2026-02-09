@@ -5,6 +5,7 @@
 #include "Input/ChestInput.h"
 #include "Input/Option/OptionInput.h"
 #include "Input/QuestBoard/QuestBoardInput.h"
+#include "Input/QuestQueue/QuestQueueInput.h"
 
 #include <imgui.h>
 
@@ -25,6 +26,11 @@ void InputManager::OnCreate()
 	auto questBoardInputController = GetScene()->RegisterActor<Actor>("QuestBoardInput", ActorTag::System);
 	questBoardInputController->SetParent(this);
 	auto questBoardInput = questBoardInputController->AddComponent<QuestBoardInput>();
+
+	// クエスト待機用入力コントローラー登録
+	auto questQueueInputController = GetScene()->RegisterActor<Actor>("QuestQueueInput", ActorTag::System);
+	questQueueInputController->SetParent(this);
+	auto questQueueInput = questQueueInputController->AddComponent<QuestQueueInput>();
 }
 
 // 開始関数

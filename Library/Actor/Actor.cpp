@@ -688,6 +688,9 @@ void Actor::DrawColliderGui()
 /// 起動フラグが変化したときの処理
 void Actor::ChangedActive(bool isActive)
 {
+	// 行列を更新
+	UpdateTransform();
+
 	// 各コンポーネントの起動フラグ変化処理
 	for (std::shared_ptr<Component>& component : _components)
 	{

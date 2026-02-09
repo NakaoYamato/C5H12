@@ -187,6 +187,12 @@ void SpriteRenderer::DrawGui()
 	}
 	ImGui::Separator();
 }
+// 起動フラグが変化したときの処理
+void SpriteRenderer::OnChangedActive(bool isActive)
+{
+	// トランスフォームの更新を挟む
+	Update(0.0f);
+}
 // 画像読み込み
 void SpriteRenderer::LoadTexture(const std::string& spriteName,
 	const wchar_t* filename,

@@ -35,6 +35,9 @@ public:
 	void DelayedRender(const RenderContext& rc) override;
 	// GUI•`‰æ
 	void DrawGui() override;
+	// ‹N“®ƒtƒ‰ƒO‚ª•Ï‰»‚µ‚½‚Æ‚«‚Ìˆ—
+	void OnChangedActive(bool isActive) override;
+
 	// ‰æ‘œ“Ç‚İ‚İ
 	void LoadTexture(const std::string& spriteName, const wchar_t* filename, Sprite::CenterAlignment alignment = Sprite::CenterAlignment::CenterCenter);
 	// ‰æ‘œ‚Æ‚Ì“–‚½‚è”»’è

@@ -203,6 +203,10 @@ void PlayerCameraController::SetPlayerActor(PlayerActor* playerActor)
 // リセット
 void PlayerCameraController::Reset(const Vector3& angle)
 {
+    if (!_playerActor)
+    {
+        return;
+    }
     // カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform =
         DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);

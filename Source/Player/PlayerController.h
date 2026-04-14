@@ -15,7 +15,7 @@
 
 #include "PlayerItemController.h"
 
-class PlayerController : public Component
+class PlayerController : public Component, public std::enable_shared_from_this<PlayerController>
 {
 public:
 	enum EffectType : UINT
@@ -53,6 +53,8 @@ public:
 	void Teleport(const Vector3& position, const Vector3& angle);
 	// リスポーン
 	void Respawn(const Vector3& position, const Vector3& angle);
+	// リスポーン（現在地から一番近いリスポーン地点）
+	void Respawn();
 
 #pragma region アクセサ
 	// キャラクターコントローラー取得

@@ -34,16 +34,14 @@ void PlayerController::Start()
 	{
 		_metaAI = gameManager->GetComponent<MetaAI>();
 
-		// メタAIからリスポーン位置を取得
-		EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
-		if (entryZone)
+		// コントローラーを登録
+		if (auto metaAI = _metaAI.lock())
 		{
-			Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
-			Vector3 respawnAngle = entryZone->GetAngle();
-			// 座標と角度を設定
-			GetActor()->GetTransform().SetWorldPosition(respawnPosition);
-			GetActor()->GetTransform().SetWorldAngle(respawnAngle);
+			metaAI->RegisterPlayerController(shared_from_this());
 		}
+
+		// リスポーン
+		Respawn();
 	}
 #pragma region コールバック設定
 	// 被ダメージコールバック設定
@@ -182,19 +180,7 @@ void PlayerController::Update(float elapsedTime)
 		_respawnTimer += elapsedTime;
 		if (_respawnTimer >= _respawnTimeMax)
 		{
-			// メタAIからリスポーン位置を取得
-			EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
-			if (entryZone)
-			{
-				Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
-				Vector3 respawnAngle = entryZone->GetAngle();
-				Respawn(respawnPosition, respawnAngle);
-			}
-			else
-			{
-				// リスポーン位置が見つからなかった場合、現在位置にリスポーン
-				Respawn(GetActor()->GetTransform().GetWorldPosition(), GetActor()->GetTransform().GetWorldAngle());
-			}
+			Respawn();
 		}
 
 		return;
@@ -440,6 +426,29 @@ void PlayerController::Respawn(const Vector3& position, const Vector3& angle)
 
 	// テレポート
 	Teleport(position, angle);
+}
+
+// リスポーン（現在地から一番近いリスポーン地点）
+void PlayerController::Respawn()
+{
+	// メタAI取得
+	auto metaAI = _metaAI.lock();
+	if (!metaAI)
+		return;
+
+	// メタAIからリスポーン位置を取得
+	EntryZone* entryZone = metaAI->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
+	if (entryZone)
+	{
+		Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
+		Vector3 respawnAngle = entryZone->GetAngle();
+		Respawn(respawnPosition, respawnAngle);
+	}
+	else
+	{
+		// リスポーン位置が見つからなかった場合、現在位置にリスポーン
+		Respawn(GetActor()->GetTransform().GetWorldPosition(), GetActor()->GetTransform().GetWorldAngle());
+	}
 }
 
 bool PlayerController::IsAttack() const

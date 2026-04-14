@@ -383,6 +383,7 @@
     <ClCompile Include="Source\Quest\QuestData.cpp" />
     <ClCompile Include="Source\Quest\QuestManager.cpp" />
     <ClCompile Include="Source\Quest\QuestController.cpp" />
+    <ClCompile Include="Source\Quest\UI\QuestClearUIController.cpp" />
     <ClCompile Include="Source\Quest\UI\QuestStartUIController.cpp" />
     <ClCompile Include="Source\Scene\Editor\SceneArmorEditor.cpp" />
     <ClCompile Include="Source\Scene\Test\SceneUIDebug.cpp" />
@@ -698,6 +699,7 @@
     <ClInclude Include="Source\Quest\QuestData.h" />
     <ClInclude Include="Source\Quest\QuestManager.h" />
     <ClInclude Include="Source\Quest\QuestController.h" />
+    <ClInclude Include="Source\Quest\UI\QuestClearUIController.h" />
     <ClInclude Include="Source\Quest\UI\QuestStartUIController.h" />
     <ClInclude Include="Source\Scene\Editor\SceneArmorEditor.h" />
     <ClInclude Include="Source\Scene\Test\SceneUIDebug.h" />

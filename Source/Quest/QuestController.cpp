@@ -59,14 +59,7 @@ void QuestController::Update(float elapsedTime)
 			{
 				if (auto playerController = playerActor->GetComponent<PlayerController>())
 				{
-					// メタAIからリスポーン位置を取得
-					EntryZone* entryZone = _metaAI.lock()->SearchNearestEntryZone(Targetable::Faction::Player, GetActor()->GetTransform().GetWorldPosition());
-					if (entryZone)
-					{
-						Vector3 respawnPosition = entryZone->GetActor()->GetTransform().GetWorldPosition() + entryZone->GetCenter();
-						Vector3 respawnAngle = entryZone->GetAngle();
-						playerController->Respawn(respawnPosition, respawnAngle);
-					}
+					playerController->Respawn();
 				}
 			}
 
@@ -404,19 +397,23 @@ void QuestController::UpdateCompleted(float elapsedTime)
 				timerUIController->GetActor()->SetIsActive(false);
 			}
 
-			// プレイヤーの体力を戻す
-			for (auto& playerController : metaAI->GetPlayerControllers())
+			for (auto& playerControllerWeak : metaAI->GetPlayerControllers())
 			{
-				if (!playerController.expired())
+				auto playerController = playerControllerWeak.lock();
+				if (!playerController)
                     continue;
-                auto playerActor = playerController.lock()->GetActor();
+                auto playerActor = playerController->GetActor();
 				if (!playerActor)
                     continue;
 
+				// プレイヤーの体力を戻す
 				if (auto damageable = playerActor->GetComponent<Damageable>())
 				{
 					damageable->ResetHealth(damageable->GetMaxHealth());
 				}
+
+				// プレイヤーを初期位置に移動
+				playerController->Respawn();
             }
 		}
 	}

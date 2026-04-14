@@ -31,6 +31,10 @@ void PlayerStateController::OnContact(CollisionData& collisionData)
 // 抜刀移行
 void PlayerStateController::ChangeToCombatState(const std::string& mainStateName)
 {
+	// 現在のステートを終了
+	if (GetStateMachine())
+		GetStateMachine()->EndState();
+
 	_isCombatState = true;
 	ChangeState(mainStateName);
 }
@@ -38,6 +42,10 @@ void PlayerStateController::ChangeToCombatState(const std::string& mainStateName
 // 納刀移行
 void PlayerStateController::ChangeToNonCombatState(const std::string& mainStateName)
 {
+	// 現在のステートを終了
+	if (GetStateMachine())
+		GetStateMachine()->EndState();
+
 	_isCombatState = false;
 	ChangeState(mainStateName);
 }

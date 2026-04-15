@@ -133,9 +133,6 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 
 	// GBufferの色情報、深度情報をRTに設定しながら使うとエラーが出るので
 	// 対策としてSRVのコピーを作成する
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyColorSRV;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyParameterSRV;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> copyDepthStencilSRV;
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -146,20 +143,20 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 			device, dc,
 			gbuffer->GetRenderTargetSRV(GBUFFER_COLOR_MAP_INDEX).Get(),
 			&srvDesc,
-			copyColorSRV.ReleaseAndGetAddressOf()
+			_copyColorSRV.ReleaseAndGetAddressOf()
 		);
 		GpuResourceManager::CreateShaderResourceViewCopy(
 			device, dc,
 			gbuffer->GetRenderTargetSRV(GBUFFER_PARAMETER_MAP_INDEX).Get(),
 			&srvDesc,
-			copyParameterSRV.ReleaseAndGetAddressOf()
+			_copyParameterSRV.ReleaseAndGetAddressOf()
 		);
 		srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
 		GpuResourceManager::CreateShaderResourceViewCopy(
 			device, dc,
 			gbuffer->GetDepthSRV().Get(),
 			&srvDesc,
-			copyDepthStencilSRV.ReleaseAndGetAddressOf()
+			_copyDepthStencilSRV.ReleaseAndGetAddressOf()
 		);
 	}
 
@@ -201,9 +198,9 @@ void DecalRenderer::Render(GBuffer* gbuffer, ID3D11Device* device, const RenderC
 		DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4(drawInfo.world);
 
 		// シェーダー内でGBufferのテクスチャの色、ワールド座標を取得するために送信
-		dc->PSSetShaderResources(GBUFFER_COLOR_SRV_INDEX, 1, copyColorSRV.GetAddressOf());
-		dc->PSSetShaderResources(GBUFFER_PARAMETER_SRV_INDEX, 1, copyParameterSRV.GetAddressOf());
-		dc->PSSetShaderResources(GBUFFER_DEPTH_SRV_INDEX, 1, copyDepthStencilSRV.GetAddressOf());
+		dc->PSSetShaderResources(GBUFFER_COLOR_SRV_INDEX, 1, _copyColorSRV.GetAddressOf());
+		dc->PSSetShaderResources(GBUFFER_PARAMETER_SRV_INDEX, 1, _copyParameterSRV.GetAddressOf());
+		dc->PSSetShaderResources(GBUFFER_DEPTH_SRV_INDEX, 1, _copyDepthStencilSRV.GetAddressOf());
 		// 情報の設定
 		{
 			// デカールのテクスチャを設定

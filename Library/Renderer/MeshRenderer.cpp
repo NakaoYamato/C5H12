@@ -582,10 +582,7 @@ void MeshRenderer::DrawDynamicBoneMesh(const RenderContext& rc, ModelShaderBase*
 
 	// スケルトン用定数バッファ
 	size_t size = std::min<size_t>(boneTransforms.size(), static_cast<size_t>(FBX_MAX_BONES));
-	for (size_t i = 0; i < size; ++i)
-	{
-		_cbDynamicSkeleton.boneTransforms[i] = boneTransforms[i];
-	}
+	std::memcpy(_cbDynamicSkeleton.boneTransforms, boneTransforms.data(), sizeof(DirectX::XMFLOAT4X4) * size);
 	_cbDynamicSkeleton.materialColor = materialColor;
 
 	dc->UpdateSubresource(_dynamicBoneCB.Get(), 0, 0, &_cbDynamicSkeleton, 0, 0);

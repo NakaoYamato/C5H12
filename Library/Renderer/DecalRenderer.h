@@ -107,6 +107,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		_geometryInputLayout;
 
 	std::unordered_map<std::string, PixelShaderData> _geometryPixelShaders;
+
+	// GBufferのSRVをコピーして保持するためのCOMオブジェクト
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _copyColorSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _copyParameterSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _copyDepthStencilSRV;
 #pragma endregion
 	// 描画情報のリスト
 	std::vector<DrawInfo>							_drawInfos;

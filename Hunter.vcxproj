@@ -196,6 +196,7 @@
     <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_canvas.cpp" />
     <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_node_editor.cpp" />
     <ClCompile Include="Library\ImGui\imgui-node-editor\imgui_node_editor_api.cpp" />
+    <ClCompile Include="Library\ImGui\ImGuiColorTextEdit-master\TextEditor.cpp" />
     <ClCompile Include="Library\Input\ManagedTarget\DirectInput.cpp" />
     <ClCompile Include="Library\Material\Material.cpp" />
     <ClCompile Include="Library\Math\Easing.cpp" />
@@ -493,6 +494,7 @@
     <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_extra_math.h" />
     <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor.h" />
     <ClInclude Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.h" />
+    <ClInclude Include="Library\ImGui\ImGuiColorTextEdit-master\TextEditor.h" />
     <ClInclude Include="Library\Input\ManagedTarget\DirectInput.h" />
     <ClInclude Include="Library\Material\Material.h" />
     <ClInclude Include="Library\Math\MathF.h" />

@@ -20,7 +20,7 @@
 #define IMGUI_NODE_EDITOR_IMPLEMENTATION
 #include "../imgui-node-editor/imgui_node_editor.h"
 
-
+#include "./ImGuiColorTextEdit-master/TextEditor.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern ImWchar glyphRangesJapanese[];
@@ -50,4 +50,7 @@ private:
 	static ax::NodeEditor::EditorContext* editorContext;
 
 	static void DockSpace();
+
+	// TextEditor—p
+	static TextEditor textEditor;
 };

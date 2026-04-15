@@ -5,6 +5,7 @@
 
 HWND ImGuiManager::hWnd;
 ax::NodeEditor::EditorContext* ImGuiManager::editorContext = nullptr;
+TextEditor ImGuiManager::textEditor;
 
 void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc,
 	bool* isPaused, void (*setPause)(bool), int maxThreads)
@@ -36,6 +37,11 @@ void ImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceConte
 	editorContext = ax::NodeEditor::CreateEditor(&config);
 	ax::NodeEditor::SetCurrentEditor(editorContext);
 
+	// TextEditorèâä˙âª
+    auto lang = TextEditor::LanguageDefinition::CPlusPlus();
+    textEditor.SetLanguageDefinition(lang);
+    textEditor.SetText("int main() {\n\tprintf(\"Hello, ImGui!\");\n\treturn 0;\n}");
+
 	ProfileInitialize(isPaused, setPause, maxThreads);
 
 	ProfileThreadName(0, "Main Thread");
@@ -66,6 +72,10 @@ void ImGuiManager::Update()
 	ImGuizmo::BeginFrame();
 	ImGuizmo::SetOrthographic(false);
 	ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+
+	ImGui::Begin("Code Editor");
+	textEditor.Render("MyEditor", ImVec2(0, 0), true);
+	ImGui::End();
 }
 
 void ImGuiManager::Render()

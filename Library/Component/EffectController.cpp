@@ -329,7 +329,7 @@ EffectController::EffekseerEffectData* EffectController::LoadEffekseerEffect(UIN
 {
 	if (_effectMap.find(id) == _effectMap.end())
 	{
-		_effectMap[id] = std::make_unique<EffekseerEffectData>(GetActor().get());
+		_effectMap[id] = std::make_unique<EffekseerEffectData>(GetActor());
 		_effectMap[id]->Load(filepath);
 	}
 	return static_cast<EffekseerEffectData*>(_effectMap[id].get());
@@ -340,7 +340,7 @@ EffectController::ParticleEffectData* EffectController::LoadParticleEffect(UINT 
 {
 	if (_effectMap.find(id) == _effectMap.end())
 	{
-		_effectMap[id] = std::make_unique<ParticleEffectData>(GetActor().get());
+		_effectMap[id] = std::make_unique<ParticleEffectData>(GetActor());
 		_effectMap[id]->Load(filepath);
 	}
 	return static_cast<ParticleEffectData*>(_effectMap[id].get());

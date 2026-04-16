@@ -82,10 +82,10 @@ public:
 	virtual void DrawGui() {}
 
 	// アクター設定
-	void SetActor(std::shared_ptr<Actor> actor) { this->_actor = actor; }
+	void SetActor(std::shared_ptr<Actor> actor) { this->_actor = actor.get(); }
 
 	// アクター取得
-	std::shared_ptr<Actor> GetActor() { return _actor.lock(); }
+	Actor* GetActor() { return _actor; }
 
 #pragma region 入出力
 	// ディレクトリ取得
@@ -98,5 +98,5 @@ public:
 #pragma endregion
 
 private:
-	std::weak_ptr<Actor>	_actor;
+	Actor*	_actor = nullptr;
 };

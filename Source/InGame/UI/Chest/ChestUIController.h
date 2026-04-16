@@ -62,7 +62,7 @@ public:
 	void Close();
 
 	// 使用中のチェストアクター設定
-	void SetChestActor(const std::shared_ptr<Actor>& actor) { _chestActor = actor; }
+	void SetChestActor(Actor* actor) { _chestActor = actor; }
 	// 入力値設定
 	void SetInputState(InputState inputState) { _inputState = inputState; }
 	// 入力値設定
@@ -94,7 +94,7 @@ private:
 	float _fadeTime = 0.4f;
 
 	// 使用中のチェストアクター
-	std::weak_ptr<Actor> _chestActor;
+	Actor* _chestActor = nullptr;
 	// プレイヤーアクター
-	std::weak_ptr<Actor> _playerActor;
+	Actor* _playerActor = nullptr;
 };

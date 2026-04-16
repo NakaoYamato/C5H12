@@ -49,8 +49,8 @@ void ModelCollider::Update(float elapsedTime)
 			continue;
 		auto& node = poseNodes[sphere.nodeIndex];
 		Actor* actor = sphere.tagIndex != -1 ? 
-			_bodyPartActors[tagNames.at(sphere.tagIndex)].lock().get() :
-			GetActor().get();
+			_bodyPartActors[tagNames.at(sphere.tagIndex)] :
+			GetActor();
 		Vector3 worldPosition = sphere.position.TransformCoord(node.worldTransform);
 
 		// アニメーションイベントの当たり判定と接触する場合当たり判定を登録しない
@@ -78,8 +78,8 @@ void ModelCollider::Update(float elapsedTime)
 		auto& startNode = poseNodes[capsule.startNodeIndex];
 		auto& endNode = poseNodes[capsule.endNodeIndex];
 		Actor* actor = capsule.tagIndex != -1 ?
-			_bodyPartActors[tagNames.at(capsule.tagIndex)].lock().get() :
-			GetActor().get();
+			_bodyPartActors[tagNames.at(capsule.tagIndex)] :
+			GetActor();
 		Vector3 worldStart = capsule.start.TransformCoord(startNode.worldTransform);
 		Vector3 worldEnd = capsule.end.TransformCoord(endNode.worldTransform);
 
@@ -163,7 +163,7 @@ void ModelCollider::UpdateAnimationEventCollision(float elapsedTime,
 		case AnimationEvent::ShapeType::Box:
 			// TODO: Boxの当たり判定は未実装
 			//collisionManager.RegisterBoxData(
-			//	GetActor().get(),
+			//	GetActor(),
 			//	layer,
 			//	layerMask,
 			//	event.position.TransformCoord(node.worldTransform),
@@ -172,14 +172,14 @@ void ModelCollider::UpdateAnimationEventCollision(float elapsedTime,
 			break;
 		case AnimationEvent::ShapeType::Sphere:
 			collisionManager.RegisterSphereData(
-				GetActor().get(),
+				GetActor(),
 				layer,
 				layerMask,
 				Vector3(transform._41, transform._42, transform._43),
 				event.scale.x);
 			// アニメーションイベントの球体当たり判定データを追加
 			sphereDatas.emplace_back(
-				GetActor().get(),
+				GetActor(),
 				layer,
 				layerMask,
 				Vector3(transform._41, transform._42, transform._43),
@@ -188,7 +188,7 @@ void ModelCollider::UpdateAnimationEventCollision(float elapsedTime,
 			break;
 		case AnimationEvent::ShapeType::Capsule:
 			collisionManager.RegisterCapsuleData(
-				GetActor().get(),
+				GetActor(),
 				layer,
 				layerMask,
 				event.position.TransformCoord(node.worldTransform),
@@ -196,7 +196,7 @@ void ModelCollider::UpdateAnimationEventCollision(float elapsedTime,
 				event.scale.x);
 			// アニメーションイベントのカプセル当たり判定データを追加
 			capsuleDatas.emplace_back(
-				GetActor().get(),
+				GetActor(),
 				layer,
 				layerMask,
 				event.position.TransformCoord(node.worldTransform),

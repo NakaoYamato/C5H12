@@ -34,13 +34,13 @@ public:
 			GetActor()->GetName() + tag,
 			GetActor()->GetTag()
 		);
-		actor->SetParent(GetActor().get());
-		_bodyPartActors[tag] = actor;
+		actor->SetParent(GetActor());
+		_bodyPartActors[tag] = actor.get();
 		return actor.get();
 	}
 
 	// 部位ごとのアクター取得
-	std::unordered_map<std::string, std::weak_ptr<Actor>>& GetTagActors()
+	std::unordered_map<std::string, Actor*>& GetTagActors()
 	{
 		return _bodyPartActors;
 	}
@@ -69,7 +69,7 @@ private:
 	// モデル当たり判定情報
 	ModelCollision _modelCollision;
 	// 部位ごとのアクター
-	std::unordered_map<std::string, std::weak_ptr<Actor>> _bodyPartActors;
+	std::unordered_map<std::string, Actor*> _bodyPartActors;
 	// アニメータ
 	std::weak_ptr<Animator> _animator;
 	// 攻撃判定が出たかどうか

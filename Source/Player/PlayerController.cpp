@@ -366,19 +366,19 @@ void PlayerController::OnContact(CollisionData& collisionData)
 		if (auto interactionController = collisionData.other->GetComponent<InteractionController>())
 		{
 			// 選択可能かどうかの判定
-			if (interactionController->IsSelectable(GetActor().get()))
+			if (interactionController->IsSelectable(GetActor()))
 			{
-				interactionController->OnSelect(GetActor().get());
+				interactionController->OnSelect(GetActor());
 
 				// 使用可能かどうかの判定
-				if (interactionController->IsUsable(GetActor().get()))
+				if (interactionController->IsUsable(GetActor()))
 				{
 					// 納刀状態、アイテム使用中でない場合のみ可能
 					if (!stateController->IsCombatState() && !IsUsingItem())
 					{
 						if (IsSelect())
 						{
-							interactionController->OnUse(GetActor().get());
+							interactionController->OnUse(GetActor());
 						}
 					}
 				}

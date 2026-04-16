@@ -223,7 +223,7 @@ void TransparentWallCollider::EditingUpdate(float elapsedTime)
 			// このオブジェクト以外と交差していたら交差点を保存
 			for (auto& result : actors)
 			{
-				if (result.hitActor != this->GetActor().get())
+				if (result.hitActor != this->GetActor())
 				{
 					_intersectionWorldPoint = result.hitPosition;
 					_intersectState |= IntersectState::Stage;
@@ -447,7 +447,7 @@ void TransparentWallCollider::UpdateMovePoint(float elapsedTime)
 				// このオブジェクト以外と交差しているか
 				for (auto& result : actors)
 				{
-					if (result.hitActor != this->GetActor().get())
+					if (result.hitActor != this->GetActor())
 					{
 						worldPosition.y = result.hitPosition.y;
 						break;

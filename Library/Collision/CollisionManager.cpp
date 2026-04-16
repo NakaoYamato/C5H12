@@ -311,7 +311,7 @@ bool CollisionManager::RayCast(
 		{
 			hit = true;
 			// 衝突したアクターを設定
-			*hitActor = meshCollider->GetActor().get();
+			*hitActor = meshCollider->GetActor();
 		}
 	}
 	return hit;
@@ -332,7 +332,7 @@ std::vector<CollisionManager::RayCastResult> CollisionManager::RayCast(
 		if (meshCollider->RayCast(start, direction, &dist, &hitPos, &hitNorm))
 		{
 			CollisionManager::RayCastResult result;
-			result.hitActor = meshCollider->GetActor().get();
+			result.hitActor = meshCollider->GetActor();
 			result.hitPosition = hitPos;
 			result.hitNormal = hitNorm;
 			result.distance = dist;
@@ -359,7 +359,7 @@ bool CollisionManager::SphereCast(
 		{
 			hit = true;
 			// 衝突したアクターを設定
-			*hitActor = meshCollider->GetActor().get();
+			*hitActor = meshCollider->GetActor();
 		}
 	}
 	return hit;
@@ -381,7 +381,7 @@ std::vector<CollisionManager::RayCastResult> CollisionManager::SphereCast(
 		if (meshCollider->SphereCast(origin, direction, radius, &dist, &hitPos, &hitNorm))
 		{
 			CollisionManager::RayCastResult result;
-			result.hitActor = meshCollider->GetActor().get();
+			result.hitActor = meshCollider->GetActor();
 			result.hitPosition = hitPos;
 			result.hitNormal = hitNorm;
 			result.distance = dist;
@@ -425,7 +425,7 @@ std::vector<Actor*> CollisionManager::OverlapSphere(const Vector3& position, flo
 
 			if (resutl)
 			{
-				hitActors.push_back(meshCollider->GetActor().get());
+				hitActors.push_back(meshCollider->GetActor());
 				break; // 一つでも衝突したらこのメッシュコライダーはヒット
 			}
 		}
@@ -537,7 +537,7 @@ void CollisionManager::SetDataByCollider()
 		Transform& transform = sphere->GetActor()->GetTransform();
 		_sphereDatas.push_back(
 			SphereData(
-				sphere->GetActor().get(),
+				sphere->GetActor(),
                 sphere->GetLayer(),
 				sphere->GetLayerMask(),
 				sphere->GetPosition().TransformCoord(transform.GetMatrix()),
@@ -552,7 +552,7 @@ void CollisionManager::SetDataByCollider()
 		Transform& transform = box->GetActor()->GetTransform();
 		_boxDatas.push_back(
 			BoxData(
-				box->GetActor().get(),
+				box->GetActor(),
                 box->GetLayer(),
 				box->GetLayerMask(),
 				box->GetPosition().TransformCoord(transform.GetMatrix()),
@@ -568,7 +568,7 @@ void CollisionManager::SetDataByCollider()
 		Transform& transform = capsule->GetActor()->GetTransform();
 		_capsuleDatas.push_back(
 			CapsuleData(
-				capsule->GetActor().get(),
+				capsule->GetActor(),
                 capsule->GetLayer(),
 				capsule->GetLayerMask(),
 				capsule->GetStart().TransformCoord(transform.GetMatrix()),
@@ -746,7 +746,7 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 	for (auto& meshCollider : _meshColliders)
 	{
 		// 同じ場合は処理しない
-		if (sphere.actor == meshCollider->GetActor().get())return;
+		if (sphere.actor == meshCollider->GetActor())return;
 		// マスクチェック
 		if (!CheckCollisionLayer(
 			sphere.layer, sphere.mask,
@@ -808,7 +808,7 @@ void CollisionManager::SphereVsMesh(const SphereData& sphere, std::unordered_map
 				sphere.actor,
 				sphere.layer,
 				sphere.isTrigger,
-				meshCollider->GetActor().get(),
+				meshCollider->GetActor(),
 				meshCollider->GetLayer(),
 				meshCollider->IsTrigger(),
 				resultHitPosition,

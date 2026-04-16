@@ -22,11 +22,11 @@ public:
 	// 接触時処理
 	void OnContactEnter(CollisionData& collisionData) override;
 	// 火球を撃ったアクターを設定
-	void SetBallActor(std::shared_ptr<Actor> actor) { _ballActor = actor; }
+	void SetBallActor(Actor* actor) { _ballActor = actor; }
 
 private:
 	// 火球を撃ったアクター
-	std::weak_ptr<Actor> _ballActor;
+	Actor* _ballActor = nullptr;
 	// エフェクトコントローラー
 	std::weak_ptr<EffectController> _effectController;
 	// 球コライダー

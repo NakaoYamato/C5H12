@@ -14,7 +14,7 @@
 void SpriteRenderer::OnCreate()
 {
 	// e‚ªUIActor‚Å‚ ‚ê‚ÎRectTransform‚ğæ“¾
-	UIActor* uiActor = dynamic_cast<UIActor*>(GetActor().get());
+	UIActor* uiActor = dynamic_cast<UIActor*>(GetActor());
 	if (uiActor)
 	{
 		_myRectTransform = &uiActor->GetRectTransform();

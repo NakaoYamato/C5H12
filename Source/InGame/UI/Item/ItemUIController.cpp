@@ -27,7 +27,7 @@ void ItemUIController::Start()
 	_quantityTransform.SetLocalPosition(Vector2(15.0f, 12.0f));
 
 	_userDataManager = ResourceManager::Instance().GetResourceAs<UserDataManager>("UserDataManager");
-	auto uiActor = std::dynamic_pointer_cast<UIActor>(GetActor());
+	auto uiActor = static_cast<UIActor*>(GetActor());
 	if (uiActor)
 	{
 		_myRectTransform = &uiActor->GetRectTransform();

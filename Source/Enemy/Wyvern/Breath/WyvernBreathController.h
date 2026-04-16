@@ -23,10 +23,10 @@ public:
 	void OnContactEnter(CollisionData& collisionData) override;
 
 	// ブレスを撃ったアクターを設定
-	void SetBreathActor(std::shared_ptr<Actor> actor) { _breathActor = actor; }
+	void SetBreathActor(Actor* actor) { _breathActor = actor; }
 private:
 	// ブレスを撃ったアクター
-	std::weak_ptr<Actor> _breathActor;
+	Actor* _breathActor = nullptr;
 	// エフェクトコントローラー
 	std::weak_ptr<EffectController> _effectController;
 	// カプセルコライダー群

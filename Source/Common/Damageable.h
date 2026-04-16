@@ -48,7 +48,7 @@ public:
 	// 防御倍率取得
 	float GetDefenseFactor() const { return _defenseFactor; }
 	// 最後にダメージを与えてきたアクター取得
-    std::shared_ptr<Actor> GetLastDamageActor() const { return _lastDamageActor.lock(); }
+	Actor* GetLastDamageActor() const { return _lastDamageActor; }
 
 	// 無敵状態にする
 	void SetInvisible(float time) { _invisibleTimer = time; }
@@ -59,7 +59,7 @@ public:
 	// 被弾位置を設定
 	void SetHitPosition(const Vector3& position) { _hitPosition = position; }
 	// 最後にダメージを与えてきたアクターを設定
-    void SetLastDamageActor(std::shared_ptr<Actor> actor) { _lastDamageActor = actor; }
+    void SetLastDamageActor(Actor* actor) { _lastDamageActor = actor; }
 	// 防御力を設定
 	void SetDefense(float defense) { _defense = defense; }
 	// 防御倍率を設定
@@ -111,5 +111,5 @@ protected:
 	CallBackHandler<void> _onDeathCallback;
 
     // 最後にダメージを与えてきたアクター
-    std::weak_ptr<Actor> _lastDamageActor;
+	Actor* _lastDamageActor = nullptr;
 };

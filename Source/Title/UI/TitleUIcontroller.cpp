@@ -9,7 +9,7 @@
 // ŠJnˆ—
 void TitleUIcontroller::Start()
 {
-    auto uiActor = std::dynamic_pointer_cast<UIActor>(GetActor());
+    auto uiActor = static_cast<UIActor*>(GetActor());
     if (uiActor)
     {
         _myRectTransform = &uiActor->GetRectTransform();

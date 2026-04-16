@@ -67,7 +67,7 @@ void WyvernBallController::OnContactEnter(CollisionData& collisionData)
 	{
 		// 自身には当たらないようにする
 		if (collisionData.other->GetParent() != nullptr &&
-			collisionData.other->GetParent() == _ballActor.lock().get())
+			collisionData.other->GetParent() == _ballActor)
 			return;
 
 		// ダメージを与える

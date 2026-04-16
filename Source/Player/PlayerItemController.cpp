@@ -125,7 +125,7 @@ bool PlayerItemController::Use()
 	}
 
 
-	_function = userDataManager->UseItem(_currentIndex, GetActor().get());
+	_function = userDataManager->UseItem(_currentIndex, GetActor());
 
 	return _function != nullptr;
 }

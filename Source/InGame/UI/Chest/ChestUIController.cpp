@@ -100,7 +100,7 @@ void ChestUIController::Open()
         auto playerActor = std::dynamic_pointer_cast<PlayerActor>(player);
         if (playerActor && playerActor->IsUserControlled())
         {
-			_playerActor = playerActor;
+			_playerActor = playerActor.get();
 			break;
         }
     }
@@ -120,7 +120,7 @@ void ChestUIController::Close()
 	this->GetActor()->SetIsActive(false);
 
 	// プレイヤーのリムライトを元に戻す
-	if (auto player = _playerActor.lock())
+	if (auto player = _playerActor)
 	{
         if (auto playerEquipmentController = player->GetComponent<PlayerEquipmentController>())
         {
@@ -132,7 +132,7 @@ void ChestUIController::Close()
         }
 	}
 
-	_chestActor.reset();
+	_chestActor = nullptr;
 }
 
 // Selectメニューの入力処理
@@ -237,18 +237,18 @@ void ChestUIController::UpdateToArmorMenu(float elapsedTime)
         auto armorUI = _armorUI.lock();
         armorUI->GetActor()->SetIsActive(true);
         // プレイヤーの装備コントローラー設定
-		if (auto player = _playerActor.lock())
+		if (auto player = _playerActor)
 		{
 			auto playerEquipmentController = player->GetComponent<PlayerEquipmentController>();
 			armorUI->SetPlayerEquipmentController(playerEquipmentController);
 		}
 
-        auto chestActor = _chestActor.lock();
+        auto chestActor = _chestActor;
 
         _state = ChestUIController::ArmorMenu;
 
         // プレイヤーをチェストの前に移動、回転させる
-		if (auto player = _playerActor.lock())
+		if (auto player = _playerActor)
 		{
             float positionY = player->GetTransform().GetWorldPosition().y;
             player->GetTransform().SetPosition(
@@ -260,7 +260,7 @@ void ChestUIController::UpdateToArmorMenu(float elapsedTime)
 		if (_changeArmorCamera)
 		{
             _changeArmorCamera->Swich();
-            _changeArmorCamera->SetChestActor(chestActor);
+            _changeArmorCamera->SetChestActor(chestActor->shared_from_this());
 		}
     }
 }

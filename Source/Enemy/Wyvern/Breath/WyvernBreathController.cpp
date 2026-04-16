@@ -61,7 +61,7 @@ void WyvernBreathController::OnContactEnter(CollisionData& collisionData)
 	// UŒ‚”»’è
 	if (collisionData.myLayer == CollisionLayer::Attack &&
 		collisionData.otherLayer == CollisionLayer::Hit &&
-		collisionData.other != _breathActor.lock().get())
+		collisionData.other != _breathActor)
 	{
 		// ƒ_ƒ[ƒW‚ð—^‚¦‚é
 		auto damageable = collisionData.other->GetComponent<Damageable>();

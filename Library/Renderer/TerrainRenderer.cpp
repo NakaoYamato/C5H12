@@ -77,28 +77,22 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             _gbPixelShader.ReleaseAndGetAddressOf());
     }
 
-	// 静的描画用シェーダー作成
-    {
-		// 頂点シェーダー作成
-		GpuResourceManager::CreateVsFromCso(
-			device,
-			"./Data/Shader/HLSL/Terrain/TerrainStaticVS.cso",
-			_staticVertexShader.ReleaseAndGetAddressOf(),
-            nullptr,
-            nullptr,
-            0);
-    }
-
     // 草描画用シェーダー作成
 	{
+        D3D11_INPUT_ELEMENT_DESC inputElementDesc[]
+        {
+            { "SV_POSITION",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "WORLD_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "NORMAL",         0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "TANGENT",        0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "PARAMETER",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "TEXCOORD",       0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        };
         // 頂点シェーダー作成
-        GpuResourceManager::CreateVsFromCso(
-            device, 
-            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassVS.cso",
-            _grassVertexShader.GetAddressOf(),
-            nullptr, 
-            nullptr, 
-            0);
+		_grassVertexShader.Load(device,
+			"./Data/Shader/HLSL/Terrain/Grass/TerrainGrassVS.cso",
+			inputElementDesc,
+            static_cast<UINT>(_countof(inputElementDesc)));
         // ハルシェーダー
         GpuResourceManager::CreateHsFromCso(
             device,
@@ -158,33 +152,50 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             _streamOutDomainShader.ReleaseAndGetAddressOf());
     }
 
-    // ストリームアウトプットされた情報の受け取り用バッファ
+    // コリジョン用ストリームアウトシェーダー
+    {
+        D3D11_SO_DECLARATION_ENTRY declaration[] =
+        {
+            {0,"WORLD_POSITION",0,0,3,0},
+            {0,"PADDING",		0,0,1,0},
+        };
+        UINT bufferStrides[] = { sizeof(Terrain::CollisionStreamOutVertex) };
+        GpuResourceManager::CreateGsWithStreamOutFromCso(
+            device,
+            "./Data/Shader/HLSL/Terrain/TerrainCollisionGS.cso",
+            _streamOutCollisionGeometryShader.ReleaseAndGetAddressOf(),
+            declaration, _countof(declaration),
+            bufferStrides, _countof(bufferStrides),
+            0);
+    }
+
+    // ストリームアウトプットされた情報の受け取り用バッファ（コリジョン用）
     {
         D3D11_BUFFER_DESC desc{};
         desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.ByteWidth = sizeof(Terrain::StreamOutVertex) * StreamOutMaxVertex;
+        desc.ByteWidth = sizeof(Terrain::CollisionStreamOutVertex) * StreamOutMaxVertex;
         desc.BindFlags = D3D11_BIND_STREAM_OUTPUT;
         desc.CPUAccessFlags = 0;
         desc.MiscFlags = 0;
         desc.StructureByteStride = 0;
 
         HRESULT hr = device->CreateBuffer(&desc, nullptr,
-            _streamOutVertexBuffer.ReleaseAndGetAddressOf());
+            _streamOutCollisionVertexBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 
-    // CPUからアクセスするためのバッファ
+	// CPUからアクセスするためのバッファ（コリジョン用）
     {
         D3D11_BUFFER_DESC desc{};
         desc.Usage = D3D11_USAGE_STAGING;
-        desc.ByteWidth = sizeof(Terrain::StreamOutVertex) * StreamOutMaxVertex;
+        desc.ByteWidth = sizeof(Terrain::CollisionStreamOutVertex) * StreamOutMaxVertex;
         desc.BindFlags = 0;
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
         desc.MiscFlags = 0;
         desc.StructureByteStride = 0;
 
         HRESULT hr = device->CreateBuffer(&desc, nullptr,
-            _streamOutCopyBuffer.ReleaseAndGetAddressOf());
+            _streamOutCollisionCopyBuffer.ReleaseAndGetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 
@@ -232,16 +243,7 @@ void TerrainRenderer::Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world)
 	drawInfo.terrain = terrain;
 	drawInfo.world = world;
 
-    // 静的描画の場合
-    if (terrain->GetStreamOutData().size() != 0 && _isStaticDraw)
-    {
-        _staticDrawInfos.push_back(drawInfo);
-    }
-    // 通常描画
-    else
-    {
-        _drawInfos.push_back(drawInfo);
-    }
+    _drawInfos.push_back(drawInfo);
 
 	// 草の描画登録
 	_grassDrawInfos.push_back(drawInfo);
@@ -252,7 +254,7 @@ void TerrainRenderer::DrawShadow(Terrain* terrain, const DirectX::XMFLOAT4X4& wo
     std::lock_guard<std::mutex> lock(_drawInfoMutex);
 
     // 頂点情報を書き出していない場合は登録しない
-    if (terrain->GetStreamOutData().size() == 0)
+    if (terrain->GetCollisionStreamOutData().size() == 0)
         return;
 
     DrawInfo drawInfo;
@@ -303,7 +305,6 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     dc->PSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
 
     RenderDynamic(rc, writeGBuffer);
-    RenderStatic(rc, writeGBuffer);
 
     // シェーダーリソースビューを解除
     ID3D11ShaderResourceView* nullSRVs[3] = {};
@@ -315,7 +316,6 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
 
     // 登録しているTerrainを描画した後はクリア
     _drawInfos.clear();
-    _staticDrawInfos.clear();
     _exportVertexDrawInfos.clear();
     _grassDrawInfos.clear();
 }
@@ -344,11 +344,11 @@ void TerrainRenderer::CastShadow(const RenderContext& rc)
         {
             nullptr,
             nullptr,
-            drawInfo.terrain->GetStreamOutSRV().Get(),
+            drawInfo.terrain->GetCollisionStreamOutSRV().Get(),
         };
         dc->VSSetShaderResources(0, _countof(srvs), srvs);
 
-        dc->DrawInstanced(static_cast<UINT>(drawInfo.terrain->GetStreamOutData().size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0);
+        dc->DrawInstanced(static_cast<UINT>(drawInfo.terrain->GetCollisionStreamOutData().size()), _CASCADED_SHADOW_MAPS_SIZE, 0, 0);
     }
 
     // シェーダー解除
@@ -380,7 +380,6 @@ void TerrainRenderer::DrawGui()
     {
         if (ImGui::Begin(u8"Terrain"))
         {
-			ImGui::Checkbox(u8"静的描画", &_isStaticDraw);
 			ImGui::Checkbox(u8"草を描画", &_isDrawingGrass);
 			ImGui::Checkbox(u8"ワイヤーフレーム", &_isWireFrame);
 			ImGui::Checkbox(u8"Mipmapを使用", &_isUsingMipmap);
@@ -442,8 +441,6 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
     dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
     dc->HSSetShader(_streamOutHullShader.Get(), nullptr, 0);
     dc->DSSetShader(_streamOutDomainShader.Get(), nullptr, 0);
-    // ストリームアウトを有効にする
-    dc->GSSetShader(_streamOutGeometryShader.Get(), nullptr, 0);
     // 書き込みはしない
     dc->PSSetShader(nullptr, nullptr, 0);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
@@ -454,10 +451,6 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
         // 定数バッファの更新
         _data.world = drawInfo.world;
         dc->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_data, 0, 0);
-
-        //	ストリームアウト用の頂点バッファを設定
-        UINT streamoutOffsets[1] = { 0 };
-        dc->SOSetTargets(1, _streamOutVertexBuffer.GetAddressOf(), streamoutOffsets);
 
         // シェーダーリソースビューの設定
         ID3D11ShaderResourceView* srvs[] =
@@ -476,45 +469,72 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
         UINT offset = 0;
         dc->IASetVertexBuffers(0, 1, drawInfo.terrain->GetVertexBuffer().GetAddressOf(), &stride, &offset);
         dc->IASetIndexBuffer(drawInfo.terrain->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0);
-        // 描画
-        D3D11_BUFFER_DESC bufferDesc{};
-        drawInfo.terrain->GetIndexBuffer()->GetDesc(&bufferDesc);
-        dc->DrawIndexed(bufferDesc.ByteWidth / sizeof(uint32_t), 0, 0);
 
-        // 書き出した頂点情報をTerrainに送る
-        // 受け取りバッファをクリア
-        ID3D11Buffer* clear_streamout_buffer[] = { nullptr };
-        UINT streamout_offsets[1] = { 0 };
-        dc->SOSetTargets(1, clear_streamout_buffer, streamout_offsets);
-
-        // CPUからアクセスするためのバッファにコピー
-        dc->CopyResource(_streamOutCopyBuffer.Get(),
-            _streamOutVertexBuffer.Get());
-
-        // 取得した頂点情報から草の生える位置を算出
-        D3D11_MAPPED_SUBRESOURCE mapped_resource;
-        dc->Map(_streamOutCopyBuffer.Get(), 0,
-            D3D11_MAP_READ, 0, &mapped_resource);
-        if (mapped_resource.pData)
+        // 草に使うストリームアウトを書き出し
         {
-            // 頂点情報を受け取り
-            std::vector<Terrain::StreamOutVertex> streamOut;
-            // 頂点数を計算
-            const UINT size =
-                static_cast<UINT>(std::pow(DivisionCount, 2)) *
-                static_cast<UINT>(std::pow(_data.collisionTessFactor, 2)) *
-                6;
-            streamOut.resize(size);
-            CopyMemory(streamOut.data(), mapped_resource.pData, sizeof(Terrain::StreamOutVertex) * size);
-            // マップ解除
-            dc->Unmap(_streamOutCopyBuffer.Get(), 0);
-            // Terrainに頂点情報を設定
-            drawInfo.terrain->SetStreamOutData(dc, streamOut);
+			// ストリームアウト用ジオメトリシェーダーを設定
+            dc->GSSetShader(_streamOutGeometryShader.Get(), nullptr, 0);
+
+            //	ストリームアウト用の頂点バッファを設定
+            UINT streamoutOffsets[1] = { 0 };
+            dc->SOSetTargets(1, drawInfo.terrain->GetStreamOutVertexBuffer().GetAddressOf(), streamoutOffsets);
+
+            // 描画
+            D3D11_BUFFER_DESC bufferDesc{};
+            drawInfo.terrain->GetIndexBuffer()->GetDesc(&bufferDesc);
+            dc->DrawIndexed(bufferDesc.ByteWidth / sizeof(uint32_t), 0, 0);
+
+            // ターゲットを外す
+            ID3D11Buffer* nullBuffer[] = { nullptr };
+            dc->SOSetTargets(1, nullBuffer, streamoutOffsets);
         }
-        else
+
+		// コリジョン用に使うストリームアウトを書き出し
         {
-            // マップ解除
-            dc->Unmap(_streamOutCopyBuffer.Get(), 0);
+            // コリジョン用ストリームアウトジオメトリシェーダーを設定
+            dc->GSSetShader(_streamOutCollisionGeometryShader.Get(), nullptr, 0);
+
+            //	ストリームアウト用の頂点バッファを設定
+            UINT streamoutOffsets[1] = { 0 };
+            dc->SOSetTargets(1, _streamOutCollisionVertexBuffer.GetAddressOf(), streamoutOffsets);
+
+            // 描画
+            D3D11_BUFFER_DESC bufferDesc{};
+            drawInfo.terrain->GetIndexBuffer()->GetDesc(&bufferDesc);
+            dc->DrawIndexed(bufferDesc.ByteWidth / sizeof(uint32_t), 0, 0);
+            // 書き出した頂点情報をTerrainに送る
+            // 受け取りバッファをクリア
+            ID3D11Buffer* clear_streamout_buffer[] = { nullptr };
+            UINT streamout_offsets[1] = { 0 };
+            dc->SOSetTargets(1, clear_streamout_buffer, streamout_offsets);
+            // CPUからアクセスするためのバッファにコピー
+            dc->CopyResource(_streamOutCollisionCopyBuffer.Get(),
+                _streamOutCollisionVertexBuffer.Get());
+            // 取得した頂点情報からコリジョン用の頂点を算出
+            D3D11_MAPPED_SUBRESOURCE mapped_resource;
+            dc->Map(_streamOutCollisionCopyBuffer.Get(), 0,
+                D3D11_MAP_READ, 0, &mapped_resource);
+            if (mapped_resource.pData)
+            {
+                // 頂点情報を受け取り
+                std::vector<Terrain::CollisionStreamOutVertex> streamOut;
+                // 頂点数を計算
+                const UINT size =
+                    static_cast<UINT>(std::pow(DivisionCount, 2)) *
+                    static_cast<UINT>(std::pow(_data.collisionTessFactor, 2)) *
+                    6;
+                streamOut.resize(size);
+                CopyMemory(streamOut.data(), mapped_resource.pData, sizeof(Terrain::CollisionStreamOutVertex) * size);
+                // マップ解除
+                dc->Unmap(_streamOutCollisionCopyBuffer.Get(), 0);
+                // Terrainに頂点情報を設定
+                drawInfo.terrain->SetCollisionStreamOutData(dc, streamOut);
+            }
+            else
+            {
+                // マップ解除
+                dc->Unmap(_streamOutCollisionCopyBuffer.Get(), 0);
+            }
         }
     }
 
@@ -580,52 +600,6 @@ void TerrainRenderer::RenderDynamic(const RenderContext& rc, bool writeGBuffer)
     dc->PSSetShader(nullptr, nullptr, 0);
 }
 
-void TerrainRenderer::RenderStatic(const RenderContext& rc, bool writeGBuffer)
-{
-    ID3D11DeviceContext* dc = rc.deviceContext;
-
-    dc->IASetInputLayout(nullptr);
-    dc->VSSetShader(_staticVertexShader.Get(), nullptr, 0);
-    if (writeGBuffer)
-        dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
-    else
-        dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
-    // 頂点バッファ設定
-    ID3D11Buffer* clearBuffer[] = { nullptr };
-    UINT strides[] = { 0 };
-    UINT offsets[] = { 0 };
-    dc->IASetVertexBuffers(0, 1, clearBuffer, strides, offsets);
-    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    for (const auto& drawInfo : _staticDrawInfos)
-    {
-        // 定数バッファの更新
-        _data.world = drawInfo.world;
-        dc->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_data, 0, 0);
-
-        // シェーダーリソースビューの設定
-        ID3D11ShaderResourceView* srvs[] =
-        {
-            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::BaseColorTextureIndex).Get(),
-            drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::NormalTextureIndex).Get(),
-            drawInfo.terrain->GetStreamOutSRV().Get(),
-        };
-        // Mipmapを使用するかどうか設定
-        if (_isUsingMipmap)
-            srvs[0] = drawInfo.terrain->GetMipmapBaseColorSRV().Get();
-        dc->VSSetShaderResources(0, _countof(srvs), srvs);
-        dc->PSSetShaderResources(0, _countof(srvs), srvs);
-
-        dc->Draw(static_cast<UINT>(drawInfo.terrain->GetStreamOutData().size()), 0);
-    }
-
-    // シェーダー解除
-    dc->VSSetShader(nullptr, nullptr, 0);
-    dc->HSSetShader(nullptr, nullptr, 0);
-    dc->DSSetShader(nullptr, nullptr, 0);
-    dc->GSSetShader(nullptr, nullptr, 0);
-    dc->PSSetShader(nullptr, nullptr, 0);
-}
-
 void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
 {
     ID3D11DeviceContext* dc = rc.deviceContext;
@@ -650,12 +624,10 @@ void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
     dc->PSSetShaderResources(4, 1, _grassColorSRV.GetAddressOf());
 
     // 入力レイアウト設定
-    dc->IASetInputLayout(nullptr);
-    // バッファクリア
-    ID3D11Buffer* clearBuffer[] = { nullptr };
-    UINT strides[] = { 0 };
-    UINT offsets[] = { 0 };
-    dc->IASetVertexBuffers(0, 1, clearBuffer, strides, offsets);
+    dc->IASetInputLayout(_grassVertexShader.GetInputLayout());
+    // バッファ
+    UINT stride = sizeof(Terrain::StreamOutVertex);
+    UINT offset = 0;
     dc->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
@@ -664,16 +636,9 @@ void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
         // 草の描画
         for (const auto& drawInfo : _grassDrawInfos)
         {
-            // シェーダーリソースビューの設定
-            ID3D11ShaderResourceView* srvs[] =
-            {
-                drawInfo.terrain->GetStreamOutSRV().Get(),
-            };
-            dc->VSSetShaderResources(0, _countof(srvs), srvs);
-            dc->PSSetShaderResources(0, _countof(srvs), srvs);
+            dc->IASetVertexBuffers(0, 1, drawInfo.terrain->GetStreamOutVertexBuffer().GetAddressOf(), &stride, &offset);
 
-            // 頂点数分コール
-            dc->Draw(static_cast<UINT>(drawInfo.terrain->GetStreamOutData().size()), 0);
+            dc->DrawAuto();
         }
     }
 

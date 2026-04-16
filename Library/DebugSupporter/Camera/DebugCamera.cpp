@@ -16,6 +16,8 @@ void DebugCamera::Update(float elapsedTime)
     if (Debug::Input::IsActive(DebugInput::BTN_F4))
     {
         // ローディング等でカメラがないときは処理しない
+        if (SceneManager::Instance().GetCurrentScene() == nullptr)
+            return;
 		auto mainCamera = SceneManager::Instance().GetCurrentScene()->GetMainCamera();
 		if (mainCamera == nullptr)
 			return;

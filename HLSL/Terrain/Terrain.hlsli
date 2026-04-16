@@ -35,6 +35,13 @@ struct DS_OUT
 #define PS_IN DS_OUT
 #define StreamOutData DS_OUT
 
+// コリジョン用ストリームアウトデータ
+struct CollisionStreamOutData
+{
+    float3 worldPosition : WORLD_POSITION;
+    float padding : PADDING;
+};
+
 cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
 {
     row_major float4x4 world;

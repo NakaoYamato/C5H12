@@ -1,11 +1,14 @@
 #include "TerrainGrass.hlsli"
 
-// ’¸“_î•ñ
-StructuredBuffer<StreamOutData> streamOutDatas : register(t0);
-
-GRASS_HS_IN main(uint vertexId : SV_VertexID)
+GRASS_HS_IN main(StreamOutData input)
 {
-    // ’¸“_”Ô†‚ğ‘—‚é‚¾‚¯
-    GRASS_HS_IN vout = streamOutDatas[vertexId];
+    GRASS_HS_IN vout;
+    vout.position = input.position;
+    vout.worldPosition = input.worldPosition;
+    vout.worldNormal = input.worldNormal;
+    vout.worldTangent = input.worldTangent;
+    vout.parameter = input.parameter;
+    vout.texcoord = input.texcoord;
+    
     return vout;
 }

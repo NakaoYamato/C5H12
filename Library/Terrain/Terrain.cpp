@@ -41,21 +41,36 @@ Terrain::Terrain(ID3D11Device* device, const std::string& serializePath) :
                 );
     }
 
-	// 頂点情報をGPUに送るためのバッファ、SRV作成
+	// 頂点情報用バッファ
 	{
 		D3D11_BUFFER_DESC desc{};
-		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT;
 		desc.ByteWidth = sizeof(StreamOutVertex) * 
             static_cast<UINT>(TerrainRenderer::DivisionCount * 2) *
             static_cast<UINT>(TerrainRenderer::DivisionCount * 2 - 1) *
             static_cast<UINT>(std::pow(TerrainRenderer::MaxTessellation, 2.0f));
-		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		desc.MiscFlags = 0;
 		desc.StructureByteStride = sizeof(StreamOutVertex);
 		desc.Usage = D3D11_USAGE_DEFAULT;
 		HRESULT hr = device->CreateBuffer(&desc, nullptr, _streamOutVertexBuffer.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		hr = device->CreateShaderResourceView(_streamOutVertexBuffer.Get(),
-            nullptr, _streamOutSRV.GetAddressOf());
+	}
+
+	// コリジョン用ストリームアウトバッファ、SRV作成
+	{
+		D3D11_BUFFER_DESC desc{};
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.ByteWidth = sizeof(CollisionStreamOutVertex) *
+			static_cast<UINT>(TerrainRenderer::DivisionCount * 2) *
+			static_cast<UINT>(TerrainRenderer::DivisionCount * 2 - 1) *
+			static_cast<UINT>(std::pow(TerrainRenderer::MaxTessellation, 2.0f));
+		desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		desc.StructureByteStride = sizeof(CollisionStreamOutVertex);
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		HRESULT hr = device->CreateBuffer(&desc, nullptr, _collisionStreamOutVertexBuffer.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		hr = device->CreateShaderResourceView(_collisionStreamOutVertexBuffer.Get(),
+			nullptr, _collisionStreamOutSRV.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
@@ -275,7 +290,7 @@ bool Terrain::Raycast(
     Vector3* intersectionWorldNormal,
     Vector2* intersectUVPosition) const
 {
-    auto& streamOutData = GetStreamOutData();
+    auto& streamOutData = GetCollisionStreamOutData();
     if (streamOutData.empty())
         return false;
 
@@ -362,26 +377,26 @@ void Terrain::SaveParameterMap(ID3D11Device* device, ID3D11DeviceContext* dc, co
 		_parameterTexturePath = parameterMapPath;
     }
 }
-// ストリームアウトデータを設定
-void Terrain::SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<StreamOutVertex>& data)
+// コリジョン用ストリームアウトデータを設定
+void Terrain::SetCollisionStreamOutData(ID3D11DeviceContext* dc, const std::vector<CollisionStreamOutVertex>& data)
 {
-    _streamOutData = data;
-    UINT size = static_cast<UINT>(_streamOutData.size() * sizeof(StreamOutVertex));
-    // バッファを更新
-    D3D11_BOX writeBox = {};
-    writeBox.left = 0;
-    writeBox.right = size;
-    writeBox.top = 0;
-    writeBox.bottom = 1;
-    writeBox.front = 0;
-    writeBox.back = 1;
-    dc->UpdateSubresource(
-        _streamOutVertexBuffer.Get(),
-        0,
-        &writeBox,
-        _streamOutData.data(),
-        size,
-        0);
+	_collisionStreamOutData = data;
+	UINT size = static_cast<UINT>(_collisionStreamOutData.size() * sizeof(CollisionStreamOutVertex));
+	// バッファを更新
+	D3D11_BOX writeBox = {};
+	writeBox.left = 0;
+	writeBox.right = size;
+	writeBox.top = 0;
+	writeBox.bottom = 1;
+	writeBox.front = 0;
+	writeBox.back = 1;
+	dc->UpdateSubresource(
+		_collisionStreamOutVertexBuffer.Get(),
+		0,
+		&writeBox,
+		_collisionStreamOutData.data(),
+		size,
+		0);
 }
 // 書き出し
 void Terrain::SaveToFile(ID3D11Device* device, ID3D11DeviceContext* dc, const std::string& path)

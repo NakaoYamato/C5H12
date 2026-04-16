@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include "../../Library/Terrain/Terrain.h"
+#include "../../Library/Graphics/Shader.h"
 
 class TerrainRenderer
 {
@@ -85,7 +86,6 @@ public:
 private:
     void RenderStreamOut(const RenderContext& rc);
     void RenderDynamic(const RenderContext& rc, bool writeGBuffer);
-    void RenderStatic(const RenderContext& rc, bool writeGBuffer);
     void RenderGrass(const RenderContext& rc, bool writeGBuffer);
 private:
 #pragma region 描画用COMオブジェクト
@@ -100,12 +100,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
 
-	// 静的描画用シェーダー
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>	_staticVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>	_staticInputLayout;
-
     // 草描画用シェーダー
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>	_grassVertexShader;
+	VertexShader _grassVertexShader;
     Microsoft::WRL::ComPtr<ID3D11HullShader>	_grassHullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	_grassDomainShader;
 	Microsoft::WRL::ComPtr<ID3D11GeometryShader> _grassGeometryShader;
@@ -117,11 +113,13 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _grassColorSRV;
 
     // ストリームアウト用
-    Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutVertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCopyBuffer;
     Microsoft::WRL::ComPtr<ID3D11HullShader>	    _streamOutHullShader;
     Microsoft::WRL::ComPtr<ID3D11DomainShader>	    _streamOutDomainShader;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCollisionVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCollisionCopyBuffer;
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutCollisionGeometryShader;
 
     // 影描画用
     Microsoft::WRL::ComPtr<ID3D11VertexShader>	    _shadowVertexShader;
@@ -131,8 +129,6 @@ private:
 	std::vector<DrawInfo> _drawInfos;
     // 頂点書き出し用情報配列
     std::vector<DrawInfo> _exportVertexDrawInfos;
-    // 静的描画用情報配列
-	std::vector<DrawInfo> _staticDrawInfos;
 	// 草の描画用情報
 	std::vector<DrawInfo> _grassDrawInfos;
     // 影描画用情報配列
@@ -149,8 +145,6 @@ private:
 	GrassConstantBuffer _dataGrass;
     // 草を描画するか
 	bool _isDrawingGrass = false;
-    // 静的描画か
-	bool _isStaticDraw = false;
     // ワイヤーフレーム描画
 	bool _isWireFrame = false;
     // GUI描画フラグ

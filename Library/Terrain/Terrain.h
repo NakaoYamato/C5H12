@@ -25,6 +25,12 @@ public:
         Vector4 parameter = {};
         Vector2 texcoord = {};
     };
+    // コリジョン用ストリームアウト
+	struct CollisionStreamOutVertex
+	{
+		Vector3 worldPosition = {};
+		float padding{};
+	};
     // テクスチャ品質
 	enum class TextureQuality
 	{
@@ -65,14 +71,18 @@ public:
     Microsoft::WRL::ComPtr<ID3D11Buffer>& GetIndexBuffer() { return _indexBuffer; }
 	// 頂点情報をGPUに送るためのバッファを取得
 	Microsoft::WRL::ComPtr<ID3D11Buffer>& GetStreamOutVertexBuffer() { return _streamOutVertexBuffer; }
-	// 頂点情報をGPUに送るためのSRVを取得
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetStreamOutSRV() { return _streamOutSRV; }
+	// コリジョン用ストリームアウトバッファを取得
+	Microsoft::WRL::ComPtr<ID3D11Buffer>& GetCollisionStreamOutVertexBuffer() { return _collisionStreamOutVertexBuffer; }
+	// コリジョン用ストリームアウトSRVを取得
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetCollisionStreamOutSRV() { return _collisionStreamOutSRV; }
+
     // マテリアルマップのフレームバッファを取得
 	FrameBuffer* GetMaterialMapFB(TextureQuality quality = TextureQuality::High) { return _materialMapFB[static_cast<size_t>(quality)].get(); }
-    // ストリームアウトデータを取得
-    const std::vector<StreamOutVertex>& GetStreamOutData() const { return _streamOutData; }
-	// ストリームアウトデータを設定
-    void SetStreamOutData(ID3D11DeviceContext* dc, const std::vector<StreamOutVertex>& data);
+    
+	// コリジョン用ストリームアウトデータを取得
+	const std::vector<CollisionStreamOutVertex>& GetCollisionStreamOutData() const { return _collisionStreamOutData; }
+	// コリジョン用ストリームアウトデータを設定
+	void SetCollisionStreamOutData(ID3D11DeviceContext* dc, const std::vector<CollisionStreamOutVertex>& data);
 
 	// Mipmap用SRVを取得
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& GetMipmapBaseColorSRV() { return _mipmapBaseColorSRV; }
@@ -100,8 +110,9 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>    _indexBuffer;
     // 頂点情報をGPUに送るためのバッファ
     Microsoft::WRL::ComPtr<ID3D11Buffer> _streamOutVertexBuffer;
-    // 頂点情報をGPUに送るためのSRV
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _streamOutSRV;
+	// コリジョン用ストリームアウトバッファ
+	Microsoft::WRL::ComPtr<ID3D11Buffer> _collisionStreamOutVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _collisionStreamOutSRV;
 
     // ロード用SRV
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _loadBaseColorSRV;
@@ -118,8 +129,8 @@ private:
     // テクスチャをロードしたかどうか
     bool _isLoadingTextures = false;
 
-    // 頂点情報
-    std::vector<StreamOutVertex> _streamOutData;
+	// コリジョン用頂点情報
+	std::vector<CollisionStreamOutVertex> _collisionStreamOutData;
 
     // シリアライズパス
     std::string _serializePath;

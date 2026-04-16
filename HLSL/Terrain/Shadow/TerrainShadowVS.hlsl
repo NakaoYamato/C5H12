@@ -1,7 +1,7 @@
 #include "TerrainShadow.hlsli"
 
 // ’¸“_î•ñ
-StructuredBuffer<StreamOutData> streamOutDatas : register(t2);
+StructuredBuffer<CollisionStreamOutData> streamOutDatas : register(t2);
 
 VS_OUT_CSM main(uint vertexId : SV_VertexID, uint instanceId : SV_INSTANCEID)
 {

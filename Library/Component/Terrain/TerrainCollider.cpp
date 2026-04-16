@@ -34,7 +34,7 @@ MeshCollider::CollisionMesh TerrainCollider::RecalculateCollisionMesh(Model* mod
 	auto terrain = _terrainController.lock()->GetTerrain().lock();
     if (!terrain)
 		return CollisionMesh();
-	auto& streamOutData = terrain->GetStreamOutData();
+	auto& streamOutData = terrain->GetCollisionStreamOutData();
 	if (streamOutData.empty())
 		return CollisionMesh();
 

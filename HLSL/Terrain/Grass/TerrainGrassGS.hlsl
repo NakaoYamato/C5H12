@@ -58,7 +58,7 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     const float random_curvature = Random(gin[0].worldPosition.xy * 0.01);
     float curvature = PI * 0.5 * (random_curvature * 2.0 - 1.0) * grass_curvature;
     const row_major float4x4 C = ToMatrixRotation(curvature / BLADE_SEGMENTS, midpointTangent.xyz);
-    float4 segment_normal = midpointNormal;
+    float4 segment_normal = float4(0, 1, 0, 0);
     
     float3 rightVector = float3(sin(randomZX * 2.0f * PI), 0.0f, cos(randomZX * 2.0f * PI));
     

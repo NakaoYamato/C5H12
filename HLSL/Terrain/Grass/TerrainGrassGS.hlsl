@@ -60,6 +60,8 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     const row_major float4x4 C = ToMatrixRotation(curvature / BLADE_SEGMENTS, midpointTangent.xyz);
     float4 segment_normal = midpointNormal;
     
+    float3 rightVector = float3(sin(randomZX * 2.0f * PI), 0.0f, cos(randomZX * 2.0f * PI));
+    
     GRASS_PS_IN element;
     for (int i = 0; i < BLADE_SEGMENTS; i++)
     {
@@ -70,16 +72,27 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
         element.worldNormal = segment_normal.xyz;
         
         element.color = witheredColor;
+        float4 centerPosition = midpointPosition + segment_normal * segment_height;
 
-        element.worldPosition = midpointPosition + segment_normal * segment_height;
-        element.worldPosition.x += sin(randomZX * 2.0f * PI) * segment_width;
-        element.worldPosition.z += cos(randomZX * 2.0f * PI) * segment_width;
+        // --------------------------------------------------
+        // 1つ目の頂点（左側）
+        // --------------------------------------------------
+        element.worldPosition = centerPosition;
+        // 【修正】中心から rightVector 方向に幅の分だけプラスする
+        element.worldPosition.xyz += rightVector * segment_width;
+        
         element.worldPosition = mul(element.worldPosition - midpointPosition, B) + midpointPosition;
         element.position = mul(element.worldPosition, viewProjection);
         element.texcoord = float2(0, 1 - t);
         output.Append(element);
 
-        element.worldPosition = midpointPosition + segment_normal * segment_height;
+        // --------------------------------------------------
+        // 2つ目の頂点（右側）
+        // --------------------------------------------------
+        element.worldPosition = centerPosition;
+        // 【修正】中心から rightVector と逆方向に幅の分だけマイナスする（ここで均等な幅になる）
+        element.worldPosition.xyz -= rightVector * segment_width;
+        
         element.worldPosition = mul(element.worldPosition - midpointPosition, B) + midpointPosition;
         element.position = mul(element.worldPosition, viewProjection);
         element.texcoord = float2(1, 1 - t);
@@ -90,7 +103,11 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     element.worldPosition = midpointPosition + segment_normal * grassBladeHeight;
     element.worldPosition = mul(element.worldPosition - midpointPosition, B) + midpointPosition;
     element.position = mul(element.worldPosition, viewProjection);
-    element.worldNormal = segment_normal.xyz;
+    // 草が伸びる方向(Up)と横方向(Right)の外積から、草の「面」が向いている法線(Forward)を計算
+    float3 faceNormal = normalize(cross(segment_normal.xyz, rightVector));
+
+    // その面法線を頂点にセットする
+    element.worldNormal = faceNormal;
     element.color = witheredColor;
     element.texcoord = float2(0.5, 0);
     output.Append(element);

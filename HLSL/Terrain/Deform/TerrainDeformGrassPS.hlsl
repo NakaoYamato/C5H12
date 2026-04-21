@@ -7,7 +7,7 @@ PS_OUT main(VsOut pin)
     float rate = CalculateBrushRate(pin.texcoord);
 
     float factor = brushStrength * rate;
-    baseParameter.g = lerp(baseParameter.g, brushStrength, rate);
+    baseParameter.g = saturate(baseParameter.g + factor);
     
     PS_OUT pout = (PS_OUT) 0;
     pout.color = baseColor;

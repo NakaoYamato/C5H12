@@ -100,6 +100,9 @@ private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
 
+    // デバッグ表示用ピクセルシェーダー
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_debugPixelShader;
+
     // 草描画用シェーダー
 	VertexShader _grassVertexShader;
     Microsoft::WRL::ComPtr<ID3D11HullShader>	_grassHullShader;
@@ -151,4 +154,6 @@ private:
 	bool _isDrawingGui = false;
     // Mipmapを使用するか
 	bool _isUsingMipmap = false;
+    // デバッグ表示フラグ
+    bool _isDebugDraw = false;
 };

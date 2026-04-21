@@ -75,6 +75,12 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             device,
             "./Data/Shader/HLSL/Terrain/TerrainGBPS.cso",
             _gbPixelShader.ReleaseAndGetAddressOf());
+
+        // デバッグ表示用ピクセルシェーダー
+        GpuResourceManager::CreatePsFromCso(
+            device,
+            "./Data/Shader/HLSL/Terrain/TerrainDebugGBPS.cso",
+            _debugPixelShader.ReleaseAndGetAddressOf());
     }
 
     // 草描画用シェーダー作成
@@ -85,7 +91,7 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             { "WORLD_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "NORMAL",         0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "TANGENT",        0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "PARAMETER",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "PARAMETER",      0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "TEXCOORD",       0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         };
         // 頂点シェーダー作成
@@ -383,6 +389,7 @@ void TerrainRenderer::DrawGui()
 			ImGui::Checkbox(u8"草を描画", &_isDrawingGrass);
 			ImGui::Checkbox(u8"ワイヤーフレーム", &_isWireFrame);
 			ImGui::Checkbox(u8"Mipmapを使用", &_isUsingMipmap);
+            ImGui::Checkbox(u8"デバッグ表示", &_isDebugDraw);
 			ImGui::Separator();
 			int textureQuality = static_cast<int>(_currentTextureQuality);
 			if (ImGui::Combo(u8"テクスチャ品質", &textureQuality, u8"低\0中\0高\0"))
@@ -557,7 +564,13 @@ void TerrainRenderer::RenderDynamic(const RenderContext& rc, bool writeGBuffer)
     dc->DSSetShader(_domainShader.Get(), nullptr, 0);
     dc->GSSetShader(nullptr, nullptr, 0);
     if (writeGBuffer)
-        dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
+    {
+        if (_isDebugDraw)
+            dc->PSSetShader(_debugPixelShader.Get(), nullptr, 0);
+        else
+            dc->PSSetShader(_gbPixelShader.Get(), nullptr, 0);
+
+    }
     else
         dc->PSSetShader(_pixelShader.Get(), nullptr, 0);
     dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
@@ -636,6 +649,9 @@ void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
         // 草の描画
         for (const auto& drawInfo : _grassDrawInfos)
         {
+            dc->DSSetShaderResources(4, 1,
+                drawInfo.terrain->GetMaterialMapFB(_currentTextureQuality)->GetColorSRV(Terrain::ParameterTextureIndex).GetAddressOf());
+
             dc->IASetVertexBuffers(0, 1, drawInfo.terrain->GetStreamOutVertexBuffer().GetAddressOf(), &stride, &offset);
 
             dc->DrawAuto();
@@ -645,6 +661,7 @@ void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
     ID3D11ShaderResourceView* nullSRVs[3] = {};
     dc->GSSetShaderResources(5, 1, nullSRVs);
     dc->PSSetShaderResources(4, 1, nullSRVs);
+    dc->DSSetShaderResources(4, 1, nullSRVs);
     // シェーダーを解除
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->HSSetShader(nullptr, nullptr, 0);

@@ -1964,5 +1964,6 @@
     <FxCompile Include="HLSL\Terrain\TerrainStreamOutDS.hlsl" />
     <FxCompile Include="HLSL\Sprite\SpriteDissolvePS.hlsl" />
     <FxCompile Include="HLSL\Terrain\TerrainCollisionGS.hlsl" />
+    <FxCompile Include="HLSL\Terrain\TerrainDebugGBPS.hlsl" />
   </ItemGroup>
 </Project>

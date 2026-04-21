@@ -2,6 +2,8 @@
 #include "../../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
+Texture2D<float4> parameterTexture : register(t4);
+
 struct DS_OUTPUT
 {
 	float4 vPosition  : SV_POSITION;
@@ -37,7 +39,10 @@ const OutputPatch<GRASS_DS_IN, 3> patch)
     // í∏ì_UVç¿ïW
     float2 texcoord = patch[0].texcoord * UV.x + patch[1].texcoord * UV.y + patch[2].texcoord * UV.z;
     
-    float4 parameter = patch[0].parameter * UV.x + patch[1].parameter * UV.y + patch[2].parameter * UV.z;
+    float4 interp_parameter = patch[0].parameter * UV.x + patch[1].parameter * UV.y + patch[2].parameter * UV.z;
+    
+    float4 parameter = parameterTexture.SampleLevel(samplerStates[_LINEAR_CLAMP_SAMPLER_INDEX], texcoord, 0);
+    
     // èÓïÒê›íË
     dout.position = float4(position, 1.0);
     dout.worldPosition = worldPosition;

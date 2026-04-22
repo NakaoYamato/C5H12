@@ -125,8 +125,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutCollisionGeometryShader;
 
     // ‰e•`‰æ—p
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>	    _shadowVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_shadowGeometryShader;
+	VertexShader                                _shadowVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11HullShader>	_shadowHullShader;
+    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_shadowDomainShader;
+	GeometryShader                              _shadowGeometryShader;
 #pragma endregion
     // Terrain‚Ì•`‰æ—pî•ñ”z—ñ
 	std::vector<DrawInfo> _drawInfos;

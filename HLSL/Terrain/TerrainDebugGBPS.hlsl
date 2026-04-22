@@ -27,6 +27,7 @@ PS_GB_OUT main(PS_IN pin)
         normalize(pin.worldNormal.xyz)
     };
     normal = normalize(mul(normal * 2.0f - 1.0f, mat));
+    normal = float3(0, -1, 0);
             
     return CreateOutputData(
     color.rgb,

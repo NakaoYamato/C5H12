@@ -147,6 +147,9 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
         element.worldNormal = gin[0].worldNormal;
         element.texcoord = vertexTexcoord[i];
         element.color = color;
+        element.color.g = gin[0].texcoord.x;
+        element.color.r = gin[0].texcoord.y;
+        element.color.b = 0.0f;
         output.Append(element);
     }
     output.RestartStrip();

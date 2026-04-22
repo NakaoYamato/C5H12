@@ -210,7 +210,6 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         D3D11_INPUT_ELEMENT_DESC inputElementDesc[]
         {
             { "POSITION",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "SV_INSTANCEID",  0, DXGI_FORMAT_R16_UINT,        0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         };
         // 頂点シェーダ
         _shadowVertexShader.Load(device, "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowVS.cso",
@@ -354,6 +353,10 @@ void TerrainRenderer::CastShadow(const RenderContext& rc)
 
     for (const auto& drawInfo : _shadowDrawInfos)
     {
+        // 定数バッファの更新
+        _data.world = drawInfo.world;
+        dc->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_data, 0, 0);
+
         // シェーダーリソースビューの設定
         ID3D11ShaderResourceView* srvs[] =
         {

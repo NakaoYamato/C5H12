@@ -25,17 +25,20 @@ struct GRASS_HS_CONSTANT_OUT
 // 草描画用定数バッファ
 cbuffer TERRAIN_GRASS_CONSTANT_BUFFER : register(b2)
 {
-    float grassTessellation;
-    float grassLODDistanceMax;
-    float grassHeightFactor;
-    float grassWidthFactor;
+    float4 grassLodTessFactors;         // LOD用分割数
     
-    float grassWitheredFactor;
-    float grassCurvature;
-    float grassHeightVariance;
-    float perlinNoiseDistributionFactor;
+    float grassLODDistance;             // LOD距離
+    float perlinNoiseDistributionFactor; // パーリンノイズの分布
+    float grassHeightFactor;            // 草の高さ
+    float grassHeightVariance;          // 草の高さのズレ
     
-    float obstacleInfluence;
-    float3 padding;
+    float grassWidthFactor;             // 草の幅
+    float grassWidthVariance;           // 草の幅のズレ
+    float grassCurvature;               // 曲率
+    float grassCurvatureVariance;       // 曲率のズレ
+    
+    float grassWitheredFactor;          // 枯れ具合
+    float obstacleInfluence;            // 障害物の影響度
+    float2 padding;
 
 }

@@ -18,23 +18,27 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
         return;
     }
     
-    float cameraLength = length(cameraPosition.xyz - gin[0].worldPosition);
-    if (cameraLength > grassLODDistanceMax)
-    {
-        // 遠すぎるなら描画しない
-        return;
-    }
+    //float cameraLength = length(cameraPosition.xyz - gin[0].worldPosition);
+    //if (cameraLength > grassLODDistanceMax)
+    //{
+    //    // 遠すぎるなら描画しない
+    //    return;
+    //}
         
 #if 1
+    // ランダム値の生成
     const float randomXY = Random(gin[0].worldPosition.xy);
     const float randomYZ = Random(gin[0].worldPosition.yz);
     const float randomZX = Random(gin[0].worldPosition.zx);
     
+    // ノイズから草の高さ、幅を決定
     const float perlinNoise = Noise(gin[0].worldPosition.xyz * perlinNoiseDistributionFactor);
-    const float grassBladeHeight = gin[0].parameter.g + grassHeightFactor + (perlinNoise * 2.0 - 1.0) * grassHeightVariance;
-    const float grassBladeWidth = grassWidthFactor;
+    const float noise01 = (perlinNoise * 2.0 - 1.0);
+    const float grassBladeHeight = gin[0].parameter.g + grassHeightFactor + noise01 * grassHeightVariance;
+    const float grassBladeWidth = grassWidthFactor + noise01 * grassWidthVariance;
     float4 witheredColor = float4(perlinNoise * grassWitheredFactor, 0.0, 0.0, 1.0);
     
+    // 草の中点の位置を計算
     float4 midpointPosition = float4(gin[0].worldPosition.xyz, 1.0f);
     midpointPosition.x += randomYZ;
     midpointPosition.z += randomXY;
@@ -42,8 +46,9 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     float4 midpointNormal = float4(normalize(gin[0].worldNormal), 0.0f);
     float4 midpointTangent = normalize(gin[0].worldTangent);
     
-    const float2 distortion_texcoord = midpointPosition.xz + windFrequency * totalElapsedTime;
-    const float4 distortion = distortion_texture.SampleLevel(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], distortion_texcoord * 0.001, 0) * 2 - 1;
+    // 風による歪みをテクスチャから取得
+    const float2 distortionTexcoord = midpointPosition.xz + windFrequency * totalElapsedTime;
+    const float4 distortion = distortion_texture.SampleLevel(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], distortionTexcoord * 0.001, 0) * 2 - 1;
     const float wind_avatar_bending_angle = distortion.y * PI * 0.5 * windStrength;
     const float3 wind_bending_axis = normalize(float3(distortion.x, 0, distortion.z));
     const float4x4 W = ToMatrixRotation(wind_avatar_bending_angle, wind_bending_axis);

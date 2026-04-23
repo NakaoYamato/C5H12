@@ -8,15 +8,16 @@ InputPatch<GRASS_HS_IN, 3> ip,
 uint pid : SV_PrimitiveID)
 {
     GRASS_HS_CONSTANT_OUT hout = (GRASS_HS_CONSTANT_OUT) 0;
-    float4 v0 = float4(ip[0].worldPosition.xyz, 1);
-    float4 v1 = float4(ip[1].worldPosition.xyz, 1);
-    float4 v2 = float4(ip[2].worldPosition.xyz, 1);
-    float4 f = DistanceBasedTess(v0, v1, v2, cameraPosition.xyz, 0.0, grassLODDistanceMax, grassTessellation);
-    hout.factor[0] = f.x;
-    hout.factor[1] = f.y;
-    hout.factor[2] = f.z;
-    // “à•”•”•ª‚Ì•ªŠ„”‚ğw’è
-    hout.innerFactor = f.w;
+    // ƒJƒƒ‰‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä•ªŠ„”‚ğ’²®
+    float3 center = (ip[0].worldPosition + ip[1].worldPosition + ip[2].worldPosition) / 4.0;
+    float3 vec = center - cameraPosition.xyz;
+    float len = length(vec);
+    int index = (int) clamp(len / lodDistance, 0.0f, 3.0f);
+    float factor = grassLodTessFactors[index];
+    
+    hout.factor[1] = factor;
+    hout.factor[2] = factor;
+    hout.innerFactor = factor;
     
     return hout;
 }

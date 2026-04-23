@@ -38,18 +38,21 @@ public:
 	// 草の定数バッファのデータ構造体
 	struct GrassConstantBuffer
 	{
-        float grassTessellation = 8.0f;     // 草の分割数
-        float lodDistanceMax = 100.0f;      // LOD距離
+        Vector4 lodTessFactors = { 9.0f, 7.0f, 5.0f, 1.0f }; // LODの分割数
+
+        float lodTessDistance = 20.0f;      // LOD距離
+        float parlinNoiseDistribution = 0.178f; // パーリンノイズの分布
 		float height = 1.0f;				// 草の高さ
-		float width = 0.04f;                // 草の幅
+        float heightVariance = 0.165f;      // 草の高さのズレ
+
+        float width = 0.03f;                // 草の幅
+        float widthVariance = 0.01f;        // 草の幅のズレ
+        float curvature = 0.7f;             // 曲率
+        float curvatureVariance = 0.3f;     // 曲率のズレ
 
 		float witherdFactor = 0.194f;       // 枯れ具合
-		float curvature = 0.6f;             // 曲率
-		float heightVariance = 0.165f;      // 高さのズレ
-		float parlinNoiseDistribution = 0.178f; // パーリンノイズの分布
-
-		float obstacleInfluence = 0.2f;          // 障害物の影響度
-		float padding[3] = {};
+		float obstacleInfluence = 0.2f;     // 障害物の影響度
+		float padding[2] = {};
 	};
     // 描画用情報
     struct DrawInfo
@@ -162,7 +165,7 @@ private:
 	// 草の定数バッファ
 	GrassConstantBuffer _dataGrass;
     // 草を描画するか
-	bool _isDrawingGrass = false;
+	bool _isDrawingGrass = true;
     // ワイヤーフレーム描画
 	bool _isWireFrame = false;
     // GUI描画フラグ

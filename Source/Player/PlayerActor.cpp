@@ -7,6 +7,7 @@
 #include "../../Library/Component/CharactorController.h"
 #include "../../Library/Component/EffectController.h"
 #include "../../Library/Component/Collider/ModelCollider.h"
+#include "../../Library/Component/ObstacleController.h"
 #include "../../Library/Shader/Model/ModelShaderResource.h"
 
 #include "../../Source/Common/Targetable.h"
@@ -54,6 +55,7 @@ void PlayerActor::OnCreate()
 	auto playerStateController	= this->AddComponent<PlayerStateController>();
 	auto networkReceiver		= this->AddComponent<NetworkReceiver>();
 	auto networkSender			= this->AddComponent<PlayerNetworkSender>();
+	auto obstacleController		= this->AddComponent<ObstacleController>();
 
 	// エフェクト読み込み
 	{

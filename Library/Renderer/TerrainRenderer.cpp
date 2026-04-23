@@ -393,6 +393,7 @@ void TerrainRenderer::DrawGui()
 
 				ImGui::DragFloat(u8"影の分割係数", &_data.shadowTessFactor, 0.1f, 0.0f, 10.0f);
 				ImGui::DragFloat(u8"影のオフセット", &_data.shadowOffset, 0.001f, -1.0f, 1.0f);
+				ImGui::DragFloat(u8"基本色の高さ影響度", &_data.texHeightInfluence, 0.001f, 0.0f, 1.0f);
 
                 ImGui::SliderFloat(u8"エミッシブ", &_data.emissive, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"メタリック", &_data.metalness, 0.0f, 1.0f, "%.2f");
@@ -422,10 +423,13 @@ void TerrainRenderer::DrawGui()
                 ImGui::DragFloat(u8"曲率", &_dataGrass.curvature, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"高さのズレ", &_dataGrass.heightVariance, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"ノイズ", &_dataGrass.parlinNoiseDistribution, 0.01f, 0.01f, 10.0f, "%.2f");
-                ImGui::ColorEdit4(u8"Specular Color", &_dataGrass.specularColor.x);
+                ImGui::SliderFloat(u8"障害物の影響度", &_dataGrass.obstacleInfluence, 0.0f, 1.0f, "%.2f");
+
                 ImGui::TreePop();
             }
         }
+        // GUIが埋まってしまう問題を解決するためのスペース
+        ImGui::Dummy(ImVec2(0.0f, 100.0f));
 		ImGui::End();
     }
 }

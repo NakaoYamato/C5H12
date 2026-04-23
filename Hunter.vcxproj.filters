@@ -870,6 +870,9 @@
     <ClCompile Include="Library\Lua\LuaManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Library\Component\ObstacleController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Library\Math\HighPrecisionTimer.h">
@@ -1820,6 +1823,9 @@
     <ClInclude Include="Library\Lua\LuaManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Library\Component\ObstacleController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
@@ -1869,6 +1875,7 @@
     <None Include="Library\ImGui\imgui-node-editor\imgui_node_editor_internal.inl">
       <Filter>ヘッダー ファイル</Filter>
     </None>
+    <None Include="HLSL\CBuffer\B5\Object.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\DebugSupporter\DebugRendererPS.hlsl" />

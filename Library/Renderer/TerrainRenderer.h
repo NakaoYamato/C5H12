@@ -32,22 +32,24 @@ public:
         float collisionTessFactor = 21.0f;  // 衝突判定用エッジ分割数(奇数のみ)
 
         float shadowTessFactor = 0.5f;      // 影の分割係数
-		float shadowOffset = -0.01f;         // 影のオフセット
+		float shadowOffset = -0.02f;        // 影のオフセット
 		float padding[2] = {};
     };
+	// 草の定数バッファのデータ構造体
 	struct GrassConstantBuffer
 	{
         float grassTessellation = 8.0f;     // 草の分割数
-        float lodDistanceMax = 100.0f;    // LOD距離
-        float height = 1.0f;
-        float width = 0.04f;
+        float lodDistanceMax = 100.0f;      // LOD距離
+		float height = 1.0f;				// 草の高さ
+		float width = 0.04f;                // 草の幅
 
-        float witherdFactor = 0.194f;
-        float curvature = 0.6f;
-        float heightVariance = 0.165f;
-		float parlinNoiseDistribution = 0.178f;
+		float witherdFactor = 0.194f;       // 枯れ具合
+		float curvature = 0.6f;             // 曲率
+		float heightVariance = 0.165f;      // 高さのズレ
+		float parlinNoiseDistribution = 0.178f; // パーリンノイズの分布
 
-		Vector4 specularColor{ 0.885f, 0.673f, 0.328f, 1.000f }; // 草のスペキュラカラー
+		float obstacleInfluence = 0.2f;          // 障害物の影響度
+		float padding[3] = {};
 	};
     // 描画用情報
     struct DrawInfo

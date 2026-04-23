@@ -180,6 +180,7 @@
     <ClCompile Include="Library\Component\EnvironmentController.cpp" />
     <ClCompile Include="Library\Component\InstancingModelRenderer.cpp" />
     <ClCompile Include="Library\Component\LocusRenderer.cpp" />
+    <ClCompile Include="Library\Component\ObstacleController.cpp" />
     <ClCompile Include="Library\Component\StageEffectEmitter.cpp" />
     <ClCompile Include="Library\Component\Terrain\TerrainCollider.cpp" />
     <ClCompile Include="Library\Component\SpriteRenderer.cpp" />
@@ -476,6 +477,7 @@
     <ClInclude Include="Library\Component\EnvironmentController.h" />
     <ClInclude Include="Library\Component\InstancingModelRenderer.h" />
     <ClInclude Include="Library\Component\LocusRenderer.h" />
+    <ClInclude Include="Library\Component\ObstacleController.h" />
     <ClInclude Include="Library\Component\StageEffectEmitter.h" />
     <ClInclude Include="Library\Component\Terrain\TerrainCollider.h" />
     <ClInclude Include="Library\Component\SpriteRenderer.h" />
@@ -763,6 +765,7 @@
     <None Include="HLSL\CBuffer\B2\Model\PhongMeshCB.hlsli" />
     <None Include="HLSL\CBuffer\B3\CascadedShadowCB.hlsli" />
     <None Include="HLSL\CBuffer\B3\LightCB.hlsli" />
+    <None Include="HLSL\CBuffer\B5\Object.hlsli" />
     <None Include="HLSL\DebugSupporter\DebugRenderer.hlsli" />
     <None Include="HLSL\Decal\Decal.hlsli" />
     <None Include="HLSL\Decal\DecalGeometry.hlsli" />

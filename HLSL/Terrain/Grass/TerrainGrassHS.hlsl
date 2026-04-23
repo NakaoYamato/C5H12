@@ -16,7 +16,7 @@ uint pid : SV_PrimitiveID)
     hout.factor[1] = f.y;
     hout.factor[2] = f.z;
     // “à•”•”•ª‚Ì•ªŠ„”‚ğw’è
-    hout.innerFactor = /*Random(ip[0].worldPosition.xz) **/ f.w;
+    hout.innerFactor = f.w;
     
     return hout;
 }

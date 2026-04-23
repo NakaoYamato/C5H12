@@ -36,6 +36,7 @@
 
 #define _SCENE_CB_SLOT_INDEX 0
 #define _LIGHT_CB_SLOT_INDEX 3
+#define _OBJECT_CB_SLOT_INDEX 5
 
 static constexpr float _FIXED_UPDATE_RATE = 1.0f / 60.0f;
 #pragma endregion

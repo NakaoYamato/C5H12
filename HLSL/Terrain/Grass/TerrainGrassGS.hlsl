@@ -2,6 +2,7 @@
 #include "../../Function/ToMatrix.hlsli"
 #include "../../Function/Noise.hlsli"
 #include "../../Define/SamplerStateDefine.hlsli"
+#include "../../CBuffer/B5/Object.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 #define PI 3.141592653
@@ -29,10 +30,10 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     const float randomYZ = Random(gin[0].worldPosition.yz);
     const float randomZX = Random(gin[0].worldPosition.zx);
     
-    const float perlinNoise = Noise(gin[0].worldPosition.xyz * perlin_noise_distribution_factor);
-    const float grassBladeHeight = gin[0].parameter.g + (perlinNoise * 2.0 - 1.0) * grass_height_variance;
-    const float grassBladeWidth = grass_width_factor;
-    const float4 witheredColor = float4(perlinNoise * grass_withered_factor, 0.0, 0.0, 1.0);
+    const float perlinNoise = Noise(gin[0].worldPosition.xyz * perlinNoiseDistributionFactor);
+    const float grassBladeHeight = gin[0].parameter.g + grassHeightFactor + (perlinNoise * 2.0 - 1.0) * grassHeightVariance;
+    const float grassBladeWidth = grassWidthFactor;
+    float4 witheredColor = float4(perlinNoise * grassWitheredFactor, 0.0, 0.0, 1.0);
     
     float4 midpointPosition = float4(gin[0].worldPosition.xyz, 1.0f);
     midpointPosition.x += randomYZ;
@@ -56,11 +57,33 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
     const row_major float4x4 B = mul(W, A);
     
     const float random_curvature = Random(gin[0].worldPosition.xy * 0.01);
-    float curvature = PI * 0.5 * (random_curvature * 2.0 - 1.0) * grass_curvature;
+    float curvature = PI * 0.5 * (random_curvature * 2.0 - 1.0) * grassCurvature;
     const row_major float4x4 C = ToMatrixRotation(curvature / BLADE_SEGMENTS, midpointTangent.xyz);
     float4 segment_normal = float4(0, 1, 0, 0);
     
     float3 rightVector = float3(sin(randomZX * 2.0f * PI), 0.0f, cos(randomZX * 2.0f * PI));
+    
+    // 障害物との位置関係から倒れる方向を決定
+    float3 fallVector = float3(0, 0, 0);
+    
+    [unroll]
+    for (int objectIndex = 0; objectIndex < MaxObjectConstant; objectIndex++)
+    {
+        if (objectData[objectIndex].radius <= 0.0f)
+        {
+                // 半径が0以下なら存在しないものとしてスキップ
+            continue;
+        }
+        float3 toObstacle = objectData[objectIndex].position - midpointPosition.xyz;
+        float len = length(toObstacle);
+        float lenParRadius = len / objectData[objectIndex].radius;
+        if (lenParRadius < 1.0f)
+        {
+            fallVector -= (1.0f - lenParRadius) * normalize(toObstacle);
+        }
+    }
+    // 倒れる方向のy成分を減らす
+    fallVector.y = 0.0f;
     
     GRASS_PS_IN element;
     for (int i = 0; i < BLADE_SEGMENTS; i++)
@@ -73,24 +96,20 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
         
         element.color = witheredColor;
         float4 centerPosition = midpointPosition + segment_normal * segment_height;
-
-        // --------------------------------------------------
+        // 倒れる方向を加える
+        centerPosition.xyz += fallVector.xyz * i * obstacleInfluence;
+        
         // 1つ目の頂点（左側）
-        // --------------------------------------------------
         element.worldPosition = centerPosition;
-        // 【修正】中心から rightVector 方向に幅の分だけプラスする
         element.worldPosition.xyz += rightVector * segment_width;
         
         element.worldPosition = mul(element.worldPosition - midpointPosition, B) + midpointPosition;
         element.position = mul(element.worldPosition, viewProjection);
         element.texcoord = float2(0, 1 - t);
         output.Append(element);
-
-        // --------------------------------------------------
+        
         // 2つ目の頂点（右側）
-        // --------------------------------------------------
         element.worldPosition = centerPosition;
-        // 【修正】中心から rightVector と逆方向に幅の分だけマイナスする（ここで均等な幅になる）
         element.worldPosition.xyz -= rightVector * segment_width;
         
         element.worldPosition = mul(element.worldPosition - midpointPosition, B) + midpointPosition;
@@ -101,6 +120,8 @@ void main(point GRASS_GS_IN gin[1], inout TriangleStream<GRASS_PS_IN> output)
         segment_normal = mul(segment_normal, C);
     }
     element.worldPosition = midpointPosition + segment_normal * grassBladeHeight;
+    // 倒れる方向を加える
+    element.worldPosition.xyz += fallVector.xyz * BLADE_SEGMENTS * obstacleInfluence;
     element.worldPosition = mul(element.worldPosition - midpointPosition, B) + midpointPosition;
     element.position = mul(element.worldPosition, viewProjection);
     // 草が伸びる方向(Up)と横方向(Right)の外積から、草の「面」が向いている法線(Forward)を計算

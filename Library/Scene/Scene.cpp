@@ -84,8 +84,17 @@ void Scene::Finalize()
 //更新処理
 void Scene::Update(float elapsedTime)
 {
+    ConstantBufferManager* cbManager = Graphics::Instance().GetConstantBufferManager();
+
     // RCのデータをクリア
 	GetRenderContext().pointLights.clear();
+
+    // オブジェクト定数バッファのデータクリア
+	{
+        std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+		ConstantBufferManager::ObjectConstantBuffer objectCB{};
+		cbManager->UpdateCB(Graphics::Instance().GetDeviceContext(), ConstantBufferType::ObjectCB, &objectCB);
+	}
 
     // ゲームオブジェクトの更新
     _actorManager.Update(elapsedTime);
@@ -112,7 +121,6 @@ void Scene::Update(float elapsedTime)
 	_time += elapsedTime;
 
     // 定数バッファの更新
-    ConstantBufferManager* cbManager = Graphics::Instance().GetConstantBufferManager();
 	cbManager->GetSceneCB().totalElapsedTime = _time;
 	cbManager->GetSceneCB().deltaTime = elapsedTime;
 
@@ -230,6 +238,8 @@ void Scene::Render()
     cbManager->SetCB(dc, _SCENE_CB_SLOT_INDEX, ConstantBufferType::SceneCB, ConstantUpdateTarget::ALL);
     // ライト定数バッファの設定
     cbManager->SetCB(dc, _LIGHT_CB_SLOT_INDEX, ConstantBufferType::LightCB, ConstantUpdateTarget::ALL);
+	// オブジェクト定数バッファの設定
+	cbManager->SetCB(dc, _OBJECT_CB_SLOT_INDEX, ConstantBufferType::ObjectCB, ConstantUpdateTarget::ALL);
 
     //--------------------------------------------------------------------------------------
     // GBuffer生成

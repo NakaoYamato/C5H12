@@ -27,13 +27,15 @@ cbuffer TERRAIN_GRASS_CONSTANT_BUFFER : register(b2)
 {
     float grassTessellation;
     float grassLODDistanceMax;
-    float grass_height_factor;
-    float grass_width_factor;
+    float grassHeightFactor;
+    float grassWidthFactor;
     
-    float grass_withered_factor;
-    float grass_curvature;
-    float grass_height_variance;
-    float perlin_noise_distribution_factor;
+    float grassWitheredFactor;
+    float grassCurvature;
+    float grassHeightVariance;
+    float perlinNoiseDistributionFactor;
     
-    float4 grass_specular_color;
+    float obstacleInfluence;
+    float3 padding;
+
 }

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 
+#include "ConstantBuffer.h"
 #include "RenderContext.h"
 
 /// <summary>
@@ -16,6 +17,7 @@ enum class ConstantBufferType
 {
 	SceneCB,
 	LightCB,
+	ObjectCB,
 
 	CBtypeMax,
 };
@@ -33,6 +35,9 @@ enum class ConstantUpdateTarget : int
 	Compute		= 0b100000,
 	ALL			= 0b111111,
 };
+
+// オブジェクトの最大数
+constexpr size_t MaxObjectConstant = 5;
 
 /// <summary>
 /// 定数バッファの管理者
@@ -73,6 +78,17 @@ public:
 		PointLight pointLights[8];
 	};
 
+	// オブジェクト定数バッファ
+	struct ObjectConstantBuffer : public ConstantBufferBase
+	{
+		struct ObjectData
+		{
+			Vector3 position{};
+			float radius = 0.0f;
+		};
+		ObjectData objects[MaxObjectConstant];
+	};
+
 public:
 	ConstantBufferManager(ID3D11Device* device);
 	~ConstantBufferManager() {}
@@ -104,16 +120,20 @@ public:
 
 	SceneConstantBuffer& GetSceneCB() { return _sceneCB; }
 	LightConstantBuffer& GetLightCB() { return _lightCB; }
+	ObjectConstantBuffer& GetObjectCB() { return _objectCB; }
 private:
 	// シーン定数バッファの更新
 	void UpdateSceneCB(SceneConstantBuffer* buffer);
 	// ライト定数バッファの更新
 	void UpdateLightCB(LightConstantBuffer* buffer);
+	// オブジェクト定数バッファの更新
+	void UpdateObjectCB(ObjectConstantBuffer* buffer);
 
 private:
 	// 定数バッファ
 	SceneConstantBuffer _sceneCB{};
 	LightConstantBuffer _lightCB{};
+	ObjectConstantBuffer _objectCB{};
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer>	_constantBuffers[static_cast<size_t>(ConstantBufferType::CBtypeMax)];
+	ConstantBuffer	_constantBuffers[static_cast<size_t>(ConstantBufferType::CBtypeMax)];
 };

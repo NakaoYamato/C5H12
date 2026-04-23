@@ -4,15 +4,11 @@
 ConstantBufferManager::ConstantBufferManager(ID3D11Device* device)
 {
 	// シーン用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(
-		device,
-		sizeof(SceneConstantBuffer),
-		_constantBuffers[static_cast<size_t>(ConstantBufferType::SceneCB)].GetAddressOf());
+	_constantBuffers[static_cast<size_t>(ConstantBufferType::SceneCB)].Create(device, sizeof(SceneConstantBuffer));
 	// ライト用定数バッファ
-	(void)GpuResourceManager::CreateConstantBuffer(
-		device,
-		sizeof(LightConstantBuffer),
-		_constantBuffers[static_cast<size_t>(ConstantBufferType::LightCB)].GetAddressOf());
+	_constantBuffers[static_cast<size_t>(ConstantBufferType::LightCB)].Create(device, sizeof(LightConstantBuffer));
+	// オブジェクト用定数バッファ
+	_constantBuffers[static_cast<size_t>(ConstantBufferType::ObjectCB)].Create(device, sizeof(ObjectConstantBuffer));
 }
 
 // 定数バッファの一括更新
@@ -64,6 +60,8 @@ void ConstantBufferManager::Update(const RenderContext& rc)
 		UpdateLightCB(&lightCB);
 		dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::LightCB)].Get(), 0, 0, &this->_lightCB, 0, 0);
 	}
+
+	dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::ObjectCB)].Get(), 0, 0, &this->_objectCB, 0, 0);
 }
 
 /// 指定の定数バッファの更新
@@ -79,7 +77,11 @@ void ConstantBufferManager::UpdateCB(ID3D11DeviceContext* dc,
 		break;
 	case ConstantBufferType::LightCB:
 		UpdateLightCB((LightConstantBuffer*)(parameter));
-		dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::LightCB)].Get(), 0, 0, &_sceneCB, 0, 0);
+		dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::LightCB)].Get(), 0, 0, &_lightCB, 0, 0);
+		break;
+	case ConstantBufferType::ObjectCB:
+		UpdateObjectCB((ObjectConstantBuffer*)(parameter));
+		dc->UpdateSubresource(_constantBuffers[static_cast<size_t>(ConstantBufferType::ObjectCB)].Get(), 0, 0, &_objectCB, 0, 0);
 		break;
 	default:
 		assert(!"bufferType overflow");
@@ -149,6 +151,18 @@ void ConstantBufferManager::UpdateLightCB(LightConstantBuffer* buffer)
 		for (int i = 0; i < _countof(_lightCB.pointLights); ++i)
 		{
 			this->_lightCB.pointLights[i] = buffer->pointLights[i];
+		}
+	}
+}
+
+// オブジェクト定数バッファの更新
+void ConstantBufferManager::UpdateObjectCB(ObjectConstantBuffer* buffer)
+{
+	if (buffer != nullptr)
+	{
+		for (size_t i = 0; i < MaxObjectConstant; ++i)
+		{
+			this->_objectCB.objects[i] = buffer->objects[i];
 		}
 	}
 }

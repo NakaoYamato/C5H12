@@ -2,24 +2,6 @@
 #include "../../Define/SamplerStateDefine.hlsli"
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
-struct DS_OUTPUT
-{
-	float4 vPosition  : SV_POSITION;
-};
-
-struct HS_CONTROL_POINT_OUTPUT
-{
-	float3 vPosition : WORLDPOS; 
-};
-
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	float EdgeTessFactor[3]			: SV_TessFactor;
-	float InsideTessFactor			: SV_InsideTessFactor;
-};
-
-#define NUM_CONTROL_POINTS 3
-
 [domain("tri")]
 GRASS_DS_OUT main(GRASS_HS_CONSTANT_OUT input, float3 UV : SV_DomainLocation,
 const OutputPatch<GRASS_DS_IN, 3> patch)

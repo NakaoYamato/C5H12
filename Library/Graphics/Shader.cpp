@@ -73,6 +73,25 @@ void GeometryShader::Load(ID3D11Device* device, const std::string& filepath)
 	_geometryShader = GpuResourceManager::GetGeometryShader(_filepath).Get();
 }
 
+// ジオメトリシェーダーを読み込む（ストリームアウト用）
+void GeometryShader::LoadForStreamOut(ID3D11Device* device, const std::string& filepath,
+	const D3D11_SO_DECLARATION_ENTRY* declaration, UINT numEntries, 
+	const UINT* bufferStrides, UINT numStrides,
+	UINT rasterizedStream)
+{
+	_filepath = filepath;
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+	GpuResourceManager::CreateGsWithStreamOutFromCso(
+		device,
+		_filepath.c_str(),
+		geometryShader.ReleaseAndGetAddressOf(),
+		declaration, numEntries,
+		bufferStrides, numStrides,
+		rasterizedStream
+	);
+	_geometryShader = GpuResourceManager::GetGeometryShader(_filepath).Get();
+}
+
 // 読み込んだジオメトリシェーダーを取得
 ID3D11GeometryShader* GeometryShader::Get() const
 {

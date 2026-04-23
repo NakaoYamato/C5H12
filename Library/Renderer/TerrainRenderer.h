@@ -67,8 +67,12 @@ public:
 
 	// 初期化
 	void Initialize(ID3D11Device* device);
-    // 頂点情報書き出し登録
-    void ExportVertices(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
+    
+	// コリジョン用頂点情報書き出し登録
+	void RegisterCollisionVertices(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
+	// 草用頂点情報書き出し登録
+	void RegisterGrassVertices(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
+
     // 描画登録
 	void Draw(Terrain* terrain, const DirectX::XMFLOAT4X4& world);
     // 影描画登録
@@ -88,7 +92,9 @@ public:
 	void SetTextureQuality(Terrain::TextureQuality quality) { _currentTextureQuality = quality; }
 
 private:
-    void RenderStreamOut(const RenderContext& rc);
+    void RenderCollisionStreamOut(const RenderContext& rc);
+    void RenderGrassStreamOut(const RenderContext& rc);
+
     void RenderDynamic(const RenderContext& rc, bool writeGBuffer);
     void RenderGrass(const RenderContext& rc, bool writeGBuffer);
 private:
@@ -121,11 +127,11 @@ private:
     // ストリームアウト用
     HullShader	        _streamOutHullShader;
     DomainShader	    _streamOutDomainShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
+    GeometryShader	_streamOutGeometryShader;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCollisionVertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCollisionCopyBuffer;
-	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutCollisionGeometryShader;
+    GeometryShader	_streamOutCollisionGeometryShader;
 
     // 影描画用
 	VertexShader        _shadowVertexShader;
@@ -135,8 +141,10 @@ private:
 #pragma endregion
     // Terrainの描画用情報配列
 	std::vector<DrawInfo> _drawInfos;
-    // 頂点書き出し用情報配列
-    std::vector<DrawInfo> _exportVertexDrawInfos;
+	// コリジョン用頂点書き出し情報配列
+	std::vector<DrawInfo> _collisionExportVertexDrawInfos;
+	// 草用頂点書き出し情報配列
+	std::vector<DrawInfo> _grassExportVertexDrawInfos;
 	// 草の描画用情報
 	std::vector<DrawInfo> _grassDrawInfos;
     // 影描画用情報配列

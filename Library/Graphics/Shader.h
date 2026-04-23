@@ -44,6 +44,14 @@ public:
 	~GeometryShader() = default;
 	// ジオメトリシェーダーを読み込む
 	void Load(ID3D11Device* device, const std::string& filepath);
+	// ジオメトリシェーダーを読み込む（ストリームアウト用）
+	void LoadForStreamOut(ID3D11Device* device, const std::string& filepath, 
+		const D3D11_SO_DECLARATION_ENTRY* declaration,
+		UINT numEntries,
+		const UINT* bufferStrides,
+		UINT numStrides,
+		UINT rasterizedStream);
+
 	// 読み込んだジオメトリシェーダーを取得
 	ID3D11GeometryShader* Get() const;
 private:

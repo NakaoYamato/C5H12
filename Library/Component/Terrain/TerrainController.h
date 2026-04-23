@@ -40,6 +40,9 @@ public:
 	EditState GetEditState() const { return _editState; }
 	// 編集状態設定
     void SetEditState(EditState state);
+
+    // 草の頂点情報を再計算
+	void RecalculateGrassVertices();
 #pragma endregion
 
 private:
@@ -49,4 +52,6 @@ private:
 	EditState _editState = EditState::None;
     // ストリームアウトデータ描画フラグ
     bool _drawStreamOut = false;
+	// 草の頂点情報を再計算するフラグ
+	int _recalculateGrassVerticesCount = 0;
 };

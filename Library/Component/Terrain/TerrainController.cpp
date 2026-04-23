@@ -28,7 +28,10 @@ void TerrainController::OnCreate()
     }
 
 	// 地形の頂点情報をエクスポートする
-    GetActor()->GetScene()->GetTerrainRenderer().ExportVertices(
+    GetActor()->GetScene()->GetTerrainRenderer().RegisterCollisionVertices(
+        _terrain.get(),
+        GetActor()->GetTransform().GetMatrix());
+    GetActor()->GetScene()->GetTerrainRenderer().RegisterGrassVertices(
         _terrain.get(),
         GetActor()->GetTransform().GetMatrix());
 	_editState = EditState::Editing;
@@ -60,7 +63,7 @@ void TerrainController::LateUpdate(float elapsedTime)
     // 編集状態がEditingの場合は、地形の頂点再計算とコライダーの再構築を行い、編集状態をCompleteに変更
     if (_editState == EditState::Editing)
     {
-        GetActor()->GetScene()->GetTerrainRenderer().ExportVertices(
+        GetActor()->GetScene()->GetTerrainRenderer().RegisterCollisionVertices(
             _terrain.get(),
             GetActor()->GetTransform().GetMatrix());
 		if (auto terrainCollider = GetActor()->GetCollider<TerrainCollider>())
@@ -68,6 +71,14 @@ void TerrainController::LateUpdate(float elapsedTime)
 			terrainCollider->SetRecalculate(true);
 		}
         _editState = EditState::Complete;
+    }
+
+    // 草の更新
+    if (_recalculateGrassVerticesCount-- == 0)
+    {
+        GetActor()->GetScene()->GetTerrainRenderer().RegisterGrassVertices(
+            _terrain.get(),
+            GetActor()->GetTransform().GetMatrix());
     }
 }
 // 描画処理
@@ -150,4 +161,10 @@ void TerrainController::DrawGui()
 void TerrainController::SetEditState(EditState state)
 {
     _editState = state;
+}
+
+// 草の頂点情報を再計算
+void TerrainController::RecalculateGrassVertices()
+{
+	_recalculateGrassVerticesCount = 2; // 2フレーム後に再計算する
 }

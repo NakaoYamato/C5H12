@@ -20,6 +20,6 @@ GrassTransformingBrush::GrassTransformingBrush(TerrainDeformer* deformer) :
 void GrassTransformingBrush::RegisterTask(std::weak_ptr<TerrainController> terrainController, const Vector2& uvPosition, float radius, float strength)
 {
     TerrainDeformerBrush::RegisterTask(terrainController, uvPosition, radius, strength);
-    // 地形に編集を適用
-    terrainController.lock()->SetEditState(TerrainController::EditState::Editing);
+    // 草の頂点情報を再計算
+    terrainController.lock()->RecalculateGrassVertices();
 }

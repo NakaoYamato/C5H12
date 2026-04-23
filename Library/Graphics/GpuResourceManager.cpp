@@ -387,29 +387,48 @@ void GpuResourceManager::CreateGsWithStreamOutFromCso(ID3D11Device* device,
 	UINT numStrides,
 	UINT rasterizedStream)
 {
-	FILE* fp{ nullptr };
-	fopen_s(&fp, csoName, "rb");
-	_ASSERT_EXPR_A(fp, "CSO File not found");
+	// 過去に生成しているか確認
+	auto it = geometryShaderMap.find(csoName);
+	if (it != geometryShaderMap.end())
+	{
+		// 過去に生成したデータを取得
+		*geometryShader = it->second.Get();
+		(*geometryShader)->AddRef();
+	}
+	else
+	{
+		FILE* fp{ nullptr };
+		fopen_s(&fp, csoName, "rb");
+		_ASSERT_EXPR_A(fp, "CSO File not found");
 
-	fseek(fp, 0, SEEK_END);
-	long cso_sz{ ftell(fp) };
-	fseek(fp, 0, SEEK_SET);
+		fseek(fp, 0, SEEK_END);
+		long cso_sz{ ftell(fp) };
+		fseek(fp, 0, SEEK_SET);
 
-	std::unique_ptr<unsigned char[]> csoData{ std::make_unique<unsigned char[]>(cso_sz) };
-	fread(csoData.get(), cso_sz, 1, fp);
-	fclose(fp);
+		std::unique_ptr<unsigned char[]> csoData{ std::make_unique<unsigned char[]>(cso_sz) };
+		fread(csoData.get(), cso_sz, 1, fp);
+		fclose(fp);
 
-	HRESULT hr{ S_OK };
-	hr = device->CreateGeometryShaderWithStreamOutput(csoData.get(),
-		cso_sz, 
-		declaration,
-		numEntries,
-		bufferStrides,
-		numStrides,
-		rasterizedStream,
-		nullptr, 
-		geometryShader);
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		HRESULT hr{ S_OK };
+		hr = device->CreateGeometryShaderWithStreamOutput(csoData.get(),
+			cso_sz,
+			declaration,
+			numEntries,
+			bufferStrides,
+			numStrides,
+			rasterizedStream,
+			nullptr,
+			geometryShader);
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+		// 生成したデータをセット
+		geometryShaderMap.insert(std::make_pair(csoName, *geometryShader));
+
+		Debug::Output::String(L"ストリームアウト用ジオメトリシェーダーの作成成功\n");
+		Debug::Output::String("\t");
+		Debug::Output::String(csoName);
+		Debug::Output::String("\n");
+	}
 }
 
 // コンピュートシェーダー作成

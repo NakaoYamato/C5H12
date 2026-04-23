@@ -21,15 +21,19 @@ public:
 
         Vector4 lodTessFactors = { 49.0f, 31.0f, 21.0f, 11.0f }; // LODの分割数
 
+        float emissive = 0.0f;              // エミッシブ
+        float metalness = 0.0f;             // メタリック
+        float roughness = 1.0f;             // ラフネス
         int divisionCount = 15;             // 分割数
+
 		float terrainLength = 50.0f;        // 地形1枚の長さ(m)
         float lodTessDistance = 15.0f;      // LODの距離
+        float texHeightInfluence = 0.25f;   // 基本色の高さ影響度
         float collisionTessFactor = 21.0f;  // 衝突判定用エッジ分割数(奇数のみ)
 
-        float emissive = 0.0f;              // エミッシブ
-        float metalness = 0.0f;            // メタリック
-        float roughness = 1.0f;             // ラフネス
-        float padding{};
+        float shadowTessFactor = 0.5f;      // 影の分割係数
+		float shadowOffset = -0.01f;         // 影のオフセット
+		float padding[2] = {};
     };
 	struct GrassConstantBuffer
 	{
@@ -93,31 +97,30 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> _grassConstantBuffer;
 
 	// 通常描画用シェーダー
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>	_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>	_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11HullShader>	_hullShader;
-    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_domainShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_gbPixelShader;
+	VertexShader        _vertexShader;
+    HullShader          _hullShader;
+	DomainShader        _domainShader;
+	PixelShader         _pixelShader;
+	PixelShader         _gbPixelShader;
 
     // デバッグ表示用ピクセルシェーダー
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_debugPixelShader;
+    PixelShader	        _debugPixelShader;
 
     // 草描画用シェーダー
-	VertexShader _grassVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11HullShader>	_grassHullShader;
-    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_grassDomainShader;
-	Microsoft::WRL::ComPtr<ID3D11GeometryShader> _grassGeometryShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_grassPixelShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>	_grassGBPixelShader;
+	VertexShader        _grassVertexShader;
+    HullShader	        _grassHullShader;
+    DomainShader	    _grassDomainShader;
+    GeometryShader      _grassGeometryShader;
+    PixelShader	        _grassPixelShader;
+    PixelShader	        _grassGBPixelShader;
 	// 風のゆがみテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _windDistortionSRV;
     // 草のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _grassColorSRV;
 
     // ストリームアウト用
-    Microsoft::WRL::ComPtr<ID3D11HullShader>	    _streamOutHullShader;
-    Microsoft::WRL::ComPtr<ID3D11DomainShader>	    _streamOutDomainShader;
+    HullShader	        _streamOutHullShader;
+    DomainShader	    _streamOutDomainShader;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutGeometryShader;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer>            _streamOutCollisionVertexBuffer;
@@ -125,10 +128,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11GeometryShader>	_streamOutCollisionGeometryShader;
 
     // 影描画用
-	VertexShader                                _shadowVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11HullShader>	_shadowHullShader;
-    Microsoft::WRL::ComPtr<ID3D11DomainShader>	_shadowDomainShader;
-	GeometryShader                              _shadowGeometryShader;
+	VertexShader        _shadowVertexShader;
+    HullShader	        _shadowHullShader;
+    DomainShader	    _shadowDomainShader;
+	GeometryShader      _shadowGeometryShader;
 #pragma endregion
     // Terrainの描画用情報配列
 	std::vector<DrawInfo> _drawInfos;

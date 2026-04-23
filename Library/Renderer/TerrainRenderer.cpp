@@ -48,39 +48,21 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         };
         // 頂点シェーダー
-        GpuResourceManager::CreateVsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainVS.cso",
-            _vertexShader.ReleaseAndGetAddressOf(),
-            _inputLayout.ReleaseAndGetAddressOf(),
-            inputElementDesc,
-            static_cast<UINT>(_countof(inputElementDesc)));
+		_vertexShader.Load(device,
+			"./Data/Shader/HLSL/Terrain/TerrainVS.cso",
+			inputElementDesc,
+			static_cast<UINT>(_countof(inputElementDesc)));
         // ハルシェーダー
-        GpuResourceManager::CreateHsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainHS.cso",
-            _hullShader.ReleaseAndGetAddressOf());
+		_hullShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainHS.cso");
         // ドメインシェーダー
-        GpuResourceManager::CreateDsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainDS.cso",
-            _domainShader.ReleaseAndGetAddressOf());
+		_domainShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainDS.cso");
         // ピクセルシェーダー
-        GpuResourceManager::CreatePsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainPS.cso",
-            _pixelShader.ReleaseAndGetAddressOf());
+		_pixelShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainPS.cso");
         // GBufferへ書き込む用のピクセルシェーダー
-        GpuResourceManager::CreatePsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainGBPS.cso",
-            _gbPixelShader.ReleaseAndGetAddressOf());
+		_gbPixelShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainGBPS.cso");
 
         // デバッグ表示用ピクセルシェーダー
-        GpuResourceManager::CreatePsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainDebugGBPS.cso",
-            _debugPixelShader.ReleaseAndGetAddressOf());
+		_debugPixelShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainDebugGBPS.cso");
     }
 
     // 草描画用シェーダー作成
@@ -100,30 +82,15 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
 			inputElementDesc,
             static_cast<UINT>(_countof(inputElementDesc)));
         // ハルシェーダー
-        GpuResourceManager::CreateHsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassHS.cso",
-            _grassHullShader.ReleaseAndGetAddressOf());
+		_grassHullShader.Load(device, "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassHS.cso");
         // ドメインシェーダー
-        GpuResourceManager::CreateDsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassDS.cso",
-            _grassDomainShader.ReleaseAndGetAddressOf());
+        _grassDomainShader.Load(device, "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassDS.cso");
 		// ジオメトリシェーダー作成
-		GpuResourceManager::CreateGsFromCso(
-			device,
-			"./Data/Shader/HLSL/Terrain/Grass/TerrainGrassGS.cso",
-			_grassGeometryShader.GetAddressOf());
+		_grassGeometryShader.Load(device, "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassGS.cso");
 		// ピクセルシェーダー作成
-		GpuResourceManager::CreatePsFromCso(
-			device,
-			"./Data/Shader/HLSL/Terrain/Grass/TerrainGrassPS.cso",
-            _grassPixelShader.GetAddressOf());
+		_grassPixelShader.Load(device, "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassPS.cso");
         // GBufferへ書き込む用のピクセルシェーダー
-        GpuResourceManager::CreatePsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassGBPS.cso",
-            _grassGBPixelShader.ReleaseAndGetAddressOf());
+		_grassGBPixelShader.Load(device, "./Data/Shader/HLSL/Terrain/Grass/TerrainGrassGBPS.cso");
 	}
 
     // ストリームアウトを使用してプリミティブを取得するシェーダー
@@ -147,15 +114,9 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
             0);
 
 		// ハルシェーダー
-        GpuResourceManager::CreateHsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainStreamOutHS.cso",
-            _streamOutHullShader.ReleaseAndGetAddressOf());
+		_streamOutHullShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainStreamOutHS.cso");
         // ドメインシェーダー
-        GpuResourceManager::CreateDsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/TerrainStreamOutDS.cso",
-            _streamOutDomainShader.ReleaseAndGetAddressOf());
+        _streamOutDomainShader.Load(device, "./Data/Shader/HLSL/Terrain/TerrainStreamOutDS.cso");
     }
 
     // コリジョン用ストリームアウトシェーダー
@@ -215,15 +176,9 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         _shadowVertexShader.Load(device, "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowVS.cso",
 			inputElementDesc, static_cast<UINT>(_countof(inputElementDesc)));
         // ハルシェーダー
-        GpuResourceManager::CreateHsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowHS.cso",
-            _shadowHullShader.ReleaseAndGetAddressOf());
+        _shadowHullShader.Load(device, "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowHS.cso");
         // ドメインシェーダー
-        GpuResourceManager::CreateDsFromCso(
-            device,
-            "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowDS.cso",
-            _shadowDomainShader.ReleaseAndGetAddressOf());
+        _shadowDomainShader.Load(device, "./Data/Shader/HLSL/Terrain/Shadow/TerrainShadowDS.cso");
         // ジオメトリシェーダー
         _shadowGeometryShader.Load(device, "./Data/Shader/HLSL/Model/CascadedShadow/CascadedShadowGS.cso");
     }
@@ -342,6 +297,9 @@ void TerrainRenderer::CastShadow(const RenderContext& rc)
     
     dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));
 
+    dc->HSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+    dc->DSSetConstantBuffers(ModelCBIndex, 1, _constantBuffer.GetAddressOf());
+
     dc->IASetInputLayout(_shadowVertexShader.GetInputLayout());
     dc->VSSetShader(_shadowVertexShader.Get(), nullptr, 0);
     dc->HSSetShader(_shadowHullShader.Get(), nullptr, 0);
@@ -424,9 +382,13 @@ void TerrainRenderer::DrawGui()
                 ImGui::SliderFloat(u8"LOD距離", &_data.lodTessDistance, 1.0f, 200.0f, "%.1f");
                 ImGui::SliderFloat(u8"衝突判定用エッジ分割数", &_data.collisionTessFactor, 1.0f, MaxTessellation, "%.1f");
 
+				ImGui::DragFloat(u8"影の分割係数", &_data.shadowTessFactor, 0.1f, 0.0f, 10.0f);
+				ImGui::DragFloat(u8"影のオフセット", &_data.shadowOffset, 0.001f, -1.0f, 1.0f);
+
                 ImGui::SliderFloat(u8"エミッシブ", &_data.emissive, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"メタリック", &_data.metalness, 0.0f, 1.0f, "%.2f");
                 ImGui::SliderFloat(u8"ラフネス", &_data.roughness, 0.0f, 1.0f, "%.2f");
+
                 ImGui::TreePop();
 
                 auto Oddification = [](float& value)
@@ -464,7 +426,7 @@ void TerrainRenderer::RenderStreamOut(const RenderContext& rc)
     ID3D11DeviceContext* dc = rc.deviceContext;
 
     // シェーダー設定
-    dc->IASetInputLayout(_inputLayout.Get());
+    dc->IASetInputLayout(_vertexShader.GetInputLayout());
     dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
     dc->HSSetShader(_streamOutHullShader.Get(), nullptr, 0);
     dc->DSSetShader(_streamOutDomainShader.Get(), nullptr, 0);
@@ -578,7 +540,7 @@ void TerrainRenderer::RenderDynamic(const RenderContext& rc, bool writeGBuffer)
     ID3D11DeviceContext* dc = rc.deviceContext;
 
     // シェーダー設定
-    dc->IASetInputLayout(_inputLayout.Get());
+    dc->IASetInputLayout(_vertexShader.GetInputLayout());
     dc->VSSetShader(_vertexShader.Get(), nullptr, 0);
     dc->HSSetShader(_hullShader.Get(), nullptr, 0);
     dc->DSSetShader(_domainShader.Get(), nullptr, 0);

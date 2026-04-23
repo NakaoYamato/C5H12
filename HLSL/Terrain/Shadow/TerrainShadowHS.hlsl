@@ -13,7 +13,7 @@ uint pid : SV_PrimitiveID)
     float3 vec = center - cameraPosition.xyz;
     float len = length(vec);
     int index = (int) clamp(len / lodDistance, 0.0f, 3.0f);
-    float factor = lodTessFactors[index] * 10;
+    float factor = lodTessFactors[index] * shadowTessFactor;
     
     // エッジの分割数を指定
     hout.factor[0] = factor;

@@ -48,13 +48,17 @@ cbuffer TESSELATION_CONSTANT_BUFFER : register(b1)
     
     float4 lodTessFactors;    // LOD用分割数
     
-    int divisionCount;          // 分割数
-    float terrainLength;        // 全体の長さ
-    float lodDistance;          // LOD距離
-    float collisionTessFactor;  // 衝突判定用エッジ分割数(奇数のみ)    
-    
     float emissive;             // エミッシブ
     float metalness;            // メタリック
     float roughness;            // ラフネス
-    float tesselationPadding;
+    int divisionCount;          // 分割数
+    
+    float terrainLength;        // 全体の長さ
+    float lodDistance;          // LOD距離
+    float texHeightInfluence;   // 基本色の高さ影響度
+    float collisionTessFactor;  // 衝突判定用エッジ分割数(奇数のみ)    
+    
+    float shadowTessFactor;     // 影の分割係数
+    float shadowOffset;         // 影のオフセット
+    float2 tesselationPading;
 }

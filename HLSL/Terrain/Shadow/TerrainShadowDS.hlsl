@@ -32,10 +32,13 @@ const OutputPatch<CSM_DS_IN, 4> patch)
     
     // 現在地点の高さを取得
     float4 parameter = parameterTexture.SampleLevel(samplerStates[_LINEAR_CLAMP_SAMPLER_INDEX], texcoord, 0);
-    float height = parameter.r + parameter.b * 0.25f;
+    float height = parameter.r + parameter.b * texHeightInfluence;
     
     // 座標の適用
     worldPosition.y += height;
+    
+    // オフセットを足す
+    worldPosition.y += shadowOffset;
 
     // 情報設定
     dout.position = mul(float4(worldPosition, 1.0), csm_data.cascaded_matrices[patch[0].instanceId]);

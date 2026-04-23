@@ -50,3 +50,33 @@ private:
 	std::string _filepath{};
 	ID3D11GeometryShader* _geometryShader{};
 };
+
+// ハルシェーダークラス
+class HullShader
+{
+public:
+	HullShader() = default;
+	~HullShader() = default;
+	// ハルシェーダーを読み込む
+	void Load(ID3D11Device* device, const std::string& filepath);
+	// 読み込んだハルシェーダーを取得
+	ID3D11HullShader* Get() const;
+private:
+	std::string _filepath{};
+	Microsoft::WRL::ComPtr<ID3D11HullShader> _hullShader{};
+};
+
+// ドメインシェーダークラス
+class DomainShader
+{
+public:
+	DomainShader() = default;
+	~DomainShader() = default;
+	// ドメインシェーダーを読み込む
+	void Load(ID3D11Device* device, const std::string& filepath);
+	// 読み込んだドメインシェーダーを取得
+	ID3D11DomainShader* Get() const;
+private:
+	std::string _filepath{};
+	Microsoft::WRL::ComPtr<ID3D11DomainShader> _domainShader{};
+};

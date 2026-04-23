@@ -82,3 +82,37 @@ ID3D11GeometryShader* GeometryShader::Get() const
 	return _geometryShader;
 #endif // _DEBUG
 }
+
+// ハルシェーダーを読み込む
+void HullShader::Load(ID3D11Device* device, const std::string& filepath)
+{
+	_filepath = filepath;
+	GpuResourceManager::CreateHsFromCso(
+		device,
+		_filepath.c_str(),
+		_hullShader.ReleaseAndGetAddressOf()
+	);
+}
+
+// 読み込んだハルシェーダーを取得
+ID3D11HullShader* HullShader::Get() const
+{
+	return _hullShader.Get();
+}
+
+// ドメインシェーダーを読み込む
+void DomainShader::Load(ID3D11Device* device, const std::string& filepath)
+{
+	_filepath = filepath;
+	GpuResourceManager::CreateDsFromCso(
+		device,
+		_filepath.c_str(),
+		_domainShader.ReleaseAndGetAddressOf()
+	);
+}
+
+// 読み込んだドメインシェーダーを取得
+ID3D11DomainShader* DomainShader::Get() const
+{
+	return _domainShader.Get();
+}

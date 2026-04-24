@@ -38,9 +38,9 @@ public:
 	// 草の定数バッファのデータ構造体
 	struct GrassConstantBuffer
 	{
-        Vector4 lodTessFactors = { 9.0f, 7.0f, 5.0f, 1.0f }; // LODの分割数
+        Vector4 lodTessFactors = { 7.0f, 5.0f, 3.0f, 3.0f }; // LODの分割数
 
-        float lodTessDistance = 20.0f;      // LOD距離
+        float lodTessDistance = 10.0f;      // LOD距離
         float parlinNoiseDistribution = 0.178f; // パーリンノイズの分布
 		float height = 1.0f;				// 草の高さ
         float heightVariance = 0.165f;      // 草の高さのズレ

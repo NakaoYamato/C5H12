@@ -15,6 +15,7 @@ uint pid : SV_PrimitiveID)
     int index = (int) clamp(len / lodDistance, 0.0f, 3.0f);
     float factor = grassLodTessFactors[index];
     
+    hout.factor[0] = factor;
     hout.factor[1] = factor;
     hout.factor[2] = factor;
     hout.innerFactor = factor;

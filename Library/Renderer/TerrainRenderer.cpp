@@ -418,15 +418,21 @@ void TerrainRenderer::DrawGui()
                 ImGui::SliderFloat4(u8"分割数", &_dataGrass.lodTessFactors.x, 1.0f, MaxTessellation, "%.1f");
                 ImGui::SliderFloat(u8"LOD距離", &_dataGrass.lodTessDistance, 1.0f, 200.0f, "%.1f");
                 ImGui::DragFloat(u8"ノイズ", &_dataGrass.parlinNoiseDistribution, 0.01f, 0.01f, 10.0f, "%.2f");
-
                 ImGui::DragFloat(u8"高さ", &_dataGrass.height, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"高さのズレ", &_dataGrass.heightVariance, 0.01f, 0.01f, 10.0f, "%.2f");
+
                 ImGui::DragFloat(u8"幅", &_dataGrass.width, 0.001f, 0.001f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"幅のズレ", &_dataGrass.widthVariance, 0.001f, 0.001f, 10.0f, "%.2f");
-
                 ImGui::DragFloat(u8"曲率", &_dataGrass.curvature, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"曲率のズレ", &_dataGrass.curvatureVariance, 0.01f, 0.01f, 10.0f, "%.2f");
+
+				float windVariance = _dataGrass.windVariance * 1000.0f;
+                ImGui::DragFloat(u8"風の影響度のズレ(0.001)", &windVariance, 0.01f, 0.01f, 1.0f, "%.2f");
+				_dataGrass.windVariance = windVariance / 1000.0f;
+                ImGui::DragFloat(u8"草の先端の細さ", &_dataGrass.taperedFactor, 0.01f, 0.0f, 1.0f, "%.2f");
+                ImGui::DragFloat(u8"草の先端の細さのズレ", &_dataGrass.taperedVariance, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::DragFloat(u8"枯れ具合", &_dataGrass.witherdFactor, 0.01f, 0.01f, 1.0f, "%.2f");
+
                 ImGui::SliderFloat(u8"障害物の影響度", &_dataGrass.obstacleInfluence, 0.0f, 1.0f, "%.2f");
 
                 ImGui::TreePop();

@@ -50,9 +50,13 @@ public:
         float curvature = 0.7f;             // 曲率
         float curvatureVariance = 0.3f;     // 曲率のズレ
 
-		float witherdFactor = 0.194f;       // 枯れ具合
-		float obstacleInfluence = 0.2f;     // 障害物の影響度
-		float padding[2] = {};
+		float windVariance = 0.001f;        // 風の影響度のズレ
+		float taperedFactor = 0.5f;         // 草の先端の細さ
+		float taperedVariance = 0.2f;       // 草の先端の細さのズレ
+        float witherdFactor = 0.194f;       // 枯れ具合
+
+        float obstacleInfluence = 0.2f;     // 障害物の影響度
+		float padding[3] = {};
 	};
     // 描画用情報
     struct DrawInfo

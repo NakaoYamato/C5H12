@@ -37,8 +37,12 @@ cbuffer TERRAIN_GRASS_CONSTANT_BUFFER : register(b2)
     float grassCurvature;               // 曲率
     float grassCurvatureVariance;       // 曲率のズレ
     
+    float grassWindVariance;            // 風の強さのズレ
+    float grassTaperFactor;             // 草の先細り具合
+    float grassTaperVariance;           // 草の先細り具合のズレ
     float grassWitheredFactor;          // 枯れ具合
+    
     float obstacleInfluence;            // 障害物の影響度
-    float2 padding;
+    float3 padding;
 
 }

@@ -6,8 +6,7 @@ Texture2D colorMap : register(t4);
 
 float4 main(GRASS_PS_IN pin) : SV_TARGET
 {
-    float4 color = colorMap.Sample(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], pin.texcoord);
-    const float3 grass_withered_color = saturate(color.rgb + pin.color.rgb);
-    float3 diffuse_color = lerp(grass_withered_color, grass_withered_color * 0.2, pin.texcoord.y);
-    return float4(diffuse_color, 1.0f);
+    float3 color = colorMap.Sample(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], pin.texcoord).rgb * pin.color.rgb;
+    
+    return float4(color.rgb, 1.0f);
 }

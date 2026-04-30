@@ -6,15 +6,27 @@
 SamplerState samplerStates[_SAMPLER_STATE_MAX] : register(s0);
 
 Texture2D colorMap : register(t4);
+Texture2D normalMap : register(t5);
 
 PS_GB_OUT main(GRASS_PS_IN pin)
 {
-    float4 color = colorMap.Sample(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], pin.texcoord);
-    const float3 grass_withered_color = saturate(color.rgb + pin.color.rgb);
-    float3 diffuse_color = lerp(grass_withered_color, grass_withered_color * 0.2, pin.texcoord.y);
+    float3 color = colorMap.Sample(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], pin.texcoord).rgb * pin.color.rgb;
+    float3 normal = normalMap.Sample(samplerStates[_ANISOTROPIC_SAMPLER_INDEX], pin.texcoord).rgb;
+    normal = normalize(normal);
+    
+    // 法線計算
+    float3 binormal = normalize(cross(pin.worldNormal.xyz, pin.worldTangent.xyz));
+    // ノーマルテクスチャ法線をワールドへ変換
+    float3x3 mat =
+    {
+        normalize(pin.worldTangent.xyz),
+        normalize(binormal),
+        normalize(pin.worldNormal.xyz)
+    };
+    normal = normalize(mul(normal * 2.0f - 1.0f, mat));
     
     return CreateOutputData(
-    diffuse_color.rgb,
+    color.rgb,
     0.5f,
     pin.worldNormal,
     0.5f,

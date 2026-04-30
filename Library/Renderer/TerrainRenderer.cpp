@@ -188,8 +188,12 @@ void TerrainRenderer::Initialize(ID3D11Device* device)
         nullptr);
 	// 草のテクスチャ読み込み
 	GpuResourceManager::LoadTextureFromFile(device,
-		L"./Data/Terrain/Environment/Grass/Texture/ground_02.png",
+		L"./Data/Texture/Grass/Grass.png",
 		_grassColorSRV.ReleaseAndGetAddressOf(),
+		nullptr);
+	GpuResourceManager::LoadTextureFromFile(device,
+		L"./Data/Texture/Grass/NormalMap.png",
+        _grassNormalSRV.ReleaseAndGetAddressOf(),
 		nullptr);
 }
 // コリジョン用頂点情報書き出し登録
@@ -293,7 +297,9 @@ void TerrainRenderer::Render(const RenderContext& rc, bool writeGBuffer)
     dc->VSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
     dc->DSSetShaderResources(0, _countof(nullSRVs), nullSRVs);
 
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
     RenderGrass(rc, writeGBuffer);
+    dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullFront));
 
     // 登録しているTerrainを描画した後はクリア
     _drawInfos.clear();
@@ -417,7 +423,7 @@ void TerrainRenderer::DrawGui()
             {
                 ImGui::SliderFloat4(u8"分割数", &_dataGrass.lodTessFactors.x, 1.0f, MaxTessellation, "%.1f");
                 ImGui::SliderFloat(u8"LOD距離", &_dataGrass.lodTessDistance, 1.0f, 200.0f, "%.1f");
-                ImGui::DragFloat(u8"ノイズ", &_dataGrass.parlinNoiseDistribution, 0.01f, 0.01f, 10.0f, "%.2f");
+                ImGui::DragFloat(u8"ノイズ", &_dataGrass.parlinNoiseDistribution, 0.01f, 0.01f, 100.0f, "%.2f");
                 ImGui::DragFloat(u8"高さ", &_dataGrass.height, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"高さのズレ", &_dataGrass.heightVariance, 0.01f, 0.01f, 10.0f, "%.2f");
 
@@ -426,14 +432,15 @@ void TerrainRenderer::DrawGui()
                 ImGui::DragFloat(u8"曲率", &_dataGrass.curvature, 0.01f, 0.01f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"曲率のズレ", &_dataGrass.curvatureVariance, 0.01f, 0.01f, 10.0f, "%.2f");
 
-				float windVariance = _dataGrass.windVariance * 1000.0f;
-                ImGui::DragFloat(u8"風の影響度のズレ(0.001)", &windVariance, 0.01f, 0.01f, 1.0f, "%.2f");
-				_dataGrass.windVariance = windVariance / 1000.0f;
+                ImGui::DragFloat(u8"風の影響度のズレ", &_dataGrass.windVariance, 0.1f, 0.1f, 10.0f, "%.2f");
                 ImGui::DragFloat(u8"草の先端の細さ", &_dataGrass.taperedFactor, 0.01f, 0.0f, 1.0f, "%.2f");
                 ImGui::DragFloat(u8"草の先端の細さのズレ", &_dataGrass.taperedVariance, 0.01f, 0.0f, 1.0f, "%.2f");
 				ImGui::DragFloat(u8"枯れ具合", &_dataGrass.witherdFactor, 0.01f, 0.01f, 1.0f, "%.2f");
 
                 ImGui::SliderFloat(u8"障害物の影響度", &_dataGrass.obstacleInfluence, 0.0f, 1.0f, "%.2f");
+				ImGui::DragFloat(u8"シンプルな草に切り替わる距離", &_dataGrass.simpleGrassDistance, 1.0f, 0.0f, 300.0f, "%.2f");
+
+				ImGui::ColorEdit4(u8"枯れた草の色", &_dataGrass.witherColor.x);
 
                 ImGui::TreePop();
             }
@@ -693,6 +700,7 @@ void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
     dc->GSSetShaderResources(5, 1, _windDistortionSRV.GetAddressOf());
     // 草のテクスチャを設定
     dc->PSSetShaderResources(4, 1, _grassColorSRV.GetAddressOf());
+    dc->PSSetShaderResources(5, 1, _grassColorSRV.GetAddressOf());
 
     // 入力レイアウト設定
     dc->IASetInputLayout(_grassVertexShader.GetInputLayout());
@@ -716,6 +724,7 @@ void TerrainRenderer::RenderGrass(const RenderContext& rc, bool writeGBuffer)
     ID3D11ShaderResourceView* nullSRVs[3] = {};
     dc->GSSetShaderResources(5, 1, nullSRVs);
     dc->PSSetShaderResources(4, 1, nullSRVs);
+    dc->PSSetShaderResources(5, 1, nullSRVs);
     // シェーダーを解除
     dc->VSSetShader(nullptr, nullptr, 0);
     dc->HSSetShader(nullptr, nullptr, 0);

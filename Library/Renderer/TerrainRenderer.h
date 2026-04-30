@@ -38,10 +38,10 @@ public:
 	// 草の定数バッファのデータ構造体
 	struct GrassConstantBuffer
 	{
-        Vector4 lodTessFactors = { 7.0f, 5.0f, 3.0f, 3.0f }; // LODの分割数
+        Vector4 lodTessFactors = { 3.0f, 3.0f, 1.0f, 1.0f }; // LODの分割数
 
         float lodTessDistance = 10.0f;      // LOD距離
-        float parlinNoiseDistribution = 0.178f; // パーリンノイズの分布
+        float parlinNoiseDistribution = 30.0f; // パーリンノイズの分布
 		float height = 1.0f;				// 草の高さ
         float heightVariance = 0.165f;      // 草の高さのズレ
 
@@ -50,13 +50,17 @@ public:
         float curvature = 0.7f;             // 曲率
         float curvatureVariance = 0.3f;     // 曲率のズレ
 
-		float windVariance = 0.001f;        // 風の影響度のズレ
+		float windVariance = 2.0f;          // 風の影響度のズレ
+		float windSpeed = 0.001f;           // 風の進行速度
 		float taperedFactor = 0.5f;         // 草の先端の細さ
 		float taperedVariance = 0.2f;       // 草の先端の細さのズレ
-        float witherdFactor = 0.194f;       // 枯れ具合
 
+        float witherdFactor = 0.194f;       // 枯れ具合
         float obstacleInfluence = 0.2f;     // 障害物の影響度
-		float padding[3] = {};
+		float simpleGrassDistance = 50.0f;  // シンプルな草に切り替わる距離
+		float padding[1] = {};
+
+		Vector4 witherColor = Vector4::Gray; // 枯れた草の色
 	};
     // 描画用情報
     struct DrawInfo
@@ -132,6 +136,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _windDistortionSRV;
     // 草のテクスチャ
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _grassColorSRV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> _grassNormalSRV;
 
     // ストリームアウト用
     HullShader	        _streamOutHullShader;

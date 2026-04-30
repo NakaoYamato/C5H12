@@ -5,6 +5,7 @@ struct GRASS_PS_IN
     float4 position : SV_POSITION; // 位置
     float4 worldPosition : WORLD_POSITION; // ワールド空間の位置
     float3 worldNormal : NORMAL; // ワールド空間の法線
+    float4 worldTangent : TANGENT;
     float2 texcoord : TEXCOORD; // テクスチャ座標
     float4 color : COLOR; // 色
 };
@@ -38,11 +39,14 @@ cbuffer TERRAIN_GRASS_CONSTANT_BUFFER : register(b2)
     float grassCurvatureVariance;       // 曲率のズレ
     
     float grassWindVariance;            // 風の強さのズレ
+    float grassWindSpeed;               // 風の強さのズレ
     float grassTaperFactor;             // 草の先細り具合
     float grassTaperVariance;           // 草の先細り具合のズレ
-    float grassWitheredFactor;          // 枯れ具合
     
+    float grassWitheredFactor;          // 枯れ具合
     float obstacleInfluence;            // 障害物の影響度
-    float3 padding;
-
+    float simpleGrassDistance;          // シンプルな草に切り替わる距離
+    float padding;
+    
+    float4 witherColor;                 // 枯れた草の色
 }
